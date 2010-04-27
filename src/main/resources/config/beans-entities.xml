@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+<!--
+  - Resources defined for URIplay. 
+  -->
+
+  <util:list id="resourceTypes">
+    <value>org.uriplay.media.reference.entity.AudioFormat</value>
+    <value>org.uriplay.media.reference.entity.ContainerFormat</value>
+    <value>org.uriplay.media.reference.entity.VideoFormat</value>
+    <value>org.uriplay.media.entity.Playlist</value>
+    <value>org.uriplay.media.entity.Description</value>
+    <value>org.uriplay.media.entity.Item</value>
+    <value>org.uriplay.media.entity.Brand</value>
+    <value>org.uriplay.media.entity.Episode</value>
+    <value>org.uriplay.media.entity.Version</value>
+    <value>org.uriplay.media.entity.Broadcast</value>
+    <value>org.uriplay.media.entity.Encoding</value>
+    <value>org.uriplay.media.entity.Location</value>
+  </util:list>
+
+</beans>

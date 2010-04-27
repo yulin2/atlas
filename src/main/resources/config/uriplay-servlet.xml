@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+	<!--
+     - Application context definition for the uriplay DispatcherServlet.
+     -->
+	<context:annotation-config />
+     
+    <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+	<bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
+     
+	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<props>
+				<prop key="/api/1.0/">frontPageController</prop>
+				<prop key="/api/1.0/*">itemControllerV1</prop>
+				<prop key="/api/1.0/list*">listControllerV1</prop>
+				<prop key="/api/1.0/lists*">listsControllerV1</prop>
+				<prop key="/api/1.0/doc*">uriFetchingControllerV1</prop>
+				<prop key="/api/1.0/status">statusController</prop>
+
+				<prop key="/2.0/">frontPageController</prop>
+				<prop key="/2.0/list*">listControllerV2</prop>
+				<prop key="/2.0/lists*">listsControllerV2</prop>
+				<prop key="/2.0/doc*">uriFetchingControllerV2</prop>
+
+				<prop key="/system/c4/update">c4UpdateController</prop>
+				<prop key="/system/bbc/update">bbcUpdateController</prop>
+				<prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
+				<prop key="/system/orphans/update">orphanUpdateController</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="healthController" class="org.uriplay.system.HealthController"/>
+	
+	<bean id="c4UpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+		<constructor-arg ref="c4BrandsUpdater"/>
+	</bean>
+	
+	<bean id="bbcUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+		<constructor-arg ref="bbcBrandsUpdater"/>
+	</bean>
+
+	<bean id="bbcScheduleUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+		<constructor-arg ref="bbcSchedulesUpdater"/>
+	</bean>
+	
+	<bean id="orphanUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+		<constructor-arg ref="perPublisherUpdater"/>
+	</bean>
+	
+    <bean id="statusController" class="org.jherd.watchdog.StatusController">
+    	<property name="viewName" value="org/uriplay/www/Status" />
+    </bean>
+	
+	<bean id="frontPageController" class="org.jherd.servlet.mvc.SimpleViewController">
+ 		<property name="viewName" value="org/uriplay/www/Home" />
+	</bean>
+	
+	<bean id="newQueryApiController" class="org.uriplay.query.v2.QueryController">
+		<constructor-arg ref="queryExecutor"/>
+	</bean>
+	
+	<bean id="uriFetchingControllerV1" class="org.uriplay.query.v1.UriFetchingController">
+		<constructor-arg ref="remoteFetcher" />
+	</bean>
+	
+	<bean id="itemControllerV1" parent="uriFetchingControllerV1">
+		<constructor-arg><bean class="org.uriplay.beans.SingleItemProjector" /></constructor-arg> 
+	</bean>
+	
+	<bean id="listControllerV1"  parent="uriFetchingControllerV1">
+		<constructor-arg><bean class="org.uriplay.beans.FlatteningProjector" /></constructor-arg> 
+	</bean>
+	
+	<bean id="listsControllerV1" parent="uriFetchingControllerV1">
+		<constructor-arg><bean class="org.uriplay.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
+	</bean>
+	
+	<bean id="uriFetchingControllerV2" class="org.uriplay.query.v2.UriFetchingController">
+		<constructor-arg ref="unknownTypeQueryExecutor" />
+	</bean>
+	
+	<bean id="itemControllerV2" parent="uriFetchingControllerV2">
+		<constructor-arg><bean class="org.uriplay.beans.SingleItemProjector" /></constructor-arg> 
+	</bean>
+	
+	<bean id="listControllerV2"  parent="uriFetchingControllerV2">
+		<constructor-arg><bean class="org.uriplay.beans.FlatteningProjector" /></constructor-arg> 
+	</bean>
+	
+	<bean id="listsControllerV2" parent="uriFetchingControllerV2">
+		<constructor-arg><bean class="org.uriplay.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
+	</bean>
+
+	<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="org/jherd/http-error" p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">
+		<constructor-arg>
+			<bean class="org.springframework.web.servlet.view.JstlView">
+				<constructor-arg value="/WEB-INF/templates/org/jherd/http-error.jsp" />
+			</bean>
+		</constructor-arg>
+	</bean>
+				
+	<bean class="org.uriplay.views.ExtensionBasedContentNegotiatingViewResolver" p:order="#{T(org.springframework.core.Ordered).LOWEST_PRECEDENCE}">
+		<property name="mediaTypes">
+			<map>
+				<entry key="xml" value="application/xml" />
+				<entry key="rdf.xml" value="application/rdf+xml" />
+				<entry key="html" value="text/html" />
+				<entry key="json" value="application/json" />
+				<entry key="oembed.json" value="application/oembed+json" />
+				<entry key="oembed.xml" value="application/oembed+xml" />
+				<entry key="atom" value="application/atom+xml" />
+				<entry key="rss" value="application/rss+xml" />
+			</map>
+		</property>
+		<property name="viewResolvers">
+			<list>
+				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="APPLICATION_RDF_XML" />
+							<constructor-arg ref="rdfXmlTranslator" />
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="TEXT_HTML" />
+							<constructor-arg>
+								<bean class="org.uriplay.beans.html.HtmlTranslator" />
+							</constructor-arg>
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="APPLICATION_XML" />
+							<constructor-arg ref="simpleXmlTranslator" />
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="APPLICATION_JSON" />
+							<constructor-arg ref="simpleJsonTranslator" />
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="APPLICATION_ATOM_XML" />
+							<constructor-arg>
+								<bean class="org.uriplay.beans.AtomFeedTranslator" />
+							</constructor-arg>
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="APPLICATION_RSS_XML" />
+							<constructor-arg>
+								<bean class="org.uriplay.beans.RssFeedTranslator" />
+							</constructor-arg>
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean id="oembedJsonViewResolver" class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="APPLICATION_OEMBED_JSON" />
+							<constructor-arg>
+								<bean class="org.uriplay.beans.OembedJsonTranslator" />
+							</constructor-arg>
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean id="oembedXmlViewResolver" class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+					<constructor-arg>
+						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+							<constructor-arg value="APPLICATION_OEMBED_XML" />
+							<constructor-arg>
+								<bean class="org.uriplay.beans.OembedXmlTranslator" />
+							</constructor-arg>
+						</bean>
+					</constructor-arg>
+				</bean>
+				<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+					<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+					<property name="prefix" value="/WEB-INF/templates/" />
+					<property name="suffix" value=".jsp" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+    
+	<bean id="simpleXmlTranslator" class="org.uriplay.beans.FullToSimpleModelTranslator">
+		<constructor-arg><bean class="org.uriplay.beans.JaxbXmlTranslator" /></constructor-arg>
+	</bean>
+
+	<bean id="simpleJsonTranslator" class="org.uriplay.beans.FullToSimpleModelTranslator">
+		<constructor-arg ref="jsonTranslator" />
+	</bean>
+    
+    <bean id="jsonTranslator" class="org.uriplay.beans.JsonTranslator" scope="request">
+        <aop:scoped-proxy/>
+    </bean>
+
+    <bean class="org.jherd.servlet.StatusCodeExceptionResolver">
+		<property name="exceptionMappings">  
+			<map>  
+     			<entry key="org.jherd.servlet.ServletResponseException" value="org/jherd/http-error" />  
+     			<entry key="org.jherd.servlet.ContentNotFoundException" value="org/jherd/http-error" />  
+		    </map>  
+		</property>  
+	</bean> 
+</beans>

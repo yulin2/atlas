@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Channel4ServiceResult serviceName="Catchup List Brand" status="OK" xmlns:ns2="http://domain.catchup.channel4.com/CatchupAvailability">
+    <serviceReport returnCode="200">
+        <description>OK</description>
+    </serviceReport>
+    <brand_details>
+        <id>desperate-housewives</id>
+        <name>Desperate Housewives</name>
+        <synopsis>Dark comedy drama exploring the complicated reality behind the apparent domestic bliss of a group of housewives in a fictitious American suburb</synopsis>
+        <episodes>
+            <ns2:episode_details>
+                <brandId>desperate-housewives</brandId>
+                <id>16</id>
+                <name>Desperate Housewives</name>
+                <contractId>46989</contractId>
+                <image>desperate-housewives</image>
+                <imageAlt>The cast of Desperate Housewives</imageAlt>
+                <episodeAnnotation>Crime Doesn't Pay</episodeAnnotation>
+                <classification>SIXTEEN</classification>
+                <year>**STATIC** year</year>
+                <duration>2513</duration>
+                <lastOn>Channel 4</lastOn>
+                <lastTx>2009-04-08T22:00:00</lastTx>
+                <synopsis>Bree tells Lynette that she'll help Tom to get a new job, but her good intentions inadvertently reveal Orson's shameful misdeeds.
+
+Carlos' adulterous boss uses Gaby as cover while he cheats on his wife, and Edie digs into Dave's past after a chance encounter with an old acquaintance.</synopsis>
+                <expirationDate>2009-05-08T22:00:00</expirationDate>
+                <image>/static/programmes/images/defaultImages/largeADefaultImage.png</image>
+                <imageAlt>Channel 4 Default</imageAlt>
+            </ns2:episode_details>
+            <ns2:episode_details>
+                <brandId>desperate-housewives</brandId>
+                <id>14</id>
+                <name>Desperate Housewives</name>
+                <contractId>46989</contractId>
+                <image>desperate-housewives</image>
+                <imageAlt>The cast of Desperate Housewives</imageAlt>
+                <episodeAnnotation>Mama Spent Money When She Had None</episodeAnnotation>
+                <classification>SIXTEEN</classification>
+                <year>**STATIC** year</year>
+                <duration>2504</duration>
+                <lastOn>Channel 4</lastOn>
+                <lastTx>2009-03-25T22:04:41</lastTx>
+                <synopsis>Bree enjoys the success of her new book by treating herself to a new car, but Lynette and Tom decide to sell his Mustang to help with their financial woes.
+
+Susan is determined to send MJ to the best school - even though she and Mike can't afford it.
+
+Meanwhile, Gaby joins Edie's no-nonsense bootcamp to get back into shape, and Lee tries to decide whether he should tell Lynette and Tom some disturbing facts about Dave.
+</synopsis>
+                <expirationDate>2009-04-24T22:05:00</expirationDate>
+                <image>/static/programmes/images/defaultImages/largeADefaultImage.png</image>
+                <imageAlt>Channel 4 Default</imageAlt>
+            </ns2:episode_details>
+            <ns2:episode_details>
+                <brandId>desperate-housewives</brandId>
+                <id>17</id>
+                <name>Desperate Housewives</name>
+                <contractId>46989</contractId>
+                <image>desperate-housewives</image>
+                <imageAlt>The cast of Desperate Housewives</imageAlt>
+                <episodeAnnotation>The Story of Lucy and Jessie</episodeAnnotation>
+                <classification>SIXTEEN</classification>
+                <year>**STATIC** year</year>
+                <duration>2514</duration>
+                <lastOn>Channel 4</lastOn>
+                <lastTx>2009-04-15T22:00:00</lastTx>
+                <synopsis>Susan gets up close and personal with another woman, while Bree will stop at nothing to protect herself from Orson's shameful habit. 
+
+Elsewhere, Gaby convinces Carlos to hire Lynette and Edie delves deeper into Dave's past.</synopsis>
+                <expirationDate>2009-05-14T23:00:00</expirationDate>
+                <image>/static/programmes/images/defaultImages/largeADefaultImage.png</image>
+                <imageAlt>Channel 4 Default</imageAlt>
+            </ns2:episode_details>
+            <ns2:episode_details>
+                <brandId>desperate-housewives</brandId>
+                <id>15</id>
+                <name>Desperate Housewives</name>
+                <contractId>46989</contractId>
+                <image>desperate-housewives</image>
+                <imageAlt>The cast of Desperate Housewives</imageAlt>
+                <episodeAnnotation>In a World Where the Kings Are Employers</episodeAnnotation>
+                <classification>EIGHTEEN</classification>
+                <year>**STATIC** year</year>
+                <duration>2475</duration>
+                <lastOn>Channel 4</lastOn>
+                <lastTx>2009-04-01T22:00:00</lastTx>
+                <synopsis>The residents of Wisteria Lane are working hard to provide for their loved ones.
+
+Susan starts a new job in order to give MJ the best in life, but when Mike leaves their son in Katherine's care, anger and jealousy rear up.
+
+As Scavo's Pizzeria continues to take a hit during the recession, Lynette tells Tom they have to sell. 
+
+Meanwhile, Carlos receives a generous bonus when Gaby discovers his boss' dirty little secret, and Orson confronts Bree when he discovers she's given Andrew a pay rise. </synopsis>
+                <expirationDate>2009-04-30T23:00:00</expirationDate>
+                <image>/static/programmes/images/defaultImages/largeADefaultImage.png</image>
+                <imageAlt>Channel 4 Default</imageAlt>
+            </ns2:episode_details>
+        </episodes>
+    </brand_details>
+</Channel4ServiceResult>

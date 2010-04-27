@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+ 
+  <bean id="contentUpdateTimerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
+    <property name="scheduledTimerTasks">
+        <list>
+            <ref bean="updateBbcBrandsScheduledTask" />
+            <ref bean="updateItvBrandsScheduledTask" />
+            <ref bean="updatePlaylistsScheduledTask" />
+            <ref bean="updateMentionsScheduledTask" />
+        </list>
+    </property>
+    <property name="daemon" value="true" />
+  </bean>
+  
+  	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="updateBbcSchedulesScheduledTask" />
+            </list>
+        </property>
+    </bean>
+	
+	<bean id="updateBbcSchedulesScheduledTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail">
+            <bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+                <property name="targetObject" ref="bbcSchedulesUpdate" />
+                <property name="targetMethod" value="run" />
+                <property name="concurrent" value="false" />
+            </bean>
+        </property>
+          <!-- run every morning at 5 AM -->
+        <property name="cronExpression" value="0 0 5 * * ?" />
+    </bean>
+    
+    <bean id="bbcSchedulesUpdate" parent="conditionalRunner">
+   		<constructor-arg ref="bbcSchedulesUpdater"/>
+   </bean>
+  
+   <bean id="updatePlaylistsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="300000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+   		<bean parent="conditionalRunner">
+    		<constructor-arg>
+ 					 <bean class="org.uriplay.persistence.system.UriRefresher">
+ 					 	<constructor-arg ref="contentStore"/>
+ 					 	<constructor-arg ref="remoteFetcher"/>
+ 					 	<property name="missingContentShouldBeMarkedAsUnavailable" value="false"/>
+ 					 	<property name="uris">
+						  <list>
+						      <value>http://feeds.bbc.co.uk/iplayer/highlights/tv</value>
+						      <value>http://www.channel4.com/programmes/4od/highlights</value>
+						  </list>
+					</property>
+					</bean>
+ 			</constructor-arg>
+ 		</bean>
+    </property>
+  </bean>
+  
+  <bean id="updateMentionsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="10000" />
+    <property name="period" value="60000" />
+    <property name="runnable">
+        <bean parent="conditionalRunner">
+            <constructor-arg>
+                <bean class="org.uriplay.tracking.PlaylistFromMentionsGenerator">
+                   <constructor-arg ref="contentStore"/>
+                   <constructor-arg ref="contentMentionStore"/>
+                   <constructor-arg value="TWITTER"/>
+               </bean>
+            </constructor-arg>
+        </bean>
+    </property>
+  </bean>
+  
+  <bean id="updateBbcBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="640000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+   		<bean parent="conditionalRunner">
+    		<constructor-arg ref="bbcBrandsUpdater" />
+ 		</bean>
+    </property>
+  </bean>
+  
+  
+  
+  <bean id="updateItvBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="1340000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+   		<bean parent="conditionalRunner">
+    		<constructor-arg ref="itvBrandsUpdater" />
+ 		</bean>
+    </property>
+  </bean>
+  
+  <bean id="brandsUpdater" abstract="true">
+  	<property name="contentStore" ref="contentStore"/>
+	<property name="fetcher" ref="remoteFetcher"/>
+	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
+  </bean>
+  
+  <!--<bean id="updateC4BrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="1020000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+        <bean parent="conditionalRunner">
+            <constructor-arg ref="c4BrandsUpdater" />
+        </bean>
+    </property>
+  </bean>-->
+  
+  <bean id="c4BrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+	 <property name="uris">
+	 	<bean class="org.uriplay.persistence.system.AToZUriSource">
+	 		<constructor-arg value="http://www.channel4.com/programmes/atoz/"/>
+	 		<constructor-arg value=""/>
+	 		<constructor-arg value="true"/>
+	 	</bean>
+	 </property>
+  </bean>
+  
+  <bean id="itvBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+	 <property name="uri" value="http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml" />
+  </bean>
+  
+  <bean id="bbcBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+	 <property name="uris">
+	 	<bean class="org.uriplay.persistence.system.AToZUriSource">
+	 		<constructor-arg value="http://feeds.bbc.co.uk/iplayer/atoz/"/>
+	 		<constructor-arg value="/list"/>
+	 		<constructor-arg value="true"/>
+	 	</bean>
+	 </property>
+  </bean>
+
+  <bean id="bbcSchedulesUpdater" class="org.uriplay.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
+	 <constructor-arg ref="localOrRemoteFetcher"/>
+	 <property name="uris">
+	    <bean class="org.uriplay.remotesite.bbc.schedule.DatedBbcScheduleUriSource">
+		    <property name="daysToLookAhead" value="5" />
+	     </bean>
+	  </property>
+  </bean>    
+  
+  <bean id="perPublisherUpdater" class="org.uriplay.remotesite.PerPublisherItemUpdater">
+	 <constructor-arg ref="queryExecutor"/>
+	 <constructor-arg>
+		 <bean class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
+			<constructor-arg ref="savingFetcher" />
+			<constructor-arg ref="contentStore" />
+			<constructor-arg>
+				<list>
+	                <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>
+				</list>
+			</constructor-arg>
+		</bean>
+	 </constructor-arg>
+	 <property name="uris">
+	    <util:list>
+	    	<value>http://vimeo.com/</value>
+	    	<value>ted.com</value>
+	    	<value>youtube</value>
+	    </util:list>
+	  </property>
+  </bean>   
+  
+  <bean id="conditionalRunner" abstract="true" class="org.jherd.util.spring.beans.IpAddressBasedConditionalRunner">
+  	<property name="shouldRunOnMachine" value="${scheduled.tasks.machine.ip}" />
+  </bean>
+   
+</beans>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf      = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs     = "http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf     = "http://xmlns.com/foaf/0.1/"
+         xmlns:po       = "http://purl.org/ontology/po/"
+         xmlns:mo       = "http://purl.org/ontology/mo/"
+         xmlns:skos     = "http://www.w3.org/2008/05/skos#"
+         xmlns:time     = "http://www.w3.org/2006/time#"
+         xmlns:dc       = "http://purl.org/dc/elements/1.1/"
+         xmlns:dcterms  = "http://purl.org/dc/terms/"
+         xmlns:wgs84_pos= "http://www.w3.org/2003/01/geo/wgs84_pos#"
+         xmlns:timeline = "http://purl.org/NET/c4dm/timeline.owl#"
+         xmlns:event    = "http://purl.org/NET/c4dm/event.owl#">
+
+<rdf:Description rdf:about="/programmes/b00g2gml.rdf">
+  <rdfs:label>Description of the episode Episode 6</rdfs:label>
+  <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2008-11-30T03:14:22Z</dcterms:created>
+  <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2009-08-16T00:23:00+01:00</dcterms:modified>
+  <foaf:primaryTopic rdf:resource="/programmes/b00g2gml#programme"/>
+</rdf:Description>
+
+<po:Episode rdf:about="/programmes/b00g2gml#programme">
+
+  <dc:title>Episode 6</dc:title>
+  <po:short_synopsis>London mayor Boris Johnson is the Star in a Reasonably Priced Car.</po:short_synopsis>
+  <po:medium_synopsis>Jeremy Clarkson and James May invade Greenham Common airbase to ask if the Communists have ever made a good car. London mayor Boris Johnson is the Star in a Reasonably Priced Car.</po:medium_synopsis>
+  <po:long_synopsis>Motoring news and views from the usual team. 
+
+Jeremy Clarkson and James May invade Greenham Common airbase to ask if the Communists have ever made a good car. Out on the test track, Richard Hammond goes crazy in the Veritas, a German sports car, and Jeremy conducts an almost ridiculously thorough road test of the new Ford Fiesta. 
+
+Plus, London mayor Boris Johnson is the Star In A Reasonably Priced Car.</po:long_synopsis>
+
+  <po:microsite rdf:resource="http://www.bbc.co.uk/topgear/"/>
+
+  <foaf:depiction rdf:resource="/iplayer/images/episode/b00g2gml_512_288.jpg"/>
+
+  <po:masterbrand rdf:resource="/bbctwo#service"/>
+
+  <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">6</po:position>
+
+  <po:genre rdf:resource="/programmes/genres/factual/carsandmotors#genre" />
+
+  <po:format rdf:resource="/programmes/formats/magazinesandreviews#format" />
+
+
+
+  <po:version rdf:resource="/programmes/b00g2ggy#programme" />
+
+</po:Episode>
+
+<po:Series rdf:about="/programmes/b00fj1rb#programme">
+  <po:episode rdf:resource="/programmes/b00g2gml#programme"/>
+</po:Series>
+
+
+
+<po:Brand rdf:about="/programmes/b006mj59#programme">
+  <po:episode rdf:resource="/programmes/b00g2gml#programme"/>
+
+</po:Brand>
+
+
+</rdf:RDF>

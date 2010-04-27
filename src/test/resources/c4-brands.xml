@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Channel4ServiceResult serviceName="Catchup List All Brands" status="OK" xmlns:ns2="http://domain.catchup.channel4.com/CatchupAvailability">
+    <serviceReport returnCode="200">
+        <description>OK</description>
+    </serviceReport>
+    <brands>
+        <total_brands>4</total_brands>
+        <brand_summary>
+            <id>10-years-younger</id>
+            <name>10 Years Younger</name>
+            <synopsis>Myleene Klass is the new presenter of the show where two women go head to head each week with one goal - to look younger. It's non-invasive techniques versus surgery - but which will get the best results?</synopsis>
+            <thumbnailImage>10-years-younger</thumbnailImage>
+        </brand_summary>
+        <brand_summary>
+            <id>the-100-greatest-kids-tv-shows</id>
+            <name>The 100 Greatest Kids' TV Shows</name>
+            <synopsis>Delve back into the recesses of your youth as we present the definitive, and updated, roll call of top kids' television - as voted by UK viewers</synopsis>
+            <thumbnailImage>the-100-greatest-kids-tv-shows</thumbnailImage>
+        </brand_summary>
+        <brand_summary>
+            <id>4music-favourites-doves</id>
+            <name>4Music Favourites: Doves</name>
+            <synopsis>Interview and performance from indie rock band Doves, featuring songs from their new album 'Kingdom of Rust'</synopsis>
+            <thumbnailImage>4music-favourites-doves-20090414112749</thumbnailImage>
+        </brand_summary>
+        <brand_summary>
+            <id>4sport-destination-2012</id>
+            <name>4Sport: Destination 2012</name>
+            <synopsis>4Sport charts the road to the London Olympics and is jam-packed with national sporting events, celebrity features and profiles on the rising stars hoping to make a big impact in 2012</synopsis>
+            <thumbnailImage>4sport-destination-2012</thumbnailImage>
+        </brand_summary>
+    </brands>
+</Channel4ServiceResult>

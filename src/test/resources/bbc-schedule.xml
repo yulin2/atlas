@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<schedule>
+	<service type="tv" key="bbctwo">
+		<title>BBC Two</title>
+		<outlet key="england">
+			<title>England</title>
+		</outlet>
+	</service>
+	<day date="2009-11-05" has_next="1" has_previous="1">
+		<broadcasts>
+			<broadcast is_repeat="1" is_blanked="0">
+				<start>2009-11-05T00:20:00Z</start>
+				<end>2009-11-05T00:50:00Z</end>
+				<duration>1800</duration>
+				<programme type="episode">
+					<pid>b00ntcgg</pid>
+					<position>3</position>
+					<title>Best Laid Plans</title>
+					<short_synopsis>Reverend David Easton puts his reputation
+						on the line as the dame in the panto.</short_synopsis>
+					<display_titles>
+						<title>An Island Parish</title>
+						<subtitle>Series 4, Best Laid Plans</subtitle>
+					</display_titles>
+					<programme type="series">
+						<pid>b00nkcc3</pid>
+						<title>Series 4</title>
+						<position>4</position>
+						<expected_child_count>14</expected_child_count>
+						<programme type="brand">
+							<pid>b006t6m6</pid>
+							<title>An Island Parish</title>
+							<expected_child_count>12</expected_child_count>
+							<ownership>
+								<service type="tv" key="bbctwo">
+									<title>BBC Two</title>
+								</service>
+							</ownership>
+						</programme>
+					</programme>
+					<media format="video">
+						<expires>2010-03-01T19:59:00Z</expires>
+						<availability>4 months left to watch</availability>
+					</media>
+				</programme>
+			</broadcast>
+		</broadcasts>
+	</day>
+</schedule>

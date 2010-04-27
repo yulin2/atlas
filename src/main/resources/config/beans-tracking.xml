@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <bean init-method="run" parent="conditionalRunner" lazy-init="false">
+        <constructor-arg>
+            <bean id="keywordTracker" class="org.uriplay.tracking.twitter.KeywordTracker" destroy-method="shutdown">
+                <constructor-arg value="${twitter.tracker.filter.hashtag}" />
+                <constructor-arg ref="statusProcessor"/>
+                
+                
+                <constructor-arg value="${twitter.tracker.username}" />
+                <constructor-arg value="${twitter.tracker.password}" />
+                <property name="keywords">
+                    <list>
+                        <value>clip</value>
+                        <value>bbc</value>
+                        <value>channel</value>
+                        <value>channel4</value>
+                        <value>blip</value>
+                        <value>hulu</value>
+                        <value>youtube</value>
+                        <value>watch</value>
+                        <value>watching</value>
+                        <value>watched</value>
+                        <value>liked</value>
+                        <value>loved</value>
+                        <value>loving</value>
+                        <value>series</value>
+                        <value>episode</value>
+                        <value>TV</value>
+                        <value>iplayer</value>
+                        <value>show</value>
+                        <value>program</value>
+                        <value>programme</value>
+                        <value>catching</value>
+                        <value>season</value>
+                        <value>tonight</value>
+                    </list>
+                </property>
+            </bean>
+        </constructor-arg>
+    </bean>
+    
+    
+    <bean id="statusProcessor" class="org.uriplay.tracking.twitter.LinkExtractingStatusProcessor">
+        <constructor-arg>
+            <bean class="org.uriplay.tracking.ContentResolvingUriMentionListener">
+                <constructor-arg ref="localOrRemoteFetcher"/>
+                <constructor-arg ref="contentMentionStore"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+    
+</beans>

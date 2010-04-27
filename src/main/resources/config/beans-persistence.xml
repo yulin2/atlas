@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+<!--
+  - Persistence context (hibernate) for URIplay.
+  -->
+  
+  <import resource="beans-entities.xml"/>
+  
+  <import resource="classpath:mongodb-context.xml"/>
+  
+  <tx:annotation-driven transaction-manager="txManager"/>  
+      
+  <bean id="localResources" class="org.uriplay.beans.DescriptionResourceMapping">
+    <constructor-arg ref="contentStore" />
+  </bean>
+  
+  <bean id="mongoDbQueryExcutor" class="org.uriplay.persistence.content.mongodb.MongoDBQueryExecutor">
+        <constructor-arg ref="mongoDbBackedContentStore"/>
+  </bean>
+  
+  <bean id="queryExecutor" class="org.uriplay.query.content.UriFetchingQueryExecutor">
+      <constructor-arg ref="localOrRemoteFetcher"/>
+      <constructor-arg>
+         <bean class="org.uriplay.query.content.fuzzy.DefuzzingQueryExecutor">
+                <constructor-arg ref="mongoDbQueryExcutor"/>
+                <constructor-arg ref="titleSearcher"/>
+         </bean>
+      </constructor-arg>
+  </bean>
+  
+  <bean id="unknownTypeQueryExecutor" class="org.uriplay.query.content.TypeResolvingQueryExecutor">
+      <constructor-arg ref="localOrRemoteFetcher"/>
+      <constructor-arg ref="mongoDbQueryExcutor"/>
+  </bean>
+  
+  <bean class="org.uriplay.persistence.content.EventFiringContentStore" id="contentStore">
+    <constructor-arg ref="mongoDbBackedContentStore"/>
+    <constructor-arg ref="AggregateContentListener"/>
+  </bean>
+  
+  <alias alias="contentMentionStore" name="mongoDbBackedContentMentionStore"/>
+  
+</beans>
+

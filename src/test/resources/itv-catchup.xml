@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ITVCatchUpMenu xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <CurrentDate>28/08/2009</CurrentDate>
+  <HomePageUrl>http://www.itv.com/ITVPlayer/default.html</HomePageUrl>
+  <VideoPageUrl>http://www.itv.com/ITVPlayer/Video/default.html</VideoPageUrl>
+  <AToZPageUrl>http://www.itv.com/ITVPlayer/AtoZ/default.html</AToZPageUrl>
+  <ProgrammePageUrl>http://www.itv.com/ITVPlayer/Programmes/default.html</ProgrammePageUrl>
+
+  <CalenderPageUrl>http://www.itv.com/ITVPlayer/30DayCatchUp/default.html</CalenderPageUrl>
+  <Top10PageUrl>http://www.itv.com/ITVPlayer/Top10Videos/?ViewType=5</Top10PageUrl>
+  <AtoZLinks>
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=A-B-C</string>
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=D-E-F</string>
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=G-H-I</string>
+
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=J-K-L</string>
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=M-N-O</string>
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=P-Q-R</string>
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=S-T-U-V</string>
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=W-X-Y-Z</string>
+
+    <string>http://www.itv.com/ITVPlayer/AtoZ/default.html?ViewType=0&amp;Filter=0-9</string>
+  </AtoZLinks>
+  <SelectedShows>
+    <ITVCatchUpProgramme>
+      <ProgrammeId>24</ProgrammeId>
+      <ProgrammeTitle>Emmerdale</ProgrammeTitle>
+      <ProgrammeMediaId>281823</ProgrammeMediaId>
+
+      <ProgrammeMediaUrl>http://www.itv.com//img/150x113/Emmerdale-463a5b46-f8e4-48d5-bf92-d00401dc25d9.jpg</ProgrammeMediaUrl>
+      <LastUpdated>2008-11-26T00:00:00</LastUpdated>
+      <Url>http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&amp;Filter=24</Url>
+      <EpisodeCount>0</EpisodeCount>
+      <VideoID>0</VideoID>
+      <DentonID>0</DentonID>
+
+      <DentonRating />
+      <AdditionalContentUrl>http://www.itv.com/Soaps/emmerdale/default.html</AdditionalContentUrl>
+      <AdditionalContentUrlText>Emmerdale website</AdditionalContentUrlText>
+    </ITVCatchUpProgramme>
+    <ITVCatchUpProgramme>
+      <ProgrammeId>4</ProgrammeId>
+      <ProgrammeTitle>Coronation Street</ProgrammeTitle>
+
+      <ProgrammeMediaId>281822</ProgrammeMediaId>
+      <ProgrammeMediaUrl>http://www.itv.com//img/150x113/Coronation-Street-d9b683c3-457b-41e1-a31e-6fa2b3b64284.jpg</ProgrammeMediaUrl>
+      <LastUpdated>2008-11-26T00:00:00</LastUpdated>
+      <Url>http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&amp;Filter=4</Url>
+      <EpisodeCount>0</EpisodeCount>
+      <VideoID>0</VideoID>
+
+      <DentonID>0</DentonID>
+      <DentonRating />
+      <AdditionalContentUrl>http://www.itv.com/Soaps/coronationstreet/default.html</AdditionalContentUrl>
+      <AdditionalContentUrlText>Coronation Street website</AdditionalContentUrlText>
+    </ITVCatchUpProgramme>
+  </SelectedShows>
+  <ItvCatchUpProgrammes>
+
+    <ITVCatchUpProgramme>
+      <ProgrammeId>972</ProgrammeId>
+      <ProgrammeTitle>A Touch of Frost</ProgrammeTitle>
+      <ProgrammeMediaId>568591</ProgrammeMediaId>
+      <ProgrammeMediaUrl>http://www.itv.com//img/150x113/A-Touch-of-Frost-2054dae8-cf18-4ebb-9b4d-bb16c0139602.jpg</ProgrammeMediaUrl>
+      <LastUpdated>2009-08-28T14:11:49.7506312+01:00</LastUpdated>
+
+      <Url>http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&amp;Filter=972</Url>
+      <EpisodeCount>2</EpisodeCount>
+      <VideoID>-1</VideoID>
+      <DentonID>-1</DentonID>
+      <DentonRating />
+      <AdditionalContentUrl>http://www.itv.com/Drama/copsandcrime/atouchoffrost/default.html</AdditionalContentUrl>
+
+      <AdditionalContentUrlText>Visit the Frost site</AdditionalContentUrlText>
+    </ITVCatchUpProgramme>
+
+  </ItvCatchUpProgrammes>
+</ITVCatchUpMenu>

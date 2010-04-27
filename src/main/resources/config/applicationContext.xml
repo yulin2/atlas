@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+<!--
+  - Application context definition for URIplay. See uriplay-servlet.xml for webapp config.
+  -->
+
+ 	<import resource="beans-persistence.xml"/>
+ 	<import resource="beans-scheduling.xml" />
+ 	<import resource="beans-short-url-services.xml" />
+ 	<import resource="beans-tracking.xml" />
+    
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location">
+            <value>classpath:${env}.properties</value>
+        </property>
+    </bean>
+
+	<bean id="localOrRemoteFetcher" class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
+		<constructor-arg>
+			<bean class="org.uriplay.query.uri.LocalOrRemoteFetcher">
+				<constructor-arg ref="localResources" />
+				<constructor-arg ref="savingFetcher" />
+			</bean>
+		</constructor-arg>
+		<constructor-arg ref="contentStore" />
+		<constructor-arg>
+			<list>
+				<bean class="org.uriplay.remotesite.bbc.BbcUriCanonicaliser" />
+                <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>
+                
+                <!--  this should go last in the chain as it is an expensive operation -->
+                <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser"/>
+			</list>
+		</constructor-arg>
+	</bean>
+		
+	<bean id="titleSearcher" class="org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher"/>
+	
+	
+	<bean id="AggregateContentListener" class="org.uriplay.persistence.content.AggregateContentListener">
+       <constructor-arg>
+           <list>
+                <ref bean="titleSearcher"/>
+           </list>
+       </constructor-arg>
+    </bean>
+	
+	<bean id="savingFetcher" class="org.uriplay.query.uri.SavingFetcher">
+		<constructor-arg ref="contentStore" />
+		<constructor-arg ref="remoteFetcher" />
+	</bean>
+	
+	<bean id="remoteFetcher" class="org.uriplay.query.uri.RemoteFetcher">
+		<constructor-arg ref="adapterDispatcher" />
+		<constructor-arg ref="beanGraphFactory" />
+		<property name="newStyleFetcher" ref="newStyleAdapterDispatcher"/>
+	</bean>
+	
+	   <bean id="newStyleAdapterDispatcher" class="org.jherd.remotesite.PerSiteAdapterDispatcher">
+        <property name="adapters">
+
+            <!-- Adapters in this list are tried in order until one matches the fetched URI -->
+            <list>
+                <bean class="org.uriplay.remotesite.ted.TedTalkAdapter"/>
+                <bean class="org.uriplay.remotesite.channel4.C4AtomBackedBrandAdapter"/>
+                <bean class="org.uriplay.remotesite.channel4.C4HighlightsAdapter"/>
+                <bean class="org.uriplay.remotesite.channel4.C4BrandAtoZAdapter"/>
+            </list>
+        </property>
+    </bean>
+	
+	<bean id="adapterDispatcher" class="org.jherd.remotesite.PerSiteRepresentationAdapterDispatcher">
+		<property name="adapters">
+
+			<!-- Adapters in this list are tried in order until one matches the fetched URI -->
+			<list>
+				<bean class="org.uriplay.remotesite.twitter.TwitterAdapter">
+					<constructor-arg ref="adapterDispatcher" />
+				</bean>
+				<bean class="org.uriplay.remotesite.youtube.YouTubeAdapter">
+					<constructor-arg ref="idGenFactory" />
+				</bean>
+				<bean class="org.uriplay.remotesite.wikipedia.WikipediaSparqlAdapter" />
+				<bean class="org.uriplay.remotesite.imdb.ImdbAdapter">
+					<constructor-arg ref="adapterDispatcher" />
+				</bean>
+				<bean class="org.uriplay.remotesite.bbc.BbcIplayerFeedAdapter" >
+					<constructor-arg ref="idGenFactory" />
+				</bean>
+				<bean class="org.uriplay.remotesite.itv.ItvBrandAdapter">
+					<constructor-arg ref="idGenFactory" />
+				</bean>
+				<bean class="org.uriplay.remotesite.bbc.BbcProgrammeAdapter">
+					<constructor-arg ref="idGenFactory" />
+				</bean>
+				
+				<bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter" >
+					<constructor-arg ref="idGenFactory" />
+				</bean>
+				<bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter" >
+					<constructor-arg ref="idGenFactory" />
+				</bean>
+				<bean class="org.uriplay.remotesite.vimeo.VimeoAdapter" >
+					<constructor-arg ref="idGenFactory" />
+					<property name="acceptedUriPattern" value="http://(www.)?vimeo.com/.*" />
+					<property name="oembedEndpoint" value="http://www.vimeo.com/api/oembed.xml" />
+					<property name="maxWidth" value="400" />
+				</bean>
+				<bean class="org.uriplay.remotesite.hulu.HuluAdapter" >
+					<constructor-arg ref="idGenFactory" />
+					<property name="acceptedUriPattern" value="http://www.hulu.com/watch/.*" />
+					<property name="oembedEndpoint" value="http://www.hulu.com/api/oembed.xml" />
+				</bean>
+				<bean class="org.uriplay.remotesite.oembed.OembedXmlAdapter" >
+					<constructor-arg ref="idGenFactory" />
+					<property name="acceptedUriPattern" value="http://www.flickr.com/.*" />
+					<property name="oembedEndpoint" value="http://www.flickr.com/services/oembed/" />
+				</bean>
+				
+				<bean class="org.uriplay.remotesite.bbc.BbcPodcastAdapter">
+				     <constructor-arg ref="idGenFactory" />
+				</bean>
+				
+				<bean class="org.uriplay.remotesite.synd.OpmlAdapter">
+					<constructor-arg ref="adapterDispatcher" />
+				</bean>
+				
+				<bean class="org.uriplay.remotesite.aggregator.UriplayAggregationAdapter">
+                    <constructor-arg ref="rdfXmlTranslator" />
+                    <constructor-arg><value>http://uriplay.rad0.net</value></constructor-arg>
+                    <constructor-arg><value>[a-z]+://[^/]*bbc.co.uk.*(\.rss|\.xml)</value></constructor-arg>
+                </bean>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="idGenFactory" class="org.jherd.beans.id.SingletonIntegerIdGeneratorFactory" />
+	
+	<util:properties id="rdfNsPrefixes">
+		<prop key="http://uriplay.org/elements/">play</prop>
+		<prop key="http://www.w3.org/1999/02/22-rdf-syntax-ns#">rdf</prop>
+		<prop key="http://www.w3.org/2000/01/rdf-schema#">rdfs</prop>
+		<prop key="http://purl.org/dc/elements/1.1/">dc</prop>
+		<prop key="http://purl.org/ontology/po/">po</prop>
+		<prop key="http://xmlns.com/foaf/0.1/">foaf</prop>
+		<prop key="http://rdfs.org/sioc/ns#">sioc</prop>
+		<prop key="http://purl.org/dc/terms/">dcterms</prop>
+	</util:properties>
+
+	<bean id="rdfXmlTranslator" class="org.jherd.rdf.beans.RdfXmlTranslator">
+		<constructor-arg>
+			<bean class="org.uriplay.beans.NaiveTypeMap" />
+		</constructor-arg>
+		<constructor-arg>
+			<ref bean="localResources" />
+		</constructor-arg>
+		<property name="nsPrefixes" ref="rdfNsPrefixes" />
+	</bean>
+	
+	<bean id="beanGraphFactory" class="org.jherd.beans.BeanGraphFactory">
+  	   <constructor-arg ref="localResources" />
+  	   <constructor-arg ref="localResources" />
+ 	   <property name="beanTypes" ref="resourceTypes" />
+  	</bean>
+
+</beans>

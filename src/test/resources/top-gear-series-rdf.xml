@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf      = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs     = "http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf     = "http://xmlns.com/foaf/0.1/"
+         xmlns:po       = "http://purl.org/ontology/po/"
+         xmlns:mo       = "http://purl.org/ontology/mo/"
+         xmlns:skos     = "http://www.w3.org/2008/05/skos#"
+         xmlns:time     = "http://www.w3.org/2006/time#"
+         xmlns:dc       = "http://purl.org/dc/elements/1.1/"
+         xmlns:dcterms  = "http://purl.org/dc/terms/"
+         xmlns:wgs84_pos= "http://www.w3.org/2003/01/geo/wgs84_pos#"
+         xmlns:timeline = "http://purl.org/NET/c4dm/timeline.owl#"
+         xmlns:event    = "http://purl.org/NET/c4dm/event.owl#">
+
+<rdf:Description rdf:about="/programmes/b007q8vv.rdf">
+  <rdfs:label>Description of the series Series 6</rdfs:label>
+  <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2007-06-01T08:06:57+01:00</dcterms:created>
+  <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2008-02-08T17:58:45Z</dcterms:modified>
+  <foaf:primaryTopic rdf:resource="/programmes/b007q8vv#programme"/>
+</rdf:Description>
+
+<po:Series rdf:about="/programmes/b007q8vv#programme">
+
+  <dc:title>Series 6</dc:title>
+  <po:short_synopsis>Motoring magazine with Jeremy Clarkson, Richard Hammond and James May</po:short_synopsis>
+  <po:medium_synopsis>Motoring magazine with Jeremy Clarkson, Richard Hammond and James May</po:medium_synopsis>
+  
+
+
+  <po:microsite rdf:resource="http://www.bbc.co.uk/topgear/"/>
+
+  <po:genre rdf:resource="/programmes/genres/factual/carsandmotors#genre" />
+
+  <po:format rdf:resource="/programmes/formats/magazinesandreviews#format" />
+
+  <po:masterbrand rdf:resource="/bbcthree#service"/>
+
+
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078wsh#programme">
+      <dc:title>Episode 1</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">1</po:position> 
+    </po:Episode>
+
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078wvp#programme">
+      <dc:title>Episode 2</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">2</po:position> 
+    </po:Episode>
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078x0p#programme">
+
+      <dc:title>Episode 3</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">3</po:position> 
+    </po:Episode>
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078x3y#programme">
+      <dc:title>Episode 4</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">4</po:position> 
+    </po:Episode>
+
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078x75#programme">
+      <dc:title>Episode 5</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">5</po:position> 
+    </po:Episode>
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078xb7#programme">
+
+      <dc:title>Episode 6</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">6</po:position> 
+    </po:Episode>
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b007vkt4#programme">
+      <dc:title>Episode 7</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">7</po:position> 
+    </po:Episode>
+
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078xhc#programme">
+      <dc:title>Episode 8</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">8</po:position> 
+    </po:Episode>
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078xkx#programme">
+
+      <dc:title>Episode 9</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">9</po:position> 
+    </po:Episode>
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078xmp#programme">
+      <dc:title>Episode 10</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">10</po:position> 
+    </po:Episode>
+
+  </po:episode>
+  <po:episode>
+    <po:Episode rdf:about="/programmes/b0078xql#programme">
+      <dc:title>Episode 11</dc:title> 
+      <po:position rdf:datatype="http://www.w3.org/2001/XMLSchema#int">11</po:position> 
+    </po:Episode>
+  </po:episode>
+
+
+</po:Series>
+
+<po:Brand rdf:about="/programmes/b006mj59#programme">
+  <po:series rdf:resource="/programmes/b007q8vv#programme"/>
+</po:Brand>
+
+
+
+</rdf:RDF>
