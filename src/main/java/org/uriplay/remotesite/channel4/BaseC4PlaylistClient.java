@@ -13,7 +13,6 @@ import com.google.common.collect.Lists;
 
 public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playlist> {
 
-	
 	private final RemoteSiteClient<BrandListingPage> brandListClient;
 	private final SiteSpecificAdapter<Brand> brandClient;
 
