@@ -122,6 +122,7 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.addPropertyValue("playlists", brandUris);
 		mpvs.addPropertyValue("items", orphanEpsiodeUris);
+		mpvs.addPropertyValue("publisher", BbcProgrammeGraphExtractor.BBC_PUBLISHER);
 		representation.addValues(playlistUri, mpvs);
 	}
 

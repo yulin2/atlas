@@ -71,7 +71,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor imple
 		Representation representation = super.extractFrom(source);
 		
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("publisher", "bbc.co.uk");
+		mpvs.addPropertyValue("publisher", BbcProgrammeGraphExtractor.BBC_PUBLISHER);
 		representation.addValues(source.getUri(), mpvs);
 
 //		Don't include a /programmes link this creates duplicate aliases
