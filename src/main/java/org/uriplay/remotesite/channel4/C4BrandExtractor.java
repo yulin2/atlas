@@ -43,6 +43,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
 
 public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 
+	private static final String DC_GUIDANCE = "dc:relation.Guidance";
 	private static final String DC_TERMS_AVAILABLE = "dcterms:available";
 	private static final String DC_TX_DATE = "dc:date.TXDate";
 	private static final String DC_TX_CHANNEL = "dc:relation.TXChannel";
@@ -156,7 +157,7 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 		Version version = new Version();
 		version.setDuration(durationFrom(lookup));
 				
-		String guidance = lookup.get("dc:relation.Guidance");
+		String guidance = lookup.get(DC_GUIDANCE);
 		if (guidance != null) {
 			version.setRating("http://uriplay.org/ratings/simple/adult");
 			version.setRatingText(guidance);
