@@ -19,13 +19,14 @@ import java.util.Set;
 
 import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.NullRequestTimer;
-import org.jherd.servlet.ContentNotFoundException;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
+
+import com.google.soy.common.collect.Lists;
 
 /**
  * Finds any uris from a given {@link ContentQuery}, fetches them using a local/remote
@@ -47,44 +48,37 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	
 	public List<Item> executeItemQuery(ContentQuery query) {
 		if (!fetch(query)) {
-			return null;
+			return Lists.newArrayList();
 		}
 		return delegate.executeItemQuery(query);
 	}
 
 	public List<Playlist> executePlaylistQuery(ContentQuery query) {
 		if (!fetch(query)) {
-			return null;
+			return Lists.newArrayList();
 		}
 		return delegate.executePlaylistQuery(query);
 	}
 	
 	public List<Brand> executeBrandQuery(ContentQuery query) {
 		if (!fetch(query)) {
-			return null;
+			return Lists.newArrayList();
 		}
 		return delegate.executeBrandQuery(query);
 	}
 	
+	/**
+	 * @return true if query executor should continue, false if the query will not
+	 * match any beans.
+	 */
 	private boolean fetch(ContentQuery query) {
 		Set<String> uris = UriExtractor.extractFrom(query);
-		if (uris.isEmpty()) {
-			return true;
-		}
-		boolean found = false;
 		for (String uri : uris) {
 			Set<Description> fetchedDescriptions = fetcher.fetch(uri, new NullRequestTimer());
-			if (fetchedDescriptions == null) {
-				continue;
-			}
-			if (fetchedDescriptions == null) { throw new ContentNotFoundException("No meta-data returned for this uri"); };
-			
-			for (Description description : fetchedDescriptions) {
-				if (description.getAllUris().contains(uri)) {
-					found = true;
-				}
+			if (fetchedDescriptions == null || fetchedDescriptions.isEmpty()) {
+				return false;
 			}
 		}
-		return found;
+		return true;
 	}
 }

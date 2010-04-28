@@ -15,6 +15,8 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.tinyurl;
 
+import java.util.Collection;
+
 import org.jherd.http.RedirectShortUrlResolver;
 import org.jherd.http.ShortUrlResolver;
 import org.uriplay.query.uri.canonical.Canonicaliser;
@@ -27,16 +29,27 @@ import org.uriplay.query.uri.canonical.Canonicaliser;
 public class ShortenedUrlCanonicaliser implements Canonicaliser {
 
 	private final ShortUrlResolver shortUrlResolver;
+	private final Collection<String> shortUrlServices;
 
-	public ShortenedUrlCanonicaliser() {
+	public ShortenedUrlCanonicaliser(Collection<String> shortUrlServices) {
+		this.shortUrlServices = shortUrlServices;
 		this.shortUrlResolver = new RedirectShortUrlResolver();
 	}
 
 	@Override
 	public String canonicalise(String uri) {
-		if (!uri.startsWith("http")) {
+		if (!uri.startsWith("http") || !isProbablyAShortUrlService(uri)) {
 			return null;
 		}
 		return shortUrlResolver.resolve(uri);
+	}
+
+	private boolean isProbablyAShortUrlService(String uri) {
+		for (String shortUrlService : shortUrlServices) {
+			if (uri.startsWith(shortUrlService)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -37,7 +37,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>
                 
                 <!--  this should go last in the chain as it is an expensive operation -->
-                <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser"/>
+                <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
+                    <constructor-arg ref="urlShorteningServices"/>
+                </bean>
 			</list>
 		</constructor-arg>
 	</bean>

@@ -35,20 +35,20 @@ public class CanonicalisingLocalRemoteFetcher implements Fetcher<Set<Object>> {
 			try {
 				Set<Object> beans = delegate.fetch(currentUri, timer);
 				if (beans == null) {
-					return null;
+					return Sets.newHashSet();
 				} else {
 					return saveAliases(beans, currentUri, aliases);
 				}
 			} catch (NoMatchingAdapterException e) {
 				String nextUri = nextUri(currentUri, aliases);
 				if (nextUri == null || nextUri.equals(currentUri)) {
-					return null;
+					return Sets.newHashSet();
 				}
 				aliases.add(currentUri);
 				currentUri = nextUri;
 			}
 		}
-		return null;
+		return Sets.newHashSet();
 	}
 
 	private String nextUri(String currentUri, Set<String> aliases) {
