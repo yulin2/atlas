@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.beans;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Identity {@link Projector} that does not alter given bean graph. 
@@ -23,8 +23,7 @@ import java.util.Set;
  */
 public class NullProjector implements Projector {
 
-	public Set<Object> applyTo(Set<Object> beans) {
+	public <T> Collection<T> applyTo(Collection<T> beans) {
 		return beans;
 	}
-
 }

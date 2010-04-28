@@ -15,7 +15,8 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.v2;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,8 +38,11 @@ import org.uriplay.beans.NullProjector;
 import org.uriplay.beans.ProfileFilter;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
+import org.uriplay.media.entity.Description;
 import org.uriplay.query.content.UnknownTypeQueryExecutor;
 import org.uriplay.query.uri.Profile;
+
+import com.google.soy.common.collect.Lists;
 
 /**
  * Controller to handle the query interface to UriPlay.
@@ -90,7 +94,7 @@ public class UriFetchingController {
 		timer.nest();
 		Query query = new Query(profile, uri, outputTimingInfo);
 		try {
-			Set<Object> beans = (Set) queryExecutor.executeQuery(uri);
+			Collection<?> beans = Lists.newArrayList(queryExecutor.executeQuery(uri));
 
 			beans = filter.applyTo(beans, query.getFilterCriteria());
 			beans = projector.applyTo(beans);

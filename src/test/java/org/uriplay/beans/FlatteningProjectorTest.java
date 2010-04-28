@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
+import java.util.Collection;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -53,7 +54,7 @@ public class FlatteningProjectorTest extends TestCase {
 		
 		Set<Object> beans = Sets.<Object>newHashSet(outerPlaylist, innerPlaylist, ep1, ep2);
 		
-		Set<Object> projected = new FlatteningProjector().applyTo(beans);
+		Collection<Object> projected = new FlatteningProjector().applyTo(beans);
 		
 		assertThat(projected, hasItem((Object) outerPlaylist));
 		assertThat(projected, hasItems((Object) ep1, ep2));
@@ -70,7 +71,7 @@ public class FlatteningProjectorTest extends TestCase {
 		
 		Set<Object> beans = Sets.newHashSet((Object) playlist, ep);
 		
-		Set<Object> projected = new FlatteningProjector().applyTo(beans);
+		Collection<Object> projected = new FlatteningProjector().applyTo(beans);
 		
 		assertThat(projected.size(), is(2));
 		assertThat(projected, hasItem((Object) playlist));	
@@ -90,7 +91,7 @@ public class FlatteningProjectorTest extends TestCase {
 		
 		Set<Object> beans = Sets.newHashSet((Object) playlist1, playlist2, playlist3, ep);
 		
-		Set<Object> projected = new FlatteningProjector().applyTo(beans);
+		Collection<Object> projected = new FlatteningProjector().applyTo(beans);
 		
 		assertThat(projected.size(), is(2));
 		assertThat(projected, hasItem((Object) playlist1));	
@@ -108,7 +109,7 @@ public class FlatteningProjectorTest extends TestCase {
 		
 		Set<Object> beans = Sets.newHashSet((Object) playlist, brand, ep);
 		
-		Set<Object> projected = new FlatteningProjector().applyTo(beans);
+		Collection<Object> projected = new FlatteningProjector().applyTo(beans);
 		
 		assertThat(projected.size(), is(2));
 		assertThat(projected, hasItem((Object) playlist));	

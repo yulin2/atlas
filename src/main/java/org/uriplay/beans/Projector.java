@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.beans;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Applies a transformation to a given set of beans, returning
@@ -26,6 +26,6 @@ import java.util.Set;
  */
 public interface Projector {
 
-	Set<Object> applyTo(Set<Object> beans);
+	<T> Collection<T> applyTo(Collection<T> beans);
 
 }

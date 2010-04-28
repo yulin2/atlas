@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.beans;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.uriplay.media.entity.Item;
@@ -30,7 +31,7 @@ import com.google.common.collect.Sets;
  */
 public class SingleItemProjector implements Projector {
 
-	public Set<Object> applyTo(Set<Object> beans) {
+	public <T> Collection<T> applyTo(Collection<T> beans) {
 	
 		if (beans == null) {
 			throw new ProjectionException("Not a single item - nothing found");

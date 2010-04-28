@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.beans;
 
-import java.util.Set;
+import java.util.Collection;
 
 import org.uriplay.query.uri.Profile;
 
@@ -26,6 +26,6 @@ import org.uriplay.query.uri.Profile;
  */
 public interface Filter {
 
-	Set<Object> applyTo(Set<Object> beans, Profile profile);
+	<T> Collection<T> applyTo(Collection<T> beans, Profile profile);
 
 }

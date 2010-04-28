@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
+import java.util.Collection;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -51,7 +52,7 @@ public class OuterCollectionRemovingProjectorTest extends TestCase {
 		
 		Set<Object> beans = Sets.<Object>newHashSet(outerPlaylist, innerPlaylist, ep1, ep2);
 		
-		Set<Object> projected = new OuterCollectionRemovingProjector().applyTo(beans);
+		Collection<Object> projected = new OuterCollectionRemovingProjector().applyTo(beans);
 		
 		assertThat(projected, hasItems((Object) ep1, ep2, innerPlaylist));
 		assertThat(projected, not(hasItem((Object) outerPlaylist)));

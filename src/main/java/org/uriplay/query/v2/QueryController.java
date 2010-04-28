@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 package org.uriplay.query.v2;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -45,10 +44,9 @@ public class QueryController {
 		this.executor = executor;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping("/2.0/item.*")
 	public ModelAndView item(HttpServletRequest request) {
-		return new ModelAndView(VIEW, RequestNs.GRAPH, itemProjector.applyTo((Set) executeItemQuery(request)));
+		return new ModelAndView(VIEW, RequestNs.GRAPH, itemProjector.applyTo(executeItemQuery(request)));
 	}
 	
 	@RequestMapping("/2.0/items.*")
@@ -57,10 +55,9 @@ public class QueryController {
 	}
 	
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping("/2.0/brand.*")
 	public ModelAndView brand(HttpServletRequest request) {
-		return new ModelAndView(VIEW, RequestNs.GRAPH, playlistProjector.applyTo((Set) executeBrandQuery(request)));
+		return new ModelAndView(VIEW, RequestNs.GRAPH, playlistProjector.applyTo(executeBrandQuery(request)));
 	}
 	
 	@RequestMapping("/2.0/brands.*")
@@ -68,10 +65,9 @@ public class QueryController {
 		return new ModelAndView(VIEW, RequestNs.GRAPH, executeBrandQuery(request));
 	}
 	
-	@SuppressWarnings("unchecked")
 	@RequestMapping("/2.0/playlist.*")
 	public ModelAndView playlist(HttpServletRequest request) {
-		return new ModelAndView(VIEW, RequestNs.GRAPH, playlistProjector.applyTo((Set) executePlaylistQuery(request)));
+		return new ModelAndView(VIEW, RequestNs.GRAPH, playlistProjector.applyTo(executePlaylistQuery(request)));
 	}
 	
 	@RequestMapping("/2.0/playlists.*")

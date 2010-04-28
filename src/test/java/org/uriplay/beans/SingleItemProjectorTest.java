@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 
+import java.util.Collection;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -49,7 +50,7 @@ public class SingleItemProjectorTest extends TestCase {
 		
 		Set<Object> beans = Sets.newHashSet(item);
 		
-		Set<Object> projected = projector.applyTo(beans);
+		Collection<Object> projected = projector.applyTo(beans);
 		
 		assertThat(projected.size(), is(1));
 		assertThat(projected, hasItem(item));
@@ -61,7 +62,7 @@ public class SingleItemProjectorTest extends TestCase {
 		
 		Set<Object> beans = Sets.newHashSet(episode);
 		
-		Set<Object> projected = projector.applyTo(beans);
+		Collection<Object> projected = projector.applyTo(beans);
 		
 		assertThat(projected.size(), is(1));
 		assertThat(projected, hasItem(episode));
@@ -107,9 +108,9 @@ public class SingleItemProjectorTest extends TestCase {
 		encoding.addAvailableAt(location1);
 		encoding.addAvailableAt(location2);
 		
-		Set<Object> beans = Sets.newHashSet((Object) episode, version, encoding, location1, location2);
+		Collection<Object> beans = Sets.newHashSet((Object) episode, version, encoding, location1, location2);
 		
-		Set<Object> projected = projector.applyTo(beans);
+		Collection<Object> projected = projector.applyTo(beans);
 		
 		assertThat(projected.size(), is(5));
 		assertThat(projected, hasItems((Object) episode, version, encoding, location1, location2));

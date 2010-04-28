@@ -14,8 +14,9 @@ implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
 package org.uriplay.beans;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -24,7 +25,7 @@ import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
 import org.uriplay.query.uri.Profile;
 
-import com.google.common.collect.Sets;
+import com.google.soy.common.collect.Lists;
 
 /**
  * A {@link Filter} that removes beans from the bean graph dependent
@@ -34,24 +35,24 @@ import com.google.common.collect.Sets;
  */
 public class ProfileFilter implements Filter {
 
-	public Set<Object> applyTo(Set<Object> beans, Profile profile) {
+	public <T> Collection<T> applyTo(Collection<T> beans, Profile profile) {
 		
 		if (profile == Profile.ALL) {
 			return beans;
 		}
 		
-		Set<Object> filtered = Sets.newHashSet();
+		List<T> filtered = Lists.newArrayList();
 		
-		for (Iterator<Object> i = beans.iterator(); i.hasNext(); ) {
+		for (Iterator<T> i = beans.iterator(); i.hasNext(); ) {
 			
-			Object bean = i.next();
+			T bean = i.next();
 
 			if (bean instanceof Playlist) {
 				
 				Playlist playlist = (Playlist) bean;
 				
 				if (shouldInclude(playlist, profile)) {
-					filtered.add(playlist);
+					filtered.add(bean);
 				}
 			}
 			
@@ -60,7 +61,7 @@ public class ProfileFilter implements Filter {
 				Item item = (Item) bean;
 				
 				if (shouldInclude(item, profile)) {
-					filtered.add(item);
+					filtered.add(bean);
 				}
 			}
 		}

@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
+import java.util.Collection;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -86,7 +87,7 @@ public class UriFetchingController {
 		
 		try {
 			
-			Set<Object> beans = localOrRemoteFetcher.fetch(query.getUri(), timer);
+			Collection<?> beans = localOrRemoteFetcher.fetch(query.getUri(), timer);
 			beans = filter.applyTo(beans, query.getFilterCriteria());
 			beans = projector.applyTo(beans);
 			

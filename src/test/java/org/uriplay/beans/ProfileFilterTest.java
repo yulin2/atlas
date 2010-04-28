@@ -177,7 +177,7 @@ public class ProfileFilterTest extends TestCase {
 	public void testFiltersOutEmptyPlaylists() throws Exception {
 		Playlist list = new Playlist();
 		Set<Object> beans = Sets.<Object> newHashSet(list);
-		assertThat(filter.applyTo(beans, Profile.IPHONE), is(Collections.emptySet()));
+		assertThat(filter.applyTo(beans, Profile.IPHONE).size(), is(0));
 	}
 	
 	private Location htmlembedLocation() {

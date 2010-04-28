@@ -15,7 +15,8 @@ permissions and limitations under the License. */
 
 package org.uriplay.beans;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
 
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
@@ -23,7 +24,7 @@ import org.uriplay.media.util.ChildFinder;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import com.google.soy.common.collect.Lists;
 
 /**
  * {@link Projector} that takes a graph of beans (Playlists and Items) and removes
@@ -38,18 +39,18 @@ import com.google.common.collect.Sets;
  */
 public class FlatteningProjector implements Projector {
 
-	public Set<Object> applyTo(Set<Object> beanGraph) {
+	public <T> Collection<T> applyTo(Collection<T> beanGraph) {
 		
-		Iterable<Object> roots = rootsOf(beanGraph);
+		Iterable<T> roots = rootsOf(beanGraph);
 		checkPreconditionsOn(roots);
 		
 		return flatten(beanGraph, roots);
 	}
 
-	private Set<Object> flatten(Set<Object> beans, Iterable<Object> roots) {
+	private <T> Collection<T> flatten(Collection<T> beans, Iterable<T> roots) {
 		
-		Object root = Iterables.getOnlyElement(roots);
-		Set<Object> flattened = Sets.newHashSet(root);
+		T root = Iterables.getOnlyElement(roots);
+		List<T> flattened = Lists.newArrayList(root);
 		
 		if (root instanceof Playlist) {
 			Playlist rootList = (Playlist) root;
@@ -57,18 +58,18 @@ public class FlatteningProjector implements Projector {
 			Iterable<Item> leaves = Iterables.filter(beans, Item.class);
 			for (Item leafItem : leaves) {
 				rootList.addItem(leafItem);
-				flattened.add(leafItem);
+				flattened.add((T) leafItem);
 			}
 		}
 		
 		return flattened;
 	}
 
-	private Iterable<Object> rootsOf(Set<Object> beans) {
+	private <T> Iterable<T> rootsOf(Collection<T> beans) {
 		return Iterables.filter(beans, Predicates.not(new ChildFinder(beans)));
 	}
 
-	private void checkPreconditionsOn(Iterable<Object> roots) {
+	private void checkPreconditionsOn(Iterable<?> roots) {
 		if (Iterables.size(roots) == 0) {
 			throw new ProjectionException("No root collection found in object graph");
 		}

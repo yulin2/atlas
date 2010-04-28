@@ -33,19 +33,9 @@ public class TypeResolvingQueryExecutor implements UnknownTypeQueryExecutor {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Set<Description> executeQuery(String uri) {
-		return (Set) beansForUris(uri);
-	}
-
-	private Set<? extends Description> beansForUris(String uri) {
-		Description bean = beanForUri(uri);
-		if (bean == null) {
-			return Sets.newHashSet();
-		} else {
-			return Sets.newHashSet(bean);
-		}
+	public Description executeQuery(String uri) {
+		return beanForUri(uri);
 	}
 
 	private Description beanForUri(String uri) {

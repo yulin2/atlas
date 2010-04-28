@@ -15,13 +15,14 @@ permissions and limitations under the License. */
 
 package org.uriplay.beans;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
 
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.util.ChildFinder;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import com.google.soy.common.collect.Lists;
 
 /**
  * {@link Projector} that takes a graph of beans (Playlists and Items) and
@@ -34,16 +35,18 @@ import com.google.common.collect.Sets;
  */
 public class OuterCollectionRemovingProjector implements Projector {
 
-	public Set<Object> applyTo(Set<Object> beans) {
+	public <T> Collection<T> applyTo(Collection<T> beans) {
 		
 		checkPreconditionsOn(beans);
-		
 		ChildFinder childFinder = new ChildFinder(beans);
-		beans.addAll(childFinder.getChildren());
-		return Sets.<Object>newHashSet(Iterables.filter(beans, childFinder));
+		
+		List<T> all = Lists.newArrayList(beans);
+		all.addAll((Collection) childFinder.getChildren());
+		
+		return Lists.<T>newArrayList(Iterables.filter(all, childFinder));
 	}
 	
-	private void checkPreconditionsOn(Iterable<Object> beans) {
+	private void checkPreconditionsOn(Iterable<?> beans) {
 		
 		for (Object bean : beans) {
 			if (bean instanceof Playlist) {

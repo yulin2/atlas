@@ -36,12 +36,14 @@ import org.springframework.web.servlet.ModelAndView;
 import org.uriplay.beans.Filter;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
+import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.testing.DummyContentData;
 import org.uriplay.query.content.UnknownTypeQueryExecutor;
 import org.uriplay.query.uri.Profile;
 
 import com.google.common.collect.Sets;
+import com.google.soy.common.collect.Lists;
 
 /**
  * Unit test for {@link UriFetchingController}.
@@ -56,8 +58,6 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	
 	static final String URI = item.getCanonicalUri();
 
-	static final Set<Object> BEANS = (Set) Sets.newHashSet(item);
-	
 	MockHttpServletRequest request = new MockHttpServletRequest();
 	MockHttpServletResponse response = new MockHttpServletResponse();
 
@@ -90,7 +90,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	public void testQueriesFetcherForUri() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(executor).executeQuery(URI); will(returnValue(BEANS));
+			one(executor).executeQuery(URI); will(returnValue(item));
 			allowing(timerFactory).create(); will(returnValue(timer));
 			one(filter); will(returnValue(filteredBeans));
 			one(projector).applyTo(filteredBeans); will(returnValue(projectedBeans));
@@ -105,7 +105,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	public void testTimesRequestFromController() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(executor).executeQuery(URI); will(returnValue(BEANS));
+			one(executor).executeQuery(URI); will(returnValue(item));
 			one(filter); will(returnValue(filteredBeans));
 			one(projector).applyTo(filteredBeans); will(returnValue(projectedBeans));
 			one(timerFactory).create(); will(returnValue(timer));
@@ -122,7 +122,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	public void testAppliesProjectorToBeanGraphBeforeRenderingView() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(executor).executeQuery(URI); will(returnValue(BEANS));
+			one(executor).executeQuery(URI); will(returnValue(item));
 			one(filter); will(returnValue(filteredBeans));
 			one(projector).applyTo(filteredBeans); will(returnValue(projectedBeans));
 			allowing(timerFactory).create(); will(returnValue(timer));
@@ -135,8 +135,8 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	public void testAppliesProfileFilterToBeanGraphBeforeProjection() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(executor).executeQuery(URI); will(returnValue(BEANS));
-			one(filter).applyTo(BEANS, Profile.WEB); will(returnValue(filteredBeans));
+			one(executor).executeQuery(URI); will(returnValue(item));
+			one(filter).applyTo(Lists.newArrayList(item), Profile.WEB); will(returnValue(filteredBeans));
 			one(projector).applyTo(filteredBeans);
 			allowing(timerFactory).create(); will(returnValue(timer));
 			ignoring(timer);
@@ -148,8 +148,8 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	public void testAppliesProfileAllIfNoneSpecified() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(executor).executeQuery(URI); will(returnValue(BEANS));
-			one(filter).applyTo(BEANS, Profile.ALL); will(returnValue(filteredBeans));
+			one(executor).executeQuery(URI); will(returnValue(item));
+			one(filter).applyTo(Lists.newArrayList(item), Profile.ALL); will(returnValue(filteredBeans));
 			one(projector).applyTo(filteredBeans);
 			allowing(timerFactory).create(); will(returnValue(timer));
 			ignoring(timer);
@@ -193,7 +193,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	public void testReturns404OnProjectorException() throws Exception {
 		
 		checking(new Expectations() {{ 
-			allowing(executor).executeQuery(URI); will(returnValue(BEANS));
+			allowing(executor).executeQuery(URI); will(returnValue(item));
 			allowing(timerFactory).create(); will(returnValue(timer));
 			ignoring(timer);
 			one(filter); will(returnValue(filteredBeans));
@@ -211,7 +211,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 	public void testAllowsParamToSuppressTimingInformation() throws Exception {
 
 		checking(new Expectations() {{ 
-			one(executor).executeQuery(URI); will(returnValue(BEANS));
+			one(executor).executeQuery(URI); will(returnValue(item));
 			one(filter); will(returnValue(filteredBeans));
 			one(projector).applyTo(filteredBeans);
 			allowing(timerFactory).create(); will(returnValue(timer));
