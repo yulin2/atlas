@@ -39,13 +39,14 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	Brand euromillionsDraw = brand("/draw", "EuroMillions Draw");
 	Brand haveIGotNewsForYou = brand("/news", "Have I Got News For You");
 	Brand brasseye = brand("/eye", "Brass Eye");
+	Brand science = brand("/science", "The Story of Science: Power, Proof and Passion");
 
 	Item englishForCats = item("/items/cats", "English for cats");
 	
 	Item jamieOliversCookingProgramme = item("/items/oliver/1", "Jamie Oliver's cooking programme", "lots of words that are the same alpha beta");
 	Item gordonRamsaysCookingProgramme = item("/items/ramsay/2", "Gordon Ramsay's cooking show", "lots of words that are the same alpha beta");
 	
-	List<Brand> brands = Arrays.asList(dragonsDen, theCityGardener, eastenders, meetTheMagoons, theJackDeeShow, peepShow, haveIGotNewsForYou, euromillionsDraw, brasseye);
+	List<Brand> brands = Arrays.asList(dragonsDen, theCityGardener, eastenders, meetTheMagoons, theJackDeeShow, peepShow, haveIGotNewsForYou, euromillionsDraw, brasseye, science);
 	List<Item> items = Arrays.asList(englishForCats, jamieOliversCookingProgramme, gordonRamsaysCookingProgramme);
 	
 	InMemoryFuzzySearcher searcher;
@@ -83,6 +84,8 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 		check(searcher.brandTitleSearch("brasseye"), brasseye);
 		check(searcher.brandTitleSearch("braseye"), brasseye);
 		check(searcher.brandTitleSearch("brassey"), brasseye);
+		check(searcher.brandTitleSearch("The Story of Science Power Proof and Passion"), science);
+		check(searcher.brandTitleSearch("The Story of Science: Power, Proof and Passion"), science);
 	}
 	
 	public void testUsesPrefixSearchForShortSearches() throws Exception {
