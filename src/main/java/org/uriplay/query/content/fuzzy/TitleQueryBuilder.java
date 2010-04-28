@@ -65,10 +65,8 @@ public class TitleQueryBuilder {
 			
 			Term term = new Term(InMemoryFuzzySearcher.FIELD_CONTENT_TITLE, token);
 			
-			if (term.text().length() >= 4) {
-				PrefixQuery prefix = new PrefixQuery(term);
-				queryForThisTerm.add(prefix,Occur.SHOULD);
-			}
+			PrefixQuery prefix = new PrefixQuery(term);
+			queryForThisTerm.add(prefix,Occur.SHOULD);
 			
 			queryForThisTerm.add(new TermQuery(term), Occur.SHOULD);
 			queryForThisTerm.add(new FuzzyQuery(term, 0.65f, 4),Occur.SHOULD);

@@ -69,12 +69,14 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 		check(searcher.brandTitleSearch("easteners"), eastenders);
 		check(searcher.brandTitleSearch("eastedners"), eastenders);
 		check(searcher.brandTitleSearch("east"), eastenders);
-		check(searcher.brandTitleSearch("eas"));
+		check(searcher.brandTitleSearch("eas"), eastenders);
 		check(searcher.brandTitleSearch("end"));
 		check(searcher.brandTitleSearch("peep show"), peepShow);
+		check(searcher.brandTitleSearch("peep s"), peepShow);
 		check(searcher.brandTitleSearch("dee"), theJackDeeShow);
 		check(searcher.brandTitleSearch("show"), peepShow, theJackDeeShow);
 		check(searcher.brandTitleSearch("jack show"), theJackDeeShow);
+		check(searcher.brandTitleSearch("the jack dee s"), theJackDeeShow);
 		check(searcher.brandTitleSearch("dee show"), theJackDeeShow);
 		check(searcher.brandTitleSearch("hav i got news"), haveIGotNewsForYou);
 		check(searcher.brandTitleSearch("the"));
