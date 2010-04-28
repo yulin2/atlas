@@ -22,16 +22,7 @@ import static org.uriplay.content.criteria.Queries.equalTo;
 import static org.uriplay.content.criteria.Queries.greaterThan;
 import static org.uriplay.content.criteria.Queries.lessThan;
 import static org.uriplay.content.criteria.Queries.searchFor;
-import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_GENRE;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_PUBLISHER;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TAG;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_AVAILABLE;
-import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_TRANSPORT_TYPE;
-import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.VERSION_DURATION;
+import static org.uriplay.content.criteria.attribute.Attributes.*;
 
 import java.util.Map;
 
@@ -42,6 +33,7 @@ import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
+import org.uriplay.media.entity.Playlist;
 
 import com.google.common.collect.Maps;
 
@@ -86,8 +78,19 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 
 		params = Maps.newHashMap();
 		params.put("item.genre", new String[] { "bob" });
-		check(params, equalTo(ITEM_GENRE, "bob"));
+		check(params, equalTo(ITEM_GENRE, "http://uriplay.org/genres/uriplay/bob"));
+		
+		params = Maps.newHashMap();
+        params.put("genre", new String[] { "bob" });
+        check(params, equalTo(ITEM_GENRE, "http://uriplay.org/genres/uriplay/bob"), Item.class);
 
+		params = Maps.newHashMap();
+		params.put("genre", new String[] { "bob" });
+        check(params, equalTo(PLAYLIST_GENRE, "http://uriplay.org/genres/uriplay/bob"), Playlist.class);
+        
+        params = Maps.newHashMap();
+        params.put("genre", new String[] { "bob" });
+        check(params, equalTo(BRAND_GENRE, "http://uriplay.org/genres/uriplay/bob"), Brand.class);
 	}
 	
 	public void testTagEquality() throws Exception {
@@ -95,7 +98,19 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		
 		params = Maps.newHashMap();
 		params.put("item.tag", new String[] { "bob" });
-		check(params, equalTo(ITEM_TAG, "bob"));
+		check(params, equalTo(ITEM_TAG, "http://uriplay.org/tags/bob"));
+		
+		params = Maps.newHashMap();
+        params.put("tag", new String[] { "bob" });
+        check(params, equalTo(ITEM_TAG, "http://uriplay.org/tags/bob"), Item.class);
+        
+        params = Maps.newHashMap();
+        params.put("tag", new String[] { "bob" });
+        check(params, equalTo(PLAYLIST_TAG, "http://uriplay.org/tags/bob"), Playlist.class);
+        
+        params = Maps.newHashMap();
+        params.put("tag", new String[] { "bob" });
+        check(params, equalTo(BRAND_TAG, "http://uriplay.org/tags/bob"), Brand.class);
 	}
 	
 	public void testTitleBeginning() throws Exception {

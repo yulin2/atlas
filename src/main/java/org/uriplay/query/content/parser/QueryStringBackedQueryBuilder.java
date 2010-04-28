@@ -29,8 +29,10 @@ import org.joda.time.DateTime;
 import org.uriplay.beans.JsonTranslator;
 import org.uriplay.content.criteria.ConjunctiveQuery;
 import org.uriplay.content.criteria.ContentQuery;
+import org.uriplay.content.criteria.attribute.Attribute;
 import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.content.criteria.attribute.QueryFactory;
+import org.uriplay.content.criteria.attribute.StringValuedAttribute;
 import org.uriplay.content.criteria.operator.Operator;
 import org.uriplay.content.criteria.operator.Operators;
 import org.uriplay.media.entity.Description;
@@ -109,8 +111,39 @@ public class QueryStringBackedQueryBuilder {
 		if (attribute == null) {
 			throw new IllegalArgumentException(attributeName + " is not a valid attribute");
 		}
-		String[] values = paramValue.split(OPERAND_SEPERATOR);
-		return attributeQueryFor(Arrays.asList(values), op, attribute);
+		List<String> values = Arrays.asList(paramValue.split(OPERAND_SEPERATOR));
+		values = formatValues(attribute, values);
+		
+		return attributeQueryFor(values, op, attribute);
+	}
+	
+	private List<String> formatValues(QueryFactory<?> attribute, List<String> values) {
+	    List<String> formattedValues = Lists.newArrayList();
+	    if (! (attribute instanceof StringValuedAttribute)) {
+	        return values;
+	    }
+	    
+	    String attributeName = ((StringValuedAttribute) attribute).javaAttributeName();
+	    
+	    if ("genre".equals(attributeName)) {
+	        for (String value: values) {
+	            if (! value.startsWith("http://")) {
+	                value = "http://uriplay.org/genres/uriplay/"+value;
+	            }
+	            formattedValues.add(value);
+	        }
+	    } else if ("tag".equals(attributeName)) {
+	        for (String value: values) {
+                if (! value.startsWith("http://")) {
+                    value = "http://uriplay.org/tags/"+value;
+                }
+                formattedValues.add(value);
+            }
+	    } else {
+	        formattedValues.addAll(values);
+	    }
+	    
+	    return formattedValues;
 	}
 
 	private ContentQuery attributeQueryFor(List<String> paramValue, Operator op, QueryFactory<?> attribute) {
