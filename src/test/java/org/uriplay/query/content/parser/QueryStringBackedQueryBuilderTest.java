@@ -44,15 +44,15 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		
 		params = Maps.newHashMap();
 		params.put("item.title", new String[] { "bob" });
-		check(params, equalTo(ITEM_TITLE, "bob"));
+		check(params, searchFor(ITEM_TITLE, "bob"));
 		
 		params = Maps.newHashMap();
 		params.put("playlist.title", new String[] { "bob" });
-		check(params, equalTo(PLAYLIST_TITLE, "bob"));
+		check(params, searchFor(PLAYLIST_TITLE, "bob"));
 		
 		params = Maps.newHashMap();
 		params.put("brand.title", new String[] { "bob" });
-		check(params, equalTo(BRAND_TITLE, "bob"));
+		check(params, searchFor(BRAND_TITLE, "bob"));
 		
 	}
 	
@@ -131,7 +131,7 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		Map<String, String[]> params = Maps.newHashMap();
 		params.put("item.title", new String[] { "bob" });
 		params.put("item.publisher", new String[] { "bbc" });
-		check(params, and(equalTo(ITEM_PUBLISHER, "bbc"), equalTo(ITEM_TITLE, "bob")));
+		check(params, and(equalTo(ITEM_PUBLISHER, "bbc"), searchFor(ITEM_TITLE, "bob")));
 	}
 
 	public void testTransportType() throws Exception {
@@ -208,17 +208,17 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 			.withIgnoreParams("foo")
 			.build(params, Item.class);
 		
-		assertEquals(equalTo(ITEM_TITLE, "bob"), query);
+		assertEquals(searchFor(ITEM_TITLE, "bob"), query);
 	}
 	
 	public void testAliases() throws Exception {
 		Map<String, String[]> params = Maps.newHashMap();
 		params.put("title", new String[] { "bob" });
-		check(params, equalTo(ITEM_TITLE, "bob"), Item.class);
+		check(params, searchFor(ITEM_TITLE, "bob"), Item.class);
 		
 		params = Maps.newHashMap();
 		params.put("title", new String[] { "bob" });
-		check(params, equalTo(BRAND_TITLE, "bob"), Brand.class);
+		check(params, searchFor(BRAND_TITLE, "bob"), Brand.class);
 		
 		params = Maps.newHashMap();
 		params.put("available", new String[] { "true" });

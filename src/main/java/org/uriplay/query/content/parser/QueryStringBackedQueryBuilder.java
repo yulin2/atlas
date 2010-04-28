@@ -29,7 +29,6 @@ import org.joda.time.DateTime;
 import org.uriplay.beans.JsonTranslator;
 import org.uriplay.content.criteria.ConjunctiveQuery;
 import org.uriplay.content.criteria.ContentQuery;
-import org.uriplay.content.criteria.attribute.Attribute;
 import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.content.criteria.attribute.QueryFactory;
 import org.uriplay.content.criteria.attribute.StringValuedAttribute;
@@ -100,21 +99,33 @@ public class QueryStringBackedQueryBuilder {
 			throw new IllegalArgumentException("Malformed attribute and operator combination");
 		}
 		String attributeName = parts[0];
-		Operator op = DEFAULT_OPERATOR;
+		QueryFactory<?> attribute = Attributes.lookup(attributeName, queryContext);
+        if (attribute == null) {
+            throw new IllegalArgumentException(attributeName + " is not a valid attribute");
+        }
+        
+		Operator op = defaultOperator(attribute);
 		if (parts.length == 2) {
 			op = Operators.lookup(parts[1]);
 			if (op == null) {
 				throw new IllegalArgumentException("Unknown operator " + parts[1]);
 			}
 		} 
-		QueryFactory<?> attribute = Attributes.lookup(attributeName, queryContext);
-		if (attribute == null) {
-			throw new IllegalArgumentException(attributeName + " is not a valid attribute");
-		}
+		
 		List<String> values = Arrays.asList(paramValue.split(OPERAND_SEPERATOR));
 		values = formatValues(attribute, values);
 		
 		return attributeQueryFor(values, op, attribute);
+	}
+	
+	private Operator defaultOperator(QueryFactory<?> attribute) {
+	    if (attribute instanceof StringValuedAttribute) {
+	        String attributeName = ((StringValuedAttribute) attribute).javaAttributeName();
+	        if ("title".equals(attributeName)) {
+	            return Operators.SEARCH;
+	        }
+	    }
+	    return DEFAULT_OPERATOR;
 	}
 	
 	private List<String> formatValues(QueryFactory<?> attribute, List<String> values) {
