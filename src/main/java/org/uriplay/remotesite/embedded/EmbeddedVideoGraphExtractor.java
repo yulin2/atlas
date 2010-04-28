@@ -23,7 +23,7 @@ import org.jherd.beans.id.IdGeneratorFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
-import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
@@ -61,7 +61,7 @@ public class EmbeddedVideoGraphExtractor implements BeanGraphExtractor<HtmlDescr
 	
 	private void addEpisode(Representation representation, String uri, HtmlDescriptionOfItem item, String versionId) {
 		
-		representation.addType(uri, Episode.class);
+		representation.addType(uri, Item.class);
 		representation.addUri(uri);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();

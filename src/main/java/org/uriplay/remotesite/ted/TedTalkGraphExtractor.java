@@ -46,7 +46,6 @@ public class TedTalkGraphExtractor  {
 		Item item = new Item();
 		item.setCanonicalUri(src.getUri());
 
-
 		HtmlDescriptionOfItem htmlItem = src.getItem();
 		item.setTitle(htmlItem.getTitle());
 		item.setDescription(htmlItem.getDescription());

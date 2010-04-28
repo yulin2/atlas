@@ -26,7 +26,7 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.entity.Encoding;
-import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 
@@ -85,7 +85,7 @@ public class OembedGraphExtractorTest extends MockObjectTestCase {
 		
 		Representation representation = extractor.extractFrom(source);
 
-		assertEquals(Episode.class, representation.getType(videoUri));
+		assertEquals(Item.class, representation.getType(videoUri));
 		assertThat(representation, hasPropertyValue(videoUri, "title", "Test Video Title"));
 		assertThat(representation, hasPropertyValue(videoUri, "publisher", "vimeo.com"));
 		assertThat(representation, hasPropertyValue(videoUri, "curie", "vim:1234"));

@@ -24,7 +24,7 @@ import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
-import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 
@@ -56,7 +56,7 @@ public class OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
 		String encodingId = idGenerator.getNextId();
 		String locationId = idGenerator.getNextId();
 		
-		representation.addType(episodeUri, Episode.class);
+		representation.addType(episodeUri, Item.class);
 		representation.addUri(episodeUri);
 		
 		representation.addType(versionId, Version.class);

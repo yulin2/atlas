@@ -24,7 +24,7 @@ import org.jherd.beans.id.IntegerIdGenerator;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Encoding;
-import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
@@ -71,7 +71,7 @@ public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
 		
 		Representation representation = extractor.extractFrom(source);
 
-		assertEquals(Episode.class, representation.getType(ITEM_URI));
+		assertEquals(Item.class, representation.getType(ITEM_URI));
 		assertThat(representation, hasPropertyValue(ITEM_URI, "title", "News News News"));
 		assertThat(representation, hasPropertyValue(ITEM_URI, "description", "The News"));
 		assertThat(representation, hasPropertyValue(ITEM_URI, "publisher", "dailymotion.com"));

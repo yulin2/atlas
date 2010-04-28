@@ -25,7 +25,7 @@ import org.jherd.beans.id.IdGenerator;
 import org.jherd.beans.id.IdGeneratorFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.entity.Encoding;
-import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
@@ -68,7 +68,7 @@ public class GenericPodcastGraphExtractor extends PodcastGraphExtractor implemen
 		for (SyndEntry entry : entries) {
 			
 			String episodeId = addAndReturnUriOf(representation, idGenerator, entry);
-			representation.addType(episodeId, Episode.class);
+			representation.addType(episodeId, Item.class);
 
 			String versionId = idGenerator.getNextId();
 			String encodingId = idGenerator.getNextId();

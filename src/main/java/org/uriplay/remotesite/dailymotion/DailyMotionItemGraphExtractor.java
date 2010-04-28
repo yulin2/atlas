@@ -23,7 +23,7 @@ import org.jherd.beans.id.IdGeneratorFactory;
 import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
-import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.query.content.PerPublisherCurieExpander;
@@ -59,7 +59,7 @@ public class DailyMotionItemGraphExtractor implements BeanGraphExtractor<HtmlDes
 	}
 	
 	private void addItemPropertiesTo(Representation representation, String itemUri, String versionId, HtmlDescriptionOfItem item) {
-		representation.addType(itemUri, Episode.class);
+		representation.addType(itemUri, Item.class);
 		representation.addUri(itemUri);
 
 		MutablePropertyValues mpvs = new MutablePropertyValues();

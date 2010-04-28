@@ -29,7 +29,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Encoding;
-import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.synd.SyndicationSource;
@@ -110,7 +110,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		assertEquals(Brand.class, representation.getType(PODCAST_URI));
 		assertThat(representation, hasPropertyValue(PODCAST_URI, "items", Sets.newHashSet(EPISODE_URI)));
 		//assertThat(representation, hasPropertyValue(PODCAST_URI, "aliases", Sets.newHashSet(SLASH_PROGRAMMES_URI)));
-		assertEquals(Episode.class, representation.getType(EPISODE_URI));
+		assertEquals(Item.class, representation.getType(EPISODE_URI));
 		assertThat(representation, hasPropertyValue(EPISODE_URI, "title", "BH"));
 		assertThat(representation, hasPropertyValue(EPISODE_URI, "description", "Broadcasting House"));
 		assertThat(representation, hasPropertyValue(EPISODE_URI, "containedIn", Sets.newHashSet(PODCAST_URI)));
