@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.v2;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +30,6 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.query.content.parser.QueryStringBackedQueryBuilder;
-
-import com.google.soy.common.collect.Sets;
 
 @Controller
 public class QueryController {
@@ -80,15 +79,15 @@ public class QueryController {
 		return new ModelAndView(VIEW, RequestNs.GRAPH, executePlaylistQuery(request));
 	}
 	
-	private Set<Item> executeItemQuery(HttpServletRequest request) {
-		return Sets.newHashSet(executor.executeItemQuery(builder.build(request, Item.class)));
+	private List<Item> executeItemQuery(HttpServletRequest request) {
+		return executor.executeItemQuery(builder.build(request, Item.class));
 	}
 
-	private Set<Playlist> executePlaylistQuery(HttpServletRequest request) {
-		return Sets.newHashSet(executor.executePlaylistQuery(builder.build(request, Playlist.class)));
+	private List<Playlist> executePlaylistQuery(HttpServletRequest request) {
+		return executor.executePlaylistQuery(builder.build(request, Playlist.class));
 	}
 	
-	private Set<Brand> executeBrandQuery(HttpServletRequest request) {
-		return Sets.newHashSet(executor.executeBrandQuery(builder.build(request, Brand.class)));
+	private List<Brand> executeBrandQuery(HttpServletRequest request) {
+		return executor.executeBrandQuery(builder.build(request, Brand.class));
 	}
 }

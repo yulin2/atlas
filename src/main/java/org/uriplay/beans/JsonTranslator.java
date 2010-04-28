@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.text.DateFormat;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +54,7 @@ public class JsonTranslator implements BeanGraphWriter {
 
     }
 
-    public void writeTo(Set<Object> graph, OutputStream stream) {
+    public void writeTo(Collection<Object> graph, OutputStream stream) {
 
         Set<Object> processed = Sets.newHashSet();
         String callback = callback(request);
@@ -86,7 +87,7 @@ public class JsonTranslator implements BeanGraphWriter {
         }
     }
 
-    private void outputItems(Set<Object> graph, Writer writer, Set<Object> processed) throws IOException {
+    private void outputItems(Collection<Object> graph, Writer writer, Set<Object> processed) throws IOException {
 
         for (Object bean : graph) {
 
@@ -101,7 +102,7 @@ public class JsonTranslator implements BeanGraphWriter {
         }
     }
 
-    private void outputLists(Set<Object> graph, Writer writer, Set<Object> processed) throws IOException {
+    private void outputLists(Collection<Object> graph, Writer writer, Set<Object> processed) throws IOException {
 
         for (Object bean : graph) {
 

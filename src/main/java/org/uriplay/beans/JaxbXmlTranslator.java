@@ -16,6 +16,7 @@ package org.uriplay.beans;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
@@ -51,7 +52,7 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 		context = JAXBContext.newInstance(UriplayXmlOutput.class, Playlist.class, Item.class, Location.class);
 	}
 	
-	public void writeTo(Set<Object> graph, OutputStream stream) {
+	public void writeTo(Collection<Object> graph, OutputStream stream) {
 		
 		try {
 			Marshaller m = context.createMarshaller();
@@ -74,7 +75,7 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 		
 	}
 
-	private void outputItems(Set<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
+	private void outputItems(Collection<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
 
 		for (Object bean : graph) {
 			
@@ -87,7 +88,7 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 		}
 	}
 
-	private void outputLists(Set<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
+	private void outputLists(Collection<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
 
 		for (Object bean : graph) {
 			

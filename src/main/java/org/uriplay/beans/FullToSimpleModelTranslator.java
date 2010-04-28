@@ -1,6 +1,7 @@
 package org.uriplay.beans;
 
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Set;
 
 import org.jherd.beans.BeanGraphWriter;
@@ -31,12 +32,12 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		this.outputWriter = xmlOutputter;
 	}
 
-	private Iterable<Object> rootsOf(Set<Object> beans) {
+	private Iterable<Object> rootsOf(Collection<Object> beans) {
 		return Iterables.filter(beans, Predicates.not(new ChildFinder(beans)));
 	}
 	
 	@Override
-	public void writeTo(Set<Object> fullGraph, OutputStream stream) {
+	public void writeTo(Collection<Object> fullGraph, OutputStream stream) {
 		
 		UriplayXmlOutput outputGraph = new UriplayXmlOutput();
 		Set<Object> processed = Sets.newHashSet();

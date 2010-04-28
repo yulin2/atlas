@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -46,11 +47,11 @@ public class HtmlTranslator implements BeanGraphWriter {
 		footer = readHtmlFrom("/html/footer.htmlf");
 	}
 	
-	private Iterable<Object> rootsOf(Set<Object> beans) {
+	private Iterable<Object> rootsOf(Collection<Object> beans) {
 		return Iterables.filter(beans, Predicates.not(new ChildFinder(beans)));
 	}
 	
-	public void writeTo(Set<Object> fullGraph, OutputStream stream) {
+	public void writeTo(Collection<Object> fullGraph, OutputStream stream) {
 		Iterable<Object> beansToProcess = beansToProcess(fullGraph);
 		Writer writer;
 		try {
@@ -87,7 +88,7 @@ public class HtmlTranslator implements BeanGraphWriter {
 		writer.write("<h1>Nothing matched your query :(</h1>");
 	}
 
-	private Iterable<Object> beansToProcess(Set<Object> fullGraph) {
+	private Iterable<Object> beansToProcess(Collection<Object> fullGraph) {
 		if (fullGraph == null) {
 			return null;
 		} else {
