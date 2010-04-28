@@ -18,7 +18,7 @@ package org.uriplay.beans;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -32,6 +32,7 @@ import org.uriplay.media.entity.Version;
 import org.uriplay.query.uri.Profile;
 
 import com.google.common.collect.Sets;
+import com.google.soy.common.collect.Lists;
 
 /**
  * Unit test for {@link ProfileFilter}.
@@ -75,9 +76,9 @@ public class ProfileFilterTest extends TestCase {
 	
 	public void testDoesNotRemoveLocationsForProfileAllPlayable() throws Exception {
 		
-		Set<Object> beans = Sets.<Object> newHashSet(playlist);
+		Collection<Object> beans = Sets.<Object>newHashSet(playlist);
 		
-		assertThat(filter.applyTo(beans, Profile.PLAYABLE), is((Object) Sets.newHashSet(playlist)));
+		assertThat(filter.applyTo(beans, Profile.PLAYABLE), is((Collection) Lists.newArrayList(playlist)));
 		assertThat(encoding.getAvailableAt(), is((Object)Sets.newHashSet(location1, location2, location3)));
 	}
 
@@ -85,7 +86,7 @@ public class ProfileFilterTest extends TestCase {
 		
 		Set<Object> beans = Sets.<Object> newHashSet(playlist);
 		
-		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Object) Sets.newHashSet(playlist)));
+		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Collection) Lists.newArrayList(playlist)));
 		assertThat(encoding.getAvailableAt(), is((Object)Sets.newHashSet(location1)));
 	}
 	
@@ -93,7 +94,7 @@ public class ProfileFilterTest extends TestCase {
 		
 		Set<Object> beans = Sets.<Object> newHashSet(playlist);
 		
-		assertThat(filter.applyTo(beans, Profile.WEB), is((Object) Sets.newHashSet(playlist)));
+		assertThat(filter.applyTo(beans, Profile.WEB), is((Collection) Lists.newArrayList(playlist)));
 		assertThat(encoding.getAvailableAt(), is((Object)Sets.newHashSet(location2)));
 	}
 	
@@ -101,7 +102,7 @@ public class ProfileFilterTest extends TestCase {
 		
 		Set<Object> beans = Sets.<Object> newHashSet(playlist);
 		
-		assertThat(filter.applyTo(beans, Profile.EMBED), is((Object) Sets.newHashSet(playlist)));
+		assertThat(filter.applyTo(beans, Profile.EMBED), is((Collection) Lists.newArrayList(playlist)));
 		assertThat(encoding.getAvailableAt(), is((Object)Sets.newHashSet(location3)));
 	}
 	
@@ -109,7 +110,7 @@ public class ProfileFilterTest extends TestCase {
 		
 		Set<Object> beans = Sets.<Object> newHashSet(item);
 		
-		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Object) Sets.newHashSet(item)));
+		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Collection) Lists.newArrayList(item)));
 		assertThat(encoding.getAvailableAt(), is((Object)Sets.newHashSet(location1)));
 	}
 	
@@ -123,9 +124,9 @@ public class ProfileFilterTest extends TestCase {
 		version2.addManifestedAs(enc2);
 		enc2.addAvailableAt(loc2);
 		
-		Set<Object> beans = Sets.<Object> newHashSet(item, item2);
+		Collection<Item> beans = Lists.newArrayList(item, item2);
 		
-		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Object) Sets.newHashSet(item, item2)));
+		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Collection) Lists.newArrayList(item, item2)));
 		assertThat(encoding.getAvailableAt(), is((Object)Sets.newHashSet(location1)));
 		assertThat(enc2.getAvailableAt(), is((Object)Sets.newHashSet(loc2)));
 	}
@@ -169,7 +170,7 @@ public class ProfileFilterTest extends TestCase {
 		
 		Set<Object> beans = Sets.<Object> newHashSet(item);
 		
-		assertThat(filter.applyTo(beans, Profile.IPHONE), is((Object) Sets.newHashSet(item)));
+		assertThat(filter.applyTo(beans, Profile.IPHONE), is((Collection) Lists.newArrayList(item)));
 		assertThat(version.getManifestedAs(), is((Object)Sets.newHashSet(audiomp4)));
 		assertThat(audiomp4.getAvailableAt(), is((Object)Sets.newHashSet(httpDownloadLocation)));
 	}
