@@ -36,6 +36,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<value>http://g0.to</value>
 		<value>http://get-shorty.com</value>
 		<value>http://get-url.com</value>
+		<value>http://goo.gl</value>
 		<value>http://hex.io</value>
 		<value>http://hotredirect.com</value>
 		<value>http://hurl.it</value>
