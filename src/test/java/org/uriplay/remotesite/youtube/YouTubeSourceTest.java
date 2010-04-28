@@ -65,8 +65,8 @@ public class YouTubeSourceTest extends TestCase {
 				
 		YouTubeSource source = new YouTubeSource(entry, "uri");
 		assertThat(source.getCategories(), hasItem("http://uriplay.org/genres/youtube/News"));
-		assertThat(source.getTags(), hasItem("http://tags.moat-project.org/tag/funny"));
-		assertThat(source.getTags(), not(hasItem("http://tags.moat-project.org/tag/news")));
+		assertThat(source.getTags(), hasItem("http://uriplay.org/tags/funny"));
+		assertThat(source.getTags(), not(hasItem("http://uriplay.org/tags/news")));
 	}
 	
 	public void testStripsParametersFromLocationUris() throws Exception {

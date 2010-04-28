@@ -42,7 +42,7 @@ import com.google.gdata.util.common.base.Charsets;
 class YouTubeSource extends BaseSource {
 	
 	private static final String URIPLAY_GENRES_SCHEME = "http://uriplay.org/genres/youtube/";
-	private static final String URIPLAY_TAGS_SCHEME = "http://tags.moat-project.org/tag/";
+	private static final String URIPLAY_TAGS_SCHEME = "http://uriplay.org/tags/";
 	private static final String GDATA_KEYWORDS_CAT_SCHEME = "http://gdata.youtube.com/schemas/2007/keywords.cat";
 	
 	private final VideoEntry videoEntry;
