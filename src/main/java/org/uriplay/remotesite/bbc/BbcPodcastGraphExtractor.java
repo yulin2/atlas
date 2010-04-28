@@ -69,6 +69,10 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor imple
 	@Override
 	public Representation extractFrom(SyndicationSource source) {
 		Representation representation = super.extractFrom(source);
+		
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.addPropertyValue("publisher", "bbc.co.uk");
+		representation.addValues(source.getUri(), mpvs);
 
 //		Don't include a /programmes link this creates duplicate aliases
 //		TODO: Reinstate this code

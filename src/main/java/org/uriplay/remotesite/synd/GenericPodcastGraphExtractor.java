@@ -126,7 +126,7 @@ public class GenericPodcastGraphExtractor extends PodcastGraphExtractor implemen
 		mpvs.addPropertyValue("title", feed.getTitle());
 		mpvs.addPropertyValue("description", feed.getDescription());
 		mpvs.addPropertyValue("items", episodes);
-		mpvs.addPropertyValue("publisher", "bbc.co.uk");
+		
 		return mpvs;
 	}
 
