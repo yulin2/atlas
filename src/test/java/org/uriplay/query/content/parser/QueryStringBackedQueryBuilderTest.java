@@ -24,7 +24,6 @@ import static org.uriplay.content.criteria.Queries.lessThan;
 import static org.uriplay.content.criteria.Queries.searchFor;
 import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TITLE;
 import static org.uriplay.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
-import static org.uriplay.content.criteria.attribute.Attributes.EPISODE_TAG;
 import static org.uriplay.content.criteria.attribute.Attributes.ITEM_GENRE;
 import static org.uriplay.content.criteria.attribute.Attributes.ITEM_PUBLISHER;
 import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TAG;
@@ -97,10 +96,6 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		params = Maps.newHashMap();
 		params.put("item.tag", new String[] { "bob" });
 		check(params, equalTo(ITEM_TAG, "bob"));
-		
-		params = Maps.newHashMap();
-		params.put("episode.tag", new String[] { "bob" });
-		check(params, equalTo(EPISODE_TAG, "bob"));
 	}
 	
 	public void testTitleBeginning() throws Exception {
