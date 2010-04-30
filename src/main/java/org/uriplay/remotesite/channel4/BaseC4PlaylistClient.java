@@ -1,12 +1,15 @@
 package org.uriplay.remotesite.channel4;
 
 import java.util.List;
+import java.util.Set;
 
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
+import org.uriplay.genres.GenreMap;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 
 import com.google.common.collect.Lists;
@@ -15,6 +18,7 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 
 	private final RemoteSiteClient<BrandListingPage> brandListClient;
 	private final SiteSpecificAdapter<Brand> brandClient;
+	private final GenreMap genreMap = new C4GenreMap();
 
 	public BaseC4PlaylistClient(RemoteSiteClient<BrandListingPage> brandListClient, SiteSpecificAdapter<Brand> brandClient) {
 		this.brandListClient = brandListClient;
@@ -38,7 +42,19 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 			playlist.setCanonicalUri(uri);
 			
 			for (HtmlBrandSummary brandRef : brandList) {
-				playlist.addPlaylist(brandClient.fetch(brandRef.getBrandPage(), timer));
+				Brand brand = brandClient.fetch(brandRef.getBrandPage(), timer);
+				if (brand != null) {
+					if (brandRef.getCategories() != null) {
+						Set<String> genres = genreMap.map(brandRef.getCategories());
+						brand.setGenres(genres);
+						// C4 only expose genres at the brand level
+						// so we add them to the items
+						for (Item item : brand.getItems()) {
+							item.setGenres(genres);
+						}
+					}
+					playlist.addPlaylist(brand);
+				}
 			}
 			return playlist;
 			
