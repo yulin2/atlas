@@ -26,7 +26,6 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.util.Version;
 
@@ -66,23 +65,27 @@ public class TitleQueryBuilder {
 			Term term = new Term(InMemoryFuzzySearcher.FIELD_CONTENT_TITLE, token);
 			
 			PrefixQuery prefix = new PrefixQuery(term);
-			queryForThisTerm.add(prefix,Occur.SHOULD);
+			queryForThisTerm.add(prefix, Occur.SHOULD);
 			
-			queryForThisTerm.add(new TermQuery(term), Occur.SHOULD);
 			queryForThisTerm.add(new FuzzyQuery(term, 0.65f, 4),Occur.SHOULD);
 			queryForTerms.add(queryForThisTerm, Occur.MUST);
 		}
 	
-		BooleanQuery either = new BooleanQuery();
+		BooleanQuery either = new BooleanQuery(); 
 		either.add(queryForTerms, Occur.SHOULD);
 		either.add(matchesWithoutSpaces(queryString), Occur.SHOULD);
+		
+		Query prefix = prefixSearch(queryString.replace(" ", ""));
+		prefix.setBoost(2);
+		either.add(prefix, Occur.SHOULD);
+		
 		BooleanQuery query = new BooleanQuery();
 		query.add(either, Occur.MUST);
 		return query;
 	}
 
 	private FuzzyQuery matchesWithoutSpaces(String queryString) {
-		return new FuzzyQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, queryString), 0.8f, 4);
+		return new FuzzyQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, queryString.replace(" ", "")), 0.8f, 4);
 	}
 	
 	private List<String> tokens(String queryString) {

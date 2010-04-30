@@ -33,6 +33,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	Brand dragonsDen = brand("/den", "Dragon's den");
 	Brand theCityGardener = brand("/garden", "The City Gardener");
 	Brand eastenders = brand("/eastenders", "Eastenders");
+	Brand politicsEast = brand("/politics", "The Politics Show East");
 	Brand meetTheMagoons = brand("/magoons", "Meet the Magoons");
 	Brand theJackDeeShow = brand("/dee", "The Jack Dee Show");
 	Brand peepShow = brand("/peep-show", "Peep Show");
@@ -46,7 +47,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	Item jamieOliversCookingProgramme = item("/items/oliver/1", "Jamie Oliver's cooking programme", "lots of words that are the same alpha beta");
 	Item gordonRamsaysCookingProgramme = item("/items/ramsay/2", "Gordon Ramsay's cooking show", "lots of words that are the same alpha beta");
 	
-	List<Brand> brands = Arrays.asList(dragonsDen, theCityGardener, eastenders, meetTheMagoons, theJackDeeShow, peepShow, haveIGotNewsForYou, euromillionsDraw, brasseye, science);
+	List<Brand> brands = Arrays.asList(dragonsDen, theCityGardener, eastenders, meetTheMagoons, theJackDeeShow, peepShow, haveIGotNewsForYou, euromillionsDraw, brasseye, science, politicsEast);
 	List<Item> items = Arrays.asList(englishForCats, jamieOliversCookingProgramme, gordonRamsaysCookingProgramme);
 	
 	InMemoryFuzzySearcher searcher;
@@ -66,21 +67,21 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 		check(searcher.brandTitleSearch("drag den"), dragonsDen);
 		check(searcher.brandTitleSearch("drag"), dragonsDen);
 		check(searcher.brandTitleSearch("dragon's den"), dragonsDen);
-		check(searcher.brandTitleSearch("eastend"), eastenders);
+		check(searcher.brandTitleSearch("eastenders"), eastenders);
 		check(searcher.brandTitleSearch("easteners"), eastenders);
 		check(searcher.brandTitleSearch("eastedners"), eastenders);
-		check(searcher.brandTitleSearch("east"), eastenders);
-		check(searcher.brandTitleSearch("eas"), eastenders);
+		check(searcher.brandTitleSearch("politics east"), politicsEast);
+		check(searcher.brandTitleSearch("eas"), eastenders, politicsEast);
+		check(searcher.brandTitleSearch("east"), eastenders, politicsEast);
 		check(searcher.brandTitleSearch("end"));
 		check(searcher.brandTitleSearch("peep show"), peepShow);
 		check(searcher.brandTitleSearch("peep s"), peepShow);
 		check(searcher.brandTitleSearch("dee"), theJackDeeShow);
-		check(searcher.brandTitleSearch("show"), peepShow, theJackDeeShow);
+		check(searcher.brandTitleSearch("show"), peepShow, politicsEast, theJackDeeShow);
 		check(searcher.brandTitleSearch("jack show"), theJackDeeShow);
 		check(searcher.brandTitleSearch("the jack dee s"), theJackDeeShow);
 		check(searcher.brandTitleSearch("dee show"), theJackDeeShow);
 		check(searcher.brandTitleSearch("hav i got news"), haveIGotNewsForYou);
-		check(searcher.brandTitleSearch("the"));
 		check(searcher.brandTitleSearch("brasseye"), brasseye);
 		check(searcher.brandTitleSearch("braseye"), brasseye);
 		check(searcher.brandTitleSearch("brassey"), brasseye);
