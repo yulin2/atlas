@@ -57,6 +57,9 @@ public class ImdbAdapter extends TimedFetcher<Representation> implements SiteSpe
 		try {
 			ImdbSource source = new ImdbSource(null, imdbUri);
 			dbpediaUri = findCanonicalDbpediaUri(source, timer);
+			if (dbpediaUri == null) {
+				return null;
+			}
 			timer.nest();
 			timer.start(this, "Forwarding request to another adapter: " + dbpediaUri);
 			timer.nest();
