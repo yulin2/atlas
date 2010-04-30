@@ -1,8 +1,7 @@
 package org.uriplay.remotesite.channel4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 import java.util.Collections;
 
@@ -28,7 +27,8 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		
 		Brand brand = new C4BrandExtractor().extract(ramsaysKitchenNighmaresFeed());
 		
-		assertThat(brand.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od"));
+		assertThat(brand.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares"));
+		assertThat(brand.getAliases(), hasItem("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od"));
 		assertThat(brand.getCurie(), is("c4:ramsays-kitchen-nightmares"));
 		assertThat(brand.getTitle(), is("Ramsay's Kitchen Nightmares"));
 		assertThat(brand.getPublisher(), is("channel4.com"));

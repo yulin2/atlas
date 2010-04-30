@@ -69,10 +69,12 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 	@Override
 	@SuppressWarnings("unchecked")
 	public Brand extract(SyndFeed source) {
-		String brandUri = source.getLink();
+		String fourOdUri = source.getLink();
+		String brandUri = source.getLink().replace("/4od", "");
 
 		Brand brand = new Brand();
 		brand.setCanonicalUri(brandUri);
+		brand.addAlias(fourOdUri);
 		brand.setTitle(title(source));
 		brand.setCurie(PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri));
 		brand.setPublisher(C4_PUBLISHER);
