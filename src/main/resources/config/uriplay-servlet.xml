@@ -47,6 +47,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	
 	<bean id="healthController" class="org.uriplay.system.HealthController"/>
 	
+	<bean id="aliasController" class="org.uriplay.system.AliasController">
+	   <constructor-arg ref="mongoDbBackedContentStore"/>
+	</bean>
+	
 	<bean id="c4UpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
 		<constructor-arg ref="c4BrandsUpdater"/>
 	</bean>
