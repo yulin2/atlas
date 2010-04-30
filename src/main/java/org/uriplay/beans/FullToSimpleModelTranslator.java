@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.jherd.beans.BeanGraphWriter;
+import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
@@ -72,12 +73,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 
 		org.uriplay.media.entity.simple.Playlist simplePlaylist = new org.uriplay.media.entity.simple.Playlist();
 		
-		simplePlaylist.setUri(fullPlayList.getCanonicalUri());
-		simplePlaylist.setAliases(fullPlayList.getAliases());
-		simplePlaylist.setCurie(fullPlayList.getCurie());
-		
-		simplePlaylist.setTitle(fullPlayList.getTitle());
-		simplePlaylist.setDescription(fullPlayList.getDescription());
+		copyBasicPlaylistAttributes(fullPlayList, simplePlaylist);
 		
 		for (Playlist fullSubList : fullPlayList.getPlaylists()) {
 			simplePlaylist.addPlaylist(simplePlaylistFrom(fullSubList, processed));
@@ -90,6 +86,15 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		}
 		
 		return simplePlaylist;
+	}
+
+	private static void copyBasicPlaylistAttributes(Playlist fullPlayList, org.uriplay.media.entity.simple.Playlist simplePlaylist) {
+		simplePlaylist.setUri(fullPlayList.getCanonicalUri());
+		simplePlaylist.setAliases(fullPlayList.getAliases());
+		simplePlaylist.setCurie(fullPlayList.getCurie());
+		simplePlaylist.setTitle(fullPlayList.getTitle());
+		simplePlaylist.setPublisher(fullPlayList.getPublisher());
+		simplePlaylist.setDescription(fullPlayList.getDescription());
 	}
 
 	static org.uriplay.media.entity.simple.Item simpleItemFrom(org.uriplay.media.entity.Item fullItem) {
@@ -135,13 +140,29 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simpleItem.setAliases(fullItem.getAliases());
 		simpleItem.setCurie(fullItem.getCurie());
 		
-		Set<Playlist> containedIn = fullItem.getContainedIn();
-		for (org.uriplay.media.entity.Playlist fullList : containedIn) {
-			org.uriplay.media.entity.simple.Playlist simpleList = new org.uriplay.media.entity.simple.Playlist();
-			simpleList.setUri(fullList.getCanonicalUri());
-			simpleList.setCurie(fullList.getCurie());
-			simpleList.setTitle(fullList.getTitle());
-			simpleItem.addContainedIn(simpleList);
+		Set<String> containedInUris = fullItem.getContainedInUris();
+		for (String uri : containedInUris) {
+			simpleItem.addContainedIn(uri);
+		}
+		
+		if (fullItem instanceof Episode) {
+			Episode episode = (Episode) fullItem;
+			
+			simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
+			simpleItem.setSeriesNumber(episode.getSeriesNumber());
+			
+			if (episode.getBrand() != null) {
+				Brand brand = episode.getBrand();
+				org.uriplay.media.entity.simple.Playlist simpleBrand = new org.uriplay.media.entity.simple.Playlist();
+				copyBasicPlaylistAttributes(brand, simpleBrand);
+				
+				// Since this is just a summary of a brand we null the 
+				// sub-playlists and sub-items to avoid empty tags appearing in the XML
+				simpleBrand.setItems(null);
+				simpleBrand.setPlaylists(null);
+				
+				simpleItem.setBrand(simpleBrand);
+			}
 		}
 		
 		simpleItem.setTitle(fullItem.getTitle());
@@ -152,11 +173,6 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simpleItem.setGenres(fullItem.getGenres());
 		simpleItem.setTags(fullItem.getTags());
 		
-		if (fullItem instanceof Episode) {
-			Episode episode = (Episode) fullItem;
-			simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
-			simpleItem.setSeriesNumber(episode.getSeriesNumber());
-		}
 		
 	}
 
