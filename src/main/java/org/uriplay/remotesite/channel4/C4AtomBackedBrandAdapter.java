@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.channel4;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -31,7 +32,7 @@ import com.sun.syndication.io.SyndFeedInput;
 
 public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 
-	private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://www.channel4.com/programmes/[^/\\s]+/4od");
+	private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("(http://www.channel4.com/programmes/[^/\\s]+)(/4od)?");
 
 	private final Log log = LogFactory.getLog(getClass());
 	
@@ -56,10 +57,19 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 	public Brand fetch(String uri, RequestTimer timer) {
 		try {
 			log.info("Fetching C4 brand " + uri);
-			return extractor.extract(feedClient.get(uri + ".atom"));
+			return extractor.extract(feedClient.get(atomUrl(uri)));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private String atomUrl(String uri) {
+		Matcher matcher = BRAND_PAGE_PATTERN.matcher(uri);
+		if (!matcher.matches()) {
+			throw new IllegalArgumentException();
+		}
+		String programmeUri = matcher.group(1);
+		return programmeUri + "/4od.atom";
 	}
 	
 	private static RemoteSiteClient<SyndFeed> atomClient() {
