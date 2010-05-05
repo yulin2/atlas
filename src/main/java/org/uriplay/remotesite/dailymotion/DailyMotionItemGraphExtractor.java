@@ -15,97 +15,68 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.dailymotion;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.DescriptionMode;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.query.content.PerPublisherCurieExpander;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
-import com.google.common.collect.Sets;
+public class DailyMotionItemGraphExtractor implements ContentExtractor<HtmlDescriptionSource, Item>  {
 
-public class DailyMotionItemGraphExtractor implements BeanGraphExtractor<HtmlDescriptionSource>  {
+	private static final String DAILYMOTION_PUBLISHER = "dailymotion.com";
 
-	private final IdGeneratorFactory idGeneratorFactory;
-
-	public DailyMotionItemGraphExtractor(IdGeneratorFactory idGen) {
-		this.idGeneratorFactory = idGen;
-	}
-
-	public Representation extractFrom(HtmlDescriptionSource src) {
+	@Override
+	public Item extract(HtmlDescriptionSource src) {
+		
 		String itemUri = src.getUri();
-		IdGenerator idGenerator = idGeneratorFactory.create();
+		
+		Encoding encoding = encoding();
+		encoding.addAvailableAt(embedLocation(src.getItem()));
+		encoding.addAvailableAt(linkLocation(itemUri));
+		
+		Version version = new Version();
+		version.addManifestedAs(encoding);
+		
+		Item item = item(itemUri, src.getItem());
+		item.addVersion(version);
 
-		Representation representation = new Representation();
-		
-		String versionId = idGenerator.getNextId();
-		String encodingId = idGenerator.getNextId();
-		String locationId = idGenerator.getNextId();
-		
-		addItemPropertiesTo(representation, itemUri, versionId, src.getItem());
-		addVersionPropertiesTo(representation, versionId, encodingId);
-		addEncodingPropertiesTo(representation, encodingId, locationId);
-		addLocationPropertiesTo(representation, locationId, src.getItem());
-		
-		return representation;
+		return item;
 	}
 	
-	private void addItemPropertiesTo(Representation representation, String itemUri, String versionId, HtmlDescriptionOfItem item) {
-		representation.addType(itemUri, Item.class);
-		representation.addUri(itemUri);
-
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", item.getTitle());
-		mpvs.addPropertyValue("description", item.getDescription());
-		mpvs.addPropertyValue("publisher", "dailymotion.com");
-		mpvs.addPropertyValue("versions", Sets.newHashSet(versionId));
-		mpvs.addPropertyValue("thumbnail", item.getThumbnail());
-		
-		if (itemUri.startsWith("http://www.dailymotion.com/video/")) {
-			mpvs.addPropertyValue("curie", PerPublisherCurieExpander.CurieAlgorithm.DM.compact(itemUri));
-		}
-		
-		representation.addValues(itemUri, mpvs);
+	private Item item(String itemUri, HtmlDescriptionOfItem htmlItem) {
+		Item item = new Item();
+		item.setCanonicalUri(itemUri);
+		item.setTitle(htmlItem.getTitle());
+		item.setDescription(htmlItem.getDescription());
+		item.setPublisher(DAILYMOTION_PUBLISHER);
+		item.setThumbnail(htmlItem.getThumbnail());
+		item.setCurie(PerPublisherCurieExpander.CurieAlgorithm.DM.compact(itemUri));
+		return item;
 	}
 	
-	private void addEncodingPropertiesTo(Representation representation, String encodingId, String locationId) {
-		representation.addType(encodingId, Encoding.class);
-		representation.addAnonymous(encodingId);
-		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("availableAt", Sets.newHashSet(locationId));
-		mpvs.addPropertyValue("dataContainerFormat", "application/x-shockwave-flash");
-		representation.addValues(encodingId, mpvs);
-	}
-
-	private void addVersionPropertiesTo(Representation representation, String versionId, String encodingId) {
-	
-		representation.addType(versionId, Version.class);
-		representation.addAnonymous(versionId);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("manifestedAs", Sets.newHashSet(encodingId));
-		representation.addValues(versionId, mpvs);
+	private Encoding encoding() {
+		Encoding encoding = new Encoding();
+		encoding.setDataContainerFormat("application/x-shockwave-flash");
+		return encoding;
 	}
 	
-	private void addLocationPropertiesTo(Representation representation, String locationId, HtmlDescriptionOfItem item) {
-		representation.addType(locationId, Location.class);
-		representation.addAnonymous(locationId);
+	private Location linkLocation(String itemUri) {
+		Location location = new Location();
+		location.setTransportType(TransportType.HTMLEMBED.toString().toLowerCase());
+		location.setUri(itemUri);
+		return location;
+	}
 
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-	//	mpvs.addPropertyValue("uri", item.getVideoSource());
-		mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT.toString().toLowerCase());
-		mpvs.addPropertyValue("transportSubType", "html");
-		mpvs.addPropertyValue("embedCode", embedCode(item.getVideoSource()));
-		
-		representation.addValues(locationId, mpvs);
+	private Location embedLocation(HtmlDescriptionOfItem item) {
+		Location location = new Location();
+		location.setTransportType(TransportType.EMBEDOBJECT.toString().toLowerCase());
+		location.setTransportSubType("html");
+		location.setEmbedCode(embedCode(item.getVideoSource()));
+		return location;
 	}
 
 	private String embedCode(String videoSource) {
@@ -113,9 +84,5 @@ public class DailyMotionItemGraphExtractor implements BeanGraphExtractor<HtmlDes
 				"</param><param name=\"allowFullScreen\" value=\"true\"></param><param name=\"allowScriptAccess\" value=\"always\">" +
 				"</param><embed src=\"" + videoSource + "&related=0\" type=\"application/x-shockwave-flash\" width=\"480\" height=\"381\" " +
 				"allowFullScreen=\"true\" allowScriptAccess=\"always\"></embed></object>";
-	}
-
-	public Representation extractFrom(HtmlDescriptionSource src, DescriptionMode mode) {
-		return null;
 	}
 }

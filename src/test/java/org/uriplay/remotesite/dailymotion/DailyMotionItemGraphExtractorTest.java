@@ -15,14 +15,12 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.dailymotion;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
+import static org.hamcrest.Matchers.is;
 
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.jherd.beans.id.IntegerIdGenerator;
-import org.jmock.Expectations;
+import java.util.Set;
+
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
@@ -30,7 +28,7 @@ import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
 
 /**
  * @author John Ayres (john@metabroadcast.com)
@@ -43,9 +41,6 @@ public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
 	static final String ENCODING_URI = "2";
 	static final String LOCATION_URI = "3";
 
-	IdGeneratorFactory idGeneratorFactory = mock(IdGeneratorFactory.class);
-	IdGenerator idGenerator = new IntegerIdGenerator();
-	
 	DailyMotionItemGraphExtractor extractor;
 	HtmlDescriptionSource source;
 	HtmlDescriptionOfItem item = new HtmlDescriptionOfItem();
@@ -54,11 +49,7 @@ public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		source = new HtmlDescriptionSource(item, ITEM_URI);
-		extractor = new DailyMotionItemGraphExtractor(idGeneratorFactory);
-		
-		checking(new Expectations() {{
-			one(idGeneratorFactory).create(); will(returnValue(idGenerator));
-		}});
+		extractor = new DailyMotionItemGraphExtractor();
 		
 		item.setTitle("News News News");
 		item.setDescription("The News");
@@ -66,28 +57,38 @@ public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
 		item.setVideoSource("videoSource");
 	}
 	
-	
 	public void testCreatesEpisodesFromFeedEntries() throws Exception {
 		
-		Representation representation = extractor.extractFrom(source);
+		Item item = extractor.extract(source);
 
-		assertEquals(Item.class, representation.getType(ITEM_URI));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "title", "News News News"));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "description", "The News"));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "publisher", "dailymotion.com"));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "curie", "dm:xbqomc_dont-do-anything_fun"));
+		assertThat(item.getTitle(), is("News News News"));
+		assertThat(item.getDescription(), is("The News"));
 		
-		assertThat(representation, hasPropertyValue(ITEM_URI, "thumbnail", "thumbnail.image"));
-
-		assertEquals(Version.class, representation.getType(VERSION_URI));
-		assertThat(representation, hasPropertyValue(VERSION_URI, "manifestedAs", Sets.newHashSet(ENCODING_URI)));
-
-		assertEquals(Encoding.class, representation.getType(ENCODING_URI));
-		assertThat(representation, hasPropertyValue(ENCODING_URI, "availableAt", Sets.newHashSet(LOCATION_URI)));
+		assertThat(item.getPublisher(), is("dailymotion.com"));
+		assertThat(item.getCurie(), is("dm:xbqomc_dont-do-anything_fun"));
 		
-		assertEquals(Location.class, representation.getType(LOCATION_URI));
-//		assertThat(representation, hasPropertyValue(LOCATION_URI, "uri", "videoSource"));
-		assertThat(representation, hasPropertyValue(LOCATION_URI, "transportType", "embedobject"));
-		assertThat(representation, hasPropertyValue(LOCATION_URI, "transportSubType", "html"));
+		assertThat(item.getThumbnail(), is("thumbnail.image"));
+
+		Version version = Iterables.getOnlyElement(item.getVersions());
+		
+		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+
+		Location embedLocation = locationByType(TransportType.EMBEDOBJECT, encoding.getAvailableAt());
+		assertThat(embedLocation.getTransportType(), is("embedobject"));
+		assertThat(embedLocation.getTransportSubType(), is("html"));
+		
+		Location linkLocation = locationByType(TransportType.HTMLEMBED, encoding.getAvailableAt());
+		assertThat(linkLocation.getTransportType(), is("htmlembed"));
+		assertThat(linkLocation.getUri(), is("http://www.dailymotion.com/video/xbqomc_dont-do-anything_fun"));
+	}
+	
+	private Location locationByType(TransportType transportType, Set<Location> availableAt) {
+		for (Location location : availableAt) {
+			if (transportType.toString().toLowerCase().equals(location.getTransportType())) {
+				return location;
+			}
+		}
+		fail("Location with transport type: " + transportType + " not found");
+		return null;
 	}
 }

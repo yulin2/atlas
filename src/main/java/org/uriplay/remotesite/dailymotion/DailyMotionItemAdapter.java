@@ -14,50 +14,66 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.dailymotion;
 
-import javax.xml.bind.JAXBException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
+import org.uriplay.media.entity.Item;
+import org.uriplay.query.uri.canonical.Canonicaliser;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for DailyMotion.com.
+ * {@link SiteSpecificAdapter} for DailyMotion.com.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author John Ayres (john@metabroadcast.com)
  */
-public class DailyMotionItemAdapter implements SiteSpecificRepresentationAdapter {
+public class DailyMotionItemAdapter implements SiteSpecificAdapter<Item> {
 
 	private final RemoteSiteClient<HtmlDescriptionOfItem> dailyMotionItemClient;
-	private final BeanGraphExtractor<HtmlDescriptionSource> propertyExtractor;
+	private final ContentExtractor<HtmlDescriptionSource, Item> itemExtractor;
 
-	private static final String baseUri = "http://www.dailymotion.com";
+	private static final String BASE_URI = "http://www.dailymotion.com/";
+	private static final Pattern CANONICAL_URI_PATTERN = Pattern.compile(BASE_URI + "video/[^/\\s\\.]+");
+	
+	private static final Pattern ALIAS_URI_PATTERN = Pattern.compile(BASE_URI + "(.*)/(video/[^/\\s\\.]+)");
 
-	public DailyMotionItemAdapter(IdGeneratorFactory idGen) throws JAXBException {
-		this(new DailyMotionItemClient(), new DailyMotionItemGraphExtractor(idGen));
+	public DailyMotionItemAdapter() {
+		this(new DailyMotionItemClient(), new DailyMotionItemGraphExtractor());
 	}
 	
-	public DailyMotionItemAdapter(RemoteSiteClient<HtmlDescriptionOfItem> client, BeanGraphExtractor<HtmlDescriptionSource> propertyExtractor) {
+	public DailyMotionItemAdapter(RemoteSiteClient<HtmlDescriptionOfItem> client, ContentExtractor<HtmlDescriptionSource, Item> itemExtractor) {
 		this.dailyMotionItemClient = client;
-		this.propertyExtractor = propertyExtractor;
+		this.itemExtractor = itemExtractor;
 	}
 
-	public Representation fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri, RequestTimer timer) {
 		try {
 			HtmlDescriptionOfItem dmItem = dailyMotionItemClient.get(uri);
-			return propertyExtractor.extractFrom(new HtmlDescriptionSource(dmItem, uri));
+			return itemExtractor.extract(new HtmlDescriptionSource(dmItem, uri));
 		} catch (Exception e) {
 			throw new FetchException("Problem processing html page from dailymotion.com", e);
 		}
 	}
 
 	public boolean canFetch(String uri) {
-		return uri.startsWith(baseUri) && uri.length() > baseUri.length() && uri.contains("/video/");
+		return CANONICAL_URI_PATTERN.matcher(uri).matches();
+	}
+	
+	public static class DailyMotionItemCanonicaliser implements Canonicaliser {
+
+		@Override
+		public String canonicalise(String uri) {
+			Matcher matcher = ALIAS_URI_PATTERN.matcher(uri);
+			if (matcher.matches()) {
+				return BASE_URI + matcher.group(2);
+			}
+			return null;
+		}
 	}
 }

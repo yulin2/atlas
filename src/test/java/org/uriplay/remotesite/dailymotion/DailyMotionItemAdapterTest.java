@@ -14,10 +14,12 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.dailymotion;
 
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Item;
+import org.uriplay.query.uri.canonical.Canonicaliser;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
@@ -32,39 +34,48 @@ public class DailyMotionItemAdapterTest extends MockObjectTestCase {
 	String uri = "http://www.dailymotion.com/video/x9l8e7_protesting-irans-election_news";
 	
 	RemoteSiteClient<HtmlDescriptionOfItem> itemClient;
-	BeanGraphExtractor<HtmlDescriptionSource> propertyExtractor;
+	ContentExtractor<HtmlDescriptionSource, Item> propertyExtractor;
 	DailyMotionItemAdapter adapter;
 	
-	HtmlDescriptionOfItem item = new HtmlDescriptionOfItem();
+	Item item = new Item();
+	HtmlDescriptionOfItem htmlItem = new HtmlDescriptionOfItem();
 	
-	HtmlDescriptionSource source = new HtmlDescriptionSource(item, uri);
+	HtmlDescriptionSource source = new HtmlDescriptionSource(htmlItem, uri);
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		itemClient = mock(RemoteSiteClient.class);
-		propertyExtractor = mock(BeanGraphExtractor.class);
+		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new DailyMotionItemAdapter(itemClient, propertyExtractor);
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
 		checking(new Expectations() {{
-			one(itemClient).get(uri); will(returnValue(item));
-			one(propertyExtractor).extractFrom(source);
+			one(itemClient).get(uri); will(returnValue(htmlItem));
+			one(propertyExtractor).extract(source); will(returnValue(item));
 		}});
 		
-		adapter.fetch(uri, null);
+		assertEquals(item, adapter.fetch(uri, null));
 	}
 	
 	public void testCanFetchResourcesForDailyMotionItems() throws Exception {
 		
+		Canonicaliser canonicaliser = new DailyMotionItemAdapter.DailyMotionItemCanonicaliser();
+		
 		assertFalse(adapter.canFetch("http://www.channel4.com/"));
+		assertNull(canonicaliser.canonicalise("http://www.channel4.com/"));
+
 		assertFalse(adapter.canFetch("http://www.dailymotion.com/"));
 		assertTrue(adapter.canFetch("http://www.dailymotion.com/video/x9l8e7_protesting-irans-election_news"));
-		assertTrue(adapter.canFetch("http://www.dailymotion.com/gb/featured/channel/fun/video/x9j0kq_what-do-you-want-on-your-tombstoney_fun"));
+		
+		
+		assertFalse(adapter.canFetch("http://www.dailymotion.com/gb/featured/channel/fun/video/x9j0kq_what-do-you-want-on-your-tombstoney_fun"));
+		assertEquals("http://www.dailymotion.com/video/x9j0kq_what-do-you-want-on-your-tombstoney_fun", canonicaliser.canonicalise("http://www.dailymotion.com/gb/featured/channel/fun/video/x9j0kq_what-do-you-want-on-your-tombstoney_fun"));
+		
 		assertFalse(adapter.canFetch("http://www.dailymotion.com/video"));
+		assertNull(canonicaliser.canonicalise("http://www.dailymotion.com/video"));
 	}
-	
 }
