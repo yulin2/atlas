@@ -181,11 +181,26 @@ public class PerPublisherCurieExpander implements CurieExpander {
 	
 	@Override
 	public String expand(String curie) {
-		return CurieAlgorithm.valueOf(prefixOf(curie).toUpperCase()).expand(curie);
+		String prefix = prefixOf(curie);
+		if (prefix == null) {
+			return null;
+		}
+		CurieAlgorithm algorithm;
+		try {
+			algorithm = CurieAlgorithm.valueOf(prefix.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			// no matching algorithm
+			return null;
+		}
+		return algorithm.expand(curie);
 	}
 
 	private String prefixOf(String curie) {
-		return curie.substring(0, curie.indexOf(":"));
+		int index = curie.indexOf(":");
+		if (index < 1) {
+			return null;
+		}
+		return curie.substring(0, index);
 	}
 
 }

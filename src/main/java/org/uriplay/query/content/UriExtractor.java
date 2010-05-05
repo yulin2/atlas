@@ -35,6 +35,9 @@ public class UriExtractor extends QueryVisitorAdapter<Void> {
 
 	private final Set<String> uris;
 	private Set<Attribute<String>> uriAttributes = Sets.newHashSet(Attributes.ITEM_URI, Attributes.BRAND_URI, Attributes.PLAYLIST_URI);
+	private Set<Attribute<String>> curieAttributes = Sets.newHashSet(Attributes.ITEM_CURIE, Attributes.BRAND_CURIE, Attributes.PLAYLIST_CURIE);
+	
+	private final CurieExpander curieExpander = new PerPublisherCurieExpander();
 
 	private UriExtractor(Set<String> uris) {
 		this.uris = uris;
@@ -45,6 +48,14 @@ public class UriExtractor extends QueryVisitorAdapter<Void> {
 
 		if (uriAttributes.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
 			uris.addAll((List<String>) query.getValue());
+		}
+		if (curieAttributes.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
+			for(String curie : (List<String>) query.getValue()) {
+				String uri = curieExpander.expand(curie);
+				if (uri != null) {
+					uris.add(uri);
+				}
+			}
 		}
 		return null;
 	}
