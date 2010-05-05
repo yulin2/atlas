@@ -63,6 +63,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
                                				"<title>Blue Peter</title>" +
                                				"<uri>http://www.bbc.co.uk/programmes/bluepeter</uri>" +
 											"<play:containedIn/>" +
+											"<play:genres/>" +
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +
@@ -70,6 +71,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 												"</play:location>" +
 											"</play:locations>" +
+											"<play:tags/>" +
 										  "</play:item>"));
 	}
 
@@ -94,12 +96,14 @@ public class JaxbXmlTranslatorTest extends TestCase {
 														"<aliases/>" +
                                         				"<title>Blue Peter</title>" +
 														"<play:containedIn/>" +
+														"<play:genres/>" +
 														"<play:locations>" +
 															"<play:location>" +
 															"<available>true</available>" +
 															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 															"</play:location>" +
 														"</play:locations>" +
+														"<play:tags/>" +
 													  "</play:item>"));
 		
 		assertThat(output, not(containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><location><uri>http://www.bbc.co.uk/bluepeter</uri></location>")));
@@ -122,12 +126,14 @@ public class JaxbXmlTranslatorTest extends TestCase {
 														"<aliases/>" +
 	                                         			"<title>Blue Peter</title>" +
 														"<play:containedIn/>" +
+														"<play:genres/>" +
 														"<play:locations>" +
 															"<play:location>" +
 															"<available>true</available>" +
 															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 															"</play:location>" +
 														  "</play:locations>" +
+														  "<play:tags/>" +
 													  "</play:item>"));
 	}
 	
@@ -153,12 +159,14 @@ public class JaxbXmlTranslatorTest extends TestCase {
 											"<aliases/>" +
 	                               			"<title>Blue Peter</title>" +
 											"<play:containedIn/>" +
+											"<play:genres/>" +
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +
 												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 												"</play:location>" +
 											  "</play:locations>" +
+											  "<play:tags/>" +
 										  "</play:item>"));
 
 		assertThat(output, not(containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><item>")));
