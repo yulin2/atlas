@@ -16,8 +16,9 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.ted;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
+
+import java.util.Set;
 
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Encoding;
@@ -67,11 +68,27 @@ public class TedTalkGraphExtractorTest extends MockObjectTestCase {
 
 		Version version = Iterables.getOnlyElement(item.getVersions());
 		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
-		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 		
-		assertThat(location.getUri(), is("videoSource"));
-		assertThat(location.getTransportType(), is("embedobject"));
-		assertThat(location.getTransportSubType(), is("html"));
-		assertThat(location.getEmbedCode(), containsString("vu=http://video.ted.com/talks/embed/RayKurzweil_2005.flv"));
+		assertThat(encoding.getAvailableAt().size(), is(2));
+		
+		Location embedLocation = locationByType("embedobject", encoding.getAvailableAt());
+		assertThat(embedLocation.getUri(), is("videoSource"));
+		assertThat(embedLocation.getTransportType(), is("embedobject"));
+		assertThat(embedLocation.getTransportSubType(), is("html"));
+		assertThat(embedLocation.getEmbedCode(), containsString("vu=http://video.ted.com/talks/embed/RayKurzweil_2005.flv"));
+		
+		Location linkLocation =  locationByType("htmlembed", encoding.getAvailableAt());
+		assertThat(linkLocation.getUri(), is(ITEM_URI));
+		assertThat(linkLocation.getTransportType(), is("htmlembed"));
+	}
+
+	private Location locationByType(String transportType, Set<Location> availableAt) {
+		for (Location location : availableAt) {
+			if (transportType.equals(location.getTransportType())) {
+				return location;
+			}
+		}
+		fail("Location with transport type: " + transportType + " not found");
+		return null;
 	}
 }

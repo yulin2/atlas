@@ -28,10 +28,10 @@ public class TedTalkGraphExtractor  {
 
 	public Item extractFrom(HtmlDescriptionSource src) {
 		
-		Location location = location(src.getItem());
 		
 		Encoding encoding = encoding();
-		encoding.addAvailableAt(location);
+		encoding.addAvailableAt(embedLocation(src.getItem()));
+		encoding.addAvailableAt(htmlLinkLocation(src.getUri()));
 		
 		Version version = new Version();
 		version.addManifestedAs(encoding);
@@ -69,7 +69,7 @@ public class TedTalkGraphExtractor  {
 		return encoding;
 	}
 	
-	private Location location(HtmlDescriptionOfItem item) {
+	private Location embedLocation(HtmlDescriptionOfItem item) {
 		Location location = new Location();
 		
 		location.setUri(item.getVideoSource());
@@ -78,6 +78,13 @@ public class TedTalkGraphExtractor  {
 		location.setTransportSubType("html");
 		location.setEmbedCode(embedCode(item.getFlashFile(), item.getThumbnail()));
 
+		return location;
+	}
+	
+	private Location htmlLinkLocation(String uri) {
+		Location location = new Location();
+		location.setUri(uri);
+		location.setTransportType(TransportType.HTMLEMBED.toString().toLowerCase());
 		return location;
 	}
 
