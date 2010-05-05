@@ -77,7 +77,6 @@ public class UriFetchingController {
 		this.timerFactory = timerFactory;
 	}
 
-	@SuppressWarnings("unchecked")
 	@RequestMapping(method=RequestMethod.GET)
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, 
 			                   @RequestParam(required=false) String profile, 
@@ -94,14 +93,15 @@ public class UriFetchingController {
 		timer.nest();
 		Query query = new Query(profile, uri, outputTimingInfo);
 		try {
-			Collection<?> beans = Lists.newArrayList(queryExecutor.executeQuery(uri));
-
-			beans = filter.applyTo(beans, query.getFilterCriteria());
-			beans = projector.applyTo(beans);
+			Description found = queryExecutor.executeQuery(uri);
 			
-			if (beans == null || beans.isEmpty()) {
+			if (found == null) {
 				throw new ContentNotFoundException("No metadata available for : " + uri);
 			}
+
+			Collection<?> beans = Lists.newArrayList(found);
+			beans = filter.applyTo(beans, query.getFilterCriteria());
+			beans = projector.applyTo(beans);
 			
 			return new ModelAndView(VIEW, RequestNs.GRAPH, beans);
 			
