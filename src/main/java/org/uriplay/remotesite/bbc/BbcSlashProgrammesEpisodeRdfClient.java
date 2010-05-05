@@ -30,7 +30,7 @@ import org.jherd.remotesite.http.RemoteSiteClient;
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author John Ayres (john@metabroadcast.com)
  */
-public class BbcSlashProgrammesEpisodeRdfClient implements RemoteSiteClient<SlashProgrammesEpisodeRdf> {
+public class BbcSlashProgrammesEpisodeRdfClient implements RemoteSiteClient<SlashProgrammesRdf> {
 
 	private final RemoteSiteClient<Reader> httpClient;
 	private final JAXBContext context;
@@ -41,13 +41,13 @@ public class BbcSlashProgrammesEpisodeRdfClient implements RemoteSiteClient<Slas
 	
 	public BbcSlashProgrammesEpisodeRdfClient(RemoteSiteClient<Reader> httpClient) throws JAXBException {
 		this.httpClient = httpClient;
-		context = JAXBContext.newInstance(SlashProgrammesEpisodeRdf.class);
+		context = JAXBContext.newInstance(SlashProgrammesRdf.class);
 	}
 
-	public SlashProgrammesEpisodeRdf get(String uri) throws Exception {
+	public SlashProgrammesRdf get(String uri) throws Exception {
 		Reader in = httpClient.get(uri);
 		Unmarshaller u = context.createUnmarshaller();
-		SlashProgrammesEpisodeRdf episodeDescription =(SlashProgrammesEpisodeRdf) u.unmarshal(in);
+		SlashProgrammesRdf episodeDescription =(SlashProgrammesRdf) u.unmarshal(in);
 		return episodeDescription;
 	}
 }

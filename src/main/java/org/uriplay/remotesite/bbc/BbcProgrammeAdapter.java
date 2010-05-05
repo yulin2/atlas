@@ -26,7 +26,12 @@ import org.jherd.beans.Representation;
 import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
 import org.jherd.remotesite.timing.RequestTimer;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesVersion;
+import org.springframework.beans.MutablePropertyValues;
+import org.uriplay.media.entity.Brand;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
+
+import com.google.common.collect.Sets;
 
 public class BbcProgrammeAdapter implements SiteSpecificRepresentationAdapter {
 
@@ -57,18 +62,40 @@ public class BbcProgrammeAdapter implements SiteSpecificRepresentationAdapter {
 
 	public Representation fetch(String uri, RequestTimer timer) {
 		try {
-			SlashProgrammesEpisodeRdf episode = readSlashProgrammesDataForEpisode(uri);
-			if (episode == null) {
+			SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
+			if (content == null) {
 				return new Representation();
 			}
-			SlashProgrammesVersionRdf version = readSlashProgrammesDataForVersion(episode.episode().versions().get(0));
-			BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, episode, version).forAnUnavailableProgramme();
-			return propertyExtractor.extractFrom(source);
+			
+			if (content.episode() != null) {
+				SlashProgrammesVersionRdf version = readSlashProgrammesDataForVersion(content.episode().versions().get(0));
+				BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version).forAnUnavailableProgramme();
+				return propertyExtractor.extractFrom(source);
+			}
+			if (content.brand() != null) {
+				return emptyBrandRepresentation(content.brand());
+			}
+			return new Representation();
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
+	private Representation emptyBrandRepresentation(SlashProgrammesContainerRef brand) {
+		String brandUri = brand.uri();
+		Representation representation = new Representation();
+		representation.addType(brandUri, Brand.class);
+		MutablePropertyValues mpvs = new MutablePropertyValues();
+		mpvs.addPropertyValue("items", Sets.newHashSet());
+		mpvs.addPropertyValue("title", brand.title());
+		mpvs.addPropertyValue("curie", BbcUriCanonicaliser.curieFor(brandUri));
+		mpvs.addPropertyValue("publisher", BbcProgrammeGraphExtractor.BBC_PUBLISHER);
+		representation.addValues(brandUri, mpvs);
+		representation.addUri(brandUri);
+		return representation;
+	}
+
 	private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {
 		try {
 			return versionClient.get(slashProgrammesUri(slashProgrammesVersion));
@@ -78,7 +105,7 @@ public class BbcProgrammeAdapter implements SiteSpecificRepresentationAdapter {
 		}
 	}
 
-	private SlashProgrammesEpisodeRdf readSlashProgrammesDataForEpisode(String episodeUri) {
+	private SlashProgrammesRdf readSlashProgrammesDataForEpisode(String episodeUri) {
 		try {
 			return episodeClient.get(episodeUri + ".rdf");
 		} catch (Exception e) {

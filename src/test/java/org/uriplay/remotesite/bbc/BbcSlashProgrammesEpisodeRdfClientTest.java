@@ -27,8 +27,8 @@ import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesContainerRef;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesEpisode;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 
 import com.google.common.collect.Iterables;
 
@@ -50,7 +50,7 @@ public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 			one(httpClient).get(URI); will(returnValue(xmlDocument()));
 		}});
 		
-		SlashProgrammesEpisodeRdf description = new BbcSlashProgrammesEpisodeRdfClient(httpClient).get(URI);
+		SlashProgrammesRdf description = new BbcSlashProgrammesEpisodeRdfClient(httpClient).get(URI);
 		
 		SlashProgrammesContainerRef brand = description.brand();
 		assertThat(brand.uri(), is("http://www.bbc.co.uk/programmes/b006mj59"));

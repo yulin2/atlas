@@ -4,19 +4,19 @@ import org.uriplay.remotesite.BaseSource;
 
 public class BbcProgrammeSource extends BaseSource {
 
-	private final SlashProgrammesEpisodeRdf episode;
+	private final SlashProgrammesRdf episode;
 	private final SlashProgrammesVersionRdf version;
 	private boolean available = true;
 	private final String slashProgrammesUri;
 
-	public BbcProgrammeSource(String uri, String slashProgrammesUri, SlashProgrammesEpisodeRdf episode, SlashProgrammesVersionRdf version) {
+	public BbcProgrammeSource(String uri, String slashProgrammesUri, SlashProgrammesRdf episode, SlashProgrammesVersionRdf version) {
 		super(uri);
 		this.slashProgrammesUri = slashProgrammesUri;
 		this.episode = episode;
 		this.version = version;
 	}
 	
-	public SlashProgrammesEpisodeRdf episode() {
+	public SlashProgrammesRdf episode() {
 		return episode;
 	}
 	

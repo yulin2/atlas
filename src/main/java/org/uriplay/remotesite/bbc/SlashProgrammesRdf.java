@@ -36,7 +36,7 @@ import com.hp.hpl.jena.vocabulary.DC;
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 @XmlRootElement(name="RDF", namespace=RDF.NS)
-class SlashProgrammesEpisodeRdf {
+class SlashProgrammesRdf {
 
 	@XmlElement(namespace=PO.NS, name="Episode")
 	private SlashProgrammesEpisode episode;
@@ -47,23 +47,7 @@ class SlashProgrammesEpisodeRdf {
 	@XmlElement(namespace=PO.NS, name="Series")
 	private SlashProgrammesContainerRef series;
 	
-	static class SlashProgrammesEpisode {
-		
-		@XmlElement(namespace=DC.NS, name="title")
-		private String title;
-		
-		@SuppressWarnings("unused")
-		@XmlElement(namespace=FOAF.NS, name="depiction")
-		private FoafDepiction depiction;
-		
-		@XmlElement(namespace=PO.NS, name="short_synopsis")
-		private String shortSynopsis;
-		
-		@XmlElement(namespace=PO.NS, name="medium_synopsis")
-		private String mediumSynopsis;
-		
-		@XmlElement(namespace=PO.NS, name="long_synopsis")
-		private String longSynopsis;
+	static class SlashProgrammesEpisode extends SlashProgrammesBase {
 		
 		@XmlElement(namespace=PO.NS, name="position")
 		private int position;
@@ -71,8 +55,62 @@ class SlashProgrammesEpisodeRdf {
 		@XmlElement(namespace=PO.NS, name="version")
 		private List<SlashProgrammesVersion> versions;
 		
+		public int episodeNumber() {
+			return position;
+		}
+		
+		public List<SlashProgrammesVersion> versions() {
+			return versions;
+		}
+		
+		public SlashProgrammesEpisode withVersion(SlashProgrammesVersion version) {
+			this.versions = Lists.newArrayList(version);
+			return this;
+		}
+		
+		public SlashProgrammesEpisode inPosition(int pos) {
+			position = pos;
+			return this;
+		}
+		
+		public SlashProgrammesEpisode withGenres(String... genres) {
+			if (this.genres == null) { this.genres = Sets.newHashSet(); }
+			for (String genre : genres) {
+				this.genres.add(new SlashProgrammesGenre().withResourceUri(genre));
+			}
+			return this;
+		}
+
+		public SlashProgrammesEpisode withTitle(String title) {
+			this.title = title;
+			return this;
+		}
+		
+		public SlashProgrammesEpisode withDescription(String description) {
+			longSynopsis = description;
+			return this;
+		}
+	}
+	
+	static class SlashProgrammesBase {
+		
+		@XmlElement(namespace=DC.NS, name="title")
+		protected String title;
+		
+		@XmlElement(namespace=FOAF.NS, name="depiction")
+		protected FoafDepiction depiction;
+		
+		@XmlElement(namespace=PO.NS, name="short_synopsis")
+		protected String shortSynopsis;
+		
+		@XmlElement(namespace=PO.NS, name="medium_synopsis")
+		protected String mediumSynopsis;
+		
+		@XmlElement(namespace=PO.NS, name="long_synopsis")
+		protected String longSynopsis;
+		
 		@XmlElement(namespace=PO.NS, name="genre")
-		private Set<SlashProgrammesGenre> genres;
+		protected Set<SlashProgrammesGenre> genres;
 		
 		public String description() {
 			if (!StringUtils.isEmpty(longSynopsis))   { return longSynopsis; }
@@ -81,31 +119,8 @@ class SlashProgrammesEpisodeRdf {
 			return null;
 		}
 
-		public int episodeNumber() {
-			return position;
-		}
-		
 		public String title() {
 			return title;
-		}
-
-		public List<SlashProgrammesVersion> versions() {
-			return versions;
-		}
-
-		public SlashProgrammesEpisode withDescription(String description) {
-			longSynopsis = description;
-			return this;
-		}
-
-		public SlashProgrammesEpisode inPosition(int pos) {
-			position = pos;
-			return this;
-		}
-
-		public SlashProgrammesEpisode withVersion(SlashProgrammesVersion version) {
-			this.versions = Lists.newArrayList(version);
-			return this;
 		}
 
 		public Set<SlashProgrammesGenre> genres() {
@@ -121,22 +136,9 @@ class SlashProgrammesEpisodeRdf {
 			return uris;
 		}
 		
-		public SlashProgrammesEpisode withGenres(String... genres) {
-			if (this.genres == null) { this.genres = Sets.newHashSet(); }
-			for (String genre : genres) {
-				this.genres.add(new SlashProgrammesGenre().withResourceUri(genre));
-			}
-			return this;
-		}
-
-		public SlashProgrammesEpisode withTitle(String title) {
-			this.title = title;
-			return this;
-		}
-
 	}
 	
-	static class SlashProgrammesContainerRef {
+	static class SlashProgrammesContainerRef extends SlashProgrammesBase {
 
 		@XmlAttribute(name="about", namespace=RDF.NS)
 		private String uri;
@@ -207,7 +209,7 @@ class SlashProgrammesEpisodeRdf {
 		return episode;
 	}
 	
-	public SlashProgrammesEpisodeRdf withEpisode(SlashProgrammesEpisode episode) {
+	public SlashProgrammesRdf withEpisode(SlashProgrammesEpisode episode) {
 		this.episode = episode;
 		return this;
 	}
@@ -220,7 +222,7 @@ class SlashProgrammesEpisodeRdf {
 		return series;
 	}
 	
-	public SlashProgrammesEpisodeRdf withBrand(SlashProgrammesContainerRef brand) {
+	public SlashProgrammesRdf withBrand(SlashProgrammesContainerRef brand) {
 		this.brand = brand;
 		return this;
 	}

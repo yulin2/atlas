@@ -31,8 +31,8 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesContainerRef;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesEpisode;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -62,7 +62,7 @@ public class BbcProgrammeGraphExtractor implements BeanGraphExtractor<BbcProgram
 		
 		String episodeUri = source.getUri();
 		
-		SlashProgrammesEpisodeRdf episode = source.episode();
+		SlashProgrammesRdf episode = source.episode();
 		SlashProgrammesContainerRef container = episode.brand();
 		
 		if (container == null) {
@@ -78,7 +78,7 @@ public class BbcProgrammeGraphExtractor implements BeanGraphExtractor<BbcProgram
 		return representation;
 	}
 	
-	private Maybe<Integer> seriesNumber(SlashProgrammesEpisodeRdf episode) {
+	private Maybe<Integer> seriesNumber(SlashProgrammesRdf episode) {
 		if (episode.series() != null && episode.series().uri() != null) {
 			return seriesResolver.seriesNumberFor(episode.series().uri());
 		}

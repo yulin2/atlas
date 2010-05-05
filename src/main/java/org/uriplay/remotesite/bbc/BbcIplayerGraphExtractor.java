@@ -33,7 +33,7 @@ import org.springframework.beans.PropertyValue;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.RemoteSiteRefresher;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesVersion;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
 import com.google.common.collect.Sets;
@@ -50,7 +50,7 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 
 	private static final Log log = LogFactory.getLog(RemoteSiteRefresher.class);
 	
-	private final RemoteSiteClient<SlashProgrammesEpisodeRdf> episodeClient;
+	private final RemoteSiteClient<SlashProgrammesRdf> episodeClient;
 	private final RemoteSiteClient<SlashProgrammesVersionRdf> versionClient;
 	
 	private final BbcProgrammeGraphExtractor programmeGraphExtractor;
@@ -59,7 +59,7 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), idGeneratorFactory);
 	}
 	
-	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesEpisodeRdf> episodeClient, 
+	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, 
 			                        RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, 
 			                        IdGeneratorFactory idGeneratorFactory) {
 		this.episodeClient = episodeClient;
@@ -87,7 +87,7 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 				continue;
 			}
 			
-			SlashProgrammesEpisodeRdf slashProgrammesEpisode = readSlashProgrammesDataForEpisode(episodeUri);
+			SlashProgrammesRdf slashProgrammesEpisode = readSlashProgrammesDataForEpisode(episodeUri);
 			SlashProgrammesVersionRdf slashProgrammesVersion = readSlashProgrammesDataForVersion(slashProgrammesEpisode.episode().versions().get(0));
 			
 			Representation representationOfEpisode = programmeGraphExtractor.extractFrom(new BbcProgrammeSource(episodeUri, slashProgrammesUri(episodeUri).replace(".rdf", ""), slashProgrammesEpisode, slashProgrammesVersion));
@@ -146,7 +146,7 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 		}
 	}
 
-	private SlashProgrammesEpisodeRdf readSlashProgrammesDataForEpisode(String episodeUri) {
+	private SlashProgrammesRdf readSlashProgrammesDataForEpisode(String episodeUri) {
 		try {
 			return episodeClient.get(slashProgrammesUri(episodeUri));
 		} catch (Exception e) {
@@ -214,10 +214,4 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 		}
 		return null;
 	}
-	
-	public Representation extractFrom(SyndicationSource source, DescriptionMode mode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

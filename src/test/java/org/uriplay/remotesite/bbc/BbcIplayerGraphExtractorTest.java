@@ -40,9 +40,9 @@ import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesContainerRef;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesEpisode;
-import org.uriplay.remotesite.bbc.SlashProgrammesEpisodeRdf.SlashProgrammesVersion;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
 import com.google.common.collect.Sets;
@@ -76,19 +76,19 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 	IdGeneratorFactory idGeneratorFactory = mock(IdGeneratorFactory.class);
 	IdGenerator idGenerator = new IntegerIdGenerator();
 	
-	RemoteSiteClient<SlashProgrammesEpisodeRdf> episodeRdfClient = mock(RemoteSiteClient.class, "episodeClient");
+	RemoteSiteClient<SlashProgrammesRdf> episodeRdfClient = mock(RemoteSiteClient.class, "episodeClient");
 	RemoteSiteClient<SlashProgrammesVersionRdf> versionRdfClient = mock(RemoteSiteClient.class, "versionClient");
 	
 	SlashProgrammesVersion version = new SlashProgrammesVersion().withResourceUri("/programmes/b00k2vtr#programme");
 			
-	SlashProgrammesEpisode episode = new SlashProgrammesEpisode().withDescription("Claire Savage investigates a workers sit-in against those that shut the Visteon plant down")
-	                                                             .inPosition(6)
+	SlashProgrammesEpisode episode = new SlashProgrammesEpisode().inPosition(6)
+																 .withVersion(version)
+																 .withDescription("Claire Savage investigates a workers sit-in against those that shut the Visteon plant down")
 	                                                             .withGenres("/programmes/genres/factual/politics#genre", "/programmes/genres/news#genre")
-	                                                             .withVersion(version)
 																 .withTitle("Shutdown");
 
 	SlashProgrammesContainerRef brand = new SlashProgrammesContainerRef().withUri("/programmes/b001#programme");
-	SlashProgrammesEpisodeRdf episodeRdf = new SlashProgrammesEpisodeRdf().withEpisode(episode).withBrand(brand);
+	SlashProgrammesRdf episodeRdf = new SlashProgrammesRdf().withEpisode(episode).withBrand(brand);
 	SlashProgrammesVersionRdf versionRdf = new SlashProgrammesVersionRdf().withLastTransmitted(tuesday10pm, "/bbctwo#service");
 	
 	BbcIplayerGraphExtractor extractor;
