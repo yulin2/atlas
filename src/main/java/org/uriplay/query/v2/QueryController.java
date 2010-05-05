@@ -24,11 +24,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.uriplay.beans.SingleItemProjector;
 import org.uriplay.beans.SinglePlaylistProjector;
+import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.query.content.parser.QueryStringBackedQueryBuilder;
+import org.uriplay.query.content.parser.WebProfileDefaultQueryAttributesSetter;
 
 @Controller
 public class QueryController {
@@ -39,6 +42,7 @@ public class QueryController {
 	
 	private final SingleItemProjector itemProjector = new SingleItemProjector();
 	private final SinglePlaylistProjector playlistProjector = new SinglePlaylistProjector();
+	private final WebProfileDefaultQueryAttributesSetter webDefaults = new WebProfileDefaultQueryAttributesSetter();
 	
 	public QueryController(KnownTypeQueryExecutor executor) {
 		this.executor = executor;
@@ -76,14 +80,18 @@ public class QueryController {
 	}
 	
 	private List<Item> executeItemQuery(HttpServletRequest request) {
-		return executor.executeItemQuery(builder.build(request, Item.class));
+		return executor.executeItemQuery(build(request, Item.class));
 	}
 
 	private List<Playlist> executePlaylistQuery(HttpServletRequest request) {
-		return executor.executePlaylistQuery(builder.build(request, Playlist.class));
+		return executor.executePlaylistQuery(build(request, Playlist.class));
 	}
 	
 	private List<Brand> executeBrandQuery(HttpServletRequest request) {
-		return executor.executeBrandQuery(builder.build(request, Brand.class));
+		return executor.executeBrandQuery(build(request, Brand.class));
+	}
+
+	private ContentQuery build(HttpServletRequest request, Class<? extends Description> type) {
+		return webDefaults.withDefaults(builder.build(request, type));
 	}
 }
