@@ -35,6 +35,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 			<list>
 				<bean class="org.uriplay.remotesite.bbc.BbcUriCanonicaliser" />
                 <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>
+                <bean class="org.uriplay.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser"/>
                 
                 <!--  this should go last in the chain as it is an expensive operation -->
                 <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">

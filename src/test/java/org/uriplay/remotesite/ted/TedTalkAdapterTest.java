@@ -16,6 +16,7 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.ted;
 
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser;
 
 /**
  * Unit test for {@link TedTalkAdapter}.
@@ -34,6 +35,13 @@ public class TedTalkAdapterTest extends MockObjectTestCase {
 		assertFalse(adapter.canFetch("http://www.ted.com/"));
 		assertTrue(adapter.canFetch("http://www.ted.com/talks/ray_kurzweil_on_how_technology_will_transform_us.html"));
 		assertTrue(adapter.canFetch("http://www.ted.com/talks/joe_derisi_hunts_the_next_killer_virus.html"));
+		
+		// the canonicaliser will handle these
+		assertFalse(adapter.canFetch("http://www.ted.com/talks/lang/eng/joe_derisi_hunts_the_next_killer_virus.html"));
 	}
 	
+	public void testCanCanonicaliseAUri() throws Exception {
+		TedTalkCanonicaliser canonicaliser = new TedTalkAdapter.TedTalkCanonicaliser();
+		assertEquals("http://www.ted.com/talks/joe_derisi_hunts_the_next_killer_virus.html", canonicaliser.canonicalise("http://www.ted.com/talks/lang/eng/joe_derisi_hunts_the_next_killer_virus.html"));
+	}
 }

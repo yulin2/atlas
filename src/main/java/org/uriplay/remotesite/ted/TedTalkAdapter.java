@@ -14,6 +14,9 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.ted;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.JAXBException;
 
 import org.jherd.remotesite.FetchException;
@@ -21,6 +24,7 @@ import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.media.entity.Item;
+import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
@@ -35,7 +39,10 @@ public class TedTalkAdapter implements SiteSpecificAdapter<Item> {
 	private final RemoteSiteClient<HtmlDescriptionOfItem> itemClient;
 	private final TedTalkGraphExtractor propertyExtractor;
 
-	private static final String baseUri = "http://www.ted.com/talks";
+	private static final String TED_BASE_URI = "http://www.ted.com/talks/";
+	
+	private static final Pattern CANONICAL_URI_PATTERN = Pattern.compile(TED_BASE_URI + "([^\\s/]+).html");
+	private static final Pattern ALIAS_URI_PATTERN = Pattern.compile("http://www.ted.com/talks/lang/eng/([^\\s/]+).html");
 
 	public TedTalkAdapter() throws JAXBException {
 		this(new TedTalkClient(), new TedTalkGraphExtractor());
@@ -56,6 +63,18 @@ public class TedTalkAdapter implements SiteSpecificAdapter<Item> {
 	}
 
 	public boolean canFetch(String uri) {
-		return uri.startsWith(baseUri) && uri.length() > baseUri.length();
+		return CANONICAL_URI_PATTERN.matcher(uri).matches();
+	}
+	
+	public static class TedTalkCanonicaliser implements Canonicaliser {
+
+		@Override
+		public String canonicalise(String uri) {
+			Matcher matcher = ALIAS_URI_PATTERN.matcher(uri);
+			if (matcher.matches()) {
+				return TED_BASE_URI + matcher.group(1) + ".html";
+			}
+			return null;
+		}
 	}
 }
