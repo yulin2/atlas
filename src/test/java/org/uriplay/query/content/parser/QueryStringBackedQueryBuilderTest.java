@@ -223,6 +223,10 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		params = Maps.newHashMap();
 		params.put("available", new String[] { "true" });
 		check(params, equalTo(LOCATION_AVAILABLE, true), Item.class);
+		
+		params = Maps.newHashMap();
+		params.put("position", new String[] { "10" });
+		check(params, equalTo(EPISODE_POSITION, 10), Item.class);
 	}
 
 	private void check(Map<String, String[]> params, ContentQuery expected) {
