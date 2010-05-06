@@ -73,12 +73,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
             <!-- Adapters in this list are tried in order until one matches the fetched URI -->
             <list>
+				<bean class="org.uriplay.remotesite.youtube.YouTubeAdapter"/>
                 <bean class="org.uriplay.remotesite.ted.TedTalkAdapter"/>
                 <bean class="org.uriplay.remotesite.channel4.C4AtomBackedBrandAdapter"/>
                 <bean class="org.uriplay.remotesite.channel4.C4HighlightsAdapter"/>
                 <bean class="org.uriplay.remotesite.channel4.C4BrandAtoZAdapter"/>
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter"/>
-                
             </list>
         </property>
     </bean>
@@ -90,9 +90,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 			<list>
 				<bean class="org.uriplay.remotesite.twitter.TwitterAdapter">
 					<constructor-arg ref="adapterDispatcher" />
-				</bean>
-				<bean class="org.uriplay.remotesite.youtube.YouTubeAdapter">
-					<constructor-arg ref="idGenFactory" />
 				</bean>
 				<bean class="org.uriplay.remotesite.wikipedia.WikipediaSparqlAdapter" />
 				<bean class="org.uriplay.remotesite.imdb.ImdbAdapter">

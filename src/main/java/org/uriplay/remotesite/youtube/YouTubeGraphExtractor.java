@@ -19,17 +19,14 @@ import java.util.Set;
 
 import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.beans.BeanGraphFactory;
-import org.jherd.beans.DescriptionMode;
 import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.joda.time.DateTimeConstants;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.youtube.YouTubeSource.Video;
 
 import com.google.common.collect.Sets;
@@ -41,164 +38,129 @@ import com.google.common.collect.Sets;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YouTubeGraphExtractor implements BeanGraphExtractor<YouTubeSource> {
+public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, Item> {
 	
 	private static final String YOUTUBE_PUBLISHER = "youtube.com";
 	
-	private final IdGeneratorFactory anonIdFactory;
 
-	public YouTubeGraphExtractor(IdGeneratorFactory anonIdGenerator) {
-		this.anonIdFactory = anonIdGenerator;
+	public YouTubeGraphExtractor() {
 	}
 
-	public Representation extractFrom(YouTubeSource source) {
-	
-		IdGenerator idGenerator = anonIdFactory.create();
+	@Override
+	public Item extract(YouTubeSource source) {
 		
-		Representation representation = new Representation();
-	
-		Set<String> encodingIds = Sets.newHashSet();
-		
+		Set<Encoding> encodings = Sets.newHashSet();
 		for (Video video : source.getVideos()) {
-			
-			String encodingId = idGenerator.getNextId();
-			String locationId = idGenerator.getNextId();
-
-			encodingIds.add(encodingId);
-			
-			representation.addType(encodingId, Encoding.class);
-			representation.addAnonymous(encodingId);
-			representation.addValues(encodingId, extractEncodingPropertyValuesFrom(video, locationId));
-			
-			representation.addType(locationId, Location.class);
-			representation.addAnonymous(locationId);
-			representation.addValues(locationId, extractLocationPropertyValuesFrom(video));
+			Location location = extractLocationPropertyValuesFrom(video);
+			Encoding encoding = extractEncodingPropertyValuesFrom(video);
+			encoding.addAvailableAt(location);
+			encodings.add(encoding);
 		}
 		
-		addEncodingForWebPage(idGenerator, source, representation, encodingIds);
+		encodings.add(encodingForWebPage(source));
 		
-		String versionId = idGenerator.getNextId();
 		
-		representation.addUri(source.getUri());
-		representation.addType(source.getUri(), Item.class);
+		Version version = new Version();
 		
-        representation.addType(versionId, Version.class);
-        representation.addAnonymous(versionId);
-        representation.addValues(source.getUri(), extractEpisodePropertyValuesFrom(source, versionId));
-        
-    	if (source.getVideos().size() > 0) {
-    		representation.addValues(versionId, extractVersionPropertyValuesFrom(encodingIds, source.getVideos().get(0)));
-		} else {
-			representation.addValues(versionId, extractVersionPropertyValuesFrom(encodingIds, null));
-		}
-		return representation;
-	}
-
-	private void addEncodingForWebPage(IdGenerator idGenerator, YouTubeSource source, Representation representation, Set<String> encodingIds) {
-	
-		String encodingId = idGenerator.getNextId();
-		String locationId = idGenerator.getNextId();
-		encodingIds.add(encodingId);
+		version.setManifestedAs(encodings);
 		
-		representation.addType(encodingId, Encoding.class);
-		representation.addAnonymous(encodingId);
-		representation.addType(locationId, Location.class);
-		representation.addAnonymous(locationId);
-		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("transportType", TransportType.HTMLEMBED.toString());
-		mpvs.addPropertyValue("uri", source.getUri());
-
-		representation.addValues(locationId, mpvs);
-		
-		mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("availableAt", Sets.newHashSet(locationId));
-		representation.addValues(encodingId, mpvs);
-	}
-	
-	private MutablePropertyValues extractEpisodePropertyValuesFrom(YouTubeSource source, String versionId) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", source.getVideoTitle());
-		mpvs.addPropertyValue("description", source.getDescription());
-		mpvs.addPropertyValue("versions", Sets.newHashSet(versionId));
-		mpvs.addPropertyValue("genres", new YouTubeGenreMap().map(source.getCategories()));
-		mpvs.addPropertyValue("tags", source.getTags());
-		mpvs.addPropertyValue("publisher", YOUTUBE_PUBLISHER);
-		mpvs.addPropertyValue("thumbnail", source.getThumbnailImageUri());
-		mpvs.addPropertyValue("image", source.getImageUri());
-		mpvs.addPropertyValue("curie", YoutubeUriCanonicaliser.curieFor(source.getUri()));
 		if (source.getVideos().size() > 0) {
-			mpvs.addPropertyValue("isLongForm", (source.getVideos().get(0).getDuration()) > (15 * DateTimeConstants.SECONDS_PER_MINUTE));
+			version.setDuration(source.getVideos().get(0).getDuration());
 		}
-		return mpvs;
-	}
-	
-	private MutablePropertyValues extractVersionPropertyValuesFrom(Set<String> encodingIds, Video video) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("manifestedAs", encodingIds);
-		if (video != null) {
-			mpvs.addPropertyValue("duration", video.getDuration());
-		}
-		return mpvs;
+		
+		Item item = item(source);
+		item.addVersion(version);
+		
+		return item;
 	}
 
-	private MutablePropertyValues extractEncodingPropertyValuesFrom(Video video, String locationId) {
+	private Encoding encodingForWebPage(YouTubeSource source) {
+		Location location = new Location();
+		location.setTransportType(TransportType.HTMLEMBED.toString());
+		location.setUri(source.getUri());
+
+		Encoding encoding = new Encoding();
+		encoding.addAvailableAt(location);
+		
+		return encoding;
+	}
 	
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("availableAt", Sets.newHashSet(locationId));
-		mpvs.addPropertyValue("dataContainerFormat", video.getType());
+	private Item item(YouTubeSource source) {
+		Item item = new Item();
+		item.setCanonicalUri(source.getUri());
+
+		item.setTitle(source.getVideoTitle());
+		item.setDescription(source.getDescription());
+		
+		item.setGenres(new YouTubeGenreMap().map(source.getCategories()));
+		item.setTags(source.getTags());
+		
+		item.setPublisher(YOUTUBE_PUBLISHER);
+		item.setThumbnail(source.getThumbnailImageUri());
+		item.setImage(source.getImageUri());
+		item.setCurie(YoutubeUriCanonicaliser.curieFor(source.getUri()));
+		if (source.getVideos().size() > 0) {
+			item.setIsLongForm((source.getVideos().get(0).getDuration()) > (15 * DateTimeConstants.SECONDS_PER_MINUTE));
+		}
+		return item;
+	}
+
+	private Encoding extractEncodingPropertyValuesFrom(Video video) {
+	
+		Encoding encoding = new Encoding();
+		
+		encoding.setDataContainerFormat(video.getType());
 		
 		switch (video.getYoutubeFormat()) {
 			case 1 :
 			case 6 : {
-				mpvs.addPropertyValue("videoHorizontalSize", 176);
-				mpvs.addPropertyValue("videoVerticalSize", 144);
+				encoding.setVideoHorizontalSize(176);
+				encoding.setVideoVerticalSize(144);
 				if (video.getYoutubeFormat() == 1) {
-					mpvs.addPropertyValue("audioCoding", "audio/AMR");
+					encoding.setAudioCoding("audio/AMR");
 				} else {
-					mpvs.addPropertyValue("audioCoding", "audio/mp4");
+					encoding.setAudioCoding("audio/mp4");
 				}
-				mpvs.addPropertyValue("audioChannels", 1);
-				mpvs.addPropertyValue("videoCoding", "video/H263");
-				mpvs.addPropertyValue("hasDOG", false);
+				encoding.setAudioChannels(1);
+				encoding.setVideoCoding("video/H263");
+				encoding.setHasDOG(false);
 				break;
 			}
 			case 5: {
-				mpvs.addPropertyValue("hasDOG", true);
+				encoding.setHasDOG(true);
 				break;
 			}
 		}
-		
-		return mpvs;
+		return encoding;
 	}
 	
-	private MutablePropertyValues extractLocationPropertyValuesFrom(Video video) {
+	private Location extractLocationPropertyValuesFrom(Video video) {
 
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-
-		mpvs.addPropertyValue("uri", video.getUrl());
+		Location location = new Location();
+		
+		location.setUri(video.getUrl());
 
 		if (video.isEmbeddable()) {
 			switch (video.getYoutubeFormat()) {
 				case 1:
 				case 6: {
-					mpvs.addPropertyValue("transportType", "stream");
-					mpvs.addPropertyValue("transportSubType", "rtsp");
+					location.setTransportType(TransportType.STREAM.toString().toLowerCase());
+					location.setTransportSubType("rtsp");
 					break;
 				}
 				case 5: {
-					mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT.toString());
-					mpvs.addPropertyValue("transportSubType", "html");
-					mpvs.addPropertyValue("embedCode", embedCodeFor(video.getUrl()));
+					location.setTransportType(TransportType.EMBEDOBJECT.toString().toLowerCase());
+					location.setTransportSubType("html");
+					location.setEmbedCode(embedCodeFor(video.getUrl()));
 					break;
 				}
 				default: {
-					mpvs.addPropertyValue("transportType", TransportType.HTMLEMBED);
+					location.setTransportType(TransportType.HTMLEMBED.toString().toLowerCase());
 				}
 			}
 		}
 		
-		return mpvs;
+		return location;
 	}
 
 	private String embedCodeFor(String url) {
@@ -210,10 +172,4 @@ public class YouTubeGraphExtractor implements BeanGraphExtractor<YouTubeSource> 
 				"</object>";
 		return String.format(embedCode, url, url);
 	}
-
-	public Representation extractFrom(YouTubeSource source, DescriptionMode mode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

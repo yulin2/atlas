@@ -16,17 +16,16 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.youtube;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
 
 import java.util.List;
 import java.util.Set;
 
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.jmock.Expectations;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -34,6 +33,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.data.TextConstruct;
@@ -47,29 +47,15 @@ import com.google.gdata.data.youtube.VideoEntry;
 public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 
 	static final String ITEM_URI = "http://www.youtube.com/watch?v=otA7tjinFX4";
-	static final String VERSION_ID = "1";
+
 	static final String LOCATION_URI = "http://www.youtube.com/v/otA7tjinFX4";
 	static final String LOCATION_URI_2 = "http://www.youtube.com/v/svnwenn331";
 	static final String LOCATION_URI_3 = "http://www.youtube.com/v/svnwvskld31";
 
-	static final String ENCODING_ID = "2";
-	static final String LOCATION_ID_1 = "3";
-
-	static final String ENCODING_ID_2 = "4";
-	static final String LOCATION_ID_2 = "5";
-
-	static final String ENCODING_ID_3 = "6";
-	static final String LOCATION_ID_3 = "7";
-	
-	static final String ENCODING_ID_4 = "8";
-	static final String LOCATION_ID_4 = "9";
-
 	static final String THUMBNAIL_URI = "http://i.ytimg.com/vi/otA7tjinFX4/3.jpg";
 	static final String IMAGE_URI = "http://i.ytimg.com/vi/otA7tjinFX4/3thumb.jpg";
 	
-	IdGeneratorFactory mockIdGeneratorFactory = mock(IdGeneratorFactory.class);
-	IdGenerator mockIdGenerator = mock(IdGenerator.class);
-	YouTubeGraphExtractor extractor = new YouTubeGraphExtractor(mockIdGeneratorFactory);
+	YouTubeGraphExtractor extractor = new YouTubeGraphExtractor();
 	VideoEntry entry = new VideoEntry();
 	YouTubeSource source;
 
@@ -121,86 +107,78 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testCanExtractVideoTitleDescriptionCategories() throws Exception {
 		
-		checking(new Expectations() {{
-			allowing(mockIdGeneratorFactory).create(); will(returnValue(mockIdGenerator));
-			ignoring(mockIdGenerator);
-		}});
-		
-		Representation representation = extractor.extractFrom(source);
-		
-		assertEquals(Item.class, representation.getType(ITEM_URI));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "title", "Video Title"));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "description", "Description of video"));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "genres", Sets.newHashSet("http://uriplay.org/genres/youtube/News", "http://uriplay.org/genres/uriplay/news")));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "tags", Sets.newHashSet("http://uriplay.org/tags/funny")));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "publisher", "youtube.com"));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "thumbnail", THUMBNAIL_URI));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "image", IMAGE_URI));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "curie", "yt:otA7tjinFX4"));
+		Item item = extractor.extract(source);
+		assertThat(item.getCanonicalUri(), is(ITEM_URI));
+		assertThat(item.getTitle(), is("Video Title"));
+		assertThat(item.getDescription(), is("Description of video"));
+		assertThat(item.getGenres(), is((Set<String>) Sets.<String>newHashSet("http://uriplay.org/genres/youtube/News", "http://uriplay.org/genres/uriplay/news")));
+		assertThat(item.getTags(), is((Set<String>) Sets.<String>newHashSet("http://uriplay.org/tags/funny")));
+		assertThat(item.getPublisher(), is("youtube.com"));
+		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
+		assertThat(item.getImage(), is(IMAGE_URI));
+		assertThat(item.getCurie(),  is("yt:otA7tjinFX4"));
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void testGeneratesVersionEncodingAndLocationData() throws Exception {
 	
-		checking(new Expectations() {{
-			one(mockIdGeneratorFactory).create(); will(returnValue(mockIdGenerator));
-			exactly(9).of(mockIdGenerator).getNextId(); 
-				will(onConsecutiveCalls(returnValue(ENCODING_ID), returnValue(LOCATION_ID_1), returnValue(ENCODING_ID_2), 
-										returnValue(LOCATION_ID_2), returnValue(ENCODING_ID_3), returnValue(LOCATION_ID_3), returnValue(ENCODING_ID_4), returnValue(LOCATION_ID_4), returnValue(VERSION_ID)));
-		}});
-		
-		Representation representation = extractor.extractFrom(source);
+		Item item = extractor.extract(source);
+		assertThat(item.getCanonicalUri(), is(ITEM_URI));
+		assertThat(item.getIsLongForm(), is(false));
 
-		assertEquals(Version.class, representation.getType(VERSION_ID));
-		assertThat(representation.getAnonymous(), hasItem(VERSION_ID));
+		Version version = Iterables.getOnlyElement(item.getVersions());
+		assertThat(version.getDuration(), is(300));
 		
-		assertThat(representation, hasPropertyValue(ITEM_URI, "versions", Sets.newHashSet(VERSION_ID)));
-		assertThat(representation, hasPropertyValue(VERSION_ID, "manifestedAs", Sets.newHashSet(ENCODING_ID, ENCODING_ID_2, ENCODING_ID_3, ENCODING_ID_4)));
-		assertThat(representation, hasPropertyValue(VERSION_ID, "duration", 300));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "isLongForm", false));
+		Set<Encoding> encodings = version.getManifestedAs();
+		assertThat(encodings.size(), is(4));
 		
-		assertEquals(Encoding.class, representation.getType(ENCODING_ID));
-		assertThat(representation.getAnonymous(), hasItem(ENCODING_ID));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "availableAt", Sets.newHashSet(LOCATION_ID_1)));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", "application/x-shockwave-flash"));
-		assertThat(representation, not(hasPropertyValue(ENCODING_ID, "videoCoding", "video/x-vp6")));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "hasDOG", true));
-	
-		assertEquals(Location.class, representation.getType(LOCATION_ID_1));
-		assertThat(representation, hasPropertyValue(LOCATION_ID_1, "transportType", TransportType.EMBEDOBJECT.toString()));
-		assertThat(representation, hasPropertyValue(LOCATION_ID_1, "transportSubType", "html"));
+		Matcher<Encoding> encoding1 = 
+			new EncodingMatcher()
+				.withDataContainerFormat(is("application/x-shockwave-flash"))
+				.withVideoCoding(is(not("video/x-vp6")))
+				.withDOG(is(true))
+				.withLocations(hasItems(
+						new LocationMatcher()
+							.withTransportSubType(is("html"))
+							.withTransportType(is(TransportType.EMBEDOBJECT.toString().toLowerCase()))));
 		
-		assertEquals(Encoding.class, representation.getType(ENCODING_ID_2));
-		assertThat(representation.getAnonymous(), hasItem(ENCODING_ID_2));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "availableAt", Sets.newHashSet(LOCATION_ID_2)));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "videoHorizontalSize", 176));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "videoVerticalSize", 144));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "dataContainerFormat", "video/3gpp"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "videoCoding", "video/H263"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "audioCoding", "audio/AMR"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "audioChannels", 1));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_2, "hasDOG", false));
-		assertEquals(Location.class, representation.getType(LOCATION_ID_2));
-
-		assertThat(representation, hasPropertyValue(LOCATION_ID_2, "transportType", "stream"));
-		assertThat(representation, hasPropertyValue(LOCATION_ID_2, "transportSubType", "rtsp"));
 		
-		assertThat(representation, hasPropertyValue(ENCODING_ID_3, "videoHorizontalSize", 176));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_3, "videoVerticalSize", 144));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_3, "dataContainerFormat", "video/3gpp"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_3, "videoCoding", "video/H263"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_3, "audioCoding", "audio/mp4"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_3, "audioChannels", 1));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_3, "hasDOG", false));
+		Matcher<Encoding> encoding2 = 
+			new EncodingMatcher()
+				.withDataContainerFormat(is("video/3gpp"))
+				.withVideoCoding(is("video/H263"))
+				.withAudioCoding(is("audio/AMR"))
+				.withVideoHorizonalSize(is(176))
+				.withVideoVerticalSize(is(144))
+				.withAudioChannels(is(1))
+				.withDOG(is(false))
+				.withLocations(hasItems(
+						new LocationMatcher()
+							.withTransportSubType(is("rtsp"))
+							.withTransportType(is(TransportType.STREAM.toString().toLowerCase()))));
 		
-		assertThat(representation, hasPropertyValue(LOCATION_ID_3, "transportType", "stream"));
-		assertThat(representation, hasPropertyValue(LOCATION_ID_3, "transportSubType", "rtsp"));
+		Matcher<Encoding> encoding3 = 
+			new EncodingMatcher()
+				.withDataContainerFormat(is("video/3gpp"))
+				.withVideoCoding(is("video/H263"))
+				.withAudioCoding(is("audio/mp4")) 
+				.withVideoHorizonalSize(is(176)) 
+				.withVideoVerticalSize(is(144)) 
+				.withAudioChannels(is(1)) 
+				.withDOG(is(false)) 
+				.withLocations(hasItems(
+						new LocationMatcher()
+							.withTransportSubType(is("rtsp"))
+							.withTransportType(is(TransportType.STREAM.toString().toLowerCase()))));
 		
-		assertEquals(Encoding.class, representation.getType(ENCODING_ID_3));
-		assertThat(representation.getAnonymous(), hasItem(ENCODING_ID_3));
-		assertThat(representation, hasPropertyValue(ENCODING_ID_4, "availableAt", Sets.newHashSet(LOCATION_ID_4)));
-		assertEquals(Location.class, representation.getType(LOCATION_ID_1));
-		assertThat(representation.getAnonymous(), hasItem(LOCATION_ID_1));
-		assertThat(representation, hasPropertyValue(LOCATION_ID_4, "uri", ITEM_URI));
+		Matcher<Encoding> encoding4 = 
+			new EncodingMatcher()
+				.withLocations(hasItems(
+						new LocationMatcher()
+							.withUri(is(ITEM_URI))
+							.withTransportType(is(TransportType.HTMLEMBED.toString().toLowerCase()))));
+		
+		assertThat(encodings, hasItems(encoding1, encoding2, encoding3, encoding4));
 	}
 
 	private TextConstruct text(String text) {
@@ -247,24 +225,147 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testCreatesLocationForWebPageEvenWhenNoVideosReturnedBySource() throws Exception {
 		
-		checking(new Expectations() {{
-			one(mockIdGeneratorFactory).create(); will(returnValue(mockIdGenerator));
-			exactly(3).of(mockIdGenerator).getNextId(); 
-				will(onConsecutiveCalls(returnValue(ENCODING_ID), returnValue(LOCATION_ID_1), returnValue(VERSION_ID)));
-		}});
-		
 		source = new NoVideosYouTubeSource(entry, ITEM_URI);
 		
-		Representation representation = extractor.extractFrom(source);
+		Item item = extractor.extract(source);
+		assertThat(item.getCanonicalUri(), is(ITEM_URI));
 		
-		assertEquals(Item.class, representation.getType(ITEM_URI));
-		assertEquals(Encoding.class, representation.getType(ENCODING_ID));
-		assertEquals(Location.class, representation.getType(LOCATION_ID_1));
-		assertEquals(Version.class, representation.getType(VERSION_ID));
-		assertThat(representation, hasPropertyValue(ITEM_URI, "versions", Sets.newHashSet(VERSION_ID)));
-		assertThat(representation, hasPropertyValue(VERSION_ID, "manifestedAs", Sets.newHashSet(ENCODING_ID)));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "availableAt", Sets.newHashSet(LOCATION_ID_1)));
-		assertThat(representation, hasPropertyValue(LOCATION_ID_1, "transportType", TransportType.HTMLEMBED.toString()));
+		Version version = Iterables.getOnlyElement(item.getVersions());
+		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
+		
+		assertThat(location.getTransportType(), is(TransportType.HTMLEMBED.toString().toLowerCase()));
 	}
 
+	static class EncodingMatcher extends TypeSafeMatcher<Encoding> {
+
+		private Matcher<String> dataContainerFormatMatcher;
+		private Matcher<String> audioCodingMatcher;
+		private Matcher<String> videoCodingMatcher;
+		private Matcher<Boolean> dogMatcher;
+		private Matcher<Integer> videoHorizonalSizeMatcher;
+		private Matcher<Integer> videoVerticalSizeMatcher;
+		private Matcher<Iterable<Location>> locationMatcher;
+		private Matcher<Integer> audioChannelsMatcher;
+
+		public EncodingMatcher withDataContainerFormat(Matcher<String> dataContainerFormatMatcher) {
+			this.dataContainerFormatMatcher = dataContainerFormatMatcher;
+			return this;
+		}
+		
+		public EncodingMatcher withDOG(Matcher<Boolean> dogMatcher) {
+			this.dogMatcher = dogMatcher;
+			return this;
+		}
+
+		public EncodingMatcher withAudioCoding(Matcher<String> audioCodingMatcher) {
+			this.audioCodingMatcher = audioCodingMatcher;
+			return this;
+		}
+		
+		public EncodingMatcher withVideoCoding(Matcher<String> videoCodingMatcher) {
+			this.videoCodingMatcher = videoCodingMatcher;
+			return this;
+		}
+		
+		public EncodingMatcher withVideoHorizonalSize(Matcher<Integer> withVideoHorizonalSizeMatcher) {
+			this.videoHorizonalSizeMatcher = withVideoHorizonalSizeMatcher;
+			return this;
+		}
+		
+		public EncodingMatcher withVideoVerticalSize(Matcher<Integer> videoVerticalSizeMatcher) {
+			this.videoVerticalSizeMatcher = videoVerticalSizeMatcher;
+			return this;
+		}
+		
+		public EncodingMatcher withAudioChannels(Matcher<Integer> audioChannelsMatcher) {
+			this.audioChannelsMatcher = audioChannelsMatcher;
+			return this;
+		}
+		
+		
+		public EncodingMatcher withLocations(Matcher<Iterable<Location>> locationMatcher) {
+			this.locationMatcher = locationMatcher;
+			return this;
+		}
+		
+		@Override
+		public boolean matchesSafely(Encoding encoding) {
+			if (dataContainerFormatMatcher != null && ! dataContainerFormatMatcher.matches(encoding.getDataContainerFormat())) {
+				return false;
+			}
+			if (audioCodingMatcher != null && ! audioCodingMatcher.matches(encoding.getAudioCoding())) {
+				return false;
+			}
+			if (videoCodingMatcher != null && ! videoCodingMatcher.matches(encoding.getVideoCoding())) {
+				return false;
+			}
+			if (videoVerticalSizeMatcher != null && ! videoVerticalSizeMatcher.matches(encoding.getVideoVerticalSize())) {
+				return false;
+			}
+			if (videoHorizonalSizeMatcher != null && ! videoHorizonalSizeMatcher.matches(encoding.getVideoHorizontalSize())) {
+				return false;
+			}
+			
+			if (audioChannelsMatcher != null && ! audioChannelsMatcher.matches(encoding.getAudioChannels())) {
+				return false;
+			}
+			
+			if (dogMatcher != null && ! dogMatcher.matches(encoding.getHasDOG())) {
+				return false;
+			}
+			if (locationMatcher != null && ! locationMatcher.matches(encoding.getAvailableAt())) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public void describeTo(Description description) {
+			description.appendValue("Encoding matching");
+		}
+		
+	}
+	
+	static class LocationMatcher extends TypeSafeMatcher<Location> {
+
+		private Matcher<String> transportTypeMatcher;
+		private Matcher<String> transportSubTypeMatcher;
+		private Matcher<String> uriMatcher;
+
+		@Override
+		public boolean matchesSafely(Location location) {
+			if (transportTypeMatcher != null && !transportTypeMatcher.matches(location.getTransportType())) {
+				return false;
+			}
+			if (transportSubTypeMatcher != null && !transportSubTypeMatcher.matches(location.getTransportSubType())) {
+				return false;
+			}
+			if (uriMatcher != null && !uriMatcher.matches(location.getUri())) {
+				return false;
+			}
+			return true;
+		}
+
+		public LocationMatcher withUri(Matcher<String> uriMatcher) {
+			this.uriMatcher = uriMatcher;
+			return this;
+		}
+
+		public LocationMatcher withTransportType(Matcher<String> transportTypeMatcher) {
+			this.transportTypeMatcher = transportTypeMatcher;
+			return this;
+		}
+		
+		public LocationMatcher withTransportSubType(Matcher<String> transportSubTypeMatcher) {
+			this.transportSubTypeMatcher = transportSubTypeMatcher;
+			return this;
+		}
+
+		@Override
+		public void describeTo(Description description) {
+			description.appendValue("Location matching");
+		}
+	}
+	
 }

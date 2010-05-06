@@ -21,12 +21,13 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Item;
+import org.uriplay.remotesite.ContentExtractor;
 
 import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.util.ResourceNotFoundException;
@@ -40,7 +41,7 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 	static final String DOCUMENT = "doc";
 	
 	RemoteSiteClient<VideoEntry> gdataClient;
-	BeanGraphExtractor<YouTubeSource> propertyExtractor;
+	ContentExtractor<YouTubeSource, Item> contentExtractor;
 	YouTubeAdapter adapter;
 	VideoEntry videoEntry = null;
 	YouTubeSource youtubeSource = new YouTubeSource(videoEntry, "http://uk.youtube.com/watch?v=-OBxL8PiFc8");
@@ -52,8 +53,8 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		gdataClient = mock(RemoteSiteClient.class);
-		propertyExtractor = mock(BeanGraphExtractor.class);
-		adapter = new YouTubeAdapter(gdataClient, propertyExtractor);
+		contentExtractor = mock(ContentExtractor.class);
+		adapter = new YouTubeAdapter(gdataClient, contentExtractor);
 		
 		checking(new Expectations() {{ 
 			ignoring(timer);
@@ -64,7 +65,7 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); will(returnValue(videoEntry));
-			one(propertyExtractor).extractFrom(youtubeSource);
+			one(contentExtractor).extract(youtubeSource); will(returnValue(new Item()));
 		}});
 		
 		adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8", timer);
@@ -101,6 +102,10 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 	
 	public void testCanFetchResourcesForYouTubeClipUris() throws Exception {
 		assertTrue(adapter.canFetch("http://www.youtube.com/watch?v=-OBxL8PiFc8"));
+		
+		// should be canonicalised before this request reaches here
+		assertFalse(adapter.canFetch("http://www.youtube.com/watch?v=-OBxL8PiFc8&featured=true"));
+		
 		assertFalse(adapter.canFetch("http://www.bbc.co.uk"));
 		assertFalse(adapter.canFetch("rtsp://rtsp2.youtube.com/Ci8LENy73wIaJgka3WEi7jmPGhMYDSANFEILdXJpcGxheS5vcmdIBlIGdmlkZW9zDA==/0/0/0/video.3gpf"));
 	}

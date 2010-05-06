@@ -17,48 +17,46 @@ package org.uriplay.remotesite.youtube;
 
 import java.util.regex.Pattern;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
-import org.jherd.remotesite.timing.TimedFetcher;
+import org.uriplay.media.entity.Item;
+import org.uriplay.remotesite.ContentExtractor;
 
 import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.util.ResourceNotFoundException;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for querying data about video clips from YouTube.
+ * {@link SiteSpecificAdapter} for querying data about video clips from YouTube.
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YouTubeAdapter extends TimedFetcher<Representation> implements SiteSpecificRepresentationAdapter {
+public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 
 	private static final Pattern YOUTUBE_CANONICAL_URI_PATTERN = Pattern.compile("http://www\\.youtube\\.com/watch\\?v=[^\\./&=]+");
 	
 	private final RemoteSiteClient<VideoEntry> gdataClient;
-	private final BeanGraphExtractor<YouTubeSource> propertyExtractor;
+	private final ContentExtractor<YouTubeSource, Item> contentExtractor;
 	
-	public YouTubeAdapter(IdGeneratorFactory idGeneratorFactory) {
-		this(new YouTubeGDataClient(), new YouTubeGraphExtractor(idGeneratorFactory)); 
+	public YouTubeAdapter() {
+		this(new YouTubeGDataClient(), new YouTubeGraphExtractor()); 
 	}
 	
-	YouTubeAdapter(RemoteSiteClient<VideoEntry> gdataClient, BeanGraphExtractor<YouTubeSource> propertyExtractor) {
+	YouTubeAdapter(RemoteSiteClient<VideoEntry> gdataClient, ContentExtractor<YouTubeSource, Item> youTubeGraphExtractor) {
 		this.gdataClient = gdataClient;
-		this.propertyExtractor = propertyExtractor;
+		this.contentExtractor = youTubeGraphExtractor;
 	}
 
 	@Override
-	protected Representation fetchInternal(String uri, RequestTimer timer) {
+	public Item fetch(String uri, RequestTimer timer) {
 		try {
 			timer.nest();
 			timer.start(this, "Querying YouTube api for data about " + uri);
 			VideoEntry videoEntry = gdataClient.get(uri);
 			timer.stop(this, "Querying YouTube api for data about " + uri);
 			timer.unnest();
-			return propertyExtractor.extractFrom(new YouTubeSource(videoEntry, uri));
+			return contentExtractor.extract(new YouTubeSource(videoEntry, uri));
 		} catch (ResourceNotFoundException e) {
 			throw new FetchException("Video not found on YouTube: " + uri, e);
 		} catch (Exception e) {
