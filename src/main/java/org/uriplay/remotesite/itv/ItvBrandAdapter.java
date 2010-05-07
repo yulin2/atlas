@@ -18,39 +18,43 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
+import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for ITV Brands.
+ * {@link SiteSpecificAdapter} for ITV Brands.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class ItvBrandAdapter implements SiteSpecificRepresentationAdapter {
+public class ItvBrandAdapter implements SiteSpecificAdapter<Playlist> {
 
 	private final RemoteSiteClient<List<ItvProgramme>> client;
-	private final BeanGraphExtractor<ItvBrandSource> propertyExtractor;
+	private final ContentExtractor<ItvBrandSource, List<Brand>> propertyExtractor;
 
 	private static final String ITV_URI = "http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml";
 
-	public ItvBrandAdapter(IdGeneratorFactory idGeneratorFactory) throws JAXBException {
-		this(new ItvCatchupClient(), new ItvGraphExtractor(idGeneratorFactory));
+	public ItvBrandAdapter() throws JAXBException {
+		this(new ItvCatchupClient(), new ItvGraphExtractor());
 	}
 	
-	public ItvBrandAdapter(RemoteSiteClient<List<ItvProgramme>> client, BeanGraphExtractor<ItvBrandSource> propertyExtractor) {
+	public ItvBrandAdapter(RemoteSiteClient<List<ItvProgramme>> client,  ContentExtractor<ItvBrandSource, List<Brand>> itvGraphExtractor) {
 		this.client = client;
-		this.propertyExtractor = propertyExtractor;
+		this.propertyExtractor = itvGraphExtractor;
 	}
 
-	public Representation fetch(String uri, RequestTimer timer) {
+	public Playlist fetch(String uri, RequestTimer timer) {
 		try {
 			List<ItvProgramme> itvBrands = client.get(uri);
-			return propertyExtractor.extractFrom(new ItvBrandSource(itvBrands, uri));
+			Playlist playlist = new Playlist();
+			playlist.setCanonicalUri(ITV_URI);
+			playlist.setTitle("ITV CatchUp Menu");
+			playlist.setPlaylists((List) propertyExtractor.extract(new ItvBrandSource(itvBrands, uri)));
+			return playlist;
 		} catch (Exception e) {
 			throw new FetchException("Problem processing data from ITV", e);
 		}

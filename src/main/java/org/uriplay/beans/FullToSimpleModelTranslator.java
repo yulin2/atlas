@@ -191,7 +191,9 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simpleLocation.setAudioChannels(encoding.getAudioChannels());
 		simpleLocation.setBitRate(encoding.getBitRate());
 		simpleLocation.setContainsAdvertising(encoding.getContainsAdvertising());
-		simpleLocation.setDataContainerFormat(encoding.getDataContainerFormat());
+		if (encoding.getDataContainerFormat() != null) {
+			simpleLocation.setDataContainerFormat(encoding.getDataContainerFormat().toString());
+		}
 		simpleLocation.setDataSize(encoding.getDataSize());
 		simpleLocation.setDistributor(encoding.getDistributor());
 		simpleLocation.setHasDOG(encoding.getHasDOG());

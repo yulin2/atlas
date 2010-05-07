@@ -118,7 +118,7 @@ public class BlipTvGraphExtractor implements ContentExtractor<HtmlDescriptionSou
 			return null;
 		}
 		Encoding encoding = new Encoding();
-		encoding.setDataContainerFormat(dataContainerFormat.toString());
+		encoding.setDataContainerFormat(dataContainerFormat);
 		return encoding;
 	}
 	

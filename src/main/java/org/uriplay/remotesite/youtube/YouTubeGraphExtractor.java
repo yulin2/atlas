@@ -20,16 +20,19 @@ import java.util.Set;
 import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.beans.BeanGraphFactory;
 import org.jherd.beans.Representation;
+import org.jherd.core.MimeType;
 import org.joda.time.DateTimeConstants;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.media.reference.entity.ContainerFormat;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.youtube.YouTubeSource.Video;
 
 import com.google.common.collect.Sets;
+import com.hp.hpl.jena.sparql.pfunction.library.container;
 
 /**
  * {@link BeanGraphExtractor} that processes the result of a query to the YouTube
@@ -51,8 +54,11 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 		
 		Set<Encoding> encodings = Sets.newHashSet();
 		for (Video video : source.getVideos()) {
-			Location location = extractLocationPropertyValuesFrom(video);
 			Encoding encoding = extractEncodingPropertyValuesFrom(video);
+			if (encoding == null) {
+				continue;
+			}
+			Location location = extractLocationPropertyValuesFrom(video);
 			encoding.addAvailableAt(location);
 			encodings.add(encoding);
 		}
@@ -106,10 +112,12 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 	}
 
 	private Encoding extractEncodingPropertyValuesFrom(Video video) {
-	
+		MimeType containerFormat = ContainerFormat.fromAltName(video.getType());
+		if (containerFormat == null) {
+			return null;
+		}
 		Encoding encoding = new Encoding();
-		
-		encoding.setDataContainerFormat(video.getType());
+		encoding.setDataContainerFormat(containerFormat);
 		
 		switch (video.getYoutubeFormat()) {
 			case 1 :

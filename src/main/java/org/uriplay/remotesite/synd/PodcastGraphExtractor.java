@@ -67,7 +67,7 @@ public abstract class PodcastGraphExtractor {
 		}
 		MimeType containerFormat = ContainerFormat.fromAltName(enclosure.getType());
 		if (containerFormat != null) {
-			mpvs.addPropertyValue("dataContainerFormat", containerFormat.toString());
+			mpvs.addPropertyValue("dataContainerFormat", containerFormat);
 		} else {
 			logger.unknownDataContainerFormat(locationUri, enclosure.getType());
 		}

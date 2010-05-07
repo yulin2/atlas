@@ -81,6 +81,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.channel4.C4BrandAtoZAdapter"/>
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter"/>
 				<bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter"/>
+				<bean class="org.uriplay.remotesite.itv.ItvBrandAdapter"/>
             </list>
         </property>
     </bean>
@@ -100,9 +101,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 				<bean class="org.uriplay.remotesite.bbc.BbcIplayerFeedAdapter" >
 					<constructor-arg ref="idGenFactory" />
 				</bean>
-				<bean class="org.uriplay.remotesite.itv.ItvBrandAdapter">
-					<constructor-arg ref="idGenFactory" />
-				</bean>
+
 				<bean class="org.uriplay.remotesite.bbc.BbcProgrammeAdapter">
 					<constructor-arg ref="idGenFactory" />
 				</bean>

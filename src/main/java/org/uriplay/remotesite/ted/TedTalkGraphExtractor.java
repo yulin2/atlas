@@ -12,9 +12,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-
 package org.uriplay.remotesite.ted;
 
+import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -26,9 +26,9 @@ import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
 public class TedTalkGraphExtractor  {
 
+	private static final String TED_PUBLISHER = "ted.com";
+
 	public Item extractFrom(HtmlDescriptionSource src) {
-		
-		
 		Encoding encoding = encoding();
 		encoding.addAvailableAt(embedLocation(src.getItem()));
 		encoding.addAvailableAt(htmlLinkLocation(src.getUri()));
@@ -49,7 +49,7 @@ public class TedTalkGraphExtractor  {
 		HtmlDescriptionOfItem htmlItem = src.getItem();
 		item.setTitle(htmlItem.getTitle());
 		item.setDescription(htmlItem.getDescription());
-		item.setPublisher("ted.com");
+		item.setPublisher(TED_PUBLISHER);
 		item.setThumbnail(htmlItem.getThumbnail());
 		item.setIsLongForm(true);
 		addCurieTo(item);
@@ -65,7 +65,7 @@ public class TedTalkGraphExtractor  {
 	
 	private Encoding encoding() {
 		Encoding encoding = new Encoding();
-		encoding.setDataContainerFormat("video/mp4");
+		encoding.setDataContainerFormat(MimeType.VIDEO_MP4);
 		return encoding;
 	}
 	

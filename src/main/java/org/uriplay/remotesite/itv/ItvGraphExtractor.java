@@ -15,71 +15,48 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.itv;
 
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.DescriptionMode;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.remotesite.ContentExtractor;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
+
 
 /**
  * {@link SiteSpecificRepresentationAdapter} for content from itv.com
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class ItvGraphExtractor implements BeanGraphExtractor<ItvBrandSource> {
+public class ItvGraphExtractor implements ContentExtractor<ItvBrandSource, List<Brand>> {
 
 	private static final String ITV_PUBLISHER = "itv.com";
-	
-	private final IdGeneratorFactory idGeneratorFactory;
-
-	public ItvGraphExtractor(IdGeneratorFactory idGeneratorFactory) {
-		this.idGeneratorFactory = idGeneratorFactory;
-	}
-
-	
-	private void addBrand(Representation representation, ItvProgramme brand, Set<String> episodeUris) {
-	
-		representation.addType(brand.url(), Brand.class);
-		representation.addUri(brand.url());
-
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("items", episodeUris);
-		mpvs.addPropertyValue("title", brand.title());
-		mpvs.addPropertyValue("curie", curieFrom(brand.url()));
-		mpvs.addPropertyValue("publisher", ITV_PUBLISHER);
-		representation.addValues(brand.url(), mpvs);
-	}
-	
-	private void addEpisode(Representation representation, ItvEpisode episode, ItvProgramme brand, String versionId) {
-	
-		representation.addType(episode.url(), Episode.class);
-		representation.addUri(episode.url());
-
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", episode.date());
-		mpvs.addPropertyValue("description", episode.description());
-		mpvs.addPropertyValue("publisher", ITV_PUBLISHER);
-		mpvs.addPropertyValue("containedIn", Sets.newHashSet(brand.url()));
-		mpvs.addPropertyValue("thumbnail", brand.thumbnail());
-		mpvs.addPropertyValue("versions", Sets.newHashSet(versionId));
-		mpvs.addPropertyValue("curie", curieFrom(episode.url()));
-		mpvs.addPropertyValue("isLongForm", true);
 		
-		representation.addValues(episode.url(), mpvs);
+	private Brand brand(ItvProgramme sourceBrand) {
+		Brand brand = new Brand();
+		brand.setCanonicalUri(sourceBrand.url());
+		brand.setTitle(sourceBrand.title());
+		brand.setCurie(curieFrom(sourceBrand.url()));
+		brand.setPublisher(ITV_PUBLISHER);
+		return brand;
+	}
+	
+	private Episode episode(ItvEpisode sourceEpisode, ItvProgramme sourceBrand) {
+		Episode episode = new Episode();
+		episode.setCanonicalUri(sourceEpisode.url());
+		episode.setTitle(sourceEpisode.date());
+		episode.setDescription(sourceEpisode.description());
+		episode.setPublisher(ITV_PUBLISHER);
+		episode.setThumbnail(sourceBrand.thumbnail());
+		episode.setCurie(curieFrom(sourceEpisode.url()));
+		episode.setIsLongForm(true);
+		return episode;
 	}
 	
 	private static Pattern curiePattern = Pattern.compile(".*ViewType=(\\d+).*&Filter=(\\d+).*");
@@ -93,65 +70,42 @@ public class ItvGraphExtractor implements BeanGraphExtractor<ItvBrandSource> {
 	}
 
 
-	public Representation extractFrom(ItvBrandSource source) {
+	@Override
+	public List<Brand> extract(ItvBrandSource source) {
 	
-		IdGenerator idGenerator = idGeneratorFactory.create();
+		List<ItvProgramme> sourceBrands = source.brands();
+		List<Brand> brands = Lists.newArrayList();
 		
-		Representation representation = new Representation();
-		
-		List<ItvProgramme> brands = source.brands();
-		for (ItvProgramme brand : brands) {
+		for (ItvProgramme sourceBrand : sourceBrands) {
 			
-			Set<String> episodeUris = Sets.newHashSet();
+			Brand brand = brand(sourceBrand);
+			brands.add(brand);
 			
-			for (ItvEpisode episode : brand.episodes()) {
+			for (ItvEpisode sourceEpisode : sourceBrand.episodes()) {
 				
-				String versionId = idGenerator.getNextId();
-				String encodingId = idGenerator.getNextId();
-				String locationId = idGenerator.getNextId();
+				Location location = location(sourceEpisode);
 				
-				addEpisode(representation, episode, brand, versionId);
-				addVersion(representation, versionId, encodingId);
-				addEncoding(representation, encodingId, locationId);
-				addLocation(representation, locationId, episode);
-				episodeUris.add(episode.url());
+				Encoding encoding = new Encoding();
+				encoding.addAvailableAt(location);
+
+				Version version = new Version();
+				version.addManifestedAs(encoding);
+				
+				Episode episode = episode(sourceEpisode, sourceBrand);
+				episode.addVersion(version);
+				
+				brand.addItem(episode);
 			}
-			
-			addBrand(representation, brand, episodeUris);
 		}
 		
-		return representation;
+		return brands;
 	}
 
-	private void addLocation(Representation representation, String locationId, ItvEpisode episode) {
-		representation.addType(locationId, Location.class);
-		representation.addAnonymous(locationId);
-		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("uri", episode.url());
-		mpvs.addPropertyValue("transportType", TransportType.HTMLEMBED);
-		mpvs.addPropertyValue("available", true);
-		representation.addValues(locationId, mpvs);
-	}
-
-
-	private void addEncoding(Representation representation, String encodingId, String locationId) {
-		representation.addType(encodingId, Encoding.class);
-		representation.addAnonymous(encodingId);
-		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("availableAt", Sets.newHashSet(locationId));
-		representation.addValues(encodingId, mpvs);
-	}
-
-
-	private void addVersion(Representation representation, String versionId, String encodingId) {
-
-		representation.addType(versionId, Version.class);
-		representation.addAnonymous(versionId);
-		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("manifestedAs", Sets.newHashSet(encodingId));
-		representation.addValues(versionId, mpvs);
+	private Location location(ItvEpisode episode) {
+		Location location = new Location();
+		location.setUri(episode.url());
+		location.setTransportType(TransportType.HTMLEMBED);
+		location.setAvailable(true);
+		return location;
 	}
 }

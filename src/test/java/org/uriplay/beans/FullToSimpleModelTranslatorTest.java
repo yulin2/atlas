@@ -11,6 +11,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jherd.beans.BeanGraphWriter;
+import org.jherd.core.MimeType;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Encoding;
@@ -68,7 +69,7 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		Version version = new Version();
 		version.setRatingText("adults only");
 		Encoding encoding = new Encoding();
-		encoding.setDataContainerFormat("audio/mpeg");
+		encoding.setDataContainerFormat(MimeType.VIDEO_3GPP);
 		version.addManifestedAs(encoding);
 		Location location = new Location();
 		location.setUri("http://example.com");
@@ -83,7 +84,7 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		org.uriplay.media.entity.simple.Location simpleLocation = Iterables.getOnlyElement(simpleLocations);
 		
 		assertThat(simpleLocation.getUri(), is("http://example.com"));
-		assertThat(simpleLocation.getDataContainerFormat(), is("audio/mpeg"));
+		assertThat(simpleLocation.getDataContainerFormat(), is(MimeType.VIDEO_3GPP.toString()));
 		assertThat(simpleLocation.getRatingText(), is("adults only"));
 		assertThat(simpleItem.getTitle(), is("Collings and Herrin"));
 	}

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -126,7 +127,7 @@ public class ProfileFilterTest extends TestCase {
 		
 		Collection<Item> beans = Lists.newArrayList(item, item2);
 		
-		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Collection) Lists.newArrayList(item, item2)));
+		assertThat(filter.applyTo(beans, Profile.DOWNLOAD), is((Collection<Item>) Lists.newArrayList(item, item2)));
 		assertThat(encoding.getAvailableAt(), is((Object)Sets.newHashSet(location1)));
 		assertThat(enc2.getAvailableAt(), is((Object)Sets.newHashSet(loc2)));
 	}
@@ -137,7 +138,7 @@ public class ProfileFilterTest extends TestCase {
 		Version version = new Version();
 		item.addVersion(version);
 		Encoding audiomp4 = new Encoding();
-		audiomp4.setDataContainerFormat("audio/mp4");
+		audiomp4.setDataContainerFormat(MimeType.AUDIO_MP4);
 		audiomp4.setVideoCoding("video/H263");
 		audiomp4.setAudioCoding("audio/mp4");
 		audiomp4.setVideoBitRate(2000);
@@ -147,7 +148,7 @@ public class ProfileFilterTest extends TestCase {
 		audiomp4.setVideoVerticalSize(400);
 		
 		Encoding videomp4 = new Encoding();
-		videomp4.setDataContainerFormat("video/mp4");
+		videomp4.setDataContainerFormat(MimeType.VIDEO_MP4);
 		videomp4.setVideoCoding("video/H263");
 		videomp4.setAudioCoding("audio/mp4");
 		videomp4.setVideoBitRate(4000);

@@ -15,8 +15,10 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.uri;
 
+
 import junit.framework.TestCase;
 
+import org.jherd.core.MimeType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Location;
 import org.uriplay.query.uri.Profile;
@@ -30,46 +32,46 @@ import org.uriplay.remotesite.bbc.Policy;
 public class ProfileTest extends TestCase {
 	
 	public void testForIphoneProfileMatchesOnlyEncodingsInGivenAudioFormats() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("audio/mpeg")));
-		assertTrue(Profile.IPHONE.matches(encodingIn("audio/mp4")));
-		assertFalse(Profile.IPHONE.matches(encodingIn("audio/ac3")));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.AUDIO_MPEG)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.AUDIO_MP4)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.AUDIO_AC3)));
 	}
 	
 	public void testForIphoneProfileMatchesOnlyEncodingsInGivenVideoFormats() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime")));
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/mp4")));
-		assertFalse(Profile.IPHONE.matches(encodingIn("video/x-divx")));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_MP4)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_XDIVX)));
 	}
 	
 	public void testForIphoneVideoCodingIfSpecifiedMustBeOneOfThese() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoCoding("video/H263")));
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoCoding("video/H264")));
-		assertFalse(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoCoding("video/x-ms-wmv")));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding("video/H263")));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding("video/H264")));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding("video/x-ms-wmv")));
 	}
 	
 	public void testForIphoneVideoBitrateIfSpecifiedMustBeLowEnough() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoBitRate(2000)));
-		assertFalse(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoBitRate(3000)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoBitRate(2000)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoBitRate(3000)));
 	}
 	
 	public void testForIphoneAudioBitrateIfSpecifiedMustBeLowEnough() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime").withAudioBitRate(160)));
-		assertFalse(Profile.IPHONE.matches(encodingIn("video/quicktime").withAudioBitRate(162)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withAudioBitRate(160)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withAudioBitRate(162)));
 	}
 	
 	public void testForIphoneVideoFramerateIfSpecifiedMustBeLowEnough() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoFrameRate(30)));
-		assertFalse(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoFrameRate(31)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoFrameRate(30)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoFrameRate(31)));
 	}
 
 	public void testForIphoneVideoHorizontalSizeIfSpecifiedMustBeLowEnough() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoHorizontalSize(640)));
-		assertFalse(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoHorizontalSize(641)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoHorizontalSize(640)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoHorizontalSize(641)));
 	}
 	
 	public void testForIphoneVideoVerticalSizeIfSpecifiedMustBeLowEnough() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoVerticalSize(480)));
-		assertFalse(Profile.IPHONE.matches(encodingIn("video/quicktime").withVideoVerticalSize(500)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoVerticalSize(480)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoVerticalSize(500)));
 	}
 	
 	public void testWorldwideProfileDisallowsLocationsThatAreUkOnly() throws Exception {
@@ -84,7 +86,7 @@ public class ProfileTest extends TestCase {
 		return location;
 	}
 
-	private Encoding encodingIn(String format) {
+	private Encoding encodingIn(MimeType format) {
 		Encoding encoding = new Encoding();
 		encoding.setDataContainerFormat(format);
 		encoding.addAvailableAt(new Location());

@@ -16,14 +16,12 @@ package org.uriplay.remotesite.channel4;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.uriplay.media.entity.Brand;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for screen-scraping from Channel4's 4OD website
+ * {@link SiteSpecificAdapter} for screen-scraping from Channel4's 4OD website
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */

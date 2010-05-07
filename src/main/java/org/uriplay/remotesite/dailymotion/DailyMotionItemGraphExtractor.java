@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.dailymotion;
 
+import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -60,7 +61,7 @@ public class DailyMotionItemGraphExtractor implements ContentExtractor<HtmlDescr
 	
 	private Encoding encoding() {
 		Encoding encoding = new Encoding();
-		encoding.setDataContainerFormat("application/x-shockwave-flash");
+		encoding.setDataContainerFormat(MimeType.APPLICATION_XSHOCKWAVEFLASH);
 		return encoding;
 	}
 	

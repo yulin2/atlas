@@ -15,23 +15,19 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.itv;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
+import static org.hamcrest.Matchers.is;
 
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.timing.RequestTimer;
-import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -44,16 +40,9 @@ public class ItvGraphExtractorTest extends MockObjectTestCase {
 	static final String BRAND_URI = "http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&Filter=2773";
 	static final String EPISODE1_URI = "http://www.itv.com/ITVPlayer/Video/default.html?ViewType=5&Filter=100109";
 
-	static final String EPISODE1_VERSION_ID = "1";
-	static final String EPISODE1_WEB_ENCODING_ID = "2";
-	static final String EPISODE1_WEB_LOCATION_ID = "3";
-
 	static final String THUMBNAIL_URL = "http://itv.com/images/a.jpg";
 
 	static final RequestTimer TIMER = null;
-	
-	IdGeneratorFactory idGeneratorFactory = mock(IdGeneratorFactory.class);
-	IdGenerator idGenerator = mock(IdGenerator.class);
 	
 	ItvGraphExtractor extractor;
 
@@ -70,50 +59,33 @@ public class ItvGraphExtractorTest extends MockObjectTestCase {
 		
 		source = new ItvBrandSource(Lists.newArrayList(programme), CATCHUP_URI);
 		
-		extractor = new ItvGraphExtractor(idGeneratorFactory);
+		extractor = new ItvGraphExtractor();
 		
-		checking(new Expectations() {{
-			allowing(idGeneratorFactory).create(); will(returnValue(idGenerator));
-		}});
 	}
 	
 	public void testCreatesEpisodesFromFeedEntries() throws Exception {
+		
+		Brand brand = Iterables.getOnlyElement(extractor.extract(source));
 
-		checking(new Expectations() {{ 
-			exactly(3).of(idGenerator).getNextId(); will(onConsecutiveCalls(returnValue(EPISODE1_VERSION_ID), returnValue(EPISODE1_WEB_ENCODING_ID),  returnValue(EPISODE1_WEB_LOCATION_ID)));
-		}});
-		
-		Representation representation = extractor.extractFrom(source);
+		assertThat(brand.getCanonicalUri(), is(BRAND_URI));
+		assertThat(brand.getPublisher(), is("itv.com"));
+		assertThat(brand.getCurie(), is("itv:1-2773"));
 
-		assertEquals(Brand.class, representation.getType(BRAND_URI));
-		assertThat(representation, hasPropertyValue(BRAND_URI, "publisher", "itv.com"));
+		Episode episode = (Episode) Iterables.getOnlyElement(brand.getItems());
+		assertThat(episode.getCanonicalUri(), is(EPISODE1_URI));
+		
+		assertThat(episode.getDescription(), is("latest episode"));
+		assertThat(episode.getPublisher(), is("itv.com"));
+		assertThat(episode.getCurie(), is("itv:5-100109"));
+		assertThat(episode.getIsLongForm(), is(true));
+		assertThat(episode.getThumbnail(), is(THUMBNAIL_URL));
+		
+		Version version = Iterables.getOnlyElement(episode.getVersions());
+		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 
-		assertEquals(Episode.class, representation.getType(EPISODE1_URI));
-		assertThat(representation, hasPropertyValue(EPISODE1_URI, "description", "latest episode"));
-		assertThat(representation, hasPropertyValue(EPISODE1_URI, "publisher", "itv.com"));
-		assertThat(representation, hasPropertyValue(EPISODE1_URI, "curie", "itv:5-100109"));
-		assertThat(representation, hasPropertyValue(EPISODE1_URI, "isLongForm", true));
-		assertThat(representation, hasPropertyValue(BRAND_URI, "curie", "itv:1-2773"));
-		
-		assertThat(representation, hasPropertyValue(EPISODE1_URI, "containedIn", Sets.newHashSet(BRAND_URI)));
-		
-		assertThat(representation, hasPropertyValue(EPISODE1_URI, "thumbnail", THUMBNAIL_URL));
-
-		assertEquals(Version.class, representation.getType(EPISODE1_VERSION_ID));
-		assertThat(representation, hasPropertyValue(EPISODE1_URI, "versions", Sets.newHashSet(EPISODE1_VERSION_ID)));
-		
-		assertThat(representation, hasPropertyValue(EPISODE1_VERSION_ID, "manifestedAs", Sets.newHashSet(EPISODE1_WEB_ENCODING_ID)));
-		assertThat(representation.getAnonymous(), hasItem(EPISODE1_VERSION_ID));
-		
-		assertEquals(Encoding.class, representation.getType(EPISODE1_WEB_ENCODING_ID));
-		assertThat(representation, hasPropertyValue(EPISODE1_WEB_ENCODING_ID, "availableAt", Sets.newHashSet(EPISODE1_WEB_LOCATION_ID)));
-
-		assertEquals(Location.class, representation.getType(EPISODE1_WEB_LOCATION_ID));
-		assertThat(representation.getAnonymous(), hasItem(EPISODE1_WEB_LOCATION_ID));
-		
-		assertThat(representation, hasPropertyValue(EPISODE1_WEB_LOCATION_ID, "uri", EPISODE1_URI));
-		assertThat(representation, hasPropertyValue(EPISODE1_WEB_LOCATION_ID, "transportType", "htmlembed"));
-		assertThat(representation, hasPropertyValue(EPISODE1_WEB_LOCATION_ID, "available", true));
+		assertThat(location.getUri(), is(EPISODE1_URI));
+		assertThat(location.getTransportType(), is(TransportType.HTMLEMBED));
+		assertThat(location.getAvailable(), is(true));
 	}
-
 }
