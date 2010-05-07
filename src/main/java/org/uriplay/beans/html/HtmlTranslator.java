@@ -465,7 +465,7 @@ public class HtmlTranslator implements BeanGraphWriter {
 			defineTerm("bit rate", encoding.getBitRate(), writer);
 			defineTerm("contains advertising", encoding.getContainsAdvertising(), writer);
 			defineTerm("data container format", encoding.getDataContainerFormat(), writer);
-			defineTerm("data size", encoding.getDataContainerFormat(), writer);
+			defineTerm("data size", encoding.getDataSize(), writer);
 			defineTerm("data distributor", encoding.getDistributor(), writer);
 			defineTerm("has digital onscreen graphic (DOG)", encoding.getHasDOG(), writer);
 			defineTerm("source", encoding.getSource(), writer);
