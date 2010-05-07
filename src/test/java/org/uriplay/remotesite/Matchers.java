@@ -17,6 +17,7 @@ package org.uriplay.remotesite;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Location;
@@ -33,7 +34,7 @@ public class Matchers {
 	
 	public static class EncodingMatcher extends TypeSafeMatcher<Encoding> {
 
-		private Matcher<String> dataContainerFormatMatcher;
+		private Matcher<MimeType> dataContainerFormatMatcher;
 		private Matcher<String> audioCodingMatcher;
 		private Matcher<String> videoCodingMatcher;
 		private Matcher<Boolean> dogMatcher;
@@ -42,7 +43,7 @@ public class Matchers {
 		private Matcher<Iterable<Location>> locationMatcher;
 		private Matcher<Integer> audioChannelsMatcher;
 
-		public EncodingMatcher withDataContainerFormat(Matcher<String> dataContainerFormatMatcher) {
+		public EncodingMatcher withDataContainerFormat(Matcher<MimeType> dataContainerFormatMatcher) {
 			this.dataContainerFormatMatcher = dataContainerFormatMatcher;
 			return this;
 		}

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hamcrest.Matcher;
+import org.jherd.core.MimeType;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -134,7 +135,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		
 		Matcher<Encoding> encoding1 = 
 			encodingMatcher()
-				.withDataContainerFormat(is("application/x-shockwave-flash"))
+				.withDataContainerFormat(is(MimeType.APPLICATION_XSHOCKWAVEFLASH))
 				.withVideoCoding(is(not("video/x-vp6")))
 				.withDOG(is(true))
 				.withLocations(hasItems(
@@ -145,7 +146,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		
 		Matcher<Encoding> encoding2 = 
 			encodingMatcher()
-				.withDataContainerFormat(is("video/3gpp"))
+				.withDataContainerFormat(is(MimeType.VIDEO_3GPP))
 				.withVideoCoding(is("video/H263"))
 				.withAudioCoding(is("audio/AMR"))
 				.withVideoHorizonalSize(is(176))
@@ -159,7 +160,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		
 		Matcher<Encoding> encoding3 = 
 			encodingMatcher()
-				.withDataContainerFormat(is("video/3gpp"))
+				.withDataContainerFormat(is(MimeType.VIDEO_3GPP))
 				.withVideoCoding(is("video/H263"))
 				.withAudioCoding(is("audio/mp4")) 
 				.withVideoHorizonalSize(is(176)) 

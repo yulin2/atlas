@@ -38,6 +38,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser"/>
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter.DailyMotionItemCanonicaliser"/>
                 <bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter.BlipTvCanonicaliser"/>
+                <bean class="org.uriplay.remotesite.hulu.HuluAdapter.HuluCanonicaliser"/>
                 
                 <!--  this should go last in the chain as it is an expensive operation -->
                 <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
@@ -82,6 +83,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter"/>
 				<bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter"/>
 				<bean class="org.uriplay.remotesite.itv.ItvBrandAdapter"/>
+                <bean class="org.uriplay.remotesite.hulu.HuluAdapter"/>
+				
+				<bean class="org.uriplay.remotesite.vimeo.VimeoAdapter" >
+                    <property name="acceptedUriPattern" value="http://vimeo.com/[\d]+" />
+                    <property name="oembedEndpoint" value="http://www.vimeo.com/api/oembed.xml" />
+                    <property name="maxWidth" value="400" />
+                </bean>
+                <bean class="org.uriplay.remotesite.oembed.OembedXmlAdapter" >
+                    <property name="acceptedUriPattern" value="http://www.flickr.com/photos/[^/]+/[\d]+" />
+                    <property name="oembedEndpoint" value="http://www.flickr.com/services/oembed/" />
+                </bean>
             </list>
         </property>
     </bean>
@@ -104,23 +116,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
 				<bean class="org.uriplay.remotesite.bbc.BbcProgrammeAdapter">
 					<constructor-arg ref="idGenFactory" />
-				</bean>
-				
-				<bean class="org.uriplay.remotesite.vimeo.VimeoAdapter" >
-					<constructor-arg ref="idGenFactory" />
-					<property name="acceptedUriPattern" value="http://(www.)?vimeo.com/.*" />
-					<property name="oembedEndpoint" value="http://www.vimeo.com/api/oembed.xml" />
-					<property name="maxWidth" value="400" />
-				</bean>
-				<bean class="org.uriplay.remotesite.hulu.HuluAdapter" >
-					<constructor-arg ref="idGenFactory" />
-					<property name="acceptedUriPattern" value="http://www.hulu.com/watch/.*" />
-					<property name="oembedEndpoint" value="http://www.hulu.com/api/oembed.xml" />
-				</bean>
-				<bean class="org.uriplay.remotesite.oembed.OembedXmlAdapter" >
-					<constructor-arg ref="idGenFactory" />
-					<property name="acceptedUriPattern" value="http://www.flickr.com/.*" />
-					<property name="oembedEndpoint" value="http://www.flickr.com/services/oembed/" />
 				</bean>
 				
 				<bean class="org.uriplay.remotesite.bbc.BbcPodcastAdapter">

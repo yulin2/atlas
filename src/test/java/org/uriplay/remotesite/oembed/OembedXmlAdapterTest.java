@@ -27,6 +27,8 @@ import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.feeds.OembedItem;
+import org.uriplay.media.entity.Item;
+import org.uriplay.remotesite.ContentExtractor;
 
 /**
  * Unit test for {@link OembedXmlAdapter}.
@@ -40,7 +42,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 	static final String OEMBED_ENDPOINT_URI = "http://www.vimeo.com/api/oembed.xml";
 	
 	RemoteSiteClient<OembedItem> oembedClient;
-	BeanGraphExtractor<OembedSource> propertyExtractor;
+	ContentExtractor<OembedSource, Item> propertyExtractor;
 	OembedXmlAdapter adapter;
 	OembedItem oembed = new OembedItem();
 	OembedSource oembedSource = new OembedSource(oembed, VIDEO_URI);
@@ -52,7 +54,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		oembedClient = mock(RemoteSiteClient.class);
-		propertyExtractor = mock(BeanGraphExtractor.class);
+		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new OembedXmlAdapter(oembedClient, propertyExtractor);
 		adapter.setOembedEndpoint(OEMBED_ENDPOINT_URI);
 		adapter.setAcceptedUriPattern("http://www.vimeo.com/\\d+");
@@ -66,7 +68,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(oembedClient).get(OEMBED_ENDPOINT_URI + "?url=" + VIDEO_URI); will(returnValue(oembed));
-			one(propertyExtractor).extractFrom(oembedSource);
+			one(propertyExtractor).extract(oembedSource); will(returnValue(new Item()));
 		}});
 		
 		adapter.fetch(VIDEO_URI, timer);
@@ -78,7 +80,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(oembedClient).get(OEMBED_ENDPOINT_URI + "?url=" + VIDEO_URI + "&maxwidth=400"); will(returnValue(oembed));
-			ignoring(propertyExtractor);
+			ignoring(propertyExtractor);  will(returnValue(new Item()));
 		}});
 		
 		adapter.fetch(VIDEO_URI, timer);
@@ -90,7 +92,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(oembedClient).get(OEMBED_ENDPOINT_URI + "?url=" + VIDEO_URI + "&maxheight=200"); will(returnValue(oembed));
-			ignoring(propertyExtractor);
+			ignoring(propertyExtractor);  will(returnValue(new Item()));
 		}});
 		
 		adapter.fetch(VIDEO_URI, timer);

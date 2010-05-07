@@ -16,83 +16,55 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.oembed;
 
 import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.DescriptionMode;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.springframework.beans.MutablePropertyValues;
+import org.jherd.core.MimeType;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
-
-import com.google.common.collect.Sets;
+import org.uriplay.remotesite.ContentExtractor;
 
 /**
  * {@link BeanGraphExtractor} pull details from oEmbed data.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
+public class OembedGraphExtractor implements ContentExtractor<OembedSource, Item> {
 
-	private final IdGeneratorFactory idGeneratorFactory;
+	public Item extract(OembedSource source) {
 
-	public OembedGraphExtractor(IdGeneratorFactory idGeneratorFactory) {
-		this.idGeneratorFactory = idGeneratorFactory;
-	}
-
-	public Representation extractFrom(OembedSource source) {
-		
-		IdGenerator idGenerator = idGeneratorFactory.create();
-		
-		Representation representation = new Representation();
-		
 		String episodeUri = source.getUri();
 		OembedItem oembed = source.getOembed();
-		
-		String versionId = idGenerator.getNextId();
-		String encodingId = idGenerator.getNextId();
-		String locationId = idGenerator.getNextId();
-		
-		representation.addType(episodeUri, Item.class);
-		representation.addUri(episodeUri);
-		
-		representation.addType(versionId, Version.class);
-		representation.addAnonymous(versionId);
-		
-		addItemPropertiesTo(representation, episodeUri, versionId, oembed);
-		
-		representation.addType(encodingId, Encoding.class);
-		representation.addAnonymous(encodingId);
-		
-		addVersionPropertiesTo(representation, versionId, encodingId);
-		
-		representation.addType(locationId, Location.class);
-		representation.addAnonymous(locationId);
 
-		addEncodingPropertiesTo(representation, encodingId, locationId, oembed);
+		Location location = addLocationPropertiesTo(oembed);
+
+		Encoding encoding = addEncodingPropertiesTo(oembed);
+		encoding.addAvailableAt(location);
 		
-		addLocationPropertiesTo(representation, locationId, oembed);
+		Version version = new Version();
+		version.addManifestedAs(encoding);
 		
-		return representation;
+		Item item = item(episodeUri, oembed);
+		item.addVersion(version);
+		
+		return item;
 	}
 
-	private void addItemPropertiesTo(Representation representation, String itemUri, String versionId, OembedItem oembed) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", oembed.title());
-		mpvs.addPropertyValue("publisher", oembed.providerUrl());
-		mpvs.addPropertyValue("thumbnail", oembed.thumbnailUrl());
-		mpvs.addPropertyValue("versions", Sets.newHashSet(versionId));
-		addCurieFor(itemUri, mpvs);
-		representation.addValues(itemUri, mpvs);
+	private Item item(String itemUri, OembedItem oembed) {
+		Item item = new Item();
+		item.setCanonicalUri(itemUri);
+		item.setTitle(oembed.title());
+		item.setPublisher(oembed.providerUrl());
+		item.setThumbnail(oembed.thumbnailUrl());
+		addCurieFor(item);
+		return item;
 	}
 
-	private void addCurieFor(String itemUri, MutablePropertyValues mpvs) {
-		String curie = curieFor(itemUri);
+	private void addCurieFor(Item item) {
+		String curie = curieFor(item.getCanonicalUri());
 		if (curie != null) {
-			mpvs.addPropertyValue("curie", curie);
+			item.setCurie(curie);
 		}
 	}
 	
@@ -105,34 +77,24 @@ public class OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
 		return null;
 	}
 
-	private void addVersionPropertiesTo(Representation representation, String versionId, String encodingId) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("manifestedAs", Sets.newHashSet(encodingId));
-		representation.addValues(versionId, mpvs);
-	}
-
-	private void addEncodingPropertiesTo(Representation representation, String encodingId, String locationId, OembedItem oembed) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("availableAt", Sets.newHashSet(locationId));
-		mpvs.addPropertyValue("videoHorizontalSize", oembed.width());
-		mpvs.addPropertyValue("videoVerticalSize", oembed.height());
-		String dataContainerFormat = getDataContainerFormat();
-		if (dataContainerFormat != null) {
-			mpvs.addPropertyValue("dataContainerFormat", dataContainerFormat);
-		}
-		representation.addValues(encodingId, mpvs);
+	private Encoding addEncodingPropertiesTo(OembedItem oembed) {
+		Encoding encoding = new Encoding();
+		encoding.setVideoHorizontalSize(oembed.width());
+		encoding.setVideoVerticalSize(oembed.height());
+		encoding.setDataContainerFormat(getDataContainerFormat());
+		return encoding;
 	}
 	
-	private void addLocationPropertiesTo(Representation representation, String locationId, OembedItem oembed) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT);
-		mpvs.addPropertyValue("transportSubType", "html");
-		mpvs.addPropertyValue("embedCode", oembed.embedCode());
+	private Location addLocationPropertiesTo(OembedItem oembed) {
+		Location location = new Location();
+		location.setTransportType(TransportType.EMBEDOBJECT);
+		location.setTransportSubType("html");
+		location.setEmbedCode(oembed.embedCode());
 		String extractedLocationUri = extractLocationUriFrom(oembed);
 		if (extractedLocationUri != null) {
-			mpvs.addPropertyValue("uri", extractedLocationUri);
+			location.setUri(extractedLocationUri);
 		}
-		representation.addValues(locationId, mpvs);
+		return location;
 	}
 
 	// override in subclasses for specific sites/oembed output formats
@@ -140,7 +102,7 @@ public class OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
 		return null;
 	}
 
-	protected String getDataContainerFormat() {
+	protected MimeType getDataContainerFormat() {
 		return null;
 	}
 }

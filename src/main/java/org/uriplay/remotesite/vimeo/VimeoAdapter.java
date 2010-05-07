@@ -16,14 +16,13 @@ package org.uriplay.remotesite.vimeo;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.uriplay.remotesite.oembed.OembedXmlAdapter;
 import org.uriplay.remotesite.oembed.OembedXmlClient;
 
 public class VimeoAdapter extends OembedXmlAdapter {
 
-	public VimeoAdapter(IdGeneratorFactory idGeneratorFactory) throws JAXBException {
-		super(new OembedXmlClient(), new VimeoOembedGraphExtractor(idGeneratorFactory));
+	public VimeoAdapter() throws JAXBException {
+		super(new OembedXmlClient(), new VimeoOembedGraphExtractor());
 	}
 
 }

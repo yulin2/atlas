@@ -33,15 +33,12 @@ public class BlipTvAdapterTest extends MockObjectTestCase {
 	
 	static final String URI = "http://blip.tv/file/2276955";
 	static final String VIDEO_SOURCE_URI = "http://e.blip.tv/scripts/flash/showplayer.swf?file=http://blip.tv/rss/flash/2289908";
-	static final String EMBED_CODE = "<embed>...</embed>";
 	
 	RemoteSiteClient<HtmlDescriptionOfItem> itemClient;
 	ContentExtractor<HtmlDescriptionSource, Item> propertyExtractor;
 	BlipTvAdapter adapter;
 	
 	HtmlDescriptionOfItem item = new HtmlDescriptionOfItem();
-	
-	HtmlDescriptionSource source = new HtmlDescriptionSource(item, URI).withEmbedCode(EMBED_CODE);
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -53,17 +50,7 @@ public class BlipTvAdapterTest extends MockObjectTestCase {
 		
 		item.setVideoSource(VIDEO_SOURCE_URI);
 	}
-	
-	public void testPerformsGetCorrespondingGivenUriThenRetrievesEmbedCodeAndPassesResultsToExtractor() throws Exception {
 		
-		checking(new Expectations() {{
-			one(itemClient).get(URI); will(returnValue(item));
-			one(propertyExtractor).extract(source); will(returnValue(new Item()));
-		}});
-		
-		adapter.fetch(URI, null);
-	}
-	
 	public void testCanFetchResourcesForBlipTvItems() throws Exception {
 		
 		Canonicaliser canonicaliser = new BlipTvAdapter.BlipTvCanonicaliser();

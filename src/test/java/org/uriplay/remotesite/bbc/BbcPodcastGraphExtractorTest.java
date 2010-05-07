@@ -23,6 +23,7 @@ import org.jdom.Element;
 import org.jherd.beans.Representation;
 import org.jherd.beans.id.IdGenerator;
 import org.jherd.beans.id.IdGeneratorFactory;
+import org.jherd.core.MimeType;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
@@ -130,7 +131,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		assertThat(representation, hasPropertyValue(ENCODING_ID, "availableAt", Sets.newHashSet(LOCATION_ID)));
 		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataSize", 2L));
 		assertThat(representation, hasPropertyValue(ENCODING_ID, "audioCoding", "audio/mpeg"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", "audio/mpeg"));
+		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.AUDIO_MPEG));
 	
 		assertEquals(Location.class, representation.getType(LOCATION_ID));
 		assertThat(representation, hasPropertyValue(LOCATION_ID, "transportType", TransportType.DOWNLOAD.toString()));
@@ -140,7 +141,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testDealsWithChrisMoylesEnhancedPodcastAsMp4() throws Exception {
 		Representation representation = extractor.extractFrom(moylesSource());
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", "audio/mp4"));
+		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.AUDIO_MP4));
 	}
 
 	private SyndicationSource moylesSource() {

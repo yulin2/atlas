@@ -33,6 +33,7 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 import org.springframework.core.io.ClassPathResource;
+import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Broadcast;
 import org.uriplay.media.entity.Encoding;
@@ -147,7 +148,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		
 		assertEquals(Location.class, representation.getType(EPISODE_2_WEB_LOCATION));
 		assertThat(representation, hasPropertyValue(EPISODE_2_WEB_LOCATION, "uri", "http://www.bbc.co.uk/iplayer/episode/b00kjbrc"));
-		assertThat(representation, hasPropertyValue(EPISODE_2_WEB_LOCATION, "transportType", "htmlembed"));
+		assertThat(representation, hasPropertyValue(EPISODE_2_WEB_LOCATION, "transportType", TransportType.HTMLEMBED));
 		assertThat(representation, hasPropertyValue(EPISODE_2_WEB_LOCATION, "available", true));
 
 		assertEquals(Brand.class, representation.getType(BRAND_URI));

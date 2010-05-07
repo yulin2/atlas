@@ -125,7 +125,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		assertThat(representation, hasPropertyValue(LOCATION_ID, "uri", LOCATION_URI));
 		
 		assertThat(representation, hasPropertyValue(ENCODING_ID, "audioCoding", "audio/mpeg"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.AUDIO_MPEG.toString()));
+		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.AUDIO_MPEG));
 	}
 	
 	public void testSetsContainerFormatForVideoPodcasts() throws Exception {
@@ -135,7 +135,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		
 		Representation representation = extractor.extractFrom(source);
 		assertThat(representation, not(hasPropertyValue(ENCODING_ID, "videoCoding", MimeType.VIDEO_XXVID.toString())));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.VIDEO_QUICKTIME.toString()));
+		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.VIDEO_QUICKTIME));
 	}
 	
 	public void testSetsVideoCodingForVideoMpegPodcasts() throws Exception {
@@ -145,7 +145,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		
 		Representation representation = extractor.extractFrom(source);
 		assertThat(representation, hasPropertyValue(ENCODING_ID, "videoCoding", MimeType.VIDEO_MPEG.toString()));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.VIDEO_MPEG.toString()));
+		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.VIDEO_MPEG));
 	}
 
 }

@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.uriplay.remotesite.Matchers.encodingMatcher;
 import static org.uriplay.remotesite.Matchers.locationMatcher;
 
+import org.jherd.core.MimeType;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Item;
@@ -73,7 +74,7 @@ public class BlipTvGraphExtractorTest extends MockObjectTestCase {
 		Version version = Iterables.getOnlyElement(item.getVersions());
 		
 		EncodingMatcher encoding1 = encodingMatcher()
-			.withDataContainerFormat(is("video/x-flv"))
+			.withDataContainerFormat(is(MimeType.VIDEO_XFLV))
 			.withLocations(hasItems(
 					locationMatcher()
 						.withUri(is("http://blip.tv/1.flv"))
@@ -86,7 +87,7 @@ public class BlipTvGraphExtractorTest extends MockObjectTestCase {
 						.withTransportSubType(is("html"))));
 		
 		EncodingMatcher encoding2 = encodingMatcher()
-			.withDataContainerFormat(is("video/quicktime"))
+			.withDataContainerFormat(is(MimeType.VIDEO_QUICKTIME))
 			.withLocations(hasItem(
 					locationMatcher()
 						.withTransportType(is(TransportType.DOWNLOAD))

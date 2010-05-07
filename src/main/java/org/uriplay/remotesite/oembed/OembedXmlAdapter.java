@@ -21,43 +21,44 @@ import javax.xml.bind.JAXBException;
 
 import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.feeds.OembedItem;
+import org.uriplay.media.entity.Item;
+import org.uriplay.remotesite.ContentExtractor;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for oEmbed XML fragments. Should be configured
+ * {@link SiteSpecificAdapter} for oEmbed XML fragments. Should be configured
  * with an oEmbed endpoint URL from which to request oEmbed XML fragment corresponding
  * to given URI.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OembedXmlAdapter implements SiteSpecificRepresentationAdapter {
+public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 
 	private final RemoteSiteClient<OembedItem> oembedClient;
-	private final BeanGraphExtractor<OembedSource> propertyExtractor;
+	private final ContentExtractor<OembedSource, Item> propertyExtractor;
 	private String oembedEndpoint;
 	private Pattern acceptedUriPattern;
 	private Integer maxWidth;
 	private Integer maxHeight;
 
-	public OembedXmlAdapter(IdGeneratorFactory idGeneratorFactory) throws JAXBException {
-		this(new OembedXmlClient(), new OembedGraphExtractor(idGeneratorFactory));
+	public OembedXmlAdapter() throws JAXBException {
+		this(new OembedXmlClient(), new OembedGraphExtractor());
 	}
 	
-	public OembedXmlAdapter(RemoteSiteClient<OembedItem> oembedClient, BeanGraphExtractor<OembedSource> propertyExtractor) {
+	public OembedXmlAdapter(RemoteSiteClient<OembedItem> oembedClient, ContentExtractor<OembedSource, Item> contentExtractor) {
 		this.oembedClient = oembedClient;
-		this.propertyExtractor = propertyExtractor;
+		this.propertyExtractor = contentExtractor;
 	}
 
-	public Representation fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri, RequestTimer timer) {
 		try {
 		String queryUri = oembedEndpointQuery(uri);
 		OembedItem oembed = oembedClient.get(queryUri);
-			return propertyExtractor.extractFrom(new OembedSource(oembed, uri));
+			return propertyExtractor.extract(new OembedSource(oembed, uri));
 		} catch (Exception e) {
 			throw new FetchException("Problem processing XML from " + oembedEndpoint, e);
 		}

@@ -17,25 +17,19 @@ package org.uriplay.remotesite.hulu;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.id.IdGeneratorFactory;
+import org.jherd.core.MimeType;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.oembed.OembedGraphExtractor;
-import org.uriplay.remotesite.oembed.OembedSource;
 
 /**
  * Specialisation of {@link OembedGraphExtractor} that pulls a location uri out of the embed code.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class HuluOembedGraphExtractor extends OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
+public class HuluOembedGraphExtractor extends OembedGraphExtractor {
 
 	private static Pattern locationPattern = Pattern.compile("value=\"(http://www.hulu.com/embed/.+?)\"");
-
-	public HuluOembedGraphExtractor(IdGeneratorFactory idGeneratorFactory) {
-		super(idGeneratorFactory);
-	}
 	
 	@Override
 	protected String extractLocationUriFrom(OembedItem oembed) {
@@ -48,8 +42,8 @@ public class HuluOembedGraphExtractor extends OembedGraphExtractor implements Be
 	}
 	
 	@Override
-	protected String getDataContainerFormat() {
-		return "video/x-flv";
+	protected MimeType getDataContainerFormat() {
+		return MimeType.VIDEO_XFLV;
 	}
 	
 	@Override

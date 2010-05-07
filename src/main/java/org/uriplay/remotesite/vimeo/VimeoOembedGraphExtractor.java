@@ -17,26 +17,19 @@ package org.uriplay.remotesite.vimeo;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.id.IdGeneratorFactory;
+import org.jherd.core.MimeType;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.oembed.OembedGraphExtractor;
-import org.uriplay.remotesite.oembed.OembedSource;
 
 /**
  * Specialisation of {@link OembedGraphExtractor} that pulls a location uri out of the embed code.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class VimeoOembedGraphExtractor extends OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
+public class VimeoOembedGraphExtractor extends OembedGraphExtractor {
 
 	private static Pattern embedCodePattern = Pattern.compile("data=\"(http://vimeo.com/moogaloop.swf\\?clip_id=\\d+)");
-	
-
-	public VimeoOembedGraphExtractor(IdGeneratorFactory idGeneratorFactory) {
-		super(idGeneratorFactory);
-	}
 	
 	@Override
 	protected String extractLocationUriFrom(OembedItem oembed) {
@@ -49,8 +42,8 @@ public class VimeoOembedGraphExtractor extends OembedGraphExtractor implements B
 	}
 	
 	@Override
-	protected String getDataContainerFormat() {
-		return "application/x-shockwave-flash";
+	protected MimeType getDataContainerFormat() {
+		return MimeType.APPLICATION_XSHOCKWAVEFLASH;
 	}
 
 	@Override

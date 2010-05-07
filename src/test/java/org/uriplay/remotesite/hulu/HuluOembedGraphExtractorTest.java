@@ -26,7 +26,7 @@ public class HuluOembedGraphExtractorTest extends TestCase {
 
 	public void testExtractsCurie() throws Exception {
 		
-		HuluOembedGraphExtractor extractor = new HuluOembedGraphExtractor(null);
+		HuluOembedGraphExtractor extractor = new HuluOembedGraphExtractor();
 		
 		assertThat(extractor.curieFor("http://www.hulu.com/watch/37199"), is("hulu:37199"));
 		assertThat(extractor.curieFor("http://www.hulu.com/watch/78417/the-daily-show-with-jon-stewart-wed-jun-17-2009"), is("hulu:78417"));

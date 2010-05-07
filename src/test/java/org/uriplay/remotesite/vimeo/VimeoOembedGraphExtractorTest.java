@@ -9,7 +9,7 @@ public class VimeoOembedGraphExtractorTest extends TestCase {
 
 	public void testGeneratesCurieFromVimeoUri() throws Exception {
 		
-		assertEquals("vim:8211405", new VimeoOembedGraphExtractor(null).curieFor("http://vimeo.com/8211405"));
+		assertEquals("vim:8211405", new VimeoOembedGraphExtractor().curieFor("http://vimeo.com/8211405"));
 		
 	}
 }

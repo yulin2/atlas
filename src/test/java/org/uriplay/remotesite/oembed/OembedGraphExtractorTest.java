@@ -16,21 +16,18 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.oembed;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
+import static org.hamcrest.Matchers.is;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.feeds.OembedItem;
+import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.remotesite.ContentExtractor;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
 
 /**
  * Unit test for {@link OembedraphExtractor}.
@@ -39,26 +36,12 @@ import com.google.common.collect.Sets;
  */
 public class OembedGraphExtractorTest extends MockObjectTestCase {
 	
-	static final String LOCATION_ID = "1";
-	static final String ENCODING_ID = "3";
-	static final String VERSION_ID  = "5";
-	
-	IdGeneratorFactory idGeneratorFactory = mock(IdGeneratorFactory.class);
-	IdGenerator idGenerator = mock(IdGenerator.class);
-	
 	OembedItem item = createTestItem();
 	
 	String videoUri = "http://www.vimeo.com/1234";
 	
 	OembedSource source = new OembedSource(item, videoUri);
 	
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		checking(new Expectations() {{
-			allowing(idGeneratorFactory).create(); will(returnValue(idGenerator));
-		}});
-	}
 	
 	private OembedItem createTestItem() {
 		OembedItem testItem = new OembedItem();
@@ -72,38 +55,30 @@ public class OembedGraphExtractorTest extends MockObjectTestCase {
 
 	public void testExtractsItemDetailsFromOembed() throws Exception {
 		
-		checking(new Expectations() {{ 
-			exactly(3).of(idGenerator).getNextId(); will(onConsecutiveCalls(returnValue(VERSION_ID), returnValue(ENCODING_ID), returnValue(LOCATION_ID))); 
-		}});
-		
-		BeanGraphExtractor<OembedSource> extractor = new OembedGraphExtractor(idGeneratorFactory) {
+		ContentExtractor<OembedSource, Item> extractor = new OembedGraphExtractor() {
 			@Override
 			protected String curieFor(String itemUri) {
 				return "vim:1234";
 			}
 		};
 		
-		Representation representation = extractor.extractFrom(source);
-
-		assertEquals(Item.class, representation.getType(videoUri));
-		assertThat(representation, hasPropertyValue(videoUri, "title", "Test Video Title"));
-		assertThat(representation, hasPropertyValue(videoUri, "publisher", "vimeo.com"));
-		assertThat(representation, hasPropertyValue(videoUri, "curie", "vim:1234"));
+		Item item = extractor.extract(source);
+		
+		assertThat(item.getCanonicalUri(), is(videoUri));
+		
+		assertThat(item.getTitle(), is("Test Video Title"));
+		assertThat(item.getPublisher(), is("vimeo.com"));
+		assertThat(item.getCurie(), is("vim:1234"));
 	
-		assertEquals(Version.class, representation.getType(VERSION_ID));
-		assertThat(representation, hasPropertyValue(videoUri, "versions", Sets.newHashSet(VERSION_ID)));
+		Version version = Iterables.getOnlyElement(item.getVersions());
+		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 		
-		assertEquals(Encoding.class, representation.getType(ENCODING_ID));
-		assertThat(representation, hasPropertyValue(VERSION_ID, "manifestedAs", Sets.newHashSet(ENCODING_ID)));
+		assertThat(encoding.getVideoHorizontalSize(), is(640));
+		assertThat(encoding.getVideoVerticalSize(), is(480));
 		
-		assertEquals(Location.class, representation.getType(LOCATION_ID));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "availableAt", Sets.newHashSet(LOCATION_ID)));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "videoHorizontalSize", 640));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "videoVerticalSize", 480));
-		
-		assertThat(representation, hasPropertyValue(LOCATION_ID, "transportType", "embedobject"));
-		assertThat(representation, hasPropertyValue(LOCATION_ID, "transportSubType", "html"));
-		assertThat(representation, hasPropertyValue(LOCATION_ID, "embedCode", "<embed ...>"));
+		assertThat(location.getTransportType(), is(TransportType.EMBEDOBJECT));
+		assertThat(location.getTransportSubType(), is("html"));
+		assertThat(location.getEmbedCode(), is("<embed ...>"));
 	}
-
 }

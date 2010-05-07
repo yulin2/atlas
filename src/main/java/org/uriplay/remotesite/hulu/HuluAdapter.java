@@ -14,16 +14,35 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.hulu;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.id.IdGeneratorFactory;
+import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.oembed.OembedXmlAdapter;
 import org.uriplay.remotesite.oembed.OembedXmlClient;
 
 public class HuluAdapter extends OembedXmlAdapter {
 
-	public HuluAdapter(IdGeneratorFactory idGeneratorFactory) throws JAXBException {
-		super(new OembedXmlClient(), new HuluOembedGraphExtractor(idGeneratorFactory));
+	private static final String BASE_URI = "http://www.hulu.com/watch/";
+	private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "[^/&\\?=@]+).*");
+	
+	public HuluAdapter() throws JAXBException {
+		super(new OembedXmlClient(), new HuluOembedGraphExtractor());
+		setAcceptedUriPattern(BASE_URI + "[^/&\\?=@]+");
+		setOembedEndpoint("http://www.hulu.com/api/oembed.xml");
 	}
+	
+	public static class HuluCanonicaliser implements Canonicaliser {
 
+		@Override
+		public String canonicalise(String uri) {
+			Matcher matcher = ALIAS_PATTERN.matcher(uri);
+			if (matcher.matches()) {
+				return matcher.group(1);
+			}
+			return null;
+		}
+	}
 }
