@@ -14,10 +14,12 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bliptv;
 
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Item;
+import org.uriplay.query.uri.canonical.Canonicaliser;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
@@ -34,8 +36,7 @@ public class BlipTvAdapterTest extends MockObjectTestCase {
 	static final String EMBED_CODE = "<embed>...</embed>";
 	
 	RemoteSiteClient<HtmlDescriptionOfItem> itemClient;
-	RemoteSiteClient<String> embedCodeClient;
-	BeanGraphExtractor<HtmlDescriptionSource> propertyExtractor;
+	ContentExtractor<HtmlDescriptionSource, Item> propertyExtractor;
 	BlipTvAdapter adapter;
 	
 	HtmlDescriptionOfItem item = new HtmlDescriptionOfItem();
@@ -47,9 +48,8 @@ public class BlipTvAdapterTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		itemClient = mock(RemoteSiteClient.class, "itemClient");
-		embedCodeClient = mock(RemoteSiteClient.class, "embedCodeClient");
-		propertyExtractor = mock(BeanGraphExtractor.class);
-		adapter = new BlipTvAdapter(itemClient, embedCodeClient, propertyExtractor);
+		propertyExtractor = mock(ContentExtractor.class);
+		adapter = new BlipTvAdapter(itemClient, propertyExtractor);
 		
 		item.setVideoSource(VIDEO_SOURCE_URI);
 	}
@@ -58,8 +58,7 @@ public class BlipTvAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(itemClient).get(URI); will(returnValue(item));
-			one(embedCodeClient).get(VIDEO_SOURCE_URI); will(returnValue(EMBED_CODE));
-			one(propertyExtractor).extractFrom(source);
+			one(propertyExtractor).extract(source); will(returnValue(new Item()));
 		}});
 		
 		adapter.fetch(URI, null);
@@ -67,9 +66,14 @@ public class BlipTvAdapterTest extends MockObjectTestCase {
 	
 	public void testCanFetchResourcesForBlipTvItems() throws Exception {
 		
+		Canonicaliser canonicaliser = new BlipTvAdapter.BlipTvCanonicaliser();
+		
 		assertFalse(adapter.canFetch("http://www.channel4.com/"));
 		assertFalse(adapter.canFetch("http://blip.tv/"));
-		assertTrue(adapter.canFetch("http://blip.tv/file/2114874?utm_source=episodepg_random&utm_medium=episodepg_random"));
+		
+		assertFalse(adapter.canFetch("http://blip.tv/file/2114874?utm_source=episodepg_random&utm_medium=episodepg_random"));
+		assertEquals("http://blip.tv/file/2114874", canonicaliser.canonicalise("http://blip.tv/file/2114874?utm_source=episodepg_random&utm_medium=episodepg_random"));
+		
 		assertTrue(adapter.canFetch("http://blip.tv/file/2052465"));
 	}
 	

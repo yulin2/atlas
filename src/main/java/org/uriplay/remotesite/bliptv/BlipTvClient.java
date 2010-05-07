@@ -72,7 +72,5 @@ public class BlipTvClient implements RemoteSiteClient<HtmlDescriptionOfItem>  {
 		} else {
 			return null;
 		}
-		
 	}
-
 }

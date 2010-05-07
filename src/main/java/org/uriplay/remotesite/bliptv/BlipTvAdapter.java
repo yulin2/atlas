@@ -14,52 +14,70 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bliptv;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
+import org.uriplay.media.entity.Item;
+import org.uriplay.query.uri.canonical.Canonicaliser;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for http://blip.tv
+ * {@link SiteSpecificAdapter} for http://blip.tv
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BlipTvAdapter implements SiteSpecificRepresentationAdapter {
+public class BlipTvAdapter implements SiteSpecificAdapter<Item> {
 
 	private final RemoteSiteClient<HtmlDescriptionOfItem> itemClient;
-	private final BeanGraphExtractor<HtmlDescriptionSource> propertyExtractor;
-	private final RemoteSiteClient<String> embedCodeClient;
+	private final ContentExtractor<HtmlDescriptionSource, Item> propertyExtractor;
 
-	private static final String baseUri = "http://blip.tv";
+	private static final Pattern CANONICAL_URI_PATTERN = Pattern.compile("http://blip.tv/file/[\\d]+");
+	private static final Pattern ALIAS_PATTERN = Pattern.compile("(http://blip.tv/file/[\\d]+).*");
 
-	public BlipTvAdapter(IdGeneratorFactory idGen) throws JAXBException {
-		this(new BlipTvClient(), new BlipTvEmbedCodeClient(), new BlipTvGraphExtractor(idGen));
+	public BlipTvAdapter() throws JAXBException {
+		this(new BlipTvClient(), new BlipTvGraphExtractor());
 	}
 	
-	public BlipTvAdapter(RemoteSiteClient<HtmlDescriptionOfItem> client, RemoteSiteClient<String> embedCodeClient, BeanGraphExtractor<HtmlDescriptionSource> propertyExtractor) {
+	public BlipTvAdapter(RemoteSiteClient<HtmlDescriptionOfItem> client, ContentExtractor<HtmlDescriptionSource, Item> contentExtractor) {
 		this.itemClient = client;
-		this.embedCodeClient = embedCodeClient;
-		this.propertyExtractor = propertyExtractor;
+		this.propertyExtractor = contentExtractor;
 	}
 
-	public Representation fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri, RequestTimer timer) {
 		try {
 			HtmlDescriptionOfItem itemDescription = itemClient.get(uri);
-			String embedCode = embedCodeClient.get(itemDescription.getVideoSource());
-			return propertyExtractor.extractFrom(new HtmlDescriptionSource(itemDescription, uri).withEmbedCode(embedCode));
+			return propertyExtractor.extract(new HtmlDescriptionSource(itemDescription, uri).withEmbedCode(embedCode(itemDescription.getVideoSource())));
 		} catch (Exception e) {
 			throw new FetchException("Problem processing html page from blip.tv", e);
 		}
 	}
 
+	private String embedCode(String videoSource) {
+		return "<embed src=\"" + videoSource + "\" type=\"application/x-shockwave-flash\" width=\"320\" height=\"270\" allowscriptaccess=\"always\" allowfullscreen=\"true\"></embed>";
+	}
+
 	public boolean canFetch(String uri) {
-		return uri.startsWith(baseUri) && uri.length() > baseUri.length() && uri.contains("/file/");
+		return CANONICAL_URI_PATTERN.matcher(uri).matches();
+	}
+	
+	public static class BlipTvCanonicaliser implements Canonicaliser {
+
+		@Override
+		public String canonicalise(String uri) {
+			Matcher matcher = ALIAS_PATTERN.matcher(uri);
+			if (matcher.matches()) {
+				return matcher.group(1);
+			}
+			return null;
+		}
+		
 	}
 }

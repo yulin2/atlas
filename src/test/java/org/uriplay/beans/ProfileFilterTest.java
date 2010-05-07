@@ -183,19 +183,19 @@ public class ProfileFilterTest extends TestCase {
 	
 	private Location htmlembedLocation() {
 		Location location = new Location();
-		location.setTransportType(TransportType.HTMLEMBED.toString());
+		location.setTransportType(TransportType.HTMLEMBED);
 		return location;
 	}
 
 	private Location downloadLocation() {
 		Location location = new Location();
-		location.setTransportType(TransportType.DOWNLOAD.toString());
+		location.setTransportType(TransportType.DOWNLOAD);
 		return location;
 	}
 	
 	private Location embedobjectLocation() {
 		Location location = new Location();
-		location.setTransportType(TransportType.EMBEDOBJECT.toString());
+		location.setTransportType(TransportType.EMBEDOBJECT);
 		return location;
 	}
 }

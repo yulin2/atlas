@@ -56,13 +56,13 @@ public enum Profile {
 	DOWNLOAD {
 		@Override
 		public boolean matches(Location location) {
-			return TransportType.DOWNLOAD.toString().equalsIgnoreCase(location.getTransportType());
+			return TransportType.DOWNLOAD.equals(location.getTransportType());
 		}
 	}, 
 	EMBED {
 		@Override
 		public boolean matches(Location location) {
-			return TransportType.EMBEDOBJECT.toString().equalsIgnoreCase(location.getTransportType());
+			return TransportType.EMBEDOBJECT.equals(location.getTransportType());
 		}
 	}, 
 	IPHONE {
@@ -82,14 +82,14 @@ public enum Profile {
 		
 		@Override
 		public boolean matches(Location location) {
-			return TransportType.DOWNLOAD.toString().equalsIgnoreCase(location.getTransportType())
+			return TransportType.DOWNLOAD.equals(location.getTransportType())
 			       && "HTTP".equalsIgnoreCase(location.getTransportSubType());
 		}
 	}, 
 	WEB {
 		@Override
 		public boolean matches(Location location) {
-			return TransportType.HTMLEMBED.toString().equalsIgnoreCase(location.getTransportType());
+			return TransportType.HTMLEMBED.equals(location.getTransportType());
 		}
 	}, 
 	WORLDWIDE {

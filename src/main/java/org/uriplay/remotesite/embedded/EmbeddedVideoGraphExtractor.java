@@ -76,7 +76,7 @@ public class EmbeddedVideoGraphExtractor implements BeanGraphExtractor<HtmlDescr
 		representation.addAnonymous(locationId);
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.addPropertyValue("embedCode", embedCode);
-		mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT.toString().toLowerCase());
+		mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT);
 		mpvs.addPropertyValue("transportSubType", "html");
 		representation.addValues(locationId, mpvs);
 	}

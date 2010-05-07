@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.*;
 import java.util.Set;
 
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
@@ -73,13 +74,13 @@ public class TedTalkGraphExtractorTest extends MockObjectTestCase {
 		
 		Location embedLocation = locationByType("embedobject", encoding.getAvailableAt());
 		assertThat(embedLocation.getUri(), is("videoSource"));
-		assertThat(embedLocation.getTransportType(), is("embedobject"));
+		assertThat(embedLocation.getTransportType(), is(TransportType.EMBEDOBJECT));
 		assertThat(embedLocation.getTransportSubType(), is("html"));
 		assertThat(embedLocation.getEmbedCode(), containsString("vu=http://video.ted.com/talks/embed/RayKurzweil_2005.flv"));
 		
 		Location linkLocation =  locationByType("htmlembed", encoding.getAvailableAt());
 		assertThat(linkLocation.getUri(), is(ITEM_URI));
-		assertThat(linkLocation.getTransportType(), is("htmlembed"));
+		assertThat(linkLocation.getTransportType(), is(TransportType.HTMLEMBED));
 	}
 
 	private Location locationByType(String transportType, Set<Location> availableAt) {

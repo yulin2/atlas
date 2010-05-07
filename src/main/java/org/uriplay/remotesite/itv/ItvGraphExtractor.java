@@ -129,7 +129,7 @@ public class ItvGraphExtractor implements BeanGraphExtractor<ItvBrandSource> {
 		
 		MutablePropertyValues mpvs = new MutablePropertyValues();
 		mpvs.addPropertyValue("uri", episode.url());
-		mpvs.addPropertyValue("transportType", TransportType.HTMLEMBED.toString().toLowerCase());
+		mpvs.addPropertyValue("transportType", TransportType.HTMLEMBED);
 		mpvs.addPropertyValue("available", true);
 		representation.addValues(locationId, mpvs);
 	}
@@ -154,11 +154,4 @@ public class ItvGraphExtractor implements BeanGraphExtractor<ItvBrandSource> {
 		mpvs.addPropertyValue("manifestedAs", Sets.newHashSet(encodingId));
 		representation.addValues(versionId, mpvs);
 	}
-
-
-	public Representation extractFrom(ItvBrandSource source, DescriptionMode mode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

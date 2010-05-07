@@ -74,17 +74,17 @@ public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
 		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
 
 		Location embedLocation = locationByType(TransportType.EMBEDOBJECT, encoding.getAvailableAt());
-		assertThat(embedLocation.getTransportType(), is("embedobject"));
+		assertThat(embedLocation.getTransportType(), is(TransportType.EMBEDOBJECT));
 		assertThat(embedLocation.getTransportSubType(), is("html"));
 		
 		Location linkLocation = locationByType(TransportType.HTMLEMBED, encoding.getAvailableAt());
-		assertThat(linkLocation.getTransportType(), is("htmlembed"));
+		assertThat(linkLocation.getTransportType(), is(TransportType.HTMLEMBED));
 		assertThat(linkLocation.getUri(), is("http://www.dailymotion.com/video/xbqomc_dont-do-anything_fun"));
 	}
 	
 	private Location locationByType(TransportType transportType, Set<Location> availableAt) {
 		for (Location location : availableAt) {
-			if (transportType.toString().toLowerCase().equals(location.getTransportType())) {
+			if (transportType.equals(location.getTransportType())) {
 				return location;
 			}
 		}

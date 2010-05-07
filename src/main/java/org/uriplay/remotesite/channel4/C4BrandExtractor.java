@@ -138,7 +138,7 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 	private Location location(String uri, Map<String, String> lookup) {
 		Location location = new Location();
 		location.setUri(uri);
-		location.setTransportType(TransportType.HTMLEMBED.toString().toLowerCase());
+		location.setTransportType(TransportType.HTMLEMBED);
 		
 		// The feed only contains available content
 		location.setAvailable(true);

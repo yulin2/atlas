@@ -99,7 +99,7 @@ public class BbcProgrammeGraphExtractor implements BeanGraphExtractor<BbcProgram
 		
 		MutablePropertyValues lmpvs = new MutablePropertyValues();
 		lmpvs.addPropertyValue("uri", iplayerPageFrom(episodeUri));
-		lmpvs.addPropertyValue("transportType", TransportType.HTMLEMBED.toString().toLowerCase());
+		lmpvs.addPropertyValue("transportType", TransportType.HTMLEMBED);
 		lmpvs.addPropertyValue("available", available);
 		representation.addValues(webLocationId, lmpvs);
 	}

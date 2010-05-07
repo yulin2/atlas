@@ -37,6 +37,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>
                 <bean class="org.uriplay.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser"/>
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter.DailyMotionItemCanonicaliser"/>
+                <bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter.BlipTvCanonicaliser"/>
                 
                 <!--  this should go last in the chain as it is an expensive operation -->
                 <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
@@ -79,6 +80,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.channel4.C4HighlightsAdapter"/>
                 <bean class="org.uriplay.remotesite.channel4.C4BrandAtoZAdapter"/>
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter"/>
+				<bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter"/>
             </list>
         </property>
     </bean>
@@ -105,9 +107,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 					<constructor-arg ref="idGenFactory" />
 				</bean>
 				
-				<bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter" >
-					<constructor-arg ref="idGenFactory" />
-				</bean>
 				<bean class="org.uriplay.remotesite.vimeo.VimeoAdapter" >
 					<constructor-arg ref="idGenFactory" />
 					<property name="acceptedUriPattern" value="http://(www.)?vimeo.com/.*" />

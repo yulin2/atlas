@@ -9,6 +9,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.springframework.core.io.ClassPathResource;
+import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Broadcast;
 import org.uriplay.media.entity.Encoding;
@@ -55,7 +56,7 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		
 		Location firstEpsiodeLocation = Iterables.get(firstEpsiodeEncoding.getAvailableAt(), 0); 
 		assertThat(firstEpsiodeLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"));
-		assertThat(firstEpsiodeLocation.getTransportType(), is("htmlembed"));
+		assertThat(firstEpsiodeLocation.getTransportType(), is(TransportType.HTMLEMBED));
 		assertThat(firstEpsiodeLocation.getAvailabilityStart(), is(new LocalDate(2009, 07, 01).toDateTimeAtStartOfDay()));
 		assertThat(firstEpsiodeLocation.getAvailabilityEnd(), is(new LocalDate(2010, 12, 31).plusDays(1).toDateTimeAtStartOfDay()));
 		

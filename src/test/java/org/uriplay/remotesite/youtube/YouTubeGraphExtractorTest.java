@@ -20,12 +20,12 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
+import static org.uriplay.remotesite.Matchers.*;
+
 import java.util.List;
 import java.util.Set;
 
-import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -133,18 +133,18 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		assertThat(encodings.size(), is(4));
 		
 		Matcher<Encoding> encoding1 = 
-			new EncodingMatcher()
+			encodingMatcher()
 				.withDataContainerFormat(is("application/x-shockwave-flash"))
 				.withVideoCoding(is(not("video/x-vp6")))
 				.withDOG(is(true))
 				.withLocations(hasItems(
-						new LocationMatcher()
+						locationMatcher()
 							.withTransportSubType(is("html"))
-							.withTransportType(is(TransportType.EMBEDOBJECT.toString().toLowerCase()))));
+							.withTransportType(is(TransportType.EMBEDOBJECT))));
 		
 		
 		Matcher<Encoding> encoding2 = 
-			new EncodingMatcher()
+			encodingMatcher()
 				.withDataContainerFormat(is("video/3gpp"))
 				.withVideoCoding(is("video/H263"))
 				.withAudioCoding(is("audio/AMR"))
@@ -153,12 +153,12 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 				.withAudioChannels(is(1))
 				.withDOG(is(false))
 				.withLocations(hasItems(
-						new LocationMatcher()
+						locationMatcher()
 							.withTransportSubType(is("rtsp"))
-							.withTransportType(is(TransportType.STREAM.toString().toLowerCase()))));
+							.withTransportType(is(TransportType.STREAM))));
 		
 		Matcher<Encoding> encoding3 = 
-			new EncodingMatcher()
+			encodingMatcher()
 				.withDataContainerFormat(is("video/3gpp"))
 				.withVideoCoding(is("video/H263"))
 				.withAudioCoding(is("audio/mp4")) 
@@ -167,16 +167,16 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 				.withAudioChannels(is(1)) 
 				.withDOG(is(false)) 
 				.withLocations(hasItems(
-						new LocationMatcher()
+						locationMatcher()
 							.withTransportSubType(is("rtsp"))
-							.withTransportType(is(TransportType.STREAM.toString().toLowerCase()))));
+							.withTransportType(is(TransportType.STREAM))));
 		
 		Matcher<Encoding> encoding4 = 
-			new EncodingMatcher()
+			encodingMatcher()
 				.withLocations(hasItems(
-						new LocationMatcher()
+						locationMatcher()
 							.withUri(is(ITEM_URI))
-							.withTransportType(is(TransportType.HTMLEMBED.toString().toLowerCase()))));
+							.withTransportType(is(TransportType.HTMLEMBED))));
 		
 		assertThat(encodings, hasItems(encoding1, encoding2, encoding3, encoding4));
 	}
@@ -234,138 +234,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
 		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 		
-		assertThat(location.getTransportType(), is(TransportType.HTMLEMBED.toString().toLowerCase()));
-	}
-
-	static class EncodingMatcher extends TypeSafeMatcher<Encoding> {
-
-		private Matcher<String> dataContainerFormatMatcher;
-		private Matcher<String> audioCodingMatcher;
-		private Matcher<String> videoCodingMatcher;
-		private Matcher<Boolean> dogMatcher;
-		private Matcher<Integer> videoHorizonalSizeMatcher;
-		private Matcher<Integer> videoVerticalSizeMatcher;
-		private Matcher<Iterable<Location>> locationMatcher;
-		private Matcher<Integer> audioChannelsMatcher;
-
-		public EncodingMatcher withDataContainerFormat(Matcher<String> dataContainerFormatMatcher) {
-			this.dataContainerFormatMatcher = dataContainerFormatMatcher;
-			return this;
-		}
-		
-		public EncodingMatcher withDOG(Matcher<Boolean> dogMatcher) {
-			this.dogMatcher = dogMatcher;
-			return this;
-		}
-
-		public EncodingMatcher withAudioCoding(Matcher<String> audioCodingMatcher) {
-			this.audioCodingMatcher = audioCodingMatcher;
-			return this;
-		}
-		
-		public EncodingMatcher withVideoCoding(Matcher<String> videoCodingMatcher) {
-			this.videoCodingMatcher = videoCodingMatcher;
-			return this;
-		}
-		
-		public EncodingMatcher withVideoHorizonalSize(Matcher<Integer> withVideoHorizonalSizeMatcher) {
-			this.videoHorizonalSizeMatcher = withVideoHorizonalSizeMatcher;
-			return this;
-		}
-		
-		public EncodingMatcher withVideoVerticalSize(Matcher<Integer> videoVerticalSizeMatcher) {
-			this.videoVerticalSizeMatcher = videoVerticalSizeMatcher;
-			return this;
-		}
-		
-		public EncodingMatcher withAudioChannels(Matcher<Integer> audioChannelsMatcher) {
-			this.audioChannelsMatcher = audioChannelsMatcher;
-			return this;
-		}
-		
-		
-		public EncodingMatcher withLocations(Matcher<Iterable<Location>> locationMatcher) {
-			this.locationMatcher = locationMatcher;
-			return this;
-		}
-		
-		@Override
-		public boolean matchesSafely(Encoding encoding) {
-			if (dataContainerFormatMatcher != null && ! dataContainerFormatMatcher.matches(encoding.getDataContainerFormat())) {
-				return false;
-			}
-			if (audioCodingMatcher != null && ! audioCodingMatcher.matches(encoding.getAudioCoding())) {
-				return false;
-			}
-			if (videoCodingMatcher != null && ! videoCodingMatcher.matches(encoding.getVideoCoding())) {
-				return false;
-			}
-			if (videoVerticalSizeMatcher != null && ! videoVerticalSizeMatcher.matches(encoding.getVideoVerticalSize())) {
-				return false;
-			}
-			if (videoHorizonalSizeMatcher != null && ! videoHorizonalSizeMatcher.matches(encoding.getVideoHorizontalSize())) {
-				return false;
-			}
-			
-			if (audioChannelsMatcher != null && ! audioChannelsMatcher.matches(encoding.getAudioChannels())) {
-				return false;
-			}
-			
-			if (dogMatcher != null && ! dogMatcher.matches(encoding.getHasDOG())) {
-				return false;
-			}
-			if (locationMatcher != null && ! locationMatcher.matches(encoding.getAvailableAt())) {
-				return false;
-			}
-			return true;
-		}
-
-		@Override
-		public void describeTo(Description description) {
-			description.appendValue("Encoding matching");
-		}
-		
-	}
-	
-	static class LocationMatcher extends TypeSafeMatcher<Location> {
-
-		private Matcher<String> transportTypeMatcher;
-		private Matcher<String> transportSubTypeMatcher;
-		private Matcher<String> uriMatcher;
-
-		@Override
-		public boolean matchesSafely(Location location) {
-			if (transportTypeMatcher != null && !transportTypeMatcher.matches(location.getTransportType())) {
-				return false;
-			}
-			if (transportSubTypeMatcher != null && !transportSubTypeMatcher.matches(location.getTransportSubType())) {
-				return false;
-			}
-			if (uriMatcher != null && !uriMatcher.matches(location.getUri())) {
-				return false;
-			}
-			return true;
-		}
-
-		public LocationMatcher withUri(Matcher<String> uriMatcher) {
-			this.uriMatcher = uriMatcher;
-			return this;
-		}
-
-		public LocationMatcher withTransportType(Matcher<String> transportTypeMatcher) {
-			this.transportTypeMatcher = transportTypeMatcher;
-			return this;
-		}
-		
-		public LocationMatcher withTransportSubType(Matcher<String> transportSubTypeMatcher) {
-			this.transportSubTypeMatcher = transportSubTypeMatcher;
-			return this;
-		}
-
-		@Override
-		public void describeTo(Description description) {
-			description.appendValue("Location matching");
-		}
+		assertThat(location.getTransportType(), is(TransportType.HTMLEMBED));
 	}
 	
 }

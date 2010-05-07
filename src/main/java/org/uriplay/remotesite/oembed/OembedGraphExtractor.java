@@ -125,7 +125,7 @@ public class OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
 	
 	private void addLocationPropertiesTo(Representation representation, String locationId, OembedItem oembed) {
 		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT.toString().toLowerCase());
+		mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT);
 		mpvs.addPropertyValue("transportSubType", "html");
 		mpvs.addPropertyValue("embedCode", oembed.embedCode());
 		String extractedLocationUri = extractLocationUriFrom(oembed);
@@ -143,11 +143,4 @@ public class OembedGraphExtractor implements BeanGraphExtractor<OembedSource> {
 	protected String getDataContainerFormat() {
 		return null;
 	}
-
-
-	public Representation extractFrom(OembedSource source, DescriptionMode mode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

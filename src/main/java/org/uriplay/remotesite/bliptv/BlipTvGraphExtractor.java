@@ -17,143 +17,128 @@ package org.uriplay.remotesite.bliptv;
 
 import java.util.Set;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.DescriptionMode;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.springframework.beans.MutablePropertyValues;
+import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.query.content.PerPublisherCurieExpander;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
 import com.google.common.collect.Sets;
 
-public class BlipTvGraphExtractor implements BeanGraphExtractor<HtmlDescriptionSource>  {
+public class BlipTvGraphExtractor implements ContentExtractor<HtmlDescriptionSource, Item>  {
 
-	private final IdGeneratorFactory idGeneratorFactory;
+	private static final String BLIP_TV_PUBLISHER = "blip.tv";
 
-	public BlipTvGraphExtractor(IdGeneratorFactory idGen) {
-		this.idGeneratorFactory = idGen;
-	}
-
-	public Representation extractFrom(HtmlDescriptionSource src) {
-		String itemUri = src.getUri();
-		IdGenerator idGenerator = idGeneratorFactory.create();
-
-		Representation representation = new Representation();
+	public Item extract(HtmlDescriptionSource src) {
 		
-		String versionId = idGenerator.getNextId();
+		Set<Encoding> encodings = Sets.newHashSet();
 		
-		Set<String> encodingIds = Sets.newHashSet();
-		
-		addItemPropertiesTo(representation, itemUri, versionId, src.getItem());
-		addVersionPropertiesTo(representation, versionId, encodingIds);
+		boolean hasFLVEncoding = false;
 		
 		for (String locationUri : src.locationUris()) {
 
-			String encodingId = idGenerator.getNextId();
-			String locationId = idGenerator.getNextId();
-
-			encodingIds.add(encodingId);
+			Encoding encoding = encoding(locationUri);
+			if (encoding == null) {
+				// Location is not a recognised video encoding, it might be an mp3 file etc.
+				continue;
+			}
 			
 			if (locationUri.endsWith(".flv")) {
-				
-				String locationId2 = idGenerator.getNextId();
-
-				addFlvDownloadLocationTo(representation, locationId, locationUri);
-				addEmbedCodeLocationTo(representation, locationId2, src.embedCode());
-				addEncodingPropertiesTo(representation, encodingId, Sets.newHashSet(locationId, locationId2), locationUri);
+				encoding.addAvailableAt(flvDownloadLocationTo(locationUri));
+				encoding.addAvailableAt(embedLocation(src.embedCode()));
+				encoding.addAvailableAt(htmlLinkLocation(src.getUri()));
+				hasFLVEncoding = true;
 			} else {
-				addLocationPropertiesTo(representation, locationId, src.getItem(), locationUri);
-				addEncodingPropertiesTo(representation, encodingId, Sets.newHashSet(locationId), locationUri);
+				encoding.addAvailableAt(downloadLocation(src.getItem(), locationUri));
 			}
+
+			encodings.add(encoding);
 		}
 		
-		return representation;
+		if (!hasFLVEncoding) {
+			Encoding encoding = new Encoding();
+			encoding.addAvailableAt(htmlLinkLocation(src.getUri()));
+			encodings.add(encoding);
+		}
+		
+		Version version= new Version();
+		version.setManifestedAs(encodings);
+		
+		String itemUri = src.getUri();
+		Item item = item(itemUri,  src.getItem());
+		item.addVersion(version);
+
+		return item;
 	}
 	
-	private void addEmbedCodeLocationTo(Representation representation, String locationId, String embedCode) {
-		representation.addType(locationId, Location.class);
-		representation.addAnonymous(locationId);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("embedCode", embedCode);
-		mpvs.addPropertyValue("transportType", TransportType.EMBEDOBJECT.toString().toLowerCase());
-		mpvs.addPropertyValue("transportSubType", "html");
-		representation.addValues(locationId, mpvs);
+	private Location htmlLinkLocation(String uri) {
+		Location location = new Location();
+		location.setUri(uri);
+		location.setTransportType(TransportType.HTMLEMBED);
+		return location;
 	}
 
-	private void addFlvDownloadLocationTo(Representation representation, String locationId, String locationUri) {
-		representation.addType(locationId, Location.class);
-		representation.addAnonymous(locationId);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("uri", locationUri);
-		mpvs.addPropertyValue("transportType", TransportType.DOWNLOAD.toString().toLowerCase());
-		representation.addValues(locationId, mpvs);
+	private Location embedLocation(String embedCode) {
+		Location location = new Location();
+		location.setEmbedCode(embedCode);
+		location.setTransportType(TransportType.EMBEDOBJECT);
+		location.setTransportSubType("html");
+		return location;
 	}
 
-	private void addItemPropertiesTo(Representation representation, String itemUri, String versionId, HtmlDescriptionOfItem item) {
-		representation.addType(itemUri, Item.class);
-		representation.addUri(itemUri);
+	private Location flvDownloadLocationTo(String locationUri) {
+		Location location = new Location();
+		location.setUri(locationUri);
+		location.setTransportType(TransportType.DOWNLOAD);
+		return location;
+	}
 
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", item.getTitle());
-		mpvs.addPropertyValue("description", item.getDescription());
-		mpvs.addPropertyValue("publisher", "blip.tv");
-		mpvs.addPropertyValue("versions", Sets.newHashSet(versionId));
-		mpvs.addPropertyValue("thumbnail", item.getThumbnail());
+	private Item item(String itemUri, HtmlDescriptionOfItem htmlItem) {
+		Item item = new Item();
+		item.setCanonicalUri(itemUri);
+		
+		item.setTitle(htmlItem.getTitle());
+		item.setDescription(htmlItem.getDescription());
+		item.setPublisher(BLIP_TV_PUBLISHER);
+		item.setThumbnail(htmlItem.getThumbnail());
 		if (itemUri.startsWith("http://blip.tv/file/")) {
-			mpvs.addPropertyValue("curie", PerPublisherCurieExpander.CurieAlgorithm.BLIP.compact(itemUri));
+			item.setCurie(PerPublisherCurieExpander.CurieAlgorithm.BLIP.compact(itemUri));
 		}
-		representation.addValues(itemUri, mpvs);
+		return item;
 	}
 	
-	private void addEncodingPropertiesTo(Representation representation, String encodingId, Set<String> locationIds, String locationUri) {
-		
-		representation.addType(encodingId, Encoding.class);
-		representation.addAnonymous(encodingId);
-		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("availableAt", locationIds);
+	private Encoding encoding( String locationUri) {
+		MimeType dataContainerFormat = toDataContainerFormat(locationUri);
+		if (dataContainerFormat == null) {
+			return null;
+		}
+		Encoding encoding = new Encoding();
+		encoding.setDataContainerFormat(dataContainerFormat.toString());
+		return encoding;
+	}
+	
+	private static MimeType toDataContainerFormat(String locationUri) {
 		if (locationUri.endsWith(".flv")) {
-			mpvs.addPropertyValue("dataContainerFormat", "video/x-flv");
+			return MimeType.VIDEO_XFLV;
 		} else if (locationUri.endsWith(".mov")) {
-			mpvs.addPropertyValue("dataContainerFormat", "video/quicktime");
+			return MimeType.VIDEO_QUICKTIME;
 		} else if (locationUri.endsWith(".m4v")) {
-			mpvs.addPropertyValue("dataContainerFormat", "video/m4v");
+			return MimeType.VIDEO_MP4;
 		} else if (locationUri.endsWith(".mp4")) {
-			mpvs.addPropertyValue("dataContainerFormat", "video/mp4");
+			return MimeType.VIDEO_MP4;
 		}
-		
-		representation.addValues(encodingId, mpvs);
-	}
-
-	private void addVersionPropertiesTo(Representation representation, String versionId, Set<String> encodingIds) {
-	
-		representation.addType(versionId, Version.class);
-		representation.addAnonymous(versionId);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("manifestedAs", encodingIds);
-		representation.addValues(versionId, mpvs);
-	}
-	
-	private void addLocationPropertiesTo(Representation representation, String locationId, HtmlDescriptionOfItem item, String locationUri) {
-		representation.addType(locationId, Location.class);
-		representation.addAnonymous(locationId);
-
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("uri", locationUri);
-		mpvs.addPropertyValue("transportType", TransportType.DOWNLOAD.toString().toLowerCase());
-		
-		representation.addValues(locationId, mpvs);
-	}
-
-	public Representation extractFrom(HtmlDescriptionSource src, DescriptionMode mode) {
 		return null;
+	}
+	
+	private Location downloadLocation(HtmlDescriptionOfItem item, String locationUri) {
+		Location location = new Location();
+		location.setUri(locationUri);
+		location.setTransportType(TransportType.DOWNLOAD);
+		return location;
 	}
 }
