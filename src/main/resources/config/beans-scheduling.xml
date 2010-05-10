@@ -168,9 +168,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	 </constructor-arg>
 	 <property name="uris">
 	    <util:list>
-	    	<value>http://vimeo.com/</value>
+	    	<value>vimeo.com</value>
 	    	<value>ted.com</value>
-	    	<value>youtube</value>
+	    	<value>youtube.com</value>
 	    </util:list>
 	  </property>
   </bean>   

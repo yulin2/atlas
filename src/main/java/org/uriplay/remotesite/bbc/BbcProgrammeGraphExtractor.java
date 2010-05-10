@@ -19,18 +19,15 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.util.Maybe;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Broadcast;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
@@ -38,27 +35,17 @@ import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 
-public class BbcProgrammeGraphExtractor implements BeanGraphExtractor<BbcProgrammeSource> {
+public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgrammeSource, Item> {
 
 	static final String BBC_PUBLISHER = "bbc.co.uk";
 	
-	private final IdGeneratorFactory idGeneratorFactory;
 	private final BbcSeriesNumberResolver seriesResolver;
 	
-	public BbcProgrammeGraphExtractor(IdGeneratorFactory idGeneratorFactory, BbcSeriesNumberResolver seriesResolver) {
-		this.idGeneratorFactory = idGeneratorFactory;
+	public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver) {
 		this.seriesResolver = seriesResolver;
 	}
 
-	public Representation extractFrom(BbcProgrammeSource source) {
-		Representation representation = new Representation();
-
-		IdGenerator idGenerator = idGeneratorFactory.create();
-
-		String versionId = idGenerator.getNextId();
-		
-		String webEncodingId = idGenerator.getNextId();
-		String webLocationId = idGenerator.getNextId();
+	public Item extract(BbcProgrammeSource source) {
 		
 		String episodeUri = source.getUri();
 		
@@ -69,13 +56,18 @@ public class BbcProgrammeGraphExtractor implements BeanGraphExtractor<BbcProgram
 			container = episode.series();
 		}
 		
-		addEpisodePropertiesTo(representation, episodeUri, versionId, container, episode.episode(), source.getSlashProgrammesUri(), seriesNumber(episode));
-
-		addVersionPropertiesTo(representation, versionId, webEncodingId, source.version(), idGenerator);
+		Location location = htmlLinkLocation(episodeUri, source.isAvailable());
 		
-		addWebPageEncodingLocationTo(representation, episodeUri, source.isAvailable(), webEncodingId, webLocationId);
+		Encoding encoding = new Encoding();
+		encoding.addAvailableAt(location);
 		
-		return representation;
+		Version version = version(source.version());
+		version.addManifestedAs(encoding);
+		
+		Item item = item(episodeUri, container, episode, source.getSlashProgrammesUri());
+		item.addVersion(version);
+		
+		return item;
 	}
 	
 	private Maybe<Integer> seriesNumber(SlashProgrammesRdf episode) {
@@ -85,77 +77,51 @@ public class BbcProgrammeGraphExtractor implements BeanGraphExtractor<BbcProgram
 		return Maybe.nothing();
 	}
 
-	private void addWebPageEncodingLocationTo(Representation representation, String episodeUri, boolean available, String webEncodingId, String webLocationId) {
-
-		representation.addType(webEncodingId, Encoding.class);
-		representation.addAnonymous(webEncodingId);
-		
-		representation.addType(webLocationId, Location.class);
-		representation.addAnonymous(webLocationId);
-		
-		MutablePropertyValues empvs = new MutablePropertyValues();
-		empvs.addPropertyValue("availableAt", Sets.newHashSet(webLocationId));
-		representation.addValues(webEncodingId, empvs);
-		
-		MutablePropertyValues lmpvs = new MutablePropertyValues();
-		lmpvs.addPropertyValue("uri", iplayerPageFrom(episodeUri));
-		lmpvs.addPropertyValue("transportType", TransportType.HTMLEMBED);
-		lmpvs.addPropertyValue("available", available);
-		representation.addValues(webLocationId, lmpvs);
+	private Location htmlLinkLocation(String episodeUri, boolean available) {
+		Location location = new Location();
+		location.setUri(iplayerPageFrom(episodeUri));
+		location.setTransportType(TransportType.HTMLEMBED);
+		location.setAvailable(available);
+		return location;
 	}
 
-	private void addVersionPropertiesTo(Representation representation, String versionId, String webEncodingId, SlashProgrammesVersionRdf slashProgrammesVersion, IdGenerator idGenerator) {
-
-		representation.addType(versionId, Version.class);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("manifestedAs", Sets.newHashSet(webEncodingId));
-		
+	private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
+		Version version = new Version();
 		if (slashProgrammesVersion != null) {
-			mpvs.addPropertyValue("transmissionTime", slashProgrammesVersion.lastTransmitted());
-			
 			if (slashProgrammesVersion.firstBroadcastSlots() != null || slashProgrammesVersion.repeatBroadcastSlots() != null) {
-				mpvs.addPropertyValue("broadcasts", broadcastsFrom(slashProgrammesVersion, representation, idGenerator));
+				version.setBroadcasts(broadcastsFrom(slashProgrammesVersion));
 			}
-			
 		}
-		
-		representation.addValues(versionId, mpvs);
-		representation.addAnonymous(versionId);
+		return version;
 	}
 
 	@VisibleForTesting
-	static Set<String> broadcastsFrom(SlashProgrammesVersionRdf slashProgrammesVersion, Representation representation, IdGenerator idGenerator) {
+	static Set<Broadcast> broadcastsFrom(SlashProgrammesVersionRdf slashProgrammesVersion) {
 
-		Set<String> broadcastIds = Sets.newHashSet();
+		Set<Broadcast> broadcasts = Sets.newHashSet();
 		
-		Set<BbcBroadcast> broadcasts = Sets.newHashSet();
+		Set<BbcBroadcast> bbcBroadcasts = Sets.newHashSet();
 
 		if (slashProgrammesVersion.firstBroadcastSlots() != null) {
-			broadcasts .addAll(slashProgrammesVersion.firstBroadcastSlots());
+			bbcBroadcasts.addAll(slashProgrammesVersion.firstBroadcastSlots());
 		}
 
 		if (slashProgrammesVersion.repeatBroadcastSlots() != null) {
-			broadcasts.addAll(slashProgrammesVersion.repeatBroadcastSlots());
+			bbcBroadcasts.addAll(slashProgrammesVersion.repeatBroadcastSlots());
 		}
 
-		for (BbcBroadcast bbcBroadcast : broadcasts) {
+		for (BbcBroadcast bbcBroadcast : bbcBroadcasts) {
 			
-			String broadcastId = idGenerator.getNextId();
-			broadcastIds.add(broadcastId);
+			Broadcast broadcast = new Broadcast();
 			
-			representation.addType(broadcastId, Broadcast.class);
-			representation.addAnonymous(broadcastId);
-			
-			MutablePropertyValues mpvs = new MutablePropertyValues();
-			
-			mpvs.addPropertyValue("transmissionTime", bbcBroadcast.broadcastDateTime());
-			mpvs.addPropertyValue("broadcastOn", channelUrlFrom(bbcBroadcast.broadcastOn()));
-			mpvs.addPropertyValue("broadcastDuration", bbcBroadcast.broadcastDuration());
-			mpvs.addPropertyValue("scheduleDate", bbcBroadcast.scheduleDate());
-			representation.addValues(broadcastId, mpvs);
+			broadcast.setTransmissionTime(bbcBroadcast.broadcastDateTime());
+			broadcast.setBroadcastOn(channelUrlFrom(bbcBroadcast.broadcastOn()));
+			broadcast.setBroadcastDuration(bbcBroadcast.broadcastDuration());
+			broadcast.setScheduleDate(bbcBroadcast.scheduleDate());
+			broadcasts.add(broadcast);
 		}
 		
-		return broadcastIds;
+		return broadcasts;
 	}
 
 	private static String channelUrlFrom(String broadcastOn) {
@@ -165,45 +131,49 @@ public class BbcProgrammeGraphExtractor implements BeanGraphExtractor<BbcProgram
 		return "http://www.bbc.co.uk" + broadcastOn;
 	}
 
-	private void addEpisodePropertiesTo(Representation representation, String episodeUri, String versionId, SlashProgrammesContainerRef container, SlashProgrammesEpisode slashProgrammesEpisode, String slashProgrammesUri, Maybe<Integer> seriesNumber) {
-		representation.addType(episodeUri, Episode.class);
-		representation.addUri(episodeUri);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", episodeTitle(slashProgrammesEpisode, seriesNumber));
+	private Item item(String episodeUri, SlashProgrammesContainerRef container, SlashProgrammesRdf episode, String slashProgrammesUri) {
+		
+		Item item = episode.brand() == null ? new Item() : new Episode();
+		item.setCanonicalUri(episodeUri);
+		
+		Maybe<Integer> seriesNumber = seriesNumber(episode);
+		
+		SlashProgrammesEpisode slashProgrammesEpisode = episode.episode();
+		item.setTitle(episodeTitle(slashProgrammesEpisode, seriesNumber));
+		
 		if (slashProgrammesEpisode != null) {
-			mpvs.addPropertyValue("description", slashProgrammesEpisode.description());
-			mpvs.addPropertyValue("episodeNumber", slashProgrammesEpisode.episodeNumber());
-			mpvs.addPropertyValue("genres", new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
+			item.setDescription(slashProgrammesEpisode.description());
+			item.setGenres(new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
 		}
 		
-		if (seriesNumber.hasValue()) {
-			mpvs.addPropertyValue("seriesNumber", seriesNumber.requireValue());
+		if (item instanceof Episode) {
+			if (seriesNumber.hasValue()) {
+				((Episode) item).setSeriesNumber(seriesNumber.requireValue());
+			}
+			((Episode) item).setEpisodeNumber(slashProgrammesEpisode.episodeNumber());
 		}
 		
 		Set<String> aliases = bbcAliasUrisFor(episodeUri);
 		if (!aliases.isEmpty()) {
-			mpvs.addPropertyValue("aliases", aliases);
+			item.setAliases(aliases);
 		}
 		
-		mpvs.addPropertyValue("curie", BbcUriCanonicaliser.curieFor(episodeUri));
-		mpvs.addPropertyValue("isLongForm", true);
+		item.setCurie(BbcUriCanonicaliser.curieFor(episodeUri));
+		item.setIsLongForm(true);
 		
-		mpvs.addPropertyValue("publisher", BBC_PUBLISHER);
-		mpvs.addPropertyValue("versions", Sets.newHashSet(versionId));
-		if (container != null) {
-			mpvs.addPropertyValue("containedIn", Sets.newHashSet(container.uri()));
-		}
-		mpvs.addPropertyValue("thumbnail", thumbnailUrlFrom(episodeUri));
-		mpvs.addPropertyValue("image", imageUrlFrom(episodeUri));
-		
-		representation.addValues(episodeUri, mpvs);
+		item.setPublisher(BBC_PUBLISHER);
+
+		item.setThumbnail(thumbnailUrlFrom(episodeUri));
+		item.setImage(imageUrlFrom(episodeUri));
+
+		return item;
 	}
 
 	private static final Pattern titleIsEpisodeAndNumber = Pattern.compile("^Episode \\d+$");
 	
 	private String episodeTitle(SlashProgrammesEpisode slashProgrammesEpisode, Maybe<Integer> seriesNumber) {
 		String title = slashProgrammesEpisode.title();
-		if (seriesNumber.isNothing() || !titleIsEpisodeAndNumber.matcher(title).matches()) {
+		if (seriesNumber.isNothing() || ! titleIsEpisodeAndNumber.matcher(title).matches()) {
 			return title;
 		}
 		return "Series " +  seriesNumber.requireValue() + " " + title;

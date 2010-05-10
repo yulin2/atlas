@@ -21,37 +21,34 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.timing.RequestTimer;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Item;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
-import com.google.common.collect.Sets;
-
-public class BbcProgrammeAdapter implements SiteSpecificRepresentationAdapter {
+public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 
 	static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile("^http://www\\.bbc\\.co\\.uk/programmes/([^/\\.]+)$");
 	
 	private final BbcSlashProgrammesEpisodeRdfClient episodeClient;
-	private final BeanGraphExtractor<BbcProgrammeSource> propertyExtractor;
+	private final ContentExtractor<BbcProgrammeSource, Item> contentExtractor;
 
 	private final BbcSlashProgrammesVersionRdfClient versionClient;
 
 	private final Log log;
 	
-	public BbcProgrammeAdapter(IdGeneratorFactory idGeneratorFactory) throws JAXBException {
-		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(idGeneratorFactory, new SeriesFetchingBbcSeriesNumberResolver()));
+	public BbcProgrammeAdapter() throws JAXBException {
+		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver()));
 	}
 	
-	public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, BeanGraphExtractor<BbcProgrammeSource> propertyExtractor) {
+	public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor) {
 		this.versionClient = versionClient;
 		this.episodeClient = episodeClient;
-		this.propertyExtractor = propertyExtractor;
+		this.contentExtractor = propertyExtractor;
 		this.log = LogFactory.getLog(getClass());
 	}
 
@@ -60,40 +57,36 @@ public class BbcProgrammeAdapter implements SiteSpecificRepresentationAdapter {
 		return matcher.matches();
 	}
 
-	public Representation fetch(String uri, RequestTimer timer) {
+	public Description fetch(String uri, RequestTimer timer) {
 		try {
 			SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
 			if (content == null) {
-				return new Representation();
+				return null;
 			}
 			
 			if (content.episode() != null) {
 				SlashProgrammesVersionRdf version = readSlashProgrammesDataForVersion(content.episode().versions().get(0));
 				BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version).forAnUnavailableProgramme();
-				return propertyExtractor.extractFrom(source);
+				return contentExtractor.extract(source);
 			}
 			if (content.brand() != null) {
-				return emptyBrandRepresentation(content.brand());
+				return emptyBrand(content.brand());
 			}
-			return new Representation();
+			return null;
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private Representation emptyBrandRepresentation(SlashProgrammesContainerRef brand) {
-		String brandUri = brand.uri();
-		Representation representation = new Representation();
-		representation.addType(brandUri, Brand.class);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("items", Sets.newHashSet());
-		mpvs.addPropertyValue("title", brand.title());
-		mpvs.addPropertyValue("curie", BbcUriCanonicaliser.curieFor(brandUri));
-		mpvs.addPropertyValue("publisher", BbcProgrammeGraphExtractor.BBC_PUBLISHER);
-		representation.addValues(brandUri, mpvs);
-		representation.addUri(brandUri);
-		return representation;
+	private Brand emptyBrand(SlashProgrammesContainerRef brandRef) {
+		String brandUri = brandRef.uri();
+		Brand brand = new Brand();
+		brand.setCanonicalUri(brandUri);
+		brand.setTitle(brandRef.title());
+		brand.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
+		brand.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
+		return brand;
 	}
 
 	private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {

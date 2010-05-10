@@ -17,19 +17,18 @@ package org.uriplay.remotesite.synd;
 
 import java.util.List;
 
-import org.jherd.beans.DescriptionMode;
-import org.jherd.beans.Representation;
 import org.jherd.core.MimeType;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.logging.Log4JLogger;
 import org.uriplay.logging.UriplayLogger;
 import org.uriplay.media.TransportType;
+import org.uriplay.media.entity.Encoding;
+import org.uriplay.media.entity.Item;
+import org.uriplay.media.entity.Location;
 import org.uriplay.media.reference.entity.AudioFormat;
 import org.uriplay.media.reference.entity.ContainerFormat;
 import org.uriplay.media.reference.entity.VideoFormat;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.sun.syndication.feed.synd.SyndEnclosure;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -46,59 +45,49 @@ public abstract class PodcastGraphExtractor {
 	public PodcastGraphExtractor() {
 		logger = new Log4JLogger();
 	}
-
-	public Representation extractFrom(SyndicationSource source, DescriptionMode mode) {
-		throw new UnsupportedOperationException("Not implemented");
-	}
 	
-	protected MutablePropertyValues extractEncodingPropertyValuesFrom(String locationUri, List<SyndEnclosure> enclosures) {
+	protected Encoding encodingFrom(List<SyndEnclosure> enclosures) {
+		Encoding encoding = new Encoding();
 		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
 		SyndEnclosure enclosure = Iterables.getOnlyElement(enclosures);
-		mpvs.addPropertyValue("availableAt", Sets.newHashSet(locationUri));
-		mpvs.addPropertyValue("dataSize", enclosure.getLength() / 1024);
+		encoding.setDataSize(enclosure.getLength() / 1024);
+		
 		MimeType audioCoding = AudioFormat.fromAltName(enclosure.getType());
 		if (audioCoding == MimeType.AUDIO_MPEG) {
-			mpvs.addPropertyValue("audioCoding", audioCoding.toString());
+			encoding.setAudioCoding(audioCoding.toString());
 		}
 		MimeType videoCoding = VideoFormat.fromAltName(enclosure.getType());
 		if (videoCoding == MimeType.VIDEO_MPEG) {
-			mpvs.addPropertyValue("videoCoding", videoCoding.toString());
+			encoding.setVideoCoding(videoCoding.toString());
 		}
 		MimeType containerFormat = ContainerFormat.fromAltName(enclosure.getType());
 		if (containerFormat != null) {
-			mpvs.addPropertyValue("dataContainerFormat", containerFormat);
+			encoding.setDataContainerFormat(containerFormat);
 		} else {
-			logger.unknownDataContainerFormat(locationUri, enclosure.getType());
+			logger.unknownDataContainerFormat(enclosure.getUrl(), enclosure.getType());
 		}
-		
-		return mpvs;
+		return encoding;
 	}
 	
-	protected MutablePropertyValues extractEpisodePropertyValuesFrom(SyndEntry entry, String versionUri, String feedUri) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", entry.getTitle());
-		mpvs.addPropertyValue("description", entry.getDescription().getValue());
-		mpvs.addPropertyValue("versions", Sets.newHashSet(versionUri));
-		mpvs.addPropertyValue("containedIn", Sets.newHashSet(feedUri));
+	protected Item itemFrom(SyndEntry entry, String feedUri) {
+		Item item = new Item();
+		item.setCanonicalUri(itemUri(entry));
+		item.setTitle(entry.getTitle());
+		item.setDescription(entry.getDescription().getValue());
 		if (publisher() != null) {
-			mpvs.addPropertyValue("publisher", publisher());
+			item.setPublisher(publisher());
 		}
-		return mpvs;
+		return item;
 	}
-	
-	protected MutablePropertyValues extractVersionPropertyValuesFrom(String encodingUri) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("manifestedAs", Sets.newHashSet(encodingUri));
-		return mpvs;
-	}
-	
-	protected MutablePropertyValues extractLocationPropertyValuesFrom(String locationUri) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("transportType", TransportType.DOWNLOAD.toString());
-		mpvs.addPropertyValue("transportSubType", "HTTP");
-		mpvs.addPropertyValue("uri", locationUri);
-		return mpvs;
+
+	protected abstract String itemUri(SyndEntry entry);
+
+	protected Location locationFrom(String locationUri) {
+		Location location = new Location();
+		location.setTransportType(TransportType.DOWNLOAD);
+		location.setTransportSubType("http");
+		location.setUri(locationUri);
+		return location;
 	}
 
 	@SuppressWarnings("unchecked")

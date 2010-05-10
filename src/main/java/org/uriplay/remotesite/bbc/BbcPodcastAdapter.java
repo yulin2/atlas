@@ -15,10 +15,10 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bbc;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.synd.SyndicationAdapter;
 import org.uriplay.remotesite.synd.SyndicationFeedClient;
 import org.uriplay.remotesite.synd.SyndicationSource;
@@ -26,22 +26,21 @@ import org.uriplay.remotesite.synd.SyndicationSource;
 import com.sun.syndication.feed.synd.SyndFeed;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for querying data about BBC podcasts.
+ * {@link SiteSpecificAdapter} for querying data about BBC podcasts.
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BbcPodcastAdapter extends SyndicationAdapter implements SiteSpecificRepresentationAdapter {
+public class BbcPodcastAdapter extends SyndicationAdapter<Playlist> implements SiteSpecificAdapter<Playlist> {
 
-	public BbcPodcastAdapter(IdGeneratorFactory idGeneratorFactory) {
-		this(new SyndicationFeedClient(), new BbcPodcastGraphExtractor(idGeneratorFactory));
+	public BbcPodcastAdapter() {
+		this(new SyndicationFeedClient(), new BbcPodcastGraphExtractor());
 	}
 	
-	protected BbcPodcastAdapter(RemoteSiteClient<SyndFeed> feedClient, BeanGraphExtractor<SyndicationSource> propertyExtractor) {
+	protected BbcPodcastAdapter(RemoteSiteClient<SyndFeed> feedClient, ContentExtractor<SyndicationSource, Playlist> propertyExtractor) {
 		super(feedClient, propertyExtractor);
 	}
 	
 	public boolean canFetch(String uri) {
 		return uri.startsWith("http://downloads.bbc.co.uk") && uri.endsWith("rss.xml"); 
 	}
-
 }

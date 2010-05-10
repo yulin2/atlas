@@ -32,6 +32,7 @@ public class HuluAdapter extends OembedXmlAdapter {
 		super(new OembedXmlClient(), new HuluOembedGraphExtractor());
 		setAcceptedUriPattern(BASE_URI + "[^/&\\?=@]+");
 		setOembedEndpoint("http://www.hulu.com/api/oembed.xml");
+		setPublisher("hulu.com");
 	}
 	
 	public static class HuluCanonicaliser implements Canonicaliser {

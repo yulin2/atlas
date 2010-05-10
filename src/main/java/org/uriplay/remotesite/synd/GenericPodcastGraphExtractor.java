@@ -16,21 +16,17 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.synd;
 
 import java.util.List;
-import java.util.Set;
 
 import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.beans.BeanGraphFactory;
 import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
+import org.uriplay.remotesite.ContentExtractor;
 
-import com.google.common.collect.Sets;
 import com.sun.syndication.feed.synd.SyndEnclosure;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -42,70 +38,38 @@ import com.sun.syndication.feed.synd.SyndFeed;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class GenericPodcastGraphExtractor extends PodcastGraphExtractor implements BeanGraphExtractor<SyndicationSource> {
-	
-	private final IdGeneratorFactory idGeneratorFactory;
+public abstract class GenericPodcastGraphExtractor extends PodcastGraphExtractor implements ContentExtractor<SyndicationSource, Playlist> {
 
-	public GenericPodcastGraphExtractor(IdGeneratorFactory idGeneratorFactory) {
-		this.idGeneratorFactory = idGeneratorFactory;
-	}
-
-	public Representation extractFrom(SyndicationSource source) {
-	
-		Representation representation = new Representation();
+	public Playlist extract(SyndicationSource source) {
 	
 		SyndFeed feed = source.getFeed();
 		
 		List<SyndEntry> entries = entriesFrom(feed);
 		
-		IdGenerator idGenerator = idGeneratorFactory.create();
-		
-		representation.addUri(source.getUri());
-		representation.addType(source.getUri(), collectionType());
-		
-		Set<String> episodes = Sets.newHashSet();
+		Playlist playlist =  collectionType();
+		playlist.setCanonicalUri(source.getUri());
+		setCollectionPropertyValuesFrom(playlist, feed, source.getUri());
 		
 		for (SyndEntry entry : entries) {
+			Location location =  locationFrom(locationUriFrom(entry));
 			
-			String episodeId = addAndReturnUriOf(representation, idGenerator, entry);
-			representation.addType(episodeId, Item.class);
+			Encoding encoding = encodingFrom(enclosuresFrom(entry));
+			encoding.addAvailableAt(location);
+			
+			Version version = new Version();
+			version.addManifestedAs(encoding);
+			
+			Item item = itemFrom(entry, source.getUri());
+			item.addVersion(version);
 
-			String versionId = idGenerator.getNextId();
-			String encodingId = idGenerator.getNextId();
-			String locationId = idGenerator.getNextId();
-			
-			episodes.add(episodeId);
-			
-			representation.addType(versionId, Version.class);
-			representation.addAnonymous(versionId);
-			
-			representation.addValues(episodeId, extractEpisodePropertyValuesFrom(entry, versionId, source.getUri()));
-			
-			representation.addValues(versionId, extractVersionPropertyValuesFrom(encodingId));
-			
-			
-			representation.addType(encodingId, Encoding.class);
-			representation.addAnonymous(encodingId);
-			representation.addValues(encodingId, extractEncodingPropertyValuesFrom(locationId, enclosuresFrom(entry)));
-			
-			representation.addAnonymous(locationId);
-			representation.addType(locationId, Location.class);
-			representation.addValues(locationId, extractLocationPropertyValuesFrom(locationUriFrom(entry)));
+			playlist.addItem(item);
 		}
 		
-		representation.addValues(source.getUri(), extractCollectionPropertyValuesFrom(episodes, feed, source.getUri()));
-		
-		return representation;
+		return playlist;
 	}
 
-	protected String addAndReturnUriOf(Representation representation, IdGenerator idGenerator, SyndEntry entry) {
-		String uri = idGenerator.getNextId();
-		representation.addAnonymous(uri);
-		return uri;
-	}
-
-	protected Class<?> collectionType() {
-		return Playlist.class;
+	protected Playlist collectionType() {
+		return new Playlist();
 	}
 
 	private String locationUriFrom(SyndEntry entry) {
@@ -121,13 +85,10 @@ public class GenericPodcastGraphExtractor extends PodcastGraphExtractor implemen
 		return locationUri;
 	}
 
-	protected MutablePropertyValues extractCollectionPropertyValuesFrom(Set<String> episodes, SyndFeed feed, String feedUri) {
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("title", feed.getTitle());
-		mpvs.addPropertyValue("description", feed.getDescription());
-		mpvs.addPropertyValue("items", episodes);
-		
-		return mpvs;
+	protected void setCollectionPropertyValuesFrom(Playlist playlist, SyndFeed feed, String feedUri) {
+		playlist.setTitle(feed.getTitle());
+		playlist.setDescription(feed.getDescription());
+		playlist.setCanonicalUri(feedUri);
 	}
 
 }

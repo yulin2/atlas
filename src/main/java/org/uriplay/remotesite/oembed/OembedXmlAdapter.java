@@ -19,8 +19,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
@@ -44,6 +42,7 @@ public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 	private Pattern acceptedUriPattern;
 	private Integer maxWidth;
 	private Integer maxHeight;
+	private String publisher;
 
 	public OembedXmlAdapter() throws JAXBException {
 		this(new OembedXmlClient(), new OembedGraphExtractor());
@@ -56,9 +55,11 @@ public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 
 	public Item fetch(String uri, RequestTimer timer) {
 		try {
-		String queryUri = oembedEndpointQuery(uri);
-		OembedItem oembed = oembedClient.get(queryUri);
-			return propertyExtractor.extract(new OembedSource(oembed, uri));
+			String queryUri = oembedEndpointQuery(uri);
+			OembedItem oembed = oembedClient.get(queryUri);
+			Item item = propertyExtractor.extract(new OembedSource(oembed, uri));
+			item.setPublisher(publisher);
+			return item;
 		} catch (Exception e) {
 			throw new FetchException("Problem processing XML from " + oembedEndpoint, e);
 		}
@@ -102,6 +103,10 @@ public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 
 	public void setMaxHeight(int maxHeight) {
 		this.maxHeight = maxHeight;
+	}
+	
+	public void setPublisher(String publisher) {
+		this.publisher = publisher;
 	}
 
 }

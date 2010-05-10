@@ -55,7 +55,6 @@ public class OembedGraphExtractor implements ContentExtractor<OembedSource, Item
 		Item item = new Item();
 		item.setCanonicalUri(itemUri);
 		item.setTitle(oembed.title());
-		item.setPublisher(oembed.providerUrl());
 		item.setThumbnail(oembed.thumbnailUrl());
 		addCurieFor(item);
 		return item;

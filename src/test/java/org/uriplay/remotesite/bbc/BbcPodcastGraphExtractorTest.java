@@ -16,27 +16,23 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.bbc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
+import static org.hamcrest.Matchers.is;
 
 import org.jdom.Attribute;
 import org.jdom.Element;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.core.MimeType;
 import org.jherd.remotesite.timing.RequestTimer;
-import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
-import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
+import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.sun.syndication.feed.synd.SyndContentImpl;
 import com.sun.syndication.feed.synd.SyndEnclosureImpl;
 import com.sun.syndication.feed.synd.SyndEntry;
@@ -56,17 +52,10 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	static final String SLASH_PROGRAMMES_URI = "http://www.bbc.co.uk/programmes/b00xxx";
 	
 	static final String EPISODE_URI = "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900";
-
-	static final String VERSION_ID = "1";
-	static final String ENCODING_ID = "2";
-	static final String LOCATION_ID = "3";
 	
 	static final RequestTimer TIMER = null;
 	
-	IdGeneratorFactory idGeneratorFactory = mock(IdGeneratorFactory.class);
-	IdGenerator idGenerator = mock(IdGenerator.class);
-	
-	BbcPodcastGraphExtractor extractor = new BbcPodcastGraphExtractor(idGeneratorFactory);
+	BbcPodcastGraphExtractor extractor = new BbcPodcastGraphExtractor();
 	SyndFeed feed;
 	SyndicationSource source;
 
@@ -75,11 +64,6 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		super.setUp();
 		feed = createFeed("BH", "Broadcasting House", "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900.mp3");
 		source = new SyndicationSource(feed, PODCAST_URI, TIMER);
-	
-		checking(new Expectations() {{
-			one(idGeneratorFactory).create(); will(returnValue(idGenerator));
-			exactly(3).of(idGenerator).getNextId(); will(onConsecutiveCalls(returnValue(VERSION_ID), returnValue(ENCODING_ID), returnValue(LOCATION_ID)));
-		}});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -106,42 +90,43 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testCanExtractTitleDescriptionAndPid() throws Exception {
 		
-		Representation representation = extractor.extractFrom(source);
+		Playlist playlist = extractor.extract(source);
 		
-		assertEquals(Brand.class, representation.getType(PODCAST_URI));
-		assertThat(representation, hasPropertyValue(PODCAST_URI, "items", Sets.newHashSet(EPISODE_URI)));
+		// Check that it's just playlist and not a brand
+		assertEquals(Playlist.class, playlist.getClass());
+		
+		Item item = Iterables.getOnlyElement(playlist.getItems());
+		
 		//assertThat(representation, hasPropertyValue(PODCAST_URI, "aliases", Sets.newHashSet(SLASH_PROGRAMMES_URI)));
-		assertEquals(Item.class, representation.getType(EPISODE_URI));
-		assertThat(representation, hasPropertyValue(EPISODE_URI, "title", "BH"));
-		assertThat(representation, hasPropertyValue(EPISODE_URI, "description", "Broadcasting House"));
-		assertThat(representation, hasPropertyValue(EPISODE_URI, "containedIn", Sets.newHashSet(PODCAST_URI)));
+		assertThat(item.getTitle(), is("BH"));
+		assertThat(item.getPublisher(), is("bbc.co.uk"));
+		assertThat(item.getDescription(), is("Broadcasting House"));
 	}
 	
 	public void testGeneratesVersionEncodingAndLocationData() throws Exception {
 		
-		Representation representation = extractor.extractFrom(source);
+		Playlist playlist = extractor.extract(source);
 		
-		assertThat(representation, hasPropertyValue(EPISODE_URI, "versions", Sets.newHashSet(VERSION_ID)));
-		assertThat(representation, hasPropertyValue(EPISODE_URI, "publisher", "bbc.co.uk"));
-		assertEquals(Version.class, representation.getType(VERSION_ID));
-
-		assertThat(representation, hasPropertyValue(VERSION_ID, "manifestedAs", Sets.newHashSet(ENCODING_ID)));
-		assertEquals(Encoding.class, representation.getType(ENCODING_ID));
+		Item item = Iterables.getOnlyElement(playlist.getItems());
+		Version version = Iterables.getOnlyElement(item.getVersions());
+		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+		Location location  = Iterables.getOnlyElement(encoding.getAvailableAt());
 		
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "availableAt", Sets.newHashSet(LOCATION_ID)));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataSize", 2L));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "audioCoding", "audio/mpeg"));
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.AUDIO_MPEG));
+		assertThat(encoding.getDataSize(), is(2L));
+		assertThat(encoding.getAudioCoding(), is("audio/mpeg"));
+		assertThat(encoding.getDataContainerFormat(), is(MimeType.AUDIO_MPEG));
 	
-		assertEquals(Location.class, representation.getType(LOCATION_ID));
-		assertThat(representation, hasPropertyValue(LOCATION_ID, "transportType", TransportType.DOWNLOAD.toString()));
-		assertThat(representation, hasPropertyValue(LOCATION_ID, "transportSubType", "HTTP"));
-		assertThat(representation, hasPropertyValue(LOCATION_ID, "uri", LOCATION_URI));
+		assertThat(location.getTransportType(), is(TransportType.DOWNLOAD));
+		assertThat(location.getTransportSubType(), is("http"));
+		assertThat(location.getUri(), is(LOCATION_URI));
 	}
 	
 	public void testDealsWithChrisMoylesEnhancedPodcastAsMp4() throws Exception {
-		Representation representation = extractor.extractFrom(moylesSource());
-		assertThat(representation, hasPropertyValue(ENCODING_ID, "dataContainerFormat", MimeType.AUDIO_MP4));
+		Playlist playlist = extractor.extract(moylesSource());
+		Item item = Iterables.getOnlyElement(playlist.getItems());
+		Version version = Iterables.getOnlyElement(item.getVersions());
+		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+		assertThat(encoding.getDataContainerFormat(), is(MimeType.AUDIO_MP4));
 	}
 
 	private SyndicationSource moylesSource() {

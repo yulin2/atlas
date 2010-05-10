@@ -8,10 +8,9 @@ import static org.hamcrest.Matchers.not;
 import java.util.List;
 import java.util.Set;
 
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IntegerIdGenerator;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
+import org.uriplay.media.entity.Broadcast;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BroadcastOn;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.Interval;
@@ -51,13 +50,12 @@ public class BbcProgrammeGraphExtractorTest extends MockObjectTestCase {
 		
 		System.out.println( broadcast("/bbc2", t1, t2).equals( broadcast("/bbc2", t1, t2)));
 		
-		List<BbcBroadcast> broadcasts = Lists.newArrayList(broadcast("/bbc1", t1, t2), broadcast("/bbc2", t1, t2), broadcast("/bbc1", t1, t2), broadcast("/bbc2", t1, t3));
+		List<BbcBroadcast> bbcBroadcasts = Lists.newArrayList(broadcast("/bbc1", t1, t2), broadcast("/bbc2", t1, t2), broadcast("/bbc1", t1, t2), broadcast("/bbc2", t1, t3));
 		
-		Representation representation = new Representation();
-		Set<String> broadcastIds = BbcProgrammeGraphExtractor.broadcastsFrom(versionWithBroadcasts(broadcasts), representation, new IntegerIdGenerator());
+		Set<Broadcast> broadcasts = BbcProgrammeGraphExtractor.broadcastsFrom(versionWithBroadcasts(bbcBroadcasts));
 		
 		// broadcast("/bbc1", t1, t2) should be removed
-		assertThat(broadcastIds.size(), is(3));
+		assertThat(broadcasts.size(), is(3));
 	}
 
 	private BbcBroadcast broadcast(String channel, DateTime start, DateTime end) {

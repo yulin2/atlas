@@ -16,16 +16,12 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.bbc;
 
 import java.util.List;
-import java.util.Set;
 
 import org.jdom.Element;
 import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.beans.BeanGraphFactory;
 import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGenerator;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.springframework.beans.MutablePropertyValues;
-import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Playlist;
 import org.uriplay.remotesite.synd.GenericPodcastGraphExtractor;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
@@ -39,19 +35,8 @@ import com.sun.syndication.feed.synd.SyndFeed;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor implements BeanGraphExtractor<SyndicationSource> {
+public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 
-	public BbcPodcastGraphExtractor(IdGeneratorFactory idGeneratorFactory) {
-		super(idGeneratorFactory);
-	}
-
-	@Override
-	protected String addAndReturnUriOf(Representation representation, IdGenerator idGenerator, SyndEntry entry) {
-		String uri = removeExtensionFrom(entry.getLink());
-		representation.addUri(uri);
-		return uri;
-	}
-	
 	private String removeExtensionFrom(String url) {
 		int index = url.lastIndexOf('.');
 		if (index < 0) {
@@ -63,16 +48,13 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor imple
 
 	@Override
 	protected String publisher() {
-		return "bbc.co.uk";
+		return BbcProgrammeGraphExtractor.BBC_PUBLISHER;
 	}
 	
 	@Override
-	public Representation extractFrom(SyndicationSource source) {
-		Representation representation = super.extractFrom(source);
-		
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("publisher", BbcProgrammeGraphExtractor.BBC_PUBLISHER);
-		representation.addValues(source.getUri(), mpvs);
+	public Playlist extract(SyndicationSource source) {
+		Playlist playlist = super.extract(source);
+		playlist.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
 
 //		Don't include a /programmes link this creates duplicate aliases
 //		TODO: Reinstate this code
@@ -80,17 +62,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor imple
 //		if (slashProgrammesLink != null) {
 //			representation.addAliasFor(source.getUri(), slashProgrammesLink);
 //		}
-		
-		return representation;
-	}
-
-
-	@Override
-	protected MutablePropertyValues extractCollectionPropertyValuesFrom(Set<String> episodes, SyndFeed feed, String feedUri) {
-		MutablePropertyValues mpvs = super.extractCollectionPropertyValuesFrom(episodes, feed, feedUri);
-		mpvs.addPropertyValue("uri", feedUri);
-
-		return mpvs;
+		return playlist;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -113,8 +85,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor imple
 	}
 
 	@Override
-	protected Class<?> collectionType() {
-		return Brand.class;
+	protected String itemUri(SyndEntry entry) {
+		return removeExtensionFrom(entry.getLink());
 	}
-	
 }

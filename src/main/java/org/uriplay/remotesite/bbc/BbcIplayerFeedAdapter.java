@@ -21,8 +21,10 @@ import javax.xml.bind.JAXBException;
 
 import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.beans.id.IdGeneratorFactory;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.synd.SyndicationAdapter;
 import org.uriplay.remotesite.synd.SyndicationFeedClient;
 import org.uriplay.remotesite.synd.SyndicationSource;
@@ -30,22 +32,22 @@ import org.uriplay.remotesite.synd.SyndicationSource;
 import com.sun.syndication.feed.synd.SyndFeed;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} processing iPlayer's RSS feeds.
+ * {@link SiteSpecificAdapter} processing iPlayer's RSS feeds.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author John Ayres (john@metabroadcast.com)
  */
-public class BbcIplayerFeedAdapter extends SyndicationAdapter implements SiteSpecificRepresentationAdapter {
+public class BbcIplayerFeedAdapter extends SyndicationAdapter<Playlist> implements SiteSpecificAdapter<Playlist> {
 
 	private final Pattern atozUriPattern = Pattern.compile("http://feeds.bbc.co.uk/iplayer/([^/]+|atoz/[a-z]|atoz/0-9)/list");
 	private final Pattern highlightsFeedPattern = Pattern.compile("http://feeds.bbc.co.uk/iplayer/(popular|highlights)/(tv|radio)");
 	
-	public BbcIplayerFeedAdapter(IdGeneratorFactory idGeneratorFactory) throws JAXBException {
-		this(new SyndicationFeedClient(), new BbcIplayerGraphExtractor(idGeneratorFactory));
+	public BbcIplayerFeedAdapter() throws JAXBException {
+		this(new SyndicationFeedClient(), new BbcIplayerGraphExtractor());
 	}
 	
-	protected BbcIplayerFeedAdapter(RemoteSiteClient<SyndFeed> feedClient, BeanGraphExtractor<SyndicationSource> propertyExtractor) {
-		super(feedClient, propertyExtractor);
+	protected BbcIplayerFeedAdapter(RemoteSiteClient<SyndFeed> feedClient, ContentExtractor<SyndicationSource, Playlist> contentExtractor) {
+		super(feedClient, contentExtractor);
 	}
 	
 	public boolean canFetch(String uri) {

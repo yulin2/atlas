@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.bbc;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,19 +24,17 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.DescriptionMode;
-import org.jherd.beans.Representation;
-import org.jherd.beans.id.IdGeneratorFactory;
 import org.jherd.remotesite.http.RemoteSiteClient;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.RemoteSiteRefresher;
+import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
-import com.google.common.collect.Sets;
+import com.google.soy.common.collect.Maps;
 import com.sun.syndication.feed.synd.SyndCategory;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndLink;
@@ -46,7 +44,7 @@ import com.sun.syndication.feed.synd.SyndLink;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationSource> {
+public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSource, Playlist> {
 
 	private static final Log log = LogFactory.getLog(RemoteSiteRefresher.class);
 	
@@ -55,25 +53,25 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 	
 	private final BbcProgrammeGraphExtractor programmeGraphExtractor;
 
-	public BbcIplayerGraphExtractor(IdGeneratorFactory idGeneratorFactory) throws JAXBException {
-		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), idGeneratorFactory);
+	public BbcIplayerGraphExtractor() throws JAXBException {
+		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient());
 	}
 	
 	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, 
-			                        RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, 
-			                        IdGeneratorFactory idGeneratorFactory) {
+			                        RemoteSiteClient<SlashProgrammesVersionRdf> versionClient) {
 		this.episodeClient = episodeClient;
 		this.versionClient = versionClient;
-		this.programmeGraphExtractor = new BbcProgrammeGraphExtractor(idGeneratorFactory, new SeriesFetchingBbcSeriesNumberResolver());
+		this.programmeGraphExtractor = new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver());
 	}
 
 	@SuppressWarnings("unchecked")
-	public Representation extractFrom(SyndicationSource source) {
+	public Playlist extract(SyndicationSource source) {
 		
-		Representation representation = new Representation();
+		Playlist playlist = new Playlist();
+		playlist.setCanonicalUri(source.getUri());
+		playlist.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
 		
-		Set<String> brandUris = Sets.newHashSet();
-		Set<String> orphanEpisodeUris = Sets.newHashSet();
+		Map<String, Brand> brandLookup = Maps.newHashMap();
 		
 		for (SyndEntry entry : (List<SyndEntry>) source.getFeed().getEntries()) {
 			
@@ -88,44 +86,32 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 			}
 			
 			SlashProgrammesRdf slashProgrammesEpisode = readSlashProgrammesDataForEpisode(episodeUri);
-			SlashProgrammesVersionRdf slashProgrammesVersion = readSlashProgrammesDataForVersion(slashProgrammesEpisode.episode().versions().get(0));
-			
-			Representation representationOfEpisode = programmeGraphExtractor.extractFrom(new BbcProgrammeSource(episodeUri, slashProgrammesUri(episodeUri).replace(".rdf", ""), slashProgrammesEpisode, slashProgrammesVersion));
-			
-			representation.mergeIn(representationOfEpisode);
 
+	
+			
+			Item item = programmeGraphExtractor.extract(new BbcProgrammeSource(episodeUri, slashProgrammesUri(episodeUri).replace(".rdf", ""), slashProgrammesEpisode, slashProgrammesRdf(slashProgrammesEpisode)));
+			
 			SyndLink relatedLink = relatedLinkFrom(entry);
 			String brandUri = brandLinkFrom(relatedLink);
+			
 			if (brandUri == null || brandUri.equals(episodeUri)) {
-				orphanEpisodeUris.add(episodeUri);
+				playlist.addItem(item);
 				continue; // no associated brand is specified as being related to this item.
 			}
 			
-			if (representation.getType(brandUri) == null) {
-				addBrand(representation, brandUri, relatedLink);
-				brandUris.add(brandUri);
+			Brand brand = brandLookup.get(brandUri);
+			if (brand == null) {
+				brand = brand(brandUri, relatedLink);
+				brandLookup.put(brandUri, brand);
+				playlist.addPlaylist(brand);
 			}
 			
-			MutablePropertyValues values = representation.getValues(brandUri);
-			PropertyValue propertyValue = values.getPropertyValue("items");
-			Set<String> items = (Set<String>) propertyValue.getValue();
-			items.add(episodeUri);
+			brand.addItem(item);
 		}
 		
-		putBrandsInPlaylist(representation, source.getUri(), brandUris, orphanEpisodeUris);
-		return representation;
+		return playlist;
 	}
 	
-	private void putBrandsInPlaylist(Representation representation, String playlistUri, Set<String> brandUris, Set<String> orphanEpsiodeUris) {
-		representation.addUri(playlistUri);
-		representation.addType(playlistUri, Playlist.class);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("playlists", brandUris);
-		mpvs.addPropertyValue("items", orphanEpsiodeUris);
-		mpvs.addPropertyValue("publisher", BbcProgrammeGraphExtractor.BBC_PUBLISHER);
-		representation.addValues(playlistUri, mpvs);
-	}
-
 	@SuppressWarnings("unchecked")
 	private boolean isRadioProgramme(SyndEntry entry) {
 		List<SyndCategory> categories = entry.getCategories();
@@ -137,6 +123,14 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 		return false;
 	}
 
+	public SlashProgrammesVersionRdf slashProgrammesRdf(SlashProgrammesRdf episodeRef) {
+		SlashProgrammesEpisode episode = episodeRef.episode();
+		if (episode.versions() == null || episode.versions().isEmpty()) {
+			return null;
+		}
+		return readSlashProgrammesDataForVersion(episode.versions().get(0));
+	}
+	
 	private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {
 		try {
 			return versionClient.get(slashProgrammesUri(slashProgrammesVersion));
@@ -163,15 +157,13 @@ public class BbcIplayerGraphExtractor implements BeanGraphExtractor<SyndicationS
 		return "http://www.bbc.co.uk" + slashProgrammesVersion.resourceUri().replace("#programme", "") + ".rdf";
 	}
 	
-	private void addBrand(Representation representation, String brandUri, SyndLink relatedLink) {
-		representation.addType(brandUri, Brand.class);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("items", Sets.newHashSet());
-		mpvs.addPropertyValue("title", brandTitleFrom(relatedLink));
-		mpvs.addPropertyValue("curie", BbcUriCanonicaliser.curieFor(brandUri));
-		mpvs.addPropertyValue("publisher", BbcProgrammeGraphExtractor.BBC_PUBLISHER);
-		representation.addValues(brandUri, mpvs);
-		representation.addUri(brandUri);
+	private Brand brand(String brandUri, SyndLink relatedLink) {
+		Brand brand = new Brand();
+		brand.setCanonicalUri(brandUri);
+		brand.setTitle(brandTitleFrom(relatedLink));
+		brand.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
+		brand.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
+		return brand;
 	}
 
 	private String brandTitleFrom(SyndLink link) {

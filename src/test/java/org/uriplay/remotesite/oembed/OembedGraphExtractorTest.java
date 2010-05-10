@@ -67,7 +67,6 @@ public class OembedGraphExtractorTest extends MockObjectTestCase {
 		assertThat(item.getCanonicalUri(), is(videoUri));
 		
 		assertThat(item.getTitle(), is("Test Video Title"));
-		assertThat(item.getPublisher(), is("vimeo.com"));
 		assertThat(item.getCurie(), is("vim:1234"));
 	
 		Version version = Iterables.getOnlyElement(item.getVersions());

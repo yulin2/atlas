@@ -20,12 +20,13 @@ import static org.hamcrest.Matchers.instanceOf;
 
 import java.io.IOException;
 
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -39,7 +40,7 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 	static final String DOCUMENT = "doc";
 	
 	RemoteSiteClient<SyndFeed> feedClient;
-	BeanGraphExtractor<SyndicationSource> propertyExtractor;
+	ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
 	BbcPodcastAdapter adapter;
 	RequestTimer timer;
 	SyndFeed feed = null;
@@ -51,7 +52,7 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 		super.setUp();
 		feedClient = mock(RemoteSiteClient.class);
 		timer = mock(RequestTimer.class);
-		propertyExtractor = mock(BeanGraphExtractor.class);
+		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new BbcPodcastAdapter(feedClient, propertyExtractor);
 		podcastSource = new SyndicationSource(feed, "http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml", timer);
 	}
@@ -60,7 +61,7 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(feedClient).get("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml"); will(returnValue(feed));
-			one(propertyExtractor).extractFrom(podcastSource);
+			one(propertyExtractor).extract(podcastSource);
 			ignoring(timer);
 		}});
 		

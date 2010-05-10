@@ -15,11 +15,12 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bbc;
 
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -31,7 +32,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
 public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 
 	RemoteSiteClient<SyndFeed> feedClient;
-	BeanGraphExtractor<SyndicationSource> propertyExtractor;
+	ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
 	BbcIplayerFeedAdapter adapter;
 	RequestTimer timer;
 	SyndFeed feed = null;
@@ -43,7 +44,7 @@ public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 		super.setUp();
 		feedClient = mock(RemoteSiteClient.class);
 		timer = mock(RequestTimer.class);
-		propertyExtractor = mock(BeanGraphExtractor.class);
+		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new BbcIplayerFeedAdapter(feedClient, propertyExtractor);
 		iplayerSource = new SyndicationSource(feed, "http://feeds.bbc.co.uk/iplayer/bbc_one/list", timer);
 	}
@@ -52,7 +53,7 @@ public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(feedClient).get("http://feeds.bbc.co.uk/iplayer/bbc_one/list"); will(returnValue(feed));
-			one(propertyExtractor).extractFrom(iplayerSource);
+			one(propertyExtractor).extract(iplayerSource);
 			ignoring(timer);
 		}});
 		
