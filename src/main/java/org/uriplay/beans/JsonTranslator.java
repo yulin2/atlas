@@ -50,7 +50,7 @@ public class JsonTranslator implements BeanGraphWriter {
     private Gson gson;
 
     public JsonTranslator() throws JAXBException {
-        gson = new GsonBuilder().setDateFormat(DateFormat.LONG).setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        gson = new GsonBuilder().disableHtmlEscaping().setDateFormat(DateFormat.LONG).setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 
     }
 
