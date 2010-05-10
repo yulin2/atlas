@@ -20,12 +20,12 @@ import static org.uriplay.media.vocabulary.DBPO.TELEVISION_SHOW;
 
 import java.util.Set;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jherd.remotesite.timing.TimedFetcher;
+import org.uriplay.media.entity.Description;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.dbpedia.DbpediaSparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
@@ -36,26 +36,26 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.core.ResultBinding;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for making queries to dbPedia for information from Wikipedia.
+ * {@link SiteSpecificAdapter} for making queries to dbPedia for information from Wikipedia.
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class WikipediaSparqlAdapter extends TimedFetcher<Representation> implements SiteSpecificRepresentationAdapter {
+public class WikipediaSparqlAdapter extends TimedFetcher<Description> implements SiteSpecificAdapter<Description> {
 
 	private final SparqlEndpoint sparqlEndpoint;
-	private final BeanGraphExtractor<WikipediaSparqlSource> propertyExtractor;
+	private final ContentExtractor<WikipediaSparqlSource, Description> propertyExtractor;
 	
 	public WikipediaSparqlAdapter() {
 		this(new DbpediaSparqlEndpoint(), new WikipediaSparqlGraphExtractor()); 
 	}
 	
-	WikipediaSparqlAdapter(SparqlEndpoint sparqlEndpoint, BeanGraphExtractor<WikipediaSparqlSource> propertyExtractor) {
+	WikipediaSparqlAdapter(SparqlEndpoint sparqlEndpoint, ContentExtractor<WikipediaSparqlSource, Description> propertyExtractor) {
 		this.sparqlEndpoint = sparqlEndpoint;
 		this.propertyExtractor = propertyExtractor;
 	}
 
 	@Override
-	protected Representation fetchInternal(String uri, RequestTimer timer) {
+	protected Description fetchInternal(String uri, RequestTimer timer) {
 		
 		WikipediaSparqlSource source = new WikipediaSparqlSource(uri);
 		
@@ -73,7 +73,7 @@ public class WikipediaSparqlAdapter extends TimedFetcher<Representation> impleme
 		
 			performSubsequentQuery(source, articleType, timer);
 			
-			return propertyExtractor.extractFrom(source);
+			return propertyExtractor.extract(source);
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);
 		} finally {

@@ -22,11 +22,12 @@ import static org.uriplay.remotesite.wikipedia.Constants.WEST_WING_WIKIPEDIA_URI
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Brand;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -46,7 +47,7 @@ public class WikipediaSparqlAdapterTest extends MockObjectTestCase {
 
 	WikipediaSparqlAdapter adapter;
 	SparqlEndpoint sparqlEndpoint = mock(SparqlEndpoint.class);
-	BeanGraphExtractor<WikipediaSparqlSource> propertyExtractor = mock(BeanGraphExtractor.class);
+	ContentExtractor<WikipediaSparqlSource, org.uriplay.media.entity.Description> propertyExtractor = mock(ContentExtractor.class);
 	ResultSet resultSet = mock(ResultSet.class);
 	Binding binding = mock(Binding.class);
 	Model model = mock(Model.class);
@@ -90,7 +91,7 @@ public class WikipediaSparqlAdapterTest extends MockObjectTestCase {
 			one(sparqlEndpoint).execute(wikipediaSource.getChildTypesOfTVShowQuery()); inSequence(querySequence); will(returnValue(resultSet));			
 			one(sparqlEndpoint).execute(wikipediaSource.getChildrenOfTVShowQuery()); inSequence(querySequence); will(returnValue(resultSet));			
 
-			one(propertyExtractor).extractFrom(with(configuredSource()));
+			one(propertyExtractor).extract(with(configuredSource())); will(returnValue(new Brand()));
 		}});
 		
 		adapter.fetch(WEST_WING_WIKIPEDIA_URI, timer);

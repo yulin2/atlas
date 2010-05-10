@@ -15,12 +15,12 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.imdb;
 
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jherd.remotesite.timing.TimedFetcher;
+import org.uriplay.media.entity.Description;
 import org.uriplay.remotesite.dbpedia.DbpediaSparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
@@ -31,28 +31,28 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.core.ResultBinding;
 
 /**
- * {@link SiteSpecificRepresentationAdapter} for making queries to dbPedia for information from Wikipedia.
+ * {@link SiteSpecificAdapter} for making queries to dbPedia for information from Wikipedia.
  * Queries for a dbpedia article referencing the given imdb id, and then delegates to another
  * adapter to process that uri.
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class ImdbAdapter extends TimedFetcher<Representation> implements SiteSpecificRepresentationAdapter {
+public class ImdbAdapter extends TimedFetcher<Description> implements SiteSpecificAdapter<Description> {
 
 	private final SparqlEndpoint sparqlEndpoint;
-	private final Fetcher<Representation> fetcher;
+	private final Fetcher<Object> fetcher;
 	
-	public ImdbAdapter(Fetcher<Representation> fetcher) {
+	public ImdbAdapter(Fetcher<Object> fetcher) {
 		this(new DbpediaSparqlEndpoint(), fetcher); 
 	}
 	
-	ImdbAdapter(SparqlEndpoint sparqlEndpoint, Fetcher<Representation> fetcher) {
+	ImdbAdapter(SparqlEndpoint sparqlEndpoint, Fetcher<Object> fetcher) {
 		this.sparqlEndpoint = sparqlEndpoint;
 		this.fetcher = fetcher;
 	}
 
 	@Override
-	protected Representation fetchInternal(String imdbUri, RequestTimer timer) {
+	protected Description fetchInternal(String imdbUri, RequestTimer timer) {
 		String dbpediaUri = null;
 		try {
 			ImdbSource source = new ImdbSource(null, imdbUri);
@@ -63,11 +63,11 @@ public class ImdbAdapter extends TimedFetcher<Representation> implements SiteSpe
 			timer.nest();
 			timer.start(this, "Forwarding request to another adapter: " + dbpediaUri);
 			timer.nest();
-			Representation representation = fetcher.fetch(dbpediaUri, timer);
+			Description description = (Description) fetcher.fetch(dbpediaUri, timer);
 			String wikipediaUri = new WikipediaSparqlSource(dbpediaUri).getCanonicalWikipediaUri();
-			representation.addAliasFor(wikipediaUri, imdbUri);
-			representation.addAliasFor(wikipediaUri, dbpediaUri);
-			return representation;
+			description.addAlias(wikipediaUri);
+			description.addAlias(dbpediaUri);
+			return description;
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + imdbUri, e);
 		} finally {

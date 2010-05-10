@@ -17,16 +17,18 @@ package org.uriplay.remotesite.imdb;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
+
+import static org.hamcrest.Matchers.*;
 
 import java.io.IOException;
+import java.util.Set;
 
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Description;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
 
@@ -55,10 +57,10 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 	static final String WIKIPEDIA_LINK = "http://en.wikipedia.org/wiki/The_Sopranos";
 	static final Resource resource = new ResourceImpl(DBPEDIA_LINK);
 
-	final Representation WIKIPEDIA_REPRESENTATION = new Representation();
+	final Description WIKIPEDIA_REPRESENTATION = new Description();
 	
 	SparqlEndpoint sparqlEndpoint;
-	Fetcher<Representation> fetcher;
+	Fetcher<Object> fetcher;
 	ImdbAdapter adapter;
 	ResultSet resultSet = mock(ResultSet.class);
 	ImdbSource imdbSource = new ImdbSource(resultSet, IMDB_LINK);
@@ -113,8 +115,8 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 			one(fetcher).fetch(DBPEDIA_LINK, timer); will(returnValue(WIKIPEDIA_REPRESENTATION));
 		}});
 		
-		Representation representation = adapter.fetch(IMDB_LINK, timer);
-		assertThat(representation, hasPropertyValue(WIKIPEDIA_LINK, "aliases", Sets.newHashSet(IMDB_LINK, DBPEDIA_LINK)));
+		Description description = adapter.fetch(IMDB_LINK, timer);
+		assertThat(description.getAliases(), is((Set<String>) Sets.newHashSet(WIKIPEDIA_LINK, DBPEDIA_LINK)));
 	}
 	
 	

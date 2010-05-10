@@ -19,23 +19,22 @@ import static org.uriplay.media.vocabulary.DBPO.FILM;
 import static org.uriplay.media.vocabulary.DBPO.PERSON;
 import static org.uriplay.media.vocabulary.DBPO.TELEVISION_EPISODE;
 import static org.uriplay.media.vocabulary.DBPO.TELEVISION_SHOW;
-import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.CONTAINED_IN_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.DESCRIPTION_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.ITEM_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.SAMEAS_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.TITLE_ID;
+import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.CONTAINED_IN_ID;
 
 import java.util.Set;
 
 import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.DescriptionMode;
 import org.jherd.beans.Representation;
-import org.jherd.remotesite.FetchException;
-import org.springframework.beans.MutablePropertyValues;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.query.ResultSet;
@@ -51,61 +50,55 @@ import com.hp.hpl.jena.sparql.core.ResultBinding;
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author Lee Denison (lee@metabroadcast.com)
  */
-public class WikipediaSparqlGraphExtractor implements BeanGraphExtractor<WikipediaSparqlSource> {
+public class WikipediaSparqlGraphExtractor implements ContentExtractor<WikipediaSparqlSource, Description> {
 
-	public Representation extractFrom(WikipediaSparqlSource source) {
-		return extractFrom(source, DescriptionMode.OPEN_WORLD);
-	}
+	public Description extract(WikipediaSparqlSource source) {
 
-	public Representation extractFrom(WikipediaSparqlSource source, DescriptionMode mode) {
-
-		Representation representation = new Representation();
 		String rootUri = source.getCanonicalWikipediaUri();
-
-		Set<String> rootTypes = source.getRootTypes();
-		for (String type : rootTypes) {
-			setBeanType(type, rootUri, representation);
+		
+		Description rootDescription = rootDescription(source);
+		if (rootDescription == null) {
+			return null;
 		}
+		rootDescription.setCanonicalUri(rootUri);
 
 		ResultSet rootProperties = source.getRootProperties();
 		while (rootProperties.hasNext()) {
 			ResultBinding resultBinding = (ResultBinding) rootProperties.next();
-
-			extractBeanPropertiesFrom(resultBinding, rootUri, source, representation);
+			setBeanProperties(resultBinding, rootDescription);
 		}
 
 		ResultSet childProperties = source.getChildProperties();
 		if (childProperties != null) {
-			Set<String> childItems = Sets.newHashSet();
-			Set<String> childLists = Sets.newHashSet();
 			
 			ResultSet childTypeProperties = source.getChildTypeProperties();
 			while (childTypeProperties.hasNext()) {
 				ResultBinding resultBinding = (ResultBinding) childTypeProperties.next();
-				String childUri = resultBinding.getResource(ITEM_ID).getURI();
 
-				Class<?> beanType = extractBeanTypeFrom(resultBinding, childUri, source, representation);
+				Description child = beanFor(resultBinding, source);
 				
-				if (beanType != null) {
-					if (Item.class.isAssignableFrom(beanType)) {
-						childItems.add(childUri);
-					} else if (Playlist.class.isAssignableFrom(beanType)) {
-						childLists.add(childUri);
+				if (child != null) {
+					child.setCanonicalUri(resultBinding.getResource(ITEM_ID).getURI());
+					setBeanProperties(resultBinding, child);
+					if (child instanceof Item) {
+						((Playlist) rootDescription).addItem((Item) child);
+					} else if (child instanceof Playlist) {
+						((Playlist) rootDescription).addPlaylist((Playlist) child);
 					}
 				}
 			}
-			
-			while (childProperties.hasNext()) {
-				ResultBinding resultBinding = (ResultBinding) childProperties.next();
-				String childUri = resultBinding.getResource(ITEM_ID).getURI();
-
-				extractBeanPropertiesFrom(resultBinding, childUri, source, representation);
-			}
-			
-			representation.getValues(rootUri).addPropertyValue("items", childItems);
-			representation.getValues(rootUri).addPropertyValue("playlists", childLists);
 		}
-		
+		if (rootDescription instanceof Item) {
+			((Item) rootDescription).setContainedInUris(containedInUris(source));
+		} 
+		if (rootDescription instanceof Playlist) {
+			((Playlist) rootDescription).setContainedInUris(containedInUris(source));
+		}
+		rootDescription.addAlias(source.getCanonicalDbpediaUri());
+		return rootDescription;
+	}
+
+	private Set<String> containedInUris(WikipediaSparqlSource source) {
 		ResultSet containedInProperties = source.getContainedInProperties();
 		Set<String> containedIn = Sets.newHashSet();
 		if (containedInProperties != null) {
@@ -114,73 +107,66 @@ public class WikipediaSparqlGraphExtractor implements BeanGraphExtractor<Wikiped
 				String containedInUri = resultBinding.getResource(CONTAINED_IN_ID).getURI();
 				containedIn.add(containedInUri);
 			}
-			
-			representation.getValues(rootUri).addPropertyValue("containedIn", containedIn);
+			return containedIn;
 		}
-
-		representation.addAliasFor(rootUri, source.getCanonicalDbpediaUri());
-
-		return representation;
+		return Sets.newHashSet();
 	}
 
-	private Class<?> extractBeanTypeFrom(ResultBinding resultBinding, String uri, WikipediaSparqlSource source, Representation representation) {
-		String articleType = source.determineItemType(resultBinding);
-		return setBeanType(articleType, uri, representation);
-	}
-
-	private Class<?> setBeanType(String articleType, String uri, Representation representation) {
-		Class<?> beanType = determineBeanType(articleType);
-
-		if (beanType != null) {
-			if (representation.getType(uri) == null) {
-				representation.addUri(uri);
-				representation.addType(uri, beanType);
-			} else {
-				throw new FetchException("Ambiguous type for resource [" + uri + "]");
+	private Description rootDescription(WikipediaSparqlSource source) {
+		Set<String> rootTypes = source.getRootTypes();
+		for (String type : rootTypes) {
+			Description description = beanFor(type);
+			if (description != null) {
+				return description;
 			}
 		}
-		
-		return beanType;
+		return null;
 	}
 
-	private void extractBeanPropertiesFrom(ResultBinding resultBinding, String uri, WikipediaSparqlSource source, Representation representation) {
-		
-		MutablePropertyValues mpvs = representation.getValues(uri);
-		
-		if (mpvs == null) {
-			mpvs = new MutablePropertyValues();
-		}
-		
+	private void setBeanProperties(ResultBinding resultBinding, Description root) {
+
 		Literal title = resultBinding.getLiteral(TITLE_ID);
 		if (title != null) {
-			mpvs.addPropertyValue("title", title.getValue());
+			if (root instanceof Playlist) {
+				((Playlist) root).setTitle(title.getValue().toString());
+			} 
+			if (root instanceof Item) {
+				((Item) root).setTitle(title.getValue().toString());
+			}
 		}
 
 		Literal description = resultBinding.getLiteral(DESCRIPTION_ID);
 		if (description != null) {
-			mpvs.addPropertyValue("description", description.getValue());
+			if (root instanceof Playlist) {
+				((Playlist) root).setDescription(description.getValue().toString());
+			} 
+			if (root instanceof Item) {
+				((Item) root).setDescription(description.getValue().toString());
+			}
 		}
 		
 		Resource sameAs = resultBinding.getResource(SAMEAS_ID);
 		if (sameAs != null) {
-			representation.addAliasFor(uri, sameAs.getURI());
+			root.addAlias(sameAs.getURI());
 		}
-		
-		representation.addValues(uri, mpvs);
 	}
 
-	private Class<?> determineBeanType(String articleType) {
+	private Description beanFor(ResultBinding resultBinding,WikipediaSparqlSource source) {
+		String articleType = source.determineItemType(resultBinding);
+		return beanFor(articleType);
+	}
+	
+	private Description beanFor(String articleType) {
 
 		if (TELEVISION_EPISODE.equals(articleType)) {
-			return Episode.class;
+			return new Episode();
 		} else if (TELEVISION_SHOW.equals(articleType)) {
-			return Brand.class;
+			return new Brand();
 		} else if (PERSON.equals(articleType)) {
-			return Playlist.class;
+			return new Playlist();
 		} else if (FILM.equals(articleType)) {
-			return Item.class;
+			return new Item();
 		}
-
 		return null;
 	}
 }

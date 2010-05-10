@@ -16,7 +16,7 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.wikipedia;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
+import static org.hamcrest.Matchers.is;
 import static org.uriplay.remotesite.wikipedia.Constants.AARON_SORKIN_DBPEDIA_URI;
 import static org.uriplay.remotesite.wikipedia.Constants.FILM_TYPE_URL;
 import static org.uriplay.remotesite.wikipedia.Constants.PERSON_TYPE_URL;
@@ -33,7 +33,8 @@ import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.DESCRIPTION
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.SAMEAS_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.TITLE_ID;
 
-import org.jherd.beans.Representation;
+import java.util.Set;
+
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
@@ -130,32 +131,32 @@ public class WikipediaSparqlGraphExtractorTest extends MockObjectTestCase {
 		
 		forTheWestWingTvShow();
 
-		Representation representation = extractor.extractFrom(source);
-		assertEquals(Brand.class, representation.getType(WEST_WING_WIKIPEDIA_URI));
-		assertThat(representation, hasPropertyValue(WEST_WING_WIKIPEDIA_URI, "title", "The West Wing"));
-		assertThat(representation, hasPropertyValue(WEST_WING_WIKIPEDIA_URI, "description", "A tv show"));
-		assertThat(representation, hasPropertyValue(WEST_WING_WIKIPEDIA_URI, "aliases", Sets.newHashSet(WEST_WING_IMDB_URI, WEST_WING_DBPEDIA_URI)));
-		assertThat(representation, hasPropertyValue(WEST_WING_WIKIPEDIA_URI, "containedIn", Sets.newHashSet(AARON_SORKIN_DBPEDIA_URI)));
+		Brand brand = (Brand) extractor.extract(source);
+		
+		assertEquals(WEST_WING_WIKIPEDIA_URI, brand.getCanonicalUri());
+		assertThat(brand.getTitle(), is("The West Wing"));
+		assertThat(brand.getDescription(), is("A tv show"));
+		assertThat(brand.getAliases(), is((Set<String>) Sets.newHashSet(WEST_WING_IMDB_URI, WEST_WING_DBPEDIA_URI)));
+		assertThat(brand.getContainedInUris(), is((Set<String>) Sets.newHashSet(AARON_SORKIN_DBPEDIA_URI)));
 	}
 	
 	public void testCreatesPropertyValuesForRootResourceForFilms() throws Exception {
 		
 		forSlumdogMillionaire();
 
-		Representation representation = extractor.extractFrom(source);
-		assertEquals(Item.class, representation.getType(SLUMDOG_WIKIPEDIA_URI));
-		assertThat(representation, hasPropertyValue(SLUMDOG_WIKIPEDIA_URI, "title", "Slumdog Millionaire"));
-		assertThat(representation, hasPropertyValue(SLUMDOG_WIKIPEDIA_URI, "description", "A film of a book of a tv show"));
+		Item item = (Item) extractor.extract(source);
+		assertThat(item.getCanonicalUri(), is(SLUMDOG_WIKIPEDIA_URI));
+		assertThat(item.getTitle(), is("Slumdog Millionaire"));
+		assertThat(item.getDescription(), is("A film of a book of a tv show"));
 	}
 	
 	public void testCreatesPropertyValuesForRootResourceForPeople() throws Exception {
 		
 		forThomasSchlamme();
 
-		Representation representation = extractor.extractFrom(source);
-		assertEquals(Playlist.class, representation.getType(THOMAS_SCHLAMME_WIKIPEDIA_URI));
-		assertThat(representation, hasPropertyValue(THOMAS_SCHLAMME_WIKIPEDIA_URI, "title", "Thomas Schlamme"));
-		assertThat(representation, hasPropertyValue(THOMAS_SCHLAMME_WIKIPEDIA_URI, "description", "The producer of the West Wing"));
+		Playlist playlist = (Playlist) extractor.extract(source);
+		assertThat(playlist.getCanonicalUri(), is(THOMAS_SCHLAMME_WIKIPEDIA_URI));
+		assertThat(playlist.getTitle(), is("Thomas Schlamme"));
+		assertThat(playlist.getDescription(), is("The producer of the West Wing"));
 	}
-
 }

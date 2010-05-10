@@ -102,6 +102,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 				<bean class="org.uriplay.remotesite.synd.OpmlAdapter">
 					<constructor-arg ref="newStyleAdapterDispatcher" />
 				</bean>
+				<bean class="org.uriplay.remotesite.wikipedia.WikipediaSparqlAdapter" />
+				    <bean class="org.uriplay.remotesite.imdb.ImdbAdapter">
+                    <constructor-arg ref="adapterDispatcher" />
+                </bean>
             </list>
         </property>
     </bean>
@@ -111,11 +115,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
 			<!-- Adapters in this list are tried in order until one matches the fetched URI -->
 			<list>
-				
-				<bean class="org.uriplay.remotesite.wikipedia.WikipediaSparqlAdapter" />
-				<bean class="org.uriplay.remotesite.imdb.ImdbAdapter">
-					<constructor-arg ref="adapterDispatcher" />
-				</bean>
 				
 				
 				<!--<bean class="org.uriplay.remotesite.aggregator.UriplayAggregationAdapter">
