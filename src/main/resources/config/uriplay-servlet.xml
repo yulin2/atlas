@@ -96,7 +96,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 	
 	<bean id="uriFetchingControllerV2" class="org.uriplay.query.v2.UriFetchingController">
-		<constructor-arg ref="unknownTypeQueryExecutor" />
+		<constructor-arg ref="remoteFetcher" />
 	</bean>
 	
 	<bean id="itemControllerV2" parent="uriFetchingControllerV2">

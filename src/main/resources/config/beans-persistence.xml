@@ -35,12 +35,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
          </bean>
       </constructor-arg>
   </bean>
-  
-  <bean id="unknownTypeQueryExecutor" class="org.uriplay.query.content.TypeResolvingQueryExecutor">
-      <constructor-arg ref="localOrRemoteFetcher"/>
-      <constructor-arg ref="mongoDbQueryExcutor"/>
-  </bean>
-  
+    
   <bean class="org.uriplay.persistence.content.EventFiringContentStore" id="contentStore">
     <constructor-arg ref="mongoDbBackedContentStore"/>
     <constructor-arg ref="AggregateContentListener"/>

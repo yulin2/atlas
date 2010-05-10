@@ -63,14 +63,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<constructor-arg ref="contentStore" />
 		<constructor-arg ref="remoteFetcher" />
 	</bean>
-	
-	<bean id="remoteFetcher" class="org.uriplay.query.uri.RemoteFetcher">
-		<constructor-arg ref="adapterDispatcher" />
-		<constructor-arg ref="beanGraphFactory" />
-		<property name="newStyleFetcher" ref="newStyleAdapterDispatcher"/>
-	</bean>
-	
-	   <bean id="newStyleAdapterDispatcher" class="org.jherd.remotesite.PerSiteAdapterDispatcher">
+		
+	<bean id="remoteFetcher" class="org.jherd.remotesite.PerSiteAdapterDispatcher">
         <property name="adapters">
 
             <!-- Adapters in this list are tried in order until one matches the fetched URI -->
@@ -100,32 +94,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     <property name="publisher" value="flickr.com" />
                 </bean>
 				<bean class="org.uriplay.remotesite.synd.OpmlAdapter">
-					<constructor-arg ref="newStyleAdapterDispatcher" />
+					<constructor-arg ref="remoteFetcher" />
 				</bean>
 				<bean class="org.uriplay.remotesite.wikipedia.WikipediaSparqlAdapter" />
 				    <bean class="org.uriplay.remotesite.imdb.ImdbAdapter">
-                    <constructor-arg ref="adapterDispatcher" />
+                    <constructor-arg ref="remoteFetcher" />
                 </bean>
             </list>
         </property>
     </bean>
-	
-	<bean id="adapterDispatcher" class="org.jherd.remotesite.PerSiteRepresentationAdapterDispatcher">
-		<property name="adapters">
-
-			<!-- Adapters in this list are tried in order until one matches the fetched URI -->
-			<list>
-				
-				
-				<!--<bean class="org.uriplay.remotesite.aggregator.UriplayAggregationAdapter">
-                    <constructor-arg ref="rdfXmlTranslator" />
-                    <constructor-arg><value>http://uriplay.rad0.net</value></constructor-arg>
-                    <constructor-arg><value>[a-z]+://[^/]*bbc.co.uk.*(\.rss|\.xml)</value></constructor-arg>
-                </bean>
-			--></list>
-		</property>
-	</bean>
-	
+		
 	<bean id="idGenFactory" class="org.jherd.beans.id.SingletonIntegerIdGeneratorFactory" />
 	
 	<util:properties id="rdfNsPrefixes">

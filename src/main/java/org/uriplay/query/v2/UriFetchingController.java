@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jherd.core.Factory;
 import org.jherd.remotesite.FetchException;
+import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.NoMatchingAdapterException;
 import org.jherd.remotesite.timing.MultiCallRequestTimer;
 import org.jherd.remotesite.timing.RequestTimer;
@@ -39,7 +40,6 @@ import org.uriplay.beans.ProfileFilter;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
 import org.uriplay.media.entity.Description;
-import org.uriplay.query.content.UnknownTypeQueryExecutor;
 import org.uriplay.query.uri.Profile;
 
 import com.google.soy.common.collect.Lists;
@@ -58,19 +58,19 @@ public class UriFetchingController {
 	private final Projector projector;
 	private final Factory<RequestTimer> timerFactory;
 
-	private final UnknownTypeQueryExecutor queryExecutor;
+	private final Fetcher<Object> queryExecutor;
 
 	private final Filter filter;
 
-	public UriFetchingController(UnknownTypeQueryExecutor queryExecutor) {
+	public UriFetchingController(Fetcher<Object> queryExecutor) {
 		this(queryExecutor, new NullProjector());
 	}
 	
-	public UriFetchingController(UnknownTypeQueryExecutor queryExecutor, Projector projector) {
+	public UriFetchingController(Fetcher<Object> queryExecutor, Projector projector) {
 		this(queryExecutor, new ProfileFilter(), projector, new MultiCallRequestTimer());
 	}
 		
-	UriFetchingController(UnknownTypeQueryExecutor queryExecutor, Filter filter, Projector projector, Factory<RequestTimer> timerFactory) {
+	UriFetchingController(Fetcher<Object> queryExecutor, Filter filter, Projector projector, Factory<RequestTimer> timerFactory) {
 		this.queryExecutor = queryExecutor;
 		this.filter = filter;
 		this.projector = projector;
@@ -93,7 +93,7 @@ public class UriFetchingController {
 		timer.nest();
 		Query query = new Query(profile, uri, outputTimingInfo);
 		try {
-			Description found = queryExecutor.executeQuery(uri);
+			Description found = (Description) queryExecutor.fetch(uri, timer);
 			
 			if (found == null) {
 				throw new ContentNotFoundException("No metadata available for : " + uri);
