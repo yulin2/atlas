@@ -15,14 +15,15 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.synd;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.SiteSpecificRepresentationAdapter;
+import org.jherd.remotesite.SiteSpecificAdapter;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jherd.remotesite.timing.TimedFetcher;
+import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 
 import com.sun.syndication.feed.opml.Opml;
 
@@ -32,25 +33,25 @@ import com.sun.syndication.feed.opml.Opml;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OpmlAdapter extends TimedFetcher<Representation> implements SiteSpecificRepresentationAdapter {
+public class OpmlAdapter extends TimedFetcher<Playlist> implements SiteSpecificAdapter<Description> {
 
 	private final RemoteSiteClient<Opml> opmlClient;
-	private final BeanGraphExtractor<OpmlSource> graphExtractor;
+	private final ContentExtractor<OpmlSource, Playlist> graphExtractor;
 	
-	public OpmlAdapter(Fetcher<Representation> delegateFetcher) {
+	public OpmlAdapter(Fetcher<Object> delegateFetcher) {
 		this(new OpmlFeedClient(), new OpmlGraphExtractor(delegateFetcher));
 	}
 
-	OpmlAdapter(RemoteSiteClient<Opml> opmlFeedClient, BeanGraphExtractor<OpmlSource> graphExtractor) {
+	OpmlAdapter(RemoteSiteClient<Opml> opmlFeedClient, ContentExtractor<OpmlSource, Playlist> graphExtractor) {
 		this.opmlClient = opmlFeedClient;
 		this.graphExtractor = graphExtractor;
 	}
 
 	@Override
-	protected Representation fetchInternal(String uri, RequestTimer timer) {
+	protected Playlist fetchInternal(String uri, RequestTimer timer) {
 		try {
 			Opml feed = opmlClient.get(uri);
-			return graphExtractor.extractFrom(new OpmlSource(feed, uri, timer));
+			return graphExtractor.extract(new OpmlSource(feed, uri, timer));
 		} catch (Exception e) {
 			throw new FetchException("Problem fetching uri: " + uri, e);
 		}

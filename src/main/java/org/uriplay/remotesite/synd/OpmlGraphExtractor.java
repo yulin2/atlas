@@ -17,134 +17,142 @@ package org.uriplay.remotesite.synd;
 
 import java.util.List;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.DescriptionMode;
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
-import org.springframework.beans.MutablePropertyValues;
+import org.uriplay.media.entity.Encoding;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.bbc.BbcPodcastGenreMap;
 import org.uriplay.remotesite.bbc.Policy;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sun.syndication.feed.opml.Outline;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OpmlGraphExtractor implements BeanGraphExtractor<OpmlSource> {
+public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist> {
 
-	private final Fetcher<Representation> delegateFetcher;
+	private final Fetcher<Object> delegateFetcher;
 	private final BbcPodcastGenreMap genreMap = new BbcPodcastGenreMap();
 
-	public OpmlGraphExtractor(Fetcher<Representation> delegateFetcher) {
+	public OpmlGraphExtractor(Fetcher<Object> delegateFetcher) {
 		this.delegateFetcher = delegateFetcher;
 	}
 
-	public Representation extractFrom(OpmlSource source) {
-		Representation representation = new Representation();
-		Set<String> containedFeeds = Sets.newHashSet();
-		
+	public Playlist extract(OpmlSource source) {
+		Playlist playlist = outerPlaylist(source);
+
 		List<Outline> outlines = typedList(source.getFeed().getOutlines());
-		fetchFeedsFor(outlines, representation, containedFeeds, source.getTimer());
+	
+		playlist.setPlaylists(fetchFeedsFor(outlines, source.getTimer()));
 		
-		addOuterPlaylist(source, containedFeeds, representation);
-		
-		return representation;
+		return playlist;
 	}
 
-	private void addOuterPlaylist(OpmlSource source, Set<String> containedFeeds, Representation representation) {
-		representation.addUri(source.getUri());
-		representation.addType(source.getUri(), Playlist.class);
-		MutablePropertyValues mpvs = new MutablePropertyValues();
-		mpvs.addPropertyValue("playlists", Sets.newHashSet(containedFeeds));
-		mpvs.addPropertyValue("title", source.getTitle());
-		mpvs.addPropertyValue("description", source.getTitle());
-		representation.addValues(source.getUri(), mpvs);
+	private Playlist outerPlaylist(OpmlSource source) {
+		Playlist playlist = new Playlist();
+		playlist.setCanonicalUri(source.getUri());
+		playlist.setTitle(source.getTitle());
+		playlist.setDescription(source.getTitle());
+		return playlist;
 	}
 	
-	private void fetchFeedsFor(List<Outline> outlines, Representation representation, Set<String> containedFeeds, RequestTimer timer) {
+	private List<Playlist> fetchFeedsFor(List<Outline> outlines, RequestTimer timer) {
+		List<Playlist> playlists = Lists.newArrayList();
 		if (outlines != null) {
 			for (Outline outline : outlines) {
-				fetchFeedsFor(outline, representation, containedFeeds, timer);
+				playlists.addAll(fetchFeedsFor(outline,  timer));
 			}
 		}
+		return playlists;
 	}
 
-	private void fetchFeedsFor(Outline outline, Representation representation, Set<String> containedFeeds, RequestTimer timer) {
+	private List<Playlist> fetchFeedsFor(Outline outline, RequestTimer timer) {
+		List<Playlist> playlists = Lists.newArrayList();
+
 		List<Outline> children = typedList(outline.getChildren());
-		fetchFeedsFor(children, representation, containedFeeds, timer);
+		playlists.addAll(fetchFeedsFor(children, timer));
 		
 		if (outline.getXmlUrl() != null) {
-			fetchFeed(outline.getXmlUrl(), outline, representation, containedFeeds, timer);
+			playlists.addAll(fetchFeed(outline.getXmlUrl(), outline, timer));
 		} else if (outline.getHtmlUrl() != null) {
-			fetchFeed(outline.getHtmlUrl(), outline, representation, containedFeeds, timer);
+			playlists.addAll(fetchFeed(outline.getHtmlUrl(), outline,  timer));
 		} else if (outline.getUrl() != null) {
-			fetchFeed(outline.getUrl(), outline, representation, containedFeeds, timer);
+			playlists.addAll(fetchFeed(outline.getUrl(), outline, timer));
 		}
+		return playlists;
 	}
 
-	private void fetchFeed(String feedUrl, Outline outline, Representation representation, Set<String> containedFeeds, RequestTimer timer) {
+	private List<Playlist> fetchFeed(String feedUrl, Outline outline, RequestTimer timer) {
 		
 		String genres = outline.getAttributeValue("bbcgenres");
 		
-		Representation feedRepresentation;
+		Playlist feed;
 		
 		try {
 			timer.nest();
-			 feedRepresentation = delegateFetcher.fetch(feedUrl, timer);
+			 feed = (Playlist) delegateFetcher.fetch(feedUrl, timer);
 		} catch (FetchException fe) {
 			// carry on and try the next feed
-			return;
+			return Lists.newArrayList();
 		} finally {
 			timer.unnest();
 		}
 		
 		if (!StringUtils.isEmpty(genres)) {
-			MutablePropertyValues mpvs = new MutablePropertyValues();
-			mpvs.addPropertyValue("genres", map(genres));
-			feedRepresentation.addValues(feedUrl, mpvs);
+			Set<String> allGenres = Sets.newHashSet(feed.getGenres());
+			allGenres.addAll(map(genres));
+			feed.setGenres(allGenres);
 		}
 		
-		addPublishedDurationFor(outline, feedRepresentation);
+		addPublishedDurationFor(outline, feed);
 		
-		addRestrictionsFor(outline, feedRepresentation);
+		addRestrictionsFor(outline, feed);
 		
-		representation.mergeIn(feedRepresentation);
-		containedFeeds.add(feedUrl);
+		return Lists.newArrayList(feed);
 	}
 
-	private void addRestrictionsFor(Outline outline, Representation feedRepresentation) {
+	private void addRestrictionsFor(Outline outline, Playlist feed) {
 		
 		// foreach location 'restrictedBy' = 'allow == 'uk' ? 
 		//      http://open.bbc.co.uk/rad/uriplay/policy/7days-uk-only : http://open.bbc.co.uk/rad/uriplay/policy/7days
 		
-		Set<Entry<String, Class<?>>> types = feedRepresentation.getTypes().entrySet();
-		
 		String allow = outline.getAttributeValue("allow");
 		
-		for (Entry<String, Class<?>> entry : types) {
-			if (entry.getValue().equals(Location.class) && entry.getKey().contains("bbc.co.uk")) {
-				MutablePropertyValues mpvs = new MutablePropertyValues();
+		for (Location location : locationsFrom(feed.getItems())) {
+			if (location.getUri() != null && location.getUri().contains("bbc.co.uk")) {
 				if ("uk".equals(allow)) {
-					mpvs.addPropertyValue("restrictedBy", Policy.SEVEN_DAYS_UK_ONLY);
+					location.setRestrictedBy(Policy.SEVEN_DAYS_UK_ONLY);
 				} else {
-					mpvs.addPropertyValue("restrictedBy", Policy.SEVEN_DAYS);
+					location.setRestrictedBy(Policy.SEVEN_DAYS);
 				}
-				feedRepresentation.addValues(entry.getKey(), mpvs);
 			}
 		}
 	}
 
-	private void addPublishedDurationFor(Outline outline, Representation feedRepresentation) {
-		Set<Entry<String, Class<?>>> types = feedRepresentation.getTypes().entrySet();
+	private Iterable<Location> locationsFrom(Iterable<Item> items) {
+		Set<Location> locations = Sets.newHashSet();
+		for (Item item : items) {
+			for (Version version : item.getVersions()) {
+				for (Encoding encoding : version.getManifestedAs()) {
+					for (Location location : encoding.getAvailableAt()) {
+						locations.add(location);
+					}
+				}
+			}
+		}
+		return locations;
+	}
+
+	private void addPublishedDurationFor(Outline outline, Playlist feed) {
 
 		// foreach version 'publishedDuration' = typicalDurationMins x 60 for secs
 
@@ -152,12 +160,9 @@ public class OpmlGraphExtractor implements BeanGraphExtractor<OpmlSource> {
 	
 		if (typicalDurationAttr != null) {
 			Integer typicalDuration = Integer.parseInt(typicalDurationAttr);
-			
-			for (Entry<String, Class<?>> entry : types) {
-				if (entry.getValue().equals(Version.class)) {
-					MutablePropertyValues mpvs = new MutablePropertyValues();
-					mpvs.addPropertyValue("publishedDuration", new Integer(typicalDuration * 60));
-					feedRepresentation.addValues(entry.getKey(), mpvs);
+			for (Item item : feed.getItems()) {
+				for (Version version : item.getVersions()) {
+					version.setDuration(new Integer(typicalDuration * 60));
 				}
 			}
 		}
@@ -180,10 +185,4 @@ public class OpmlGraphExtractor implements BeanGraphExtractor<OpmlSource> {
 	private <T> List<T> typedList(List<?> list) {
 		return (List<T>)list;
 	}
-
-	public Representation extractFrom(OpmlSource source, DescriptionMode mode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

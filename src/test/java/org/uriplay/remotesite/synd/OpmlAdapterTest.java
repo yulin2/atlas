@@ -20,12 +20,13 @@ import static org.hamcrest.Matchers.instanceOf;
 
 import java.io.IOException;
 
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Playlist;
+import org.uriplay.remotesite.ContentExtractor;
 
 import com.sun.syndication.feed.opml.Opml;
 
@@ -40,7 +41,7 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 	static final String DOCUMENT = "doc";
 	
 	RemoteSiteClient<Opml> feedClient;
-	BeanGraphExtractor<OpmlSource> propertyExtractor;
+	ContentExtractor<OpmlSource, Playlist> propertyExtractor;
 	OpmlAdapter adapter;
 	Opml opml = null;
 	RequestTimer timer = mock(RequestTimer.class);
@@ -51,7 +52,7 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		feedClient = mock(RemoteSiteClient.class);
-		propertyExtractor = mock(BeanGraphExtractor.class);
+		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new OpmlAdapter(feedClient, propertyExtractor);
 		
 		checking(new Expectations() {{
@@ -63,7 +64,7 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(feedClient).get(OPML_LINK); will(returnValue(opml));
-			one(propertyExtractor).extractFrom(opmlSource);
+			one(propertyExtractor).extract(opmlSource); will(returnValue(new Playlist()));
 		}});
 		
 		adapter.fetch(OPML_LINK, timer);

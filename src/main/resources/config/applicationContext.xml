@@ -99,6 +99,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     <property name="oembedEndpoint" value="http://www.flickr.com/services/oembed/" />
                     <property name="publisher" value="flickr.com" />
                 </bean>
+				<bean class="org.uriplay.remotesite.synd.OpmlAdapter">
+					<constructor-arg ref="newStyleAdapterDispatcher" />
+				</bean>
             </list>
         </property>
     </bean>
@@ -114,16 +117,13 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 					<constructor-arg ref="adapterDispatcher" />
 				</bean>
 				
-				<bean class="org.uriplay.remotesite.synd.OpmlAdapter">
-					<constructor-arg ref="adapterDispatcher" />
-				</bean>
 				
-				<bean class="org.uriplay.remotesite.aggregator.UriplayAggregationAdapter">
+				<!--<bean class="org.uriplay.remotesite.aggregator.UriplayAggregationAdapter">
                     <constructor-arg ref="rdfXmlTranslator" />
                     <constructor-arg><value>http://uriplay.rad0.net</value></constructor-arg>
                     <constructor-arg><value>[a-z]+://[^/]*bbc.co.uk.*(\.rss|\.xml)</value></constructor-arg>
                 </bean>
-			</list>
+			--></list>
 		</property>
 	</bean>
 	

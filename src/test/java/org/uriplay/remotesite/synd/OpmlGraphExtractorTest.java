@@ -16,23 +16,28 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.synd;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.jherd.hamcrest.Matchers.hasPropertyValue;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Encoding;
+import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.bbc.Policy;
 import org.uriplay.remotesite.youtube.YouTubeGraphExtractor;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sun.syndication.feed.opml.Attribute;
@@ -53,19 +58,46 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 	static final String LOCATION1_URI = "http://downloads.bbc.co.uk/a.mp3";
 	static final String LOCATION2_URI = "http://feed1.com/a.mp3";
 	
-	Fetcher<Representation> fetcher = mock(Fetcher.class);
+	Fetcher<Object> fetcher = mock(Fetcher.class);
 	
 	OpmlGraphExtractor extractor = new OpmlGraphExtractor(fetcher);
 	Opml feed;
 	OpmlSource source;
 
 	RequestTimer timer = mock(RequestTimer.class);
+
+	private Playlist fetchedFeed1;
+	private Playlist fetchedFeed2;
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		feed = createFeed();
 		source = new OpmlSource(feed, OPML_URI, timer);
+		
+		fetchedFeed1 = new Playlist();
+		fetchedFeed1.setCanonicalUri(FEED1_URI);
+		fetchedFeed1.addItem(itemWithLocation(LOCATION1_URI));
+		
+		fetchedFeed2 = new Playlist();
+		fetchedFeed2.setCanonicalUri(FEED2_URI);
+		fetchedFeed2.addItem(itemWithLocation(LOCATION2_URI));
+	}
+
+	private Item itemWithLocation(String locationUri) {
+		Location location = new Location();
+		location.setUri(locationUri);
+		
+		Encoding encoding = new Encoding();
+		encoding.addAvailableAt(location);
+		
+		Version version = new Version();
+		version.addManifestedAs(encoding);
+		
+		Item item = new Item();
+		item.addVersion(version);
+		
+		return item;
 	}
 
 	private Opml createFeed() throws MalformedURLException {
@@ -89,57 +121,57 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testFetchesAllContainedPodcastsAndMergesTheirRepresentations() throws Exception {
 		
-		final Representation representation1 = new Representation();
-		representation1.addUri(FEED1_URI);
-		representation1.addType(FEED1_URI, Playlist.class);
-		final Representation representation2 = new Representation();
-		representation2.addUri(FEED2_URI);
-		representation2.addType(FEED2_URI, Playlist.class);
-		
 		checking(new Expectations() {{
-			one(fetcher).fetch(FEED1_URI, timer); will(returnValue(representation1));
-			one(fetcher).fetch(FEED2_URI, timer); will(returnValue(representation2));
+			one(fetcher).fetch(FEED1_URI, timer); will(returnValue(fetchedFeed1));
+			one(fetcher).fetch(FEED2_URI, timer); will(returnValue(fetchedFeed2));
 			exactly(2).of(timer).nest();
 			exactly(2).of(timer).unnest();
 		}});
 		
-		Representation representation = extractor.extractFrom(source);
-
-		assertThat(representation, hasPropertyValue(OPML_URI, "title", "All BBC Podcasts"));
-		assertThat(representation, hasPropertyValue(OPML_URI, "description", "All BBC Podcasts"));
-
-		assertEquals(Playlist.class, representation.getType(FEED1_URI));
-		assertThat(representation, hasPropertyValue(FEED1_URI, "genres", Sets.newHashSet("http://www.bbc.co.uk/programmes/genres/entertainmentandcomedy")));
+		Playlist playlist = extractor.extract(source);
+		assertThat(playlist.getCanonicalUri(), is(OPML_URI));
 		
-		assertEquals(Playlist.class, representation.getType(FEED2_URI));
-		assertEquals(Playlist.class, representation.getType(OPML_URI));
+		assertThat(playlist.getTitle(), is("All BBC Podcasts"));
+		assertThat(playlist.getDescription(), is("All BBC Podcasts"));
+
+		List<Playlist> feeds = playlist.getPlaylists();
+		
+		Playlist feed1 = Iterables.get(feeds, 0);
+		assertThat(feed1.getCanonicalUri(), is(FEED1_URI));
+		assertThat(feed1.getGenres(), is((Set<String>) Sets.newHashSet("http://www.bbc.co.uk/programmes/genres/entertainmentandcomedy")));
+		
+		Playlist feed2 = Iterables.get(feeds, 1);
+		assertThat(feed2.getCanonicalUri(), is(FEED2_URI));
 	}
 	
 	public void testAppliesRestrictionToBbcLocationsBasedOnAllowAttribute() throws Exception {
-		
-		final Representation representation1 = new Representation();
-		representation1.addUri(FEED1_URI);
-		representation1.addType(FEED1_URI, Playlist.class);
-		representation1.addUri(LOCATION1_URI);
-		representation1.addType(LOCATION1_URI, Location.class);
-		final Representation representation2 = new Representation();
-		representation2.addUri(FEED2_URI);
-		representation2.addType(FEED2_URI, Playlist.class);
-		representation2.addUri(LOCATION2_URI);
-		representation2.addType(LOCATION2_URI, Location.class);
-		
+				
 		checking(new Expectations() {{
-			one(fetcher).fetch(FEED1_URI, timer); will(returnValue(representation1));
-			one(fetcher).fetch(FEED2_URI, timer); will(returnValue(representation2));
+			one(fetcher).fetch(FEED1_URI, timer); will(returnValue(fetchedFeed1));
+			one(fetcher).fetch(FEED2_URI, timer); will(returnValue(fetchedFeed2));
 			exactly(2).of(timer).nest();
 			exactly(2).of(timer).unnest();
 		}});
 		
-		Representation representation = extractor.extractFrom(source);
+		Playlist playlist = extractor.extract(source);
 
-		assertThat(representation, hasPropertyValue(LOCATION1_URI, "restrictedBy", Policy.SEVEN_DAYS_UK_ONLY));
-		assertThat(representation, not(hasPropertyValue(LOCATION2_URI, "restrictedBy", Policy.SEVEN_DAYS)));
-		assertThat(representation, not(hasPropertyValue(LOCATION2_URI, "restrictedBy", Policy.SEVEN_DAYS_UK_ONLY)));
+		assertThat(locationByUri(LOCATION1_URI, playlist.getPlaylists().get(0).getItems()).getRestrictedBy(), is(Policy.SEVEN_DAYS_UK_ONLY));
+		assertThat(locationByUri(LOCATION2_URI, playlist.getPlaylists().get(1).getItems()).getRestrictedBy(), is(nullValue()));
 	}
+	
 
+	private static Location locationByUri(String uri, Iterable<Item> items) {
+		for (Item item : items) {
+			for (Version version : item.getVersions()) {
+				for (Encoding encoding : version.getManifestedAs()) {
+					for (Location location : encoding.getAvailableAt()) {
+						if (uri.equals(location.getUri())) {
+							return location;
+						}
+					}
+				}
+			}
+		}
+		throw new NoSuchElementException();
+	}
 }

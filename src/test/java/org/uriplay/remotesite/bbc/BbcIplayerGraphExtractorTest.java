@@ -149,7 +149,6 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		
 		// Check not a subclass
 		assertEquals(Item.class, orphan.getClass());
-		
 	}
 
 	private <T extends Description> T byUri(String uri, Iterable<T> playlists) {
