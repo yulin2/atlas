@@ -123,12 +123,12 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 				encoding.setVideoHorizontalSize(176);
 				encoding.setVideoVerticalSize(144);
 				if (video.getYoutubeFormat() == 1) {
-					encoding.setAudioCoding("audio/AMR");
+					encoding.setAudioCoding(MimeType.AUDIO_AMR);
 				} else {
-					encoding.setAudioCoding("audio/mp4");
+					encoding.setAudioCoding(MimeType.AUDIO_MP4);
 				}
 				encoding.setAudioChannels(1);
-				encoding.setVideoCoding("video/H263");
+				encoding.setVideoCoding(MimeType.VIDEO_H263);
 				encoding.setHasDOG(false);
 				break;
 			}

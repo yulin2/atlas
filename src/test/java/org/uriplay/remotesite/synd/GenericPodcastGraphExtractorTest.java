@@ -100,7 +100,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		
 		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
 
-		assertThat(encoding.getAudioCoding(), is("audio/mpeg"));
+		assertThat(encoding.getAudioCoding(), is(MimeType.AUDIO_MPEG));
 		assertThat(encoding.getDataContainerFormat(), is(MimeType.AUDIO_MPEG));
 
 		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
@@ -118,7 +118,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		
 		Encoding encoding = extractEncodingFrom(source);
 		
-		assertThat(encoding.getVideoCoding(), is(not(MimeType.VIDEO_XXVID.toString())));
+		assertThat(encoding.getVideoCoding(), is(not(MimeType.VIDEO_XXVID)));
 		assertThat(encoding.getDataContainerFormat(), is(MimeType.VIDEO_QUICKTIME));
 	}
 
@@ -136,7 +136,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		
 		Encoding encoding = extractEncodingFrom(source);
 		
-		assertThat(encoding.getVideoCoding(), is(MimeType.VIDEO_MPEG.toString()));
+		assertThat(encoding.getVideoCoding(), is(MimeType.VIDEO_MPEG));
 		assertThat(encoding.getDataContainerFormat(), is(MimeType.VIDEO_MPEG));
 	}
 

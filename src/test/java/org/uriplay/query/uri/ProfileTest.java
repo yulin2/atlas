@@ -44,9 +44,9 @@ public class ProfileTest extends TestCase {
 	}
 	
 	public void testForIphoneVideoCodingIfSpecifiedMustBeOneOfThese() throws Exception {
-		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding("video/H263")));
-		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding("video/H264")));
-		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding("video/x-ms-wmv")));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding(MimeType.VIDEO_H263)));
+		assertTrue(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding(MimeType.VIDEO_H264)));
+		assertFalse(Profile.IPHONE.matches(encodingIn(MimeType.VIDEO_QUICKTIME).withVideoCoding(MimeType.VIDEO_XMSWMV)));
 	}
 	
 	public void testForIphoneVideoBitrateIfSpecifiedMustBeLowEnough() throws Exception {

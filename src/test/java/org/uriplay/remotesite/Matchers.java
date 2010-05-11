@@ -35,8 +35,8 @@ public class Matchers {
 	public static class EncodingMatcher extends TypeSafeMatcher<Encoding> {
 
 		private Matcher<MimeType> dataContainerFormatMatcher;
-		private Matcher<String> audioCodingMatcher;
-		private Matcher<String> videoCodingMatcher;
+		private Matcher<MimeType> audioCodingMatcher;
+		private Matcher<MimeType> videoCodingMatcher;
 		private Matcher<Boolean> dogMatcher;
 		private Matcher<Integer> videoHorizonalSizeMatcher;
 		private Matcher<Integer> videoVerticalSizeMatcher;
@@ -53,12 +53,12 @@ public class Matchers {
 			return this;
 		}
 
-		public EncodingMatcher withAudioCoding(Matcher<String> audioCodingMatcher) {
+		public EncodingMatcher withAudioCoding(Matcher<MimeType> audioCodingMatcher) {
 			this.audioCodingMatcher = audioCodingMatcher;
 			return this;
 		}
 		
-		public EncodingMatcher withVideoCoding(Matcher<String> videoCodingMatcher) {
+		public EncodingMatcher withVideoCoding(Matcher<MimeType> videoCodingMatcher) {
 			this.videoCodingMatcher = videoCodingMatcher;
 			return this;
 		}

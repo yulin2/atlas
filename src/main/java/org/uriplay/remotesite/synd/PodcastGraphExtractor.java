@@ -54,11 +54,11 @@ public abstract class PodcastGraphExtractor {
 		
 		MimeType audioCoding = AudioFormat.fromAltName(enclosure.getType());
 		if (audioCoding == MimeType.AUDIO_MPEG) {
-			encoding.setAudioCoding(audioCoding.toString());
+			encoding.setAudioCoding(audioCoding);
 		}
 		MimeType videoCoding = VideoFormat.fromAltName(enclosure.getType());
 		if (videoCoding == MimeType.VIDEO_MPEG) {
-			encoding.setVideoCoding(videoCoding.toString());
+			encoding.setVideoCoding(videoCoding);
 		}
 		MimeType containerFormat = ContainerFormat.fromAltName(enclosure.getType());
 		if (containerFormat != null) {

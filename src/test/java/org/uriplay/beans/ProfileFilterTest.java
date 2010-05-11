@@ -32,8 +32,8 @@ import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
 import org.uriplay.query.uri.Profile;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.soy.common.collect.Lists;
 
 /**
  * Unit test for {@link ProfileFilter}.
@@ -139,8 +139,8 @@ public class ProfileFilterTest extends TestCase {
 		item.addVersion(version);
 		Encoding audiomp4 = new Encoding();
 		audiomp4.setDataContainerFormat(MimeType.AUDIO_MP4);
-		audiomp4.setVideoCoding("video/H263");
-		audiomp4.setAudioCoding("audio/mp4");
+		audiomp4.setVideoCoding(MimeType.VIDEO_H263);
+		audiomp4.setAudioCoding(MimeType.AUDIO_MP4);
 		audiomp4.setVideoBitRate(2000);
 		audiomp4.setAudioBitRate(150);
 		audiomp4.setVideoFrameRate(15f);
@@ -149,8 +149,8 @@ public class ProfileFilterTest extends TestCase {
 		
 		Encoding videomp4 = new Encoding();
 		videomp4.setDataContainerFormat(MimeType.VIDEO_MP4);
-		videomp4.setVideoCoding("video/H263");
-		videomp4.setAudioCoding("audio/mp4");
+		videomp4.setVideoCoding(MimeType.VIDEO_H263);
+		videomp4.setAudioCoding(MimeType.AUDIO_MP4);
 		videomp4.setVideoBitRate(4000);
 		videomp4.setAudioBitRate(150);
 		videomp4.setVideoFrameRate(15f);

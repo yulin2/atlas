@@ -136,7 +136,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		Matcher<Encoding> encoding1 = 
 			encodingMatcher()
 				.withDataContainerFormat(is(MimeType.APPLICATION_XSHOCKWAVEFLASH))
-				.withVideoCoding(is(not("video/x-vp6")))
+				.withVideoCoding(is(not(MimeType.VIDEO_XVP6)))
 				.withDOG(is(true))
 				.withLocations(hasItems(
 						locationMatcher()
@@ -147,8 +147,8 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		Matcher<Encoding> encoding2 = 
 			encodingMatcher()
 				.withDataContainerFormat(is(MimeType.VIDEO_3GPP))
-				.withVideoCoding(is("video/H263"))
-				.withAudioCoding(is("audio/AMR"))
+				.withVideoCoding(is(MimeType.VIDEO_H263))
+				.withAudioCoding(is(MimeType.AUDIO_AMR))
 				.withVideoHorizonalSize(is(176))
 				.withVideoVerticalSize(is(144))
 				.withAudioChannels(is(1))
@@ -161,8 +161,8 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		Matcher<Encoding> encoding3 = 
 			encodingMatcher()
 				.withDataContainerFormat(is(MimeType.VIDEO_3GPP))
-				.withVideoCoding(is("video/H263"))
-				.withAudioCoding(is("audio/mp4")) 
+				.withVideoCoding(is(MimeType.VIDEO_H263))
+				.withAudioCoding(is(MimeType.AUDIO_MP4)) 
 				.withVideoHorizonalSize(is(176)) 
 				.withVideoVerticalSize(is(144)) 
 				.withAudioChannels(is(1)) 

@@ -113,7 +113,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		Location location  = Iterables.getOnlyElement(encoding.getAvailableAt());
 		
 		assertThat(encoding.getDataSize(), is(2L));
-		assertThat(encoding.getAudioCoding(), is("audio/mpeg"));
+		assertThat(encoding.getAudioCoding(), is(MimeType.AUDIO_MPEG));
 		assertThat(encoding.getDataContainerFormat(), is(MimeType.AUDIO_MPEG));
 	
 		assertThat(location.getTransportType(), is(TransportType.DOWNLOAD));

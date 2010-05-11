@@ -200,7 +200,11 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simpleLocation.setSource(encoding.getSource());
 		simpleLocation.setVideoAspectRatio(encoding.getVideoAspectRatio());
 		simpleLocation.setVideoBitRate(encoding.getVideoBitRate());
-		simpleLocation.setVideoCoding(encoding.getVideoCoding());
+		
+		if (encoding.getVideoCoding() != null) {
+			simpleLocation.setVideoCoding(encoding.getVideoCoding().toString());
+		}
+		
 		simpleLocation.setVideoFrameRate(encoding.getVideoFrameRate());
 		simpleLocation.setVideoHorizontalSize(encoding.getVideoHorizontalSize());
 		simpleLocation.setVideoProgressiveScan(encoding.getVideoProgressiveScan());
