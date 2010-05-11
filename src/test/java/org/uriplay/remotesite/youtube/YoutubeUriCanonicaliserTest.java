@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.youtube;
 
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.Fetcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
@@ -23,7 +22,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
  */
 public class YoutubeUriCanonicaliserTest extends MockObjectTestCase {
 
-	Fetcher<Representation> fetcher;
+	Fetcher<Object> fetcher;
 	YoutubeUriCanonicaliser canonicaliser;
 	
 	@Override

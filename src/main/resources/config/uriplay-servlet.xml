@@ -25,14 +25,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="mappings">
 			<props>
-				<prop key="/api/1.0/">frontPageController</prop>
 				<prop key="/api/1.0/*">itemControllerV1</prop>
 				<prop key="/api/1.0/list*">listControllerV1</prop>
 				<prop key="/api/1.0/lists*">listsControllerV1</prop>
 				<prop key="/api/1.0/doc*">uriFetchingControllerV1</prop>
-				<prop key="/api/1.0/status">statusController</prop>
 
-				<prop key="/2.0/">frontPageController</prop>
 				<prop key="/2.0/list*">listControllerV2</prop>
 				<prop key="/2.0/lists*">listsControllerV2</prop>
 				<prop key="/2.0/doc*">uriFetchingControllerV2</prop>
@@ -65,14 +62,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	
 	<bean id="orphanUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
 		<constructor-arg ref="perPublisherUpdater"/>
-	</bean>
-	
-    <bean id="statusController" class="org.jherd.watchdog.StatusController">
-    	<property name="viewName" value="org/uriplay/www/Status" />
-    </bean>
-	
-	<bean id="frontPageController" class="org.jherd.servlet.mvc.SimpleViewController">
- 		<property name="viewName" value="org/uriplay/www/Home" />
 	</bean>
 	
 	<bean id="newQueryApiController" class="org.uriplay.query.v2.QueryController">

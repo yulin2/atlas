@@ -14,14 +14,13 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bbc;
 
-import org.jherd.beans.Representation;
 import org.jherd.remotesite.Fetcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 @SuppressWarnings("unchecked")
 public class BbcUriCanonicaliserTest extends MockObjectTestCase {
 
-	Fetcher<Representation> fetcher;
+	Fetcher<Object> fetcher;
 	BbcUriCanonicaliser canonicaliser;
 	
 	@Override
