@@ -33,11 +33,11 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 
 	static final String URI = "http://example.com";
     
-	Fetcher<Set<Object>> remoteFetcher;
+	Fetcher<Object> remoteFetcher;
 	RequestTimer timer;
 	ResourceMapping resources;
 	
-	Fetcher<Set<Object>> localOrRemoteFetcher;
+	Fetcher<Object> localOrRemoteFetcher;
 	
 	Set<Object> beans = Collections.emptySet();
 	

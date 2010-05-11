@@ -33,7 +33,7 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("unchecked")
 public class SavingFetcherTest extends MockObjectTestCase {
 
-	Fetcher<Set<Object>> delegateFetcher = mock(Fetcher.class);
+	Fetcher<Object> delegateFetcher = mock(Fetcher.class);
 	MutableContentStore store = mock(MutableContentStore.class);
 	
 	String URI = "http://example.com";

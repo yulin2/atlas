@@ -14,35 +14,36 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.uri;
 
-import java.util.Set;
-
-import org.jherd.remotesite.Fetcher;
+  import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.persistence.content.MutableContentStore;
+
+import com.google.common.collect.Sets;
+
 
 /**
  * Decorator for a {@link Fetcher} that stores the results before passing them on.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class SavingFetcher implements Fetcher<Set<Object>> {
+public class SavingFetcher implements Fetcher<Object> {
 
-	private final Fetcher<Set<Object>> delegateFetcher;
+	private final Fetcher<Object> delegateFetcher;
 	private final MutableContentStore store;
 
-	public SavingFetcher(Fetcher<Set<Object>> delegateFetcher, MutableContentStore store) {
+	public SavingFetcher(Fetcher<Object> delegateFetcher, MutableContentStore store) {
 		this.delegateFetcher = delegateFetcher;
 		this.store = store;
 	}
 
-	public Set<Object> fetch(String uri, RequestTimer timer) {
+	public Object fetch(String uri, RequestTimer timer) {
 		
-		Set<Object> beans = delegateFetcher.fetch(uri, timer);
+		Object bean = delegateFetcher.fetch(uri, timer);
 		
-		if (beans == null) { return null; }
+		if (bean == null) { return null; }
 		
-		store.createOrUpdateGraph(beans, false);
+		store.createOrUpdateGraph(Sets.newHashSet(bean), false);
 		
-		return beans;
+		return bean;
 	}
 }

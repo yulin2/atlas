@@ -16,13 +16,9 @@ permissions and limitations under the License. */
 package org.uriplay.query.uri;
 
 
-import java.util.Set;
-
 import org.jherd.naming.ResourceMapping;
 import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
-
-import com.google.common.collect.Sets;
 
 /**
  * Aggregate {@link Fetcher} that checks a local datastore for resources,
@@ -30,25 +26,25 @@ import com.google.common.collect.Sets;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class LocalOrRemoteFetcher implements Fetcher<Set<Object>> {
+public class LocalOrRemoteFetcher implements Fetcher<Object> {
 
 	private final ResourceMapping localStore;
 	
-	private final Fetcher<Set<Object>> remoteFetcher;
+	private final Fetcher<Object> remoteFetcher;
 	
-	public LocalOrRemoteFetcher(ResourceMapping localStore, Fetcher<Set<Object>> remoteFetcher) {
+	public LocalOrRemoteFetcher(ResourceMapping localStore, Fetcher<Object> remoteFetcher) {
 		this.localStore = localStore;
 		this.remoteFetcher = remoteFetcher;
 	}
 
-	public Set<Object> fetch(String uri, RequestTimer timer) {
+	public Object fetch(String uri, RequestTimer timer) {
 		
 		Object local = localStore.getResource(uri);
 		
 		if (local == null) {
 			return remoteFetcher.fetch(uri, timer); 
 		} else {
-		    return Sets.newHashSet(local);
+		    return local;
 		}
 	}
 

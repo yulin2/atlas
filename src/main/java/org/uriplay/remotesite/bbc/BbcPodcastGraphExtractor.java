@@ -19,7 +19,6 @@ import java.util.List;
 
 import org.jdom.Element;
 import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.BeanGraphFactory;
 import org.jherd.beans.Representation;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.remotesite.synd.GenericPodcastGraphExtractor;

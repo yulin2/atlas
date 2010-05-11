@@ -18,7 +18,6 @@ package org.uriplay.remotesite.youtube;
 import java.util.Set;
 
 import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.BeanGraphFactory;
 import org.jherd.beans.Representation;
 import org.jherd.core.MimeType;
 import org.joda.time.DateTimeConstants;
@@ -32,7 +31,6 @@ import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.youtube.YouTubeSource.Video;
 
 import com.google.common.collect.Sets;
-import com.hp.hpl.jena.sparql.pfunction.library.container;
 
 /**
  * {@link BeanGraphExtractor} that processes the result of a query to the YouTube

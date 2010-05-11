@@ -126,11 +126,5 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		</constructor-arg>
 		<property name="nsPrefixes" ref="rdfNsPrefixes" />
 	</bean>
-	
-	<bean id="beanGraphFactory" class="org.jherd.beans.BeanGraphFactory">
-  	   <constructor-arg ref="localResources" />
-  	   <constructor-arg ref="localResources" />
- 	   <property name="beanTypes" ref="resourceTypes" />
-  	</bean>
 
 </beans>

@@ -16,7 +16,6 @@ package org.uriplay.query.content;
 
 import static org.hamcrest.Matchers.equalTo;
 
-import java.util.Set;
 
 import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
@@ -29,7 +28,6 @@ import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 
-import com.google.common.collect.Sets;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -41,7 +39,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 	ContentQuery titlequery = Queries.equalTo(Attributes.BRAND_TITLE, "ex");
 	ContentQuery query = Queries.and(uriquery, titlequery);
 
-	Fetcher<Set<Description>> fetcher = mock(Fetcher.class);
+	Fetcher<Description> fetcher = mock(Fetcher.class);
 	KnownTypeQueryExecutor delegate = mock(KnownTypeQueryExecutor.class);
 	
 	UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate);
@@ -54,7 +52,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		item.addAlias("http://example.com");
 		
 		checking(new Expectations() {{
-			one(fetcher).fetch(with(equalTo("http://example.com")), with(any(RequestTimer.class))); will(returnValue(Sets.newHashSet(item)));
+			one(fetcher).fetch(with(equalTo("http://example.com")), with(any(RequestTimer.class))); will(returnValue(item));
 			one(delegate).executeItemQuery(query);
 		}});
 			
@@ -69,7 +67,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		item.addAlias("http://example.com");
 		
 		checking(new Expectations() {{
-			one(fetcher).fetch(with(equalTo("http://example.com")), with(any(RequestTimer.class))); will(returnValue(Sets.newHashSet(item)));
+			one(fetcher).fetch(with(equalTo("http://example.com")), with(any(RequestTimer.class))); will(returnValue(item));
 			one(delegate).executePlaylistQuery(query);
 		}});
 			

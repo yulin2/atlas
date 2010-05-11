@@ -38,10 +38,10 @@ import com.google.soy.common.collect.Lists;
  */
 public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 
-	private final Fetcher<Set<Description>> fetcher;
+	private final Fetcher<Description> fetcher;
 	private final KnownTypeQueryExecutor delegate;
 	
-	public UriFetchingQueryExecutor(Fetcher<Set<Description>> fetcher, KnownTypeQueryExecutor delegate) {
+	public UriFetchingQueryExecutor(Fetcher<Description> fetcher, KnownTypeQueryExecutor delegate) {
 		this.fetcher = fetcher;
 		this.delegate = delegate;
 	}
@@ -74,8 +74,8 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	private boolean fetch(ContentQuery query) {
 		Set<String> uris = UriExtractor.extractFrom(query);
 		for (String uri : uris) {
-			Set<Description> fetchedDescriptions = fetcher.fetch(uri, new NullRequestTimer());
-			if (fetchedDescriptions == null || fetchedDescriptions.isEmpty()) {
+			Description fetchedDescriptions = fetcher.fetch(uri, new NullRequestTimer());
+			if (fetchedDescriptions == null) {
 				return false;
 			}
 		}
