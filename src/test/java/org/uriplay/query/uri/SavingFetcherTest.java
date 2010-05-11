@@ -38,17 +38,15 @@ public class SavingFetcherTest extends MockObjectTestCase {
 	
 	String URI = "http://example.com";
 	Item item1 = new Item();
-	Item item2 = new Item();
 	Brand brand = new Brand();
-	Set<Item> twoItems = Sets.newHashSet(item1, item2);
 	Set<Description> itemAndBrand = Sets.newHashSet(item1, brand);
 	RequestTimer timer = mock(RequestTimer.class);
 	
 	public void testFetchesItemsFromDelegateAndSavesToStore() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(delegateFetcher).fetch(URI, timer); will(returnValue(twoItems));
-			one(store).createOrUpdateGraph(twoItems, false);
+			one(delegateFetcher).fetch(URI, timer); will(returnValue(item1));
+			one(store).createOrUpdateGraph(Sets.newHashSet(item1), false);
 		}});
 		
 		new SavingFetcher(delegateFetcher, store).fetch(URI, timer);
