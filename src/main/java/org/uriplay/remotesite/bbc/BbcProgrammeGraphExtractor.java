@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jherd.util.Maybe;
+import org.joda.time.LocalDate;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Broadcast;
 import org.uriplay.media.entity.Encoding;
@@ -117,7 +118,9 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 			broadcast.setTransmissionTime(bbcBroadcast.broadcastDateTime());
 			broadcast.setBroadcastOn(channelUrlFrom(bbcBroadcast.broadcastOn()));
 			broadcast.setBroadcastDuration(bbcBroadcast.broadcastDuration());
-			broadcast.setScheduleDate(bbcBroadcast.scheduleDate());
+			if (bbcBroadcast.scheduleDate != null) {
+				broadcast.setScheduleDate(new LocalDate(bbcBroadcast.scheduleDate()));
+			}
 			broadcasts.add(broadcast);
 		}
 		
