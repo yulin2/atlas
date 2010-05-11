@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -121,7 +122,7 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 
 	private Integer readAsNumber(Map<String, String> lookup, String key) {
 		String value = lookup.get(key);
-		if (value == null) {
+		if (StringUtils.isBlank(value)) {
 			return null;
 		}
 		return Integer.valueOf(value);
