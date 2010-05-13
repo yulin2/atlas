@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 
 import java.util.Collections;
+import java.util.Set;
 
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
@@ -12,12 +13,16 @@ import org.springframework.core.io.ClassPathResource;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Broadcast;
+import org.uriplay.media.entity.Countries;
+import org.uriplay.media.entity.Country;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
+import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 
 import com.google.common.collect.Iterables;
+import com.google.soy.common.collect.Sets;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
@@ -57,8 +62,11 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		Location firstEpsiodeLocation = Iterables.get(firstEpsiodeEncoding.getAvailableAt(), 0); 
 		assertThat(firstEpsiodeLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"));
 		assertThat(firstEpsiodeLocation.getTransportType(), is(TransportType.HTMLEMBED));
-		assertThat(firstEpsiodeLocation.getAvailabilityStart(), is(new LocalDate(2009, 07, 01).toDateTimeAtStartOfDay()));
-		assertThat(firstEpsiodeLocation.getAvailabilityEnd(), is(new LocalDate(2010, 12, 31).plusDays(1).toDateTimeAtStartOfDay()));
+		
+		Policy firstEpisodePolicy = firstEpsiodeLocation.getPolicy();
+		assertThat(firstEpisodePolicy.getAvailabilityStart(), is(new LocalDate(2009, 07, 01).toDateTimeAtStartOfDay()));
+		assertThat(firstEpisodePolicy.getAvailabilityEnd(), is(new LocalDate(2010, 12, 31).plusDays(1).toDateTimeAtStartOfDay()));
+		assertThat(firstEpisodePolicy.getAvailableCountries(), is((Set<Country>) Sets.newHashSet(Countries.GB, Countries.IE)));
 		
 		Episode episodeWithABroadcast = (Episode) Iterables.get(brand.getItems(), 4);
 		Version episodeWithABroadcastVersion = Iterables.get(episodeWithABroadcast.getVersions(), 0);

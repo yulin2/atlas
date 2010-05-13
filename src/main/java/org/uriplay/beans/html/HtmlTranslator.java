@@ -508,9 +508,12 @@ public class HtmlTranslator implements BeanGraphWriter {
 		beginNestedDefinitionList("Location", writer);
 		
 			defineTerm("available", location.getAvailable(), writer);
-			defineTerm("availability start", location.getAvailabilityStart(), writer);
-			defineTerm("DRM playable from", location.getDrmPlayableFrom(), writer);
-			defineTerm("restricted by", location.getRestrictedBy(), writer);
+			
+			if (location.getPolicy() != null) {
+				defineTerm("availability start", location.getPolicy().getAvailabilityStart(), writer);
+				defineTerm("DRM playable from", location.getPolicy().getDrmPlayableFrom(), writer);
+			}
+			
 			defineTerm("transport is live", location.getTransportIsLive(), writer);
 			defineTerm("transport type", location.getTransportType(), writer);
 			defineTerm("transport sub type", location.getTransportSubType(), writer);

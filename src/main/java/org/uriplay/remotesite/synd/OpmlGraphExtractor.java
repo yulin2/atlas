@@ -17,19 +17,21 @@ package org.uriplay.remotesite.synd;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
+import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.bbc.BbcPodcastGenreMap;
-import org.uriplay.remotesite.bbc.Policy;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -122,18 +124,19 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 
 	private void addRestrictionsFor(Outline outline, Playlist feed) {
 		
-		// foreach location 'restrictedBy' = 'allow == 'uk' ? 
-		//      http://open.bbc.co.uk/rad/uriplay/policy/7days-uk-only : http://open.bbc.co.uk/rad/uriplay/policy/7days
-		
 		String allow = outline.getAttributeValue("allow");
 		
 		for (Location location : locationsFrom(feed.getItems())) {
 			if (location.getUri() != null && location.getUri().contains("bbc.co.uk")) {
-				if ("uk".equals(allow)) {
-					location.setRestrictedBy(Policy.SEVEN_DAYS_UK_ONLY);
-				} else {
-					location.setRestrictedBy(Policy.SEVEN_DAYS);
+				Policy policy = location.getPolicy();
+				if (policy == null) {
+					policy = new Policy();
+					location.setPolicy(policy);
 				}
+				policy.setAvailabilityLength((int) TimeUnit.SECONDS.convert(7, TimeUnit.DAYS));
+				if ("uk".equals(allow)) {
+					policy.addAvailableCountry(Countries.GB);
+				} 
 			}
 		}
 	}

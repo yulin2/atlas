@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.instanceOf;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.BeanGraphExtractor;
 import org.jherd.remotesite.FetchException;
 import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jherd.remotesite.timing.RequestTimer;

@@ -6,10 +6,12 @@ import java.util.Set;
 
 import org.jherd.beans.BeanGraphWriter;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.UriplayXmlOutput;
@@ -212,15 +214,20 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 	}
 
 	private static void copyProperties(Location location, org.uriplay.media.entity.simple.Location simpleLocation) {
+		Policy policy = location.getPolicy();
+		if (policy != null) {
+			if (policy.getAvailabilityStart() != null) {
+				simpleLocation.setAvailabilityStart(policy.getAvailabilityStart().toDate());
+			}
+			if (policy.getDrmPlayableFrom() != null) {
+				simpleLocation.setDrmPlayableFrom(policy.getDrmPlayableFrom().toDate());
+			}
+			if (policy.getAvailableCountries() != null) {
+				simpleLocation.setAvailableCountries(Countries.toCodes(policy.getAvailableCountries()));
+			}
+		}
 		
-		if (location.getAvailabilityStart() != null) {
-			simpleLocation.setAvailabilityStart(location.getAvailabilityStart().toDate());
-		}
-		if (location.getDrmPlayableFrom() != null) {
-			simpleLocation.setDrmPlayableFrom(location.getDrmPlayableFrom().toDate());
-		}
-		simpleLocation.setRestrictedBy(location.getRestrictedBy());
-	    simpleLocation.setTransportIsLive(location.getTransportIsLive());
+		simpleLocation.setTransportIsLive(location.getTransportIsLive());
 	    if (location.getTransportType() != null) {
 	    	simpleLocation.setTransportType(location.getTransportType().toString());
 	    }

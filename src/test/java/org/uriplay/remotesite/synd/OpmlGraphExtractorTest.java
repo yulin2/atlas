@@ -29,12 +29,13 @@ import org.jherd.remotesite.Fetcher;
 import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Countries;
+import org.uriplay.media.entity.Country;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
-import org.uriplay.remotesite.bbc.Policy;
 import org.uriplay.remotesite.youtube.YouTubeGraphExtractor;
 
 import com.google.common.collect.Iterables;
@@ -155,8 +156,8 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 		
 		Playlist playlist = extractor.extract(source);
 
-		assertThat(locationByUri(LOCATION1_URI, playlist.getPlaylists().get(0).getItems()).getRestrictedBy(), is(Policy.SEVEN_DAYS_UK_ONLY));
-		assertThat(locationByUri(LOCATION2_URI, playlist.getPlaylists().get(1).getItems()).getRestrictedBy(), is(nullValue()));
+		assertThat(locationByUri(LOCATION1_URI, playlist.getPlaylists().get(0).getItems()).getPolicy().getAvailableCountries(), is((Set<Country>) Sets.newHashSet(Countries.GB)));
+		assertThat(locationByUri(LOCATION2_URI, playlist.getPlaylists().get(1).getItems()).getPolicy(), is(nullValue()));
 	}
 	
 

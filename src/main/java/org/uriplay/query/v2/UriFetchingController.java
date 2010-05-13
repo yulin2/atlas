@@ -16,7 +16,6 @@ permissions and limitations under the License. */
 package org.uriplay.query.v2;
 
 import java.util.Collection;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,13 +33,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.uriplay.beans.Filter;
 import org.uriplay.beans.NullProjector;
-import org.uriplay.beans.ProfileFilter;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
 import org.uriplay.media.entity.Description;
-import org.uriplay.query.uri.Profile;
 
 import com.google.soy.common.collect.Lists;
 
@@ -58,28 +54,24 @@ public class UriFetchingController {
 	private final Projector projector;
 	private final Factory<RequestTimer> timerFactory;
 
-	private final Fetcher<Object> queryExecutor;
+	private final Fetcher<Description> queryExecutor;
 
-	private final Filter filter;
-
-	public UriFetchingController(Fetcher<Object> queryExecutor) {
+	public UriFetchingController(Fetcher<Description> queryExecutor) {
 		this(queryExecutor, new NullProjector());
 	}
 	
-	public UriFetchingController(Fetcher<Object> queryExecutor, Projector projector) {
-		this(queryExecutor, new ProfileFilter(), projector, new MultiCallRequestTimer());
+	public UriFetchingController(Fetcher<Description> queryExecutor, Projector projector) {
+		this(queryExecutor, projector, new MultiCallRequestTimer());
 	}
 		
-	UriFetchingController(Fetcher<Object> queryExecutor, Filter filter, Projector projector, Factory<RequestTimer> timerFactory) {
+	UriFetchingController(Fetcher<Description> queryExecutor, Projector projector, Factory<RequestTimer> timerFactory) {
 		this.queryExecutor = queryExecutor;
-		this.filter = filter;
 		this.projector = projector;
 		this.timerFactory = timerFactory;
 	}
 
 	@RequestMapping(method=RequestMethod.GET)
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, 
-			                   @RequestParam(required=false) String profile, 
 			                   @RequestParam(defaultValue="false") boolean outputTimingInfo) throws Exception {
 		
 		String uri = request.getParameter("uri");
@@ -91,7 +83,7 @@ public class UriFetchingController {
 		RequestTimer timer = timerFactory.create();
 		timer.start(this, uri);
 		timer.nest();
-		Query query = new Query(profile, uri, outputTimingInfo);
+		Query query = new Query(uri, outputTimingInfo);
 		try {
 			Description found = (Description) queryExecutor.fetch(uri, timer);
 			
@@ -100,7 +92,6 @@ public class UriFetchingController {
 			}
 
 			Collection<?> beans = Lists.newArrayList(found);
-			beans = filter.applyTo(beans, query.getFilterCriteria());
 			beans = projector.applyTo(beans);
 			
 			return new ModelAndView(VIEW, RequestNs.GRAPH, beans);
@@ -123,9 +114,9 @@ public class UriFetchingController {
 	static class Query {
 
 		private final String uri;
+		private boolean outputTimingInfo = true;
 
-		Query(String profile, String uri, boolean outputTimingInfo) {
-			this.profile = profile;
+		Query(String uri, boolean outputTimingInfo) {
 			this.uri = uri;
 			this.outputTimingInfo = outputTimingInfo;
 		}
@@ -134,8 +125,6 @@ public class UriFetchingController {
 			return uri;
 		}
 
-		private String profile;
-		private boolean outputTimingInfo = true;
 
 		public boolean outputTimingInfo() {
 			return outputTimingInfo;
@@ -145,15 +134,5 @@ public class UriFetchingController {
 			this.outputTimingInfo = outputTimingInfo;
 		}
 		
-		public Profile getFilterCriteria() {
-			if (profile != null) {
-				return Profile.valueOf(profile.toUpperCase());
-			} 
-			return Profile.ALL;
-		}
-		
-		public void setProfile(String profile) {
-			this.profile = profile;
-		}
 	}
 }

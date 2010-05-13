@@ -15,9 +15,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-import java.util.Collection;
-import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,12 +31,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.uriplay.beans.Filter;
 import org.uriplay.beans.NullProjector;
-import org.uriplay.beans.ProfileFilter;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
-import org.uriplay.query.uri.Profile;
+import org.uriplay.media.entity.Description;
+
+import com.google.common.collect.Lists;
 
 /**
 * Controller to handle the query interface to UriPlay.
@@ -54,31 +51,28 @@ public class UriFetchingController {
 	
 	private final Projector projector;
 	private final Factory<RequestTimer> timerFactory;
-	private final Fetcher<Set<Object>> localOrRemoteFetcher;
+	private final Fetcher<Description> localOrRemoteFetcher;
 
-	private final Filter filter;
-
-	public UriFetchingController(Fetcher<Set<Object>> fetcher) {
+	public UriFetchingController(Fetcher<Description> fetcher) {
 		this(fetcher, new NullProjector());
 	}
 	
-	public UriFetchingController(Fetcher<Set<Object>> fetcher, Projector projector) {
-		this(fetcher, new ProfileFilter(), projector, new MultiCallRequestTimer());
+	public UriFetchingController(Fetcher<Description> fetcher, Projector projector) {
+		this(fetcher, projector, new MultiCallRequestTimer());
 	}
 		
-	UriFetchingController(Fetcher<Set<Object>> fetcher, Filter filter, Projector projector, Factory<RequestTimer> timerFactory) {
+	UriFetchingController(Fetcher<Description> fetcher, Projector projector, Factory<RequestTimer> timerFactory) {
 		this.localOrRemoteFetcher = fetcher;
-		this.filter = filter;
 		this.projector = projector;
 		this.timerFactory = timerFactory;
 	}
 
 	@RequestMapping(method=RequestMethod.GET)
 	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, 
-			                   @RequestParam String uri, @RequestParam(required=false) String profile, 
+			                   @RequestParam String uri, 
 			                   @RequestParam(defaultValue="false") boolean outputTimingInfo) throws Exception {
 		
-		Query query = new Query(profile, uri, outputTimingInfo);
+		Query query = new Query(uri, outputTimingInfo);
 		
 		
 		RequestTimer timer = timerFactory.create();
@@ -86,15 +80,13 @@ public class UriFetchingController {
 		timer.nest();
 		
 		try {
+			Description bean = localOrRemoteFetcher.fetch(query.getUri(), timer);
 			
-			Collection<?> beans = localOrRemoteFetcher.fetch(query.getUri(), timer);
-			beans = filter.applyTo(beans, query.getFilterCriteria());
-			beans = projector.applyTo(beans);
-			
-			if (beans == null) {
+			if (bean == null) {
 				throw new ContentNotFoundException(uri);
 			}
-			return new ModelAndView(VIEW, RequestNs.GRAPH, beans);
+			return new ModelAndView(VIEW, RequestNs.GRAPH, projector.applyTo(Lists.newArrayList(bean)));
+
 		} catch (NoMatchingAdapterException nmae) {
 			throw new ContentNotFoundException(nmae);
 		} catch (FetchException fe) {
@@ -112,13 +104,11 @@ public class UriFetchingController {
 	
 	static class Query {
 
-		Query(String profile, String uri, boolean outputTimingInfo) {
-			this.profile = profile;
+		Query(String uri, boolean outputTimingInfo) {
 			this.uri = uri;
 			this.outputTimingInfo = outputTimingInfo;
 		}
 
-		private String profile;
 		private String uri;
 		private boolean outputTimingInfo = true;
 
@@ -128,17 +118,6 @@ public class UriFetchingController {
 
 		public void setOutputTimingInfo(boolean outputTimingInfo) {
 			this.outputTimingInfo = outputTimingInfo;
-		}
-		
-		public Profile getFilterCriteria() {
-			if (profile != null) {
-				return Profile.valueOf(profile.toUpperCase());
-			} 
-			return Profile.ALL;
-		}
-		
-		public void setProfile(String profile) {
-			this.profile = profile;
 		}
 		
 		public void setUri(String uri) {

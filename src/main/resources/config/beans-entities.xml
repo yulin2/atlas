@@ -13,9 +13,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   -->
 
   <util:list id="resourceTypes">
-    <value>org.uriplay.media.reference.entity.AudioFormat</value>
-    <value>org.uriplay.media.reference.entity.ContainerFormat</value>
-    <value>org.uriplay.media.reference.entity.VideoFormat</value>
     <value>org.uriplay.media.entity.Playlist</value>
     <value>org.uriplay.media.entity.Description</value>
     <value>org.uriplay.media.entity.Item</value>
@@ -25,6 +22,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <value>org.uriplay.media.entity.Broadcast</value>
     <value>org.uriplay.media.entity.Encoding</value>
     <value>org.uriplay.media.entity.Location</value>
+    <value>org.uriplay.media.entity.Policy</value>
   </util:list>
 
 </beans>

@@ -16,6 +16,7 @@ package org.uriplay.remotesite.channel4;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,9 +29,12 @@ import org.joda.time.LocalDate;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Broadcast;
+import org.uriplay.media.entity.Countries;
+import org.uriplay.media.entity.Country;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
+import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
@@ -101,6 +105,8 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 			
 			Element mediaGroup = mediaGroup(entry);
 			
+			Set<Country> availableCountries = null;
+			
 			if (mediaGroup != null) {
 				Element thumbnail = mediaGroup.getChild("thumbnail", NS_MEDIA_RSS);
 				if (thumbnail != null) {
@@ -108,13 +114,16 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 					episode.setThumbnail(thumbnailUri.getValue());
 					episode.setImage(thumbnailUri.getValue().replace("200x113", "625x352"));
 				}
+				Element restriction = mediaGroup.getChild("restriction", NS_MEDIA_RSS);
+				if (restriction != null && restriction.getValue() != null) {
+					availableCountries = Countries.fromDelimtedList(restriction.getValue());
+				}
 			}
 			
 			episode.setIsLongForm(true);
-			
 			episode.setDescription(description(entry));
 			
-			episode.addVersion(version(itemUri, lookup));
+			episode.addVersion(version(itemUri, lookup, availableCountries));
 			brand.addItem(episode);
 		}
 		return brand;
@@ -136,7 +145,7 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 		return description.getValue();
 	}
 	
-	private Location location(String uri, Map<String, String> lookup) {
+	private Location location(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
 		Location location = new Location();
 		location.setUri(uri);
 		location.setTransportType(TransportType.HTMLEMBED);
@@ -149,14 +158,21 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 		if (availability != null) {
 			Matcher matcher = AVAILABILTY_RANGE_PATTERN.matcher(availability);
 			if (matcher.matches()) {
-				location.setAvailabilityStart(new DateTime(matcher.group(1)));
-				location.setAvailabilityEnd(new LocalDate(matcher.group(2)).plusDays(1).toDateTimeAtStartOfDay());
+				Policy policy = new Policy()
+					.withAvailabilityStart(new DateTime(matcher.group(1)))
+					.withAvailabilityEnd(new LocalDate(matcher.group(2)).plusDays(1).toDateTimeAtStartOfDay());
+					
+				if (availableCountries != null) {
+					policy.setAvailableCountries(availableCountries);
+				}
+				location.setPolicy(policy);
 			}
 		}
 		return location;
 	}
 
-	private Version version(String uri, Map<String, String> lookup) {
+
+	private Version version(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
 		Version version = new Version();
 		version.setDuration(durationFrom(lookup));
 				
@@ -177,9 +193,8 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 			version.addBroadcast(broadcast);
 		}
 		
-		
 		Encoding encoding = new Encoding();
-		encoding.addAvailableAt(location(uri, lookup));
+		encoding.addAvailableAt(location(uri, lookup, availableCountries));
 		version.addManifestedAs(encoding);
 		return version;
 	}
