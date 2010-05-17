@@ -18,8 +18,8 @@ package org.uriplay.remotesite.youtube;
 import java.util.Set;
 
 import org.jherd.beans.BeanGraphExtractor;
+import org.jherd.beans.BeanGraphFactory;
 import org.jherd.beans.Representation;
-import org.jherd.core.MimeType;
 import org.joda.time.DateTimeConstants;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -27,6 +27,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.reference.entity.ContainerFormat;
+import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.youtube.YouTubeSource.Video;
 

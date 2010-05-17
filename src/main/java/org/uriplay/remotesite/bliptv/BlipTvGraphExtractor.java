@@ -17,12 +17,12 @@ package org.uriplay.remotesite.bliptv;
 
 import java.util.Set;
 
-import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;

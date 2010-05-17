@@ -21,11 +21,11 @@ import static org.hamcrest.Matchers.is;
 import static org.uriplay.remotesite.Matchers.encodingMatcher;
 import static org.uriplay.remotesite.Matchers.locationMatcher;
 
-import org.jherd.core.MimeType;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Version;
+import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.remotesite.Matchers.EncodingMatcher;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;

@@ -39,13 +39,13 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.jherd.util.Selection;
 import org.jherd.util.stats.Score;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.ContentListener;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.query.Selection;
 
 public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 

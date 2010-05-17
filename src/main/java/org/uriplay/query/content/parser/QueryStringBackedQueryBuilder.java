@@ -23,8 +23,6 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.jherd.util.Selection;
-import org.jherd.util.Selection.SelectionBuilder;
 import org.joda.time.DateTime;
 import org.uriplay.beans.JsonTranslator;
 import org.uriplay.content.criteria.ConjunctiveQuery;
@@ -41,6 +39,8 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.soy.common.base.Function;
 import com.google.soy.common.collect.Lists;
+import com.metabroadcast.common.query.Selection;
+import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
 public class QueryStringBackedQueryBuilder {
 
@@ -50,7 +50,7 @@ public class QueryStringBackedQueryBuilder {
 	
 	private final Set<String> ignoreParams = Sets.newHashSet(Selection.START_INDEX_REQUEST_PARAM, Selection.LIMIT_REQUEST_PARAM, JsonTranslator.CALLBACK); 
 
-	private static final SelectionBuilder selectionBuilder = Selection.builder().withMaxLimit(200);
+	private static final SelectionBuilder selectionBuilder = Selection.builder();
 
 	@SuppressWarnings("unchecked")
 	public ContentQuery build(HttpServletRequest request, Class<? extends Description> context) {

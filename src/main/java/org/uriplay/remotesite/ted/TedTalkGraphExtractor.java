@@ -14,12 +14,12 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.ted;
 
-import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;

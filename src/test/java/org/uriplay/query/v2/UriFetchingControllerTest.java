@@ -18,6 +18,7 @@ package org.uriplay.query.v2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +41,7 @@ import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.testing.DummyContentData;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -66,8 +68,8 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 
 	UriFetchingController controller;
 	
-	Set<Object> filteredBeans = (Set) Sets.newHashSet(new Object());
-	Set<Object> projectedBeans = (Set) Sets.newHashSet(new Object());
+	List<Object> foundBeans = (List) Lists.newArrayList(item);
+	List<Object> projectedBeans = (List) Lists.newArrayList(item);
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -75,6 +77,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 		timerFactory = mock(Factory.class);
 		timer = mock(RequestTimer.class);
 		projector = mock(Projector.class);
+		executor = mock(Fetcher.class);
 		controller = new UriFetchingController(executor, projector, timerFactory);
 
 		request.setMethod("GET");
@@ -86,7 +89,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 		checking(new Expectations() {{ 
 			one(executor).fetch(URI, timer); will(returnValue(item));
 			allowing(timerFactory).create(); will(returnValue(timer));
-			one(projector).applyTo(filteredBeans); will(returnValue(projectedBeans));
+			one(projector).applyTo(foundBeans); will(returnValue(projectedBeans));
 			ignoring(timer);
 		}});
 		
@@ -99,7 +102,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(executor).fetch(URI, timer); will(returnValue(item));
-			one(projector).applyTo(filteredBeans); will(returnValue(projectedBeans));
+			one(projector).applyTo(foundBeans); will(returnValue(projectedBeans));
 			one(timerFactory).create(); will(returnValue(timer));
 			one(timer).start(controller, URI);
 			one(timer).nest();
@@ -115,7 +118,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(executor).fetch(URI, timer); will(returnValue(item));
-			one(projector).applyTo(filteredBeans); will(returnValue(projectedBeans));
+			one(projector).applyTo(foundBeans); will(returnValue(projectedBeans));
 			allowing(timerFactory).create(); will(returnValue(timer));
 			ignoring(timer);
 		}});
@@ -161,7 +164,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 			allowing(executor).fetch(URI, timer); will(returnValue(item));
 			allowing(timerFactory).create(); will(returnValue(timer));
 			ignoring(timer);
-			one(projector).applyTo(filteredBeans); will(throwException(new ProjectionException("no root element")));
+			one(projector).applyTo(foundBeans); will(throwException(new ProjectionException("no root element")));
 		}});
 		
 		try {
@@ -176,7 +179,7 @@ public class UriFetchingControllerTest extends MockObjectTestCase {
 
 		checking(new Expectations() {{ 
 			one(executor).fetch(URI, timer); will(returnValue(item));
-			one(projector).applyTo(filteredBeans);
+			one(projector).applyTo(foundBeans);
 			allowing(timerFactory).create(); will(returnValue(timer));
 			allowing(timer).nest();
 			allowing(timer).start(with(anything()), with(any(String.class)));

@@ -1,7 +1,7 @@
 package org.uriplay.beans;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -11,7 +11,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jherd.beans.BeanGraphWriter;
-import org.jherd.core.MimeType;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Encoding;
@@ -21,6 +20,7 @@ import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.UriplayXmlOutput;
+import org.uriplay.media.reference.entity.MimeType;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;

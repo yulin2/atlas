@@ -17,7 +17,6 @@ package org.uriplay.remotesite.synd;
 
 import java.util.List;
 
-import org.jherd.core.MimeType;
 import org.uriplay.logging.Log4JLogger;
 import org.uriplay.logging.UriplayLogger;
 import org.uriplay.media.TransportType;
@@ -26,6 +25,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.reference.entity.AudioFormat;
 import org.uriplay.media.reference.entity.ContainerFormat;
+import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.media.reference.entity.VideoFormat;
 
 import com.google.common.collect.Iterables;

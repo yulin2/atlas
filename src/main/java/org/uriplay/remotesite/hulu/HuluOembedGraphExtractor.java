@@ -17,8 +17,8 @@ package org.uriplay.remotesite.hulu;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.core.MimeType;
 import org.uriplay.feeds.OembedItem;
+import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.oembed.OembedGraphExtractor;
 

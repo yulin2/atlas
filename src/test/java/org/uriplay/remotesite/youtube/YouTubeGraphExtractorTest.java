@@ -19,20 +19,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-
-import static org.uriplay.remotesite.Matchers.*;
+import static org.uriplay.remotesite.Matchers.encodingMatcher;
+import static org.uriplay.remotesite.Matchers.locationMatcher;
 
 import java.util.List;
 import java.util.Set;
 
 import org.hamcrest.Matcher;
-import org.jherd.core.MimeType;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.media.reference.entity.MimeType;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;

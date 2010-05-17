@@ -16,13 +16,13 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.oembed;
 
 import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.core.MimeType;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.remotesite.ContentExtractor;
 
 /**

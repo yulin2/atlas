@@ -17,10 +17,10 @@ package org.uriplay.remotesite;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.jherd.core.MimeType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Location;
+import org.uriplay.media.reference.entity.MimeType;
 
 public class Matchers {
 
