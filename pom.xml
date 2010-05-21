@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>uriplay</groupId>
+    <groupId>org.uriplay</groupId>
     <artifactId>uriplay</artifactId>
     <packaging>war</packaging>
     <version>0.0.1-SNAPSHOT</version>
@@ -96,23 +96,13 @@
     </profiles>
     <dependencies>
         <dependency>
-            <groupId>uriplay-media-reference</groupId>
-            <artifactId>uriplay-media-reference</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>uriplay</groupId>
+            <groupId>org.uriplay</groupId>
             <artifactId>uriplay-local-remote-client</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>uriplay</groupId>
+            <groupId>org.uriplay</groupId>
             <artifactId>uriplay-feeds</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>uriplay-persistence</groupId>
-            <artifactId>uriplay-persistence</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
