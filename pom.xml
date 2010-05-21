@@ -43,36 +43,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-gitexe
-                        </artifactId>
-                        <version>1.3</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.codehaus.plexus</groupId>
-                        <artifactId>plexus-utils</artifactId>
-                        <version>1.5.6</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-gitexe
-                        </artifactId>
-                        <version>1.3</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.codehaus.plexus</groupId>
-                        <artifactId>plexus-utils</artifactId>
-                        <version>1.5.6</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
@@ -122,29 +96,24 @@
     </profiles>
     <dependencies>
         <dependency>
-            <groupId>org.jherd</groupId>
-            <artifactId>jherd</artifactId>
-            <version>0.7.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>uriplay-media-reference</groupId>
             <artifactId>uriplay-media-reference</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>uriplay</groupId>
             <artifactId>uriplay-local-remote-client</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>uriplay</groupId>
             <artifactId>uriplay-feeds</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>uriplay-persistence</groupId>
             <artifactId>uriplay-persistence</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
@@ -341,6 +310,11 @@
         <env>dev</env>
     </properties>
     
+    <scm>
+        <connection>scm:svn:https://uriplay.googlecode.com/svn/uriplay/trunk/</connection>
+        <developerConnection>scm:svn:http://uriplay.googlecode.com/svn/uriplay/trunk/</developerConnection>
+    </scm>
+
     <distributionManagement>
         <repository>
             <id>metabroadcast-mvn</id>
