@@ -4,7 +4,7 @@
     <groupId>uriplay</groupId>
     <artifactId>uriplay</artifactId>
     <packaging>war</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <description>A new version of URIplay, based on JHerd 0.7.0
     </description>
     <build>
