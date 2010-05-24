@@ -98,12 +98,12 @@
         <dependency>
             <groupId>org.uriplay</groupId>
             <artifactId>uriplay-local-remote-client</artifactId>
-            <version>${project.version}</version>
+            <version>${uriplay.version}</version>
         </dependency>
         <dependency>
             <groupId>org.uriplay</groupId>
             <artifactId>uriplay-feeds</artifactId>
-            <version>${project.version}</version>
+            <version>${uriplay.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
@@ -320,6 +320,7 @@
     </dependencies>
     <properties>
         <env>dev</env>
+        <uriplay.version>${project.version}</uriplay.version>
     </properties>
 
     <scm>
