@@ -1,7 +1,9 @@
 package org.uriplay.remotesite.channel4;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 
 import java.util.Collections;
 import java.util.Set;
@@ -22,7 +24,7 @@ import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 
 import com.google.common.collect.Iterables;
-import com.google.soy.common.collect.Sets;
+import com.google.common.collect.Sets;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;

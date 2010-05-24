@@ -33,7 +33,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 
-import com.google.soy.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 

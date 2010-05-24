@@ -15,14 +15,13 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bbc;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import junit.framework.TestCase;
 
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
-
-import junit.framework.TestCase;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)

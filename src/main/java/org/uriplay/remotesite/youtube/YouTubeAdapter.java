@@ -17,12 +17,12 @@ package org.uriplay.remotesite.youtube;
 
 import java.util.regex.Pattern;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 
 import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.util.ResourceNotFoundException;

@@ -27,7 +27,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.BeanGraphWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.Playlist;

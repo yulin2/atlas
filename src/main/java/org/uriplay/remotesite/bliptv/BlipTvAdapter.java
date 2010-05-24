@@ -19,13 +19,13 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 

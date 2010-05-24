@@ -5,12 +5,12 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.NullRequestTimer;
 import org.uriplay.content.criteria.Queries;
 import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.NullRequestTimer;
 
 /**
  * Updater to iterate through stored data for given publishers and refetch to update URIplay

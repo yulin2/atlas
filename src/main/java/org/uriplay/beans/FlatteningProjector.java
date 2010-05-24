@@ -24,7 +24,7 @@ import org.uriplay.media.util.ChildFinder;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
-import com.google.soy.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 /**
  * {@link Projector} that takes a graph of beans (Playlists and Items) and removes

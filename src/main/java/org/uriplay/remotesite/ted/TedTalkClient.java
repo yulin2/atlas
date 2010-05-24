@@ -19,10 +19,10 @@ import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlNavigator;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 public class TedTalkClient implements RemoteSiteClient<HtmlDescriptionOfItem>  {
 

@@ -15,19 +15,19 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.channel4;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 
 import com.google.common.collect.Lists;
 

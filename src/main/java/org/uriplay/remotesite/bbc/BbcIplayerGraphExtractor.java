@@ -23,18 +23,18 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.beans.BeanGraphExtractor;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
-import org.uriplay.persistence.RemoteSiteRefresher;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.RemoteSiteRefresher;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
-import com.google.soy.common.collect.Maps;
+import com.google.common.collect.Maps;
 import com.sun.syndication.feed.synd.SyndCategory;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndLink;

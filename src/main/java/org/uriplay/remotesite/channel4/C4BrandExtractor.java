@@ -40,8 +40,8 @@ import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 
 import com.google.common.base.Splitter;
-import com.google.soy.common.collect.Lists;
-import com.google.soy.common.collect.Maps;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.sun.syndication.feed.synd.SyndContent;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;

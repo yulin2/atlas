@@ -21,7 +21,7 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
-import org.jherd.core.Defect;
+import org.uriplay.feeds.Defect;
 import org.uriplay.remotesite.BaseSource;
 
 import com.google.common.collect.Lists;

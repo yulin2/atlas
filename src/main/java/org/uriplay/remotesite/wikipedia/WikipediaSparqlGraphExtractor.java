@@ -19,16 +19,16 @@ import static org.uriplay.media.vocabulary.DBPO.FILM;
 import static org.uriplay.media.vocabulary.DBPO.PERSON;
 import static org.uriplay.media.vocabulary.DBPO.TELEVISION_EPISODE;
 import static org.uriplay.media.vocabulary.DBPO.TELEVISION_SHOW;
+import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.CONTAINED_IN_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.DESCRIPTION_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.ITEM_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.SAMEAS_ID;
 import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.TITLE_ID;
-import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.CONTAINED_IN_ID;
 
 import java.util.Set;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
+import org.uriplay.beans.BeanGraphExtractor;
+import org.uriplay.beans.Representation;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Episode;

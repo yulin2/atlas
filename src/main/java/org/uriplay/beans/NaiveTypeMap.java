@@ -18,7 +18,6 @@ package org.uriplay.beans;
 import java.util.Collections;
 import java.util.Set;
 
-import org.jherd.rdf.beans.TypeMap;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Broadcast;
 import org.uriplay.media.entity.Encoding;
@@ -28,6 +27,7 @@ import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
+import org.uriplay.rdf.beans.TypeMap;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;

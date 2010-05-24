@@ -4,7 +4,6 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Set;
 
-import org.jherd.beans.BeanGraphWriter;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;

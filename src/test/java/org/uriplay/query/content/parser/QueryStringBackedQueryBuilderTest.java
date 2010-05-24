@@ -22,7 +22,21 @@ import static org.uriplay.content.criteria.Queries.equalTo;
 import static org.uriplay.content.criteria.Queries.greaterThan;
 import static org.uriplay.content.criteria.Queries.lessThan;
 import static org.uriplay.content.criteria.Queries.searchFor;
-import static org.uriplay.content.criteria.attribute.Attributes.*;
+import static org.uriplay.content.criteria.attribute.Attributes.BRAND_GENRE;
+import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TAG;
+import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TITLE;
+import static org.uriplay.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
+import static org.uriplay.content.criteria.attribute.Attributes.EPISODE_POSITION;
+import static org.uriplay.content.criteria.attribute.Attributes.ITEM_GENRE;
+import static org.uriplay.content.criteria.attribute.Attributes.ITEM_PUBLISHER;
+import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TAG;
+import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TITLE;
+import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_AVAILABLE;
+import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_TRANSPORT_TYPE;
+import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_GENRE;
+import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_TAG;
+import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_TITLE;
+import static org.uriplay.content.criteria.attribute.Attributes.VERSION_DURATION;
 
 import java.util.Map;
 

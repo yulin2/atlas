@@ -16,17 +16,18 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.oembed;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
 import org.uriplay.feeds.OembedItem;
+import org.uriplay.persistence.system.RemoteSiteClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)

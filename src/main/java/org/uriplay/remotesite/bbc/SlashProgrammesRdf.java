@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
-import org.jherd.rdf.vocabulary.RDF;
 import org.uriplay.media.vocabulary.PO;
+import org.uriplay.media.vocabulary.RDF;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

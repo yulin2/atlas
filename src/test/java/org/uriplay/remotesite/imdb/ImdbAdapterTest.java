@@ -17,18 +17,17 @@ package org.uriplay.remotesite.imdb;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.util.Set;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Description;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
 

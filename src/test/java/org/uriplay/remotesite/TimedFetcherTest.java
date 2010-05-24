@@ -15,13 +15,13 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite;
 
-import org.jherd.beans.Representation;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
-import org.jherd.remotesite.timing.TimedFetcher;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.beans.Representation;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.remotesite.timing.TimedFetcher;
 
 /**
  * Unit test for {@link TimedFetcher}.

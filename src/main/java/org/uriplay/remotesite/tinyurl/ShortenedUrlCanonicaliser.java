@@ -17,8 +17,8 @@ package org.uriplay.remotesite.tinyurl;
 
 import java.util.Collection;
 
-import org.jherd.http.RedirectShortUrlResolver;
-import org.jherd.http.ShortUrlResolver;
+import org.uriplay.http.RedirectShortUrlResolver;
+import org.uriplay.http.ShortUrlResolver;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 
 /**

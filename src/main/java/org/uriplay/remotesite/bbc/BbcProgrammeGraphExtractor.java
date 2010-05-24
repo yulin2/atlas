@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.util.Maybe;
 import org.joda.time.LocalDate;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Broadcast;
@@ -35,6 +34,7 @@ import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 
 public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgrammeSource, Item> {
 

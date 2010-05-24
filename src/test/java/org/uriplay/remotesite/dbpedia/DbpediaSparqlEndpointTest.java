@@ -17,7 +17,6 @@ package org.uriplay.remotesite.dbpedia;
 
 import junit.framework.TestCase;
 
-import org.jherd.util.testing.EnvironmentTest;
 import org.uriplay.remotesite.sparql.SparqlQuery;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -29,7 +28,6 @@ import com.hp.hpl.jena.sparql.core.ResultBinding;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@EnvironmentTest
 public class DbpediaSparqlEndpointTest extends TestCase {
 
 	public void testCanRetrieveResourceByImdbId() throws Exception {

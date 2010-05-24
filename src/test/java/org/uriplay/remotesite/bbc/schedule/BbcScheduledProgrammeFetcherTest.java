@@ -2,11 +2,10 @@ package org.uriplay.remotesite.bbc.schedule;
 
 import java.util.Set;
 
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
-
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.bbc.schedule.ChannelSchedule.Programme;
 
 import com.google.common.collect.Lists;

@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.logging;
 
-import org.jherd.remotesite.FetchException;
+import org.uriplay.remotesite.FetchException;
 
 /**
  * Logger for recording business events of interest.

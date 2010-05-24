@@ -2,11 +2,8 @@ package org.uriplay.beans;
 
 import java.util.Set;
 
-import org.jherd.beans.PropertyMergeException;
-import org.jherd.beans.Representation;
-import org.jherd.beans.UriPropertySource;
-import org.jherd.naming.ResourceMapping;
 import org.springframework.beans.MutablePropertyValues;
+import org.uriplay.feeds.naming.ResourceMapping;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.content.MutableContentStore;
 

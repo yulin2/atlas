@@ -16,10 +16,10 @@ package org.uriplay.remotesite.channel4;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 
 /**
  * {@link SiteSpecificRepresentationAdapter} for screen-scraping from Channel4's 4OD website

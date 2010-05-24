@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.synd;
 
-import org.jherd.remotesite.timing.RequestTimer;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.BaseSource;
 
 import com.sun.syndication.feed.synd.SyndFeed;

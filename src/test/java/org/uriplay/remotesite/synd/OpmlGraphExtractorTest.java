@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Countries;
@@ -36,6 +34,8 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.youtube.YouTubeGraphExtractor;
 
 import com.google.common.collect.Iterables;

@@ -15,10 +15,10 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bbc;
 
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.synd.SyndicationAdapter;
 import org.uriplay.remotesite.synd.SyndicationFeedClient;
 import org.uriplay.remotesite.synd.SyndicationSource;

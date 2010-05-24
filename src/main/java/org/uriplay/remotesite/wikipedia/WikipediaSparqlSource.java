@@ -23,12 +23,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.rdf.vocabulary.RDF;
-import org.jherd.rdf.vocabulary.RDFS;
-import org.jherd.remotesite.FetchException;
 import org.uriplay.media.vocabulary.DBPO;
 import org.uriplay.media.vocabulary.DBPP;
+import org.uriplay.media.vocabulary.RDF;
+import org.uriplay.media.vocabulary.RDFS;
 import org.uriplay.remotesite.BaseSource;
+import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.sparql.SparqlQuery;
 
 import com.google.common.collect.Sets;

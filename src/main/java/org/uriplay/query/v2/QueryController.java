@@ -18,7 +18,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.jherd.servlet.RequestNs;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -30,6 +29,7 @@ import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
+import org.uriplay.persistence.servlet.RequestNs;
 import org.uriplay.query.content.parser.QueryStringBackedQueryBuilder;
 import org.uriplay.query.content.parser.WebProfileDefaultQueryAttributesSetter;
 

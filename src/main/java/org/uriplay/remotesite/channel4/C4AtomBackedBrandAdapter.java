@@ -20,12 +20,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.SiteSpecificAdapter;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;

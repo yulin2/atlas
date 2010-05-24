@@ -26,7 +26,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.jdom.Element;
-import org.jherd.util.testing.EnvironmentTest;
 
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -36,7 +35,6 @@ import com.sun.syndication.feed.synd.SyndFeed;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@EnvironmentTest
 public class SyndicationFeedClientTest extends TestCase {
 
 	public void testCanReadRssPodcast() throws Exception {

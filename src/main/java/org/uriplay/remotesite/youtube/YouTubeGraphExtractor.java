@@ -17,9 +17,9 @@ package org.uriplay.remotesite.youtube;
 
 import java.util.Set;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
 import org.joda.time.DateTimeConstants;
+import org.uriplay.beans.BeanGraphExtractor;
+import org.uriplay.beans.Representation;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;

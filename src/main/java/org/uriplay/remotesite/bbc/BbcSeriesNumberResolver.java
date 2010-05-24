@@ -14,7 +14,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bbc;
 
-import org.jherd.util.Maybe;
+import com.metabroadcast.common.base.Maybe;
 
 public interface BbcSeriesNumberResolver {
 

@@ -19,8 +19,8 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.FetchException;
 
 import com.google.gdata.client.youtube.YouTubeService;
 import com.google.gdata.data.youtube.VideoEntry;

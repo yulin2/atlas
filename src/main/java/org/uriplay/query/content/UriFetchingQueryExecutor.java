@@ -17,16 +17,16 @@ package org.uriplay.query.content;
 import java.util.List;
 import java.util.Set;
 
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.NullRequestTimer;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.NullRequestTimer;
 
-import com.google.soy.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 /**
  * Finds any uris from a given {@link ContentQuery}, fetches them using a local/remote

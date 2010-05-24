@@ -22,11 +22,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.jherd.rdf.beans.TypeMap;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.rdf.beans.TypeMap;
 
 /**
  *

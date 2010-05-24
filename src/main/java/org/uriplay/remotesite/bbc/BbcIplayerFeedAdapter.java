@@ -19,12 +19,10 @@ import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.id.IdGeneratorFactory;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.synd.SyndicationAdapter;
 import org.uriplay.remotesite.synd.SyndicationFeedClient;
 import org.uriplay.remotesite.synd.SyndicationSource;

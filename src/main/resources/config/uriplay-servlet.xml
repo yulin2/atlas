@@ -100,10 +100,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<constructor-arg><bean class="org.uriplay.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
 	</bean>
 
-	<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="org/jherd/http-error" p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">
+	<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="org/uriplay/http-error" p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">
 		<constructor-arg>
 			<bean class="org.springframework.web.servlet.view.JstlView">
-				<constructor-arg value="/WEB-INF/templates/org/jherd/http-error.jsp" />
+				<constructor-arg value="/WEB-INF/templates/org/uriplay/http-error.jsp" />
 			</bean>
 		</constructor-arg>
 	</bean>
@@ -125,7 +125,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			<list>
 				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_RDF_XML" />
 							<constructor-arg ref="rdfXmlTranslator" />
 						</bean>
@@ -133,7 +133,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				</bean>
 				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="TEXT_HTML" />
 							<constructor-arg>
 								<bean class="org.uriplay.beans.html.HtmlTranslator" />
@@ -143,7 +143,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				</bean>
 				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_XML" />
 							<constructor-arg ref="simpleXmlTranslator" />
 						</bean>
@@ -151,7 +151,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				</bean>
 				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_JSON" />
 							<constructor-arg ref="simpleJsonTranslator" />
 						</bean>
@@ -159,7 +159,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				</bean>
 				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_ATOM_XML" />
 							<constructor-arg>
 								<bean class="org.uriplay.beans.AtomFeedTranslator" />
@@ -169,7 +169,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				</bean>
 				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_RSS_XML" />
 							<constructor-arg>
 								<bean class="org.uriplay.beans.RssFeedTranslator" />
@@ -179,7 +179,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				</bean>
 				<bean id="oembedJsonViewResolver" class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_OEMBED_JSON" />
 							<constructor-arg>
 								<bean class="org.uriplay.beans.OembedJsonTranslator" />
@@ -189,7 +189,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				</bean>
 				<bean id="oembedXmlViewResolver" class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.jherd.beans.view.BeanGraphWriterView">
+						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_OEMBED_XML" />
 							<constructor-arg>
 								<bean class="org.uriplay.beans.OembedXmlTranslator" />
@@ -219,11 +219,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <aop:scoped-proxy/>
     </bean>
 
-    <bean class="org.jherd.servlet.StatusCodeExceptionResolver">
+    <bean class="org.uriplay.persistence.servlet.StatusCodeExceptionResolver">
 		<property name="exceptionMappings">  
 			<map>  
-     			<entry key="org.jherd.servlet.ServletResponseException" value="org/jherd/http-error" />  
-     			<entry key="org.jherd.servlet.ContentNotFoundException" value="org/jherd/http-error" />  
+     			<entry key="org.uriplay.persistence.servlet.ContentNotFoundException" value="org/uriplay/http-error" />  
 		    </map>  
 		</property>  
 	</bean> 

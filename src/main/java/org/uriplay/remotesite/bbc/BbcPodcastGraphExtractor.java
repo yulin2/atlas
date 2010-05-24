@@ -18,7 +18,8 @@ package org.uriplay.remotesite.bbc;
 import java.util.List;
 
 import org.jdom.Element;
-import org.jherd.beans.BeanGraphExtractor;
+import org.uriplay.beans.BeanGraphExtractor;
+import org.uriplay.beans.Representation;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.remotesite.synd.GenericPodcastGraphExtractor;
 import org.uriplay.remotesite.synd.SyndicationSource;

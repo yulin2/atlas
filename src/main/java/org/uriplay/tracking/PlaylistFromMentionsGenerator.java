@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.util.stats.Count;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
@@ -30,9 +29,10 @@ import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.tracking.ContentMention;
 import org.uriplay.persistence.tracking.ContentMentionStore;
 import org.uriplay.persistence.tracking.TrackingSource;
+import org.uriplay.util.stats.Count;
 
-import com.google.soy.common.collect.Lists;
-import com.google.soy.common.collect.Maps;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class PlaylistFromMentionsGenerator implements Runnable {
 

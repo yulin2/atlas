@@ -23,10 +23,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 

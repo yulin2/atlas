@@ -30,7 +30,7 @@ import org.uriplay.persistence.tracking.ContentMention;
 import org.uriplay.persistence.tracking.ContentMentionStore;
 import org.uriplay.persistence.tracking.TrackingSource;
 
-import com.google.soy.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class PlaylistFromMentionsGeneratorTest extends MockObjectTestCase {
 

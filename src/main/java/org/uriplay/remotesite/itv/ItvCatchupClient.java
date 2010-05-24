@@ -24,10 +24,10 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.html.HtmlNavigator;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 /**
  * Client to retrieve XML/HTML from ITV and bind it to our object model. 

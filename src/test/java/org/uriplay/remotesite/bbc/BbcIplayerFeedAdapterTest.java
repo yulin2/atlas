@@ -15,11 +15,11 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bbc;
 
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.synd.SyndicationSource;
 

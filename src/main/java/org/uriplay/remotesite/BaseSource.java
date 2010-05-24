@@ -17,7 +17,7 @@ package org.uriplay.remotesite;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.jherd.beans.BeanGraphExtractor;
+import org.uriplay.beans.BeanGraphExtractor;
 
 /**
  * Convenience base class for the 'Source' classes that are commonly

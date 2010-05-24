@@ -17,8 +17,8 @@ package org.uriplay.remotesite.synd;
 
 import java.util.List;
 
-import org.jherd.beans.BeanGraphExtractor;
-import org.jherd.beans.Representation;
+import org.uriplay.beans.BeanGraphExtractor;
+import org.uriplay.beans.Representation;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;

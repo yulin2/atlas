@@ -14,8 +14,8 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.youtube;
 
-import org.jherd.remotesite.Fetcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.persistence.system.Fetcher;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)

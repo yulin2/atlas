@@ -14,10 +14,10 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.dailymotion;
 
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;

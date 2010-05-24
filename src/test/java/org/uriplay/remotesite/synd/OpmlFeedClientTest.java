@@ -19,8 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
-import org.jherd.util.testing.EnvironmentTest;
-
 import com.sun.syndication.feed.opml.Opml;
 
 /**
@@ -28,7 +26,6 @@ import com.sun.syndication.feed.opml.Opml;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@EnvironmentTest
 public class OpmlFeedClientTest extends TestCase {
 
 	public void testCanReadOpmlOutline() throws Exception {

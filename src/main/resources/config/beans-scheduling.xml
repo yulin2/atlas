@@ -175,7 +175,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	  </property>
   </bean>   
   
-  <bean id="conditionalRunner" abstract="true" class="org.jherd.util.spring.beans.IpAddressBasedConditionalRunner">
+  <bean id="conditionalRunner" abstract="true" class="com.metabroadcast.common.util.IpAddressBasedConditionalRunner">
   	<property name="shouldRunOnMachine" value="${scheduled.tasks.machine.ip}" />
   </bean>
    

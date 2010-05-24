@@ -22,12 +22,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.util.Maybe;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
+import com.metabroadcast.common.base.Maybe;
 
 public class SeriesFetchingBbcSeriesNumberResolver implements BbcSeriesNumberResolver {
 

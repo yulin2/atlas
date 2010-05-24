@@ -18,12 +18,11 @@ package org.uriplay.query.uri;
 import java.util.Collections;
 import java.util.Set;
 
-import org.jherd.naming.ResourceMapping;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
-import org.uriplay.query.uri.LocalOrRemoteFetcher;
+import org.uriplay.feeds.naming.ResourceMapping;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
 
 /**
  * Unit test for {@link LocalOrRemoteFetcher}.

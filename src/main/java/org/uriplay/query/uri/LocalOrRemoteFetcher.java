@@ -16,9 +16,9 @@ permissions and limitations under the License. */
 package org.uriplay.query.uri;
 
 
-import org.jherd.naming.ResourceMapping;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
+import org.uriplay.feeds.naming.ResourceMapping;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
 
 /**
  * Aggregate {@link Fetcher} that checks a local datastore for resources,

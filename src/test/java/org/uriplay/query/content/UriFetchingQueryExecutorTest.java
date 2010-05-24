@@ -16,9 +16,6 @@ package org.uriplay.query.content;
 
 import static org.hamcrest.Matchers.equalTo;
 
-
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.content.criteria.ContentQuery;
@@ -27,6 +24,8 @@ import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
 
 
 /**

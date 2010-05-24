@@ -20,9 +20,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -30,7 +27,10 @@ import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.bbc.BbcPodcastGenreMap;
 
 import com.google.common.collect.Lists;

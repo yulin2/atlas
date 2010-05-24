@@ -15,15 +15,15 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.synd;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
-import org.jherd.remotesite.timing.TimedFetcher;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.SiteSpecificAdapter;
+import org.uriplay.remotesite.timing.TimedFetcher;
 
 import com.sun.syndication.feed.opml.Opml;
 

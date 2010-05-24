@@ -18,8 +18,8 @@ package org.uriplay.remotesite.imdb;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jherd.remotesite.FetchException;
 import org.uriplay.remotesite.BaseSource;
+import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.sparql.SparqlQuery;
 
 import com.hp.hpl.jena.query.ResultSet;

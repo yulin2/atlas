@@ -25,9 +25,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.jherd.rdf.vocabulary.RDF;
 import org.joda.time.DateTime;
 import org.uriplay.media.vocabulary.PO;
+import org.uriplay.media.vocabulary.RDF;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;

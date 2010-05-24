@@ -19,7 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -28,6 +27,7 @@ import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.reference.entity.MimeType;
+import org.uriplay.persistence.system.RequestTimer;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;

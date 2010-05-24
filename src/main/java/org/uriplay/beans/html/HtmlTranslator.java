@@ -14,9 +14,9 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.jherd.beans.BeanGraphWriter;
-import org.jherd.core.Defect;
 import org.springframework.core.io.ClassPathResource;
+import org.uriplay.beans.BeanGraphWriter;
+import org.uriplay.feeds.Defect;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;

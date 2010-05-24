@@ -14,9 +14,9 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.uri;
 
-  import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.RequestTimer;
-import org.uriplay.persistence.content.MutableContentStore;
+  import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
 
 import com.google.common.collect.Sets;
 

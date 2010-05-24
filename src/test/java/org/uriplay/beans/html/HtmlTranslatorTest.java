@@ -5,7 +5,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.uriplay.beans.html.HtmlTranslator;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;

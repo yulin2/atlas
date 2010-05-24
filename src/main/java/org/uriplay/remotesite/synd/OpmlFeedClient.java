@@ -17,7 +17,7 @@ package org.uriplay.remotesite.synd;
 
 import java.net.URL;
 
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.persistence.system.RemoteSiteClient;
 
 import com.sun.syndication.feed.opml.Opml;
 import com.sun.syndication.io.WireFeedInput;

@@ -18,11 +18,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.jherd.util.time.Clock;
-import org.jherd.util.time.SystemClock;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.SystemClock;
 
 public class DatedBbcScheduleUriSource implements Iterable<String> {
 

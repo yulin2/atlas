@@ -34,11 +34,11 @@ import org.uriplay.content.criteria.operator.Operator;
 import org.uriplay.content.criteria.operator.Operators;
 import org.uriplay.media.entity.Description;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.soy.common.base.Function;
-import com.google.soy.common.collect.Lists;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 

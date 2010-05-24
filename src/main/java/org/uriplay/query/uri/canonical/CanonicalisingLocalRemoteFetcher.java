@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.NoMatchingAdapterException;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Sets;
 

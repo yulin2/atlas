@@ -8,10 +8,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
 
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.bbc.schedule.ChannelSchedule.Programme;
 
 /**

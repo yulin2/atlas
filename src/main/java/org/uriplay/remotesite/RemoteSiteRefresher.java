@@ -13,15 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-package org.uriplay.persistence;
+package org.uriplay.remotesite;
 
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.naming.ResourceMapping;
-import org.jherd.persistence.BeanStore;
-import org.jherd.remotesite.Fetcher;
+import org.uriplay.feeds.naming.ResourceMapping;
+import org.uriplay.persistence.BeanStore;
+import org.uriplay.persistence.Refresher;
+import org.uriplay.persistence.system.Fetcher;
 
 /**
  * Refreshes data in the database by reading all the uris we know about, and doing

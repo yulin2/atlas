@@ -30,7 +30,7 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.util.Version;
 
 import com.google.common.collect.Iterables;
-import com.google.soy.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class TitleQueryBuilder {
 

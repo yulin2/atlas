@@ -20,15 +20,15 @@ import static org.uriplay.media.vocabulary.DBPO.TELEVISION_SHOW;
 
 import java.util.Set;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.timing.RequestTimer;
-import org.jherd.remotesite.timing.TimedFetcher;
 import org.uriplay.media.entity.Description;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.dbpedia.DbpediaSparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
+import org.uriplay.remotesite.timing.TimedFetcher;
 
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.query.ResultSet;

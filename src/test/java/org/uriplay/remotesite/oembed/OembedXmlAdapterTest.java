@@ -20,14 +20,14 @@ import static org.hamcrest.Matchers.instanceOf;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.FetchException;
 
 /**
  * Unit test for {@link OembedXmlAdapter}.

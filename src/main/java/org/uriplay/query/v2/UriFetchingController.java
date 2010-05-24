@@ -20,14 +20,6 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jherd.core.Factory;
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.NoMatchingAdapterException;
-import org.jherd.remotesite.timing.MultiCallRequestTimer;
-import org.jherd.remotesite.timing.RequestTimer;
-import org.jherd.servlet.ContentNotFoundException;
-import org.jherd.servlet.RequestNs;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -36,9 +28,17 @@ import org.springframework.web.servlet.ModelAndView;
 import org.uriplay.beans.NullProjector;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
+import org.uriplay.core.Factory;
 import org.uriplay.media.entity.Description;
+import org.uriplay.persistence.servlet.ContentNotFoundException;
+import org.uriplay.persistence.servlet.RequestNs;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.NoMatchingAdapterException;
+import org.uriplay.remotesite.timing.MultiCallRequestTimer;
 
-import com.google.soy.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 /**
  * Controller to handle the query interface to UriPlay.

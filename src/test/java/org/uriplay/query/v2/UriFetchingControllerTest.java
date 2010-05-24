@@ -19,17 +19,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.jherd.core.Factory;
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.NoMatchingAdapterException;
-import org.jherd.remotesite.timing.RequestTimer;
-import org.jherd.servlet.ContentNotFoundException;
-import org.jherd.servlet.RequestNs;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -37,12 +29,18 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
+import org.uriplay.core.Factory;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.servlet.ContentNotFoundException;
+import org.uriplay.persistence.servlet.RequestNs;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.persistence.testing.DummyContentData;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Unit test for {@link UriFetchingController}.

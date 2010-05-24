@@ -17,7 +17,6 @@ package org.uriplay.remotesite.itv;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import org.jherd.remotesite.timing.RequestTimer;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
@@ -25,6 +24,7 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.persistence.system.RequestTimer;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;

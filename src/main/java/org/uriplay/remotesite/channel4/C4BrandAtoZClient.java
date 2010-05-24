@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.jdom.Element;
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.html.HtmlNavigator;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;

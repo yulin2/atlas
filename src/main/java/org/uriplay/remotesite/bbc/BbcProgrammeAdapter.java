@@ -21,12 +21,12 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 

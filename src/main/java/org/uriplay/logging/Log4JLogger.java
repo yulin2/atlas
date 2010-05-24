@@ -17,7 +17,7 @@ package org.uriplay.logging;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jherd.remotesite.FetchException;
+import org.uriplay.remotesite.FetchException;
 
 /**
  * Simple {@link UriplayLogger} that logs using Log4J.

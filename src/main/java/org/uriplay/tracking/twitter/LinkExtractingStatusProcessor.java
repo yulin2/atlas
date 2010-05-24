@@ -2,16 +2,16 @@ package org.uriplay.tracking.twitter;
 
 import java.util.Set;
 
-import org.jherd.util.text.MessageToSafeHtmlConverter;
-import org.jherd.util.text.UrlExtractor;
 import org.joda.time.DateTime;
 import org.uriplay.persistence.tracking.ContentMention;
 import org.uriplay.persistence.tracking.PossibleContentUriMentionListener;
 import org.uriplay.persistence.tracking.TrackingSource;
+import org.uriplay.util.text.MessageToSafeHtmlConverter;
+import org.uriplay.util.text.UrlExtractor;
 
 import twitter4j.Status;
 
-import com.google.soy.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 public class LinkExtractingStatusProcessor implements StatusProcessor {
 

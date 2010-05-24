@@ -16,13 +16,14 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.youtube;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
 
 import java.util.Set;
 
-import org.uriplay.genres.GenreMap;
-
 import junit.framework.TestCase;
+
+import org.uriplay.genres.GenreMap;
 
 import com.google.common.collect.Sets;
 

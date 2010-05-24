@@ -21,8 +21,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 /**
  * Client to retrieve RDF XML representing a version, from BBC /programmes and 

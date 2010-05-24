@@ -21,9 +21,9 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
 import org.uriplay.feeds.OembedItem;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)

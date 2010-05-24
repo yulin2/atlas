@@ -5,10 +5,11 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Iterator;
 
-import org.jherd.util.time.Clock;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
+
+import com.metabroadcast.common.time.Clock;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)

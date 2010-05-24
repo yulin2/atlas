@@ -2,9 +2,9 @@ package org.uriplay.tracking;
 
 import java.util.Set;
 
-import org.jherd.remotesite.Fetcher;
-import org.jherd.remotesite.timing.NullRequestTimer;
 import org.uriplay.media.entity.Description;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.tracking.ContentMention;
 import org.uriplay.persistence.tracking.PossibleContentUriMentionListener;
 

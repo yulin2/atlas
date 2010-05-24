@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.oembed;
 
-import org.jherd.beans.BeanGraphExtractor;
+import org.uriplay.beans.BeanGraphExtractor;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;

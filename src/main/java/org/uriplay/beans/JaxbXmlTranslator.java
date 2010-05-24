@@ -25,7 +25,6 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
-import org.jherd.beans.BeanGraphWriter;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.Location;
 import org.uriplay.media.entity.simple.Playlist;

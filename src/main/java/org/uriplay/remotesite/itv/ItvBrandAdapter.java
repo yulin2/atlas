@@ -18,13 +18,13 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.remotesite.SiteSpecificAdapter;
-import org.jherd.remotesite.http.RemoteSiteClient;
-import org.jherd.remotesite.timing.RequestTimer;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 
 /**
  * {@link SiteSpecificAdapter} for ITV Brands.

@@ -24,8 +24,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.jherd.remotesite.FetchException;
-import org.jherd.util.testing.EnvironmentTest;
+import org.uriplay.remotesite.FetchException;
 
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -39,7 +38,6 @@ import com.google.gdata.data.youtube.YouTubeMediaGroup;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@EnvironmentTest
 public class YouTubeGdataClientTest extends TestCase {
 
 	YouTubeGDataClient gdataClient = new YouTubeGDataClient();

@@ -18,10 +18,10 @@ package org.uriplay.remotesite.bliptv;
 import java.io.Reader;
 import java.util.List;
 
-import org.jherd.remotesite.http.CommonsHttpClient;
-import org.jherd.remotesite.http.RemoteSiteClient;
+import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlNavigator;
+import org.uriplay.remotesite.http.CommonsHttpClient;
 
 import com.google.common.collect.Lists;
 
