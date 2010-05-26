@@ -107,6 +107,12 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 			Brand brand = brandLookup.get(brandUri);
 			if (brand == null) {
 				brand = brand(brandUri);
+				
+				if (brand == null) {
+					playlist.addItem(item);
+					continue; 
+				}
+				
 				brandLookup.put(brandUri, brand);
 				playlist.addPlaylist(brand);
 			}
@@ -163,7 +169,7 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	}
 	
 	private Brand brand(String brandUri) {
-		return (Brand) brandFetcher.fetch(brandUri + ".rdf", new NullRequestTimer());
+		return (Brand) brandFetcher.fetch(brandUri, new NullRequestTimer());
 	}
 
 	private String episodeUriFrom(String selfLink) {

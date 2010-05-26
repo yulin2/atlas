@@ -105,7 +105,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 			atLeast(1).of(episodeRdfClient).get(EPISODE_2_URI + ".rdf"); will(returnValue(episode2Rdf));
 			allowing(episodeRdfClient).get(with(not(startsWith(EPISODE_2_URI)))); will(returnValue(new SlashProgrammesRdf().withEpisode(new SlashProgrammesEpisode())));
 
-			atLeast(1).of(brandClient).fetch(BRAND_URI + ".rdf", new NullRequestTimer()); will(returnValue(BRAND));
+			atLeast(1).of(brandClient).fetch(BRAND_URI, new NullRequestTimer()); will(returnValue(BRAND));
 			allowing(brandClient).fetch(with(not(startsWith(BRAND_URI))), with(new NullRequestTimer())); will(returnValue(new Brand()));
 			
 			atLeast(1).of(versionRdfClient).get("http://www.bbc.co.uk/programmes/b00k2vtr.rdf"); will(returnValue(episode2versionRdf));
