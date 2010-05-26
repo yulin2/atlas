@@ -150,7 +150,7 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 
 	public void testTransportType() throws Exception {
 		Map<String, String[]> params = Maps.newHashMap();
-		params.put("location.transportType", new String[] { "htmlembed" });
+		params.put("location.transportType", new String[] { "link" });
 		check(params, equalTo(LOCATION_TRANSPORT_TYPE, TransportType.LINK));
 	}
 	
