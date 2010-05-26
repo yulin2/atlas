@@ -47,10 +47,12 @@ public class FlatteningProjector implements Projector {
 		return flatten(beanGraph, roots);
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> Collection<T> flatten(Collection<T> beans, Iterable<T> roots) {
 		
 		T root = Iterables.getOnlyElement(roots);
-		List<T> flattened = Lists.newArrayList(root);
+		List<T> flattened = Lists.newArrayList();
+		flattened.add(root);
 		
 		if (root instanceof Playlist) {
 			Playlist rootList = (Playlist) root;

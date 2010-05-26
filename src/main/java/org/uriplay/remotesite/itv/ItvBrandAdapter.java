@@ -50,10 +50,9 @@ public class ItvBrandAdapter implements SiteSpecificAdapter<Playlist> {
 	public Playlist fetch(String uri, RequestTimer timer) {
 		try {
 			List<ItvProgramme> itvBrands = client.get(uri);
-			Playlist playlist = new Playlist();
-			playlist.setCanonicalUri(ITV_URI);
+			Playlist playlist = new Playlist(ITV_URI);
 			playlist.setTitle("ITV CatchUp Menu");
-			playlist.setPlaylists((List) propertyExtractor.extract(new ItvBrandSource(itvBrands, uri)));
+			playlist.setPlaylists(propertyExtractor.extract(new ItvBrandSource(itvBrands, uri)));
 			return playlist;
 		} catch (Exception e) {
 			throw new FetchException("Problem processing data from ITV", e);

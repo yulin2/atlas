@@ -43,8 +43,8 @@ public class TedTalkGraphExtractor  {
 	}
 	
 	private Item item(HtmlDescriptionSource src) {
-		Item item = new Item();
-		item.setCanonicalUri(src.getUri());
+		String uri = src.getUri();
+		Item item = new Item(uri, PerPublisherCurieExpander.CurieAlgorithm.TED.compact(uri));
 
 		HtmlDescriptionOfItem htmlItem = src.getItem();
 		item.setTitle(htmlItem.getTitle());
@@ -52,16 +52,10 @@ public class TedTalkGraphExtractor  {
 		item.setPublisher(TED_PUBLISHER);
 		item.setThumbnail(htmlItem.getThumbnail());
 		item.setIsLongForm(true);
-		addCurieTo(item);
 		return item;
 	}
 
-	private void addCurieTo(Item item) {
-		String curie = PerPublisherCurieExpander.CurieAlgorithm.TED.compact(item.getCanonicalUri());
-		if (curie != null) {
-			item.setCurie(curie);
-		}
-	}
+	
 	
 	private Encoding encoding() {
 		Encoding encoding = new Encoding();

@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
  */
 public class OuterCollectionRemovingProjector implements Projector {
 
+	@SuppressWarnings("unchecked")
 	public <T> Collection<T> applyTo(Collection<T> beans) {
 		
 		checkPreconditionsOn(beans);

@@ -39,7 +39,7 @@ public class SavingFetcherTest extends MockObjectTestCase {
 	String URI = "http://example.com";
 	Item item1 = new Item();
 	Brand brand = new Brand();
-	Set<Description> itemAndBrand = Sets.newHashSet(item1, brand);
+	Set<Description> itemAndBrand = Sets.<Description>newHashSet(item1, brand);
 	RequestTimer timer = mock(RequestTimer.class);
 	
 	public void testFetchesItemsFromDelegateAndSavesToStore() throws Exception {

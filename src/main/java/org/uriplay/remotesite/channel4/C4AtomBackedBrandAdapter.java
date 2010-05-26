@@ -27,8 +27,8 @@ import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.http.CommonsHttpClient;
 
-import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.io.SyndFeedInput;
+import com.sun.syndication.feed.atom.Feed;
+import com.sun.syndication.io.WireFeedInput;
 
 public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 
@@ -36,14 +36,14 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 
 	private final Log log = LogFactory.getLog(getClass());
 	
-	private final RemoteSiteClient<SyndFeed> feedClient;
-	private final ContentExtractor<SyndFeed, Brand> extractor;
+	private final RemoteSiteClient<Feed> feedClient;
+	private final ContentExtractor<Feed, Brand> extractor;
 	
 	public C4AtomBackedBrandAdapter() {
 		this(atomClient(), new C4BrandExtractor());
 	}
 	
-	public C4AtomBackedBrandAdapter(RemoteSiteClient<SyndFeed> feedClient, ContentExtractor<SyndFeed, Brand> extractor) {
+	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> feedClient, ContentExtractor<Feed, Brand> extractor) {
 		this.feedClient = feedClient;
 		this.extractor = extractor;
 	}
@@ -72,15 +72,15 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 		return programmeUri + "/4od.atom";
 	}
 	
-	private static RemoteSiteClient<SyndFeed> atomClient() {
+	private static RemoteSiteClient<Feed> atomClient() {
 		
-		return new RemoteSiteClient<SyndFeed>() {
+		return new RemoteSiteClient<Feed>() {
 			
 			private final CommonsHttpClient client = new CommonsHttpClient();
 
 			@Override
-			public SyndFeed get(String uri) throws Exception {
-				return new SyndFeedInput().build(client.get(uri));
+			public Feed get(String uri) throws Exception {
+				return (Feed) new WireFeedInput().build(client.get(uri));
 			}
 		};
 	}

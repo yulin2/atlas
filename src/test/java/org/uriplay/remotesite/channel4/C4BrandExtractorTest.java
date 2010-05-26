@@ -25,8 +25,8 @@ import org.uriplay.media.entity.Version;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.sun.syndication.feed.synd.SyndFeed;
-import com.sun.syndication.io.SyndFeedInput;
+import com.sun.syndication.feed.atom.Feed;
+import com.sun.syndication.io.WireFeedInput;
 import com.sun.syndication.io.XmlReader;
 
 public class C4BrandExtractorTest extends MockObjectTestCase {
@@ -40,6 +40,8 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		assertThat(brand.getCurie(), is("c4:ramsays-kitchen-nightmares"));
 		assertThat(brand.getTitle(), is("Ramsay's Kitchen Nightmares"));
 		assertThat(brand.getPublisher(), is("channel4.com"));
+		assertThat(brand.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_200x113.jpg"));
+		assertThat(brand.getImage(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_625x352.jpg"));
 
 		Episode firstEpisode = (Episode) Iterables.get(brand.getItems(), 0);
 		
@@ -77,9 +79,9 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		assertThat(episodeWithABroadcastBroadcast.getBroadcastOn(), is("http://www.channel4.com/more4"));
 	}
 	
-	private SyndFeed ramsaysKitchenNighmaresFeed() {
+	private Feed ramsaysKitchenNighmaresFeed() {
 		try {
-			return new SyndFeedInput().build(new XmlReader(new ClassPathResource("4od/ramsays-kitchen-nightmares.atom").getInputStream()));
+			return (Feed) new WireFeedInput().build(new XmlReader(new ClassPathResource("4od/ramsays-kitchen-nightmares.atom").getInputStream()));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

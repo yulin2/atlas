@@ -17,12 +17,6 @@ package org.uriplay.remotesite.dbpedia;
 
 import junit.framework.TestCase;
 
-import org.uriplay.remotesite.sparql.SparqlQuery;
-
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.sparql.core.ResultBinding;
-
 /**
  * Test accessing the DbPedia SPARQL endpoint.
  *
@@ -45,13 +39,13 @@ public class DbpediaSparqlEndpointTest extends TestCase {
 //		assertEquals("http://dbpedia.org/resource/The_Poison_Sky", resource.getURI());
 	}
 
-	private Resource resourceFrom(SparqlQuery query, ResultSet result) {
-		assertTrue(result.hasNext());
-	
-		ResultBinding item = (ResultBinding) result.next();
-		Resource resource = item.getResource(query.getSelectId());
-		return resource;
-	}
+//	private Resource resourceFrom(SparqlQuery query, ResultSet result) {
+//		assertTrue(result.hasNext());
+//	
+//		ResultBinding item = (ResultBinding) result.next();
+//		Resource resource = item.getResource(query.getSelectId());
+//		return resource;
+//	}
 	
 	public void testCanSelectRedirectUri() throws Exception {
 		

@@ -96,6 +96,13 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simplePlaylist.setTitle(fullPlayList.getTitle());
 		simplePlaylist.setPublisher(fullPlayList.getPublisher());
 		simplePlaylist.setDescription(fullPlayList.getDescription());
+		
+		simplePlaylist.setImage(fullPlayList.getImage());
+		simplePlaylist.setThumbnail(fullPlayList.getThumbnail());
+		
+		simplePlaylist.setContainedIn(fullPlayList.getContainedInUris());
+		simplePlaylist.setGenres(fullPlayList.getGenres());
+		simplePlaylist.setTags(fullPlayList.getTags());
 	}
 
 	static org.uriplay.media.entity.simple.Item simpleItemFrom(org.uriplay.media.entity.Item fullItem) {

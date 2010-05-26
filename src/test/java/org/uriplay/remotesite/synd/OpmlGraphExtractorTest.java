@@ -76,12 +76,10 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 		feed = createFeed();
 		source = new OpmlSource(feed, OPML_URI, timer);
 		
-		fetchedFeed1 = new Playlist();
-		fetchedFeed1.setCanonicalUri(FEED1_URI);
+		fetchedFeed1 = new Playlist(FEED1_URI, FEED1_URI);
 		fetchedFeed1.addItem(itemWithLocation(LOCATION1_URI));
 		
-		fetchedFeed2 = new Playlist();
-		fetchedFeed2.setCanonicalUri(FEED2_URI);
+		fetchedFeed2 = new Playlist(FEED2_URI, FEED2_URI);
 		fetchedFeed2.addItem(itemWithLocation(LOCATION2_URI));
 	}
 

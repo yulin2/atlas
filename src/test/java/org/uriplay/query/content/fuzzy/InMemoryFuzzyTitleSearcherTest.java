@@ -120,9 +120,8 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	}
 
 	private Brand brand(String uri, String title) {
-		Brand b = new Brand();
+		Brand b = new Brand(uri, uri);
 		b.setTitle(title);
-		b.setCanonicalUri(uri);
 		return b;
 	}
 	

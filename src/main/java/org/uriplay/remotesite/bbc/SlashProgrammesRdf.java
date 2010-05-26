@@ -136,6 +136,9 @@ class SlashProgrammesRdf {
 			return uris;
 		}
 		
+		public FoafDepiction getDepiction() {
+			return depiction;
+		}
 	}
 	
 	static class SlashProgrammesContainerRef extends SlashProgrammesBase {

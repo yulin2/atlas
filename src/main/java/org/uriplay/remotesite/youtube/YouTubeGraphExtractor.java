@@ -90,8 +90,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 	}
 	
 	private Item item(YouTubeSource source) {
-		Item item = new Item();
-		item.setCanonicalUri(source.getUri());
+		Item item = new Item(source.getUri(), YoutubeUriCanonicaliser.curieFor(source.getUri()));
 
 		item.setTitle(source.getVideoTitle());
 		item.setDescription(source.getDescription());
@@ -102,7 +101,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 		item.setPublisher(YOUTUBE_PUBLISHER);
 		item.setThumbnail(source.getThumbnailImageUri());
 		item.setImage(source.getImageUri());
-		item.setCurie(YoutubeUriCanonicaliser.curieFor(source.getUri()));
 		if (source.getVideos().size() > 0) {
 			item.setIsLongForm((source.getVideos().get(0).getDuration()) > (15 * DateTimeConstants.SECONDS_PER_MINUTE));
 		}

@@ -99,16 +99,12 @@ public class BlipTvGraphExtractor implements ContentExtractor<HtmlDescriptionSou
 	}
 
 	private Item item(String itemUri, HtmlDescriptionOfItem htmlItem) {
-		Item item = new Item();
-		item.setCanonicalUri(itemUri);
+		Item item = new Item(itemUri, PerPublisherCurieExpander.CurieAlgorithm.BLIP.compact(itemUri));
 		
 		item.setTitle(htmlItem.getTitle());
 		item.setDescription(htmlItem.getDescription());
 		item.setPublisher(BLIP_TV_PUBLISHER);
 		item.setThumbnail(htmlItem.getThumbnail());
-		if (itemUri.startsWith("http://blip.tv/file/")) {
-			item.setCurie(PerPublisherCurieExpander.CurieAlgorithm.BLIP.compact(itemUri));
-		}
 		return item;
 	}
 	

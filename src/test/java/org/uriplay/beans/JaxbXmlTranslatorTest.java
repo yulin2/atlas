@@ -60,10 +60,11 @@ public class JaxbXmlTranslatorTest extends TestCase {
 				                            "<aliases>" +
 				                              "<alias>http://www.bbc.co.uk/p/bluepeter</alias>" +
 				                            "</aliases>" +
+				                            "<play:containedIn/>" +
+				                            "<play:genres/>" +
+				                            "<play:tags/>" +
                                				"<title>Blue Peter</title>" +
                                				"<uri>http://www.bbc.co.uk/programmes/bluepeter</uri>" +
-											"<play:containedIn/>" +
-											"<play:genres/>" +
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +
@@ -71,7 +72,6 @@ public class JaxbXmlTranslatorTest extends TestCase {
 												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 												"</play:location>" +
 											"</play:locations>" +
-											"<play:tags/>" +
 										  "</play:item>"));
 	}
 
@@ -94,16 +94,16 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		String output = stream.toString();
 		assertThat(stream.toString(), containsString("<play:item>" +
 														"<aliases/>" +
-                                        				"<title>Blue Peter</title>" +
 														"<play:containedIn/>" +
 														"<play:genres/>" +
+														"<play:tags/>" +
+                                        				"<title>Blue Peter</title>" +
 														"<play:locations>" +
 															"<play:location>" +
 															"<available>true</available>" +
 															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 															"</play:location>" +
 														"</play:locations>" +
-														"<play:tags/>" +
 													  "</play:item>"));
 		
 		assertThat(output, not(containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><location><uri>http://www.bbc.co.uk/bluepeter</uri></location>")));
@@ -124,16 +124,16 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 		assertThat(stream.toString(), containsString("<play:item>" +
 														"<aliases/>" +
-	                                         			"<title>Blue Peter</title>" +
 														"<play:containedIn/>" +
 														"<play:genres/>" +
+														"<play:tags/>" +
+	                                         			"<title>Blue Peter</title>" +
 														"<play:locations>" +
 															"<play:location>" +
 															"<available>true</available>" +
 															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 															"</play:location>" +
 														  "</play:locations>" +
-														  "<play:tags/>" +
 													  "</play:item>"));
 	}
 	
@@ -157,16 +157,16 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 		assertThat(output, containsString("<play:item>" +
 											"<aliases/>" +
-	                               			"<title>Blue Peter</title>" +
 											"<play:containedIn/>" +
 											"<play:genres/>" +
+											"<play:tags/>" +
+	                               			"<title>Blue Peter</title>" +
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +
 												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 												"</play:location>" +
 											  "</play:locations>" +
-											  "<play:tags/>" +
 										  "</play:item>"));
 
 		assertThat(output, not(containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><item>")));

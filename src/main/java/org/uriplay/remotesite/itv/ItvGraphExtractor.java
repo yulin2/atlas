@@ -39,22 +39,20 @@ public class ItvGraphExtractor implements ContentExtractor<ItvBrandSource, List<
 	private static final String ITV_PUBLISHER = "itv.com";
 		
 	private Brand brand(ItvProgramme sourceBrand) {
-		Brand brand = new Brand();
-		brand.setCanonicalUri(sourceBrand.url());
+		String uri = sourceBrand.url();
+		Brand brand = new Brand(uri, curieFrom(uri));
 		brand.setTitle(sourceBrand.title());
-		brand.setCurie(curieFrom(sourceBrand.url()));
 		brand.setPublisher(ITV_PUBLISHER);
 		return brand;
 	}
 	
 	private Episode episode(ItvEpisode sourceEpisode, ItvProgramme sourceBrand) {
-		Episode episode = new Episode();
-		episode.setCanonicalUri(sourceEpisode.url());
+		String uri = sourceEpisode.url();
+		Episode episode = new Episode(uri, curieFrom(uri));
 		episode.setTitle(sourceEpisode.date());
 		episode.setDescription(sourceEpisode.description());
 		episode.setPublisher(ITV_PUBLISHER);
 		episode.setThumbnail(sourceBrand.thumbnail());
-		episode.setCurie(curieFrom(sourceEpisode.url()));
 		episode.setIsLongForm(true);
 		return episode;
 	}

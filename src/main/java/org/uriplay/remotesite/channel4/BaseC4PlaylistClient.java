@@ -38,8 +38,7 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 				brandList.addAll(brandListingPage.getBrandList());
 			}
 			
-			Playlist playlist = new Playlist();
-			playlist.setCanonicalUri(uri);
+			Playlist playlist = new Playlist(uri);
 			
 			for (HtmlBrandSummary brandRef : brandList) {
 				Brand brand = brandClient.fetch(brandRef.getBrandPage(), timer);

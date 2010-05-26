@@ -29,6 +29,7 @@ import org.joda.time.LocalDate;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Broadcast;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Country;
 import org.uriplay.media.entity.Encoding;
@@ -42,12 +43,13 @@ import org.uriplay.remotesite.ContentExtractor;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.sun.syndication.feed.synd.SyndContent;
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
+import com.sun.syndication.feed.atom.Link;
 
-public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
+public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
+	private static final String DC_DURATION = "dc:relation.Duration";
 	private static final String DC_GUIDANCE = "dc:relation.Guidance";
 	private static final String DC_TERMS_AVAILABLE = "dcterms:available";
 	private static final String DC_TX_DATE = "dc:date.TXDate";
@@ -58,8 +60,11 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 
 	private static final Namespace NS_MEDIA_RSS = Namespace.getNamespace("http://search.yahoo.com/mrss/");
 	
-	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
 	private static final String C4_PUBLISHER = "channel4.com";
+
+	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
+	private static final String IMAGE_SIZE = "625x352";
+	private static final String THUMBNAIL_SIZE = "200x113";
 
 	private static Map<String, String> CHANNEL_LOOKUP = channelLookup(); 
 	
@@ -73,27 +78,26 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Brand extract(SyndFeed source) {
-		String fourOdUri = source.getLink();
-		String brandUri = source.getLink().replace("/4od", "");
+	public Brand extract(Feed source) {
+		String fourOdUri = ((Link) source.getAlternateLinks().get(0)).getHref();
+		String brandUri = fourOdUri.replace("/4od", "");
 
-		Brand brand = new Brand();
-		brand.setCanonicalUri(brandUri);
+		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri));
 		brand.addAlias(fourOdUri);
 		brand.setTitle(title(source));
-		brand.setCurie(PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri));
 		brand.setPublisher(C4_PUBLISHER);
-
-		for (SyndEntry entry : (List<SyndEntry>) source.getEntries()) {
+		
+		addImages(brand, source.getLogo());
+		
+		for (Entry entry : (List<Entry>) source.getEntries()) {
 			Map<String, String> lookup = foreignElementLookup(entry);
 			
 			Integer seriesNumber = readAsNumber(lookup, DC_SERIES_NUMBER);
 			Integer episodeNumber = readAsNumber(lookup, DC_EPISODE_NUMBER);
 			
-			Episode episode = new Episode();
-			String itemUri = entry.getLink();
-			episode.setCanonicalUri(itemUri);
-			episode.setCurie(PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri));
+			String itemUri = ((Link) entry.getAlternateLinks().get(0)).getHref();
+			
+			Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri));
 
 			if (episodeNumber != null && seriesNumber != null) {
 				episode.setTitle(String.format(EPISODE_TITLE_TEMPLATE , seriesNumber, episodeNumber));
@@ -111,8 +115,7 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 				Element thumbnail = mediaGroup.getChild("thumbnail", NS_MEDIA_RSS);
 				if (thumbnail != null) {
 					Attribute thumbnailUri = thumbnail.getAttribute("url");
-					episode.setThumbnail(thumbnailUri.getValue());
-					episode.setImage(thumbnailUri.getValue().replace("200x113", "625x352"));
+					addImages(episode, thumbnailUri.getValue());
 				}
 				Element restriction = mediaGroup.getChild("restriction", NS_MEDIA_RSS);
 				if (restriction != null && restriction.getValue() != null) {
@@ -129,6 +132,13 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 		return brand;
 	}
 
+	private void addImages(Content content, String thumbnail) {
+		if (thumbnail != null) {
+			content.setThumbnail(thumbnail);
+			content.setImage(thumbnail.replace(THUMBNAIL_SIZE, IMAGE_SIZE));
+		}
+	}
+
 	private Integer readAsNumber(Map<String, String> lookup, String key) {
 		String value = lookup.get(key);
 		if (StringUtils.isBlank(value)) {
@@ -137,8 +147,8 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 		return Integer.valueOf(value);
 	}
 
-	private String description(SyndEntry entry) {
-		SyndContent description = entry.getDescription();
+	private String description(Entry entry) {
+		com.sun.syndication.feed.atom.Content description = entry.getSummary();
 		if (description == null) {
 			return null;
 		}
@@ -201,7 +211,7 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 
 
 	private Integer durationFrom(Map<String, String> lookup) {
-		String durationString = lookup.get("dc:relation.Duration");
+		String durationString = lookup.get(DC_DURATION);
 		if (durationString == null) {
 			return null;
 		}
@@ -214,7 +224,7 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 	}
 
 	@SuppressWarnings("unchecked")
-	private Element mediaGroup(SyndEntry syndEntry) {
+	private Element mediaGroup(Entry syndEntry) {
 		for (Element element : (List<Element>) syndEntry.getForeignMarkup()) {
 			if (NS_MEDIA_RSS.equals(element.getNamespace()) && "group".equals(element.getName())) {
 				return element;
@@ -224,15 +234,19 @@ public class C4BrandExtractor implements ContentExtractor<SyndFeed, Brand> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Map<String, String> foreignElementLookup(SyndEntry syndEntry) {
+	private Map<String, String> foreignElementLookup(Entry entry) {
+		return foreignElementLookup((Iterable<Element>) entry.getForeignMarkup());
+	}
+
+	private Map<String, String> foreignElementLookup(Iterable<Element> foreignMarkup) {
 		Map<String, String> foreignElementLookup = Maps.newHashMap();
-		for (Element element : (List<Element>) syndEntry.getForeignMarkup()) {
+		for (Element element : foreignMarkup) {
 			foreignElementLookup.put(element.getNamespacePrefix() + ":" + element.getName(), element.getText());
 		}
 		return foreignElementLookup;
 	}
 	
-	private String title(SyndFeed source) {
+	private String title(Feed source) {
 		return source.getTitle().replace(" on 4oD", "");
 	}
 }

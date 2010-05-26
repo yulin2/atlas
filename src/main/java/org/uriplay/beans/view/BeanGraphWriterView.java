@@ -57,7 +57,8 @@ public class BeanGraphWriterView implements View {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Collection<Object> beanGraph(Map<String, Object> model) {
-		return (Collection<Object>) model.get(RequestNs.GRAPH);
+		return (Collection) model.get(RequestNs.GRAPH);
 	}
 }

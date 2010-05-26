@@ -64,7 +64,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 		return playlist;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private String slashProgrammesLinkFor(SyndFeed feed) {
 		
 		List<Element> foreignMarkup = (List<Element>) feed.getForeignMarkup();

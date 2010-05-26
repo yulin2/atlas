@@ -17,8 +17,6 @@ package org.uriplay.remotesite.bbc;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
@@ -39,9 +37,9 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 
 	private final BbcSlashProgrammesVersionRdfClient versionClient;
 
-	private final Log log;
+	private final Log log = LogFactory.getLog(getClass());
 	
-	public BbcProgrammeAdapter() throws JAXBException {
+	public BbcProgrammeAdapter() {
 		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver()));
 	}
 	
@@ -49,7 +47,6 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 		this.versionClient = versionClient;
 		this.episodeClient = episodeClient;
 		this.contentExtractor = propertyExtractor;
-		this.log = LogFactory.getLog(getClass());
 	}
 
 	public boolean canFetch(String uri) {
@@ -70,6 +67,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 				return contentExtractor.extract(source);
 			}
 			if (content.brand() != null) {
+				/* If the brand wasn't already in the DB then it's not available -- create an empty brand with no items */
 				return emptyBrand(content.brand());
 			}
 			return null;
@@ -79,12 +77,23 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 		}
 	}
 	
+	private static final Pattern IMAGE_STEM = Pattern.compile("^(.+)_[0-9]+_[0-9]+\\.[a-zA-Z]+$");
+	private static final BbcProgrammesGenreMap genreMap = new BbcProgrammesGenreMap();
+	
 	private Brand emptyBrand(SlashProgrammesContainerRef brandRef) {
 		String brandUri = brandRef.uri();
-		Brand brand = new Brand();
-		brand.setCanonicalUri(brandUri);
+		Brand brand = new Brand(brandUri, BbcUriCanonicaliser.curieFor(brandUri));
 		brand.setTitle(brandRef.title());
-		brand.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
+		if (brandRef.getDepiction() != null) {
+			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());
+			if (matcher.matches()) {
+				String base = matcher.group(1);
+				brand.setImage(base + BbcProgrammeGraphExtractor.FULL_IMAGE_EXTENSION);
+				brand.setThumbnail(base + BbcProgrammeGraphExtractor.THUMBNAIL_EXTENSION);
+			}
+		}
+		brand.setGenres(genreMap.map(brandRef.genreUris()));
+		brand.setDescription(brandRef.description());
 		brand.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
 		return brand;
 	}

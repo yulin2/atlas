@@ -10,6 +10,7 @@ import org.uriplay.remotesite.bbc.schedule.ChannelSchedule.Programme;
 
 import com.google.common.collect.Lists;
 
+@SuppressWarnings("unchecked")
 public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 
 	RemoteSiteClient<ChannelSchedule> scheduleClient = mock(RemoteSiteClient.class);

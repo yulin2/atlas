@@ -25,11 +25,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.beans.BeanGraphExtractor;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.RemoteSiteRefresher;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 import org.uriplay.remotesite.synd.SyndicationSource;
@@ -52,15 +55,17 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	private final RemoteSiteClient<SlashProgrammesVersionRdf> versionClient;
 	
 	private final BbcProgrammeGraphExtractor programmeGraphExtractor;
+	
+	private final SiteSpecificAdapter<Description> brandFetcher;
 
 	public BbcIplayerGraphExtractor() throws JAXBException {
-		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient());
+		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeAdapter());
 	}
 	
-	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, 
-			                        RemoteSiteClient<SlashProgrammesVersionRdf> versionClient) {
+	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, SiteSpecificAdapter<Description> brandFetcher) {
 		this.episodeClient = episodeClient;
 		this.versionClient = versionClient;
+		this.brandFetcher = brandFetcher;
 		this.programmeGraphExtractor = new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver());
 	}
 
@@ -101,7 +106,7 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 			
 			Brand brand = brandLookup.get(brandUri);
 			if (brand == null) {
-				brand = brand(brandUri, relatedLink);
+				brand = brand(brandUri);
 				brandLookup.put(brandUri, brand);
 				playlist.addPlaylist(brand);
 			}
@@ -157,17 +162,8 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 		return "http://www.bbc.co.uk" + slashProgrammesVersion.resourceUri().replace("#programme", "") + ".rdf";
 	}
 	
-	private Brand brand(String brandUri, SyndLink relatedLink) {
-		Brand brand = new Brand();
-		brand.setCanonicalUri(brandUri);
-		brand.setTitle(brandTitleFrom(relatedLink));
-		brand.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
-		brand.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
-		return brand;
-	}
-
-	private String brandTitleFrom(SyndLink link) {
-		return link.getTitle();
+	private Brand brand(String brandUri) {
+		return (Brand) brandFetcher.fetch(brandUri + ".rdf", new NullRequestTimer());
 	}
 
 	private String episodeUriFrom(String selfLink) {

@@ -35,13 +35,17 @@ public class BbcSlashProgrammesVersionRdfClient implements RemoteSiteClient<Slas
 	private final RemoteSiteClient<Reader> httpClient;
 	private final JAXBContext context;
 
-	public BbcSlashProgrammesVersionRdfClient() throws JAXBException {
+	public BbcSlashProgrammesVersionRdfClient() {
 		this(new CommonsHttpClient().withAcceptHeader("text/html"));
 	}
 	
-	public BbcSlashProgrammesVersionRdfClient(RemoteSiteClient<Reader> httpClient) throws JAXBException {
+	public BbcSlashProgrammesVersionRdfClient(RemoteSiteClient<Reader> httpClient) {
 		this.httpClient = httpClient;
-		context = JAXBContext.newInstance(SlashProgrammesVersionRdf.class);
+		try {
+			context = JAXBContext.newInstance(SlashProgrammesVersionRdf.class);
+		} catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public SlashProgrammesVersionRdf get(String uri) throws Exception {

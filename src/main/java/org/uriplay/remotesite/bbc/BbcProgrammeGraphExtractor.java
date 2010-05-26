@@ -38,6 +38,9 @@ import com.metabroadcast.common.base.Maybe;
 
 public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgrammeSource, Item> {
 
+	static final String FULL_IMAGE_EXTENSION = "_640_360.jpg";
+	static final String THUMBNAIL_EXTENSION = "_150_84.jpg";
+
 	static final String BBC_PUBLISHER = "bbc.co.uk";
 	
 	private final BbcSeriesNumberResolver seriesResolver;
@@ -135,9 +138,9 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	}
 
 	private Item item(String episodeUri, SlashProgrammesContainerRef container, SlashProgrammesRdf episode, String slashProgrammesUri) {
+		String curie = BbcUriCanonicaliser.curieFor(episodeUri);
 		
-		Item item = episode.brand() == null ? new Item() : new Episode();
-		item.setCanonicalUri(episodeUri);
+		Item item = episode.brand() == null ? new Item(episodeUri, curie) : new Episode(episodeUri, curie);
 		
 		Maybe<Integer> seriesNumber = seriesNumber(episode);
 		
@@ -161,14 +164,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 			item.setAliases(aliases);
 		}
 		
-		item.setCurie(BbcUriCanonicaliser.curieFor(episodeUri));
 		item.setIsLongForm(true);
 		
 		item.setPublisher(BBC_PUBLISHER);
 
 		item.setThumbnail(thumbnailUrlFrom(episodeUri));
 		item.setImage(imageUrlFrom(episodeUri));
-
+		
 		return item;
 	}
 
@@ -195,11 +197,11 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	}
 	
 	private String imageUrlFrom(String episodeUri) {
-		return extractImageUrl(episodeUri, "_640_360.jpg");
+		return extractImageUrl(episodeUri, FULL_IMAGE_EXTENSION);
 	}
 	
 	private String thumbnailUrlFrom(String episodeUri) {
-		return extractImageUrl(episodeUri,  "_150_84.jpg");
+		return extractImageUrl(episodeUri,  THUMBNAIL_EXTENSION);
 	}
 	
 	private final Pattern programmeIdPattern = Pattern.compile("(b00[a-z0-9]+).*");

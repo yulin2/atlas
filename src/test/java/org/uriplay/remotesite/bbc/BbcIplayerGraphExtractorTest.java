@@ -36,8 +36,10 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
+import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
@@ -58,6 +60,9 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 	static final String FEED_URI = "http://feeds.bbc.co.uk/iplayer/atoz/a/list";
 	
 	static final String BRAND_URI = "http://www.bbc.co.uk/programmes/b006v04h";
+	
+	static final Brand BRAND = new Brand(BRAND_URI, "curie"); {{ BRAND.setTitle("Spotlight"); }}
+	
 	static final String EPISODE_2_URI = "http://www.bbc.co.uk/programmes/b00kjbrc";
 
 	static final String ORPHAN_ITEM_URI = "http://www.bbc.co.uk/programmes/b00kfr9s";
@@ -68,6 +73,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 	
 	RemoteSiteClient<SlashProgrammesRdf> episodeRdfClient = mock(RemoteSiteClient.class, "episodeClient");
 	RemoteSiteClient<SlashProgrammesVersionRdf> versionRdfClient = mock(RemoteSiteClient.class, "versionClient");
+	SiteSpecificAdapter<Description> brandClient = mock(SiteSpecificAdapter.class);
 	
 	SlashProgrammesVersion version = new SlashProgrammesVersion().withResourceUri("/programmes/b00k2vtr#programme");
 			
@@ -77,8 +83,8 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 	                                                             .withGenres("/programmes/genres/factual/politics#genre", "/programmes/genres/news#genre")
 																 .withTitle("Shutdown");
 
-	SlashProgrammesContainerRef brand = new SlashProgrammesContainerRef().withUri("/programmes/b001#programme");
-	SlashProgrammesRdf episode2Rdf = new SlashProgrammesRdf().withEpisode(episode).withBrand(brand);
+	SlashProgrammesContainerRef brandRef = new SlashProgrammesContainerRef().withUri("/programmes/b001#programme");
+	SlashProgrammesRdf episode2Rdf = new SlashProgrammesRdf().withEpisode(episode).withBrand(brandRef);
 	SlashProgrammesVersionRdf episode2versionRdf = new SlashProgrammesVersionRdf().withLastTransmitted(tuesday10pm, "/bbctwo#service");
 	
 	BbcIplayerGraphExtractor extractor;
@@ -90,7 +96,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		super.setUp();
 		feed = createFeed("bbc-one-feed.atom.xml");
 		source = new SyndicationSource(feed, FEED_URI, TIMER);
-		extractor = new BbcIplayerGraphExtractor(episodeRdfClient, versionRdfClient);
+		extractor = new BbcIplayerGraphExtractor(episodeRdfClient, versionRdfClient, brandClient);
 	}
 	
 	public void testCreatesEpisodesFromFeedEntries() throws Exception {
@@ -98,6 +104,9 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		checking(new Expectations() {{ 
 			atLeast(1).of(episodeRdfClient).get(EPISODE_2_URI + ".rdf"); will(returnValue(episode2Rdf));
 			allowing(episodeRdfClient).get(with(not(startsWith(EPISODE_2_URI)))); will(returnValue(new SlashProgrammesRdf().withEpisode(new SlashProgrammesEpisode())));
+
+			atLeast(1).of(brandClient).fetch(BRAND_URI + ".rdf", new NullRequestTimer()); will(returnValue(BRAND));
+			allowing(brandClient).fetch(with(not(startsWith(BRAND_URI))), with(new NullRequestTimer())); will(returnValue(new Brand()));
 			
 			atLeast(1).of(versionRdfClient).get("http://www.bbc.co.uk/programmes/b00k2vtr.rdf"); will(returnValue(episode2versionRdf));
 		}});

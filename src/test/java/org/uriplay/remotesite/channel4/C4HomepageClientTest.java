@@ -36,7 +36,14 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 	String HIGHLIGHTS_URI = "http://www.channel4.com/programmes/4od/highlights";
 	String MOST_POPULAR_URI = "http://www.channel4.com/programmes/4od/most-popular";
 	
-	RemoteSiteClient<Reader> httpClient = mock(RemoteSiteClient.class);
+	RemoteSiteClient<Reader> httpClient;
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	protected void setUp() throws Exception {
+		super.setUp();
+		httpClient = mock(RemoteSiteClient.class);
+	}
 	
 	public void testRetrievingMostPopularBrands() throws Exception {
 		

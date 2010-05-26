@@ -24,6 +24,7 @@ import org.uriplay.content.criteria.attribute.Attribute;
 import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.content.criteria.operator.Operators;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 /**
@@ -34,8 +35,8 @@ import com.google.common.collect.Sets;
 public class UriExtractor extends QueryVisitorAdapter<Void> {
 
 	private final Set<String> uris;
-	private Set<Attribute<String>> uriAttributes = Sets.newHashSet(Attributes.ITEM_URI, Attributes.BRAND_URI, Attributes.PLAYLIST_URI);
-	private Set<Attribute<String>> curieAttributes = Sets.newHashSet(Attributes.ITEM_CURIE, Attributes.BRAND_CURIE, Attributes.PLAYLIST_CURIE);
+	private Set<Attribute<String>> uriAttributes = ImmutableSet.of(Attributes.ITEM_URI, Attributes.BRAND_URI, Attributes.PLAYLIST_URI);
+	private Set<Attribute<String>> curieAttributes = ImmutableSet.of(Attributes.ITEM_CURIE, Attributes.BRAND_CURIE, Attributes.PLAYLIST_CURIE);
 	
 	private final CurieExpander curieExpander = new PerPublisherCurieExpander();
 
@@ -44,6 +45,7 @@ public class UriExtractor extends QueryVisitorAdapter<Void> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Void visit(StringAttributeQuery query) {
 
 		if (uriAttributes.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
