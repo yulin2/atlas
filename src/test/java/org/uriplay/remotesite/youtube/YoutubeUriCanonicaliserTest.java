@@ -26,6 +26,7 @@ public class YoutubeUriCanonicaliserTest extends MockObjectTestCase {
 	YoutubeUriCanonicaliser canonicaliser;
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 		super.setUp();
 		fetcher = mock(Fetcher.class);
