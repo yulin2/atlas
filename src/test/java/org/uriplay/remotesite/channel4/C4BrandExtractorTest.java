@@ -65,7 +65,7 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		
 		Location firstEpsiodeLocation = Iterables.get(firstEpsiodeEncoding.getAvailableAt(), 0); 
 		assertThat(firstEpsiodeLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"));
-		assertThat(firstEpsiodeLocation.getTransportType(), is(TransportType.HTMLEMBED));
+		assertThat(firstEpsiodeLocation.getTransportType(), is(TransportType.LINK));
 		
 		Policy firstEpisodePolicy = firstEpsiodeLocation.getPolicy();
 		assertThat(firstEpisodePolicy.getAvailabilityStart(), is(new LocalDate(2009, 07, 01).toDateTimeAtStartOfDay()));

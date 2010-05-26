@@ -79,14 +79,14 @@ public class BlipTvGraphExtractor implements ContentExtractor<HtmlDescriptionSou
 	private Location htmlLinkLocation(String uri) {
 		Location location = new Location();
 		location.setUri(uri);
-		location.setTransportType(TransportType.HTMLEMBED);
+		location.setTransportType(TransportType.LINK);
 		return location;
 	}
 
 	private Location embedLocation(String embedCode) {
 		Location location = new Location();
 		location.setEmbedCode(embedCode);
-		location.setTransportType(TransportType.EMBEDOBJECT);
+		location.setTransportType(TransportType.EMBED);
 		location.setTransportSubType("html");
 		return location;
 	}

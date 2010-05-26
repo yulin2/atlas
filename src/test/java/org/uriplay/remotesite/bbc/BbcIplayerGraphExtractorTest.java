@@ -153,7 +153,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 		assertThat(location.getUri(), is("http://www.bbc.co.uk/iplayer/episode/b00kjbrc"));
 		
-		assertThat(location.getTransportType(), is(TransportType.HTMLEMBED));
+		assertThat(location.getTransportType(), is(TransportType.LINK));
 		assertThat(location.getAvailable(), is(true));
 
 		Item orphan = byUri(ORPHAN_ITEM_URI, playlist.getItems());

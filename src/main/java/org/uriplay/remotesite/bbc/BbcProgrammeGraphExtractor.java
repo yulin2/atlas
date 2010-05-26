@@ -84,7 +84,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	private Location htmlLinkLocation(String episodeUri, boolean available) {
 		Location location = new Location();
 		location.setUri(iplayerPageFrom(episodeUri));
-		location.setTransportType(TransportType.HTMLEMBED);
+		location.setTransportType(TransportType.LINK);
 		location.setAvailable(available);
 		return location;
 	}

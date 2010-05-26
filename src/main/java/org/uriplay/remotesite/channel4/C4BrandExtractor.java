@@ -158,7 +158,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 	private Location location(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
 		Location location = new Location();
 		location.setUri(uri);
-		location.setTransportType(TransportType.HTMLEMBED);
+		location.setTransportType(TransportType.LINK);
 		
 		// The feed only contains available content
 		location.setAvailable(true);

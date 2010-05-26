@@ -86,7 +86,7 @@ public class OembedGraphExtractor implements ContentExtractor<OembedSource, Item
 	
 	private Location addLocationPropertiesTo(OembedItem oembed) {
 		Location location = new Location();
-		location.setTransportType(TransportType.EMBEDOBJECT);
+		location.setTransportType(TransportType.EMBED);
 		location.setTransportSubType("html");
 		location.setEmbedCode(oembed.embedCode());
 		String extractedLocationUri = extractLocationUriFrom(oembed);

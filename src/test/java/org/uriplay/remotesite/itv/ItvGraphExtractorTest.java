@@ -85,7 +85,7 @@ public class ItvGraphExtractorTest extends MockObjectTestCase {
 		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 
 		assertThat(location.getUri(), is(EPISODE1_URI));
-		assertThat(location.getTransportType(), is(TransportType.HTMLEMBED));
+		assertThat(location.getTransportType(), is(TransportType.LINK));
 		assertThat(location.getAvailable(), is(true));
 	}
 }

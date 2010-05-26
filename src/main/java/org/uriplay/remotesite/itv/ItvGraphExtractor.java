@@ -102,7 +102,7 @@ public class ItvGraphExtractor implements ContentExtractor<ItvBrandSource, List<
 	private Location location(ItvEpisode episode) {
 		Location location = new Location();
 		location.setUri(episode.url());
-		location.setTransportType(TransportType.HTMLEMBED);
+		location.setTransportType(TransportType.LINK);
 		location.setAvailable(true);
 		return location;
 	}

@@ -67,14 +67,14 @@ public class DailyMotionItemGraphExtractor implements ContentExtractor<HtmlDescr
 	
 	private Location linkLocation(String itemUri) {
 		Location location = new Location();
-		location.setTransportType(TransportType.HTMLEMBED);
+		location.setTransportType(TransportType.LINK);
 		location.setUri(itemUri);
 		return location;
 	}
 
 	private Location embedLocation(HtmlDescriptionOfItem item) {
 		Location location = new Location();
-		location.setTransportType(TransportType.EMBEDOBJECT);
+		location.setTransportType(TransportType.EMBED);
 		location.setTransportSubType("html");
 		location.setEmbedCode(embedCode(item.getVideoSource()));
 		return location;

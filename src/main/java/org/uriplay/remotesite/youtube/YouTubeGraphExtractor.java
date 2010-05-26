@@ -80,7 +80,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
 	private Encoding encodingForWebPage(YouTubeSource source) {
 		Location location = new Location();
-		location.setTransportType(TransportType.HTMLEMBED);
+		location.setTransportType(TransportType.LINK);
 		location.setUri(source.getUri());
 
 		Encoding encoding = new Encoding();
@@ -153,13 +153,13 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 					break;
 				}
 				case 5: {
-					location.setTransportType(TransportType.EMBEDOBJECT);
+					location.setTransportType(TransportType.EMBED);
 					location.setTransportSubType("html");
 					location.setEmbedCode(embedCodeFor(video.getUrl()));
 					break;
 				}
 				default: {
-					location.setTransportType(TransportType.HTMLEMBED);
+					location.setTransportType(TransportType.LINK);
 				}
 			}
 		}

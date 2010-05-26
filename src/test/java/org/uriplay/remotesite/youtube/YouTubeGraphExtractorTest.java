@@ -141,7 +141,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 				.withLocations(hasItems(
 						locationMatcher()
 							.withTransportSubType(is("html"))
-							.withTransportType(is(TransportType.EMBEDOBJECT))));
+							.withTransportType(is(TransportType.EMBED))));
 		
 		
 		Matcher<Encoding> encoding2 = 
@@ -177,7 +177,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 				.withLocations(hasItems(
 						locationMatcher()
 							.withUri(is(ITEM_URI))
-							.withTransportType(is(TransportType.HTMLEMBED))));
+							.withTransportType(is(TransportType.LINK))));
 		
 		assertThat(encodings, hasItems(encoding1, encoding2, encoding3, encoding4));
 	}
@@ -235,7 +235,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
 		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 		
-		assertThat(location.getTransportType(), is(TransportType.HTMLEMBED));
+		assertThat(location.getTransportType(), is(TransportType.LINK));
 	}
 	
 }
