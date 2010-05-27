@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import org.uriplay.remotesite.bbc.BbcUriCanonicaliser;
 import org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser;
 
+import com.metabroadcast.common.base.Maybe;
+
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
@@ -180,19 +182,19 @@ public class PerPublisherCurieExpander implements CurieExpander {
 	}
 	
 	@Override
-	public String expand(String curie) {
+	public Maybe<String> expand(String curie) {
 		String prefix = prefixOf(curie);
 		if (prefix == null) {
-			return null;
+			return Maybe.nothing();
 		}
 		CurieAlgorithm algorithm;
 		try {
 			algorithm = CurieAlgorithm.valueOf(prefix.toUpperCase());
 		} catch (IllegalArgumentException e) {
 			// no matching algorithm
-			return null;
+			return Maybe.nothing();
 		}
-		return algorithm.expand(curie);
+		return Maybe.just(algorithm.expand(curie));
 	}
 
 	private String prefixOf(String curie) {

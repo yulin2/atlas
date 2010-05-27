@@ -26,6 +26,7 @@ import org.uriplay.content.criteria.operator.Operators;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 
 /**
  * Visits clauses of a query and extracts and URI parameters.
@@ -49,13 +50,21 @@ public class UriExtractor extends QueryVisitorAdapter<Void> {
 	public Void visit(StringAttributeQuery query) {
 
 		if (uriAttributes.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
-			uris.addAll((List<String>) query.getValue());
+			for (String value : (List<String>) query.getValue()) {
+				Maybe<String> curieExpanded = curieExpander.expand(value);
+				if (curieExpanded.hasValue()) {
+					uris.add(curieExpanded.requireValue());
+				} else {
+					uris.add(value);
+				}
+			}
+			
 		}
 		if (curieAttributes.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
 			for(String curie : (List<String>) query.getValue()) {
-				String uri = curieExpander.expand(curie);
-				if (uri != null) {
-					uris.add(uri);
+				Maybe<String> uri = curieExpander.expand(curie);
+				if (uri.hasValue()) {
+					uris.add(uri.requireValue());
 				}
 			}
 		}

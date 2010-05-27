@@ -3,6 +3,8 @@ package org.uriplay.query.content;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.MatcherAssert.*;
 
+import com.metabroadcast.common.base.Maybe;
+
 import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.*;
 
 import junit.framework.TestCase;
@@ -16,7 +18,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testExpandsBbcCuries() throws Exception {
 		
-		assertThat(expander.expand("bbc:b006mk25"), is("http://www.bbc.co.uk/programmes/b006mk25"));
+		assertThat(expander.expand("bbc:b006mk25"), is(Maybe.just("http://www.bbc.co.uk/programmes/b006mk25")));
 	}
 	
 	public void testProducesBbcCuries() throws Exception {
@@ -25,8 +27,8 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	}
 	
 	public void testExpandsC4Curies() throws Exception {
-		assertThat(expander.expand("c4:grand-designs"), is("http://www.channel4.com/programmes/grand-designs/4od"));
-		assertThat(expander.expand("c4:grand-designs_2921795"), is("http://www.channel4.com/programmes/grand-designs/4od#2921795"));
+		assertThat(expander.expand("c4:grand-designs"), is(Maybe.just("http://www.channel4.com/programmes/grand-designs/4od")));
+		assertThat(expander.expand("c4:grand-designs_2921795"), is(Maybe.just("http://www.channel4.com/programmes/grand-designs/4od#2921795")));
 	}
 	
 	public void testProducesC4Curies() throws Exception {
@@ -35,8 +37,8 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	}
 	
 	public void testExpandsItvCuries() throws Exception {
-		assertThat(expander.expand("itv:1-2773"), is("http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&Filter=2773"));
-		assertThat(expander.expand("itv:5-100109"), is("http://www.itv.com/ITVPlayer/Video/default.html?ViewType=5&Filter=100109"));
+		assertThat(expander.expand("itv:1-2773"), is(Maybe.just("http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&Filter=2773")));
+		assertThat(expander.expand("itv:5-100109"), is(Maybe.just("http://www.itv.com/ITVPlayer/Video/default.html?ViewType=5&Filter=100109")));
 	}
 	
 	public void testProducesItvCuries() throws Exception {
@@ -46,7 +48,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testExpandsYoutubeCuries() throws Exception {
 		
-		assertThat(expander.expand("yt:4QQkMVddwx0"), is("http://www.youtube.com/watch?v=4QQkMVddwx0"));
+		assertThat(expander.expand("yt:4QQkMVddwx0"), is(Maybe.just("http://www.youtube.com/watch?v=4QQkMVddwx0")));
 	}
 	
 	public void testProducesYoutubeCuries() throws Exception {
@@ -56,7 +58,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testExpandsBlipTvCuries() throws Exception {
 		
-		assertThat(expander.expand("blip:12345"), is("http://blip.tv/file/12345"));
+		assertThat(expander.expand("blip:12345"), is(Maybe.just("http://blip.tv/file/12345")));
 	}
 	
 	public void testProducesBlipTvCuries() throws Exception {
@@ -66,7 +68,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testExpandsVimeoCuries() throws Exception {
 		
-		assertThat(expander.expand("vim:12345"), is("http://vimeo.com/12345"));
+		assertThat(expander.expand("vim:12345"), is(Maybe.just("http://vimeo.com/12345")));
 	}
 	
 	public void testProducesVimeoCuries() throws Exception {
@@ -76,7 +78,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testExpandsDailyMotionCuries() throws Exception {
 		
-		assertThat(expander.expand("dm:xbqomc_dont-do-anything_fun"), is("http://www.dailymotion.com/video/xbqomc_dont-do-anything_fun"));
+		assertThat(expander.expand("dm:xbqomc_dont-do-anything_fun"), is(Maybe.just("http://www.dailymotion.com/video/xbqomc_dont-do-anything_fun")));
 	}
 	
 	public void testProducesDailyMotionCuries() throws Exception {
@@ -86,7 +88,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testExpandsHuluCuries() throws Exception {
 		
-		assertThat(expander.expand("hulu:78417"), is("http://www.hulu.com/watch/78417"));
+		assertThat(expander.expand("hulu:78417"), is(Maybe.just("http://www.hulu.com/watch/78417")));
 	}
 	
 	public void testProducesHuluCuries() throws Exception {
@@ -96,7 +98,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testExpandsTedCuries() throws Exception {
 		
-		assertThat(expander.expand("ted:elizabeth_gilbert_on_genius"), is("http://www.ted.com/talks/elizabeth_gilbert_on_genius.html"));
+		assertThat(expander.expand("ted:elizabeth_gilbert_on_genius"), is(Maybe.just("http://www.ted.com/talks/elizabeth_gilbert_on_genius.html")));
 	}
 	
 	public void testProducesTedCuries() throws Exception {

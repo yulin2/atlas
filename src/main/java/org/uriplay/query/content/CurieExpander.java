@@ -1,10 +1,12 @@
 package org.uriplay.query.content;
 
+import com.metabroadcast.common.base.Maybe;
+
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public interface CurieExpander {
 
-	String expand(String curie);
+	Maybe<String> expand(String curie);
 
 }

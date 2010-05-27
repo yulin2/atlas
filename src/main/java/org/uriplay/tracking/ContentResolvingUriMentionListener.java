@@ -1,7 +1,5 @@
 package org.uriplay.tracking;
 
-import java.util.Set;
-
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.NullRequestTimer;
@@ -10,17 +8,17 @@ import org.uriplay.persistence.tracking.PossibleContentUriMentionListener;
 
 public class ContentResolvingUriMentionListener implements PossibleContentUriMentionListener {
 
-	private final Fetcher<Set<Description>> fetcher;
+	private final Fetcher<Description> fetcher;
 	private final PossibleContentUriMentionListener listener;
 
-	public ContentResolvingUriMentionListener(Fetcher<Set<Description>> fetcher, PossibleContentUriMentionListener listener) {
+	public ContentResolvingUriMentionListener(Fetcher<Description> fetcher, PossibleContentUriMentionListener listener) {
 		this.fetcher = fetcher;
 		this.listener = listener;
 	}
 	
 	@Override
 	public void mentioned(ContentMention mention) {
-		Description description = findDescriptionFrom(mention.uri(), fetcher.fetch(mention.uri(), new NullRequestTimer()));
+		Description description = fetcher.fetch(mention.uri(), new NullRequestTimer());
 		if (description != null) {
 			listener.mentioned(canonicalise(mention, description));
 		}
@@ -30,16 +28,5 @@ public class ContentResolvingUriMentionListener implements PossibleContentUriMen
 		return new ContentMention(description.getCanonicalUri(), mention.source(), mention.externalRef(), mention.mentionedAt());
 	}
 	
-	private Description findDescriptionFrom(String uri, Set<? extends Description> descriptions) {
-		if (descriptions == null) {
-			return null;
-		}
-		for (Description description : descriptions) {
-			Set<String> uris = description.getAllUris();
-			if (uris != null && uris.contains(uri)) {
-				return description;
-			}
- 		}
-		return null;
-	}
+	
 }
