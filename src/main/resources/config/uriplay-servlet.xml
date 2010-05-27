@@ -30,9 +30,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				<prop key="/api/1.0/lists*">listsControllerV1</prop>
 				<prop key="/api/1.0/doc*">uriFetchingControllerV1</prop>
 
-				<prop key="/2.0/list*">listControllerV2</prop>
-				<prop key="/2.0/lists*">listsControllerV2</prop>
-				<prop key="/2.0/doc*">uriFetchingControllerV2</prop>
+				<prop key="/2.0/any*">uriFetchingControllerV2</prop>
 
 				<prop key="/system/c4/update">c4UpdateController</prop>
 				<prop key="/system/bbc/update">bbcUpdateController</prop>
@@ -85,7 +83,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 	
 	<bean id="uriFetchingControllerV2" class="org.uriplay.query.v2.UriFetchingController">
-		<constructor-arg ref="remoteFetcher" />
+		<constructor-arg ref="localOrRemoteFetcher" />
 	</bean>
 	
 	<bean id="itemControllerV2" parent="uriFetchingControllerV2">

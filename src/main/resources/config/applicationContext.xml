@@ -26,7 +26,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	<bean id="localOrRemoteFetcher" class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
 		<constructor-arg>
 			<bean class="org.uriplay.query.uri.LocalOrRemoteFetcher">
-				<constructor-arg ref="localResources" />
+				<constructor-arg ref="mongoDbBackedContentStore" />
 				<constructor-arg ref="savingFetcher" />
 			</bean>
 		</constructor-arg>

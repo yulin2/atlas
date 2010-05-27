@@ -15,12 +15,11 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.uri;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
-import org.uriplay.feeds.naming.ResourceMapping;
+import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.content.ContentStore;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RequestTimer;
 
@@ -32,20 +31,20 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 
 	static final String URI = "http://example.com";
     
-	Fetcher<Object> remoteFetcher;
+	Fetcher<Description> remoteFetcher;
 	RequestTimer timer;
-	ResourceMapping resources;
+	ContentStore resources;
 	
-	Fetcher<Object> localOrRemoteFetcher;
+	Fetcher<Description> localOrRemoteFetcher;
 	
-	Set<Object> beans = Collections.emptySet();
+	Description bean = new Item();
 	
-	@SuppressWarnings("unchecked")
 	@Override
+	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 		super.setUp();
 		remoteFetcher = mock(Fetcher.class);
-		resources = mock(ResourceMapping.class);
+		resources = mock(ContentStore.class);
 		timer = mock(RequestTimer.class);
 		localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
 	}
@@ -53,8 +52,8 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 	public void testQueriesRemoteFetcherForNewUri() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(resources).getResource(URI); will(returnValue(null));
-			one(remoteFetcher).fetch(URI, timer); will(returnValue(beans));
+			one(resources).findByUri(URI); will(returnValue(null));
+			one(remoteFetcher).fetch(URI, timer); will(returnValue(bean));
 			ignoring(timer);
 		}});
 		
@@ -64,7 +63,7 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 	public void testLoadsKnownResourcesFromDatabaseAndDoesNotFetch() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(resources).getResource(URI); will(returnValue(beans));
+			one(resources).findByUri(URI); will(returnValue(bean));
 			ignoring(timer);
 		}});
 		

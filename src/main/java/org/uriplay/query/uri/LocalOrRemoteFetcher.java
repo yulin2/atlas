@@ -16,7 +16,8 @@ permissions and limitations under the License. */
 package org.uriplay.query.uri;
 
 
-import org.uriplay.feeds.naming.ResourceMapping;
+import org.uriplay.media.entity.Description;
+import org.uriplay.persistence.content.ContentStore;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RequestTimer;
 
@@ -26,20 +27,20 @@ import org.uriplay.persistence.system.RequestTimer;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class LocalOrRemoteFetcher implements Fetcher<Object> {
+public class LocalOrRemoteFetcher implements Fetcher<Description> {
 
-	private final ResourceMapping localStore;
+	private final ContentStore localStore;
 	
-	private final Fetcher<Object> remoteFetcher;
+	private final Fetcher<Description> remoteFetcher;
 	
-	public LocalOrRemoteFetcher(ResourceMapping localStore, Fetcher<Object> remoteFetcher) {
+	public LocalOrRemoteFetcher(ContentStore localStore, Fetcher<Description> remoteFetcher) {
 		this.localStore = localStore;
 		this.remoteFetcher = remoteFetcher;
 	}
 
-	public Object fetch(String uri, RequestTimer timer) {
+	public Description fetch(String uri, RequestTimer timer) {
 		
-		Object local = localStore.getResource(uri);
+		Description local = localStore.findByUri(uri);
 		
 		if (local == null) {
 			return remoteFetcher.fetch(uri, timer); 
