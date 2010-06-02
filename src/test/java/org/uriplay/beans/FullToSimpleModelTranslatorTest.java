@@ -15,10 +15,9 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
-import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.entity.simple.Item;
-import org.uriplay.media.entity.simple.UriplayXmlOutput;
+import org.uriplay.media.entity.simple.UriplayQueryResult;
 import org.uriplay.media.reference.entity.MimeType;
 
 import com.google.common.collect.Iterables;
@@ -51,8 +50,8 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 			public boolean matchesSafely(Set<Object> beans) {
 				if (beans.size() != 1) { return false; }
 				Object bean = Iterables.getOnlyElement(beans);
-				if (!(bean instanceof UriplayXmlOutput)) { return false; }
-				UriplayXmlOutput output = (UriplayXmlOutput) bean;
+				if (!(bean instanceof UriplayQueryResult)) { return false; }
+				UriplayQueryResult output = (UriplayQueryResult) bean;
 				if (output.getItems().size() != 1) { return false; }
 				return true;
 			}
@@ -86,26 +85,5 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		assertThat(simpleLocation.getDataContainerFormat(), is(MimeType.VIDEO_3GPP.toString()));
 		assertThat(simpleLocation.getRatingText(), is("adults only"));
 		assertThat(simpleItem.getTitle(), is("Collings and Herrin"));
-	}
-	
-	public void testCanCreateSimplePlaylistFromNestedLists() throws Exception {
-		
-		
-		Playlist showsBeginningWithA = new Playlist();
-
-		Playlist animalHospital = new Playlist();
-		Playlist antiquesRoadshow = new Playlist();
-		animalHospital.addItem(new org.uriplay.media.entity.Item());
-		antiquesRoadshow.addItem(new org.uriplay.media.entity.Item());
-		showsBeginningWithA.addPlaylist(animalHospital);
-		showsBeginningWithA.addPlaylist(antiquesRoadshow);
-		
-		Set<Object> processed = Sets.newHashSet();
-		org.uriplay.media.entity.simple.Playlist simplePlaylist = FullToSimpleModelTranslator.simplePlaylistFrom(showsBeginningWithA, processed);
-
-		
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		new JaxbXmlTranslator().writeTo(Sets.newHashSet((Object) showsBeginningWithA, simplePlaylist), stream);
-		
 	}
 }

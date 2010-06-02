@@ -17,7 +17,6 @@ package org.uriplay.beans;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
-import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -28,13 +27,12 @@ import org.apache.xml.serialize.XMLSerializer;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.Location;
 import org.uriplay.media.entity.simple.Playlist;
-import org.uriplay.media.entity.simple.UriplayXmlOutput;
+import org.uriplay.media.entity.simple.UriplayQueryResult;
 import org.uriplay.media.vocabulary.PLAY;
 import org.uriplay.media.vocabulary.PO;
-import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Iterables;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
@@ -48,7 +46,7 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 	private JAXBContext context;
 
 	public JaxbXmlTranslator() throws JAXBException {
-		context = JAXBContext.newInstance(UriplayXmlOutput.class, Playlist.class, Item.class, Location.class);
+		context = JAXBContext.newInstance(UriplayQueryResult.class, Playlist.class, Item.class, Location.class);
 	}
 	
 	public void writeTo(Collection<Object> graph, OutputStream stream) {
@@ -57,12 +55,8 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 			Marshaller m = context.createMarshaller();
 			m.setProperty("com.sun.xml.bind.namespacePrefixMapper", new UriplayNamespacePrefixMapper());
 
-			Set<Object> processed = Sets.newHashSet();
-			
 			XMLSerializer serializer = getXMLSerializer(stream);
-			
-			outputLists(graph, serializer.asContentHandler(), m, processed);
-			outputItems(graph, serializer.asContentHandler(), m, processed);
+			m.marshal(Iterables.getOnlyElement(graph), serializer.asContentHandler());
 			
 		} catch (JAXBException e) {
 			throw new RuntimeException(e);
@@ -74,42 +68,42 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 		
 	}
 
-	private void outputItems(Collection<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
-
-		for (Object bean : graph) {
-			
-			if (processed.contains(bean)) { continue; }
-			
-			if (bean instanceof Item) {
-				m.marshal(bean, contentHandler);
-				processed.add(bean);
-			}
-		}
-	}
-
-	private void outputLists(Collection<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
-
-		for (Object bean : graph) {
-			
-			if (processed.contains(bean)) { continue; }
-			
-			if (bean instanceof Playlist) {
-				Playlist playlist = (Playlist) bean;
-				m.marshal(playlist, contentHandler);
-				if (playlist.getItems() != null) {
-					for (Item item : playlist.getItems()) {
-						processed.add(item);
-					}
-				}
-				if (playlist.getPlaylists() != null) {
-					for (Playlist list : playlist.getPlaylists()) {
-						processed.add(list);
-					}
-				}
-				processed.add(playlist);
-			}
-		}
-	}
+//	private void outputItems(Collection<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
+//
+//		for (Object bean : graph) {
+//			
+//			if (processed.contains(bean)) { continue; }
+//			
+//			if (bean instanceof Item) {
+//				m.marshal(bean, contentHandler);
+//				processed.add(bean);
+//			}
+//		}
+//	}
+//
+//	private void outputLists(Collection<Object> graph, ContentHandler contentHandler, Marshaller m, Set<Object> processed) throws JAXBException {
+//
+//		for (Object bean : graph) {
+//			
+//			if (processed.contains(bean)) { continue; }
+//			
+//			if (bean instanceof Playlist) {
+//				Playlist playlist = (Playlist) bean;
+//				m.marshal(playlist, contentHandler);
+//				if (playlist.getItems() != null) {
+//					for (Item item : playlist.getItems()) {
+//						processed.add(item);
+//					}
+//				}
+//				if (playlist.getPlaylists() != null) {
+//					for (Playlist list : playlist.getPlaylists()) {
+//						processed.add(list);
+//					}
+//				}
+//				processed.add(playlist);
+//			}
+//		}
+//	}
 	
 	private static XMLSerializer getXMLSerializer(OutputStream oStream) throws SAXException {
      

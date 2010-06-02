@@ -16,7 +16,6 @@ package org.uriplay.beans;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -27,7 +26,7 @@ import junit.framework.TestCase;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.Location;
 import org.uriplay.media.entity.simple.Playlist;
-import org.uriplay.media.entity.simple.UriplayXmlOutput;
+import org.uriplay.media.entity.simple.UriplayQueryResult;
 
 import com.google.common.collect.Sets;
 
@@ -37,9 +36,9 @@ import com.google.common.collect.Sets;
 public class JaxbXmlTranslatorTest extends TestCase {
 
 	OutputStream stream = new ByteArrayOutputStream();
-	Set<Object> graph = Sets.newHashSet();
 
 	public void testCanOutputSimpleItemObjectModelAsXml() throws Exception {
+		Set<Object> graph = Sets.newHashSet();
 
 		Item item = new Item();
 		item.setTitle("Blue Peter");
@@ -49,7 +48,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		location.setUri("http://www.bbc.co.uk/bluepeter");
 		location.setEmbedCode("object><embed></embed></object>");
 		item.addLocation(location);
-		UriplayXmlOutput uriplay = new UriplayXmlOutput();
+		UriplayQueryResult uriplay = new UriplayQueryResult();
 		uriplay.addItem(item);
 		graph.add(uriplay);
 		
@@ -76,41 +75,9 @@ public class JaxbXmlTranslatorTest extends TestCase {
 	}
 
 	
-	public void testCanOutputSimpleObjectModelAsXmlIfAllBeansInSet() throws Exception {
-		
-		Item item = new Item();
-		item.setTitle("Blue Peter");
-		Location location = new Location();
-		location.setUri("http://www.bbc.co.uk/bluepeter");
-		item.addLocation(location);
-		UriplayXmlOutput uriplay = new UriplayXmlOutput();
-		uriplay.addItem(item);
-		graph.add(item);
-		graph.add(location);
-		graph.add(uriplay);
-		
-		new JaxbXmlTranslator().writeTo(graph, stream);
-		
-		String output = stream.toString();
-		assertThat(stream.toString(), containsString("<play:item>" +
-														"<aliases/>" +
-														"<play:containedIn/>" +
-														"<play:genres/>" +
-														"<play:tags/>" +
-                                        				"<title>Blue Peter</title>" +
-														"<play:locations>" +
-															"<play:location>" +
-															"<available>true</available>" +
-															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
-															"</play:location>" +
-														"</play:locations>" +
-													  "</play:item>"));
-		
-		assertThat(output, not(containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><location><uri>http://www.bbc.co.uk/bluepeter</uri></location>")));
-	}
-	
 	public void testCanOutputSimpleListObjectModelAsXml() throws Exception {
-		
+		Set<Object> graph = Sets.newHashSet();
+
 		Playlist list = new Playlist();
 		Item item = new Item();
 		item.setTitle("Blue Peter");
@@ -136,40 +103,4 @@ public class JaxbXmlTranslatorTest extends TestCase {
 														  "</play:locations>" +
 													  "</play:item>"));
 	}
-	
-	public void testCanOutputSimpleListObjectModelAsXmlIfAllBeansInSet() throws Exception {
-		
-		Playlist list = new Playlist();
-		Item item = new Item();
-		item.setTitle("Blue Peter");
-		Location location = new Location();
-		location.setUri("http://www.bbc.co.uk/bluepeter");
-		item.addLocation(location);
-		list.addItem(item);
-
-		graph.add(location);
-		graph.add(item);
-		graph.add(list);
-		
-		new JaxbXmlTranslator().writeTo(graph, stream);
-		
-		String output = stream.toString();
-		
-		assertThat(output, containsString("<play:item>" +
-											"<aliases/>" +
-											"<play:containedIn/>" +
-											"<play:genres/>" +
-											"<play:tags/>" +
-	                               			"<title>Blue Peter</title>" +
-											"<play:locations>" +
-												"<play:location>" +
-												"<available>true</available>" +
-												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
-												"</play:location>" +
-											  "</play:locations>" +
-										  "</play:item>"));
-
-		assertThat(output, not(containsString("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><item>")));
-	}
-
 }

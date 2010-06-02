@@ -13,7 +13,7 @@ import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.entity.simple.Item;
-import org.uriplay.media.entity.simple.UriplayXmlOutput;
+import org.uriplay.media.entity.simple.UriplayQueryResult;
 import org.uriplay.media.util.ChildFinder;
 
 import com.google.common.base.Predicates;
@@ -41,7 +41,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 	@Override
 	public void writeTo(Collection<Object> fullGraph, OutputStream stream) {
 		
-		UriplayXmlOutput outputGraph = new UriplayXmlOutput();
+		UriplayQueryResult outputGraph = new UriplayQueryResult();
 		Set<Object> processed = Sets.newHashSet();
 		
 		Iterable<Object> beansToProcess = rootsOf(fullGraph);

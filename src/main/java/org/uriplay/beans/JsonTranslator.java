@@ -18,20 +18,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.Collection;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.uriplay.media.entity.simple.Item;
-import org.uriplay.media.entity.simple.Playlist;
 
-import com.google.common.collect.Sets;
+import com.google.common.base.Charsets;
+import com.google.common.collect.Iterables;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -55,23 +52,16 @@ public class JsonTranslator implements BeanGraphWriter {
 
     public void writeTo(Collection<Object> graph, OutputStream stream) {
 
-        Set<Object> processed = Sets.newHashSet();
         String callback = callback(request);
 
-        OutputStreamWriter writer;
-        try {
-            writer = new OutputStreamWriter(stream, "UTF-8");
-        } catch (UnsupportedEncodingException uee) {
-            throw new RuntimeException(uee);
-        }
+        OutputStreamWriter writer = new OutputStreamWriter(stream, Charsets.UTF_8);
 
         try {
             if (callback != null) {
                 writer.write(callback+"(");
             }
-            outputLists(graph, writer, processed);
-            outputItems(graph, writer, processed);
-
+            writer.write(gson.toJson(Iterables.getOnlyElement(graph)));
+            
             if (callback != null) {
                 writer.write(");");
             }
@@ -85,40 +75,7 @@ public class JsonTranslator implements BeanGraphWriter {
             }
         }
     }
-
-    private void outputItems(Collection<Object> graph, Writer writer, Set<Object> processed) throws IOException {
-
-        for (Object bean : graph) {
-
-            if (processed.contains(bean)) {
-                continue;
-            }
-
-            if (bean instanceof Item) {
-                writer.write(gson.toJson(bean));
-                processed.add(bean);
-            }
-        }
-    }
-
-    private void outputLists(Collection<Object> graph, Writer writer, Set<Object> processed) throws IOException {
-
-        for (Object bean : graph) {
-
-            if (processed.contains(bean)) {
-                continue;
-            }
-
-            if (bean instanceof Playlist) {
-                Playlist playlist = (Playlist) bean;
-                writer.write(gson.toJson(bean));
-                for (Item item : playlist.getItems()) {
-                    processed.add(item);
-                }
-                processed.add(playlist);
-            }
-        }
-    }
+  
 
     private String callback(HttpServletRequest request) {
         if (request == null) {
