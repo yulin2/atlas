@@ -22,7 +22,6 @@ import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.uriplay.beans.JsonTranslator;
 import org.uriplay.content.criteria.ConjunctiveQuery;
@@ -50,6 +49,8 @@ public class QueryStringBackedQueryBuilder {
 	
 	private final Set<String> ignoreParams = Sets.newHashSet(Selection.START_INDEX_REQUEST_PARAM, Selection.LIMIT_REQUEST_PARAM, JsonTranslator.CALLBACK); 
 
+	private final DateTimeInQueryParser dateTimeParser = new DateTimeInQueryParser();
+	
 	private static final SelectionBuilder selectionBuilder = Selection.builder();
 
 	@SuppressWarnings("unchecked")
@@ -176,7 +177,7 @@ public class QueryStringBackedQueryBuilder {
 					return Integer.parseInt(paramValue);
 				}
 				if (DateTime.class.equals(type)) {
-					return coerceToDate(paramValue);
+					return dateTimeParser.parse(paramValue);
 				}
 				if (Enum.class.isAssignableFrom(type)) {
 					return coerceToEnumValue(paramValue, type);
@@ -194,12 +195,6 @@ public class QueryStringBackedQueryBuilder {
 		return Enum.valueOf((Class) type, paramValue.toUpperCase());
 	}
 
-	private DateTime coerceToDate(String param) {
-		if (StringUtils.isNumeric(param)) {
-			return new DateTime(Long.valueOf(param));
-		}
-		throw new IllegalArgumentException("DateTime not in a recognised format");
-	}
 	
 	public QueryStringBackedQueryBuilder withIgnoreParams(String... params) {
 		ignoreParams.addAll(Arrays.asList(params));
