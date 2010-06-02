@@ -51,8 +51,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    		<bean parent="conditionalRunner">
     		<constructor-arg>
  					 <bean class="org.uriplay.persistence.system.UriRefresher">
- 					 	<constructor-arg ref="contentStore"/>
- 					 	<constructor-arg ref="remoteFetcher"/>
+ 					 	<property name="contentStore" ref="contentStore"/>
+                        <property name="fetcher" ref="remoteFetcher"/>
  					 	<property name="missingContentShouldBeMarkedAsUnavailable" value="false"/>
  					 	<property name="uris">
 						  <list>

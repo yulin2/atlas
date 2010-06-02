@@ -12,16 +12,13 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   - Application context definition for URIplay. See uriplay-servlet.xml for webapp config.
   -->
 
- 	<import resource="beans-persistence.xml"/>
- 	<import resource="beans-scheduling.xml" />
- 	<import resource="beans-short-url-services.xml" />
- 	<import resource="beans-tracking.xml" />
+ 	<import resource="classpath:beans-persistence.xml"/>
+ 	<import resource="classpath:beans-scheduling.xml" />
+ 	<import resource="classpath:beans-short-url-services.xml" />
+ 	<import resource="classpath:beans-tracking.xml" />
+    <import resource="classpath:uriplay-servlet.xml" />
     
-    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location">
-            <value>classpath:${env}.properties</value>
-        </property>
-    </bean>
+    <bean id="contextConfigurer" class="com.metabroadcast.common.properties.ContextConfigurer" init-method="init"/>
 
 	<bean id="localOrRemoteFetcher" class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
 		<constructor-arg>
