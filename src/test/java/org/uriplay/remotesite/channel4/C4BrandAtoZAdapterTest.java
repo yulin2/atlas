@@ -87,6 +87,7 @@ public class C4BrandAtoZAdapterTest extends MockObjectTestCase {
 		Playlist playlist = adapter.fetch(uri, null);
 		
 		assertThat(playlist.getCanonicalUri(), is("http://www.channel4.com/programmes/atoz/a"));
+		assertThat(playlist.getCurie(), is("c4:atoz_a"));
 		assertThat(playlist.getPlaylists(), is(Arrays.<Playlist>asList(brand101, brand102, brand103)));
 	}
 	

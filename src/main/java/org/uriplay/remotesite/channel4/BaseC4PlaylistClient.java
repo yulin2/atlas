@@ -9,6 +9,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 
@@ -38,7 +39,7 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 				brandList.addAll(brandListingPage.getBrandList());
 			}
 			
-			Playlist playlist = new Playlist(uri);
+			Playlist playlist = new Playlist(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri));
 			
 			for (HtmlBrandSummary brandRef : brandList) {
 				Brand brand = brandClient.fetch(brandRef.getBrandPage(), timer);
@@ -61,4 +62,5 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 			throw new FetchException("Problem processing html page from: " + uri, e);
 		}
 	}
+
 }

@@ -14,12 +14,17 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.channel4;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.xml.bind.JAXBException;
 
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.SiteSpecificAdapter;
+
+import com.metabroadcast.common.base.Maybe;
 
 /**
  * {@link SiteSpecificRepresentationAdapter} for screen-scraping from Channel4's 4OD website
@@ -28,7 +33,9 @@ import org.uriplay.remotesite.SiteSpecificAdapter;
  */
 public class C4BrandAtoZAdapter extends BaseC4PlaylistClient implements SiteSpecificAdapter<Playlist> {
 
-	private static final String baseUri = "http://www.channel4.com/programmes/atoz";
+	private static final String C4_ATOZ_CURIE_PREFIX = "c4:atoz_";
+	private static final String C4_ATOZ_URI_PREFIX = "http://www.channel4.com/programmes/atoz/";
+	private static final Pattern ATOZ = Pattern.compile(C4_ATOZ_URI_PREFIX + "([a-z]|0-9)");
 
 	public C4BrandAtoZAdapter() throws JAXBException {
 		this(new C4BrandAtoZClient(), new C4AtomBackedBrandAdapter());
@@ -39,6 +46,21 @@ public class C4BrandAtoZAdapter extends BaseC4PlaylistClient implements SiteSpec
 	}
 
 	public boolean canFetch(String uri) {
-		return uri.startsWith(baseUri) && uri.length() > baseUri.length();
+		return ATOZ.matcher(uri).matches();
+	}
+
+	public static Maybe<String> compact(String uri) {
+		Matcher matcher = ATOZ.matcher(uri);
+		if (matcher.matches()) {
+			return Maybe.just(C4_ATOZ_CURIE_PREFIX +  matcher.group(1));
+		}
+		return Maybe.nothing();
+	}
+
+	public static Maybe<String> expand(String curie) {
+		if (curie.startsWith(C4_ATOZ_CURIE_PREFIX)) {
+			return Maybe.just(C4_ATOZ_URI_PREFIX + curie.substring(C4_ATOZ_CURIE_PREFIX.length()));
+		}
+		return Maybe.nothing();
 	}
 }

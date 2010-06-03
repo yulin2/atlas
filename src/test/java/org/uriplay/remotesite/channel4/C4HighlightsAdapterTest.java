@@ -72,6 +72,7 @@ public class C4HighlightsAdapterTest extends MockObjectTestCase {
 		Playlist playlist = adapter.fetch("http://www.channel4.com/programmes/4od/most-popular", timer);
 		
 		assertThat(playlist.getCanonicalUri(), is("http://www.channel4.com/programmes/4od/most-popular"));
+		assertThat(playlist.getCurie(), is("c4:most-popular"));
 		assertThat(playlist.getPlaylists(), is(Arrays.<Playlist>asList(brand101)));
 	}
 	

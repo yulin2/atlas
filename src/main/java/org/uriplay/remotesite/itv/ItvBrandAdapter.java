@@ -22,6 +22,7 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -36,7 +37,7 @@ public class ItvBrandAdapter implements SiteSpecificAdapter<Playlist> {
 	private final RemoteSiteClient<List<ItvProgramme>> client;
 	private final ContentExtractor<ItvBrandSource, List<Brand>> propertyExtractor;
 
-	private static final String ITV_URI = "http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml";
+	public static final String ITV_URI = "http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml";
 
 	public ItvBrandAdapter() throws JAXBException {
 		this(new ItvCatchupClient(), new ItvGraphExtractor());
@@ -50,7 +51,7 @@ public class ItvBrandAdapter implements SiteSpecificAdapter<Playlist> {
 	public Playlist fetch(String uri, RequestTimer timer) {
 		try {
 			List<ItvProgramme> itvBrands = client.get(uri);
-			Playlist playlist = new Playlist(ITV_URI);
+			Playlist playlist = new Playlist(ITV_URI, PerPublisherCurieExpander.CurieAlgorithm.ITV.compact(ITV_URI));
 			playlist.setTitle("ITV CatchUp Menu");
 			playlist.setPlaylists(propertyExtractor.extract(new ItvBrandSource(itvBrands, uri)));
 			return playlist;

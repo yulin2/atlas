@@ -20,6 +20,8 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 
+import com.metabroadcast.common.base.Maybe;
+
 /**
  * {@link SiteSpecificAdapter} for screen-scraping from Channel4's 4OD website
  *  
@@ -27,6 +29,9 @@ import org.uriplay.remotesite.SiteSpecificAdapter;
  */
 public class C4HighlightsAdapter extends BaseC4PlaylistClient {
 
+	private static final String C4_HIGHLIGHTS_CURIE = "c4:highlights";
+	private static final String C4_MOST_POPULAR_CURIE = "c4:most-popular";
+	
 	private static final String HIGHLIGHTS_URI = "http://www.channel4.com/programmes/4od/highlights";
 	private static final String CURRENT_MOST_POPULAR_URI = "http://www.channel4.com/programmes/4od/most-popular";
 	
@@ -39,6 +44,26 @@ public class C4HighlightsAdapter extends BaseC4PlaylistClient {
 	}
 
 	public boolean canFetch(String uri) {
-		return uri.startsWith(CURRENT_MOST_POPULAR_URI) || uri.startsWith(HIGHLIGHTS_URI);
+		return CURRENT_MOST_POPULAR_URI.equals(uri) || HIGHLIGHTS_URI.equals(uri);
+	}
+
+	public static Maybe<String> compact(String uri) {
+		if (CURRENT_MOST_POPULAR_URI.equals(uri)) {
+			return Maybe.just(C4_MOST_POPULAR_CURIE);
+		}
+		if (HIGHLIGHTS_URI.equals(uri)) {
+			return Maybe.just(C4_HIGHLIGHTS_CURIE);
+		}
+		return Maybe.nothing();
+	}
+
+	public static Maybe<String> expand(String curie) {
+		if (C4_HIGHLIGHTS_CURIE.equals(curie)) {
+			return Maybe.just(HIGHLIGHTS_URI);
+		}
+		if (C4_MOST_POPULAR_CURIE.equals(curie)) {
+			return Maybe.just(CURRENT_MOST_POPULAR_URI);
+		}
+		return Maybe.nothing();
 	}
 }

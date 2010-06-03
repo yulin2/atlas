@@ -3,7 +3,11 @@ package org.uriplay.query.content;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.uriplay.remotesite.bbc.BbcIplayerFeedAdapter;
 import org.uriplay.remotesite.bbc.BbcUriCanonicaliser;
+import org.uriplay.remotesite.channel4.C4BrandAtoZAdapter;
+import org.uriplay.remotesite.channel4.C4HighlightsAdapter;
+import org.uriplay.remotesite.itv.ItvBrandAdapter;
 import org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser;
 
 import com.metabroadcast.common.base.Maybe;
@@ -15,13 +19,22 @@ public class PerPublisherCurieExpander implements CurieExpander {
 
 	public enum CurieAlgorithm {
 		BBC {
+
 			@Override
 			public String expand(String curie) {
+				Maybe<String> uri = BbcIplayerFeedAdapter.expand(curie);
+				if (uri.hasValue()) {
+					return uri.requireValue();
+				}
 				return "http://www.bbc.co.uk/programmes/" + curie.substring(4);
 			}
 
 			@Override
 			public String compact(String url) {
+				Maybe<String> curie = BbcIplayerFeedAdapter.compact(url);
+				if (curie.hasValue()) {
+					return curie.requireValue();
+				}
 				return "bbc:b00" + BbcUriCanonicaliser.bbcProgrammeIdFrom(url);
 			}
 		},
@@ -30,6 +43,14 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			final String separator = "_";
 			@Override
 			public String expand(String curie) {
+				Maybe<String> uri = C4BrandAtoZAdapter.expand(curie);
+				if (uri.hasValue()) {
+					return uri.requireValue();
+				}
+				uri = C4HighlightsAdapter.expand(curie);
+				if (uri.hasValue()) {
+					return uri.requireValue();
+				}
 				String withoutPrefix = curie.substring(curie.indexOf(":") + 1);
 				if (withoutPrefix.contains(separator)) {
 					String[] components = withoutPrefix.split(separator);
@@ -44,6 +65,15 @@ public class PerPublisherCurieExpander implements CurieExpander {
 
 			@Override
 			public String compact(String url) {
+				
+				Maybe<String> curie = C4BrandAtoZAdapter.compact(url);
+				if (curie.hasValue()) {
+					return curie.requireValue();
+				}
+				curie = C4HighlightsAdapter.compact(url);
+				if (curie.hasValue()) {
+					return curie.requireValue();
+				}
 				String itemId = matchAgainst(url, c4ItemIdPattern);
 				if (itemId == null) {
 					return "c4:" + matchAgainst(url, c4BrandIdPattern);
@@ -52,8 +82,15 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			}
 		},
 		ITV {
+			
+			private static final String ITV_CATCHUP_CURIE = "itv:catchup";
+			
 			@Override
 			public String expand(String curie) {
+				if (ITV_CATCHUP_CURIE.equals(curie)) {
+					return ItvBrandAdapter.ITV_URI;
+				}
+				
 				String withoutPrefix = curie.substring(curie.indexOf(":") + 1);
 				if (withoutPrefix.contains("-")) {
 					String[] components = withoutPrefix.split("-");
@@ -74,6 +111,10 @@ public class PerPublisherCurieExpander implements CurieExpander {
 
 			@Override
 			public String compact(String url) {
+				if (ItvBrandAdapter.ITV_URI.equals(url)) {
+					return ITV_CATCHUP_CURIE;
+				}
+
 				String itemId = matchAgainst(url, itvItemIdPattern);
 				if (itemId != null) {
 					return "itv:5-" + itemId;

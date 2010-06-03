@@ -30,6 +30,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.RemoteSiteRefresher;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -72,8 +73,9 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	@SuppressWarnings("unchecked")
 	public Playlist extract(SyndicationSource source) {
 		
-		Playlist playlist = new Playlist();
-		playlist.setCanonicalUri(source.getUri());
+		Playlist playlist = new Playlist(source.getUri(), PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(source.getUri()));
+
+		
 		playlist.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
 		
 		Map<String, Brand> brandLookup = Maps.newHashMap();

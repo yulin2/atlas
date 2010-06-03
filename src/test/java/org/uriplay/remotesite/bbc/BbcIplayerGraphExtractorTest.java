@@ -113,6 +113,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		
 		Playlist playlist = extractor.extract(source);
 		assertThat(playlist.getCanonicalUri(), is(FEED_URI));
+		assertThat(playlist.getCurie(), is("bbc:atoz_a"));
 		assertThat(playlist.getPublisher(), is("bbc.co.uk"));
 
 		System.out.println(playlist.getPlaylists());
