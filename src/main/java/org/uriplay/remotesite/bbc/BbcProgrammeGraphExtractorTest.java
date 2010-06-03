@@ -13,6 +13,7 @@ import org.joda.time.DateTime;
 import org.uriplay.media.entity.Broadcast;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BroadcastOn;
+import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.Service;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.Interval;
 
 import com.google.common.collect.Lists;
@@ -61,7 +62,8 @@ public class BbcProgrammeGraphExtractorTest extends MockObjectTestCase {
 	private BbcBroadcast broadcast(String channel, DateTime start, DateTime end) {
 		BbcBroadcast broadcast = new BbcBroadcast();
 		broadcast.broadcastOn = new BroadcastOn();
-		broadcast.broadcastOn.resourceUri = channel;
+		broadcast.broadcastOn.service = new Service();
+		broadcast.broadcastOn.service.resourceUri = channel;
 		Interval interval = new Interval();
 		interval.startTime = start.toString();
 		interval.endTime = end.toString();
@@ -72,7 +74,7 @@ public class BbcProgrammeGraphExtractorTest extends MockObjectTestCase {
 
 	private SlashProgrammesVersionRdf versionWithBroadcasts(List<BbcBroadcast> broadcasts) {
 		SlashProgrammesVersionRdf version = new SlashProgrammesVersionRdf();
-		version.firstBroadcasts = broadcasts;
+		version.broadcasts = broadcasts;
 		return version;
 	}
 }

@@ -48,14 +48,13 @@ public class BbcSlashProgrammesVersionRdfClientTest extends MockObjectTestCase {
 		
 		SlashProgrammesVersionRdf version = new BbcSlashProgrammesVersionRdfClient(httpClient).get(URI);
 		
-		assertThat(version.firstBroadcastSlots().size(), is(10));
-		assertThat(version.repeatBroadcastSlots().size(), is(8));
+		assertThat(version.broadcastSlots().size(), is(22));
 		
-		BbcBroadcast firstBroadcast = version.firstBroadcastSlots().get(0);
+		BbcBroadcast firstBroadcast = version.broadcastSlots().get(0);
 		assertThat(firstBroadcast.broadcastTime(), is("2007-11-25T20:00:00Z"));
-		assertThat(firstBroadcast.broadcastOn(), is("/bbctwo#service"));
+		assertThat(firstBroadcast.broadcastOn(), is("/services/bbctwo/ni_analogue#service"));
 		assertThat(firstBroadcast.broadcastDuration(), is(3600));
-		assertThat(version.firstBroadcastSlots().get(0).scheduleDate(), is("2007-11-25"));
+		assertThat(version.broadcastSlots().get(0).scheduleDate(), is("2007-11-25"));
 	}
 
 	protected Reader xmlDocument() throws IOException {

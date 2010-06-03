@@ -38,18 +38,11 @@ import com.google.common.collect.Lists;
 @XmlRootElement(name="RDF", namespace=RDF.NS)
 class SlashProgrammesVersionRdf {
 	
-	@XmlElement(namespace=PO.NS, name="FirstBroadcast")
-	List<BbcBroadcast> firstBroadcasts;
+	@XmlElement(namespace=PO.NS, name="Broadcast")
+	List<BbcBroadcast> broadcasts;
 	
-	@XmlElement(namespace=PO.NS, name="RepeatBroadcast")
-	List<BbcBroadcast> repeatBroadcasts;
-
-	List<BbcBroadcast> firstBroadcastSlots() {
-		return firstBroadcasts;
-	}
-
-	List<BbcBroadcast> repeatBroadcastSlots() {
-		return repeatBroadcasts;
+	List<BbcBroadcast> broadcastSlots() {
+		return broadcasts;
 	}
 	
 	static class BbcBroadcast {
@@ -81,7 +74,8 @@ class SlashProgrammesVersionRdf {
 
 		public BbcBroadcast onChannel(String channel) {
 			broadcastOn = new BroadcastOn();
-			broadcastOn.resourceUri = channel;
+			broadcastOn.service = new Service();
+			broadcastOn.service.resourceUri = channel;
 			return this;
 		}
 		
@@ -94,8 +88,8 @@ class SlashProgrammesVersionRdf {
 		}
 
 		public String broadcastOn() {
-			if (broadcastOn != null) {
-				return broadcastOn.resourceUri;
+			if (broadcastOn != null && broadcastOn.service != null) {
+				return broadcastOn.service.resourceUri;
 			}
 			return null;
 		}
@@ -134,8 +128,8 @@ class SlashProgrammesVersionRdf {
 	
 	static class BroadcastOn {
 		
-		@XmlAttribute(namespace=RDF.NS, name="resource")
-		String resourceUri;
+	    @XmlElement(namespace=PO.NS, name="Service")
+		Service service;
 		
 		@Override
 		public boolean equals(Object obj) {
@@ -147,6 +141,21 @@ class SlashProgrammesVersionRdf {
 			return HashCodeBuilder.reflectionHashCode(this);
 		}
 		
+	}
+	
+	static class Service {
+	    @XmlAttribute(namespace=RDF.NS, name="about")
+        String resourceUri;
+	    
+	    @Override
+        public boolean equals(Object obj) {
+            return EqualsBuilder.reflectionEquals(this, obj);
+        }
+        
+        @Override
+        public int hashCode() {
+            return HashCodeBuilder.reflectionHashCode(this);
+        }
 	}
 	
 	static class Interval {
@@ -169,17 +178,17 @@ class SlashProgrammesVersionRdf {
 	}
 
 	public SlashProgrammesVersionRdf withLastTransmitted(DateTime lastTx, String channel) {
-		this.firstBroadcasts = Lists.newArrayList(new BbcBroadcast().atTime(lastTx.toString()).onChannel(channel));
+		this.broadcasts = Lists.newArrayList(new BbcBroadcast().atTime(lastTx.toString()).onChannel(channel));
 		return this;
 	}
 
 	public DateTime lastTransmitted() {
 		
-		if (firstBroadcasts == null || firstBroadcasts.isEmpty()) { return null; }
+		if (broadcasts == null || broadcasts.isEmpty()) { return null; }
 		
-		Collections.sort(firstBroadcasts, new ByTransmissionDateComparator());
+		Collections.sort(broadcasts, new ByTransmissionDateComparator());
 		
-		return Iterables.getLast(firstBroadcasts).broadcastDateTime();
+		return Iterables.getLast(broadcasts).broadcastDateTime();
 	}
 	
 	static class ByTransmissionDateComparator implements Comparator<BbcBroadcast> {

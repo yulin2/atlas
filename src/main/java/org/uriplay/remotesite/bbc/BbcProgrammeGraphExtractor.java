@@ -92,7 +92,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
 		Version version = new Version();
 		if (slashProgrammesVersion != null) {
-			if (slashProgrammesVersion.firstBroadcastSlots() != null || slashProgrammesVersion.repeatBroadcastSlots() != null) {
+			if (slashProgrammesVersion.broadcastSlots() != null) {
 				version.setBroadcasts(broadcastsFrom(slashProgrammesVersion));
 			}
 		}
@@ -106,12 +106,8 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 		
 		Set<BbcBroadcast> bbcBroadcasts = Sets.newHashSet();
 
-		if (slashProgrammesVersion.firstBroadcastSlots() != null) {
-			bbcBroadcasts.addAll(slashProgrammesVersion.firstBroadcastSlots());
-		}
-
-		if (slashProgrammesVersion.repeatBroadcastSlots() != null) {
-			bbcBroadcasts.addAll(slashProgrammesVersion.repeatBroadcastSlots());
+		if (slashProgrammesVersion.broadcastSlots() != null) {
+			bbcBroadcasts.addAll(slashProgrammesVersion.broadcastSlots());
 		}
 
 		for (BbcBroadcast bbcBroadcast : bbcBroadcasts) {

@@ -34,7 +34,7 @@ public class SlashProgrammesVersionRdfTest extends TestCase {
 	public void testFindsLatestTransmissionDateForOneShowing() throws Exception {
 		
 		SlashProgrammesVersionRdf versionRdf = new SlashProgrammesVersionRdf();
-		versionRdf.firstBroadcasts = Lists.newArrayList(new SlashProgrammesVersionRdf.BbcBroadcast().atTime("2007-11-25T20:00:00Z"));
+		versionRdf.broadcasts = Lists.newArrayList(new SlashProgrammesVersionRdf.BbcBroadcast().atTime("2007-11-25T20:00:00Z"));
 		
 		assertThat(versionRdf.lastTransmitted(), is(nov25th8pm));
 	}
@@ -42,7 +42,7 @@ public class SlashProgrammesVersionRdfTest extends TestCase {
 	public void testFindsLatestTransmissionDateForTwoShowings() throws Exception {
 		
 		SlashProgrammesVersionRdf versionRdf = new SlashProgrammesVersionRdf();
-		versionRdf.firstBroadcasts = Lists.newArrayList(new SlashProgrammesVersionRdf.BbcBroadcast().atTime("2007-11-25T20:00:00Z"), 
+		versionRdf.broadcasts = Lists.newArrayList(new SlashProgrammesVersionRdf.BbcBroadcast().atTime("2007-11-25T20:00:00Z"), 
 				                                        new SlashProgrammesVersionRdf.BbcBroadcast().atTime("2007-11-26T20:00:00Z"));
 		
 		assertThat(versionRdf.lastTransmitted(), is(nov26th8pm));
