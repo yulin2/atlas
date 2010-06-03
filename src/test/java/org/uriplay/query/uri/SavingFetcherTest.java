@@ -19,6 +19,7 @@ import java.util.Set;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.MutableContentStore;
@@ -33,7 +34,7 @@ import com.google.common.collect.Sets;
 @SuppressWarnings("unchecked")
 public class SavingFetcherTest extends MockObjectTestCase {
 
-	Fetcher<Object> delegateFetcher = mock(Fetcher.class);
+	Fetcher<Content> delegateFetcher = mock(Fetcher.class);
 	MutableContentStore store = mock(MutableContentStore.class);
 	
 	String URI = "http://example.com";
@@ -46,7 +47,7 @@ public class SavingFetcherTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegateFetcher).fetch(URI, timer); will(returnValue(item1));
-			one(store).createOrUpdateGraph(Sets.newHashSet(item1), false);
+			one(store).createOrUpdateContent(item1, false);
 		}});
 		
 		new SavingFetcher(delegateFetcher, store).fetch(URI, timer);

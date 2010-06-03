@@ -14,11 +14,10 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.uri;
 
-  import org.uriplay.persistence.content.MutableContentStore;
+  import org.uriplay.media.entity.Content;
+import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RequestTimer;
-
-import com.google.common.collect.Sets;
 
 
 /**
@@ -28,21 +27,21 @@ import com.google.common.collect.Sets;
  */
 public class SavingFetcher implements Fetcher<Object> {
 
-	private final Fetcher<Object> delegateFetcher;
+	private final Fetcher<Content> delegateFetcher;
 	private final MutableContentStore store;
 
-	public SavingFetcher(Fetcher<Object> delegateFetcher, MutableContentStore store) {
+	public SavingFetcher(Fetcher<Content> delegateFetcher, MutableContentStore store) {
 		this.delegateFetcher = delegateFetcher;
 		this.store = store;
 	}
 
 	public Object fetch(String uri, RequestTimer timer) {
 		
-		Object bean = delegateFetcher.fetch(uri, timer);
+		Content bean = delegateFetcher.fetch(uri, timer);
 		
 		if (bean == null) { return null; }
 		
-		store.createOrUpdateGraph(Sets.newHashSet(bean), false);
+		store.createOrUpdateContent(bean, false);
 		
 		return bean;
 	}
