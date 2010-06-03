@@ -56,6 +56,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 		String output = stream.toString();
 		assertThat(output, containsString("<play:item>" +
+											"<uri>http://www.bbc.co.uk/programmes/bluepeter</uri>" +
 				                            "<aliases>" +
 				                              "<alias>http://www.bbc.co.uk/p/bluepeter</alias>" +
 				                            "</aliases>" +
@@ -63,7 +64,6 @@ public class JaxbXmlTranslatorTest extends TestCase {
 				                            "<play:genres/>" +
 				                            "<play:tags/>" +
                                				"<title>Blue Peter</title>" +
-                               				"<uri>http://www.bbc.co.uk/programmes/bluepeter</uri>" +
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +

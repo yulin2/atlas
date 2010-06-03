@@ -12,6 +12,7 @@ import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
+import org.uriplay.media.entity.simple.BrandSummary;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.UriplayQueryResult;
 import org.uriplay.media.util.ChildFinder;
@@ -161,15 +162,14 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 			
 			if (episode.getBrand() != null) {
 				Brand brand = episode.getBrand();
-				org.uriplay.media.entity.simple.Playlist simpleBrand = new org.uriplay.media.entity.simple.Playlist();
-				copyBasicPlaylistAttributes(brand, simpleBrand);
+				BrandSummary brandSummary = new BrandSummary();
+
+				brandSummary.setUri(brand.getCanonicalUri());
+				brandSummary.setCurie(brand.getCurie());
+				brandSummary.setTitle(brand.getTitle());
+				brandSummary.setDescription(brand.getDescription());
 				
-				// Since this is just a summary of a brand we null the 
-				// sub-playlists and sub-items to avoid empty tags appearing in the XML
-				simpleBrand.setItems(null);
-				simpleBrand.setPlaylists(null);
-				
-				simpleItem.setBrand(simpleBrand);
+				simpleItem.setBrand(brandSummary);
 			}
 		}
 		
