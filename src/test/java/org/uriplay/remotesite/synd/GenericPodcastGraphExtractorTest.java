@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -106,7 +107,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
 
 		assertThat(location.getTransportType(), is(TransportType.DOWNLOAD));
-		assertThat(location.getTransportSubType(), is("http"));
+		assertThat(location.getTransportSubType(), is(TransportSubType.HTTP));
 		assertThat(location.getUri(), is(LOCATION_URI));
 		
 	}

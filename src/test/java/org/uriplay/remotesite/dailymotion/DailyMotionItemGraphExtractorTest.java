@@ -75,7 +75,6 @@ public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
 
 		Location embedLocation = locationByType(TransportType.EMBED, encoding.getAvailableAt());
 		assertThat(embedLocation.getTransportType(), is(TransportType.EMBED));
-		assertThat(embedLocation.getTransportSubType(), is("html"));
 		
 		Location linkLocation = locationByType(TransportType.LINK, encoding.getAvailableAt());
 		assertThat(linkLocation.getTransportType(), is(TransportType.LINK));

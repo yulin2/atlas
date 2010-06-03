@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -117,7 +118,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		assertThat(encoding.getDataContainerFormat(), is(MimeType.AUDIO_MPEG));
 	
 		assertThat(location.getTransportType(), is(TransportType.DOWNLOAD));
-		assertThat(location.getTransportSubType(), is("http"));
+		assertThat(location.getTransportSubType(), is(TransportSubType.HTTP));
 		assertThat(location.getUri(), is(LOCATION_URI));
 	}
 	

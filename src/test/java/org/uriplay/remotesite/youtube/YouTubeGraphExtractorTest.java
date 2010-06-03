@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.hamcrest.Matcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -140,7 +141,6 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 				.withDOG(is(true))
 				.withLocations(hasItems(
 						locationMatcher()
-							.withTransportSubType(is("html"))
 							.withTransportType(is(TransportType.EMBED))));
 		
 		
@@ -155,7 +155,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 				.withDOG(is(false))
 				.withLocations(hasItems(
 						locationMatcher()
-							.withTransportSubType(is("rtsp"))
+							.withTransportSubType(is(TransportSubType.RTSP))
 							.withTransportType(is(TransportType.STREAM))));
 		
 		Matcher<Encoding> encoding3 = 
@@ -169,7 +169,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 				.withDOG(is(false)) 
 				.withLocations(hasItems(
 						locationMatcher()
-							.withTransportSubType(is("rtsp"))
+							.withTransportSubType(is(TransportSubType.RTSP))
 							.withTransportType(is(TransportType.STREAM))));
 		
 		Matcher<Encoding> encoding4 = 

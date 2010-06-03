@@ -17,6 +17,7 @@ package org.uriplay.remotesite;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Location;
@@ -125,7 +126,7 @@ public class Matchers {
 	public static class LocationMatcher extends TypeSafeMatcher<Location> {
 
 		private Matcher<TransportType> transportTypeMatcher;
-		private Matcher<String> transportSubTypeMatcher;
+		private Matcher<TransportSubType> transportSubTypeMatcher;
 		private Matcher<String> uriMatcher;
 
 		@Override
@@ -152,7 +153,7 @@ public class Matchers {
 			return this;
 		}
 		
-		public LocationMatcher withTransportSubType(Matcher<String> transportSubTypeMatcher) {
+		public LocationMatcher withTransportSubType(Matcher<TransportSubType> transportSubTypeMatcher) {
 			this.transportSubTypeMatcher = transportSubTypeMatcher;
 			return this;
 		}

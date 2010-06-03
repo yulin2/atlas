@@ -20,6 +20,7 @@ import java.util.Set;
 import org.joda.time.DateTimeConstants;
 import org.uriplay.beans.BeanGraphExtractor;
 import org.uriplay.beans.Representation;
+import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -149,12 +150,11 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 				case 1:
 				case 6: {
 					location.setTransportType(TransportType.STREAM);
-					location.setTransportSubType("rtsp");
+					location.setTransportSubType(TransportSubType.RTSP);
 					break;
 				}
 				case 5: {
 					location.setTransportType(TransportType.EMBED);
-					location.setTransportSubType("html");
 					location.setEmbedCode(embedCodeFor(video.getUrl()));
 					break;
 				}

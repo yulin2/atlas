@@ -83,8 +83,7 @@ public class BlipTvGraphExtractorTest extends MockObjectTestCase {
 						.withUri(is(ITEM_URI))
 						.withTransportType(is(TransportType.LINK)),
 					locationMatcher()
-						.withTransportType(is(TransportType.EMBED))
-						.withTransportSubType(is("html"))));
+						.withTransportType(is(TransportType.EMBED))));
 		
 		EncodingMatcher encoding2 = encodingMatcher()
 			.withDataContainerFormat(is(MimeType.VIDEO_QUICKTIME))

@@ -76,7 +76,6 @@ public class TedTalkGraphExtractorTest extends MockObjectTestCase {
 		Location embedLocation = locationByType(TransportType.EMBED, encoding.getAvailableAt());
 		assertThat(embedLocation.getUri(), is("videoSource"));
 		assertThat(embedLocation.getTransportType(), is(TransportType.EMBED));
-		assertThat(embedLocation.getTransportSubType(), is("html"));
 		assertThat(embedLocation.getEmbedCode(), containsString("vu=http://video.ted.com/talks/embed/RayKurzweil_2005.flv"));
 		
 		Location linkLocation =  locationByType(TransportType.LINK, encoding.getAvailableAt());

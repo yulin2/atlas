@@ -69,7 +69,6 @@ public class TedTalkGraphExtractor  {
 		location.setUri(item.getVideoSource());
 		location.setTransportType(TransportType.EMBED);
 		
-		location.setTransportSubType("html");
 		location.setEmbedCode(embedCode(item.getFlashFile(), item.getThumbnail()));
 
 		return location;

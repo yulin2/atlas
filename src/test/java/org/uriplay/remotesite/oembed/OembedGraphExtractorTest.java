@@ -77,7 +77,6 @@ public class OembedGraphExtractorTest extends MockObjectTestCase {
 		assertThat(encoding.getVideoVerticalSize(), is(480));
 		
 		assertThat(location.getTransportType(), is(TransportType.EMBED));
-		assertThat(location.getTransportSubType(), is("html"));
 		assertThat(location.getEmbedCode(), is("<embed ...>"));
 	}
 }

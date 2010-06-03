@@ -237,7 +237,9 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 	    if (location.getTransportType() != null) {
 	    	simpleLocation.setTransportType(location.getTransportType().toString());
 	    }
-	    simpleLocation.setTransportSubType(location.getTransportSubType());
+	    if (location.getTransportSubType() != null) {
+	    	simpleLocation.setTransportSubType(location.getTransportSubType().toString());
+	    }
 	    simpleLocation.setUri(location.getUri());
 	    simpleLocation.setEmbedCode(location.getEmbedCode());
 	    simpleLocation.setAvailable(location.getAvailable());

@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.uriplay.logging.Log4JLogger;
 import org.uriplay.logging.UriplayLogger;
+import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -85,7 +86,7 @@ public abstract class PodcastGraphExtractor {
 	protected Location locationFrom(String locationUri) {
 		Location location = new Location();
 		location.setTransportType(TransportType.DOWNLOAD);
-		location.setTransportSubType("http");
+		location.setTransportSubType(TransportSubType.HTTP);
 		location.setUri(locationUri);
 		return location;
 	}
