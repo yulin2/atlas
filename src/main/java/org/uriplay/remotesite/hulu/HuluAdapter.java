@@ -17,33 +17,58 @@ package org.uriplay.remotesite.hulu;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
+import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
-import org.uriplay.remotesite.oembed.OembedXmlAdapter;
-import org.uriplay.remotesite.oembed.OembedXmlClient;
+import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.SiteSpecificAdapter;
+import org.uriplay.remotesite.html.HtmlNavigator;
 
-public class HuluAdapter extends OembedXmlAdapter {
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 
-	private static final String BASE_URI = "http://www.hulu.com/watch/";
+public class HuluAdapter implements SiteSpecificAdapter<Item> {
+
+	public static final String BASE_URI = "http://www.hulu.com/watch/";
 	private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "[^/&\\?=@]+).*");
+    private final SimpleHttpClient httpClient;
+    private final HuluContentExtractor extractor;
 	
-	public HuluAdapter() throws JAXBException {
-		super(new OembedXmlClient(), new HuluOembedGraphExtractor());
-		setAcceptedUriPattern(BASE_URI + "[^/&\\?=@]+");
-		setOembedEndpoint("http://www.hulu.com/api/oembed.xml");
-		setPublisher("hulu.com");
+	public HuluAdapter() {
+	    this(new SimpleHttpClientBuilder().build(), new HuluContentExtractor());
 	}
-	
-	public static class HuluCanonicaliser implements Canonicaliser {
 
-		@Override
-		public String canonicalise(String uri) {
-			Matcher matcher = ALIAS_PATTERN.matcher(uri);
-			if (matcher.matches()) {
-				return matcher.group(1);
-			}
-			return null;
-		}
-	}
+	public HuluAdapter(SimpleHttpClient httpClient, HuluContentExtractor extractor) {
+        this.httpClient = httpClient;
+        this.extractor = extractor;
+    }
+	
+    @Override
+    public Item fetch(String uri, RequestTimer timer) {
+        try {
+            String content = httpClient.get(uri);
+            HtmlNavigator navigator = new HtmlNavigator(content);
+            
+            return extractor.extract(navigator);
+        } catch (HttpException e) {
+            throw new FetchException("Unable to retrieve from Hulu", e);
+        }
+    }
+    
+    @Override
+    public boolean canFetch(String uri) {
+        return ALIAS_PATTERN.matcher(uri).matches();
+    }
+
+    public static class HuluCanonicaliser implements Canonicaliser {
+        @Override
+        public String canonicalise(String uri) {
+            Matcher matcher = ALIAS_PATTERN.matcher(uri);
+            if (matcher.matches()) {
+                return matcher.group(1);
+            }
+            return null;
+        }
+    }
 }

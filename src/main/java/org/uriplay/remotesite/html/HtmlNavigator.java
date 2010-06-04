@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.html;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -49,6 +50,10 @@ public class HtmlNavigator {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public HtmlNavigator(String content) {
+	    this(new StringReader(content));
 	}
 
 	private static Document domFor(Reader in) throws Exception {
