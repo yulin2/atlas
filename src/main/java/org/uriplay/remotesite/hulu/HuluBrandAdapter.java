@@ -17,9 +17,10 @@ package org.uriplay.remotesite.hulu;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.uriplay.media.entity.Item;
+import org.uriplay.media.entity.Brand;
 import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
+import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.html.HtmlNavigator;
@@ -28,24 +29,24 @@ import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 
-public class HuluAdapter implements SiteSpecificAdapter<Item> {
+public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
-	public static final String BASE_URI = "http://www.hulu.com/watch/";
+	public static final String BASE_URI = "http://www.hulu.com/";
 	private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "[^/&\\?=@]+).*");
     private final SimpleHttpClient httpClient;
-    private final HuluContentExtractor extractor;
+    private final ContentExtractor<HtmlNavigator, Brand> extractor;
 	
-	public HuluAdapter() {
-	    this(new SimpleHttpClientBuilder().build(), new HuluContentExtractor());
+	public HuluBrandAdapter() {
+	    this(new SimpleHttpClientBuilder().build(), new HuluBrandContentExtractor());
 	}
 
-	public HuluAdapter(SimpleHttpClient httpClient, HuluContentExtractor extractor) {
+	public HuluBrandAdapter(SimpleHttpClient httpClient, ContentExtractor<HtmlNavigator, Brand> extractor) {
         this.httpClient = httpClient;
         this.extractor = extractor;
     }
 	
     @Override
-    public Item fetch(String uri, RequestTimer timer) {
+    public Brand fetch(String uri, RequestTimer timer) {
         try {
             String content = httpClient.get(uri);
             HtmlNavigator navigator = new HtmlNavigator(content);
@@ -61,7 +62,7 @@ public class HuluAdapter implements SiteSpecificAdapter<Item> {
         return ALIAS_PATTERN.matcher(uri).matches();
     }
 
-    public static class HuluCanonicaliser implements Canonicaliser {
+    public static class HuluItemCanonicaliser implements Canonicaliser {
         @Override
         public String canonicalise(String uri) {
             Matcher matcher = ALIAS_PATTERN.matcher(uri);

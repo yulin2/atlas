@@ -15,7 +15,6 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
-import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
@@ -25,14 +24,14 @@ import org.uriplay.remotesite.html.HtmlNavigator;
 
 import com.google.soy.common.collect.Sets;
 
-public class HuluContentExtractor implements ContentExtractor<HtmlNavigator, Item> {
+public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
     private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.watch = ";
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final Pattern INFO_PATTERN = Pattern.compile("^Season\\s*(\\d+)\\s*:\\s*Ep\\.\\s*(\\d+).*\\((\\d+):(\\d+):?(\\d*)\\).*$");
 
     @SuppressWarnings("unchecked")
     @Override
-    public Item extract(HtmlNavigator source) {
+    public Episode extract(HtmlNavigator source) {
         try {
             Episode item = new Episode();
             Version version = new Version();
@@ -51,7 +50,7 @@ public class HuluContentExtractor implements ContentExtractor<HtmlNavigator, Ite
             List<Element> elements = source.allElementsMatching("//li[@class='tags-content-cell']/a");
             Set<String> tags = Sets.newHashSet();
             for (Element element : elements) {
-                tags.add("http://www.hulu.com/search/search_tag?query=" + element.getValue());
+                tags.add("http://www.hulu.com" + element.getAttributeValue("href"));
             }
             item.setTags(tags);
 
@@ -102,11 +101,9 @@ public class HuluContentExtractor implements ContentExtractor<HtmlNavigator, Ite
                         throw new FetchException("Unable to map JSON values", e);
                     }
 
-                    String vanityTitle = "/" + (String) attributes.get("show_title");
                     if (attributes.containsKey("video") && attributes.get("video") instanceof Map) {
                         Map<String, Object> videoAttributes = (Map<String, Object>) attributes.get("video");
                         if (videoAttributes.containsKey("video_title")) {
-                            vanityTitle += "-" + (String) videoAttributes.get("video_title");
                             item.setTitle((String) videoAttributes.get("video_title"));
                         }
                         location.setUri((String) videoAttributes.get("video_src"));
@@ -118,11 +115,15 @@ public class HuluContentExtractor implements ContentExtractor<HtmlNavigator, Ite
                     }
 
                     String videoLink = (String) attributes.get("video_link");
-                    String uri = videoLink.replace(vanityTitle.toLowerCase(), "");
+                    Matcher matcher = HuluRssAdapter.URI_PATTERN.matcher(videoLink);
+                    if (matcher.matches()) {
+                        String uri = matcher.group(1);
+                        item.setCanonicalUri(uri);
+                        item.setCurie("hulu:" + uri.replace(HuluItemAdapter.BASE_URI, ""));
+                    }
+                    
                     item.addAlias(videoLink);
-                    item.setCanonicalUri(uri);
                     item.setDescription((String) attributes.get("video_description"));
-                    item.setCurie("hulu:" + uri.replace(HuluAdapter.BASE_URI, ""));
                     item.setPublisher("hulu.com");
                     item.setIsLongForm(true);
                     
@@ -130,7 +131,7 @@ public class HuluContentExtractor implements ContentExtractor<HtmlNavigator, Ite
                     brand.setTitle((String) attributes.get("show_title"));
                     brand.setCanonicalUri((String) attributes.get("show_link"));
 
-                    continue;
+                    break;
                 }
             }
 

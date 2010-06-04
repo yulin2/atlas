@@ -10,8 +10,8 @@ import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 
-public class HuluAdapterTest extends TestCase {
-    HuluAdapter adapter = new HuluAdapter();
+public class HuluItemAdapterTest extends TestCase {
+    HuluItemAdapter adapter = new HuluItemAdapter();
     
     public void testShouldRetrieveHuluItem() throws Exception {
         Episode item = (Episode) adapter.fetch("http://www.hulu.com/watch/152348/glee-funk", null);
@@ -48,5 +48,11 @@ public class HuluAdapterTest extends TestCase {
         assertNotNull(location.getPolicy());
         assertFalse(location.getPolicy().getAvailableCountries().isEmpty());
         assertEquals(Countries.US, location.getPolicy().getAvailableCountries().iterator().next());
+    }
+    
+    public void testShouldBeAbleToFetch() throws Exception {
+        assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348/glee-funk"));
+        assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348"));
+        assertFalse(adapter.canFetch("http://www.hulu.com/glee"));
     }
 }
