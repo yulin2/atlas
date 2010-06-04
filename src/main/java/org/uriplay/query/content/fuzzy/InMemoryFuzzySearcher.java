@@ -57,7 +57,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	
 	private static final TitleQueryBuilder titleQueryBuilder = new TitleQueryBuilder();
 
-	protected static final int MAX_RESULTS = 500;
+	protected static final int MAX_RESULTS = 5000;
 	
 	private final Directory brandsDir = new RAMDirectory();
 	private final Directory itemsDir = new RAMDirectory();
@@ -157,10 +157,9 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 				
 				@Override
 				public void collect(int docId) throws IOException {
-					if (hits.size() > MAX_RESULTS) {
-						throw new IllegalStateException("Too many results");
+					if (hits.size() < MAX_RESULTS) {
+						hits.add(new Score<Integer>(docId, scorer.score()));
 					}
-					hits.add(new Score<Integer>(docId, scorer.score()));
 				}
 				
 				@Override
