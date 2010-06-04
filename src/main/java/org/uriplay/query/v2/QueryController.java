@@ -38,11 +38,10 @@ public class QueryController {
 	private static final String VIEW = "uriplayModel";
 
 	private final KnownTypeQueryExecutor executor;
-	private final QueryStringBackedQueryBuilder builder = new QueryStringBackedQueryBuilder();
+	private final QueryStringBackedQueryBuilder builder = new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter());
 	
 	private final SingleItemProjector itemProjector = new SingleItemProjector();
 	private final SinglePlaylistProjector playlistProjector = new SinglePlaylistProjector();
-	private final WebProfileDefaultQueryAttributesSetter webDefaults = new WebProfileDefaultQueryAttributesSetter();
 	
 	public QueryController(KnownTypeQueryExecutor executor) {
 		this.executor = executor;
@@ -92,6 +91,6 @@ public class QueryController {
 	}
 
 	private ContentQuery build(HttpServletRequest request, Class<? extends Description> type) {
-		return webDefaults.withDefaults(builder.build(request, type));
+		return builder.build(request, type);
 	}
 }

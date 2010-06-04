@@ -1,12 +1,14 @@
 package org.uriplay.remotesite;
 
+import static org.uriplay.content.criteria.ContentQueryBuilder.query;
+
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.uriplay.content.criteria.Queries;
+import org.uriplay.content.criteria.ContentQueryBuilder;
 import org.uriplay.content.criteria.attribute.Attributes;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
@@ -22,19 +24,20 @@ public class PerPublisherItemUpdater implements Runnable {
 
 	private static Log LOG = LogFactory.getLog(PerPublisherItemUpdater.class);
 	
-	private final Fetcher<Set<Object>> uriplayFetcher;
+	private final Fetcher<Content> uriplayFetcher;
 	private final KnownTypeQueryExecutor contentStore;
 
 	private Iterable<String> publishers;
 
-	public PerPublisherItemUpdater(KnownTypeQueryExecutor contentStore, Fetcher<Set<Object>> uriplayFetcher) {
+	public PerPublisherItemUpdater(KnownTypeQueryExecutor contentStore, Fetcher<Content> uriplayFetcher) {
 		this.contentStore = contentStore;
 		this.uriplayFetcher = uriplayFetcher;
 	}
 
 	private void update(String publisher) {
+		ContentQueryBuilder publisherEqualsQuery = query().equalTo(Attributes.ITEM_PUBLISHER, publisher);
 		
-		List<Item> items = contentStore.executeItemQuery(Queries.equalTo(Attributes.ITEM_PUBLISHER, publisher));
+		List<Item> items = contentStore.executeItemQuery(publisherEqualsQuery.build());
 		
 		for (Item item : items) {
 			try {

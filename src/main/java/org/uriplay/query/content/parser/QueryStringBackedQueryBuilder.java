@@ -24,8 +24,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.uriplay.beans.JsonTranslator;
-import org.uriplay.content.criteria.ConjunctiveQuery;
+import org.uriplay.content.criteria.AtomicQuery;
+import org.uriplay.content.criteria.AttributeQuery;
+import org.uriplay.content.criteria.BooleanAttributeQuery;
 import org.uriplay.content.criteria.ContentQuery;
+import org.uriplay.content.criteria.attribute.Attribute;
 import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.content.criteria.attribute.QueryFactory;
 import org.uriplay.content.criteria.attribute.StringValuedAttribute;
@@ -34,7 +37,6 @@ import org.uriplay.content.criteria.operator.Operators;
 import org.uriplay.media.entity.Description;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -52,10 +54,27 @@ public class QueryStringBackedQueryBuilder {
 	private final DateTimeInQueryParser dateTimeParser = new DateTimeInQueryParser();
 	
 	private static final SelectionBuilder selectionBuilder = Selection.builder();
+	private final DefaultQueryAttributesSetter defaults;
 
+	private static final DefaultQueryAttributesSetter NO_DEFAULTS = new DefaultQueryAttributesSetter() {
+		
+		@Override
+		public ContentQuery withDefaults() {
+			return ContentQuery.MATCHES_EVERYTHING;
+		}
+	};
+	
+	public QueryStringBackedQueryBuilder() {
+		this(NO_DEFAULTS);
+	}
+	
+	public QueryStringBackedQueryBuilder(DefaultQueryAttributesSetter defaults) {
+		this.defaults = defaults;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public ContentQuery build(HttpServletRequest request, Class<? extends Description> context) {
-		return build(request.getParameterMap(), context).withSelection(selectionBuilder.build(request));
+		return build(request.getParameterMap(), context).copyWithSelection(selectionBuilder.build(request));
 	}
 	
 	ContentQuery build(Map<String, String[]> params,  Class<? extends Description> context) {
@@ -76,25 +95,35 @@ public class QueryStringBackedQueryBuilder {
 		if (params.isEmpty()) {
 			throw new IllegalArgumentException("No parameters specified");
 		}
-		/* Special case: one element - avoids creating a single element conjunction */
-		if (params.size() == 1) {
-			Entry<String, String[]> entry = Iterables.getOnlyElement(params.entrySet());
-			String[] values = entry.getValue();
-			if (values.length == 1) {
-				return toQuery(entry.getKey(), values[0], context);
-			}
-		}
-		ConjunctiveQuery query = new ConjunctiveQuery();
+				
+		Set<Attribute<?>> userSuppliedAttributes = Sets.newHashSet();
+		List<AtomicQuery> operands = Lists.newArrayList();
+		
 		for (Entry<String, String[]> param : params.entrySet()) {
 			String attributeName = param.getKey();
 			for (String value : param.getValue()) {
-				query.add(toQuery(attributeName, value, context));
+				AttributeQuery<?> attributeQuery = toQuery(attributeName, value, context);
+				
+				userSuppliedAttributes.add(attributeQuery.getAttribute());
+				
+				if (attributeQuery instanceof BooleanAttributeQuery && ((BooleanAttributeQuery) attributeQuery).isUnconditionallyTrue()) {
+					continue;
+				}
+				operands.add(attributeQuery);
 			}
 		}
-		return query;
+		
+		for (AtomicQuery atomicQuery : defaults.withDefaults().operands()) {
+			if (atomicQuery instanceof AttributeQuery<?> && userSuppliedAttributes.contains(((AttributeQuery<?>) atomicQuery).getAttribute())) {
+				continue;
+			}
+			operands.add(atomicQuery);
+		}
+		
+		return new ContentQuery(operands);
 	}
 	
-	private ContentQuery toQuery(String paramKey, String paramValue, Class<? extends Description> queryContext) {
+	private AttributeQuery<?> toQuery(String paramKey, String paramValue, Class<? extends Description> queryContext) {
 		String[] parts = paramKey.split(ATTRIBUTE_OPERATOR_SEPERATOR);
 		if (parts.length > 2) {
 			throw new IllegalArgumentException("Malformed attribute and operator combination");
@@ -113,8 +142,15 @@ public class QueryStringBackedQueryBuilder {
 			}
 		} 
 		
-		List<String> values = Arrays.asList(paramValue.split(OPERAND_SEPERATOR));
+		List<String> values;
+		if (Boolean.class.equals(attribute.requiresOperandOfType()) && "any".equals(paramValue)) {
+			values = Arrays.asList("true", "false");
+		} else {
+			values = Arrays.asList(paramValue.split(OPERAND_SEPERATOR));
+		}
+		
 		values = formatValues(attribute, values);
+		
 		
 		return attributeQueryFor(values, op, attribute);
 	}
@@ -158,8 +194,8 @@ public class QueryStringBackedQueryBuilder {
 	    return formattedValues;
 	}
 
-	private ContentQuery attributeQueryFor(List<String> paramValue, Operator op, QueryFactory<?> attribute) {
-		return attribute.createQuery(op,  coerceListToType(paramValue, attribute.requiresOperandOfType()));
+	private AttributeQuery<?> attributeQueryFor(List<String> paramValue, Operator op, QueryFactory<?> attribute) {
+		return attribute.createQuery(op, coerceListToType(paramValue, attribute.requiresOperandOfType()));
 	}
 
 	private List<?> coerceListToType(List<String> paramValues, Class<?> requiresOperandOfType) {

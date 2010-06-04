@@ -14,14 +14,10 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.content.parser;
 
-
 import org.uriplay.content.criteria.ContentQuery;
-import org.uriplay.content.criteria.attribute.Attributes;
-import static org.uriplay.content.criteria.ContentQueryBuilder.query;
 
-public class WebProfileDefaultQueryAttributesSetter implements DefaultQueryAttributesSetter {
+public interface DefaultQueryAttributesSetter {
 
-	public ContentQuery withDefaults() {
-		return query().equalTo(Attributes.LOCATION_AVAILABLE, true).build();
-	}
+	public ContentQuery withDefaults();
+
 }

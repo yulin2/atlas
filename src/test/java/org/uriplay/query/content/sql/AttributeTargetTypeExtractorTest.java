@@ -16,11 +16,10 @@ package org.uriplay.query.content.sql;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.uriplay.content.criteria.Queries.after;
-import static org.uriplay.content.criteria.Queries.and;
-import static org.uriplay.content.criteria.Queries.beginning;
 import static org.uriplay.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
 import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TITLE;
+
+import static org.uriplay.content.criteria.ContentQueryBuilder.*;
 
 import java.util.Set;
 
@@ -39,12 +38,12 @@ public class AttributeTargetTypeExtractorTest extends TestCase {
 	AttributeTargetTypeExtractor extractor = new AttributeTargetTypeExtractor();
 
 	public void testExtractingItemAttribute() throws Exception {
-		ContentQuery query = beginning(ITEM_TITLE, "bob");
+		ContentQuery query = query().beginning(ITEM_TITLE, "bob").build();
 		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Item.class)));
 	}
 	
 	public void testCompositeQuery() {
-		ContentQuery query = and(beginning(ITEM_TITLE, "bob"), after(BROADCAST_TRANSMISSION_TIME, new DateTime()));
+		ContentQuery query = query().beginning(ITEM_TITLE, "bob").after(BROADCAST_TRANSMISSION_TIME, new DateTime()).build();
 		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Item.class, Broadcast.class)));
 	}
 }

@@ -16,14 +16,14 @@ package org.uriplay.query.content.fuzzy;
 
 import java.util.List;
 
+import org.uriplay.content.criteria.AtomicQuery;
+import org.uriplay.content.criteria.AttributeQuery;
 import org.uriplay.content.criteria.BooleanAttributeQuery;
-import org.uriplay.content.criteria.ConjunctiveQuery;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.content.criteria.DateTimeAttributeQuery;
 import org.uriplay.content.criteria.EnumAttributeQuery;
 import org.uriplay.content.criteria.IntegerAttributeQuery;
 import org.uriplay.content.criteria.MatchesNothing;
-import org.uriplay.content.criteria.Queries;
 import org.uriplay.content.criteria.QueryVisitor;
 import org.uriplay.content.criteria.StringAttributeQuery;
 import org.uriplay.content.criteria.attribute.Attributes;
@@ -58,14 +58,14 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 
 	private ContentQuery defuzz(ContentQuery query) {
-		return query.accept(new TitleDefuzzingQueryVisitor());
+		return query.copyWithOperands(query.accept(new TitleDefuzzingQueryVisitor()));
 	}
 	
-	private class TitleDefuzzingQueryVisitor implements QueryVisitor<ContentQuery> {
+	private class TitleDefuzzingQueryVisitor implements QueryVisitor<AtomicQuery> {
 		
 		@SuppressWarnings("unchecked")
 		@Override
-		public ContentQuery visit(StringAttributeQuery query) {
+		public AtomicQuery visit(StringAttributeQuery query) {
 			if(!Operators.SEARCH.equals(query.getOperator())) {
 				return query;
 			}
@@ -82,7 +82,7 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 				if (uris.isEmpty()) {
 					return MatchesNothing.get();
 				}
-				return Queries.equalTo(Attributes.BRAND_URI, uris);
+				return Attributes.BRAND_URI.createQuery(Operators.EQUALS, uris);
 			}
 			if (Attributes.ITEM_TITLE.equals(query.getAttribute())) {
 				List<String> uris = Lists.newArrayList();
@@ -93,41 +93,32 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 				if (uris.isEmpty()) {
 					return MatchesNothing.get();
 				}
-				return Queries.equalTo(Attributes.ITEM_URI, uris);
+				return Attributes.ITEM_URI.createQuery(Operators.EQUALS, uris);
 			}
 			return query;
 		}
 		
 		@Override
-		public ContentQuery visit(IntegerAttributeQuery query) {
+		public AttributeQuery<?> visit(IntegerAttributeQuery query) {
 			return query;
 		}
 
 		@Override
-		public ContentQuery visit(BooleanAttributeQuery query) {
+		public AttributeQuery<?> visit(BooleanAttributeQuery query) {
 			return query;
 		}
 
 		@Override
-		public ContentQuery visit(EnumAttributeQuery<?> query) {
+		public AttributeQuery<?> visit(EnumAttributeQuery<?> query) {
 			return query;
 		}
 
 		@Override
-		public ContentQuery visit(DateTimeAttributeQuery query) {
+		public AttributeQuery<?> visit(DateTimeAttributeQuery query) {
 			return query;
 		}
 
-		@Override
-		public ContentQuery visit(ConjunctiveQuery query) {
-			List<ContentQuery> newConjucts = Lists.newArrayList();
-			for (ContentQuery operand : query.operands()) {
-				newConjucts.add(defuzz(operand));
-			}
-			return query.copyWithOperands(newConjucts);
-		}
-
-		public ContentQuery visit(MatchesNothing noOp) {
+		public AtomicQuery visit(MatchesNothing noOp) {
 			return noOp;
 		}
 	}

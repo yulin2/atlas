@@ -15,11 +15,11 @@ permissions and limitations under the License. */
 package org.uriplay.query.content;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.uriplay.content.criteria.ContentQueryBuilder.query;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.content.criteria.ContentQuery;
-import org.uriplay.content.criteria.Queries;
 import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
@@ -27,16 +27,15 @@ import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RequestTimer;
 
-
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 @SuppressWarnings("unchecked")
 public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 
-	ContentQuery uriquery = Queries.equalTo(Attributes.ITEM_URI, "http://example.com");
-	ContentQuery titlequery = Queries.equalTo(Attributes.BRAND_TITLE, "ex");
-	ContentQuery query = Queries.and(uriquery, titlequery);
+	ContentQuery uriquery = query().equalTo(Attributes.ITEM_URI, "http://example.com").build();
+	ContentQuery titlequery = query().equalTo(Attributes.BRAND_TITLE, "ex").build();
+	ContentQuery query =  query().equalTo(Attributes.ITEM_URI, "http://example.com").equalTo(Attributes.BRAND_TITLE, "ex").build();
 
 	Fetcher<Description> fetcher = mock(Fetcher.class);
 	KnownTypeQueryExecutor delegate = mock(KnownTypeQueryExecutor.class);
