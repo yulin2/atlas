@@ -35,7 +35,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser"/>
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter.DailyMotionItemCanonicaliser"/>
                 <bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter.BlipTvCanonicaliser"/>
-                <bean class="org.uriplay.remotesite.hulu.HuluAdapter.HuluCanonicaliser"/>
+                <bean class="org.uriplay.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser"/>
+                <bean class="org.uriplay.remotesite.hulu.HuluBrandAdapter.HuluBrandCanonicaliser"/>
                 
                 <!--  this should go last in the chain as it is an expensive operation -->
                 <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
@@ -60,6 +61,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 		<constructor-arg ref="contentStore" />
 		<constructor-arg ref="remoteFetcher" />
 	</bean>
+    
+    <bean id="huluBrandAdapter" class="org.uriplay.remotesite.hulu.HuluBrandAdapter">
+        <property name="episodeAdapter" ref="huluItemAdapter" />
+    </bean>
+    
+    <bean id="huluItemAdapter" class="org.uriplay.remotesite.hulu.HuluItemAdapter">
+        <property name="contentStore" ref="contentStore" />
+        <property name="brandAdapter">
+            <bean class="org.uriplay.remotesite.hulu.HuluBrandAdapter" />
+        </property>
+    </bean>
 		
 	<bean id="remoteFetcher" class="org.uriplay.remotesite.PerSiteAdapterDispatcher">
         <property name="adapters">
@@ -74,10 +86,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter"/>
 				<bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter"/>
 				<bean class="org.uriplay.remotesite.itv.ItvBrandAdapter"/>
-                <bean class="org.uriplay.remotesite.hulu.HuluAdapter"/>
                 <bean class="org.uriplay.remotesite.bbc.BbcIplayerFeedAdapter"/>
                 <bean class="org.uriplay.remotesite.bbc.BbcProgrammeAdapter"/>
                 <bean class="org.uriplay.remotesite.bbc.BbcPodcastAdapter"/>
+                <ref bean="huluBrandAdapter" />
+                <ref bean="huluItemAdapter" />
+                <bean class="org.uriplay.remotesite.hulu.HuluRssAdapter"/>
 				
 				<bean class="org.uriplay.remotesite.vimeo.VimeoAdapter" >
                     <property name="acceptedUriPattern" value="http://vimeo.com/[\d]+" />

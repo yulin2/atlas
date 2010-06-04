@@ -9,6 +9,7 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
+import org.uriplay.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser;
 
 public class HuluItemAdapterTest extends TestCase {
     HuluItemAdapter adapter = new HuluItemAdapter();
@@ -54,5 +55,11 @@ public class HuluItemAdapterTest extends TestCase {
         assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348/glee-funk"));
         assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348"));
         assertFalse(adapter.canFetch("http://www.hulu.com/glee"));
+    }
+    
+    public void testCanonicaliser() throws Exception {
+        assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348/glee-funk"));
+        assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348"));
+        assertNull(new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/glee"));
     }
 }

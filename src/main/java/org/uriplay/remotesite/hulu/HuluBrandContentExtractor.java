@@ -12,7 +12,6 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
-import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.html.HtmlNavigator;
 
 import com.google.soy.common.collect.Sets;
@@ -20,15 +19,6 @@ import com.google.soy.common.collect.Sets;
 public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator, Brand> {
     private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.subscribe = ";
     private static final ObjectMapper mapper = new ObjectMapper();
-    private final SiteSpecificAdapter<Episode> episodeAdapter;
-    
-    public HuluBrandContentExtractor() {
-        this(new HuluItemAdapter());
-    }
-    
-    public HuluBrandContentExtractor(SiteSpecificAdapter<Episode> episodeAdapter) {
-        this.episodeAdapter = episodeAdapter;
-    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -45,7 +35,7 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
             
             elements = source.allElementsMatching("//div[@id='episode-container']/div/ul/li/a']");
             for (Element element : elements) {
-                Episode episode = episodeAdapter.fetch(element.getAttributeValue("href"), null);
+                Episode episode = new Episode(element.getAttributeValue("href"), null);
                 brand.addItem(episode);
             }
 

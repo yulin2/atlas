@@ -17,6 +17,8 @@ package org.uriplay;
 
 import junit.framework.TestCase;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 /**
  * Test that we can load beans from the Spring configuration - checks that the config is wired correctly.
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -24,9 +26,8 @@ import junit.framework.TestCase;
 public class SpringTest extends TestCase {
 
 	public void testCanCreateQueryController() throws Exception {
-//	    TestDatabase.createJndiDataSource("jdbc/${uriplay.database}");
-//	    String[] configLocations = new String[] {"config/uriplay-servlet.xml", "config/applicationContext.xml"};
-//		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configLocations);
-//		applicationContext.getBean("queryController");
+	    String[] configLocations = new String[] {"classpath:uriplay.xml"};
+		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configLocations);
+		applicationContext.getBean("newQueryApiController");
 	}
 }

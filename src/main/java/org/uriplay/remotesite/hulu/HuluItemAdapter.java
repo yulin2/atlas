@@ -14,13 +14,20 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.hulu;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
+import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.html.HtmlNavigator;
 
@@ -29,13 +36,25 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 
 public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
+    
+    static final Log LOG = LogFactory.getLog(HuluItemAdapter.class);
 
 	public static final String BASE_URI = "http://www.hulu.com/watch/";
 	private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "\\d+)\\/?.*");
+	
     private final SimpleHttpClient httpClient;
     private final HuluItemContentExtractor extractor;
+    // If you don't set the brand adapter, it won't try to hydrate them, which is important for stopping everything from spiraling out of control
+    private SiteSpecificAdapter<Brand> brandAdapter;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+    
+    private MutableContentStore contentStore;
 	
 	public HuluItemAdapter() {
+	    this(HttpClients.webserviceClient(), new HuluItemContentExtractor());
+	}
+	
+	public HuluItemAdapter(boolean hydrateBrand) {
 	    this(new SimpleHttpClientBuilder().build(), new HuluItemContentExtractor());
 	}
 
@@ -50,7 +69,13 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
             String content = httpClient.get(uri);
             HtmlNavigator navigator = new HtmlNavigator(content);
             
-            return extractor.extract(navigator);
+            Episode episode = extractor.extract(navigator);
+            
+            if (episode.getBrand() != null && episode.getBrand().getCanonicalUri() != null && contentStore != null && brandAdapter != null) {
+                executor.execute(new BrandHydratingJob(episode.getBrand().getCanonicalUri()));
+            }
+            
+            return episode;
         } catch (HttpException e) {
             throw new FetchException("Unable to retrieve from Hulu", e);
         }
@@ -60,8 +85,26 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     public boolean canFetch(String uri) {
         return ALIAS_PATTERN.matcher(uri).matches();
     }
+    
+    class BrandHydratingJob implements Runnable {
+        
+        private final String uri;
 
-    public static class HuluCanonicaliser implements Canonicaliser {
+        public BrandHydratingJob(String uri) {
+            this.uri = uri;
+        }
+
+        public void run() {
+            try {
+                Brand brand = brandAdapter.fetch(uri, null);
+                contentStore.createOrUpdatePlaylist(brand, false);
+            } catch (Exception e) {
+                LOG.warn(e);
+            }
+        }
+    }
+
+    public static class HuluItemCanonicaliser implements Canonicaliser {
         @Override
         public String canonicalise(String uri) {
             Matcher matcher = ALIAS_PATTERN.matcher(uri);
@@ -70,5 +113,13 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
             }
             return null;
         }
+    }
+    
+    public void setContentStore(MutableContentStore contentStore) {
+        this.contentStore = contentStore;
+    }
+    
+    public void setBrandAdapter(SiteSpecificAdapter<Brand> brandAdapter) {
+        this.brandAdapter = brandAdapter;
     }
 }
