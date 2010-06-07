@@ -36,6 +36,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				<prop key="/system/bbc/update">bbcUpdateController</prop>
 				<prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
 				<prop key="/system/orphans/update">orphanUpdateController</prop>
+                <prop key="/system/hulu/update">huluUpdateController</prop>
 			</props>
 		</property>
 	</bean>
@@ -57,6 +58,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="bbcScheduleUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
 		<constructor-arg ref="bbcSchedulesUpdater"/>
 	</bean>
+    
+    <bean id="huluUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+        <constructor-arg ref="huluBrandsUpdater"/>
+    </bean>
 	
 	<bean id="orphanUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
 		<constructor-arg ref="perPublisherUpdater"/>
