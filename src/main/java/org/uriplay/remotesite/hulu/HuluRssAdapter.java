@@ -1,5 +1,6 @@
 package org.uriplay.remotesite.hulu;
 
+import java.io.StringReader;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,9 +10,10 @@ import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
-import org.uriplay.remotesite.http.CommonsHttpClient;
 
+import com.metabroadcast.common.http.SimpleHttpClient;
 import com.sun.syndication.feed.rss.Channel;
 import com.sun.syndication.feed.rss.Guid;
 import com.sun.syndication.feed.rss.Item;
@@ -79,11 +81,11 @@ public class HuluRssAdapter implements SiteSpecificAdapter<Playlist> {
 
         return new RemoteSiteClient<Channel>() {
 
-            private final CommonsHttpClient client = new CommonsHttpClient();
+            private final SimpleHttpClient client = HttpClients.webserviceClient();
 
             @Override
             public Channel get(String uri) throws Exception {
-                return (Channel) new WireFeedInput().build(client.get(uri));
+                return (Channel) new WireFeedInput().build(new StringReader(client.get(uri)));
             }
         };
     }
