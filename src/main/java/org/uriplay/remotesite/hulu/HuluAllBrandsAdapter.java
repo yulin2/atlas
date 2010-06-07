@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
+import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
@@ -22,6 +23,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     private final SimpleHttpClient httpClient;
     private final SiteSpecificAdapter<Brand> brandAdapter;
     static final Log LOG = LogFactory.getLog(HuluAllBrandsAdapter.class);
+    private MutableContentStore contentStore;
     
     public HuluAllBrandsAdapter() {
         this(HttpClients.webserviceClient(), new HuluBrandAdapter());
@@ -34,6 +36,10 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     public HuluAllBrandsAdapter(SimpleHttpClient httpClient, SiteSpecificAdapter<Brand> brandAdapter) {
         this.httpClient = httpClient;
         this.brandAdapter = brandAdapter;
+    }
+    
+    public void setContentStore(MutableContentStore contentStore) {
+        this.contentStore = contentStore;
     }
 
     @Override
@@ -53,6 +59,11 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                 String brandUri = element.getAttributeValue("href");
                 if (brandAdapter.canFetch(brandUri)) {
                     Brand brand = brandAdapter.fetch(brandUri, timer);
+                    
+                    if (contentStore != null) {
+                        contentStore.createOrUpdatePlaylist(brand, false);
+                    }
+                    
                     playlist.addPlaylist(brand);
                 }
             }

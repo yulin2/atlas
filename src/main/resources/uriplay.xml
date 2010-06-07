@@ -66,11 +66,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="huluAllBrandsAdapter" class="org.uriplay.remotesite.hulu.HuluAllBrandsAdapter">
       <constructor-arg>
         <bean class="org.uriplay.remotesite.hulu.HuluBrandAdapter">
-          <!--<property name="episodeAdapter">
+          <property name="episodeAdapter">
             <bean class="org.uriplay.remotesite.hulu.HuluItemAdapter"/>
           </property>
-        --></bean>
+        </bean>
       </constructor-arg>
+      <property name="contentStore" ref="contentStore"/>
     </bean>
     
     <bean id="huluBrandAdapter" class="org.uriplay.remotesite.hulu.HuluBrandAdapter">

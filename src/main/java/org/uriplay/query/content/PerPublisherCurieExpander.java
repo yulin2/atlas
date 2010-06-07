@@ -176,16 +176,30 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			}	
 		},
 		HULU {
+		    final Pattern episodePattern = Pattern.compile("^\\d+$");
+		    
 			@Override
 			public String expand(String curie) {
-				return "http://www.hulu.com/watch/" + curie.substring(5);
+			    String identifier = curie.substring(5);
+			    Matcher matcher = episodePattern.matcher(identifier);
+			    if (matcher.matches()) {
+			        return "http://www.hulu.com/watch/" + identifier;
+			    } else {
+			        return "http://www.hulu.com/" + identifier;
+			    }
 			}
 
-			final Pattern huluPattern = Pattern.compile("https?://.*hulu.com/watch/([^\\./&=]+).*");
+			final Pattern huluEpisodePattern = Pattern.compile("https?://.*hulu.com/watch/([^\\./&=]+).*");
+			final Pattern huluBrandPattern = Pattern.compile("https?://.*hulu.com/([a-z\\-]+).*");
 
 			@Override
 			public String compact(String url) {
-				return "hulu:" + matchAgainst(url, huluPattern);
+			    Matcher matcher = huluEpisodePattern.matcher(url);
+			    if (matcher.matches()) {
+			        return "hulu:" + matcher.group(1);
+			    } else {
+			        return "hulu:" + matchAgainst(url, huluBrandPattern);
+			    }
 			}	
 		},
 		TED {

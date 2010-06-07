@@ -123,11 +123,13 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	public void testExpandsHuluCuries() throws Exception {
 		
 		assertThat(expander.expand("hulu:78417"), is(Maybe.just("http://www.hulu.com/watch/78417")));
+		assertThat(expander.expand("hulu:glee"), is(Maybe.just("http://www.hulu.com/glee")));
 	}
 	
 	public void testProducesHuluCuries() throws Exception {
 		
 		assertThat(HULU.compact("http://www.hulu.com/watch/78417/the-daily-show-with-jon-stewart-wed-jun-17-2009"), is("hulu:78417"));
+		assertThat(HULU.compact("http://www.hulu.com/glee"), is("hulu:glee"));
 	}
 	
 	public void testExpandsTedCuries() throws Exception {
