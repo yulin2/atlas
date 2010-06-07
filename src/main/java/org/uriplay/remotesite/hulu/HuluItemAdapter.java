@@ -33,7 +33,6 @@ import org.uriplay.remotesite.html.HtmlNavigator;
 
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
-import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 
 public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     
@@ -52,10 +51,6 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 	
 	public HuluItemAdapter() {
 	    this(HttpClients.webserviceClient(), new HuluItemContentExtractor());
-	}
-	
-	public HuluItemAdapter(boolean hydrateBrand) {
-	    this(new SimpleHttpClientBuilder().build(), new HuluItemContentExtractor());
 	}
 
 	public HuluItemAdapter(SimpleHttpClient httpClient, HuluItemContentExtractor extractor) {
