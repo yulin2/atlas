@@ -10,6 +10,7 @@ import org.jaxen.JaxenException;
 import org.jdom.Element;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
+import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.html.HtmlNavigator;
@@ -24,32 +25,19 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
     @Override
     public Brand extract(HtmlNavigator source) {
         try {
-            Brand brand = new Brand();
-            
-            List<Element> elements = source.allElementsMatching("//li[@class='tags-content-cell']/a");
-            Set<String> tags = Sets.newHashSet();
-            for (Element element : elements) {
-                tags.add("http://www.hulu.com" + element.getAttributeValue("href"));
-            }
-            brand.setTags(tags);
-            
-            elements = source.allElementsMatching("//div[@id='episode-container']/div/ul/li/a']");
-            for (Element element : elements) {
-                Episode episode = new Episode(element.getAttributeValue("href"), null);
-                brand.addItem(episode);
-            }
-
-            elements = source.allElementsMatching("//body/script");
-
-            for (Element element : elements) {
+            Brand brand = null;
+          
+            for (Element element : source.allElementsMatching("//body/script")) {
                 String value = element.getValue();
 
                 if (value.startsWith(SOCIAL_FEED)) {
                     try {
                         Map<String, Object> attributes = mapper.readValue(value.replace(SOCIAL_FEED, ""), HashMap.class);
+                        
+                        String brandUri = (String) attributes.get("show_link");
+                        
+                        brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri));
 
-                        brand.setCanonicalUri((String) attributes.get("show_link"));
-                        brand.setCurie("hulu:" + brand.getCanonicalUri().replace(HuluBrandAdapter.BASE_URI, ""));
                         brand.setDescription((String) attributes.get("show_description"));
                         brand.setTitle((String) attributes.get("show_title"));
                         brand.setPublisher("hulu.com");
@@ -71,6 +59,22 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
                         throw new FetchException("Unable to map JSON values", e);
                     }
                 }
+            }
+            
+            if (brand == null) {
+            	throw new FetchException("Page did not not contain a brand, possible change of markup?");
+            }
+            
+            Set<String> tags = Sets.newHashSet();
+            for (Element element : source.allElementsMatching("//li[@class='tags-content-cell']/a")) {
+                tags.add("http://www.hulu.com" + element.getAttributeValue("href"));
+            }
+            brand.setTags(tags);
+            
+            for (Element element : source.allElementsMatching("//div[@id='episode-container']/div/ul/li/a']")) {
+                String episodeUri = element.getAttributeValue("href");
+				Episode episode = new Episode(episodeUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(episodeUri));
+                brand.addItem(episode);
             }
 
             return brand;

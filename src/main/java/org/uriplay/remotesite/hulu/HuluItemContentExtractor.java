@@ -18,6 +18,7 @@ import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
+import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.html.HtmlNavigator;
@@ -37,12 +38,8 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
             Version version = new Version();
             Encoding encoding = new Encoding();
             Location location = new Location();
-            Policy policy = new Policy();
-            Brand brand = new Brand();
-            
-            item.setBrand(brand);
-            policy.addAvailableCountry(Countries.US);
-            location.setPolicy(policy);
+        
+            location.setPolicy(usPolicy());
             encoding.addAvailableAt(location);
             version.addManifestedAs(encoding);
             item.addVersion(version);
@@ -127,9 +124,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                     item.setPublisher("hulu.com");
                     item.setIsLongForm(true);
                     
-                    brand.setDescription((String) attributes.get("show_description"));
-                    brand.setTitle((String) attributes.get("show_title"));
-                    brand.setCanonicalUri((String) attributes.get("show_link"));
+                    item.setBrand(brandFrom(attributes));
 
                     break;
                 }
@@ -140,4 +135,18 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
             throw new FetchException("Unable to navigate HTML document", e);
         }
     }
+
+	private Policy usPolicy() {
+		Policy policy = new Policy();
+		policy.addAvailableCountry(Countries.US);
+		return policy;
+	}
+
+	private Brand brandFrom(Map<String, Object> attributes) {
+		String brandUri = (String) attributes.get("show_link");
+		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri));
+		brand.setDescription((String) attributes.get("show_description"));
+		brand.setTitle((String) attributes.get("show_title"));
+		return brand;
+	}
 }
