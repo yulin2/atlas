@@ -38,6 +38,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
     public static final String BASE_URI = "http://www.hulu.com/";
+    private static final Pattern SUB_BRAND_PATTERN = Pattern.compile("(" + BASE_URI + ").+?\\/([a-z\\-]+).*");
     private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "[a-z\\-]+).*");
     private final SimpleHttpClient httpClient;
     private final ContentExtractor<HtmlNavigator, Brand> extractor;
@@ -69,6 +70,8 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
                     episodes.add(episode);
                 }
                 brand.setItems(episodes);
+            } else {
+                brand.setItems(Lists.<Item>newArrayList());
             }
 
             return brand;
@@ -85,12 +88,18 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     public static class HuluBrandCanonicaliser implements Canonicaliser {
         @Override
         public String canonicalise(String uri) {
-            Matcher matcher = ALIAS_PATTERN.matcher(uri);
+            if (uri.startsWith("http://www.hulu.com/watch") || uri.startsWith("http://www.hulu.com/feed")) {
+                return null;
+            }
+            
+            Matcher matcher = SUB_BRAND_PATTERN.matcher(uri);
             if (matcher.matches()) {
-                String canonical = matcher.group(1);
-                if (!canonical.endsWith("/watch") && !canonical.endsWith("/feeds")) {
-                    return canonical;
-                }
+                return matcher.group(1) + matcher.group(2);
+            }
+            
+            matcher = ALIAS_PATTERN.matcher(uri);
+            if (matcher.matches()) {
+                return matcher.group(1);
             }
             return null;
         }

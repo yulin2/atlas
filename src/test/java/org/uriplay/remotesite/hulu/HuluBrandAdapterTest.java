@@ -42,7 +42,8 @@ public class HuluBrandAdapterTest extends MockObjectTestCase {
     }
     
     public void testShouldCanonicalise() throws Exception {
-        assertEquals("http://www.hulu.com/glee", new HuluBrandCanonicaliser().canonicalise("http://www.hulu.com/glee/someothershit"));
+        assertEquals("http://www.hulu.com/glee", new HuluBrandCanonicaliser().canonicalise("http://www.hulu.com/glee"));
+        assertEquals("http://www.hulu.com/americas-game", new HuluBrandCanonicaliser().canonicalise("http://www.hulu.com/nfl/americas-game"));
         assertNull(new HuluBrandCanonicaliser().canonicalise("http://www.hulu.com/watch/489427/glee"));
     }
 }

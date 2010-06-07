@@ -14,6 +14,7 @@ import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.html.HtmlNavigator;
+import org.uriplay.remotesite.hulu.HuluBrandAdapter.HuluBrandCanonicaliser;
 
 import com.google.soy.common.collect.Sets;
 
@@ -34,7 +35,7 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
                     try {
                         Map<String, Object> attributes = mapper.readValue(value.replace(SOCIAL_FEED, ""), HashMap.class);
                         
-                        String brandUri = (String) attributes.get("show_link");
+                        String brandUri = new HuluBrandCanonicaliser().canonicalise((String) attributes.get("show_link"));
                         
                         brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri));
 
