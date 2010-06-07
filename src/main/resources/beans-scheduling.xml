@@ -13,6 +13,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <list>
             <ref bean="updateBbcBrandsScheduledTask" />
             <ref bean="updateItvBrandsScheduledTask" />
+            <ref bean="updateHuluBrandsScheduledTask" />
             <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateMentionsScheduledTask" />
         </list>
@@ -104,6 +105,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </property>
   </bean>
   
+  <bean id="updateHuluBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="1940000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+      <bean parent="conditionalRunner">
+        <constructor-arg ref="huluBrandsUpdater" />
+    </bean>
+    </property>
+  </bean>
+  
   <bean id="brandsUpdater" abstract="true">
   	<property name="contentStore" ref="contentStore"/>
 	<property name="fetcher" ref="remoteFetcher"/>
@@ -132,6 +143,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   
   <bean id="itvBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
 	 <property name="uri" value="http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml" />
+  </bean>
+  
+  <bean id="huluBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+   <property name="uri" value="http://www.hulu.com/browse/alphabetical/episodes" />
   </bean>
   
   <bean id="bbcBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Item;
@@ -40,6 +42,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     private final SimpleHttpClient httpClient;
     private final ContentExtractor<HtmlNavigator, Brand> extractor;
     private SiteSpecificAdapter<Episode> episodeAdapter;
+    static final Log LOG = LogFactory.getLog(HuluBrandAdapter.class);
 
     public HuluBrandAdapter() {
         this(HttpClients.webserviceClient(), new HuluBrandContentExtractor());
@@ -53,6 +56,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     @Override
     public Brand fetch(String uri, RequestTimer timer) {
         try {
+            LOG.info("Retrieving Hulu brand: "+uri);
             String content = httpClient.get(uri);
             HtmlNavigator navigator = new HtmlNavigator(content);
 
@@ -75,7 +79,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
     @Override
     public boolean canFetch(String uri) {
-        return Pattern.compile(BASE_URI + "[a-z\\-]+").matcher(uri).matches();
+        return Pattern.compile(BASE_URI + "[a-z\\-]+").matcher(uri).matches() && ! uri.startsWith("http://www.hulu.com/browse");
     }
 
     public static class HuluBrandCanonicaliser implements Canonicaliser {
