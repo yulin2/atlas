@@ -65,24 +65,20 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     
     <bean id="huluAllBrandsAdapter" class="org.uriplay.remotesite.hulu.HuluAllBrandsAdapter">
       <constructor-arg>
-        <bean class="org.uriplay.remotesite.hulu.HuluBrandAdapter">
-          <property name="episodeAdapter">
-            <bean class="org.uriplay.remotesite.hulu.HuluItemAdapter"/>
-          </property>
-        </bean>
+        <ref bean="huluBrandAdapter" />
       </constructor-arg>
       <property name="contentStore" ref="contentStore"/>
     </bean>
     
     <bean id="huluBrandAdapter" class="org.uriplay.remotesite.hulu.HuluBrandAdapter">
-        <property name="episodeAdapter" ref="huluItemAdapter" />
+        <property name="episodeAdapter">
+            <bean class="org.uriplay.remotesite.hulu.HuluItemAdapter" />
+        </property>
     </bean>
     
     <bean id="huluItemAdapter" class="org.uriplay.remotesite.hulu.HuluItemAdapter">
         <property name="contentStore" ref="contentStore" />
-        <property name="brandAdapter">
-            <bean class="org.uriplay.remotesite.hulu.HuluBrandAdapter" />
-        </property>
+        <property name="brandAdapter" ref="huluBrandAdapter" />
     </bean>
 		
 	<bean id="remoteFetcher" class="org.uriplay.remotesite.PerSiteAdapterDispatcher">

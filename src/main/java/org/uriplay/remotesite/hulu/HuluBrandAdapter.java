@@ -67,11 +67,10 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
             if (episodeAdapter != null) {
                 for (Item item : brand.getItems()) {
                     Episode episode = episodeAdapter.fetch(item.getCanonicalUri(), null);
+                    episode.setBrand(brand);
                     episodes.add(episode);
                 }
                 brand.setItems(episodes);
-            } else {
-                brand.setItems(Lists.<Item>newArrayList());
             }
 
             return brand;
