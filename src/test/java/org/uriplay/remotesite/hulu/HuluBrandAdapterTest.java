@@ -5,16 +5,15 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.hulu.HuluBrandAdapter.HuluBrandCanonicaliser;
-
-import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 
 @SuppressWarnings("unchecked")
 public class HuluBrandAdapterTest extends MockObjectTestCase {
     SiteSpecificAdapter<Episode> episodeAdapter = mock(SiteSpecificAdapter.class);
     HuluBrandContentExtractor brandExtractor = new HuluBrandContentExtractor();
-    HuluBrandAdapter adapter = new HuluBrandAdapter(new SimpleHttpClientBuilder().build(), brandExtractor);
+    HuluBrandAdapter adapter = new HuluBrandAdapter(HttpClients.webserviceClient(), brandExtractor);
 
     public void testShouldGetBrand() throws Exception {
         checking(new Expectations() {{
