@@ -61,6 +61,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     @Override
     public Episode fetch(String uri, RequestTimer timer) {
         try {
+            LOG.info("Retrieving hulu episode: "+uri);
             String content = httpClient.get(uri);
             HtmlNavigator navigator = new HtmlNavigator(content);
             
