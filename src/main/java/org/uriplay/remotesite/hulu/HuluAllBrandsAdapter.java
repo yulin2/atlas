@@ -1,6 +1,8 @@
 package org.uriplay.remotesite.hulu;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,6 +11,7 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.HttpClients;
@@ -24,11 +27,12 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     private final SiteSpecificAdapter<Brand> brandAdapter;
     static final Log LOG = LogFactory.getLog(HuluAllBrandsAdapter.class);
     private MutableContentStore contentStore;
-    
+    private final ExecutorService executor = Executors.newFixedThreadPool(2);
+
     public HuluAllBrandsAdapter() {
         this(HttpClients.webserviceClient(), new HuluBrandAdapter());
     }
-    
+
     public HuluAllBrandsAdapter(SiteSpecificAdapter<Brand> brandAdapter) {
         this(HttpClients.webserviceClient(), brandAdapter);
     }
@@ -37,7 +41,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
         this.httpClient = httpClient;
         this.brandAdapter = brandAdapter;
     }
-    
+
     public void setContentStore(MutableContentStore contentStore) {
         this.contentStore = contentStore;
     }
@@ -58,13 +62,11 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
             for (Element element : elements) {
                 String brandUri = element.getAttributeValue("href");
                 if (brandAdapter.canFetch(brandUri)) {
-                    Brand brand = brandAdapter.fetch(brandUri, timer);
-                    
                     if (contentStore != null) {
-                        contentStore.createOrUpdatePlaylist(brand, false);
+                        executor.execute(new BrandHydratingJob(brandUri));
                     }
-                    
-                    playlist.addPlaylist(brand);
+
+                    playlist.addPlaylist(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri)));
                 }
             }
 
@@ -74,11 +76,30 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
         }
     }
 
+    class BrandHydratingJob implements Runnable {
+
+        private final String uri;
+
+        public BrandHydratingJob(String uri) {
+            this.uri = uri;
+        }
+
+        public void run() {
+            try {
+                Brand brand = brandAdapter.fetch(uri, null);
+                contentStore.createOrUpdatePlaylist(brand, false);
+            } catch (Exception e) {
+                LOG.warn("Error retrieving Hulu brand: "+uri, e);
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     public boolean canFetch(String uri) {
         return URL.equals(uri);
     }
-    
+
     public static class HuluAllBrandsCanonicaliser implements Canonicaliser {
         @Override
         public String canonicalise(String uri) {
