@@ -57,7 +57,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     @Override
     public Brand fetch(String uri, RequestTimer timer) {
         try {
-            LOG.info("Retrieving Hulu brand: "+uri);
+            LOG.info("Retrieving Hulu brand: " + uri);
             String content = httpClient.get(uri);
             HtmlNavigator navigator = new HtmlNavigator(content);
 
@@ -75,13 +75,13 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
             return brand;
         } catch (HttpException e) {
-            throw new FetchException("Unable to retrieve from Hulu", e);
+            throw new FetchException("Unable to retrieve brand from Hulu: " + uri, e);
         }
     }
 
     @Override
     public boolean canFetch(String uri) {
-        return Pattern.compile(BASE_URI + "[a-z\\-]+").matcher(uri).matches() && ! uri.startsWith("http://www.hulu.com/browse");
+        return Pattern.compile(BASE_URI + "[a-z\\-]+").matcher(uri).matches() && !uri.startsWith("http://www.hulu.com/browse");
     }
 
     public static class HuluBrandCanonicaliser implements Canonicaliser {
@@ -90,12 +90,12 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
             if (uri.startsWith("http://www.hulu.com/watch") || uri.startsWith("http://www.hulu.com/feed")) {
                 return null;
             }
-            
+
             Matcher matcher = SUB_BRAND_PATTERN.matcher(uri);
             if (matcher.matches()) {
                 return matcher.group(1) + matcher.group(2);
             }
-            
+
             matcher = ALIAS_PATTERN.matcher(uri);
             if (matcher.matches()) {
                 return matcher.group(1);
