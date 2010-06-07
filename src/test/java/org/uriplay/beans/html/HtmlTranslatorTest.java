@@ -5,6 +5,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.joda.time.Duration;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
@@ -28,11 +29,11 @@ public class HtmlTranslatorTest extends TestCase {
 		
 		Version version = new Version();
 		item.addVersion(version);
-		version.setDuration(999);
+		version.setDuration(Duration.standardSeconds(999));
 		
 		Version version2 = new Version();
 		item.addVersion(version2);
-		version2.setDuration(185);
+		version2.setDuration(Duration.standardSeconds(185));
 		
 		Encoding encoding = new Encoding();
 		version.addManifestedAs(encoding);
@@ -62,11 +63,11 @@ public class HtmlTranslatorTest extends TestCase {
 		
 		Version version = new Version();
 		item1.addVersion(version);
-		version.setDuration(999);
+		version.setDuration(Duration.standardSeconds(999));
 		
 		Version version2 = new Version();
 		item1.addVersion(version2);
-		version2.setDuration(185);
+		version2.setDuration(Duration.standardSeconds(185));
 		
 		Encoding encoding = new Encoding();
 		version.addManifestedAs(encoding);

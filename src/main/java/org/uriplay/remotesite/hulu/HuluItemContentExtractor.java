@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jaxen.JaxenException;
 import org.jdom.Element;
+import org.joda.time.Duration;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Countries;
@@ -71,7 +72,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                     } else {
                         duration = first * 60 + second;
                     }
-                    version.setDuration(duration);
+                    version.setDuration(Duration.standardSeconds(duration));
                 }
             }
             

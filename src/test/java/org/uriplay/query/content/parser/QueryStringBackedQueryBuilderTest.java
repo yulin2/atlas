@@ -15,21 +15,7 @@ permissions and limitations under the License. */
 package org.uriplay.query.content.parser;
 
 
-import static org.uriplay.content.criteria.attribute.Attributes.BRAND_GENRE;
-import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TAG;
-import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
-import static org.uriplay.content.criteria.attribute.Attributes.EPISODE_POSITION;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_GENRE;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_PUBLISHER;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TAG;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_AVAILABLE;
-import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_TRANSPORT_TYPE;
-import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_GENRE;
-import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_TAG;
-import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.VERSION_DURATION;
+import static org.uriplay.content.criteria.attribute.Attributes.*;
 
 import java.util.Map;
 
@@ -188,6 +174,13 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		Map<String, String[]> params = Maps.newHashMap();
 		params.put("broadcast.transmissionTime-before", new String[] {"101"});
 		check(params, query().before(BROADCAST_TRANSMISSION_TIME, new DateTime(101L)));
+	}
+	
+	public void testTransmissionTimeEquals() throws Exception {
+		DateTime when = new DateTime(1010101);
+		Map<String, String[]> params = Maps.newHashMap();
+		params.put("broadcast.transmissionTime", new String[] { String.valueOf(when.getMillis()) });
+		check(params, query().before(BROADCAST_TRANSMISSION_TIME, when.plusSeconds(1)).after(BROADCAST_TRANSMISSION_END_TIME, when));
 	}
 	
 	public void testInvalidAttribute() {

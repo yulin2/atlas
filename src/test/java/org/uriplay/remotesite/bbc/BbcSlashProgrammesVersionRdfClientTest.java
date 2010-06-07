@@ -24,9 +24,12 @@ import java.io.Reader;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.joda.time.DateTime;
 import org.springframework.core.io.ClassPathResource;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
+
+import com.metabroadcast.common.time.DateTimeZones;
 
 /**
  * Unit test for {@link BbcSlashProgrammesVersionRdfClient}.
@@ -51,9 +54,9 @@ public class BbcSlashProgrammesVersionRdfClientTest extends MockObjectTestCase {
 		assertThat(version.broadcastSlots().size(), is(22));
 		
 		BbcBroadcast firstBroadcast = version.broadcastSlots().get(0);
-		assertThat(firstBroadcast.broadcastTime(), is("2007-11-25T20:00:00Z"));
+		assertThat(firstBroadcast.broadcastDateTime(), is(new DateTime("2007-11-25T20:00:00Z", DateTimeZones.UTC)));
 		assertThat(firstBroadcast.broadcastOn(), is("/services/bbctwo/ni_analogue#service"));
-		assertThat(firstBroadcast.broadcastDuration(), is(3600));
+		assertThat(firstBroadcast.broadcastEndDateTime(), is(new DateTime("2007-11-25T21:00:00Z", DateTimeZones.UTC)));
 		assertThat(version.broadcastSlots().get(0).scheduleDate(), is("2007-11-25"));
 	}
 

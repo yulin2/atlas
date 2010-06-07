@@ -17,7 +17,7 @@ package org.uriplay.remotesite.youtube;
 
 import java.util.Set;
 
-import org.joda.time.DateTimeConstants;
+import org.joda.time.Duration;
 import org.uriplay.beans.BeanGraphExtractor;
 import org.uriplay.beans.Representation;
 import org.uriplay.media.TransportSubType;
@@ -103,7 +103,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 		item.setThumbnail(source.getThumbnailImageUri());
 		item.setImage(source.getImageUri());
 		if (source.getVideos().size() > 0) {
-			item.setIsLongForm((source.getVideos().get(0).getDuration()) > (15 * DateTimeConstants.SECONDS_PER_MINUTE));
+			item.setIsLongForm((source.getVideos().get(0).getDuration()).isLongerThan(Duration.standardMinutes(15)));
 		}
 		return item;
 	}

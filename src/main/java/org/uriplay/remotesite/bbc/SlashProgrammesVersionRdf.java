@@ -31,6 +31,7 @@ import org.uriplay.media.vocabulary.RDF;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.time.DateTimeZones;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -56,10 +57,6 @@ class SlashProgrammesVersionRdf {
 		@XmlElement(namespace=PO.NS, name="broadcast_on")
 		BroadcastOn broadcastOn;
 		
-		String broadcastTime() {
-			 return event.interval.startTime;
-		}
-
 		public BbcBroadcast atTime(String time) {
 			Interval interval =  new Interval();
 			interval.startTime = time;
@@ -80,7 +77,11 @@ class SlashProgrammesVersionRdf {
 		}
 		
 		public DateTime broadcastDateTime() {
-			return new DateTime(broadcastTime());
+			return new DateTime(event.interval.startTime, DateTimeZones.UTC);
+		}
+		
+		public DateTime broadcastEndDateTime() {
+			return new DateTime(event.interval.endTime, DateTimeZones.UTC);
 		}
 
 		public String scheduleDate() {
@@ -94,10 +95,6 @@ class SlashProgrammesVersionRdf {
 			return null;
 		}
 
-		public Integer broadcastDuration() {
-			return (int) ((new DateTime(event.interval.endTime).getMillis() - new DateTime(event.interval.startTime).getMillis()) / 1000);
-		}
-		
 		@Override
 		public boolean equals(Object obj) {
 			return EqualsBuilder.reflectionEquals(this, obj);

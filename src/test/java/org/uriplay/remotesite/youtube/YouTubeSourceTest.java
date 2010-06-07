@@ -25,6 +25,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.joda.time.Duration;
 import org.uriplay.remotesite.youtube.YouTubeSource.Video;
 
 import com.google.common.collect.Lists;
@@ -71,7 +72,7 @@ public class YouTubeSourceTest extends TestCase {
 	
 	public void testStripsParametersFromLocationUris() throws Exception {
 		
-		Video video = new YouTubeSource.Video("type", 0, "http://www.youtube.com/v/pliAz4L-sAQ&f=videos&c=uriplay.org&app=youtube_gdata", 0, true);
+		Video video = new YouTubeSource.Video("type", Duration.ZERO, "http://www.youtube.com/v/pliAz4L-sAQ&f=videos&c=uriplay.org&app=youtube_gdata", 0, true);
 		assertThat(video.getUrl(), is("http://www.youtube.com/v/pliAz4L-sAQ"));
 	}
 }

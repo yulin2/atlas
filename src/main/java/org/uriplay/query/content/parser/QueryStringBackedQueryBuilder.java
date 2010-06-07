@@ -37,9 +37,11 @@ import org.uriplay.content.criteria.operator.Operators;
 import org.uriplay.media.entity.Description;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.soy.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
@@ -102,13 +104,25 @@ public class QueryStringBackedQueryBuilder {
 		for (Entry<String, String[]> param : params.entrySet()) {
 			String attributeName = param.getKey();
 			for (String value : param.getValue()) {
-				AttributeQuery<?> attributeQuery = toQuery(attributeName, value, context);
 				
-				userSuppliedAttributes.add(attributeQuery.getAttribute());
+				AttributeOperatorValues query = toQuery(attributeName, value, context);
+				
+				userSuppliedAttributes.add(query.attribute);
+				
+				if (Attributes.BROADCAST_TRANSMISSION_TIME.equals(query.attribute) && Operators.EQUALS.equals(query.op)) {
+					DateTime when = Iterables.getOnlyElement(coerceListToType(query.values, DateTime.class));
+					
+					operands.add(Attributes.BROADCAST_TRANSMISSION_TIME.createQuery(Operators.BEFORE, ImmutableList.of(when.plusSeconds(1))));
+					operands.add(Attributes.BROADCAST_TRANSMISSION_END_TIME.createQuery(Operators.AFTER, ImmutableList.of(when)));
+					continue;
+				}
+				
+				AttributeQuery<?> attributeQuery = query.toAttributeQuery();
 				
 				if (attributeQuery instanceof BooleanAttributeQuery && ((BooleanAttributeQuery) attributeQuery).isUnconditionallyTrue()) {
 					continue;
 				}
+
 				operands.add(attributeQuery);
 			}
 		}
@@ -123,13 +137,31 @@ public class QueryStringBackedQueryBuilder {
 		return new ContentQuery(operands);
 	}
 	
-	private AttributeQuery<?> toQuery(String paramKey, String paramValue, Class<? extends Description> queryContext) {
+
+	
+	private class AttributeOperatorValues {
+		
+		private final Attribute<?> attribute;
+		private final Operator op;
+		private final List<String> values;
+		
+		public AttributeOperatorValues(Attribute<?> attribute, Operator op, List<String> values) {
+			this.attribute = attribute;
+			this.op = op;
+			this.values = values;
+		}
+		public AttributeQuery<?> toAttributeQuery() {
+			return attribute.createQuery(op, coerceListToType(values, attribute.requiresOperandOfType()));
+		}
+	}
+	
+	private AttributeOperatorValues toQuery(String paramKey, String paramValue, Class<? extends Description> queryContext) {
 		String[] parts = paramKey.split(ATTRIBUTE_OPERATOR_SEPERATOR);
 		if (parts.length > 2) {
 			throw new IllegalArgumentException("Malformed attribute and operator combination");
 		}
 		String attributeName = parts[0];
-		QueryFactory<?> attribute = Attributes.lookup(attributeName, queryContext);
+		Attribute<?> attribute = Attributes.lookup(attributeName, queryContext);
         if (attribute == null) {
             throw new IllegalArgumentException(attributeName + " is not a valid attribute");
         }
@@ -148,11 +180,7 @@ public class QueryStringBackedQueryBuilder {
 		} else {
 			values = Arrays.asList(paramValue.split(OPERAND_SEPERATOR));
 		}
-		
-		values = formatValues(attribute, values);
-		
-		
-		return attributeQueryFor(values, op, attribute);
+		return new AttributeOperatorValues(attribute, op, formatValues(attribute, values));
 	}
 	
 	private Operator defaultOperator(QueryFactory<?> attribute) {
@@ -194,12 +222,10 @@ public class QueryStringBackedQueryBuilder {
 	    return formattedValues;
 	}
 
-	private AttributeQuery<?> attributeQueryFor(List<String> paramValue, Operator op, QueryFactory<?> attribute) {
-		return attribute.createQuery(op, coerceListToType(paramValue, attribute.requiresOperandOfType()));
-	}
 
-	private List<?> coerceListToType(List<String> paramValues, Class<?> requiresOperandOfType) {
-		return Lists.transform(paramValues, coerceToType(requiresOperandOfType));
+	@SuppressWarnings("unchecked")
+	private <T> List<T> coerceListToType(List<String> paramValues, Class<T> requiresOperandOfType) {
+		return (List) Lists.transform(paramValues, coerceToType(requiresOperandOfType));
 	}
 
 	private Function<String, Object> coerceToType(final Class<?> type) {

@@ -25,6 +25,7 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
@@ -184,7 +185,8 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
 	private Version version(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
 		Version version = new Version();
-		version.setDuration(durationFrom(lookup));
+		Duration duration = durationFrom(lookup);
+		version.setDuration(duration);
 				
 		String guidance = lookup.get(DC_GUIDANCE);
 		if (guidance != null) {
@@ -197,9 +199,8 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		String txChannel = CHANNEL_LOOKUP.get(lookup.get(DC_TX_CHANNEL));
 		String txDate = lookup.get(DC_TX_DATE);
 		if (txChannel != null) {
-			Broadcast broadcast = new Broadcast();
-			broadcast.setBroadcastOn(txChannel);
-			broadcast.setTransmissionTime(new DateTime(txDate));
+			DateTime txStart = new DateTime(txDate);
+			Broadcast broadcast = new Broadcast(txChannel, txStart, duration);
 			version.addBroadcast(broadcast);
 		}
 		
@@ -210,7 +211,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 	}
 
 
-	private Integer durationFrom(Map<String, String> lookup) {
+	private Duration durationFrom(Map<String, String> lookup) {
 		String durationString = lookup.get(DC_DURATION);
 		if (durationString == null) {
 			return null;
@@ -220,7 +221,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		for (String part : parts) {
 			duration = (duration * 60) + Integer.valueOf(part);
 		}
-		return duration;
+		return Duration.standardSeconds(duration);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.hamcrest.Matcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.joda.time.Duration;
 import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -76,9 +77,9 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		
 		@Override
 		List<Video> getVideos() {
-			return Lists.newArrayList(new Video("application/x-shockwave-flash", 300, LOCATION_URI, 5, true), 
-									  new Video("video/3gpp", 300, LOCATION_URI_2, 1, true),
-					                  new Video("video/3gpp", 300, LOCATION_URI_3, 6, true));
+			return Lists.newArrayList(new Video("application/x-shockwave-flash", Duration.standardMinutes(5), LOCATION_URI, 5, true), 
+									  new Video("video/3gpp", Duration.standardMinutes(5), LOCATION_URI_2, 1, true),
+					                  new Video("video/3gpp", Duration.standardMinutes(5), LOCATION_URI_3, 6, true));
 		}
 		
 		@Override

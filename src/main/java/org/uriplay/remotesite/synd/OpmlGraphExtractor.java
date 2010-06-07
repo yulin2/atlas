@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.Duration;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -165,7 +166,7 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 			Integer typicalDuration = Integer.parseInt(typicalDurationAttr);
 			for (Item item : feed.getItems()) {
 				for (Version version : item.getVersions()) {
-					version.setDuration(new Integer(typicalDuration * 60));
+					version.setDuration(Duration.standardMinutes(typicalDuration));
 				}
 			}
 		}

@@ -21,6 +21,7 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
+import org.joda.time.Duration;
 import org.uriplay.feeds.Defect;
 import org.uriplay.remotesite.BaseSource;
 
@@ -80,16 +81,16 @@ class YouTubeSource extends BaseSource {
 	static class Video {
 
 		private final String url;
-		private final int duration;
+		private final Duration duration;
 		private final String type;
 		private final int youtubeFormat;
 		private final boolean embeddable;
 
 		public Video(MediaContent mediaContent, boolean embeddable) {
-			this(mediaContent.getType(), mediaContent.getDuration(), mediaContent.getUrl(), ((YouTubeMediaContent)mediaContent).getYouTubeFormat(), embeddable);
+			this(mediaContent.getType(), Duration.standardSeconds(mediaContent.getDuration()), mediaContent.getUrl(), ((YouTubeMediaContent)mediaContent).getYouTubeFormat(), embeddable);
 		}
 
-		public Video(String type, int duration, String locationUri, int youtubeFormat, boolean embeddable) {
+		public Video(String type, Duration duration, String locationUri, int youtubeFormat, boolean embeddable) {
 			this.type = type;
 			this.duration = duration;
 			this.embeddable = embeddable;
@@ -109,7 +110,7 @@ class YouTubeSource extends BaseSource {
 			return type;
 		}
 		
-		public int getDuration() {
+		public Duration getDuration() {
 			return duration;
 		}
 		
