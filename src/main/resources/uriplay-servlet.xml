@@ -45,6 +45,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	
 	<bean id="aliasController" class="org.uriplay.system.AliasController">
 	   <constructor-arg ref="mongoDbBackedContentStore"/>
+	   <constructor-arg ref="localOrRemoteFetcher"/>
 	</bean>
 	
 	<bean id="c4UpdateController" class="org.uriplay.persistence.system.ContentUpdateController">

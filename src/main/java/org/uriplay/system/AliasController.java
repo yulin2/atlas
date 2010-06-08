@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.system.NullRequestTimer;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -33,9 +35,11 @@ import com.google.common.collect.Sets;
 public class AliasController {
 
 	private final MutableContentStore store;
+	private final Fetcher<Description> finder;
 
-	public AliasController(MutableContentStore store) {
+	public AliasController(MutableContentStore store, Fetcher<Description> finder) {
 		this.store = store;
+		this.finder = finder;
 	}
 	
 	@RequestMapping("/system/aliases")
@@ -58,13 +62,18 @@ public class AliasController {
 				continue;
 			}
 			
-			Description canonicalContent = store.findByUri(aliasAndTarget.canonicalUri);
-			if (canonicalContent == null) {
-				errors.add("Not adding alias " + aliasAndTarget.alias + "  because the canonicalUri (" + aliasAndTarget.canonicalUri + ") can't be found");
+			try { 
+				Description canonicalContent = finder.fetch(aliasAndTarget.canonicalUri, new NullRequestTimer());
+				if (canonicalContent == null) {
+					errors.add("Not adding alias " + aliasAndTarget.alias + "  because the canonicalUri (" + aliasAndTarget.canonicalUri + ") can't be found");
+					continue;
+				}
+				store.addAliases(canonicalContent.getCanonicalUri(), Sets.newHashSet(aliasAndTarget.alias));
+			} catch (Exception e) {
+				errors.add("Not adding alias " + aliasAndTarget.alias + "  because the canonicalUri (" + aliasAndTarget.canonicalUri + ") threw a Fetch Exception");
 				continue;
 			}
 			
-			store.addAliases(canonicalContent.getCanonicalUri(), Sets.newHashSet(aliasAndTarget.alias));
 		}
 		
 		model.put("info", info);
