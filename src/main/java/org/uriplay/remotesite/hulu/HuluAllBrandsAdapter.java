@@ -49,10 +49,6 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     @Override
     public Playlist fetch(String uri, RequestTimer timer) {
         try {
-            Playlist playlist = new Playlist();
-            playlist.setCanonicalUri(URL);
-            playlist.setCurie("hulu:all_brands");
-
             LOG.info("Retrieving all Hulu brands");
 
             String content = httpClient.get(uri);
@@ -65,12 +61,11 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                     if (contentStore != null) {
                         executor.execute(new BrandHydratingJob(brandUri));
                     }
-
-                    playlist.addPlaylist(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri)));
                 }
             }
 
-            return playlist;
+            // Returning empty playlist
+            return new Playlist(URL, "hulu:all_brands");
         } catch (Exception e) {
             throw new FetchException("Unable to retrieve all hulu brands", e);
         }
