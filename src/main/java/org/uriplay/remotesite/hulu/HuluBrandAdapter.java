@@ -75,7 +75,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
             return brand;
         } catch (HttpException e) {
-            throw new FetchException("Unable to retrieve brand from Hulu: " + uri, e);
+            throw new FetchException("Unable to retrieve brand from Hulu brand: " + uri, e);
         }
     }
 

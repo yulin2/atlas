@@ -83,7 +83,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                 Brand brand = brandAdapter.fetch(uri, null);
                 contentStore.createOrUpdatePlaylist(brand, false);
             } catch (Exception e) {
-                LOG.warn("Error retrieving Hulu brand: "+uri, e);
+                LOG.warn("Error retrieving Hulu brand: " + uri + " while retrieving all brands", e);
                 e.printStackTrace();
             }
         }
