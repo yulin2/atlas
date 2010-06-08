@@ -142,4 +142,16 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 		assertThat(TED.compact("http://www.ted.com/talks/elizabeth_gilbert_on_genius.html"), is("ted:elizabeth_gilbert_on_genius"));
 	}
 	
+	
+	public void testExpandsFacebookCuries() throws Exception {
+		
+		assertThat(expander.expand("fb:101"), is(Maybe.just("http://graph.facebook.com/101")));
+	}
+	
+	public void testProducesFacebookCuries() throws Exception {
+		
+		assertThat(FB.compact("http://graph.facebook.com/101"), is("fb:101"));
+	}
+	
+	
 }

@@ -138,6 +138,17 @@ public class PerPublisherCurieExpander implements CurieExpander {
 				return "yt:" + YoutubeUriCanonicaliser.videoIdFrom(url);
 			}	
 		},
+		FB {
+			@Override
+			public String expand(String curie) {
+				return "http://graph.facebook.com/" + curie.substring(3);
+			}
+
+			@Override
+			public String compact(String url) {
+				return "fb:" + url.replace("http://graph.facebook.com/", "");
+			}	
+		},
 		BLIP {
 			@Override
 			public String expand(String curie) {
