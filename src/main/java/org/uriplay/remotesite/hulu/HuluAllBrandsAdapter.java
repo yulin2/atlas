@@ -17,7 +17,6 @@ import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.html.HtmlNavigator;
 
-import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
@@ -84,7 +83,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                 Brand brand = brandAdapter.fetch(uri, null);
                 contentStore.createOrUpdatePlaylist(brand, false);
             } catch (Exception e) {
-                LOG.warn("Error retrieving Hulu brand: " + uri + " while retrieving all brands with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage(), e);
+                LOG.warn("Error retrieving Hulu brand: " + uri + " while retrieving all brands with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
             }
         }
     }
