@@ -66,9 +66,13 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
             if (episodeAdapter != null) {
                 for (Item item : brand.getItems()) {
-                    Episode episode = episodeAdapter.fetch(item.getCanonicalUri(), null);
-                    episode.setBrand(brand);
-                    episodes.add(episode);
+                    try {
+                        Episode episode = episodeAdapter.fetch(item.getCanonicalUri(), null);
+                        episode.setBrand(brand);
+                        episodes.add(episode);
+                    } catch (FetchException fe) {
+                        LOG.warn("Failed to retrieve episode: "+item.getCanonicalUri(), fe);
+                    }
                 }
                 brand.setItems(episodes);
             }
