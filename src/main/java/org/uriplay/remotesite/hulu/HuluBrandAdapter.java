@@ -80,7 +80,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
             LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getItems().size() + " episodes");
             return brand;
         } catch (HttpException e) {
-            throw new FetchException("Unable to retrieve brand from Hulu brand: " + uri, e);
+            throw new FetchException("Unable to retrieve brand from Hulu: " + uri, e);
         }
     }
 
