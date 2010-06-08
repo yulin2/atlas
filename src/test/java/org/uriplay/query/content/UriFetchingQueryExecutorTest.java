@@ -21,7 +21,7 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.content.criteria.attribute.Attributes;
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
@@ -37,7 +37,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 	ContentQuery titlequery = query().equalTo(Attributes.BRAND_TITLE, "ex").build();
 	ContentQuery query =  query().equalTo(Attributes.ITEM_URI, "http://example.com").equalTo(Attributes.BRAND_TITLE, "ex").build();
 
-	Fetcher<Description> fetcher = mock(Fetcher.class);
+	Fetcher<Content> fetcher = mock(Fetcher.class);
 	KnownTypeQueryExecutor delegate = mock(KnownTypeQueryExecutor.class);
 	
 	UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate);

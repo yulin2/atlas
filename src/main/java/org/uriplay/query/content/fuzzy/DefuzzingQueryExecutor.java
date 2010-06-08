@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.uriplay.query.content.fuzzy;
 
 import java.util.List;
+import java.util.Map;
 
 import org.uriplay.content.criteria.AtomicQuery;
 import org.uriplay.content.criteria.AttributeQuery;
@@ -29,6 +30,7 @@ import org.uriplay.content.criteria.StringAttributeQuery;
 import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.content.criteria.operator.Operators;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
@@ -56,10 +58,17 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 	public List<Playlist> executePlaylistQuery(ContentQuery query) {
 		return delegate.executePlaylistQuery(defuzz(query));
 	}
+	
+	@Override
+	public Map<String, Content> executeAnyQuery(Iterable<String> uris) {
+		return delegate.executeAnyQuery(uris);
+	}
 
 	private ContentQuery defuzz(ContentQuery query) {
 		return query.copyWithOperands(query.accept(new TitleDefuzzingQueryVisitor()));
 	}
+	
+	
 	
 	private class TitleDefuzzingQueryVisitor implements QueryVisitor<AtomicQuery> {
 		
@@ -122,4 +131,6 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 			return noOp;
 		}
 	}
+
+
 }

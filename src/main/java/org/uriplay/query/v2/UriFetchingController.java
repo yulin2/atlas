@@ -29,16 +29,16 @@ import org.uriplay.beans.NullProjector;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
 import org.uriplay.core.Factory;
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
+import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.servlet.ContentNotFoundException;
 import org.uriplay.persistence.servlet.RequestNs;
-import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.NoMatchingAdapterException;
 import org.uriplay.remotesite.timing.MultiCallRequestTimer;
 
-import com.google.common.collect.Lists;
+import com.google.soy.common.base.Splitter;
 
 /**
  * Controller to handle the query interface to UriPlay.
@@ -54,17 +54,17 @@ public class UriFetchingController {
 	private final Projector projector;
 	private final Factory<RequestTimer> timerFactory;
 
-	private final Fetcher<Description> queryExecutor;
+	private final KnownTypeQueryExecutor queryExecutor;
 
-	public UriFetchingController(Fetcher<Description> queryExecutor) {
+	public UriFetchingController(KnownTypeQueryExecutor queryExecutor) {
 		this(queryExecutor, new NullProjector());
 	}
 	
-	public UriFetchingController(Fetcher<Description> queryExecutor, Projector projector) {
+	public UriFetchingController(KnownTypeQueryExecutor queryExecutor, Projector projector) {
 		this(queryExecutor, projector, new MultiCallRequestTimer());
 	}
 		
-	UriFetchingController(Fetcher<Description> queryExecutor, Projector projector, Factory<RequestTimer> timerFactory) {
+	UriFetchingController(KnownTypeQueryExecutor queryExecutor, Projector projector, Factory<RequestTimer> timerFactory) {
 		this.queryExecutor = queryExecutor;
 		this.projector = projector;
 		this.timerFactory = timerFactory;
@@ -80,21 +80,15 @@ public class UriFetchingController {
 			throw new IllegalArgumentException("No uri specified");
 		}
 		
-		RequestTimer timer = timerFactory.create();
-		timer.start(this, uri);
-		timer.nest();
-		Query query = new Query(uri, outputTimingInfo);
 		try {
-			Description found = (Description) queryExecutor.fetch(uri, timer);
+			
+			Collection<Content> found = queryExecutor.executeAnyQuery(Splitter.on(',').split(uri)).values();
 			
 			if (found == null) {
 				throw new ContentNotFoundException("No metadata available for : " + uri);
 			}
 
-			Collection<?> beans = Lists.newArrayList(found);
-			beans = projector.applyTo(beans);
-			
-			return new ModelAndView(VIEW, RequestNs.GRAPH, beans);
+			return new ModelAndView(VIEW, RequestNs.GRAPH, found);
 			
 		} catch (NoMatchingAdapterException nmae) {
 			throw new ContentNotFoundException(nmae);
@@ -102,37 +96,6 @@ public class UriFetchingController {
 			throw new ContentNotFoundException(fe);
 		} catch (ProjectionException pe) {
 			throw new ContentNotFoundException(pe);
-		} finally {
-			timer.unnest();
-			timer.stop(this, query.getUri());
-			if (query.outputTimingInfo()) {
-				timer.outputTo(response);
-			}
 		}
-	}
-
-	static class Query {
-
-		private final String uri;
-		private boolean outputTimingInfo = true;
-
-		Query(String uri, boolean outputTimingInfo) {
-			this.uri = uri;
-			this.outputTimingInfo = outputTimingInfo;
-		}
-
-		public String getUri() {
-			return uri;
-		}
-
-
-		public boolean outputTimingInfo() {
-			return outputTimingInfo;
-		}
-
-		public void setOutputTimingInfo(boolean outputTimingInfo) {
-			this.outputTimingInfo = outputTimingInfo;
-		}
-		
 	}
 }
