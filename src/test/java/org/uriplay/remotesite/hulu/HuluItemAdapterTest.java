@@ -65,11 +65,4 @@ public class HuluItemAdapterTest extends TestCase {
         assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348"));
         assertNull(new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/glee"));
     }
-
-    public void testInfoPattern() throws Exception {
-        Pattern pattern = Pattern.compile("^.*Season\\s*(\\d+).*Ep\\.\\s*(\\d+)\\|(\\d+):(\\d+):?(\\d*)\\|.*$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNIX_LINES);
-        Matcher matcher = pattern.matcher("\n                    Season 1 Ê:Ê Ep. 21|42:34|\n//<![CDATA[\n" + "new VideoRating('star-rating-container', 152348, 4.37431)\n//]]>\n"
-                + "|\n                  ");
-        assertTrue(matcher.matches());
-    }
 }
