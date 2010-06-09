@@ -29,7 +29,7 @@ import com.google.soy.common.collect.Sets;
 public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
     private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.watch = ";
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static final Pattern INFO_PATTERN = Pattern.compile("^Season\\s*(\\d+)\\s*:\\s*Ep\\.\\s*(\\d+).*\\((\\d+):(\\d+):?(\\d*)\\).*$");
+    private static final Pattern INFO_PATTERN = Pattern.compile("^.*Season\\s*(\\d+).*Ep\\.\\s*(\\d+)\\|(\\d+):(\\d+):?(\\d*)\\|.*$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNIX_LINES);
 
     @SuppressWarnings("unchecked")
     @Override
@@ -52,8 +52,8 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
             }
             item.setTags(tags);
 
-            Element infoElement = source.firstElementOrNull("//span[@class='video-info']");
-            if (infoElement != null && infoElement.getValue() != null) {
+            elements = source.allElementsMatching("//div[@class='description-shift']");
+            for (Element infoElement: elements) {
                 Matcher matcher = INFO_PATTERN.matcher(infoElement.getValue());
                 if (matcher.matches() && matcher.groupCount() > 3) {
                     item.setSeriesNumber(Integer.valueOf(matcher.group(1)));
@@ -73,6 +73,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                         duration = first * 60 + second;
                     }
                     version.setDuration(Duration.standardSeconds(duration));
+                    break;
                 }
             }
             

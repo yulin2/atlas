@@ -1,5 +1,8 @@
 package org.uriplay.remotesite.hulu;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import junit.framework.TestCase;
 
 import org.uriplay.media.TransportType;
@@ -13,17 +16,17 @@ import org.uriplay.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser;
 
 public class HuluItemAdapterTest extends TestCase {
     HuluItemAdapter adapter = new HuluItemAdapter();
-    
+
     public void testShouldRetrieveHuluItem() throws Exception {
         Episode item = (Episode) adapter.fetch("http://www.hulu.com/watch/152348/glee-funk", null);
         assertNotNull(item);
-        
+
         Brand brand = item.getBrand();
         assertNotNull(brand);
         assertEquals("Glee", brand.getTitle());
         assertEquals("http://www.hulu.com/glee", brand.getCanonicalUri());
         assertNotNull(brand.getDescription());
-        
+
         assertEquals("Funk", item.getTitle());
         assertEquals("http://www.hulu.com/watch/152348", item.getCanonicalUri());
         assertFalse(item.getTags().isEmpty());
@@ -32,14 +35,14 @@ public class HuluItemAdapterTest extends TestCase {
         assertNotNull(item.getImage());
         assertEquals(Integer.valueOf(1), item.getSeriesNumber());
         assertEquals(Integer.valueOf(21), item.getEpisodeNumber());
-        
+
         Version version = item.getVersions().iterator().next();
         assertNotNull(version);
         assertTrue(version.getDuration() > 0);
-        
+
         Encoding encoding = version.getManifestedAs().iterator().next();
         assertNotNull(encoding);
-        
+
         Location location = encoding.getAvailableAt().iterator().next();
         assertNotNull(location);
         assertNotNull(location.getEmbedCode());
@@ -50,16 +53,23 @@ public class HuluItemAdapterTest extends TestCase {
         assertFalse(location.getPolicy().getAvailableCountries().isEmpty());
         assertEquals(Countries.US, location.getPolicy().getAvailableCountries().iterator().next());
     }
-    
+
     public void testShouldBeAbleToFetch() throws Exception {
         assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348/glee-funk"));
         assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348"));
         assertFalse(adapter.canFetch("http://www.hulu.com/glee"));
     }
-    
+
     public void testCanonicaliser() throws Exception {
         assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348/glee-funk"));
         assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348"));
         assertNull(new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/glee"));
+    }
+
+    public void testInfoPattern() throws Exception {
+        Pattern pattern = Pattern.compile("^.*Season\\s*(\\d+).*Ep\\.\\s*(\\d+)\\|(\\d+):(\\d+):?(\\d*)\\|.*$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNIX_LINES);
+        Matcher matcher = pattern.matcher("\n                    Season 1 Ê:Ê Ep. 21|42:34|\n//<![CDATA[\n" + "new VideoRating('star-rating-container', 152348, 4.37431)\n//]]>\n"
+                + "|\n                  ");
+        assertTrue(matcher.matches());
     }
 }
