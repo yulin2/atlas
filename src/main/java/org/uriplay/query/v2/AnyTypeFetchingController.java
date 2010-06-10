@@ -25,18 +25,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-import org.uriplay.beans.NullProjector;
-import org.uriplay.beans.ProjectionException;
-import org.uriplay.beans.Projector;
-import org.uriplay.core.Factory;
 import org.uriplay.media.entity.Content;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.servlet.ContentNotFoundException;
 import org.uriplay.persistence.servlet.RequestNs;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.NoMatchingAdapterException;
-import org.uriplay.remotesite.timing.MultiCallRequestTimer;
 
 import com.google.soy.common.base.Splitter;
 
@@ -47,27 +41,14 @@ import com.google.soy.common.base.Splitter;
  * @author Lee Denison (lee@metabroadcast.com)
  */
 @Controller
-public class UriFetchingController {
+public class AnyTypeFetchingController {
 
 	private static final String VIEW = "uriplayModel";
 	
-	private final Projector projector;
-	private final Factory<RequestTimer> timerFactory;
-
 	private final KnownTypeQueryExecutor queryExecutor;
 
-	public UriFetchingController(KnownTypeQueryExecutor queryExecutor) {
-		this(queryExecutor, new NullProjector());
-	}
-	
-	public UriFetchingController(KnownTypeQueryExecutor queryExecutor, Projector projector) {
-		this(queryExecutor, projector, new MultiCallRequestTimer());
-	}
-		
-	UriFetchingController(KnownTypeQueryExecutor queryExecutor, Projector projector, Factory<RequestTimer> timerFactory) {
+	public AnyTypeFetchingController(KnownTypeQueryExecutor queryExecutor) {
 		this.queryExecutor = queryExecutor;
-		this.projector = projector;
-		this.timerFactory = timerFactory;
 	}
 
 	@RequestMapping(method=RequestMethod.GET)
@@ -81,21 +62,17 @@ public class UriFetchingController {
 		}
 		
 		try {
-			
 			Collection<Content> found = queryExecutor.executeAnyQuery(Splitter.on(',').split(uri)).values();
 			
 			if (found == null) {
 				throw new ContentNotFoundException("No metadata available for : " + uri);
 			}
-
 			return new ModelAndView(VIEW, RequestNs.GRAPH, found);
 			
 		} catch (NoMatchingAdapterException nmae) {
 			throw new ContentNotFoundException(nmae);
 		} catch (FetchException fe) {
 			throw new ContentNotFoundException(fe);
-		} catch (ProjectionException pe) {
-			throw new ContentNotFoundException(pe);
-		}
+		} 
 	}
 }
