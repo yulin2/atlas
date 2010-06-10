@@ -51,7 +51,7 @@ public class QueryStringBackedQueryBuilder {
 	private static final String ATTRIBUTE_OPERATOR_SEPERATOR = "-";
 	private static final String OPERAND_SEPERATOR = ",";
 	
-	private final Set<String> ignoreParams = Sets.newHashSet(Selection.START_INDEX_REQUEST_PARAM, Selection.LIMIT_REQUEST_PARAM, JsonTranslator.CALLBACK); 
+	private final Set<String> ignoreParams = Sets.newHashSet(Selection.OLD_START_INDEX_REQUEST_PARAM, Selection.START_INDEX_REQUEST_PARAM, Selection.LIMIT_REQUEST_PARAM, JsonTranslator.CALLBACK); 
 
 	private final DateTimeInQueryParser dateTimeParser = new DateTimeInQueryParser();
 	
