@@ -50,7 +50,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
         try {
             LOG.info("Retrieving all Hulu brands");
 
-            String content = httpClient.get(uri);
+            String content = httpClient.getContentsOf(uri);
             HtmlNavigator navigator = new HtmlNavigator(content);
 
             List<Element> elements = navigator.allElementsMatching("//a[@rel='nofollow']");

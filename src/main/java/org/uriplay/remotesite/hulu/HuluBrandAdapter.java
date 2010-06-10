@@ -58,7 +58,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     public Brand fetch(String uri, RequestTimer timer) {
         try {
             LOG.info("Retrieving Hulu brand: " + uri + " with " + httpClient.getClass() + " : " + httpClient.toString());
-            String content = httpClient.get(uri);
+            String content = httpClient.getContentsOf(uri);
             HtmlNavigator navigator = new HtmlNavigator(content);
 
             Brand brand = extractor.extract(navigator);

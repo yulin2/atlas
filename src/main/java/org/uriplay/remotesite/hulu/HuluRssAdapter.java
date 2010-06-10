@@ -85,7 +85,7 @@ public class HuluRssAdapter implements SiteSpecificAdapter<Playlist> {
 
             @Override
             public Channel get(String uri) throws Exception {
-                return (Channel) new WireFeedInput().build(new StringReader(client.get(uri)));
+                return (Channel) new WireFeedInput().build(new StringReader(client.getContentsOf(uri)));
             }
         };
     }
