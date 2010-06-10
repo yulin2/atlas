@@ -16,6 +16,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="updateHuluBrandsScheduledTask" />
             <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateMentionsScheduledTask" />
+            <ref bean="updateC4BrandsScheduledTask" />
         </list>
     </property>
     <property name="daemon" value="true" />
@@ -121,15 +122,15 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
   </bean>
   
-  <!--<bean id="updateC4BrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+  <bean id="updateC4BrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
     <property name="delay"  value="1020000" />
-    <property name="period" value="1800000" />
+    <property name="period" value="3600000" />
     <property name="runnable">
         <bean parent="conditionalRunner">
             <constructor-arg ref="c4BrandsUpdater" />
         </bean>
     </property>
-  </bean>-->
+  </bean>
   
   <bean id="c4BrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
 	 <property name="uris">
