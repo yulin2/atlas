@@ -23,8 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.View;
 import org.uriplay.beans.BeanGraphWriter;
-import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.persistence.servlet.RequestNs;
+
+import com.metabroadcast.common.media.MimeType;
 
 public class BeanGraphWriterView implements View {
 

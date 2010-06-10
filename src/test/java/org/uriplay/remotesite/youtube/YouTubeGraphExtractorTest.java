@@ -34,13 +34,13 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
-import org.uriplay.media.reference.entity.MimeType;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.gdata.data.TextConstruct;
 import com.google.gdata.data.youtube.VideoEntry;
+import com.metabroadcast.common.media.MimeType;
 
 /**
  * Unit test for {@link YouTubeGraphExtractor}

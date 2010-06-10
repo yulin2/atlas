@@ -28,12 +28,12 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
-import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.media.MimeType;
 import com.sun.syndication.feed.synd.SyndContentImpl;
 import com.sun.syndication.feed.synd.SyndEnclosureImpl;
 import com.sun.syndication.feed.synd.SyndEntry;

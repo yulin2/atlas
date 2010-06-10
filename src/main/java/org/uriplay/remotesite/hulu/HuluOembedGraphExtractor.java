@@ -18,9 +18,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.uriplay.feeds.OembedItem;
-import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.oembed.OembedGraphExtractor;
+
+import com.metabroadcast.common.media.MimeType;
 
 /**
  * Specialisation of {@link OembedGraphExtractor} that pulls a location uri out of the embed code.

@@ -18,10 +18,10 @@ import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.UriplayQueryResult;
-import org.uriplay.media.reference.entity.MimeType;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.media.MimeType;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)

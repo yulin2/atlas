@@ -3,7 +3,7 @@ package org.uriplay.remotesite.http;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import org.uriplay.media.reference.entity.MimeType;
+import com.metabroadcast.common.media.MimeType;
 
 public class TypedData {
 

@@ -21,7 +21,8 @@ import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Location;
-import org.uriplay.media.reference.entity.MimeType;
+
+import com.metabroadcast.common.media.MimeType;
 
 public class Matchers {
 

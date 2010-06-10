@@ -22,8 +22,9 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
-import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.remotesite.ContentExtractor;
+
+import com.metabroadcast.common.media.MimeType;
 
 /**
  * {@link BeanGraphExtractor} pull details from oEmbed data.

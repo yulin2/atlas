@@ -25,13 +25,13 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Version;
-import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.remotesite.Matchers.EncodingMatcher;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.media.MimeType;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)

@@ -27,11 +27,11 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
 import org.uriplay.media.reference.entity.ContainerFormat;
-import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.youtube.YouTubeSource.Video;
 
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.media.MimeType;
 
 /**
  * {@link BeanGraphExtractor} that processes the result of a query to the YouTube

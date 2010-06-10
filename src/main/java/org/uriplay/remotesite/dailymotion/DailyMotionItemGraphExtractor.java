@@ -20,11 +20,12 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
-import org.uriplay.media.reference.entity.MimeType;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlDescriptionSource;
+
+import com.metabroadcast.common.media.MimeType;
 
 public class DailyMotionItemGraphExtractor implements ContentExtractor<HtmlDescriptionSource, Item>  {
 
