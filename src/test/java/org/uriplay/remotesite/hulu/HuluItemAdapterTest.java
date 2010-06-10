@@ -1,8 +1,5 @@
 package org.uriplay.remotesite.hulu;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import junit.framework.TestCase;
 
 import org.uriplay.media.TransportType;

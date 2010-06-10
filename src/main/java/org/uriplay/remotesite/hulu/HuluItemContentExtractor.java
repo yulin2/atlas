@@ -43,17 +43,11 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
             location.setPolicy(usPolicy());
             encoding.addAvailableAt(location);
             version.addManifestedAs(encoding);
+            
             item.addVersion(version);
+            item.setTags(getTags(source));
 
-            List<Element> elements = source.allElementsMatching("//li[@class='tags-content-cell']/a");
-            Set<String> tags = Sets.newHashSet();
-            for (Element element : elements) {
-                tags.add("http://www.hulu.com" + element.getAttributeValue("href"));
-            }
-            item.setTags(tags);
-
-            elements = source.allElementsMatching("//div[@class='description-shift']");
-            for (Element infoElement: elements) {
+            for (Element infoElement: source.allElementsMatching("//div[@class='description-shift']")) {
                 Matcher matcher = INFO_PATTERN.matcher(infoElement.getValue());
                 if (matcher.matches() && matcher.groupCount() > 3) {
                     item.setSeriesNumber(Integer.valueOf(matcher.group(1)));
@@ -87,9 +81,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                 location.setEmbedCode(embedCode.substring(0, embedCode.length()-2));
             }
 
-            elements = source.allElementsMatching("//body/script");
-
-            for (Element element : elements) {
+            for (Element element : source.allElementsMatching("//body/script")) {
                 String value = element.getValue();
 
                 if (value.startsWith(SOCIAL_FEED)) {
@@ -150,5 +142,14 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
 		brand.setDescription((String) attributes.get("show_description"));
 		brand.setTitle((String) attributes.get("show_title"));
 		return brand;
+	}
+	
+	public static Set<String> getTags(HtmlNavigator source) throws JaxenException {
+	    List<Element> elements = source.allElementsMatching("//li[@class='tags-content-cell']/a");
+        Set<String> tags = Sets.newHashSet();
+        for (Element element : elements) {
+            tags.add("http://uriplay.org/tags/" + element.getAttributeValue("href").replace("/search/search_tag?query=", ""));
+        }
+        return tags;
 	}
 }

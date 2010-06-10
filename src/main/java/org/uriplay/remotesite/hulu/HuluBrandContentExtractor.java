@@ -3,7 +3,6 @@ package org.uriplay.remotesite.hulu;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jaxen.JaxenException;
@@ -15,8 +14,6 @@ import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.html.HtmlNavigator;
 import org.uriplay.remotesite.hulu.HuluBrandAdapter.HuluBrandCanonicaliser;
-
-import com.google.soy.common.collect.Sets;
 
 public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator, Brand> {
     private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.subscribe = ";
@@ -65,12 +62,8 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
             if (brand == null) {
             	throw new FetchException("Page did not not contain a brand, possible change of markup?");
             }
-            
-            Set<String> tags = Sets.newHashSet();
-            for (Element element : source.allElementsMatching("//li[@class='tags-content-cell']/a")) {
-                tags.add("http://www.hulu.com" + element.getAttributeValue("href"));
-            }
-            brand.setTags(tags);
+
+            brand.setTags(HuluItemContentExtractor.getTags(source));
             
             for (Element element : source.allElementsMatching("//div[@id='episode-container']/div/ul/li/a']")) {
                 String episodeUri = element.getAttributeValue("href");
