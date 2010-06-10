@@ -88,20 +88,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<constructor-arg><bean class="org.uriplay.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
 	</bean>
 	
-	<bean id="anyTypeController" class="org.uriplay.query.v2.UriFetchingController">
+	<bean id="anyTypeController" class="org.uriplay.query.v2.AnyTypeFetchingController">
 		<constructor-arg ref="queryExecutor" />
-	</bean>
-	
-	<bean id="itemControllerV2" parent="uriFetchingControllerV2">
-		<constructor-arg><bean class="org.uriplay.beans.SingleItemProjector" /></constructor-arg> 
-	</bean>
-	
-	<bean id="listControllerV2"  parent="uriFetchingControllerV2">
-		<constructor-arg><bean class="org.uriplay.beans.FlatteningProjector" /></constructor-arg> 
-	</bean>
-	
-	<bean id="listsControllerV2" parent="uriFetchingControllerV2">
-		<constructor-arg><bean class="org.uriplay.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
 	</bean>
 
 	<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="org/uriplay/http-error" p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">
