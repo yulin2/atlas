@@ -169,7 +169,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 				brandSummary.setTitle(brand.getTitle());
 				brandSummary.setDescription(brand.getDescription());
 				
-				simpleItem.setBrand(brandSummary);
+				simpleItem.setBrandSummary(brandSummary);
 			}
 		}
 		
