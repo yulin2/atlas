@@ -100,7 +100,8 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 			
 			Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri));
 
-			if (episodeNumber != null && seriesNumber != null) {
+			episode.setTitle(title(entry));
+			if ((episode.getTitle() == null || episode.getTitle().equals(brand.getTitle())) && episodeNumber != null && seriesNumber != null) {
 				episode.setTitle(String.format(EPISODE_TITLE_TEMPLATE , seriesNumber, episodeNumber));
 			}
 			
@@ -155,6 +156,14 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		}
 		return description.getValue();
 	}
+	
+	private String title(Entry entry) {
+        com.sun.syndication.feed.atom.Content title = entry.getTitleEx();
+        if (title == null) {
+            return null;
+        }
+        return title.getValue();
+    }
 	
 	private Location location(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
 		Location location = new Location();
