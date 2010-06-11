@@ -43,12 +43,14 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	Brand science = brand("/science", "The Story of Science: Power, Proof and Passion");
 
 	Item englishForCats = item("/items/cats", "English for cats");
+	Item u2 = item("/items/u2", "U2 Ultraviolet");
 	
 	Item jamieOliversCookingProgramme = item("/items/oliver/1", "Jamie Oliver's cooking programme", "lots of words that are the same alpha beta");
 	Item gordonRamsaysCookingProgramme = item("/items/ramsay/2", "Gordon Ramsay's cooking show", "lots of words that are the same alpha beta");
 	
 	List<Brand> brands = Arrays.asList(dragonsDen, theCityGardener, eastenders, meetTheMagoons, theJackDeeShow, peepShow, haveIGotNewsForYou, euromillionsDraw, brasseye, science, politicsEast);
 	List<Item> items = Arrays.asList(englishForCats, jamieOliversCookingProgramme, gordonRamsaysCookingProgramme);
+	List<Item> itemsUpdated = Arrays.asList(u2);
 	
 	InMemoryFuzzySearcher searcher;
 	
@@ -58,6 +60,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 		searcher = new InMemoryFuzzySearcher();
 		searcher.brandChanged(brands, ContentListener.changeType.BOOTSTRAP);
 		searcher.itemChanged(items, ContentListener.changeType.BOOTSTRAP);
+		searcher.itemChanged(itemsUpdated, null);
 	}
 	
 	public void testFindingBrandsByTitle() throws Exception {
@@ -97,6 +100,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	
 	public void testFindingItemsByTitle() throws Exception {
 		check(searcher.itemTitleSearch("cats"), englishForCats);
+		check(searcher.itemTitleSearch("u2"), u2);
 	}
 	
 	public void testUpdateByType() throws Exception {

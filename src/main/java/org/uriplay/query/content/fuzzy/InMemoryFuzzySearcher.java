@@ -74,7 +74,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	private static void closeWriter(IndexWriter writer) {
 		try {
 			//writer.commit();
-			//writer.optimize();
+			writer.optimize();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} finally {
