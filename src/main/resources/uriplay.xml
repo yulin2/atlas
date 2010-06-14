@@ -46,7 +46,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <bean id="titleSearcher" class="org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher" />
 
-    <bean id="AggregateContentListener" class="org.uriplay.persistence.content.QueueingContentListener">
+    <bean id="AggregateContentListener" class="org.uriplay.persistence.content.QueueingContentListener" destroy-method="shutdown">
         <constructor-arg>
             <bean class="org.uriplay.persistence.content.AggregateContentListener">
                 <constructor-arg>
