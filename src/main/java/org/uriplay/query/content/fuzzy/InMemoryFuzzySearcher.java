@@ -117,11 +117,11 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	}
 
 	public List<String> brandTitleSearch(String queryString) {
-		return search(searcherFor(brandsDir), titleQueryBuilder.build(queryString), new Selection());
+		return search(searcherFor(brandsDir), titleQueryBuilder.build(queryString), Selection.ALL);
 	}
 
 	public List<String> itemTitleSearch(String queryString) {
-		return search(searcherFor(itemsDir), titleQueryBuilder.build(queryString), new Selection());
+		return search(searcherFor(itemsDir), titleQueryBuilder.build(queryString), Selection.ALL);
 	}
 	
 	private static Searcher searcherFor(Directory dir)  {
@@ -135,7 +135,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	private List<String> search(Searcher searcher, Query query, Selection selection)  {
 		try {
 			if (selection == null) {
-				selection = new Selection();
+				selection = Selection.ALL;
 			}
 			int startIndex = selection.startIndexOrDefaultValue(0);
 			int endIndex = selection.hasLimit() ? startIndex + selection.getLimit() : Integer.MAX_VALUE;
