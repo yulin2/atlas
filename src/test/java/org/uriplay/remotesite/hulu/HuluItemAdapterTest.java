@@ -40,10 +40,38 @@ public class HuluItemAdapterTest extends TestCase {
         Encoding encoding = version.getManifestedAs().iterator().next();
         assertNotNull(encoding);
 
-        Location location = encoding.getAvailableAt().iterator().next();
+        assertEquals(2, encoding.getAvailableAt().size());
+        boolean foundLink = false;
+        boolean foundEmbed = false;
+        for (Location location: encoding.getAvailableAt()) {
+            if (location.getEmbedCode() != null) {
+                foundEmbed = true;
+                assertEmbedLocation(location);
+            } else {
+                foundLink = true;
+                assertLinkLocation(location);
+            }
+        }
+        assertTrue(foundLink);
+        assertTrue(foundEmbed);
+    }
+    
+    private void assertEmbedLocation(Location location) {
         assertNotNull(location);
         assertNotNull(location.getEmbedCode());
         assertEquals(TransportType.EMBED, location.getTransportType());
+        assertEquals(true, location.getAvailable());
+        assertEquals(Boolean.valueOf(true), location.getTransportIsLive());
+        assertNotNull(location.getPolicy());
+        assertFalse(location.getPolicy().getAvailableCountries().isEmpty());
+        assertEquals(Countries.US, location.getPolicy().getAvailableCountries().iterator().next());
+    }
+    
+    private void assertLinkLocation(Location location) {
+        assertNotNull(location);
+        assertNotNull(location.getUri()); 
+        assertNull(location.getEmbedCode());
+        assertEquals(TransportType.LINK, location.getTransportType());
         assertEquals(true, location.getAvailable());
         assertEquals(Boolean.valueOf(true), location.getTransportIsLive());
         assertNotNull(location.getPolicy());

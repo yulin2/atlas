@@ -38,10 +38,13 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
             Episode item = new Episode();
             Version version = new Version();
             Encoding encoding = new Encoding();
-            Location location = new Location();
+            Location embedLocation = new Location();
+            Location linkLocation = new Location();
         
-            location.setPolicy(usPolicy());
-            encoding.addAvailableAt(location);
+            embedLocation.setPolicy(usPolicy());
+            linkLocation.setPolicy(usPolicy());
+            encoding.addAvailableAt(embedLocation);
+            encoding.addAvailableAt(linkLocation);
             version.addManifestedAs(encoding);
             
             item.addVersion(version);
@@ -78,7 +81,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                 int index = embedCode.indexOf(search) + search.length();
                 
                 embedCode = embedCode.substring(index, embedCode.length()).trim();
-                location.setEmbedCode(embedCode.substring(0, embedCode.length()-2));
+                embedLocation.setEmbedCode(embedCode.substring(0, embedCode.length()-2));
             }
 
             for (Element element : source.allElementsMatching("//body/script")) {
@@ -97,10 +100,11 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                         if (videoAttributes.containsKey("video_title")) {
                             item.setTitle((String) videoAttributes.get("video_title"));
                         }
-                        location.setUri((String) videoAttributes.get("video_src"));
-                        location.setAvailable(true);
-                        location.setTransportIsLive(true);
-                        location.setTransportType(TransportType.EMBED);
+                        embedLocation.setUri((String) videoAttributes.get("video_src"));
+                        embedLocation.setAvailable(true);
+                        embedLocation.setTransportIsLive(true);
+                        embedLocation.setTransportType(TransportType.EMBED);
+                        
                         item.setThumbnail((String) videoAttributes.get("preview_img"));
                         item.setImage((String) videoAttributes.get("preview_img"));
                     }
@@ -112,6 +116,11 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                         item.setCanonicalUri(uri);
                         item.setCurie("hulu:" + uri.replace(HuluItemAdapter.BASE_URI, ""));
                     }
+                    
+                    linkLocation.setUri(videoLink);
+                    linkLocation.setAvailable(true);
+                    linkLocation.setTransportIsLive(true);
+                    linkLocation.setTransportType(TransportType.LINK);
                     
                     item.addAlias(videoLink);
                     item.setDescription((String) attributes.get("video_description"));
