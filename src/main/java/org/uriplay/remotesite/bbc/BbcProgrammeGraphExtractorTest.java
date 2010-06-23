@@ -13,8 +13,8 @@ import org.joda.time.DateTime;
 import org.uriplay.media.entity.Broadcast;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BroadcastOn;
-import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.Service;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.Interval;
+import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.Service;
 
 import com.google.common.collect.Lists;
 

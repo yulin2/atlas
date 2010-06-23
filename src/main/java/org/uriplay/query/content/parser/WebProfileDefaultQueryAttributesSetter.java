@@ -15,9 +15,10 @@ permissions and limitations under the License. */
 package org.uriplay.query.content.parser;
 
 
+import static org.uriplay.content.criteria.ContentQueryBuilder.query;
+
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.content.criteria.attribute.Attributes;
-import static org.uriplay.content.criteria.ContentQueryBuilder.query;
 
 public class WebProfileDefaultQueryAttributesSetter implements DefaultQueryAttributesSetter {
 

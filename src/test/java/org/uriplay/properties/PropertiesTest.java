@@ -1,8 +1,8 @@
 package org.uriplay.properties;
 
-import com.metabroadcast.common.properties.Configurer;
-
 import junit.framework.TestCase;
+
+import com.metabroadcast.common.properties.Configurer;
 
 public class PropertiesTest extends TestCase {
     public void testShouldTakeProdProperties() throws Exception {

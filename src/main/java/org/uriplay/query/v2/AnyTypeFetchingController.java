@@ -32,7 +32,7 @@ import org.uriplay.persistence.servlet.RequestNs;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.NoMatchingAdapterException;
 
-import com.google.soy.common.base.Splitter;
+import com.google.common.base.Splitter;
 
 /**
  * Controller to handle the query interface to UriPlay.

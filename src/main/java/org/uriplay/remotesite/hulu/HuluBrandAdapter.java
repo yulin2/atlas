@@ -31,7 +31,7 @@ import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.html.HtmlNavigator;
 
-import com.google.soy.common.collect.Lists;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 

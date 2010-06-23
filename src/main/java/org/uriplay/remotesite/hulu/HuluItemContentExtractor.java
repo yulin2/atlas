@@ -24,7 +24,7 @@ import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.html.HtmlNavigator;
 
-import com.google.soy.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
     private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.watch = ";

@@ -1,13 +1,20 @@
 package org.uriplay.query.content;
 
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.BBC;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.BLIP;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.C4;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.DM;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.FB;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.HULU;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.ITV;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.TED;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.VIM;
+import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.YT;
+import junit.framework.TestCase;
 
 import com.metabroadcast.common.base.Maybe;
-
-import static org.uriplay.query.content.PerPublisherCurieExpander.CurieAlgorithm.*;
-
-import junit.framework.TestCase;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
