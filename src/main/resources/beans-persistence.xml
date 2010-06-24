@@ -22,11 +22,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="mongoDbBackedContentStore"/>
   </bean>
   
+  <bean id="mongoDbQueryExcutorThatFiltersUriQueries" class="org.uriplay.persistence.content.mongodb.MongoDBQueryExecutor">
+        <constructor-arg ref="mongoDbBackedContentStore"/>
+        <property name="filterUriQueries" value="true"/>
+  </bean>
+  
   <bean id="queryExecutor" class="org.uriplay.query.content.UriFetchingQueryExecutor">
       <constructor-arg ref="localOrRemoteFetcher"/>
       <constructor-arg>
          <bean class="org.uriplay.query.content.fuzzy.DefuzzingQueryExecutor">
                 <constructor-arg ref="mongoDbQueryExcutor"/>
+                <constructor-arg ref="mongoDbQueryExcutorThatFiltersUriQueries"/>
                 <constructor-arg ref="titleSearcher"/>
          </bean>
       </constructor-arg>

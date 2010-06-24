@@ -15,6 +15,9 @@ permissions and limitations under the License. */
 package org.uriplay.query.content.fuzzy;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+
+import static com.metabroadcast.common.query.Selection.ALL;
+
 import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
@@ -64,51 +67,56 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	}
 	
 	public void testFindingBrandsByTitle() throws Exception {
-		check(searcher.brandTitleSearch("den"), dragonsDen);
-		check(searcher.brandTitleSearch("dragon"), dragonsDen);
-		check(searcher.brandTitleSearch("dragons"), dragonsDen);
-		check(searcher.brandTitleSearch("drag den"), dragonsDen);
-		check(searcher.brandTitleSearch("drag"), dragonsDen);
-		check(searcher.brandTitleSearch("dragon's den"), dragonsDen);
-		check(searcher.brandTitleSearch("eastenders"), eastenders);
-		check(searcher.brandTitleSearch("easteners"), eastenders);
-		check(searcher.brandTitleSearch("eastedners"), eastenders);
-		check(searcher.brandTitleSearch("politics east"), politicsEast);
-		check(searcher.brandTitleSearch("eas"), eastenders, politicsEast);
-		check(searcher.brandTitleSearch("east"), eastenders, politicsEast);
-		check(searcher.brandTitleSearch("end"));
-		check(searcher.brandTitleSearch("peep show"), peepShow);
-		check(searcher.brandTitleSearch("peep s"), peepShow);
-		check(searcher.brandTitleSearch("dee"), theJackDeeShow);
-		check(searcher.brandTitleSearch("show"), peepShow, politicsEast, theJackDeeShow);
-		check(searcher.brandTitleSearch("jack show"), theJackDeeShow);
-		check(searcher.brandTitleSearch("the jack dee s"), theJackDeeShow);
-		check(searcher.brandTitleSearch("dee show"), theJackDeeShow);
-		check(searcher.brandTitleSearch("hav i got news"), haveIGotNewsForYou);
-		check(searcher.brandTitleSearch("brasseye"), brasseye);
-		check(searcher.brandTitleSearch("braseye"), brasseye);
-		check(searcher.brandTitleSearch("brassey"), brasseye);
-		check(searcher.brandTitleSearch("The Story of Science Power Proof and Passion"), science);
-		check(searcher.brandTitleSearch("The Story of Science: Power, Proof and Passion"), science);
+		check(searcher.brandTitleSearch("den", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("dragon", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("dragons", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("drag den", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("drag", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("dragon's den", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("eastenders", ALL),  eastenders);
+		check(searcher.brandTitleSearch("easteners", ALL),  eastenders);
+		check(searcher.brandTitleSearch("eastedners", ALL),  eastenders);
+		check(searcher.brandTitleSearch("politics east", ALL),  politicsEast);
+		check(searcher.brandTitleSearch("eas", ALL),  eastenders, politicsEast);
+		check(searcher.brandTitleSearch("east", ALL),  eastenders, politicsEast);
+		check(searcher.brandTitleSearch("end", ALL));
+		check(searcher.brandTitleSearch("peep show", ALL),  peepShow);
+		check(searcher.brandTitleSearch("peep s", ALL),  peepShow);
+		check(searcher.brandTitleSearch("dee", ALL),  theJackDeeShow);
+		check(searcher.brandTitleSearch("show", ALL),  peepShow, politicsEast, theJackDeeShow);
+		check(searcher.brandTitleSearch("jack show", ALL),  theJackDeeShow);
+		check(searcher.brandTitleSearch("the jack dee s", ALL),  theJackDeeShow);
+		check(searcher.brandTitleSearch("dee show", ALL),  theJackDeeShow);
+		check(searcher.brandTitleSearch("hav i got news", ALL),  haveIGotNewsForYou);
+		check(searcher.brandTitleSearch("brasseye", ALL),  brasseye);
+		check(searcher.brandTitleSearch("braseye", ALL),  brasseye);
+		check(searcher.brandTitleSearch("brassey", ALL),  brasseye);
+		check(searcher.brandTitleSearch("The Story of Science Power Proof and Passion", ALL),  science);
+		check(searcher.brandTitleSearch("The Story of Science: Power, Proof and Passion", ALL),  science);
 	}
 	
 	public void testUsesPrefixSearchForShortSearches() throws Exception {
-		check(searcher.brandTitleSearch("D"), dragonsDen);
-		check(searcher.brandTitleSearch("Dr"), dragonsDen);
-		check(searcher.brandTitleSearch("a"));
+		check(searcher.brandTitleSearch("D", ALL),  dragonsDen);
+		check(searcher.brandTitleSearch("Dr", ALL),  dragonsDen);
+		check(searcher.brandTitleSearch("a", ALL));
+	}
+	
+	public void testLimitAndOffset() throws Exception {
+		check(searcher.brandTitleSearch("eas", ALL),  eastenders, politicsEast);
+
 	}
 	
 	public void testFindingItemsByTitle() throws Exception {
-		check(searcher.itemTitleSearch("cats"), englishForCats);
-		check(searcher.itemTitleSearch("u2"), u2);
+		check(searcher.itemTitleSearch("cats", ALL),  englishForCats);
+		check(searcher.itemTitleSearch("u2", ALL),  u2);
 	}
 	
 	public void testUpdateByType() throws Exception {
 		Brand dragonsDenV2 = brand("/den", "Dragon's den Version 2");
 		
-		check(searcher.brandTitleSearch("dragon"), dragonsDen);
+		check(searcher.brandTitleSearch("dragon", ALL),  dragonsDen);
 		searcher.brandChanged(Lists.newArrayList(dragonsDenV2), ContentListener.changeType.CONTENT_UPDATE);
-		check(searcher.brandTitleSearch("dragon"), dragonsDen);
+		check(searcher.brandTitleSearch("dragon", ALL),  dragonsDen);
 	}
 
 	private void check(List<String> found, Description... content) {

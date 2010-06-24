@@ -16,9 +16,11 @@ package org.uriplay.query.content.fuzzy;
 
 import java.util.List;
 
+import com.metabroadcast.common.query.Selection;
+
 public interface FuzzySearcher {
 
-	List<String> brandTitleSearch(String queryString);
+	List<String> brandTitleSearch(String queryString, Selection selection);
 
-	List<String> itemTitleSearch(String queryString);
+	List<String> itemTitleSearch(String queryString, Selection selection);
 }
