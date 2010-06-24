@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Broadcast;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
@@ -124,6 +125,16 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		for (Encoding encoding : version.getManifestedAs()) {
 			addTo(simpleItem, version, encoding);
 		}
+		
+		for (Broadcast broadcast : version.getBroadcasts()) {
+			org.uriplay.media.entity.simple.Broadcast simpleBroadcast = simplify(broadcast);
+			copyProperties(version, simpleBroadcast);
+			simpleItem.addBroadcast(simpleBroadcast);
+		}
+	}
+
+	private static org.uriplay.media.entity.simple.Broadcast simplify(Broadcast broadcast) {
+		return new org.uriplay.media.entity.simple.Broadcast(broadcast.getBroadcastOn(), broadcast.getTransmissionTime(), broadcast.getTransmissionEndTime());
 	}
 
 	private static void addTo(Item simpleItem, Version version, Encoding encoding) {
@@ -184,7 +195,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		
 	}
 
-	private static void copyProperties(Version version, org.uriplay.media.entity.simple.Location simpleLocation) {
+	private static void copyProperties(Version version, org.uriplay.media.entity.simple.Version simpleLocation) {
 
 		simpleLocation.setPublishedDuration(version.getPublishedDuration());
 		simpleLocation.setDuration(version.getDuration());

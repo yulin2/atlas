@@ -23,6 +23,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.joda.time.DateTime;
+import org.uriplay.media.entity.simple.Broadcast;
 import org.uriplay.media.entity.simple.Item;
 import org.uriplay.media.entity.simple.Location;
 import org.uriplay.media.entity.simple.Playlist;
@@ -48,9 +50,13 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		location.setUri("http://www.bbc.co.uk/bluepeter");
 		location.setEmbedCode("object><embed></embed></object>");
 		item.addLocation(location);
+		DateTime transmitted = new DateTime(1990, 1, 1, 1, 1, 1, 1);
+		item.addBroadcast(new Broadcast("channel", transmitted, transmitted.plusHours(1)));
 		UriplayQueryResult uriplay = new UriplayQueryResult();
 		uriplay.addItem(item);
 		graph.add(uriplay);
+		
+		System.out.println(item.getBroadcasts());
 		
 		new JaxbXmlTranslator().writeTo(graph, stream);
 		
@@ -64,6 +70,13 @@ public class JaxbXmlTranslatorTest extends TestCase {
 				                            "<play:genres/>" +
 				                            "<play:tags/>" +
                                				"<title>Blue Peter</title>" +
+                               				"<play:broadcasts>" +
+                               					"<play:broadcast>" +
+                               						"<broadcastDuration>3600</broadcastDuration>" +
+                               						"<broadcastOn>channel</broadcastOn><transmissionEndTime>1990-01-01T02:01:01.001Z</transmissionEndTime>" +
+                               						"<transmissionTime>1990-01-01T01:01:01.001Z</transmissionTime>" +
+                               					"</play:broadcast>" +
+                               				"</play:broadcasts>" +
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +
@@ -95,6 +108,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 														"<play:genres/>" +
 														"<play:tags/>" +
 	                                         			"<title>Blue Peter</title>" +
+	                                         			"<play:broadcasts/>" +
 														"<play:locations>" +
 															"<play:location>" +
 															"<available>true</available>" +
