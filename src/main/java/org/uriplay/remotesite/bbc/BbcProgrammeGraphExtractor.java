@@ -149,7 +149,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 			if (seriesNumber.hasValue()) {
 				((Episode) item).setSeriesNumber(seriesNumber.requireValue());
 			}
-			((Episode) item).setEpisodeNumber(slashProgrammesEpisode.episodeNumber());
+			Integer episodeNumber = slashProgrammesEpisode.episodeNumber();
+			if (episodeNumber != null) {
+				((Episode) item).setEpisodeNumber(episodeNumber);
+			}
 		}
 		
 		Set<String> aliases = bbcAliasUrisFor(episodeUri);

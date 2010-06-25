@@ -50,12 +50,12 @@ class SlashProgrammesRdf {
 	static class SlashProgrammesEpisode extends SlashProgrammesBase {
 		
 		@XmlElement(namespace=PO.NS, name="position")
-		private int position;
+		private Integer position;
 
 		@XmlElement(namespace=PO.NS, name="version")
 		private List<SlashProgrammesVersion> versions;
 		
-		public int episodeNumber() {
+		public Integer episodeNumber() {
 			return position;
 		}
 		
