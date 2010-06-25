@@ -39,13 +39,15 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.content.criteria.ContentQueryBuilder;
+import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.time.DateTimeZones;
 
 
 public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
@@ -181,17 +183,17 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 	public void testTransmittedAfter() {
 		Map<String, String[]> params = Maps.newHashMap();
 		params.put("broadcast.transmissionTime-after", new String[] {"101"});
-		check(params, query().after(BROADCAST_TRANSMISSION_TIME, new DateTime(101L)));
+		check(params, query().after(BROADCAST_TRANSMISSION_TIME, new DateTime(101L, DateTimeZones.UTC)));
 	}
 	
 	public void testTransmittedBefore() {
 		Map<String, String[]> params = Maps.newHashMap();
 		params.put("broadcast.transmissionTime-before", new String[] {"101"});
-		check(params, query().before(BROADCAST_TRANSMISSION_TIME, new DateTime(101L)));
+		check(params, query().before(BROADCAST_TRANSMISSION_TIME, new DateTime(101L, DateTimeZones.UTC)));
 	}
 	
 	public void testTransmissionTimeEquals() throws Exception {
-		DateTime when = new DateTime(1010101);
+		DateTime when = new DateTime(1010101, DateTimeZones.UTC);
 		Map<String, String[]> params = Maps.newHashMap();
 		params.put("broadcast.transmissionTime", new String[] { String.valueOf(when.getMillis()) });
 		check(params, query().before(BROADCAST_TRANSMISSION_TIME, when.plusSeconds(1)).after(BROADCAST_TRANSMISSION_END_TIME, when));
@@ -230,6 +232,14 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 			.build(params, Item.class);
 		
 		assertEquals(query().searchFor(ITEM_TITLE, "bob").build(), query);
+	}
+	
+	public void testBroadcastQuery() throws Exception {
+		Map<String, String[]> params = Maps.newHashMap();
+		params.put("transmissionTime-after", new String[] { "10101" });
+		
+		new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter());
+		check(params, query().after(Attributes.BROADCAST_TRANSMISSION_TIME, new DateTime(10101, DateTimeZones.UTC)), Item.class);
 	}
 	
 	public void testAliases() throws Exception {
@@ -272,10 +282,10 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 	}
 
 	private void check(Map<String, String[]> params, ContentQueryBuilder expected) {
-		check(params, expected, Description.class);
+		check(params, expected, Content.class);
 	}
 	
-	private void check(Map<String, String[]> params, ContentQueryBuilder expected, Class<? extends Description> type) {
+	private void check(Map<String, String[]> params, ContentQueryBuilder expected, Class<? extends Content> type) {
 		ContentQuery query = builder.build(params, type);
 		assertEquals(expected.build(), query);
 	}

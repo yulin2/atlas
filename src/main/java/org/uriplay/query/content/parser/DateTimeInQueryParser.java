@@ -23,6 +23,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
 
 public class DateTimeInQueryParser {
@@ -42,7 +43,7 @@ public class DateTimeInQueryParser {
 	public DateTime parse(String value) throws MalformedDateTimeException {
 		
 		if (!StringUtils.isBlank(value) && StringUtils.isNumeric(value)) {
-			return new DateTime(Long.valueOf(value));
+			return new DateTime(Long.valueOf(value), DateTimeZones.UTC);
 		}
 		
 		Matcher matcher = EXPRESSION.matcher(value);

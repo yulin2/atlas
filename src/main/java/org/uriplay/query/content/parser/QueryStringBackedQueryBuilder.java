@@ -34,6 +34,7 @@ import org.uriplay.content.criteria.attribute.QueryFactory;
 import org.uriplay.content.criteria.attribute.StringValuedAttribute;
 import org.uriplay.content.criteria.operator.Operator;
 import org.uriplay.content.criteria.operator.Operators;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 
 import com.google.common.base.Function;
@@ -75,11 +76,11 @@ public class QueryStringBackedQueryBuilder {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public ContentQuery build(HttpServletRequest request, Class<? extends Description> context) {
+	public ContentQuery build(HttpServletRequest request, Class<? extends Content> context) {
 		return build(request.getParameterMap(), context).copyWithSelection(selectionBuilder.build(request));
 	}
 	
-	ContentQuery build(Map<String, String[]> params,  Class<? extends Description> context) {
+	ContentQuery build(Map<String, String[]> params,  Class<? extends Content> context) {
 		return buildFromFilteredMap(filter(params), context);
 	}
 	
@@ -114,6 +115,10 @@ public class QueryStringBackedQueryBuilder {
 					
 					operands.add(Attributes.BROADCAST_TRANSMISSION_TIME.createQuery(Operators.BEFORE, ImmutableList.of(when.plusSeconds(1))));
 					operands.add(Attributes.BROADCAST_TRANSMISSION_END_TIME.createQuery(Operators.AFTER, ImmutableList.of(when)));
+
+					// hack to show unavailable broadcasts
+					userSuppliedAttributes.add(Attributes.LOCATION_AVAILABLE);
+					
 					continue;
 				}
 				

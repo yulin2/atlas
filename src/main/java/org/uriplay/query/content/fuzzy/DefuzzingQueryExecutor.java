@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 package org.uriplay.query.content.fuzzy;
 
 import java.util.List;
-import java.util.Map;
 
 import org.uriplay.content.criteria.AtomicQuery;
 import org.uriplay.content.criteria.ContentQuery;
@@ -101,14 +100,13 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 
 	public List<Playlist> executePlaylistQuery(ContentQuery query) {
+		if (isFuzzy(query)) {
+			// Fuzzy playlist queries not supported
+			return Lists.newArrayList();
+		}
 		return nonFuzzyQueryDelegate.executePlaylistQuery(query);
 	}
 	
-	@Override
-	public Map<String, Content> executeAnyQuery(Iterable<String> uris) {
-		return nonFuzzyQueryDelegate.executeAnyQuery(uris);
-	}
-
 	private ContentQuery defuzz(ContentQuery query) {
 		return query.copyWithOperands(query.accept(new TitleDefuzzingQueryVisitor(query.getSelection())));
 	}

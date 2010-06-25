@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.v2;
 
-import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,16 +23,20 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Content;
+import org.uriplay.media.entity.Item;
+import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.servlet.ContentNotFoundException;
 import org.uriplay.persistence.servlet.RequestNs;
+import org.uriplay.query.content.parser.QueryStringBackedQueryBuilder;
+import org.uriplay.query.content.parser.WebProfileDefaultQueryAttributesSetter;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.NoMatchingAdapterException;
 
-import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 
 /**
  * Controller to handle the query interface to UriPlay.
@@ -45,28 +49,23 @@ public class AnyTypeFetchingController {
 
 	private static final String VIEW = "uriplayModel";
 	
-	private final KnownTypeQueryExecutor queryExecutor;
+	private final KnownTypeQueryExecutor executor;
+	private final QueryStringBackedQueryBuilder builder = new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter());
 
 	public AnyTypeFetchingController(KnownTypeQueryExecutor queryExecutor) {
-		this.queryExecutor = queryExecutor;
+		this.executor = queryExecutor;
 	}
 
 	@RequestMapping(method=RequestMethod.GET)
-	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, 
-			                   @RequestParam(defaultValue="false") boolean outputTimingInfo) throws Exception {
-		
-		String uri = request.getParameter("uri");
-		
-		if (uri == null) {
-			throw new IllegalArgumentException("No uri specified");
-		}
+	public ModelAndView handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		try {
-			Collection<Content> found = queryExecutor.executeAnyQuery(Splitter.on(',').split(uri)).values();
+			List<Content> found = Lists.newArrayList();
 			
-			if (found == null) {
-				throw new ContentNotFoundException("No metadata available for : " + uri);
-			}
+			found.addAll(executor.executeBrandQuery(builder.build(request, Brand.class)));
+			found.addAll(executor.executeItemQuery(builder.build(request, Item.class)));
+			found.addAll(executor.executePlaylistQuery(builder.build(request, Playlist.class)));
+		
 			return new ModelAndView(VIEW, RequestNs.GRAPH, found);
 			
 		} catch (NoMatchingAdapterException nmae) {

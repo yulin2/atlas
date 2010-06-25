@@ -25,7 +25,7 @@ import org.uriplay.beans.SingleItemProjector;
 import org.uriplay.beans.SinglePlaylistProjector;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.media.entity.Brand;
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
@@ -90,7 +90,7 @@ public class QueryController {
 		return executor.executeBrandQuery(build(request, Brand.class));
 	}
 
-	private ContentQuery build(HttpServletRequest request, Class<? extends Description> type) {
+	private ContentQuery build(HttpServletRequest request, Class<? extends Content> type) {
 		return builder.build(request, type);
 	}
 }
