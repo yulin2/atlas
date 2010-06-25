@@ -18,8 +18,6 @@ package org.uriplay.remotesite.youtube;
 import java.util.Set;
 
 import org.joda.time.Duration;
-import org.uriplay.beans.BeanGraphExtractor;
-import org.uriplay.beans.Representation;
 import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -35,8 +33,7 @@ import com.metabroadcast.common.media.MimeType;
 
 /**
  * {@link BeanGraphExtractor} that processes the result of a query to the YouTube
- * GData API, and constructs a {@link Representation}, which may later be handled
- * by the {@link BeanGraphFactory}.
+ * GData API
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */

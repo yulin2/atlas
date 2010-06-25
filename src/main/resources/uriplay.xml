@@ -139,9 +139,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg>
             <bean class="org.uriplay.beans.NaiveTypeMap" />
         </constructor-arg>
-        <constructor-arg>
-            <ref bean="localResources" />
-        </constructor-arg>
         <property name="nsPrefixes" ref="rdfNsPrefixes" />
     </bean>
 

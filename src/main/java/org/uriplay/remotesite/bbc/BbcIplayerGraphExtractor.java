@@ -23,7 +23,6 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.uriplay.beans.BeanGraphExtractor;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
@@ -32,7 +31,6 @@ import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
-import org.uriplay.remotesite.RemoteSiteRefresher;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
@@ -50,7 +48,7 @@ import com.sun.syndication.feed.synd.SyndLink;
  */
 public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSource, Playlist> {
 
-	private static final Log log = LogFactory.getLog(RemoteSiteRefresher.class);
+	private static final Log log = LogFactory.getLog(BbcIplayerGraphExtractor.class);
 	
 	private final RemoteSiteClient<SlashProgrammesRdf> episodeClient;
 	private final RemoteSiteClient<SlashProgrammesVersionRdf> versionClient;

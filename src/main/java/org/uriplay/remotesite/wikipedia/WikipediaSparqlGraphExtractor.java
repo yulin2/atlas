@@ -27,8 +27,6 @@ import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.TITLE_ID;
 
 import java.util.Set;
 
-import org.uriplay.beans.BeanGraphExtractor;
-import org.uriplay.beans.Representation;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Episode;

@@ -14,10 +14,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   
   <import resource="classpath:mongodb-context.xml"/>
   
-  <bean id="localResources" class="org.uriplay.beans.DescriptionResourceMapping">
-    <constructor-arg ref="contentStore" />
-  </bean>
-  
   <bean id="mongoDbQueryExcutor" class="org.uriplay.persistence.content.mongodb.MongoDBQueryExecutor">
         <constructor-arg ref="mongoDbBackedContentStore"/>
   </bean>
