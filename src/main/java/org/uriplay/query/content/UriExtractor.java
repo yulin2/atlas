@@ -37,7 +37,6 @@ public class UriExtractor extends QueryVisitorAdapter<Void> {
 
 	private final Set<String> uris;
 	private Set<Attribute<String>> uriAttributes = ImmutableSet.of(Attributes.ITEM_URI, Attributes.BRAND_URI, Attributes.PLAYLIST_URI);
-	private Set<Attribute<String>> curieAttributes = ImmutableSet.of(Attributes.ITEM_CURIE, Attributes.BRAND_CURIE, Attributes.PLAYLIST_CURIE);
 	
 	private final CurieExpander curieExpander = new PerPublisherCurieExpander();
 
@@ -59,14 +58,6 @@ public class UriExtractor extends QueryVisitorAdapter<Void> {
 				}
 			}
 			
-		}
-		if (curieAttributes.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
-			for(String curie : (List<String>) query.getValue()) {
-				Maybe<String> uri = curieExpander.expand(curie);
-				if (uri.hasValue()) {
-					uris.add(uri.requireValue());
-				}
-			}
 		}
 		return null;
 	}
