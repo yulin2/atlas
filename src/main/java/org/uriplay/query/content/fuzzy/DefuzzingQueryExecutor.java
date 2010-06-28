@@ -28,6 +28,7 @@ import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
+import org.uriplay.query.content.DelegateQueryExecutor;
 
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.query.Selection;
@@ -46,14 +47,8 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 		this.fuzzySearcher = fuzzySearcher;
 	}
 	
-	private static interface DelegateQuery<T extends Content> {
-		
-		List<T> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query);
-		
-	}
-	
 	public List<Brand> executeBrandQuery(ContentQuery query) {
-		return executeContentQuery(query, new DelegateQuery<Brand>() {
+		return executeContentQuery(query, new DelegateQueryExecutor<Brand>() {
 
 			@Override
 			public List<Brand> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
@@ -63,7 +58,7 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 	
 	public List<Item> executeItemQuery(ContentQuery query) {
-		return executeContentQuery(query, new DelegateQuery<Item>() {
+		return executeContentQuery(query, new DelegateQueryExecutor<Item>() {
 
 			@Override
 			public List<Item> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
@@ -72,14 +67,14 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 		});
 	}
 
-	public <T extends Content> List<T> executeContentQuery(ContentQuery query, DelegateQuery<T> exec) {
+	public <T extends Content> List<T> executeContentQuery(ContentQuery query, DelegateQueryExecutor<T> exec) {
 		if (!isFuzzy(query)) {
 			return exec.executeQuery(nonFuzzyQueryDelegate, query);
 		}
 		return query.getSelection().applyTo(loadAll(query, exec));
 	}
 
-	private <T extends Content> List<T> loadAll(ContentQuery query, DelegateQuery<T> exec) {
+	private <T extends Content> List<T> loadAll(ContentQuery query, DelegateQueryExecutor<T> exec) {
 		Selection originalSelection = query.getSelection();
 		int numberToLoad = originalSelection.getOffset() + originalSelection.limitOrDefaultValue(BATCH_SIZE);
 		

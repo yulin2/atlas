@@ -20,18 +20,18 @@ import java.util.Set;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Content;
-import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.NullRequestTimer;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 
 /**
  * Finds any uris from a given {@link ContentQuery}, fetches them using a local/remote
- * fetcher (so either from the database or from the internet), and uses the response
+ * fetcher (so either from the database or from the Internet), and uses the response
  * to replace the uris given in the query with the canonical versions of each, before passing
  * the updated query on to a delegate. 
  *  
@@ -48,39 +48,75 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 	
 	public List<Item> executeItemQuery(ContentQuery query) {
-		if (!fetch(query)) {
-			return Lists.newArrayList();
-		}
-		return delegate.executeItemQuery(query);
-	}
+		return executeContentQuery(query, new DelegateQueryExecutor<Item>() {
 
-	public List<Playlist> executePlaylistQuery(ContentQuery query) {
-		if (!fetch(query)) {
-			return Lists.newArrayList();
-		}
-		return delegate.executePlaylistQuery(query);
+			@Override
+			public List<Item> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
+				return executor.executeItemQuery(query);
+			}
+		});
 	}
 	
 	public List<Brand> executeBrandQuery(ContentQuery query) {
-		if (!fetch(query)) {
-			return Lists.newArrayList();
-		}
-		return delegate.executeBrandQuery(query);
+		return executeContentQuery(query, new DelegateQueryExecutor<Brand>() {
+
+			@Override
+			public List<Brand> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
+				return executor.executeBrandQuery(query);
+			}
+		});
 	}
+	
+	public List<Playlist> executePlaylistQuery(ContentQuery query) {
+		return executeContentQuery(query, new DelegateQueryExecutor<Playlist>() {
 
+			@Override
+			public List<Playlist> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
+				return executor.executePlaylistQuery(query);
+			}
+		});
+	}
+	
+	public <T extends Content> List<T> executeContentQuery(ContentQuery query, DelegateQueryExecutor<T> executor) {
 
-	/**
-	 * @return true if query executor should continue, false if the query will not
-	 * match any beans.
-	 */
-	private boolean fetch(ContentQuery query) {
-		Set<String> uris = UriExtractor.extractFrom(query);
-		for (String uri : uris) {
-			Description fetchedDescriptions = fetcher.fetch(uri, new NullRequestTimer());
-			if (fetchedDescriptions == null) {
-				return false;
+		List<T> found =  executor.executeQuery(delegate, query);
+		
+		Set<String> missingUris = missingUris(found, query);
+		
+		if (missingUris.isEmpty()) {
+			return found;
+		} 
+
+		boolean foundAtLeastOneUri = false;
+		
+		for (String missingUri : missingUris) {
+			Content remoteContent = fetcher.fetch(missingUri, new NullRequestTimer());
+			if (remoteContent != null) {
+				foundAtLeastOneUri = true;
 			}
 		}
-		return true;
+		
+		if (!foundAtLeastOneUri) {
+			return ImmutableList.of();
+		}
+
+		return executor.executeQuery(delegate, query);
+	}
+	
+	private static Set<String> missingUris(Iterable<? extends Content> content, ContentQuery query) {
+		return Sets.difference(UriExtractor.extractFrom(query), urisFrom(content));
+	}
+
+	private static Set<String> urisFrom(Iterable<? extends Content> contents) {
+		Set<String> uris = Sets.newHashSet();
+		for (Content content : contents) {
+			uris.addAll(content.getAllUris());
+			if (content instanceof Playlist) {
+				for (Item item : ((Playlist) content).getItems()) {
+					uris.addAll(item.getAllUris());
+				}
+			}
+		}
+		return uris;
 	}
 }

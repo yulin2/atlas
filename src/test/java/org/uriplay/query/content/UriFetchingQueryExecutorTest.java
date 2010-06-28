@@ -14,18 +14,20 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.content;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.uriplay.content.criteria.ContentQueryBuilder.query;
-
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.content.criteria.ContentQuery;
 import org.uriplay.content.criteria.attribute.Attributes;
+import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
+import org.uriplay.persistence.system.NullRequestTimer;
+
+import com.google.common.collect.ImmutableList;
+
+import static org.uriplay.content.criteria.ContentQueryBuilder.query;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -33,44 +35,78 @@ import org.uriplay.persistence.system.RequestTimer;
 @SuppressWarnings("unchecked")
 public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 
-	ContentQuery uriquery = query().equalTo(Attributes.ITEM_URI, "http://example.com").build();
-	ContentQuery titlequery = query().equalTo(Attributes.BRAND_TITLE, "ex").build();
-	ContentQuery query =  query().equalTo(Attributes.ITEM_URI, "http://example.com").equalTo(Attributes.BRAND_TITLE, "ex").build();
+	private static final Item item1 = new Item("item1", "curie:1");
+	private static final Item item2 = new Item("item2", "curie:2");
+	private static final ContentQuery queryForItem1 = query().equalTo(Attributes.ITEM_URI, "item1").build();
 
-	Fetcher<Content> fetcher = mock(Fetcher.class);
-	KnownTypeQueryExecutor delegate = mock(KnownTypeQueryExecutor.class);
+	private Fetcher<Content> fetcher = mock(Fetcher.class);
+	private KnownTypeQueryExecutor delegate = mock(KnownTypeQueryExecutor.class);
 	
-	UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate);
+	private UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate);
 
-	public void testDelegatesItemQuery() throws Exception {
-
-		final Item item = new Item();
+	public void testThatWhenTheQueryIsSatisfiedByTheDatabaseThatTheFetcherIsNotUsed() throws Exception {
 		
-		item.setCanonicalUri("http://canonical.com");
-		item.addAlias("http://example.com");
-		
-		checking(new Expectations() {{
-			one(fetcher).fetch(with(equalTo("http://example.com")), with(any(RequestTimer.class))); will(returnValue(item));
-			one(delegate).executeItemQuery(query);
+		checking(new Expectations() {{ 
+			one(delegate).executeItemQuery(queryForItem1); will(returnValue(ImmutableList.of(item1)));
+			never(fetcher);
 		}});
-			
-		executor.executeItemQuery(query);
+		
+		executor.executeItemQuery(queryForItem1);
 	}
 	
-	public void testDelegatesPlaylistQuery() throws Exception {
+	public void testThatWhenTheQueryIsNotSatisfiedByTheDatabaseTheFetcherIsUsed() throws Exception {
+		
+		checking(new Expectations() {{ 
+			one(delegate).executeItemQuery(queryForItem1); will(returnValue(ImmutableList.<Item>of()));
+			one(fetcher).fetch("item1", new NullRequestTimer()); will(returnValue(item1));
+			one(delegate).executeItemQuery(queryForItem1); will(returnValue(ImmutableList.of(item1)));
 
-	final Item item = new Item();
-		
-		item.setCanonicalUri("http://canonical.com");
-		item.addAlias("http://example.com");
-		
-		checking(new Expectations() {{
-			one(fetcher).fetch(with(equalTo("http://example.com")), with(any(RequestTimer.class))); will(returnValue(item));
-			one(delegate).executePlaylistQuery(query);
 		}});
-			
-		executor.executePlaylistQuery(query);
 		
+		executor.executeItemQuery(queryForItem1);
 	}
+	
+	public void testThatIfTheFetcherReturnsNothingTheTheDBIsNotRetried() throws Exception {
+		
+		checking(new Expectations() {{ 
+			one(delegate).executeItemQuery(queryForItem1); will(returnValue(ImmutableList.<Item>of()));
+			one(fetcher).fetch("item1", new NullRequestTimer()); will(returnValue(null));
 
+		}});
+
+		executor.executeItemQuery(queryForItem1);
+	}
+	
+	public void testThatWhenSomeItemsAreInTheDatabaseAndSomeAreNotThatTheFetcherIsUsedOnTheMissingItems() throws Exception {
+		final ContentQuery queryForItems1and2 = query().equalTo(Attributes.ITEM_URI, "item1", "item2").build();
+		
+		checking(new Expectations() {{ 
+			one(delegate).executeItemQuery(queryForItems1and2); will(returnValue(ImmutableList.of(item1)));
+			one(fetcher).fetch("item2", new NullRequestTimer()); will(returnValue(item2));
+			one(delegate).executeItemQuery(queryForItems1and2); will(returnValue(ImmutableList.of(item1, item2)));
+		}});
+
+		executor.executeItemQuery(queryForItems1and2);
+	}
+	
+	public void testThatItemInBrandQueriesWork() throws Exception {
+		
+		final Brand brand = new Brand("brand1", "brand:1");
+		brand.addItem(item1);
+		
+		
+		checking(new Expectations() {{ 
+			one(delegate).executeBrandQuery(queryForItem1); will(returnValue(ImmutableList.of()));
+			one(fetcher).fetch("item1", new NullRequestTimer()); will(returnValue(item1));
+			one(delegate).executeBrandQuery(queryForItem1); will(returnValue(ImmutableList.of(brand)));
+		}});
+		
+		executor.executeBrandQuery(queryForItem1);
+		
+		checking(new Expectations() {{ 
+			one(delegate).executeBrandQuery(queryForItem1); will(returnValue(ImmutableList.of(brand)));
+		}});
+
+		executor.executeBrandQuery(queryForItem1);
+	}
 }
