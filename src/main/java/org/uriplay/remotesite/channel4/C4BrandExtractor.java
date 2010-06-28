@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -42,6 +41,7 @@ import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sun.syndication.feed.atom.Entry;
@@ -143,7 +143,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
 	private Integer readAsNumber(Map<String, String> lookup, String key) {
 		String value = lookup.get(key);
-		if (StringUtils.isBlank(value)) {
+		if (Strings.isNullOrEmpty(value)) {
 			return null;
 		}
 		return Integer.valueOf(value);

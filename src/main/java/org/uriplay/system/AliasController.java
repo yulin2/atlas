@@ -27,6 +27,7 @@ import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.NullRequestTimer;
 
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -84,7 +85,7 @@ public class AliasController {
 	private static ImmutableList<AliasAndTarget> aliasesFrom(String csv) {
 		List<AliasAndTarget> aliases = Lists.newArrayList();
 		for (String line : csv.split("\n")) {
-			if (org.apache.commons.lang.StringUtils.isBlank(line)) {
+			if (Strings.isNullOrEmpty(line)) {
 				continue;
 			}
 			List<String> parts = Lists.newArrayList(Splitter.on(',').trimResults().split(line));

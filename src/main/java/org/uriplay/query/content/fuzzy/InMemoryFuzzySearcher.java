@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -44,6 +43,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.ContentListener;
 import org.uriplay.util.stats.Score;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.query.Selection;
 
@@ -105,7 +105,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	}
 
 	private Document asDocument(String uri, String title) {
-		if (StringUtils.isBlank(uri) || StringUtils.isBlank(title)) {
+		if (Strings.isNullOrEmpty(uri) || Strings.isNullOrEmpty(title)) {
 			return null;
 		}
 		
