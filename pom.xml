@@ -57,6 +57,11 @@
             <artifactId>uriplay-feeds</artifactId>
             <version>${uriplay.version}</version>
         </dependency>
+          <dependency>
+            <groupId>org.uriplay</groupId>
+            <artifactId>uriplay-persistence</artifactId>
+            <version>${uriplay.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.jmock</groupId>
             <artifactId>jmock-junit3</artifactId>
