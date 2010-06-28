@@ -15,7 +15,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <import resource="classpath:beans-tracking.xml" />
     <import resource="classpath:uriplay-servlet.xml" />
 
-    <bean id="contextConfigurer" class="com.metabroadcast.common.properties.ContextConfigurer" init-method="init" />
+    <bean id="contextConfigurer" class="com.metabroadcast.common.webapp.properties.ContextConfigurer" init-method="init" />
 
     <bean id="localOrRemoteFetcher" class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
         <constructor-arg>
