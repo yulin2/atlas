@@ -17,8 +17,8 @@ package org.uriplay.remotesite.synd;
 
 import java.util.List;
 
-import org.uriplay.logging.Log4JLogger;
-import org.uriplay.logging.UriplayLogger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.TransportSubType;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Encoding;
@@ -41,11 +41,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
  */
 public abstract class PodcastGraphExtractor {
 	
-	private UriplayLogger logger;
-	
-	public PodcastGraphExtractor() {
-		logger = new Log4JLogger();
-	}
+	private final Log log = LogFactory.getLog(getClass());
 	
 	protected Encoding encodingFrom(List<SyndEnclosure> enclosures) {
 		Encoding encoding = new Encoding();
@@ -65,7 +61,7 @@ public abstract class PodcastGraphExtractor {
 		if (containerFormat != null) {
 			encoding.setDataContainerFormat(containerFormat);
 		} else {
-			logger.unknownDataContainerFormat(enclosure.getUrl(), enclosure.getType());
+			log.warn("unknownDataContainerFormat " + enclosure.getUrl() + " : " + enclosure.getType());
 		}
 		return encoding;
 	}
