@@ -21,14 +21,12 @@ import static org.uriplay.media.vocabulary.DBPO.TELEVISION_SHOW;
 import java.util.Set;
 
 import org.uriplay.media.entity.Description;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.dbpedia.DbpediaSparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
-import org.uriplay.remotesite.timing.TimedFetcher;
 
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.query.ResultSet;
@@ -40,7 +38,7 @@ import com.hp.hpl.jena.sparql.core.ResultBinding;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class WikipediaSparqlAdapter extends TimedFetcher<Description> implements SiteSpecificAdapter<Description> {
+public class WikipediaSparqlAdapter implements SiteSpecificAdapter<Description> {
 
 	private final SparqlEndpoint sparqlEndpoint;
 	private final ContentExtractor<WikipediaSparqlSource, Description> propertyExtractor;
@@ -55,37 +53,34 @@ public class WikipediaSparqlAdapter extends TimedFetcher<Description> implements
 	}
 
 	@Override
-	protected Description fetchInternal(String uri, RequestTimer timer) {
+	public Description fetch(String uri) {
 		
 		WikipediaSparqlSource source = new WikipediaSparqlSource(uri);
 		
 		try {
-			timer.nest();
 			
-			findCanonicalDbpediaUri(source, timer); 
+			findCanonicalDbpediaUri(source); 
 			
-			Set<String> rootTypes = queryTypeAndGenericItemProperties(source, timer);
+			Set<String> rootTypes = queryTypeAndGenericItemProperties(source);
 			String articleType = source.determineItemType(rootTypes);
 			
 			if (rootTypes.isEmpty() && articleType == null) {
 				throw new FetchException("No information available for: " + uri);
 			}
 		
-			performSubsequentQuery(source, articleType, timer);
+			performSubsequentQuery(source, articleType);
 			
 			return propertyExtractor.extract(source);
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);
-		} finally {
-			timer.unnest();
 		}
 	}
 
-	private Set<String> queryTypeAndGenericItemProperties(WikipediaSparqlSource source, RequestTimer timer) {
+	private Set<String> queryTypeAndGenericItemProperties(WikipediaSparqlSource source) {
 		
 		// query for item properties regardless of what type the item is.
 		ResultSet propertyResult = performTimedSparqlQuery(
-				source.getItemTypeQuery(), timer, "Sparql query for type of " + source.getCanonicalDbpediaUri());
+				source.getItemTypeQuery(), "Sparql query for type of " + source.getCanonicalDbpediaUri());
 		
 		Set<String> rootTypes = Sets.newHashSet();
 		
@@ -98,24 +93,24 @@ public class WikipediaSparqlAdapter extends TimedFetcher<Description> implements
 		source.setRootTypes(rootTypes);
 
 		propertyResult = performTimedSparqlQuery(
-				source.getItemQuery(), timer, "Sparql query for properties of " + source.getCanonicalDbpediaUri());
+				source.getItemQuery(), "Sparql query for properties of " + source.getCanonicalDbpediaUri());
 	
 		source.setRootProperties(propertyResult);
 		
 		propertyResult = performTimedSparqlQuery(
-				source.getContainedInQuery(), timer, "Sparql query for resources containing " + source.getCanonicalDbpediaUri());
+				source.getContainedInQuery(), "Sparql query for resources containing " + source.getCanonicalDbpediaUri());
 		
 		source.setContainedInProperties(propertyResult);
 		
 		return rootTypes;
 	}
 
-	private void findCanonicalDbpediaUri(WikipediaSparqlSource source, RequestTimer timer) {
+	private void findCanonicalDbpediaUri(WikipediaSparqlSource source) {
 		
 		SparqlQuery query = source.getUriQuery();
 		
 		ResultSet canonicalUriResult =
-			performTimedSparqlQuery(query, timer, "Dbpedia sparql query for canonical uri for: " + source.getUri());
+			performTimedSparqlQuery(query, "Dbpedia sparql query for canonical uri for: " + source.getUri());
 		
 		//TODO: it is possible that the redirected URI is not the end of the redirect chain,
 		//and is therefore not 'canonical'. We should loop until there are no more redirects.
@@ -130,26 +125,24 @@ public class WikipediaSparqlAdapter extends TimedFetcher<Description> implements
 		//should all be added as sameAs links.
 	}
 
-	private ResultSet performTimedSparqlQuery(SparqlQuery query, RequestTimer timer, String message) {
-		timer.start(sparqlEndpoint, message);
+	private ResultSet performTimedSparqlQuery(SparqlQuery query, String message) {
 		ResultSet result = sparqlEndpoint.execute(query);
-		timer.stop(sparqlEndpoint, message);
 		return result;
 	}
 
-	private void performSubsequentQuery(WikipediaSparqlSource source, String articleType, RequestTimer timer) {
+	private void performSubsequentQuery(WikipediaSparqlSource source, String articleType) {
 	
 		ResultSet childResult;
 		
 		// if the item is a person, query their works
 		if (PERSON.equals(articleType)) {
 			childResult = performTimedSparqlQuery(source.getChildTypesOfPersonQuery(), 
-					timer, "Child types of Person sparql query for: " + source.getCanonicalDbpediaUri());
+					 "Child types of Person sparql query for: " + source.getCanonicalDbpediaUri());
 			source.setChildTypeProperties(childResult);			
 
 			
 			childResult = performTimedSparqlQuery(source.getChildrenOfPersonQuery(), 
-					timer, "Child properties of Person sparql query for: " + source.getCanonicalDbpediaUri());
+					"Child properties of Person sparql query for: " + source.getCanonicalDbpediaUri());
 			source.setChildProperties(childResult);			
 		}
 		
@@ -157,11 +150,11 @@ public class WikipediaSparqlAdapter extends TimedFetcher<Description> implements
 		if (TELEVISION_SHOW.equals(articleType)) {
 			
 			childResult = performTimedSparqlQuery(source.getChildTypesOfTVShowQuery(), 
-					timer, "Child types of TV show sparql query for: " + source.getCanonicalDbpediaUri());
+					 "Child types of TV show sparql query for: " + source.getCanonicalDbpediaUri());
 			source.setChildTypeProperties(childResult);			
 
 			childResult = performTimedSparqlQuery(source.getChildrenOfTVShowQuery(), 
-					timer, "Sparql query for all episodes of TV show: " + source.getCanonicalDbpediaUri());
+					 "Sparql query for all episodes of TV show: " + source.getCanonicalDbpediaUri());
 			source.setChildProperties(childResult);			
 		}		
 	}

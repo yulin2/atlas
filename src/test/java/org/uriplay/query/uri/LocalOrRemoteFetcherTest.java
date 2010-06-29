@@ -21,7 +21,6 @@ import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.ContentStore;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 
 /**
  * Unit test for {@link LocalOrRemoteFetcher}.
@@ -32,7 +31,6 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 	static final String URI = "http://example.com";
     
 	Fetcher<Description> remoteFetcher;
-	RequestTimer timer;
 	ContentStore resources;
 	
 	Fetcher<Description> localOrRemoteFetcher;
@@ -45,7 +43,6 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 		super.setUp();
 		remoteFetcher = mock(Fetcher.class);
 		resources = mock(ContentStore.class);
-		timer = mock(RequestTimer.class);
 		localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
 	}
 
@@ -53,21 +50,19 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(resources).findByUri(URI); will(returnValue(null));
-			one(remoteFetcher).fetch(URI, timer); will(returnValue(bean));
-			ignoring(timer);
+			one(remoteFetcher).fetch(URI); will(returnValue(bean));
 		}});
 		
-		localOrRemoteFetcher.fetch(URI, timer);
+		localOrRemoteFetcher.fetch(URI);
 	}
 	
 	public void testLoadsKnownResourcesFromDatabaseAndDoesNotFetch() throws Exception {
 		
 		checking(new Expectations() {{ 
 			one(resources).findByUri(URI); will(returnValue(bean));
-			ignoring(timer);
 		}});
 		
-		localOrRemoteFetcher.fetch(URI, timer);
+		localOrRemoteFetcher.fetch(URI);
 	}
 	
 }

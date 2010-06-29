@@ -10,7 +10,6 @@ import org.jdom.Element;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.MutableContentStore;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.HttpClients;
@@ -46,7 +45,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     }
 
     @Override
-    public Playlist fetch(String uri, RequestTimer timer) {
+    public Playlist fetch(String uri) {
         try {
             LOG.info("Retrieving all Hulu brands");
 
@@ -80,7 +79,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
 
         public void run() {
             try {
-                Brand brand = brandAdapter.fetch(uri, null);
+                Brand brand = brandAdapter.fetch(uri);
                 contentStore.createOrUpdatePlaylist(brand, false);
             } catch (Exception e) {
                 LOG.warn("Error retrieving Hulu brand: " + uri + " while retrieving all brands with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());

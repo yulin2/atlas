@@ -29,7 +29,6 @@ import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.bbc.BbcPodcastGenreMap;
@@ -55,7 +54,7 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 
 		List<Outline> outlines = typedList(source.getFeed().getOutlines());
 	
-		playlist.setPlaylists(fetchFeedsFor(outlines, source.getTimer()));
+		playlist.setPlaylists(fetchFeedsFor(outlines));
 		
 		return playlist;
 	}
@@ -68,47 +67,44 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 		return playlist;
 	}
 	
-	private List<Playlist> fetchFeedsFor(List<Outline> outlines, RequestTimer timer) {
+	private List<Playlist> fetchFeedsFor(List<Outline> outlines) {
 		List<Playlist> playlists = Lists.newArrayList();
 		if (outlines != null) {
 			for (Outline outline : outlines) {
-				playlists.addAll(fetchFeedsFor(outline,  timer));
+				playlists.addAll(fetchFeedsFor(outline));
 			}
 		}
 		return playlists;
 	}
 
-	private List<Playlist> fetchFeedsFor(Outline outline, RequestTimer timer) {
+	private List<Playlist> fetchFeedsFor(Outline outline) {
 		List<Playlist> playlists = Lists.newArrayList();
 
 		List<Outline> children = typedList(outline.getChildren());
-		playlists.addAll(fetchFeedsFor(children, timer));
+		playlists.addAll(fetchFeedsFor(children));
 		
 		if (outline.getXmlUrl() != null) {
-			playlists.addAll(fetchFeed(outline.getXmlUrl(), outline, timer));
+			playlists.addAll(fetchFeed(outline.getXmlUrl(), outline));
 		} else if (outline.getHtmlUrl() != null) {
-			playlists.addAll(fetchFeed(outline.getHtmlUrl(), outline,  timer));
+			playlists.addAll(fetchFeed(outline.getHtmlUrl(), outline));
 		} else if (outline.getUrl() != null) {
-			playlists.addAll(fetchFeed(outline.getUrl(), outline, timer));
+			playlists.addAll(fetchFeed(outline.getUrl(), outline));
 		}
 		return playlists;
 	}
 
-	private List<Playlist> fetchFeed(String feedUrl, Outline outline, RequestTimer timer) {
+	private List<Playlist> fetchFeed(String feedUrl, Outline outline) {
 		
 		String genres = outline.getAttributeValue("bbcgenres");
 		
 		Playlist feed;
 		
 		try {
-			timer.nest();
-			 feed = (Playlist) delegateFetcher.fetch(feedUrl, timer);
+			 feed = (Playlist) delegateFetcher.fetch(feedUrl);
 		} catch (FetchException fe) {
 			// carry on and try the next feed
 			return Lists.newArrayList();
-		} finally {
-			timer.unnest();
-		}
+		} 
 		
 		if (!StringUtils.isEmpty(genres)) {
 			Set<String> allGenres = Sets.newHashSet(feed.getGenres());

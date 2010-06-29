@@ -24,7 +24,6 @@ import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 
 import com.google.common.collect.Sets;
 
@@ -41,16 +40,15 @@ public class SavingFetcherTest extends MockObjectTestCase {
 	Item item1 = new Item();
 	Brand brand = new Brand();
 	Set<Description> itemAndBrand = Sets.<Description>newHashSet(item1, brand);
-	RequestTimer timer = mock(RequestTimer.class);
 	
 	public void testFetchesItemsFromDelegateAndSavesToStore() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(delegateFetcher).fetch(URI, timer); will(returnValue(item1));
+			one(delegateFetcher).fetch(URI); will(returnValue(item1));
 			one(store).createOrUpdateContent(item1, false);
 		}});
 		
-		new SavingFetcher(delegateFetcher, store).fetch(URI, timer);
+		new SavingFetcher(delegateFetcher, store).fetch(URI);
 	}
 	
 }

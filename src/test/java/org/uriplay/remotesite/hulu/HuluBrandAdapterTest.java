@@ -4,7 +4,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.hulu.HuluBrandAdapter.HuluBrandCanonicaliser;
@@ -17,12 +16,12 @@ public class HuluBrandAdapterTest extends MockObjectTestCase {
 
     public void testShouldGetBrand() throws Exception {
         checking(new Expectations() {{
-            allowing(episodeAdapter).fetch((String) with(anything()), (RequestTimer) with(anything())); will(returnValue(new Episode()));
+            allowing(episodeAdapter).fetch((String) with(anything())); will(returnValue(new Episode()));
         }});
         adapter.setEpisodeAdapter(episodeAdapter);
         
         String uri = "http://www.hulu.com/glee";
-        Brand brand = adapter.fetch(uri, null);
+        Brand brand = adapter.fetch(uri);
         
         assertNotNull(brand);
         assertEquals("Glee", brand.getTitle());

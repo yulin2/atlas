@@ -35,7 +35,6 @@ import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.youtube.YouTubeGraphExtractor;
 
 import com.google.common.collect.Iterables;
@@ -65,8 +64,6 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 	Opml feed;
 	OpmlSource source;
 
-	RequestTimer timer = mock(RequestTimer.class);
-
 	private Playlist fetchedFeed1;
 	private Playlist fetchedFeed2;
 	
@@ -74,7 +71,7 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		feed = createFeed();
-		source = new OpmlSource(feed, OPML_URI, timer);
+		source = new OpmlSource(feed, OPML_URI);
 		
 		fetchedFeed1 = new Playlist(FEED1_URI, FEED1_URI);
 		fetchedFeed1.addItem(itemWithLocation(LOCATION1_URI));
@@ -121,10 +118,8 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 	public void testFetchesAllContainedPodcastsAndMergesTheirRepresentations() throws Exception {
 		
 		checking(new Expectations() {{
-			one(fetcher).fetch(FEED1_URI, timer); will(returnValue(fetchedFeed1));
-			one(fetcher).fetch(FEED2_URI, timer); will(returnValue(fetchedFeed2));
-			exactly(2).of(timer).nest();
-			exactly(2).of(timer).unnest();
+			one(fetcher).fetch(FEED1_URI); will(returnValue(fetchedFeed1));
+			one(fetcher).fetch(FEED2_URI); will(returnValue(fetchedFeed2));
 		}});
 		
 		Playlist playlist = extractor.extract(source);
@@ -146,10 +141,8 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 	public void testAppliesRestrictionToBbcLocationsBasedOnAllowAttribute() throws Exception {
 				
 		checking(new Expectations() {{
-			one(fetcher).fetch(FEED1_URI, timer); will(returnValue(fetchedFeed1));
-			one(fetcher).fetch(FEED2_URI, timer); will(returnValue(fetchedFeed2));
-			exactly(2).of(timer).nest();
-			exactly(2).of(timer).unnest();
+			one(fetcher).fetch(FEED1_URI); will(returnValue(fetchedFeed1));
+			one(fetcher).fetch(FEED2_URI); will(returnValue(fetchedFeed2));
 		}});
 		
 		Playlist playlist = extractor.extract(source);

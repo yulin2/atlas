@@ -7,7 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Sets;
@@ -28,12 +27,12 @@ public class CanonicalisingLocalRemoteFetcher implements Fetcher<Object> {
 	}
 
 	@Override
-	public Object fetch(String uri, RequestTimer timer) {
+	public Object fetch(String uri) {
 		Set<String> aliases = Sets.newHashSet();
 		String currentUri = uri;
 		for (int i = 0; i < MAX_CANONICALISATIONS; i++) {
 			try {
-				Object bean = delegate.fetch(currentUri, timer);
+				Object bean = delegate.fetch(currentUri);
 				if (bean == null) {
 					return null;
 				} else {

@@ -17,13 +17,11 @@ package org.uriplay.remotesite.imdb;
 
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.dbpedia.DbpediaSparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
-import org.uriplay.remotesite.timing.TimedFetcher;
 import org.uriplay.remotesite.wikipedia.WikipediaSparqlSource;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -37,7 +35,7 @@ import com.hp.hpl.jena.sparql.core.ResultBinding;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class ImdbAdapter extends TimedFetcher<Description> implements SiteSpecificAdapter<Description> {
+public class ImdbAdapter implements SiteSpecificAdapter<Description> {
 
 	private final SparqlEndpoint sparqlEndpoint;
 	private final Fetcher<Object> fetcher;
@@ -52,37 +50,30 @@ public class ImdbAdapter extends TimedFetcher<Description> implements SiteSpecif
 	}
 
 	@Override
-	protected Description fetchInternal(String imdbUri, RequestTimer timer) {
+	public Description fetch(String imdbUri) {
 		String dbpediaUri = null;
 		try {
 			ImdbSource source = new ImdbSource(null, imdbUri);
-			dbpediaUri = findCanonicalDbpediaUri(source, timer);
+			dbpediaUri = findCanonicalDbpediaUri(source);
 			if (dbpediaUri == null) {
 				return null;
 			}
-			timer.nest();
-			timer.start(this, "Forwarding request to another adapter: " + dbpediaUri);
-			timer.nest();
-			Description description = (Description) fetcher.fetch(dbpediaUri, timer);
+			Description description = (Description) fetcher.fetch(dbpediaUri);
 			String wikipediaUri = new WikipediaSparqlSource(dbpediaUri).getCanonicalWikipediaUri();
 			description.addAlias(wikipediaUri);
 			description.addAlias(dbpediaUri);
 			return description;
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + imdbUri, e);
-		} finally {
-			timer.unnest();
-			timer.stop(this, "Forwarding request to another adapter: " + dbpediaUri);
-			timer.unnest();
-		}
+		} 
 	}
 
-	private String findCanonicalDbpediaUri(ImdbSource source, RequestTimer timer) {
+	private String findCanonicalDbpediaUri(ImdbSource source) {
 		
 		SparqlQuery query = source.getSparqlQuery();
 		
 		ResultSet result =
-			performTimedSparqlQuery(query, timer, "Querying dbpedia for articles referencing " + source.getUri());
+			performTimedSparqlQuery(query, "Querying dbpedia for articles referencing " + source.getUri());
 		
 		if (result.hasNext()) {
 			ResultBinding binding = (ResultBinding) result.next();
@@ -93,12 +84,8 @@ public class ImdbAdapter extends TimedFetcher<Description> implements SiteSpecif
 		return null;
 	}
 
-	private ResultSet performTimedSparqlQuery(SparqlQuery query, RequestTimer timer, String message) {
-		timer.nest();
-		timer.start(sparqlEndpoint, message);
+	private ResultSet performTimedSparqlQuery(SparqlQuery query, String message) {
 		ResultSet result = sparqlEndpoint.execute(query);
-		timer.stop(sparqlEndpoint, message);
-		timer.unnest();
 		return result;
 	}
 

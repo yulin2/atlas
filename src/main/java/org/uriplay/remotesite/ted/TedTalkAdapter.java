@@ -21,7 +21,6 @@ import javax.xml.bind.JAXBException;
 
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -53,7 +52,7 @@ public class TedTalkAdapter implements SiteSpecificAdapter<Item> {
 		this.propertyExtractor = propertyExtractor;
 	}
 
-	public Item fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri) {
 		try {
 			HtmlDescriptionOfItem dmItem = itemClient.get(uri);
 			return propertyExtractor.extractFrom(new HtmlDescriptionSource(dmItem, uri));

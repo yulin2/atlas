@@ -67,11 +67,11 @@ public class C4BrandAtoZAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(itemClient).get(uri); will(returnValue(page));
-			one(propertyExtractor).fetch("http://www.channel4.com/programmes/101/4od", null); will(returnValue(brand101));
-			one(propertyExtractor).fetch("http://www.channel4.com/programmes/202/4od", null); will(returnValue(brand102));
+			one(propertyExtractor).fetch("http://www.channel4.com/programmes/101/4od"); will(returnValue(brand101));
+			one(propertyExtractor).fetch("http://www.channel4.com/programmes/202/4od"); will(returnValue(brand102));
 		}});
 		
-		adapter.fetch(uri, null);
+		adapter.fetch(uri);
 	}
 	
 	public void testWillFetchSubsequentPaginatedPages() throws Exception {
@@ -79,12 +79,12 @@ public class C4BrandAtoZAdapterTest extends MockObjectTestCase {
 		checking(new Expectations() {{
 			one(itemClient).get(uri); will(returnValue(page1));
 			one(itemClient).get(uri2); will(returnValue(page2));
-			one(propertyExtractor).fetch("http://www.channel4.com/programmes/101/4od", null); will(returnValue(brand101));
-			one(propertyExtractor).fetch("http://www.channel4.com/programmes/202/4od", null); will(returnValue(brand102));
-			one(propertyExtractor).fetch("http://www.channel4.com/programmes/303/4od", null); will(returnValue(brand103));
+			one(propertyExtractor).fetch("http://www.channel4.com/programmes/101/4od"); will(returnValue(brand101));
+			one(propertyExtractor).fetch("http://www.channel4.com/programmes/202/4od"); will(returnValue(brand102));
+			one(propertyExtractor).fetch("http://www.channel4.com/programmes/303/4od"); will(returnValue(brand103));
 		}});
 		
-		Playlist playlist = adapter.fetch(uri, null);
+		Playlist playlist = adapter.fetch(uri);
 		
 		assertThat(playlist.getCanonicalUri(), is("http://www.channel4.com/programmes/atoz/a"));
 		assertThat(playlist.getCurie(), is("c4:atoz_a"));

@@ -26,7 +26,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 import org.uriplay.remotesite.sparql.SparqlQuery;
@@ -66,7 +65,6 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 	Binding binding = mock(Binding.class);
 	Model model = mock(Model.class);
 	ResultBinding resultBinding = new ResultBinding(model, binding);
-	RequestTimer timer = mock(RequestTimer.class);
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -75,10 +73,6 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 		sparqlEndpoint = mock(SparqlEndpoint.class);
 		fetcher = mock(Fetcher.class);
 		adapter = new ImdbAdapter(sparqlEndpoint, fetcher);
-
-		checking(new Expectations() {{ 
-			ignoring(timer);
-		}});
 	}
 	
 	public void testQueriesSparqlEndpointForCorrespondingDbediaUriAndPassesToFetcher() throws Exception {
@@ -86,10 +80,10 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 		forAnImdbIdReferencedByWikipedia();
 		
 		checking(new Expectations() {{ 
-			one(fetcher).fetch(DBPEDIA_LINK, timer); will(returnValue(WIKIPEDIA_REPRESENTATION));
+			one(fetcher).fetch(DBPEDIA_LINK); will(returnValue(WIKIPEDIA_REPRESENTATION));
 		}});
 		
-		adapter.fetch(IMDB_LINK, timer);
+		adapter.fetch(IMDB_LINK);
 	}
 	
 	public void testWrapsExceptionIfHttpClientThrowsException() throws Exception {
@@ -99,7 +93,7 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 		}});
 		
 		try {
-			adapter.fetch(IMDB_LINK, timer);
+			adapter.fetch(IMDB_LINK);
 			fail("Should have thrown FetchException.");
 		} catch (Exception e) {
 			assertThat(e, instanceOf(FetchException.class));
@@ -111,10 +105,10 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 		forAnImdbIdReferencedByWikipedia();
 		
 		checking(new Expectations() {{ 
-			one(fetcher).fetch(DBPEDIA_LINK, timer); will(returnValue(WIKIPEDIA_REPRESENTATION));
+			one(fetcher).fetch(DBPEDIA_LINK); will(returnValue(WIKIPEDIA_REPRESENTATION));
 		}});
 		
-		Description description = adapter.fetch(IMDB_LINK, timer);
+		Description description = adapter.fetch(IMDB_LINK);
 		assertThat(description.getAliases(), is((Set<String>) Sets.newHashSet(WIKIPEDIA_LINK, DBPEDIA_LINK)));
 	}
 	

@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -49,13 +48,9 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 	}
 
 	@Override
-	public Item fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri) {
 		try {
-			timer.nest();
-			timer.start(this, "Querying YouTube api for data about " + uri);
 			VideoEntry videoEntry = gdataClient.get(uri);
-			timer.stop(this, "Querying YouTube api for data about " + uri);
-			timer.unnest();
 			return contentExtractor.extract(new YouTubeSource(videoEntry, uri));
 		} catch (ResourceNotFoundException e) {
 			throw new FetchException("Video not found on YouTube: " + uri, e);

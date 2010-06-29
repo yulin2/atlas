@@ -36,9 +36,7 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
-import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
@@ -67,8 +65,6 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 
 	static final String ORPHAN_ITEM_URI = "http://www.bbc.co.uk/programmes/b00kfr9s";
 
-	static final RequestTimer TIMER = null;
-	
 	DateTime tuesday10pm = new DateTime(2009, 04, 21, 22, 00, 00, 00);
 	
 	RemoteSiteClient<SlashProgrammesRdf> episodeRdfClient = mock(RemoteSiteClient.class, "episodeClient");
@@ -95,7 +91,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		feed = createFeed("bbc-one-feed.atom.xml");
-		source = new SyndicationSource(feed, FEED_URI, TIMER);
+		source = new SyndicationSource(feed, FEED_URI);
 		extractor = new BbcIplayerGraphExtractor(episodeRdfClient, versionRdfClient, brandClient);
 	}
 	
@@ -105,8 +101,8 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 			atLeast(1).of(episodeRdfClient).get(EPISODE_2_URI + ".rdf"); will(returnValue(episode2Rdf));
 			allowing(episodeRdfClient).get(with(not(startsWith(EPISODE_2_URI)))); will(returnValue(new SlashProgrammesRdf().withEpisode(new SlashProgrammesEpisode())));
 
-			atLeast(1).of(brandClient).fetch(BRAND_URI, new NullRequestTimer()); will(returnValue(BRAND));
-			allowing(brandClient).fetch(with(not(startsWith(BRAND_URI))), with(new NullRequestTimer())); will(returnValue(new Brand()));
+			atLeast(1).of(brandClient).fetch(BRAND_URI); will(returnValue(BRAND));
+			allowing(brandClient).fetch(with(not(startsWith(BRAND_URI)))); will(returnValue(new Brand()));
 			
 			atLeast(1).of(versionRdfClient).get("http://www.bbc.co.uk/programmes/b00k2vtr.rdf"); will(returnValue(episode2versionRdf));
 		}});

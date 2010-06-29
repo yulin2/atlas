@@ -24,7 +24,6 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Version;
-import org.uriplay.persistence.system.RequestTimer;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -42,8 +41,6 @@ public class ItvGraphExtractorTest extends MockObjectTestCase {
 
 	static final String THUMBNAIL_URL = "http://itv.com/images/a.jpg";
 
-	static final RequestTimer TIMER = null;
-	
 	ItvGraphExtractor extractor;
 
 	ItvProgramme programme;

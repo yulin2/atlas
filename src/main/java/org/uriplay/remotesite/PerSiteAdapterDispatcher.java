@@ -18,7 +18,6 @@ package org.uriplay.remotesite;
 import java.util.List;
 
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 
 
 /**
@@ -32,10 +31,10 @@ public class PerSiteAdapterDispatcher implements Fetcher<Object> {
 
 	private List<SiteSpecificAdapter<?>> adapters;
 
-	public Object fetch(String uri, RequestTimer timer) {
+	public Object fetch(String uri) {
 		SiteSpecificAdapter<?> adapter = findMatchingAdapterFor(uri);
 		if (adapter != null) {
-			return adapter.fetch(uri, timer);
+			return adapter.fetch(uri);
 		} else {
 			return null;
 		}

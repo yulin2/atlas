@@ -19,7 +19,6 @@ package org.uriplay.query.uri;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.content.ContentStore;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 
 /**
  * Aggregate {@link Fetcher} that checks a local datastore for resources,
@@ -38,12 +37,12 @@ public class LocalOrRemoteFetcher implements Fetcher<Description> {
 		this.remoteFetcher = remoteFetcher;
 	}
 
-	public Description fetch(String uri, RequestTimer timer) {
+	public Description fetch(String uri) {
 		
 		Description local = localStore.findByUri(uri);
 		
 		if (local == null) {
-			return remoteFetcher.fetch(uri, timer); 
+			return remoteFetcher.fetch(uri); 
 		} else {
 		    return local;
 		}

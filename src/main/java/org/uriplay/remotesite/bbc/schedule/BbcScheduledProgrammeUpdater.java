@@ -45,7 +45,7 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 			List<Programme> programmes = schedule.programmes();
 			for (Programme programme : programmes) {
 				if (programme.isEpisode()) {
-					uriplayFetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid(), null);
+					uriplayFetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
 				}
 			}
 		} catch (Exception e) {

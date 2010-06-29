@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -42,7 +41,7 @@ public class HuluRssAdapter implements SiteSpecificAdapter<Playlist> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Playlist fetch(String uri, RequestTimer timer) {
+    public Playlist fetch(String uri) {
         try {
             Playlist playlist = new Playlist();
 
@@ -60,7 +59,7 @@ public class HuluRssAdapter implements SiteSpecificAdapter<Playlist> {
                     Matcher matcher = URI_PATTERN.matcher(guid.getValue());
                     if (matcher.matches()) {
                         
-                        Episode item = huluItemAdapter.fetch(matcher.group(1), null);
+                        Episode item = huluItemAdapter.fetch(matcher.group(1));
                         playlist.addItem(item);
                     }
                 }

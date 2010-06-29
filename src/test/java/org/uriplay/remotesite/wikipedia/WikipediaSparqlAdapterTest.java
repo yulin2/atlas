@@ -26,7 +26,6 @@ import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 
@@ -56,17 +55,11 @@ public class WikipediaSparqlAdapterTest extends MockObjectTestCase {
 	Resource canonicalResource = new ResourceImpl(WEST_WING_DBPEDIA_URI);
 	Resource typeResource = new ResourceImpl(TELEVISION_SHOW_TYPE_URL);
 
-	RequestTimer timer = mock(RequestTimer.class);
-	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		wikipediaSource.setCanonicalDbpediaUri(WEST_WING_DBPEDIA_URI);
 		adapter = new WikipediaSparqlAdapter(sparqlEndpoint, propertyExtractor);
-		
-		checking(new Expectations() {{
-			ignoring(timer);
-		}});
 	}
 	
 	public void testPerformsTelevisionShowQuery() throws Exception {
@@ -94,7 +87,7 @@ public class WikipediaSparqlAdapterTest extends MockObjectTestCase {
 			one(propertyExtractor).extract(with(configuredSource())); will(returnValue(new Brand()));
 		}});
 		
-		adapter.fetch(WEST_WING_WIKIPEDIA_URI, timer);
+		adapter.fetch(WEST_WING_WIKIPEDIA_URI);
 	}
 	
 	public void testCanFetchDbpediaUris() throws Exception {

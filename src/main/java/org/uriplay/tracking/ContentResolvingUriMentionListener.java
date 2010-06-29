@@ -2,7 +2,6 @@ package org.uriplay.tracking;
 
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.tracking.ContentMention;
 import org.uriplay.persistence.tracking.PossibleContentUriMentionListener;
 
@@ -18,7 +17,7 @@ public class ContentResolvingUriMentionListener implements PossibleContentUriMen
 	
 	@Override
 	public void mentioned(ContentMention mention) {
-		Description description = fetcher.fetch(mention.uri(), new NullRequestTimer());
+		Description description = fetcher.fetch(mention.uri());
 		if (description != null) {
 			listener.mentioned(canonicalise(mention, description));
 		}

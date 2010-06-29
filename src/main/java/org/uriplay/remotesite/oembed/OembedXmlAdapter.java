@@ -22,7 +22,6 @@ import javax.xml.bind.JAXBException;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -53,7 +52,7 @@ public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 		this.propertyExtractor = contentExtractor;
 	}
 
-	public Item fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri) {
 		try {
 			String queryUri = oembedEndpointQuery(uri);
 			OembedItem oembed = oembedClient.get(queryUri);

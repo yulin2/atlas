@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.http.CommonsHttpClient;
@@ -54,7 +53,7 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 	}
 
 	@Override
-	public Brand fetch(String uri, RequestTimer timer) {
+	public Brand fetch(String uri) {
 		try {
 			log.info("Fetching C4 brand " + uri);
 			return extractor.extract(feedClient.get(atomUrl(uri)));

@@ -27,7 +27,6 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
-import org.uriplay.persistence.system.NullRequestTimer;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
@@ -169,7 +168,7 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	}
 	
 	private Brand brand(String brandUri) {
-		return (Brand) brandFetcher.fetch(brandUri, new NullRequestTimer());
+		return (Brand) brandFetcher.fetch(brandUri);
 	}
 
 	private String episodeUriFrom(String selfLink) {

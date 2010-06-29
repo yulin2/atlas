@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.synd;
 
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.BaseSource;
 
 import com.sun.syndication.feed.opml.Opml;
@@ -28,12 +27,10 @@ import com.sun.syndication.feed.opml.Opml;
 public class OpmlSource extends BaseSource {
 
 	private final Opml opml;
-	private final RequestTimer timer;
 
-	public OpmlSource(Opml opml, String uri, RequestTimer timer) {
+	public OpmlSource(Opml opml, String uri) {
 		super(uri);
 		this.opml = opml;
-		this.timer = timer;
 	}
 
 	public Opml getFeed() {
@@ -43,9 +40,4 @@ public class OpmlSource extends BaseSource {
 	public String getTitle() {
 		return opml.getTitle();
 	}
-
-	public RequestTimer getTimer() {
-		return timer;
-	}
-
 }

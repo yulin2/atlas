@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.synd;
 
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.BaseSource;
 
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -28,20 +27,13 @@ import com.sun.syndication.feed.synd.SyndFeed;
 public class SyndicationSource extends BaseSource {
 
 	private final SyndFeed feed;
-	private final RequestTimer timer;
 
-	public SyndicationSource(SyndFeed feed, String uri, RequestTimer timer) {
+	public SyndicationSource(SyndFeed feed, String uri) {
 		super(uri);
 		this.feed = feed;
-		this.timer = timer;
 	}
 
 	public SyndFeed getFeed() {
 		return feed;
 	}
-
-	public RequestTimer getTimer() {
-		return timer;
-	}
-
 }

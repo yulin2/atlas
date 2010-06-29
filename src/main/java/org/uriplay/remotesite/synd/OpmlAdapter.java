@@ -19,11 +19,9 @@ import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
-import org.uriplay.remotesite.timing.TimedFetcher;
 
 import com.sun.syndication.feed.opml.Opml;
 
@@ -33,7 +31,7 @@ import com.sun.syndication.feed.opml.Opml;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OpmlAdapter extends TimedFetcher<Playlist> implements SiteSpecificAdapter<Description> {
+public class OpmlAdapter implements SiteSpecificAdapter<Description> {
 
 	private final RemoteSiteClient<Opml> opmlClient;
 	private final ContentExtractor<OpmlSource, Playlist> graphExtractor;
@@ -48,10 +46,10 @@ public class OpmlAdapter extends TimedFetcher<Playlist> implements SiteSpecificA
 	}
 
 	@Override
-	protected Playlist fetchInternal(String uri, RequestTimer timer) {
+	public Playlist fetch(String uri) {
 		try {
 			Opml feed = opmlClient.get(uri);
-			return graphExtractor.extract(new OpmlSource(feed, uri, timer));
+			return graphExtractor.extract(new OpmlSource(feed, uri));
 		} catch (Exception e) {
 			throw new FetchException("Problem fetching uri: " + uri, e);
 		}

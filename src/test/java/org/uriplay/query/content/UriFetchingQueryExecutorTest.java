@@ -14,6 +14,8 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.content;
 
+import static org.uriplay.content.criteria.ContentQueryBuilder.query;
+
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.content.criteria.ContentQuery;
@@ -23,11 +25,8 @@ import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.NullRequestTimer;
 
 import com.google.common.collect.ImmutableList;
-
-import static org.uriplay.content.criteria.ContentQueryBuilder.query;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -58,7 +57,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegate).executeItemQuery(queryForItem1); will(returnValue(ImmutableList.<Item>of()));
-			one(fetcher).fetch("item1", new NullRequestTimer()); will(returnValue(item1));
+			one(fetcher).fetch("item1"); will(returnValue(item1));
 			one(delegate).executeItemQuery(queryForItem1); will(returnValue(ImmutableList.of(item1)));
 
 		}});
@@ -70,7 +69,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegate).executeItemQuery(queryForItem1); will(returnValue(ImmutableList.<Item>of()));
-			one(fetcher).fetch("item1", new NullRequestTimer()); will(returnValue(null));
+			one(fetcher).fetch("item1"); will(returnValue(null));
 
 		}});
 
@@ -82,7 +81,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegate).executeItemQuery(queryForItems1and2); will(returnValue(ImmutableList.of(item1)));
-			one(fetcher).fetch("item2", new NullRequestTimer()); will(returnValue(item2));
+			one(fetcher).fetch("item2"); will(returnValue(item2));
 			one(delegate).executeItemQuery(queryForItems1and2); will(returnValue(ImmutableList.of(item1, item2)));
 		}});
 
@@ -97,7 +96,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegate).executeBrandQuery(queryForItem1); will(returnValue(ImmutableList.of()));
-			one(fetcher).fetch("item1", new NullRequestTimer()); will(returnValue(item1));
+			one(fetcher).fetch("item1"); will(returnValue(item1));
 			one(delegate).executeBrandQuery(queryForItem1); will(returnValue(ImmutableList.of(brand)));
 		}});
 		

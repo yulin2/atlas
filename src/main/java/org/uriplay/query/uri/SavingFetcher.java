@@ -17,7 +17,6 @@ package org.uriplay.query.uri;
   import org.uriplay.media.entity.Content;
 import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 
 
 /**
@@ -35,9 +34,9 @@ public class SavingFetcher implements Fetcher<Object> {
 		this.store = store;
 	}
 
-	public Object fetch(String uri, RequestTimer timer) {
+	public Object fetch(String uri) {
 		
-		Content bean = delegateFetcher.fetch(uri, timer);
+		Content bean = delegateFetcher.fetch(uri);
 		
 		if (bean == null) { return null; }
 		

@@ -26,7 +26,6 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 
 import com.google.common.collect.Lists;
@@ -47,7 +46,6 @@ public class C4HighlightsAdapterTest extends MockObjectTestCase {
 	List<HtmlBrandSummary> listOfBrandSummaries = Lists.newArrayList(new HtmlBrandSummary().withId("101"));
 	BrandListingPage brandListingPage = new BrandListingPage(listOfBrandSummaries);
 
-	RequestTimer timer = mock(RequestTimer.class);
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -56,20 +54,16 @@ public class C4HighlightsAdapterTest extends MockObjectTestCase {
 		c4client = mock(RemoteSiteClient.class);
 		propertyExtractor = mock(SiteSpecificAdapter.class);
 		adapter = new C4HighlightsAdapter(c4client, propertyExtractor);
-		
-		checking(new Expectations() {{ 
-			ignoring(timer);
-		}});
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
 		checking(new Expectations() {{
 			one(c4client).get("http://www.channel4.com/programmes/4od/most-popular"); will(returnValue(brandListingPage));
-			one(propertyExtractor).fetch("http://www.channel4.com/programmes/101/4od", timer); will(returnValue(brand101));
+			one(propertyExtractor).fetch("http://www.channel4.com/programmes/101/4od"); will(returnValue(brand101));
 		}});
 		
-		Playlist playlist = adapter.fetch("http://www.channel4.com/programmes/4od/most-popular", timer);
+		Playlist playlist = adapter.fetch("http://www.channel4.com/programmes/4od/most-popular");
 		
 		assertThat(playlist.getCanonicalUri(), is("http://www.channel4.com/programmes/4od/most-popular"));
 		assertThat(playlist.getCurie(), is("c4:most-popular"));

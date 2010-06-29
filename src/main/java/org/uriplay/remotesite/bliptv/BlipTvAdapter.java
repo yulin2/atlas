@@ -21,7 +21,6 @@ import javax.xml.bind.JAXBException;
 
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
@@ -51,7 +50,7 @@ public class BlipTvAdapter implements SiteSpecificAdapter<Item> {
 		this.propertyExtractor = contentExtractor;
 	}
 
-	public Item fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri) {
 		try {
 			HtmlDescriptionOfItem itemDescription = itemClient.get(uri);
 			return propertyExtractor.extract(new HtmlDescriptionSource(itemDescription, uri).withEmbedCode(embedCode(itemDescription.getVideoSource())));

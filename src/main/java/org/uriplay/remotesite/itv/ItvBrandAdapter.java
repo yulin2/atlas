@@ -21,7 +21,6 @@ import javax.xml.bind.JAXBException;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
@@ -48,7 +47,7 @@ public class ItvBrandAdapter implements SiteSpecificAdapter<Playlist> {
 		this.propertyExtractor = itvGraphExtractor;
 	}
 
-	public Playlist fetch(String uri, RequestTimer timer) {
+	public Playlist fetch(String uri) {
 		try {
 			List<ItvProgramme> itvBrands = client.get(uri);
 			Playlist playlist = new Playlist(ITV_URI, PerPublisherCurieExpander.CurieAlgorithm.ITV.compact(ITV_URI));

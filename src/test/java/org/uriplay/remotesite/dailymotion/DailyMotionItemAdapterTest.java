@@ -58,7 +58,7 @@ public class DailyMotionItemAdapterTest extends MockObjectTestCase {
 			one(propertyExtractor).extract(source); will(returnValue(item));
 		}});
 		
-		assertEquals(item, adapter.fetch(uri, null));
+		assertEquals(item, adapter.fetch(uri));
 	}
 	
 	public void testCanFetchResourcesForDailyMotionItems() throws Exception {

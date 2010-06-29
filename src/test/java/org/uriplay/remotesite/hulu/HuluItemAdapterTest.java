@@ -15,7 +15,7 @@ public class HuluItemAdapterTest extends TestCase {
     HuluItemAdapter adapter = new HuluItemAdapter();
 
     public void testShouldRetrieveHuluItem() throws Exception {
-        Episode item = (Episode) adapter.fetch("http://www.hulu.com/watch/152348/glee-funk", null);
+        Episode item = (Episode) adapter.fetch("http://www.hulu.com/watch/152348/glee-funk");
         assertNotNull(item);
 
         Brand brand = item.getBrand();

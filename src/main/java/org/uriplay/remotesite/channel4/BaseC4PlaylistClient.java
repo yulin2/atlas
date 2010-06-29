@@ -8,7 +8,6 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.content.PerPublisherCurieExpander;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -27,7 +26,7 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 	}
 
 	@Override
-	public final Playlist fetch(String uri, RequestTimer timer) {
+	public final Playlist fetch(String uri) {
 		try {
 			List<HtmlBrandSummary> brandList = Lists.newArrayList();
 			
@@ -42,7 +41,7 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 			Playlist playlist = new Playlist(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri));
 			
 			for (HtmlBrandSummary brandRef : brandList) {
-				Brand brand = brandClient.fetch(brandRef.getBrandPage(), timer);
+				Brand brand = brandClient.fetch(brandRef.getBrandPage());
 				if (brand != null) {
 					if (brandRef.getCategories() != null) {
 						Set<String> genres = genreMap.map(brandRef.getCategories());

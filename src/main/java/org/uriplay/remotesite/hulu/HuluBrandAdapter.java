@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Item;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
@@ -55,7 +54,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     }
 
     @Override
-    public Brand fetch(String uri, RequestTimer timer) {
+    public Brand fetch(String uri) {
         try {
             LOG.info("Retrieving Hulu brand: " + uri + " with " + httpClient.getClass() + " : " + httpClient.toString());
             String content = httpClient.getContentsOf(uri);
@@ -67,7 +66,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
             if (episodeAdapter != null) {
                 for (Item item : brand.getItems()) {
                     try {
-                        Episode episode = episodeAdapter.fetch(item.getCanonicalUri(), null);
+                        Episode episode = episodeAdapter.fetch(item.getCanonicalUri());
                         episode.setBrand(brand);
                         episodes.add(episode);
                     } catch (FetchException fe) {

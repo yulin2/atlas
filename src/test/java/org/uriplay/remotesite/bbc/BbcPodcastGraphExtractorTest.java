@@ -28,7 +28,6 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
 import com.google.common.collect.Iterables;
@@ -54,7 +53,6 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	
 	static final String EPISODE_URI = "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900";
 	
-	static final RequestTimer TIMER = null;
 	
 	BbcPodcastGraphExtractor extractor = new BbcPodcastGraphExtractor();
 	SyndFeed feed;
@@ -64,7 +62,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		feed = createFeed("BH", "Broadcasting House", "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900.mp3");
-		source = new SyndicationSource(feed, PODCAST_URI, TIMER);
+		source = new SyndicationSource(feed, PODCAST_URI);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -144,7 +142,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		enclosure.setType("audio/x-m4a");
 		entry.setEnclosures(Lists.newArrayList(enclosure));
 		feed.setEntries(Lists.newArrayList(entry));
-		return new SyndicationSource(feed, PODCAST_URI, TIMER);
+		return new SyndicationSource(feed, PODCAST_URI);
 	}
 
 }

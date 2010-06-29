@@ -12,7 +12,6 @@ import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.NullRequestTimer;
 
 /**
  * Updater to iterate through stored data for given publishers and refetch to update URIplay
@@ -41,7 +40,7 @@ public class PerPublisherItemUpdater implements Runnable {
 		
 		for (Item item : items) {
 			try {
-				uriplayFetcher.fetch(item.getCanonicalUri(), new NullRequestTimer());
+				uriplayFetcher.fetch(item.getCanonicalUri());
 				LOG.info("Updating info from:" + item.getCanonicalUri());
 			} catch (Exception e) {
 				LOG.warn((e));

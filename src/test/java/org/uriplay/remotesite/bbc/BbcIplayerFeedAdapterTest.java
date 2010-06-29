@@ -19,7 +19,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.synd.SyndicationSource;
 
@@ -34,7 +33,6 @@ public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 	RemoteSiteClient<SyndFeed> feedClient;
 	ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
 	BbcIplayerFeedAdapter adapter;
-	RequestTimer timer;
 	SyndFeed feed = null;
 	SyndicationSource iplayerSource;
 	
@@ -43,10 +41,9 @@ public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		feedClient = mock(RemoteSiteClient.class);
-		timer = mock(RequestTimer.class);
 		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new BbcIplayerFeedAdapter(feedClient, propertyExtractor);
-		iplayerSource = new SyndicationSource(feed, "http://feeds.bbc.co.uk/iplayer/bbc_one/list", timer);
+		iplayerSource = new SyndicationSource(feed, "http://feeds.bbc.co.uk/iplayer/bbc_one/list");
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
@@ -54,10 +51,9 @@ public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 		checking(new Expectations() {{
 			one(feedClient).get("http://feeds.bbc.co.uk/iplayer/bbc_one/list"); will(returnValue(feed));
 			one(propertyExtractor).extract(iplayerSource);
-			ignoring(timer);
 		}});
 		
-		adapter.fetch("http://feeds.bbc.co.uk/iplayer/bbc_one/list", timer);
+		adapter.fetch("http://feeds.bbc.co.uk/iplayer/bbc_one/list");
 	}
 	
 	public void testCanFetchResourcesForRssUris() throws Exception {

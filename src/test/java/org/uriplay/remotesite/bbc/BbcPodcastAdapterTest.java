@@ -24,7 +24,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.synd.SyndicationSource;
@@ -42,7 +41,6 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 	RemoteSiteClient<SyndFeed> feedClient;
 	ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
 	BbcPodcastAdapter adapter;
-	RequestTimer timer;
 	SyndFeed feed = null;
 	SyndicationSource podcastSource;
 	
@@ -51,10 +49,9 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		feedClient = mock(RemoteSiteClient.class);
-		timer = mock(RequestTimer.class);
 		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new BbcPodcastAdapter(feedClient, propertyExtractor);
-		podcastSource = new SyndicationSource(feed, "http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml", timer);
+		podcastSource = new SyndicationSource(feed, "http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml");
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
@@ -62,21 +59,19 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 		checking(new Expectations() {{
 			one(feedClient).get("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml"); will(returnValue(feed));
 			one(propertyExtractor).extract(podcastSource);
-			ignoring(timer);
 		}});
 		
-		adapter.fetch("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml", timer);
+		adapter.fetch("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml");
 	}
 	
 	public void testWrapsExceptionIfRemoteClientThrowsException() throws Exception {
 		
 		checking(new Expectations() {{
 			allowing(feedClient).get("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml"); will(throwException(new IOException()));
-			ignoring(timer);
 		}});
 		
 		try {
-			adapter.fetch("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml", timer);
+			adapter.fetch("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml");
 			
 			fail("Should have thrown FetchException.");
 		} catch (Exception e) {

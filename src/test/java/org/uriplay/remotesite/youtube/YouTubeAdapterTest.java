@@ -25,7 +25,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 
@@ -46,7 +45,6 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 	VideoEntry videoEntry = null;
 	YouTubeSource youtubeSource = new YouTubeSource(videoEntry, "http://uk.youtube.com/watch?v=-OBxL8PiFc8");
 
-	RequestTimer timer = mock(RequestTimer.class);
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -55,10 +53,6 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 		gdataClient = mock(RemoteSiteClient.class);
 		contentExtractor = mock(ContentExtractor.class);
 		adapter = new YouTubeAdapter(gdataClient, contentExtractor);
-		
-		checking(new Expectations() {{ 
-			ignoring(timer);
-		}});
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
@@ -68,7 +62,7 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 			one(contentExtractor).extract(youtubeSource); will(returnValue(new Item()));
 		}});
 		
-		adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8", timer);
+		adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8");
 	}
 	
 	public void testWrapsExceptionIfGDataClientThrowsIOException() throws Exception {
@@ -78,7 +72,7 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 		}});
 		
 		try {
-			adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8", timer);
+			adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8");
 			fail("Should have thrown FetchException.");
 		} catch (Exception e) {
 			assertThat(e, instanceOf(FetchException.class));
@@ -93,7 +87,7 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 		}});
 		
 		try {
-			adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8", timer);
+			adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8");
 			fail("Should have thrown FetchException.");
 		} catch (FetchException fe) {
 			assertThat(fe.getMessage(), is("Video not found on YouTube: http://uk.youtube.com/watch?v=-OBxL8PiFc8"));

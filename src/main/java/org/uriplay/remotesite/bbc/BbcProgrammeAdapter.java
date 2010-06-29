@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
@@ -54,7 +53,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 		return matcher.matches();
 	}
 
-	public Description fetch(String uri, RequestTimer timer) {
+	public Description fetch(String uri) {
 		try {
 			SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
 			if (content == null) {

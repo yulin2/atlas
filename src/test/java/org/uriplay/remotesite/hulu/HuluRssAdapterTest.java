@@ -4,7 +4,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 
 @SuppressWarnings("unchecked")
@@ -15,10 +14,10 @@ public class HuluRssAdapterTest extends MockObjectTestCase {
     
     public void ignoreShouldRetrieveRssPlaylsit() throws Exception {
         checking(new Expectations() {{
-            allowing(itemAdapter).fetch((String) with(anything()), (RequestTimer) with(anything())); will(returnValue(new Item()));
+            allowing(itemAdapter).fetch((String) with(anything())); will(returnValue(new Item()));
         }});
         
-        Playlist playlist = adapter.fetch(feedUrl, null);
+        Playlist playlist = adapter.fetch(feedUrl);
         
         assertNotNull(playlist);
         assertNotNull(playlist.getTitle());

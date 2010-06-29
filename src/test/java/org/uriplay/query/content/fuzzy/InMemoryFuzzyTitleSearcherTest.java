@@ -14,10 +14,8 @@ permissions and limitations under the License. */
 
 package org.uriplay.query.content.fuzzy;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
 import static com.metabroadcast.common.query.Selection.ALL;
-
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;

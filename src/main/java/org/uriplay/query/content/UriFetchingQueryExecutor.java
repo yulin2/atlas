@@ -24,7 +24,6 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.NullRequestTimer;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -90,7 +89,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		boolean foundAtLeastOneUri = false;
 		
 		for (String missingUri : missingUris) {
-			Content remoteContent = fetcher.fetch(missingUri, new NullRequestTimer());
+			Content remoteContent = fetcher.fetch(missingUri);
 			if (remoteContent != null) {
 				foundAtLeastOneUri = true;
 			}

@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
@@ -52,7 +51,7 @@ public class DailyMotionItemAdapter implements SiteSpecificAdapter<Item> {
 		this.itemExtractor = itemExtractor;
 	}
 
-	public Item fetch(String uri, RequestTimer timer) {
+	public Item fetch(String uri) {
 		try {
 			HtmlDescriptionOfItem dmItem = dailyMotionItemClient.get(uri);
 			return itemExtractor.extract(new HtmlDescriptionSource(dmItem, uri));

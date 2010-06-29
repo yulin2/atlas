@@ -27,7 +27,6 @@ import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.media.entity.Version;
-import org.uriplay.persistence.system.RequestTimer;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -50,8 +49,6 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 	static final String ENTRY_URI = "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900.mp3";
 	static final String LOCATION_URI = "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900.mp3";
 		
-	static final RequestTimer TIMER = null;
-	
 	GenericPodcastGraphExtractor extractor = new GenericPodcastGraphExtractor() {
 		@Override
 		protected String itemUri(SyndEntry entry) {
@@ -66,7 +63,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		feed = createFeed("BH", "Broadcasting House", LOCATION_URI, "audio/mpeg");
-		source = new SyndicationSource(feed, PODCAST_URI, TIMER);
+		source = new SyndicationSource(feed, PODCAST_URI);
 	}
 
 	private SyndFeed createFeed(String title, String description, String uri, String type) {
@@ -115,7 +112,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 	public void testSetsContainerFormatForVideoPodcasts() throws Exception {
 		
 		feed = createFeed("Video Podcast", "Rolling Stones", LOCATION_URI, "video/quicktime");
-		source = new SyndicationSource(feed, PODCAST_URI, TIMER);
+		source = new SyndicationSource(feed, PODCAST_URI);
 		
 		Encoding encoding = extractEncodingFrom(source);
 		
@@ -133,7 +130,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 	public void testSetsVideoCodingForVideoMpegPodcasts() throws Exception {
 		
 		feed = createFeed("Video Podcast", "Rolling Stones", LOCATION_URI, "video/mpeg");
-		source = new SyndicationSource(feed, PODCAST_URI, TIMER);
+		source = new SyndicationSource(feed, PODCAST_URI);
 		
 		Encoding encoding = extractEncodingFrom(source);
 		

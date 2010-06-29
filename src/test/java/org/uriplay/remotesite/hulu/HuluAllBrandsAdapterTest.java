@@ -4,7 +4,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 
@@ -16,11 +15,11 @@ public class HuluAllBrandsAdapterTest extends MockObjectTestCase {
     public void testShouldGetBrand() throws Exception {
         checking(new Expectations() {{
             allowing(brandAdapter).canFetch((String) with(anything())); will(returnValue(true));
-            allowing(brandAdapter).fetch((String) with(anything()), (RequestTimer) with(anything())); will(returnValue(new Brand()));
+            allowing(brandAdapter).fetch((String) with(anything())); will(returnValue(new Brand()));
         }});
         
         String uri = "http://www.hulu.com/browse/alphabetical/episodes";
-        Playlist playlist = adapter.fetch(uri, null);
+        Playlist playlist = adapter.fetch(uri);
         
         assertNotNull(playlist);
         assertEquals(uri, playlist.getCanonicalUri());

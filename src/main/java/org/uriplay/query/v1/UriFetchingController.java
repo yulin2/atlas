@@ -26,15 +26,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.uriplay.beans.NullProjector;
 import org.uriplay.beans.ProjectionException;
 import org.uriplay.beans.Projector;
-import org.uriplay.core.Factory;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.servlet.ContentNotFoundException;
 import org.uriplay.persistence.servlet.RequestNs;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.NoMatchingAdapterException;
-import org.uriplay.remotesite.timing.MultiCallRequestTimer;
 
 import com.google.common.collect.Lists;
 
@@ -50,7 +47,6 @@ public class UriFetchingController {
 	private static final String VIEW = "uriplayModel";
 	
 	private final Projector projector;
-	private final Factory<RequestTimer> timerFactory;
 	private final Fetcher<Description> localOrRemoteFetcher;
 
 	public UriFetchingController(Fetcher<Description> fetcher) {
@@ -58,13 +54,8 @@ public class UriFetchingController {
 	}
 	
 	public UriFetchingController(Fetcher<Description> fetcher, Projector projector) {
-		this(fetcher, projector, new MultiCallRequestTimer());
-	}
-		
-	UriFetchingController(Fetcher<Description> fetcher, Projector projector, Factory<RequestTimer> timerFactory) {
 		this.localOrRemoteFetcher = fetcher;
 		this.projector = projector;
-		this.timerFactory = timerFactory;
 	}
 
 	@RequestMapping(method=RequestMethod.GET)
@@ -75,12 +66,8 @@ public class UriFetchingController {
 		Query query = new Query(uri, outputTimingInfo);
 		
 		
-		RequestTimer timer = timerFactory.create();
-		timer.start(this, query.getUri());
-		timer.nest();
-		
 		try {
-			Description bean = localOrRemoteFetcher.fetch(query.getUri(), timer);
+			Description bean = localOrRemoteFetcher.fetch(query.getUri());
 			
 			if (bean == null) {
 				throw new ContentNotFoundException(uri);
@@ -93,13 +80,7 @@ public class UriFetchingController {
 			throw new ContentNotFoundException(fe);
 		} catch (ProjectionException pe) {
 			throw new ContentNotFoundException(pe);
-		} finally {
-			timer.unnest();
-			timer.stop(this, query.getUri());
-			if (query.outputTimingInfo()) {
-				timer.outputTo(response);
-			}
-		}
+		} 
 	}
 	
 	static class Query {

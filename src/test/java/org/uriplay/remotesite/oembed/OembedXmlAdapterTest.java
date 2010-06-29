@@ -25,7 +25,6 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 
@@ -46,7 +45,6 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 	OembedItem oembed = new OembedItem();
 	OembedSource oembedSource = new OembedSource(oembed, VIDEO_URI);
 
-	RequestTimer timer = mock(RequestTimer.class);
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -57,10 +55,6 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 		adapter = new OembedXmlAdapter(oembedClient, propertyExtractor);
 		adapter.setOembedEndpoint(OEMBED_ENDPOINT_URI);
 		adapter.setAcceptedUriPattern("http://www.vimeo.com/\\d+");
-		
-		checking(new Expectations() {{ 
-			ignoring(timer);
-		}});
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
@@ -70,7 +64,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 			one(propertyExtractor).extract(oembedSource); will(returnValue(new Item()));
 		}});
 		
-		adapter.fetch(VIDEO_URI, timer);
+		adapter.fetch(VIDEO_URI);
 	}
 	
 	public void testPassesMaxWidthParamIfSet() throws Exception {
@@ -82,7 +76,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 			ignoring(propertyExtractor);  will(returnValue(new Item()));
 		}});
 		
-		adapter.fetch(VIDEO_URI, timer);
+		adapter.fetch(VIDEO_URI);
 	}
 	
 	public void testPassesMaxHeightParamIfSet() throws Exception {
@@ -94,7 +88,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 			ignoring(propertyExtractor);  will(returnValue(new Item()));
 		}});
 		
-		adapter.fetch(VIDEO_URI, timer);
+		adapter.fetch(VIDEO_URI);
 	}
 	
 	public void testWrapsExceptionIfClientThrowsJaxbException() throws Exception {
@@ -104,7 +98,7 @@ public class OembedXmlAdapterTest extends MockObjectTestCase {
 		}});
 		
 		try {
-			adapter.fetch(VIDEO_URI, timer);
+			adapter.fetch(VIDEO_URI);
 			fail("Should have thrown FetchException.");
 		} catch (Exception e) {
 			assertThat(e, instanceOf(FetchException.class));

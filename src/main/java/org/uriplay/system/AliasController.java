@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.system.NullRequestTimer;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -64,7 +63,7 @@ public class AliasController {
 			}
 			
 			try { 
-				Description canonicalContent = finder.fetch(aliasAndTarget.canonicalUri, new NullRequestTimer());
+				Description canonicalContent = finder.fetch(aliasAndTarget.canonicalUri);
 				if (canonicalContent == null) {
 					errors.add("Not adding alias " + aliasAndTarget.alias + "  because the canonicalUri (" + aliasAndTarget.canonicalUri + ") can't be found");
 					continue;

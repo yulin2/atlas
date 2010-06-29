@@ -24,7 +24,6 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 
@@ -44,8 +43,7 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 	ContentExtractor<OpmlSource, Playlist> propertyExtractor;
 	OpmlAdapter adapter;
 	Opml opml = null;
-	RequestTimer timer = mock(RequestTimer.class);
-	OpmlSource opmlSource = new OpmlSource(opml, OPML_LINK, timer);
+	OpmlSource opmlSource = new OpmlSource(opml, OPML_LINK);
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -54,10 +52,6 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 		feedClient = mock(RemoteSiteClient.class);
 		propertyExtractor = mock(ContentExtractor.class);
 		adapter = new OpmlAdapter(feedClient, propertyExtractor);
-		
-		checking(new Expectations() {{
-			ignoring(timer);
-		}});
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
@@ -67,7 +61,7 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 			one(propertyExtractor).extract(opmlSource); will(returnValue(new Playlist()));
 		}});
 		
-		adapter.fetch(OPML_LINK, timer);
+		adapter.fetch(OPML_LINK);
 	}
 	
 	public void testWrapsExceptionIfRemoteClientThrowsException() throws Exception {
@@ -77,7 +71,7 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 		}});
 		
 		try {
-			adapter.fetch(OPML_LINK, timer);
+			adapter.fetch(OPML_LINK);
 			
 			fail("Should have thrown FetchException.");
 		} catch (Exception e) {

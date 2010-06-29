@@ -15,12 +15,11 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.synd;
 
+import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
-import org.uriplay.remotesite.timing.TimedFetcher;
 
 import com.sun.syndication.feed.synd.SyndFeed;
 
@@ -28,7 +27,7 @@ import com.sun.syndication.feed.synd.SyndFeed;
  * Base for {@link SiteSpecificAdapter}s dealing with syndicated feeds
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public abstract class SyndicationAdapter<T> extends TimedFetcher<T> {
+public abstract class SyndicationAdapter<T> implements Fetcher<T> {
 
 	protected final RemoteSiteClient<SyndFeed> feedClient;
 	protected final ContentExtractor<SyndicationSource, T> contentExtractor;
@@ -39,10 +38,10 @@ public abstract class SyndicationAdapter<T> extends TimedFetcher<T> {
 	}
 
 	@Override
-	protected T fetchInternal(String uri, RequestTimer timer) {
+	public T fetch(String uri) {
 		try {
 			SyndFeed feed = feedClient.get(uri);
-			return contentExtractor.extract(new SyndicationSource(feed, uri, timer));
+			return contentExtractor.extract(new SyndicationSource(feed, uri));
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);
 		}

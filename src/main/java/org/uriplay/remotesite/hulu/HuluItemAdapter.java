@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.persistence.content.MutableContentStore;
-import org.uriplay.persistence.system.RequestTimer;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.HttpClients;
@@ -60,7 +59,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     }
 
     @Override
-    public Episode fetch(String uri, RequestTimer timer) {
+    public Episode fetch(String uri) {
         try {
             LOG.info("Retrieving hulu episode: " + uri);
             String content = httpClient.getContentsOf(uri);
@@ -93,7 +92,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
         public void run() {
             try {
-                Brand brand = brandAdapter.fetch(uri, null);
+                Brand brand = brandAdapter.fetch(uri);
                 contentStore.createOrUpdatePlaylist(brand, false);
             } catch (Exception e) {
                 LOG.warn("Unable to retrieve hulu brand :" + uri + " while hydrating item", e);
