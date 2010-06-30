@@ -236,6 +236,9 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 			if (policy.getAvailabilityStart() != null) {
 				simpleLocation.setAvailabilityStart(policy.getAvailabilityStart().toDate());
 			}
+			if (policy.getAvailabilityEnd() != null) {
+				simpleLocation.setAvailabilityEnd(policy.getAvailabilityEnd().toDate());
+			}
 			if (policy.getDrmPlayableFrom() != null) {
 				simpleLocation.setDrmPlayableFrom(policy.getDrmPlayableFrom().toDate());
 			}
