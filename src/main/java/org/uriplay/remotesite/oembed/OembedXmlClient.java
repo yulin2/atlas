@@ -16,6 +16,7 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.oembed;
 
 import java.io.Reader;
+import java.io.StringReader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -23,27 +24,29 @@ import javax.xml.bind.Unmarshaller;
 
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+import org.uriplay.remotesite.HttpClients;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class OembedXmlClient implements RemoteSiteClient<OembedItem> {
 
-	private final RemoteSiteClient<Reader> httpClient;
+	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
 	
 	public OembedXmlClient() throws JAXBException {
-		this(new CommonsHttpClient());
+		this(HttpClients.webserviceClient());
 	}
 	
-	public OembedXmlClient(RemoteSiteClient<Reader> httpClient) throws JAXBException {
+	public OembedXmlClient(SimpleHttpClient httpClient) throws JAXBException {
 		this.httpClient = httpClient;
 		context = JAXBContext.newInstance(OembedItem.class);
 	}
 
 	public OembedItem get(String uri) throws Exception {
-		Reader in = httpClient.get(uri);
+		Reader in = new StringReader(httpClient.getContentsOf(uri));
 		Unmarshaller u = context.createUnmarshaller();
 		OembedItem oembedItem =(OembedItem) u.unmarshal(in);
 		return oembedItem;

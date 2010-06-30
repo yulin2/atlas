@@ -64,6 +64,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 	private static final String C4_PUBLISHER = "channel4.com";
 
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
+	
 	private static final String IMAGE_SIZE = "625x352";
 	private static final String THUMBNAIL_SIZE = "200x113";
 

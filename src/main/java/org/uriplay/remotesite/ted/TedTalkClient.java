@@ -15,31 +15,31 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.ted;
 
-import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlNavigator;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class TedTalkClient implements RemoteSiteClient<HtmlDescriptionOfItem>  {
 
-	private final RemoteSiteClient<Reader> client;
+	private final SimpleHttpClient client;
 
-	public TedTalkClient(RemoteSiteClient<Reader> client) {
+	public TedTalkClient(SimpleHttpClient client) {
 		this.client = client;
 	}
 
 	public TedTalkClient() {
-		this(new CommonsHttpClient());
+		this(HttpClients.screenScrapingClient());
 	}
 
 	public HtmlDescriptionOfItem get(String uri) throws Exception {
-		Reader in = client.get(uri);
 		
-		HtmlNavigator html = new HtmlNavigator(in);
+		HtmlNavigator html = new HtmlNavigator(client.getContentsOf(uri));
 		HtmlDescriptionOfItem item = new HtmlDescriptionOfItem();
 
 		item.setTitle(html.metaTagContents("title"));

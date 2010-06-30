@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.channel4;
 
-import java.io.Reader;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,10 +21,11 @@ import java.util.regex.Pattern;
 import org.jaxen.JaxenException;
 import org.jdom.Element;
 import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.html.HtmlNavigator;
-import org.uriplay.remotesite.http.CommonsHttpClient;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -38,21 +38,19 @@ public class C4HomePageClient implements RemoteSiteClient<BrandListingPage> {
 	
 	private static final String FOUR_OD_PROGRAMMES_PAGE = "http://www.channel4.com/programmes/4od";
 	
-	private final RemoteSiteClient<Reader> client;
+	private final SimpleHttpClient client;
 
-	public C4HomePageClient(RemoteSiteClient<Reader> client) {
+	public C4HomePageClient(SimpleHttpClient client) {
 		this.client = client;
 	}
 
 	public C4HomePageClient() {
-		this(new CommonsHttpClient().withAcceptHeader("text/html"));
+		this(HttpClients.screenScrapingClient());
 	}
 	
 	public BrandListingPage get(String uri) throws Exception {
-	
-		Reader in = client.get(FOUR_OD_PROGRAMMES_PAGE);
 		
-		HtmlNavigator html = new HtmlNavigator(in);
+		HtmlNavigator html = new HtmlNavigator(client.getContentsOf(FOUR_OD_PROGRAMMES_PAGE));
 
 		if (uri.endsWith(MOST_POPULAR_URI_FRAGMENT)) {
 			return new BrandListingPage(extractMostPopularBrandsFrom(html));

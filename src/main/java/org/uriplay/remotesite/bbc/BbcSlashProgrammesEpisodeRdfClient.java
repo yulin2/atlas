@@ -16,13 +16,16 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.bbc;
 
 import java.io.Reader;
+import java.io.StringReader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+import org.uriplay.remotesite.HttpClients;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * Client to retrieve XML from Channel 4 and bind it to our object model using JAXB. 
@@ -32,14 +35,14 @@ import org.uriplay.remotesite.http.CommonsHttpClient;
  */
 public class BbcSlashProgrammesEpisodeRdfClient implements RemoteSiteClient<SlashProgrammesRdf> {
 
-	private final RemoteSiteClient<Reader> httpClient;
+	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
 
 	public BbcSlashProgrammesEpisodeRdfClient() {
-		this(new CommonsHttpClient().withAcceptHeader("text/html"));
+		this(HttpClients.webserviceClient());
 	}
 	
-	public BbcSlashProgrammesEpisodeRdfClient(RemoteSiteClient<Reader> httpClient) {
+	public BbcSlashProgrammesEpisodeRdfClient(SimpleHttpClient httpClient) {
 		this.httpClient = httpClient;
 		try {
 			context = JAXBContext.newInstance(SlashProgrammesRdf.class);
@@ -49,7 +52,7 @@ public class BbcSlashProgrammesEpisodeRdfClient implements RemoteSiteClient<Slas
 	}
 
 	public SlashProgrammesRdf get(String uri) throws Exception {
-		Reader in = httpClient.get(uri);
+		Reader in = new StringReader(httpClient.getContentsOf(uri));
 		Unmarshaller u = context.createUnmarshaller();
 		SlashProgrammesRdf episodeDescription =(SlashProgrammesRdf) u.unmarshal(in);
 		return episodeDescription;

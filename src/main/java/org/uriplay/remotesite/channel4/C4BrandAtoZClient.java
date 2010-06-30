@@ -14,38 +14,36 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.channel4;
 
-import java.io.Reader;
 import java.util.List;
 import java.util.Set;
 
 import org.jdom.Element;
 import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.html.HtmlNavigator;
-import org.uriplay.remotesite.http.CommonsHttpClient;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class C4BrandAtoZClient implements RemoteSiteClient<BrandListingPage> {
 
-	private final RemoteSiteClient<Reader> client;
+	private final SimpleHttpClient client;
 
-	public C4BrandAtoZClient(RemoteSiteClient<Reader> client) {
+	public C4BrandAtoZClient(SimpleHttpClient client) {
 		this.client = client;
 	}
 
 	public C4BrandAtoZClient() {
-		this(new CommonsHttpClient().withAcceptHeader("text/html"));
+		this(HttpClients.screenScrapingClient());
 	}
 
 	public BrandListingPage get(String uri) throws Exception {
-	
-		Reader in = client.get(uri);
 		
-		HtmlNavigator html = new HtmlNavigator(in);
+		HtmlNavigator html = new HtmlNavigator(client.getContentsOf(uri));
 		List<HtmlBrandSummary> brandList = Lists.newArrayList();
 		
 		List<Element> brandListItems = html.allElementsMatching(".//ul[@id='BrandResultList']/li");

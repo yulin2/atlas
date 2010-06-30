@@ -18,17 +18,13 @@ package org.uriplay.remotesite.bbc;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-
-import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
-import org.springframework.core.io.ClassPathResource;
-import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.FixedResponseHttpClient;
 import org.uriplay.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 
+import com.google.common.io.Resources;
+import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.time.DateTimeZones;
 
 /**
@@ -36,18 +32,13 @@ import com.metabroadcast.common.time.DateTimeZones;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@SuppressWarnings("unchecked")
 public class BbcSlashProgrammesVersionRdfClientTest extends MockObjectTestCase {
 	
 	String URI = "http://example.com";
 	
-	RemoteSiteClient<Reader> httpClient = mock(RemoteSiteClient.class);
+	private final SimpleHttpClient httpClient = FixedResponseHttpClient.respondTo(URI, Resources.getResource("top-gear-version-rdf.xml"));
 
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
-		
-		checking(new Expectations() {{ 
-			one(httpClient).get(URI); will(returnValue(xmlDocument()));
-		}});
 		
 		SlashProgrammesVersionRdf version = new BbcSlashProgrammesVersionRdfClient(httpClient).get(URI);
 		
@@ -58,10 +49,6 @@ public class BbcSlashProgrammesVersionRdfClientTest extends MockObjectTestCase {
 		assertThat(firstBroadcast.broadcastOn(), is("/services/bbctwo/ni_analogue#service"));
 		assertThat(firstBroadcast.broadcastEndDateTime(), is(new DateTime("2007-11-25T21:00:00Z", DateTimeZones.UTC)));
 		assertThat(version.broadcastSlots().get(0).scheduleDate(), is("2007-11-25"));
-	}
-
-	protected Reader xmlDocument() throws IOException {
-		return new InputStreamReader(new ClassPathResource("top-gear-version-rdf.xml").getInputStream());
 	}
 
 }

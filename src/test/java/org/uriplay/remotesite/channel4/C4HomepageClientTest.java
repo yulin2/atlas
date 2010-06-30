@@ -17,15 +17,13 @@ package org.uriplay.remotesite.channel4;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.List;
 
-import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
-import org.springframework.core.io.ClassPathResource;
-import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.FixedResponseHttpClient;
+
+import com.google.common.io.Resources;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -36,20 +34,10 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 	String HIGHLIGHTS_URI = "http://www.channel4.com/programmes/4od/highlights";
 	String MOST_POPULAR_URI = "http://www.channel4.com/programmes/4od/most-popular";
 	
-	RemoteSiteClient<Reader> httpClient;
-	
-	@Override
-	@SuppressWarnings("unchecked")
-	protected void setUp() throws Exception {
-		super.setUp();
-		httpClient = mock(RemoteSiteClient.class);
-	}
+	private final SimpleHttpClient httpClient = FixedResponseHttpClient.respondTo(FOUR_OD_HOMEPAGE, Resources.getResource("4od-homepage.html"));
 	
 	public void testRetrievingMostPopularBrands() throws Exception {
 		
-		checking(new Expectations() {{ 
-			one(httpClient).get(FOUR_OD_HOMEPAGE); will(returnValue(fourOdHomepageHtml()));
-		}});
 		
 		C4HomePageClient client = new C4HomePageClient(httpClient);
 		
@@ -67,10 +55,6 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 	}
 	
 	public void testRetrievingHighlightBrands() throws Exception {
-		
-		checking(new Expectations() {{ 
-			one(httpClient).get(FOUR_OD_HOMEPAGE); will(returnValue(fourOdHomepageHtml()));
-		}});
 		
 		C4HomePageClient client = new C4HomePageClient(httpClient);
 		
@@ -90,9 +74,5 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 		assertThat(lastBrand.getId(), is("90210"));
 		assertThat(lastBrand.getBrandPage(), is("http://www.channel4.com/programmes/90210/4od"));
 
-	}
-	
-	protected Reader fourOdHomepageHtml() throws IOException {
-		return new InputStreamReader(new ClassPathResource("4od-homepage.html").getInputStream());
 	}
 }

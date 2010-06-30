@@ -6,7 +6,6 @@ public class BbcProgrammeSource extends BaseSource {
 
 	private final SlashProgrammesRdf episode;
 	private final SlashProgrammesVersionRdf version;
-	private boolean available = true;
 	private final String slashProgrammesUri;
 
 	public BbcProgrammeSource(String uri, String slashProgrammesUri, SlashProgrammesRdf episode, SlashProgrammesVersionRdf version) {
@@ -26,14 +25,5 @@ public class BbcProgrammeSource extends BaseSource {
 	
 	public String getSlashProgrammesUri() {
 		return slashProgrammesUri;
-	}
-	
-	public BbcProgrammeSource forAnUnavailableProgramme() {
-		this.available = false;
-		return this;
-	}
-	
-	public boolean isAvailable() {
-		return available;
 	}
 }

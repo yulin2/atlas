@@ -26,6 +26,7 @@ import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Location;
+import org.uriplay.media.entity.Policy;
 import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
@@ -44,9 +45,11 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	static final String BBC_PUBLISHER = "bbc.co.uk";
 	
 	private final BbcSeriesNumberResolver seriesResolver;
+	private final BbcProgrammesPolicyClient policyClient;
 	
-	public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver) {
+	public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient) {
 		this.seriesResolver = seriesResolver;
+		this.policyClient = policyClient;
 	}
 
 	public Item extract(BbcProgrammeSource source) {
@@ -60,7 +63,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 			container = episode.series();
 		}
 		
-		Location location = htmlLinkLocation(episodeUri, source.isAvailable());
+		Location location = htmlLinkLocation(episodeUri);
 		
 		Encoding encoding = new Encoding();
 		encoding.addAvailableAt(location);
@@ -81,11 +84,18 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 		return Maybe.nothing();
 	}
 
-	private Location htmlLinkLocation(String episodeUri, boolean available) {
+	private Location htmlLinkLocation(String episodeUri) {
 		Location location = new Location();
 		location.setUri(iplayerPageFrom(episodeUri));
 		location.setTransportType(TransportType.LINK);
-		location.setAvailable(available);
+		
+		Maybe<Policy> policy = policyClient.policyForUri(episodeUri);
+		
+		if (policy.hasValue()) {
+			location.setPolicy(policy.requireValue());
+		}
+		
+		location.setAvailable(policy.hasValue());
 		return location;
 	}
 

@@ -16,13 +16,16 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.bbc;
 
 import java.io.Reader;
+import java.io.StringReader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+import org.uriplay.remotesite.HttpClients;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * Client to retrieve RDF XML representing a version, from BBC /programmes and 
@@ -32,14 +35,14 @@ import org.uriplay.remotesite.http.CommonsHttpClient;
  */
 public class BbcSlashProgrammesVersionRdfClient implements RemoteSiteClient<SlashProgrammesVersionRdf> {
 
-	private final RemoteSiteClient<Reader> httpClient;
+	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
 
 	public BbcSlashProgrammesVersionRdfClient() {
-		this(new CommonsHttpClient().withAcceptHeader("text/html"));
+		this(HttpClients.webserviceClient());
 	}
 	
-	public BbcSlashProgrammesVersionRdfClient(RemoteSiteClient<Reader> httpClient) {
+	public BbcSlashProgrammesVersionRdfClient(SimpleHttpClient httpClient) {
 		this.httpClient = httpClient;
 		try {
 			context = JAXBContext.newInstance(SlashProgrammesVersionRdf.class);
@@ -49,7 +52,7 @@ public class BbcSlashProgrammesVersionRdfClient implements RemoteSiteClient<Slas
 	}
 
 	public SlashProgrammesVersionRdf get(String uri) throws Exception {
-		Reader in = httpClient.get(uri);
+		Reader in = new StringReader(httpClient.getContentsOf(uri));
 		Unmarshaller u = context.createUnmarshaller();
 		SlashProgrammesVersionRdf versionDescription = (SlashProgrammesVersionRdf) u.unmarshal(in);
 		return versionDescription;

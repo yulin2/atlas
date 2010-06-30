@@ -18,24 +18,23 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
 
+import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
-import org.uriplay.persistence.system.RemoteSiteClient;
 
-@SuppressWarnings("unchecked")
+import com.metabroadcast.common.http.SimpleHttpClient;
+
 public class BbcSeriesNumberResolverTest extends MockObjectTestCase {
+
+	final SimpleHttpClient client = mock(SimpleHttpClient.class);
 
 	public void testTheResolver() throws Exception {
 		final String seriesUri = "http://www.bbc.co.uk/programmes/b007q8vv";
-		final RemoteSiteClient<Reader> client = mock(RemoteSiteClient.class);
 		
 		checking(new Expectations() {{
-			one(client).get(seriesUri + ".rdf"); will(returnValue(xmlDocument()));
+			one(client).getContentsOf(seriesUri + ".rdf"); will(returnValue(xmlDocument()));
 		}});
 		
 		SeriesFetchingBbcSeriesNumberResolver resolver = new SeriesFetchingBbcSeriesNumberResolver(client);
@@ -48,10 +47,9 @@ public class BbcSeriesNumberResolverTest extends MockObjectTestCase {
 	
 	public void testLookupingUpAMissingSeries() throws Exception {
 		final String missingSeriesUri = "http://www.bbc.co.uk/programmes/b00missing";
-		final RemoteSiteClient<Reader> client = mock(RemoteSiteClient.class);
 		
 		checking(new Expectations() {{
-			one(client).get(missingSeriesUri + ".rdf"); will(returnValue(new StringReader("this string doesn't contain a series number")));
+			one(client).getContentsOf(missingSeriesUri + ".rdf"); will(returnValue("this string doesn't contain a series number"));
 		}});
 		
 		SeriesFetchingBbcSeriesNumberResolver resolver = new SeriesFetchingBbcSeriesNumberResolver(client);
@@ -62,7 +60,7 @@ public class BbcSeriesNumberResolverTest extends MockObjectTestCase {
 		assertTrue(resolver.seriesNumberFor(missingSeriesUri).isNothing());
 	}
 	
-	protected Reader xmlDocument() throws IOException {
-		return new InputStreamReader(new ClassPathResource("top-gear-series-rdf.xml").getInputStream());
+	protected String xmlDocument() throws IOException {
+		return IOUtils.toString(new ClassPathResource("top-gear-series-rdf.xml").getInputStream());
 	}
 }

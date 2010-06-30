@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import com.google.common.collect.Lists;
 
@@ -28,8 +29,8 @@ import com.google.common.collect.Lists;
  */
 public class SlashProgrammesVersionRdfTest extends TestCase {
 	
-	DateTime nov25th8pm = new DateTime(2007, 11, 25, 20, 00, 00, 00);
-	DateTime nov26th8pm = new DateTime(2007, 11, 26, 20, 00, 00, 00);
+	DateTime nov25th8pm = new DateTime(2007, 11, 25, 20, 00, 00, 00, DateTimeZone.UTC);
+	DateTime nov26th8pm = new DateTime(2007, 11, 26, 20, 00, 00, 00, DateTimeZone.UTC);
 	
 	public void testFindsLatestTransmissionDateForOneShowing() throws Exception {
 		

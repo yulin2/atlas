@@ -24,10 +24,9 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.SiteSpecificAdapter;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+import org.uriplay.remotesite.support.atom.AtomClient;
 
 import com.sun.syndication.feed.atom.Feed;
-import com.sun.syndication.io.WireFeedInput;
 
 public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 
@@ -39,7 +38,7 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 	private final ContentExtractor<Feed, Brand> extractor;
 	
 	public C4AtomBackedBrandAdapter() {
-		this(atomClient(), new C4BrandExtractor());
+		this(new AtomClient(), new C4BrandExtractor());
 	}
 	
 	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> feedClient, ContentExtractor<Feed, Brand> extractor) {
@@ -69,19 +68,6 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 		}
 		String programmeUri = matcher.group(1);
 		return programmeUri + "/4od.atom";
-	}
-	
-	private static RemoteSiteClient<Feed> atomClient() {
-		
-		return new RemoteSiteClient<Feed>() {
-			
-			private final CommonsHttpClient client = new CommonsHttpClient();
-
-			@Override
-			public Feed get(String uri) throws Exception {
-				return (Feed) new WireFeedInput().build(client.get(uri));
-			}
-		};
 	}
 
 }

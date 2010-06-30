@@ -1,34 +1,36 @@
 package org.uriplay.remotesite.bbc.schedule;
 
 import java.io.Reader;
+import java.io.StringReader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+import org.uriplay.remotesite.HttpClients;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 
 public class BbcScheduleClient implements RemoteSiteClient<ChannelSchedule> {
 
-	private final RemoteSiteClient<Reader> httpClient;
+	private final SimpleHttpClient httpClient;
 	
 	private final JAXBContext context;
 
 	public BbcScheduleClient() throws JAXBException {
-		this(new CommonsHttpClient());
+		this(HttpClients.webserviceClient());
 	}
 	
-	BbcScheduleClient(RemoteSiteClient<Reader> httpClient) throws JAXBException {
+	BbcScheduleClient(SimpleHttpClient httpClient) throws JAXBException {
 		this.httpClient = httpClient;
 		context = JAXBContext.newInstance(ChannelSchedule.class);
 	}
 
 	public ChannelSchedule get(String uri) throws Exception {
-		Reader in = httpClient.get(uri);
+		Reader in = new StringReader(httpClient.getContentsOf(uri));
 		Unmarshaller u = context.createUnmarshaller();
 		return (ChannelSchedule) u.unmarshal(in);
 	}
-
 }

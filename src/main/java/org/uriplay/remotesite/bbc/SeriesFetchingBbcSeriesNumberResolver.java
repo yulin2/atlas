@@ -15,27 +15,29 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.bbc;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
-import org.uriplay.persistence.system.RemoteSiteClient;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+import org.uriplay.remotesite.HttpClients;
 
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class SeriesFetchingBbcSeriesNumberResolver implements BbcSeriesNumberResolver {
 
 	private final ConcurrentMap<String, Maybe<Integer>> cache;
 	
-	private final RemoteSiteClient<Reader> client;
+	private final SimpleHttpClient client;
 
-	public SeriesFetchingBbcSeriesNumberResolver(RemoteSiteClient<Reader> client) {
+	public SeriesFetchingBbcSeriesNumberResolver() {
+		this(HttpClients.webserviceClient());
+	}
+
+	public SeriesFetchingBbcSeriesNumberResolver(SimpleHttpClient client) {
 		this.client = client;
 		cache = new MapMaker()
 			.expiration(1, TimeUnit.HOURS)
@@ -49,24 +51,19 @@ public class SeriesFetchingBbcSeriesNumberResolver implements BbcSeriesNumberRes
 			@Override
 			public Maybe<Integer> apply(String uri) {
 				try {
-					return extractSeriesNumberFrom(client.get(canonicaliseAndCheckUri(uri)));
+					return extractSeriesNumberFrom(client.getContentsOf(canonicaliseAndCheckUri(uri)));
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
 			}
 		};
 	}
-
-	public SeriesFetchingBbcSeriesNumberResolver() {
-		this(new CommonsHttpClient());
-	}
 	
 	public Maybe<Integer> seriesNumberFor(String seriesUri) {
 		return cache.get(seriesUri);
 	}
 
-	private Maybe<Integer> extractSeriesNumberFrom(Reader reader) throws IOException {
-		String rdf = IOUtils.toString(reader);
+	private Maybe<Integer> extractSeriesNumberFrom(String rdf) throws IOException {
 		Pattern p = Pattern.compile("<dc:title>Series (\\d+)</dc:title>");
 		Matcher matcher = p.matcher(rdf);
 		if (matcher.find()) {

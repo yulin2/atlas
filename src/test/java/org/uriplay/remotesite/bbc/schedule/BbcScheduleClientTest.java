@@ -4,30 +4,29 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
-import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.bbc.schedule.ChannelSchedule.Programme;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@SuppressWarnings("unchecked")
 public class BbcScheduleClientTest extends MockObjectTestCase {
 	
 	String URI = "http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml";
 	
-	RemoteSiteClient<Reader> httpClient = mock(RemoteSiteClient.class);
+	private SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
 
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(httpClient).get(URI); will(returnValue(xmlDocument()));
+			one(httpClient).getContentsOf(URI); will(returnValue(xmlDocument()));
 		}});
 		
 		ChannelSchedule result = new BbcScheduleClient(httpClient).get(URI);
@@ -41,8 +40,8 @@ public class BbcScheduleClientTest extends MockObjectTestCase {
 
 	}
 
-	protected Reader xmlDocument() throws IOException {
-		return new InputStreamReader(new ClassPathResource("bbc-schedule.xml").getInputStream());
+	private String xmlDocument() throws IOException {
+		return IOUtils.toString(new ClassPathResource("bbc-schedule.xml").getInputStream());
 	}
 
 }

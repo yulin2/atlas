@@ -15,32 +15,31 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.bliptv;
 
-import java.io.Reader;
 import java.util.List;
 
 import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 import org.uriplay.remotesite.html.HtmlNavigator;
-import org.uriplay.remotesite.http.CommonsHttpClient;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class BlipTvClient implements RemoteSiteClient<HtmlDescriptionOfItem>  {
 
-	private final RemoteSiteClient<Reader> client;
+	private final SimpleHttpClient client;
 
-	public BlipTvClient(RemoteSiteClient<Reader> client) {
+	public BlipTvClient(SimpleHttpClient client) {
 		this.client = client;
 	}
 
 	public BlipTvClient() {
-		this(new CommonsHttpClient());
+		this(HttpClients.webserviceClient());
 	}
 
 	public HtmlDescriptionOfItem get(String uri) throws Exception {
-		Reader in = client.get(uri);
 		
-		HtmlNavigator html = new HtmlNavigator(in);
+		HtmlNavigator html = new HtmlNavigator(client.getContentsOf(uri));
 		HtmlDescriptionOfItem item = new HtmlDescriptionOfItem();
 
 		item.setTitle(html.metaTagContents("title"));

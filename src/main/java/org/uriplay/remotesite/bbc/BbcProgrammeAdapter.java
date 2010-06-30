@@ -39,7 +39,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 	private final Log log = LogFactory.getLog(getClass());
 	
 	public BbcProgrammeAdapter() {
-		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver()));
+		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient()));
 	}
 	
 	public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor) {
@@ -52,7 +52,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 		Matcher matcher = SLASH_PROGRAMMES_URL_PATTERN.matcher(uri);
 		return matcher.matches();
 	}
-
+	
 	public Description fetch(String uri) {
 		try {
 			SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
@@ -62,7 +62,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 			
 			if (content.episode() != null) {
 				SlashProgrammesVersionRdf version = readSlashProgrammesDataForVersion(content.episode().versions().get(0));
-				BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version).forAnUnavailableProgramme();
+				BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version);
 				return contentExtractor.extract(source);
 			}
 			if (content.brand() != null) {

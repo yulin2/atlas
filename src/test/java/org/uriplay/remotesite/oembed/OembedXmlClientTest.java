@@ -20,29 +20,28 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 
+import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
 import org.uriplay.feeds.OembedItem;
-import org.uriplay.persistence.system.RemoteSiteClient;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@SuppressWarnings("unchecked")
 public class OembedXmlClientTest extends MockObjectTestCase {
 	
-	String URI = "http://example.com";
+	private final String URI = "http://example.com";
 	
-	RemoteSiteClient<Reader> httpClient = mock(RemoteSiteClient.class);
+	private final SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
 
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(httpClient).get(URI); will(returnValue(xmlDocument()));
+			one(httpClient).getContentsOf(URI); will(returnValue(xmlDocument()));
 		}});
 		
 		OembedItem oembed = new OembedXmlClient(httpClient).get(URI);
@@ -55,8 +54,8 @@ public class OembedXmlClientTest extends MockObjectTestCase {
 		assertThat(oembed.embedCode(), startsWith("<object"));
 	}
 
-	protected Reader xmlDocument() throws IOException {
-		return new InputStreamReader(new ClassPathResource("vimeo-oembed.xml").getInputStream());
+	protected String xmlDocument() throws IOException {
+		return IOUtils.toString(new ClassPathResource("vimeo-oembed.xml").getInputStream());
 	}
 
 }

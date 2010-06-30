@@ -19,29 +19,27 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
-import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.html.HtmlDescriptionOfItem;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
-@SuppressWarnings("unchecked")
 public class DailyMotionItemClientTest extends MockObjectTestCase {
 
-	String URI = "/uri";
+	private String URI = "/uri";
 	
-	RemoteSiteClient<Reader> httpClient = mock(RemoteSiteClient.class);
+	private SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
 	
 	public void testTheClient() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(httpClient).get(URI); will(returnValue(itemHtml()));
+			one(httpClient).getContentsOf(URI); will(returnValue(itemHtml()));
 		}});
 		
 		DailyMotionItemClient client = new DailyMotionItemClient(httpClient);
@@ -57,8 +55,8 @@ public class DailyMotionItemClientTest extends MockObjectTestCase {
 		
 	}
 	
-	protected Reader itemHtml() throws IOException {
-		return new InputStreamReader(new ClassPathResource("daily-motion-item.html").getInputStream());
+	protected String itemHtml() throws IOException {
+		return IOUtils.toString(new ClassPathResource("daily-motion-item.html").getInputStream());
 	}
 
 }

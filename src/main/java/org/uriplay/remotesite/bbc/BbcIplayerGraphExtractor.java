@@ -64,7 +64,7 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 		this.episodeClient = episodeClient;
 		this.versionClient = versionClient;
 		this.brandFetcher = brandFetcher;
-		this.programmeGraphExtractor = new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver());
+		this.programmeGraphExtractor = new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient());
 	}
 
 	@SuppressWarnings("unchecked")

@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.uriplay.remotesite.itv;
 
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -26,8 +27,10 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.FetchException;
+import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.html.HtmlNavigator;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * Client to retrieve XML/HTML from ITV and bind it to our object model. 
@@ -37,22 +40,22 @@ import org.uriplay.remotesite.http.CommonsHttpClient;
  */
 public class ItvCatchupClient implements RemoteSiteClient<List<ItvProgramme>> {
 
-	private final RemoteSiteClient<Reader> httpClient;
+	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
 
 	private static final Log log = LogFactory.getLog(ItvCatchupClient.class);
 	
 	public ItvCatchupClient() throws JAXBException {
-		this(new CommonsHttpClient().withAcceptHeader("text/html"));
+		this(HttpClients.screenScrapingClient());
 	}
 	
-	public ItvCatchupClient(RemoteSiteClient<Reader> httpClient) throws JAXBException {
+	public ItvCatchupClient(SimpleHttpClient httpClient) throws JAXBException {
 		this.httpClient = httpClient;
 		context = JAXBContext.newInstance(ItvProgrammes.class, ItvProgramme.class);
 	}
 
 	public List<ItvProgramme> get(String uri) throws Exception {
-		Reader in = httpClient.get(uri);
+		Reader in = new StringReader(httpClient.getContentsOf(uri));
 		Unmarshaller u = context.createUnmarshaller();
 		u.setSchema(null);
 		ItvProgrammes itvProgrammes = (ItvProgrammes) u.unmarshal(in);
@@ -68,10 +71,8 @@ public class ItvCatchupClient implements RemoteSiteClient<List<ItvProgramme>> {
 		int programmeId = program.programmeId();
 		
 		try {
-			
-			Reader Reader = httpClient.get("http://www.itv.com/_app/Dynamic/CatchUpData.ashx?ViewType=1&Filter=" + programmeId + "&moduleID=262033&columnWidth=2");
-			
-			HtmlNavigator htmlNavigator = new HtmlNavigator(Reader);
+			String data = httpClient.getContentsOf("http://www.itv.com/_app/Dynamic/CatchUpData.ashx?ViewType=1&Filter=" + programmeId + "&moduleID=262033&columnWidth=2");
+			HtmlNavigator htmlNavigator = new HtmlNavigator(data);
 			List<Element> content = htmlNavigator.allElementsMatching("//div[@class='content']");
 			
 			addEpisodesTo(program, htmlNavigator, content);

@@ -1,27 +1,20 @@
 package org.uriplay.http;
 
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.joda.time.Duration;
-import org.uriplay.remotesite.http.CommonsHttpClient;
+import java.util.concurrent.TimeUnit;
+
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 
 public class RedirectShortUrlResolver implements ShortUrlResolver {
 
-	private final CommonsHttpClient client = new CommonsHttpClient().withSocketTimeout(Duration.standardSeconds(10)).withConnectionTimeout(Duration.standardSeconds(5));
+	private final SimpleHttpClient client = new SimpleHttpClientBuilder().withSocketTimeout(10, TimeUnit.SECONDS).withConnectionTimeout(5, TimeUnit.SECONDS).build();
 	
 	@Override
 	public String resolve(String shortUri) {
-		
-		HeadMethod response = client.head(shortUri);
-		
-		if (response != null && response.getStatusCode() == HttpStatus.SC_MOVED_PERMANENTLY) {
-			Header locationHeader = response.getResponseHeader("Location");
-			if (locationHeader == null) {
-				return null;
-			}
-			return locationHeader.getValue();
-		} else {
+		try {
+			return client.head(shortUri).finalUrl();
+		} catch (HttpException e) {
 			return null;
 		}
 	}

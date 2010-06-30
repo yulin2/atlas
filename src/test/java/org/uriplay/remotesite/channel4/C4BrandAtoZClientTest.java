@@ -18,33 +18,23 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.List;
 
-import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
-import org.springframework.core.io.ClassPathResource;
-import org.uriplay.persistence.system.RemoteSiteClient;
+import org.uriplay.remotesite.FixedResponseHttpClient;
+
+import com.google.common.io.Resources;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@SuppressWarnings("unchecked")
 public class C4BrandAtoZClientTest extends MockObjectTestCase {
 
-	String URI = "/uri";
-	
-	RemoteSiteClient<Reader> httpClient = mock(RemoteSiteClient.class);
+	private String URI = "/uri";
 	
 	public void testTheClient() throws Exception {
 		
-		checking(new Expectations() {{ 
-			one(httpClient).get(URI); will(returnValue(atozPageHtml()));
-		}});
-		
-		C4BrandAtoZClient client = new C4BrandAtoZClient(httpClient);
+		C4BrandAtoZClient client = new C4BrandAtoZClient(FixedResponseHttpClient.respondTo(URI, Resources.getResource("4od-atoz-a.html")));
 		
 		BrandListingPage page = client.get(URI);
 		List<HtmlBrandSummary> brandList = page.getBrandList();
@@ -61,9 +51,4 @@ public class C4BrandAtoZClientTest extends MockObjectTestCase {
 		assertTrue(page.hasNextPageLink());
 		assertThat(page.getNextPageLink(), is("http://www.channel4.com/programmes/atoz/a/page-2"));
 	}
-	
-	protected Reader atozPageHtml() throws IOException {
-		return new InputStreamReader(new ClassPathResource("4od-atoz-a.html").getInputStream());
-	}
-
 }

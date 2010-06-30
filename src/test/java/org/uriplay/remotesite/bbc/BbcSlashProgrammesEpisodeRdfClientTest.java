@@ -20,34 +20,32 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 
+import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
-import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * Unit test for {@link BbcSlashProgrammesEpisodeRdfClient}.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@SuppressWarnings("unchecked")
 public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 	
-	String URI = "http://example.com";
+	private final String URI = "http://example.com";
 	
-	RemoteSiteClient<Reader> httpClient = mock(RemoteSiteClient.class);
+	private final SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
 
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		checking(new Expectations() {{ 
-			one(httpClient).get(URI); will(returnValue(xmlDocument()));
+			one(httpClient).getContentsOf(URI); will(returnValue(xmlDocument()));
 		}});
 		
 		SlashProgrammesRdf description = new BbcSlashProgrammesEpisodeRdfClient(httpClient).get(URI);
@@ -68,7 +66,7 @@ public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 
 	}
 
-	protected Reader xmlDocument() throws IOException {
-		return new InputStreamReader(new ClassPathResource("top-gear-rdf.xml").getInputStream());
+	protected String xmlDocument() throws IOException {
+		return IOUtils.toString(new ClassPathResource("top-gear-rdf.xml").getInputStream());
 	}
 }
