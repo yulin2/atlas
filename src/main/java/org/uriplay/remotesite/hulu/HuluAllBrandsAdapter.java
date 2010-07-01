@@ -16,6 +16,7 @@ import org.uriplay.remotesite.HttpClients;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.html.HtmlNavigator;
 
+import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
@@ -49,22 +50,39 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
         try {
             LOG.info("Retrieving all Hulu brands");
 
-            String content = httpClient.getContentsOf(uri);
-            HtmlNavigator navigator = new HtmlNavigator(content);
+            String content = null;
 
-            List<Element> elements = navigator.allElementsMatching("//a[@rel='nofollow']");
-            for (Element element : elements) {
-                String brandUri = element.getAttributeValue("href");
-                if (brandAdapter.canFetch(brandUri)) {
-                    if (contentStore != null) {
-                        executor.execute(new BrandHydratingJob(brandUri));
+            for (int i = 0; i < 5; i++) {
+                try {
+                    content = httpClient.getContentsOf(uri);
+                    if (content != null) {
+                        break;
                     }
+                } catch (HttpException e) {
+                    LOG.warn("Error retrieving all hulu brands: " + uri + " attempt " + i + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
                 }
             }
 
+            if (content != null) {
+                HtmlNavigator navigator = new HtmlNavigator(content);
+
+                List<Element> elements = navigator.allElementsMatching("//a[@rel='nofollow']");
+                for (Element element : elements) {
+                    String brandUri = element.getAttributeValue("href");
+                    if (brandAdapter.canFetch(brandUri)) {
+                        if (contentStore != null) {
+                            executor.execute(new BrandHydratingJob(brandUri));
+                        }
+                    }
+                }
+            } else {
+                LOG.error("Unable to retrieve all hulu brands: " + uri);
+            }
+            
             // Returning empty playlist
             return new Playlist(URL, "hulu:all_brands");
         } catch (Exception e) {
+            LOG.warn("Error retrieving all hulu brands: " + uri + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
             throw new FetchException("Unable to retrieve all hulu brands", e);
         }
     }
