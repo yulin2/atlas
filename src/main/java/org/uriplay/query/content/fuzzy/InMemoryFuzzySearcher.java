@@ -111,7 +111,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 		
 		Document doc = new Document();
         doc.add(new Field(FIELD_CONTENT_TITLE, title, Field.Store.NO, Field.Index.ANALYZED));
-        doc.add(new Field(FIELD_TITLE_FLATTENED, title.replace(" ", ""), Field.Store.NO, Field.Index.ANALYZED));
+        doc.add(new Field(FIELD_TITLE_FLATTENED, titleQueryBuilder.flatten(title), Field.Store.NO, Field.Index.ANALYZED));
         doc.add(new Field(FIELD_CONTENT_URI, uri, Field.Store.YES,  Field.Index.NOT_ANALYZED));
         return doc;
 	}

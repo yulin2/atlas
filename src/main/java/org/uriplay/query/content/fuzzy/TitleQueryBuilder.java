@@ -26,6 +26,7 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.PrefixQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.util.Version;
 
@@ -43,7 +44,7 @@ public class TitleQueryBuilder {
 		if (shouldUsePrefixSearch(tokens)) {
 			return prefixSearch(Iterables.getOnlyElement(tokens));
 		} else {
-			return fuzzyTermSearch(queryString, tokens);
+			return fuzzyTermSearch(flatten(queryString), tokens);
 		}
 	}
 
@@ -55,7 +56,7 @@ public class TitleQueryBuilder {
 		return new PrefixQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, token));
 	}
 
-	private BooleanQuery fuzzyTermSearch(String queryString, List<String> tokens) {
+	private BooleanQuery fuzzyTermSearch(String flattenedQuery, List<String> tokens) {
 		BooleanQuery queryForTerms = new BooleanQuery();
 
 		for(String token : tokens) {
@@ -73,22 +74,26 @@ public class TitleQueryBuilder {
 	
 		BooleanQuery either = new BooleanQuery(); 
 		either.add(queryForTerms, Occur.SHOULD);
-		either.add(matchesWithoutSpaces(queryString), Occur.SHOULD);
+		either.add(fuzzyWithoutSpaces(flattenedQuery), Occur.SHOULD);
 		
-		Query prefix = prefixSearch(queryString.replace(" ", ""));
+		Query prefix = prefixSearch(flattenedQuery);
 		prefix.setBoost(2);
 		either.add(prefix, Occur.SHOULD);
+		
+		Query exactMatch = new TermQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, flattenedQuery));
+		exactMatch.setBoost(100);
+		either.add(exactMatch, Occur.SHOULD);
 		
 		BooleanQuery query = new BooleanQuery();
 		query.add(either, Occur.MUST);
 		return query;
 	}
 
-	private FuzzyQuery matchesWithoutSpaces(String queryString) {
-		return new FuzzyQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, queryString.replace(" ", "")), 0.8f, 4);
+	private FuzzyQuery fuzzyWithoutSpaces(String flattened) {
+		return new FuzzyQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, flattened), 0.8f, 4);
 	}
 	
-	private List<String> tokens(String queryString) {
+	private static List<String> tokens(String queryString) {
 		TokenStream tokens = new StandardAnalyzer(Version.LUCENE_30).tokenStream("", new StringReader(queryString));
 		List<String> tokensAsStrings = Lists.newArrayList();
 		try {
@@ -100,5 +105,9 @@ public class TitleQueryBuilder {
 			throw new RuntimeException(e);
 		}
 		return tokensAsStrings;
+	}
+
+	public String flatten(String title) {
+		return title.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 	}
 }
