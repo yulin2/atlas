@@ -35,6 +35,8 @@ import org.uriplay.content.criteria.attribute.StringValuedAttribute;
 import org.uriplay.content.criteria.operator.Operator;
 import org.uriplay.content.criteria.operator.Operators;
 import org.uriplay.media.entity.Content;
+import org.uriplay.media.entity.Countries;
+import org.uriplay.media.entity.Country;
 import org.uriplay.media.entity.Description;
 
 import com.google.common.base.Function;
@@ -200,8 +202,14 @@ public class QueryStringBackedQueryBuilder {
 	
 	private List<String> formatValues(QueryFactory<?> attribute, List<String> values) {
 	    List<String> formattedValues = Lists.newArrayList();
-	    if (! (attribute instanceof StringValuedAttribute)) {
+	    if (!(attribute instanceof StringValuedAttribute)) {
 	        return values;
+	    }
+	    
+	    if (Attributes.POLICY_AVAILABLE_COUNTRY.equals(attribute)) {
+	    	Set<Country> withAll = Sets.newHashSet(Countries.fromCodes(values));
+	    	withAll.add(Countries.ALL);
+	    	return ImmutableList.copyOf(Countries.toCodes(withAll));
 	    }
 	    
 	    String attributeName = ((StringValuedAttribute) attribute).javaAttributeName();

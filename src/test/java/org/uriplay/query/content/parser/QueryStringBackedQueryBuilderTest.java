@@ -16,22 +16,7 @@ package org.uriplay.query.content.parser;
 
 
 import static org.uriplay.content.criteria.ContentQueryBuilder.query;
-import static org.uriplay.content.criteria.attribute.Attributes.BRAND_GENRE;
-import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TAG;
-import static org.uriplay.content.criteria.attribute.Attributes.BRAND_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_END_TIME;
-import static org.uriplay.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
-import static org.uriplay.content.criteria.attribute.Attributes.EPISODE_POSITION;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_GENRE;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_PUBLISHER;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TAG;
-import static org.uriplay.content.criteria.attribute.Attributes.ITEM_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_AVAILABLE;
-import static org.uriplay.content.criteria.attribute.Attributes.LOCATION_TRANSPORT_TYPE;
-import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_GENRE;
-import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_TAG;
-import static org.uriplay.content.criteria.attribute.Attributes.PLAYLIST_TITLE;
-import static org.uriplay.content.criteria.attribute.Attributes.VERSION_DURATION;
+import static org.uriplay.content.criteria.attribute.Attributes.*;
 
 import java.util.Map;
 
@@ -43,6 +28,7 @@ import org.uriplay.content.criteria.attribute.Attributes;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Content;
+import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 
@@ -69,6 +55,19 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		params.put("brand.title", new String[] { "bob" });
 		check(params, query().searchFor(BRAND_TITLE, "bob"));
 		
+	}
+	
+	public void testAvailableCountrySearch() throws Exception {
+		Map<String, String[]> params = Maps.newHashMap();
+		
+		params = Maps.newHashMap();
+		params.put("availableCountries", new String[] { "gb" });
+		check(params, query().equalTo(POLICY_AVAILABLE_COUNTRY, Countries.GB.code(), Countries.ALL.code()));
+		
+
+		params = Maps.newHashMap();
+		params.put("availableCountries", new String[] { "all" });
+		check(params, query().equalTo(POLICY_AVAILABLE_COUNTRY, Countries.ALL.code()));
 	}
 	
 	public void testTitleSearch() throws Exception {
