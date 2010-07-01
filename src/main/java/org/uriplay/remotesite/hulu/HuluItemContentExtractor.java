@@ -50,7 +50,11 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
             item.addVersion(version);
             item.setTags(getTags(source));
 
-            for (Element infoElement: source.allElementsMatching("//div[@class='description-shift']")) {
+            List<Element> elements = source.allElementsMatching("//div[@class='description-shift']");
+            if (elements.isEmpty()) {
+                elements = source.allElementsMatching("//div[@class='description']");
+            }
+            for (Element infoElement: elements) {
                 Matcher matcher = INFO_PATTERN.matcher(infoElement.getValue());
                 if (matcher.matches() && matcher.groupCount() > 3) {
                     item.setSeriesNumber(Integer.valueOf(matcher.group(1)));
