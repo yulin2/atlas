@@ -12,10 +12,13 @@ import org.uriplay.media.entity.Version;
 import org.uriplay.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser;
 
 public class HuluItemAdapterTest extends TestCase {
+    
+    String episodeUrl = "http://www.hulu.com/watch/153788";
+    String vanityUrl = episodeUrl+"/glee-journey-to-regionals";
     HuluItemAdapter adapter = new HuluItemAdapter();
 
     public void testShouldRetrieveHuluItem() throws Exception {
-        Episode item = (Episode) adapter.fetch("http://www.hulu.com/watch/152348/glee-funk");
+        Episode item = (Episode) adapter.fetch(vanityUrl);
         assertNotNull(item);
 
         Brand brand = item.getBrand();
@@ -24,14 +27,14 @@ public class HuluItemAdapterTest extends TestCase {
         assertEquals("http://www.hulu.com/glee", brand.getCanonicalUri());
         assertNotNull(brand.getDescription());
 
-        assertEquals("Funk", item.getTitle());
-        assertEquals("http://www.hulu.com/watch/152348", item.getCanonicalUri());
+        assertEquals("Journey to Regionals", item.getTitle());
+        assertEquals(episodeUrl, item.getCanonicalUri());
         assertFalse(item.getTags().isEmpty());
         assertNotNull(item.getDescription());
         assertNotNull(item.getThumbnail());
         assertNotNull(item.getImage());
         assertEquals(Integer.valueOf(1), item.getSeriesNumber());
-        assertEquals(Integer.valueOf(21), item.getEpisodeNumber());
+        assertEquals(Integer.valueOf(22), item.getEpisodeNumber());
 
         Version version = item.getVersions().iterator().next();
         assertNotNull(version);
