@@ -14,11 +14,11 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   
   <import resource="classpath:mongodb-context.xml"/>
   
-  <bean id="mongoDbQueryExcutor" class="org.uriplay.persistence.content.mongodb.MongoDBQueryExecutor">
+  <bean id="mongoDbQueryExcutor" class="org.uriplay.persistence.content.mongo.MongoDBQueryExecutor">
         <constructor-arg ref="mongoDbBackedContentStore"/>
   </bean>
   
-  <bean id="mongoDbQueryExcutorThatFiltersUriQueries" class="org.uriplay.persistence.content.mongodb.MongoDBQueryExecutor">
+  <bean id="mongoDbQueryExcutorThatFiltersUriQueries" class="org.uriplay.persistence.content.mongo.MongoDBQueryExecutor">
         <constructor-arg ref="mongoDbBackedContentStore"/>
         <property name="filterUriQueries" value="true"/>
   </bean>
