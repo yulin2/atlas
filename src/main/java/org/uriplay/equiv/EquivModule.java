@@ -14,13 +14,20 @@ permissions and limitations under the License. */
 
 package org.uriplay.equiv;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.uriplay.equiv.www.EquivController;
+import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.equiv.EquivStore;
 import org.uriplay.persistence.equiv.MongoEquivStore;
+import org.uriplay.remotesite.EquivGenerator;
+import org.uriplay.remotesite.freebase.FreebaseBrandEquivGenerator;
 
+import com.google.common.collect.ImmutableList;
 import com.mongodb.Mongo;
 
 @Configuration
@@ -34,5 +41,14 @@ public class EquivModule {
 	
 	@Bean EquivStore store() {
 		return new MongoEquivStore(mongo, "uriplay");
+	}
+	
+	@Bean EquivContentListener contentListener() {
+	    List<EquivGenerator<Brand>> brandEquivGenerators = ImmutableList.<EquivGenerator<Brand>>of(new FreebaseBrandEquivGenerator());
+	    
+	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators, store());
+	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());
+	    
+	    return new EquivContentListener(brandUpdater, itemUpdater);
 	}
 }

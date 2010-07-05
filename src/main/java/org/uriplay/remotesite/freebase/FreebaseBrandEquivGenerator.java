@@ -10,13 +10,13 @@ import java.util.regex.Pattern;
 
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Equiv;
-import org.uriplay.remotesite.EquivalenceGenerator;
+import org.uriplay.remotesite.EquivGenerator;
 
 import com.freebase.api.Freebase;
 import com.freebase.json.JSON;
 import com.google.inject.internal.Lists;
 
-public class FreebaseBrandEquivalenceGenerator implements EquivalenceGenerator<Brand> {
+public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
 
     private static final Pattern HEX = Pattern.compile("(\\$[0-9A-F]{4})");
     protected static final String WIKIPEDIA = "http://en.wikipedia.org/wiki/";
@@ -24,11 +24,11 @@ public class FreebaseBrandEquivalenceGenerator implements EquivalenceGenerator<B
     protected static final String HULU = "http://www.hulu.com/";
     private final Freebase freebase;
 
-    public FreebaseBrandEquivalenceGenerator() {
+    public FreebaseBrandEquivGenerator() {
         this(Freebase.getFreebase());
     }
 
-    public FreebaseBrandEquivalenceGenerator(Freebase freebase) {
+    public FreebaseBrandEquivGenerator(Freebase freebase) {
         this.freebase = freebase;
     }
 

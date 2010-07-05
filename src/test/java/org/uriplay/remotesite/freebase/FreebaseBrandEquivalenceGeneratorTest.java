@@ -8,7 +8,7 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Equiv;
 
 public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
-    private FreebaseBrandEquivalenceGenerator generator = new FreebaseBrandEquivalenceGenerator();
+    private FreebaseBrandEquivGenerator generator = new FreebaseBrandEquivGenerator();
     
     public void testShouldRetrieveWikipediaEquivForGlee() {
         Brand brand = new Brand("http://www.hulu.com/glee", "hulu:glee");
@@ -21,7 +21,7 @@ public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
         for (Equiv equiv: equivs) {
             assertEquals(brand.getCanonicalUri(), equiv.left());
             assertNotSame(equiv.left(), equiv.right());
-            assertTrue(equiv.right().startsWith(FreebaseBrandEquivalenceGenerator.WIKIPEDIA) || equiv.right().startsWith(FreebaseBrandEquivalenceGenerator.HULU));
+            assertTrue(equiv.right().startsWith(FreebaseBrandEquivGenerator.WIKIPEDIA) || equiv.right().startsWith(FreebaseBrandEquivGenerator.HULU));
         }
         System.out.println(equivs);
     }
@@ -36,7 +36,7 @@ public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
         
         for (Equiv equiv: equivs) {
             assertEquals(brand.getCanonicalUri(), equiv.left());
-            assertTrue(equiv.right().startsWith(FreebaseBrandEquivalenceGenerator.WIKIPEDIA));
+            assertTrue(equiv.right().startsWith(FreebaseBrandEquivGenerator.WIKIPEDIA));
         }
         System.out.println(equivs);
     }
