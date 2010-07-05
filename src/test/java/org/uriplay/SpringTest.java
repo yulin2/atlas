@@ -17,7 +17,8 @@ package org.uriplay;
 
 import junit.framework.TestCase;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  * Test that we can load beans from the Spring configuration - checks that the config is wired correctly.
@@ -26,8 +27,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class SpringTest extends TestCase {
 
 	public void testCanCreateQueryController() throws Exception {
-	    String[] configLocations = new String[] {"classpath:uriplay.xml"};
-		ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configLocations);
+		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(UriplayModule.class);
 		applicationContext.getBean("newQueryApiController");
 	}
 }

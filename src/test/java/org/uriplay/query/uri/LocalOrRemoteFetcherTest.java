@@ -17,6 +17,7 @@ package org.uriplay.query.uri;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.content.ContentStore;
@@ -30,10 +31,10 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 
 	static final String URI = "http://example.com";
     
-	Fetcher<Description> remoteFetcher;
+	Fetcher<Content> remoteFetcher;
 	ContentStore resources;
 	
-	Fetcher<Description> localOrRemoteFetcher;
+	Fetcher<Content> localOrRemoteFetcher;
 	
 	Description bean = new Item();
 	

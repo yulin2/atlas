@@ -9,20 +9,21 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   - Application context definition for URIplay. See uriplay-servlet.xml for webapp config.
   -->
 
-    <import resource="classpath:beans-persistence.xml" />
     <import resource="classpath:beans-scheduling.xml" />
     <import resource="classpath:beans-short-url-services.xml" />
     <import resource="classpath:beans-tracking.xml" />
     <import resource="classpath:uriplay-servlet.xml" />
 
-    <bean class="org.uriplay.equiv.EquivModule"/>
-
     <bean id="contextConfigurer" class="com.metabroadcast.common.webapp.properties.ContextConfigurer" init-method="init" />
+
+   <bean id="mongo" class="com.mongodb.Mongo">
+        <constructor-arg value="${mongo.host}" type="java.lang.String" />
+    </bean>
 
     <bean id="localOrRemoteFetcher" class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
         <constructor-arg>
             <bean class="org.uriplay.query.uri.LocalOrRemoteFetcher">
-                <constructor-arg ref="mongoDbBackedContentStore" />
+                <constructor-arg ref="contentStore" />
                 <constructor-arg ref="savingFetcher" />
             </bean>
         </constructor-arg>
@@ -43,20 +44,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                     <constructor-arg ref="urlShorteningServices" />
                 </bean>
             </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="titleSearcher" class="org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher" />
-
-    <bean id="AggregateContentListener" class="org.uriplay.persistence.content.QueueingContentListener" destroy-method="shutdown">
-        <constructor-arg>
-            <bean class="org.uriplay.persistence.content.AggregateContentListener">
-                <constructor-arg>
-                    <list>
-                        <ref bean="titleSearcher" />
-                    </list>
-                </constructor-arg>
-            </bean>
         </constructor-arg>
     </bean>
 

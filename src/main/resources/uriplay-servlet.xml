@@ -17,6 +17,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
      - Application context definition for the uriplay DispatcherServlet.
      -->
 	<context:annotation-config />
+	
+	<import resource="beans-entities.xml"/>
      
     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
@@ -44,7 +46,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="healthController" class="org.uriplay.system.HealthController"/>
 	
 	<bean id="aliasController" class="org.uriplay.system.AliasController">
-	   <constructor-arg ref="mongoDbBackedContentStore"/>
+	   <constructor-arg ref="contentStore"/>
 	   <constructor-arg ref="localOrRemoteFetcher"/>
 	</bean>
 	

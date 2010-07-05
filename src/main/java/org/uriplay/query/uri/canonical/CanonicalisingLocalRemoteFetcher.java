@@ -5,34 +5,35 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Sets;
 
-public class CanonicalisingLocalRemoteFetcher implements Fetcher<Object> {
+public class CanonicalisingLocalRemoteFetcher implements Fetcher<Description> {
 
 	private static final int MAX_CANONICALISATIONS = 5;
 	private final Log log = LogFactory.getLog(getClass());
 	
 	private final List<Canonicaliser> chain;
-	private final Fetcher<Object> delegate;
+	private final Fetcher<Description> delegate;
 	private final MutableContentStore store;
 
-	public CanonicalisingLocalRemoteFetcher(Fetcher<Object> delegate, List<Canonicaliser> chain, MutableContentStore store) {
+	public CanonicalisingLocalRemoteFetcher(Fetcher<Description> delegate, List<Canonicaliser> chain, MutableContentStore store) {
 		this.delegate = delegate;
 		this.chain = chain;
 		this.store = store;
 	}
 
 	@Override
-	public Object fetch(String uri) {
+	public Description fetch(String uri) {
 		Set<String> aliases = Sets.newHashSet();
 		String currentUri = uri;
 		for (int i = 0; i < MAX_CANONICALISATIONS; i++) {
 			try {
-				Object bean = delegate.fetch(currentUri);
+				Description bean = delegate.fetch(currentUri);
 				if (bean == null) {
 					return null;
 				} else {
@@ -69,7 +70,7 @@ public class CanonicalisingLocalRemoteFetcher implements Fetcher<Object> {
 		}
 	}
 
-	private Object saveAliases(Object bean, String canonicalUri, Set<String> aliases) {
+	private Description saveAliases(Description bean, String canonicalUri, Set<String> aliases) {
 		if (!aliases.isEmpty()) {
 			store.addAliases(canonicalUri, aliases);
 		}
