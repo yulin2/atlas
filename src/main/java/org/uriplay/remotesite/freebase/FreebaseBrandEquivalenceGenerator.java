@@ -55,7 +55,7 @@ public class FreebaseBrandEquivalenceGenerator implements EquivalenceGenerator<B
     }
     
     private void addId(List<Equiv> equivs, Brand brand, String id, String prefix) {
-        if (id != null && !brand.getCanonicalUri().equals(id)) {
+        if (id != null && !brand.getCanonicalUri().equals(prefix+id)) {
             equivs.add(new Equiv(brand.getCanonicalUri(), prefix+id));
         }
     }
