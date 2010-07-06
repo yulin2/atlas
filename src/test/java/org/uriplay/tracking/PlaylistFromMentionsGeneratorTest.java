@@ -24,7 +24,8 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
-import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.content.ContentResolver;
+import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.persistence.testing.DummyContentData;
 import org.uriplay.persistence.tracking.ContentMention;
 import org.uriplay.persistence.tracking.ContentMentionStore;
@@ -34,20 +35,22 @@ import com.google.common.collect.Lists;
 
 public class PlaylistFromMentionsGeneratorTest extends MockObjectTestCase {
 
-	MutableContentStore contentStore;
-	ContentMentionStore mentionStore;
-	DummyContentData data;
+	private ContentResolver resolver;
+	private ContentMentionStore mentionStore;
+	private DummyContentData data;
+	private ContentWriter writer;
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		this.contentStore = mock(MutableContentStore.class);
+		this.resolver = mock(ContentResolver.class);
 		this.mentionStore = mock(ContentMentionStore.class);
+		this.writer = mock(ContentWriter.class);
 		this.data = new DummyContentData();
 	}
 	
 	public void testGeneratingPlaylists() throws Exception {
-		PlaylistFromMentionsGenerator generator = new PlaylistFromMentionsGenerator(contentStore, mentionStore, TrackingSource.TWITTER);
+		PlaylistFromMentionsGenerator generator = new PlaylistFromMentionsGenerator(resolver, writer, mentionStore, TrackingSource.TWITTER);
 		
 		final List<ContentMention> mentions = Lists.newArrayList(mention("/a", TrackingSource.TWITTER), mention("/b", TrackingSource.TWITTER), mention("/b", TrackingSource.TWITTER));
 		
@@ -57,11 +60,11 @@ public class PlaylistFromMentionsGeneratorTest extends MockObjectTestCase {
 		checking(new Expectations() {{
 			one(mentionStore).mentions(TrackingSource.TWITTER, 10000); will(returnValue(mentions));
 		
-			allowing(contentStore).findByUri("/a"); will(returnValue(data.dotCottonsBigAdventure));
-			allowing(contentStore).findByUri("/b"); will(returnValue(data.englishForCats));
+			allowing(resolver).findByUri("/a"); will(returnValue(data.dotCottonsBigAdventure));
+			allowing(resolver).findByUri("/b"); will(returnValue(data.englishForCats));
 		
-			one(contentStore).createOrUpdatePlaylist(with(playlistEq(expectedHotnessPlaylist)), with(false));
-			one(contentStore).createOrUpdatePlaylist(with(playlistEq(expectedMentionsPlaylist)), with(false));
+			one(writer).createOrUpdatePlaylist(with(playlistEq(expectedHotnessPlaylist)), with(false));
+			one(writer).createOrUpdatePlaylist(with(playlistEq(expectedMentionsPlaylist)), with(false));
 		}});
 		
 		generator.run();

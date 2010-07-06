@@ -53,7 +53,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    		<bean parent="conditionalRunner">
     		<constructor-arg>
  					 <bean class="org.uriplay.persistence.system.UriRefresher">
- 					 	<property name="contentStore" ref="contentStore"/>
+ 					 	<property name="contentStore" ref="contentWriter"/>
                         <property name="fetcher" ref="remoteFetcher"/>
  					 	<property name="missingContentShouldBeMarkedAsUnavailable" value="false"/>
  					 	<property name="uris">
@@ -75,7 +75,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <bean parent="conditionalRunner">
             <constructor-arg>
                 <bean class="org.uriplay.tracking.PlaylistFromMentionsGenerator">
-                   <constructor-arg ref="contentStore"/>
+                   <constructor-arg ref="contentResolver"/>
+                   <constructor-arg ref="contentWriter"/>
                    <constructor-arg ref="contentMentionStore"/>
                    <constructor-arg value="TWITTER"/>
                </bean>
@@ -117,7 +118,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   </bean>
   
   <bean id="brandsUpdater" abstract="true">
-  	<property name="contentStore" ref="contentStore"/>
+  	<property name="contentStore" ref="contentWriter"/>
 	<property name="fetcher" ref="remoteFetcher"/>
 	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
   </bean>
@@ -161,7 +162,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   </bean>
 
   <bean id="bbcSchedulesUpdater" class="org.uriplay.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
-	 <constructor-arg ref="localOrRemoteFetcher"/>
+	 <constructor-arg ref="contentResolver"/>
 	 <property name="uris">
 	    <bean class="org.uriplay.remotesite.bbc.schedule.DatedBbcScheduleUriSource">
 		    <property name="daysToLookAhead" value="5" />
@@ -174,7 +175,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	 <constructor-arg>
 		 <bean class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
 			<constructor-arg ref="savingFetcher" />
-			<constructor-arg ref="contentStore" />
+			<constructor-arg ref="contentWriter" />
 			<constructor-arg>
 				<list>
 	                <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>

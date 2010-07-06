@@ -52,7 +52,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="statusProcessor" class="org.uriplay.tracking.twitter.LinkExtractingStatusProcessor">
         <constructor-arg>
             <bean class="org.uriplay.tracking.ContentResolvingUriMentionListener">
-                <constructor-arg ref="localOrRemoteFetcher"/>
+                <constructor-arg ref="contentResolver"/>
                 <constructor-arg ref="contentMentionStore"/>
             </bean>
         </constructor-arg>

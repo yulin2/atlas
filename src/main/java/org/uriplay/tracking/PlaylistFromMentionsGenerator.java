@@ -25,7 +25,8 @@ import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
-import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.content.ContentResolver;
+import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.persistence.tracking.ContentMention;
 import org.uriplay.persistence.tracking.ContentMentionStore;
 import org.uriplay.persistence.tracking.TrackingSource;
@@ -49,14 +50,16 @@ public class PlaylistFromMentionsGenerator implements Runnable {
 		}
 	};
 
-	private final MutableContentStore content;
 	private final ContentMentionStore mentionStore;
 	
 	private TrackingSource source;
+	private final ContentResolver resolver;
+	private final ContentWriter contentWriter;
 
-	public PlaylistFromMentionsGenerator(MutableContentStore content, ContentMentionStore mentions, TrackingSource source) {
+	public PlaylistFromMentionsGenerator(ContentResolver resolver, ContentWriter contentWriter, ContentMentionStore mentions, TrackingSource source) {
+		this.resolver = resolver;
+		this.contentWriter = contentWriter;
 		this.mentionStore = mentions;
-		this.content = content;
 		this.source = source;
 	}
 
@@ -74,7 +77,7 @@ public class PlaylistFromMentionsGenerator implements Runnable {
 		Map<Playlist, Count<Playlist>> playlistMentionCounts = Maps.newHashMap();
 		
 		for (ContentMention contentMention : mentioned) {
-			Description found = content.findByUri(contentMention.uri());
+			Description found = resolver.findByUri(contentMention.uri());
 			if (found != null) {
 				if (found instanceof Item) {
 					Item item = (Item) found;
@@ -90,8 +93,8 @@ public class PlaylistFromMentionsGenerator implements Runnable {
 			}
 		}
 		
-		content.createOrUpdatePlaylist(mentionsPlaylist, false);
-		content.createOrUpdatePlaylist(hotnessPlaylist(itemMentionCounts, playlistMentionCounts), false);
+		contentWriter.createOrUpdatePlaylist(mentionsPlaylist, false);
+		contentWriter.createOrUpdatePlaylist(hotnessPlaylist(itemMentionCounts, playlistMentionCounts), false);
 	}
 	
 	/**

@@ -18,54 +18,39 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.uriplay.media.entity.Content;
+import org.uriplay.persistence.UriplayPersistenceModule;
 import org.uriplay.persistence.content.AggregateContentListener;
 import org.uriplay.persistence.content.ContentListener;
-import org.uriplay.persistence.content.EventFiringContentStore;
-import org.uriplay.persistence.content.MongoDbBackedContentBootstrapper;
-import org.uriplay.persistence.content.MutableContentStore;
 import org.uriplay.persistence.content.QueueingContentListener;
 import org.uriplay.persistence.content.mongo.MongoDBQueryExecutor;
-import org.uriplay.persistence.content.mongo.MongoDbBackedContentStore;
+import org.uriplay.persistence.content.mongo.MongoRoughSearch;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
 import org.uriplay.persistence.system.Fetcher;
-import org.uriplay.persistence.tracking.ContentMentionStore;
-import org.uriplay.persistence.tracking.MongoDBBackedContentMentionStore;
 import org.uriplay.query.content.UriFetchingQueryExecutor;
 import org.uriplay.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher;
 
 import com.google.common.collect.ImmutableList;
-import com.mongodb.Mongo;
 
 @Configuration
+@Import(UriplayPersistenceModule.class)
 public class QueryModule {
 
-	private @Autowired Mongo mongo;
-
-	private @Autowired @Qualifier("localOrRemoteFetcher") Fetcher<Content> localOrRemoteFetcher;
-	
-	public @Bean ContentMentionStore contentMentionStore() {
-		return new MongoDBBackedContentMentionStore(mongo, "uriplay");
-	}
-	
-	public @Bean MutableContentStore contentStore() {
-		return new EventFiringContentStore(mongoContentStore(), contentListener());
-	}	
+	private @Autowired @Qualifier("contentResolver") Fetcher<Content> localOrRemoteFetcher;
+	private @Autowired MongoRoughSearch contentStore;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
-		return new MongoDBQueryExecutor(mongoContentStore());
+		return new MongoDBQueryExecutor(contentStore);
 	}
 
 	@Bean KnownTypeQueryExecutor mongoDbQueryExcutorThatFiltersUriQueries() {
-		MongoDBQueryExecutor executor = new MongoDBQueryExecutor(mongoContentStore());
+		MongoDBQueryExecutor executor = new MongoDBQueryExecutor(contentStore);
 		executor.setFilterUriQueries(true);
 		return executor;
 	}
 
-	@Bean MongoDbBackedContentStore mongoContentStore() {
-		return new MongoDbBackedContentStore(mongo, "uriplay");
-	}
 	
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 		return new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()));
@@ -77,10 +62,6 @@ public class QueryModule {
 	
 	@Bean(destroyMethod="shutdown") ContentListener contentListener() {
 		return new QueueingContentListener(new AggregateContentListener(ImmutableList.of(titleSearcher())));
-	}
-	
-	@Bean MongoDbBackedContentBootstrapper contentBootstrapper() {
-		return new MongoDbBackedContentBootstrapper(contentListener(), mongoContentStore());
 	}
 
 }

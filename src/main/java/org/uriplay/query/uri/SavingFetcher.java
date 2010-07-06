@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 package org.uriplay.query.uri;
 
   import org.uriplay.media.entity.Content;
-import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.persistence.system.Fetcher;
 
 
@@ -27,9 +27,9 @@ import org.uriplay.persistence.system.Fetcher;
 public class SavingFetcher implements Fetcher<Object> {
 
 	private final Fetcher<Content> delegateFetcher;
-	private final MutableContentStore store;
+	private final ContentWriter store;
 
-	public SavingFetcher(Fetcher<Content> delegateFetcher, MutableContentStore store) {
+	public SavingFetcher(Fetcher<Content> delegateFetcher, ContentWriter store) {
 		this.delegateFetcher = delegateFetcher;
 		this.store = store;
 	}

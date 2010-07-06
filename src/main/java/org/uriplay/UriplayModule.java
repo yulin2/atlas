@@ -18,11 +18,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.uriplay.equiv.EquivModule;
+import org.uriplay.persistence.UriplayPersistenceModule;
 import org.uriplay.query.QueryModule;
 
 @Configuration
+@Import({EquivModule.class, QueryModule.class, UriplayPersistenceModule.class})
 @ImportResource("classpath:uriplay.xml")
-@Import({EquivModule.class, QueryModule.class})
 public class UriplayModule {
 	
 }

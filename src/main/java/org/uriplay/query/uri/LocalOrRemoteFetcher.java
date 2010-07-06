@@ -17,7 +17,7 @@ package org.uriplay.query.uri;
 
 
 import org.uriplay.media.entity.Content;
-import org.uriplay.persistence.content.ContentStore;
+import org.uriplay.persistence.content.ContentResolver;
 import org.uriplay.persistence.system.Fetcher;
 
 /**
@@ -26,13 +26,13 @@ import org.uriplay.persistence.system.Fetcher;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class LocalOrRemoteFetcher implements Fetcher<Content> {
+public class LocalOrRemoteFetcher implements Fetcher<Content>, ContentResolver {
 
-	private final ContentStore localStore;
+	private final ContentResolver localStore;
 	
 	private final Fetcher<Content> remoteFetcher;
 	
-	public LocalOrRemoteFetcher(ContentStore localStore, Fetcher<Content> remoteFetcher) {
+	public LocalOrRemoteFetcher(ContentResolver localStore, Fetcher<Content> remoteFetcher) {
 		this.localStore = localStore;
 		this.remoteFetcher = remoteFetcher;
 	}
@@ -48,4 +48,8 @@ public class LocalOrRemoteFetcher implements Fetcher<Content> {
 		}
 	}
 
+	@Override
+	public Content findByUri(String uri) {
+		return fetch(uri);
+	}
 }

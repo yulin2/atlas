@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
-import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.HttpClients;
@@ -25,7 +25,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     private final SimpleHttpClient httpClient;
     private final SiteSpecificAdapter<Brand> brandAdapter;
     static final Log LOG = LogFactory.getLog(HuluAllBrandsAdapter.class);
-    private MutableContentStore contentStore;
+    private ContentWriter contentStore;
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
     public HuluAllBrandsAdapter() {
@@ -41,7 +41,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
         this.brandAdapter = brandAdapter;
     }
 
-    public void setContentStore(MutableContentStore contentStore) {
+    public void setContentStore(ContentWriter contentStore) {
         this.contentStore = contentStore;
     }
 

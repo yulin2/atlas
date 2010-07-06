@@ -22,7 +22,7 @@ import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
-import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.persistence.system.Fetcher;
 
 import com.google.common.collect.Sets;
@@ -34,7 +34,7 @@ import com.google.common.collect.Sets;
 public class SavingFetcherTest extends MockObjectTestCase {
 
 	Fetcher<Content> delegateFetcher = mock(Fetcher.class);
-	MutableContentStore store = mock(MutableContentStore.class);
+	ContentWriter store = mock(ContentWriter.class);
 	
 	String URI = "http://example.com";
 	Item item1 = new Item();
@@ -45,7 +45,7 @@ public class SavingFetcherTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegateFetcher).fetch(URI); will(returnValue(item1));
-			one(store).createOrUpdateContent(item1, false);
+			one(store).createOrUpdateItem(item1);
 		}});
 		
 		new SavingFetcher(delegateFetcher, store).fetch(URI);

@@ -22,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.uriplay.media.entity.Description;
-import org.uriplay.persistence.content.MutableContentStore;
-import org.uriplay.persistence.system.Fetcher;
+import org.uriplay.persistence.content.ContentResolver;
+import org.uriplay.persistence.content.ContentWriter;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -34,11 +34,11 @@ import com.google.common.collect.Sets;
 @Controller
 public class AliasController {
 
-	private final MutableContentStore store;
-	private final Fetcher<Description> finder;
+	private final ContentWriter writer;
+	private final ContentResolver finder;
 
-	public AliasController(MutableContentStore store, Fetcher<Description> finder) {
-		this.store = store;
+	public AliasController(ContentWriter writer, ContentResolver finder) {
+		this.writer = writer;
 		this.finder = finder;
 	}
 	
@@ -56,19 +56,19 @@ public class AliasController {
 		ImmutableList<AliasAndTarget> aliases = aliasesFrom(csvAliases);
 		for (AliasAndTarget aliasAndTarget : aliases) {
 			
-			Description content = store.findByUri(aliasAndTarget.alias);
+			Description content = finder.findByUri(aliasAndTarget.alias);
 			if (content != null) {
 				info.add("Not adding alias " + aliasAndTarget.alias + "  because it already exists");
 				continue;
 			}
 			
 			try { 
-				Description canonicalContent = finder.fetch(aliasAndTarget.canonicalUri);
+				Description canonicalContent = finder.findByUri(aliasAndTarget.canonicalUri);
 				if (canonicalContent == null) {
 					errors.add("Not adding alias " + aliasAndTarget.alias + "  because the canonicalUri (" + aliasAndTarget.canonicalUri + ") can't be found");
 					continue;
 				}
-				store.addAliases(canonicalContent.getCanonicalUri(), Sets.newHashSet(aliasAndTarget.alias));
+				writer.addAliases(canonicalContent.getCanonicalUri(), Sets.newHashSet(aliasAndTarget.alias));
 			} catch (Exception e) {
 				errors.add("Not adding alias " + aliasAndTarget.alias + "  because the canonicalUri (" + aliasAndTarget.canonicalUri + ") threw a Fetch Exception");
 				continue;

@@ -20,7 +20,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Item;
-import org.uriplay.persistence.content.ContentStore;
+import org.uriplay.persistence.content.ContentResolver;
 import org.uriplay.persistence.system.Fetcher;
 
 /**
@@ -32,7 +32,7 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 	static final String URI = "http://example.com";
     
 	Fetcher<Content> remoteFetcher;
-	ContentStore resources;
+	ContentResolver resources;
 	
 	Fetcher<Content> localOrRemoteFetcher;
 	
@@ -43,7 +43,7 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		remoteFetcher = mock(Fetcher.class);
-		resources = mock(ContentStore.class);
+		resources = mock(ContentResolver.class);
 		localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
 	}
 

@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Episode;
-import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.HttpClients;
@@ -47,7 +47,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     private SiteSpecificAdapter<Brand> brandAdapter;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    private MutableContentStore contentStore;
+    private ContentWriter contentStore;
 
     public HuluItemAdapter() {
         this(HttpClients.webserviceClient(), new HuluItemContentExtractor());
@@ -111,7 +111,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
         }
     }
 
-    public void setContentStore(MutableContentStore contentStore) {
+    public void setContentStore(ContentWriter contentStore) {
         this.contentStore = contentStore;
     }
 

@@ -5,23 +5,25 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
-import org.uriplay.persistence.content.MutableContentStore;
+import org.uriplay.persistence.content.ContentResolver;
+import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Sets;
 
-public class CanonicalisingLocalRemoteFetcher implements Fetcher<Description> {
+public class CanonicalisingLocalRemoteFetcher implements Fetcher<Description>, ContentResolver {
 
 	private static final int MAX_CANONICALISATIONS = 5;
 	private final Log log = LogFactory.getLog(getClass());
 	
 	private final List<Canonicaliser> chain;
 	private final Fetcher<Description> delegate;
-	private final MutableContentStore store;
+	private final ContentWriter store;
 
-	public CanonicalisingLocalRemoteFetcher(Fetcher<Description> delegate, List<Canonicaliser> chain, MutableContentStore store) {
+	public CanonicalisingLocalRemoteFetcher(Fetcher<Description> delegate, List<Canonicaliser> chain, ContentWriter store) {
 		this.delegate = delegate;
 		this.chain = chain;
 		this.store = store;
@@ -75,5 +77,10 @@ public class CanonicalisingLocalRemoteFetcher implements Fetcher<Description> {
 			store.addAliases(canonicalUri, aliases);
 		}
 		return bean;
+	}
+
+	@Override
+	public Content findByUri(String uri) {
+		return (Content) fetch(uri);
 	}
 }
