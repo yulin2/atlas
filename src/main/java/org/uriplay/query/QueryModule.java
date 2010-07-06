@@ -21,9 +21,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.uriplay.media.entity.Content;
 import org.uriplay.persistence.UriplayPersistenceModule;
-import org.uriplay.persistence.content.AggregateContentListener;
-import org.uriplay.persistence.content.ContentListener;
-import org.uriplay.persistence.content.QueueingContentListener;
 import org.uriplay.persistence.content.mongo.MongoDBQueryExecutor;
 import org.uriplay.persistence.content.mongo.MongoRoughSearch;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
@@ -31,8 +28,6 @@ import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.query.content.UriFetchingQueryExecutor;
 import org.uriplay.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher;
-
-import com.google.common.collect.ImmutableList;
 
 @Configuration
 @Import(UriplayPersistenceModule.class)
@@ -51,7 +46,6 @@ public class QueryModule {
 		return executor;
 	}
 
-	
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 		return new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()));
 	}
@@ -59,9 +53,4 @@ public class QueryModule {
 	@Bean InMemoryFuzzySearcher titleSearcher() {
 		return new InMemoryFuzzySearcher();
 	}
-	
-	@Bean(destroyMethod="shutdown") ContentListener contentListener() {
-		return new QueueingContentListener(new AggregateContentListener(ImmutableList.of(titleSearcher())));
-	}
-
 }
