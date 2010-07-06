@@ -15,6 +15,8 @@ permissions and limitations under the License. */
 package org.uriplay.query.uri;
 
   import org.uriplay.media.entity.Content;
+import org.uriplay.media.entity.Item;
+import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.persistence.system.Fetcher;
 
@@ -40,8 +42,17 @@ public class SavingFetcher implements Fetcher<Object> {
 		
 		if (bean == null) { return null; }
 		
-		store.createOrUpdateContent(bean, false);
+		createOrUpdateContent(bean, false);
 		
 		return bean;
 	}
+	
+    private void createOrUpdateContent(Content root, boolean markMissingItemsAsUnavailable) {
+        if (root instanceof Playlist) {
+            store.createOrUpdatePlaylist((Playlist) root, markMissingItemsAsUnavailable);
+        }
+        if (root instanceof Item) {
+           store.createOrUpdateItem((Item) root);
+        }
+    }
 }
