@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.uriplay.equiv.www.EquivController;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Item;
+import org.uriplay.persistence.content.AggregateContentListener;
 import org.uriplay.persistence.equiv.EquivalentUrlStore;
 import org.uriplay.persistence.equiv.MongoEquivStore;
 import org.uriplay.remotesite.EquivGenerator;
@@ -34,6 +35,7 @@ import com.mongodb.Mongo;
 public class EquivModule {
 
 	private @Autowired Mongo mongo;
+	private @Autowired AggregateContentListener aggregateContentListener;
 	
 	@Bean EquivController manualEquivAssignmentController() {
 		return new EquivController(store());
@@ -43,12 +45,14 @@ public class EquivModule {
 		return new MongoEquivStore(mongo, "uriplay");
 	}
 	
-	@Bean EquivContentListener contentListener() {
+	@Bean EquivContentListener equivContentListener() {
 	    List<EquivGenerator<Brand>> brandEquivGenerators = ImmutableList.<EquivGenerator<Brand>>of(new FreebaseBrandEquivGenerator());
 	    
 	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators, store());
 	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());
 	    
-	    return new EquivContentListener(brandUpdater, itemUpdater);
+	    EquivContentListener equivContentListener = new EquivContentListener(brandUpdater, itemUpdater);
+	    aggregateContentListener.addListener(equivContentListener);
+	    return equivContentListener;
 	}
 }

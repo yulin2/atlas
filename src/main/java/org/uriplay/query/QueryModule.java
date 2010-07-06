@@ -20,6 +20,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.uriplay.persistence.UriplayPersistenceModule;
+import org.uriplay.persistence.content.AggregateContentListener;
+import org.uriplay.persistence.content.ContentListener;
+import org.uriplay.persistence.content.QueueingContentListener;
 import org.uriplay.persistence.content.mongo.MongoDBQueryExecutor;
 import org.uriplay.persistence.content.mongo.MongoRoughSearch;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
@@ -34,6 +37,7 @@ public class QueryModule {
 
 	private @Autowired @Qualifier("contentResolver") CanonicalisingLocalRemoteFetcher localOrRemoteFetcher;
 	private @Autowired MongoRoughSearch contentStore;
+	private @Autowired AggregateContentListener aggregateContentListener;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
 		return new MongoDBQueryExecutor(contentStore);
@@ -52,4 +56,10 @@ public class QueryModule {
 	@Bean InMemoryFuzzySearcher titleSearcher() {
 		return new InMemoryFuzzySearcher();
 	}
+    
+    @Bean(destroyMethod="shutdown") ContentListener queueingContentListener() {
+        QueueingContentListener queueingContentListener = new QueueingContentListener(titleSearcher());
+        aggregateContentListener.addListener(queueingContentListener);
+        return queueingContentListener;
+    }
 }

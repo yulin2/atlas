@@ -35,5 +35,4 @@ public class EquivContentListener implements ContentListener {
             }
         }
     }
-
 }

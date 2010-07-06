@@ -42,13 +42,15 @@ public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
         if (source != null && source.has("result")) {
             JSON result = source.get("result");
 
-            String huluId = string(getSingleValue(result, "hulu_id"), "value");
-            addId(equivs, brand, huluId, HULU);
-            
-            String thetvdbId = string(getSingleValue(result, "thetvdb_id"), "value");
-            addId(equivs, brand, thetvdbId, THETVDB);
-
-            equivs.addAll(equivalents(brand, wikipediaIds(result)));
+            if (result != null) {
+                String huluId = string(getSingleValue(result, "hulu_id"), "value");
+                addId(equivs, brand, huluId, HULU);
+                
+                String thetvdbId = string(getSingleValue(result, "thetvdb_id"), "value");
+                addId(equivs, brand, thetvdbId, THETVDB);
+    
+                equivs.addAll(equivalents(brand, wikipediaIds(result)));
+            }
         }
 
         return equivs;
