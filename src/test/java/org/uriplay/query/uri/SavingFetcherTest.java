@@ -45,7 +45,7 @@ public class SavingFetcherTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegateFetcher).fetch(URI); will(returnValue(item1));
-			one(store).createOrUpdateItem(item1);
+			one(store).createOrUpdateContent(item1, false);
 		}});
 		
 		new SavingFetcher(delegateFetcher, store).fetch(URI);
