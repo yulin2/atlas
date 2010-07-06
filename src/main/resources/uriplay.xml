@@ -20,38 +20,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg value="${mongo.host}" type="java.lang.String" />
     </bean>
 
-    <bean id="contentResolver" class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
-        <constructor-arg>
-            <bean class="org.uriplay.query.uri.LocalOrRemoteFetcher">
-                <constructor-arg ref="mongoContentStore" />
-                <constructor-arg ref="savingFetcher" />
-            </bean>
-        </constructor-arg>
-        <constructor-arg ref="contentWriter" />
-        <constructor-arg>
-            <list>
-                <bean class="org.uriplay.remotesite.bbc.BbcUriCanonicaliser" />
-                <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser" />
-                <bean class="org.uriplay.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser" />
-                <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter.DailyMotionItemCanonicaliser" />
-                <bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter.BlipTvCanonicaliser" />
-                <bean class="org.uriplay.remotesite.hulu.HuluAllBrandsAdapter.HuluAllBrandsCanonicaliser" />
-                <bean class="org.uriplay.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser" />
-                <bean class="org.uriplay.remotesite.hulu.HuluBrandAdapter.HuluBrandCanonicaliser" />
-
-                <!--  this should go last in the chain as it is an expensive operation -->
-                <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
-                    <constructor-arg ref="urlShorteningServices" />
-                </bean>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="savingFetcher" class="org.uriplay.query.uri.SavingFetcher">
-        <constructor-arg ref="contentWriter" />
-        <constructor-arg ref="remoteFetcher" />
-    </bean>
-
     <bean id="huluAllBrandsAdapter" class="org.uriplay.remotesite.hulu.HuluAllBrandsAdapter">
         <constructor-arg>
             <ref bean="huluBrandAdapter" />
@@ -68,6 +36,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="huluItemAdapter" class="org.uriplay.remotesite.hulu.HuluItemAdapter">
         <property name="contentStore" ref="contentWriter" />
         <property name="brandAdapter" ref="huluBrandAdapter" />
+    </bean>
+    
+    <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
+        <constructor-arg ref="urlShorteningServices"/>
     </bean>
 
     <bean id="remoteFetcher" class="org.uriplay.remotesite.PerSiteAdapterDispatcher">

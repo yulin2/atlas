@@ -6,36 +6,35 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Content;
-import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.content.ContentResolver;
-import org.uriplay.persistence.content.ContentWriter;
+import org.uriplay.persistence.content.mongo.AliasWriter;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Sets;
 
-public class CanonicalisingLocalRemoteFetcher implements Fetcher<Description>, ContentResolver {
+public class CanonicalisingLocalRemoteFetcher implements Fetcher<Content>, ContentResolver {
 
 	private static final int MAX_CANONICALISATIONS = 5;
 	private final Log log = LogFactory.getLog(getClass());
 	
 	private final List<Canonicaliser> chain;
-	private final Fetcher<Description> delegate;
-	private final ContentWriter store;
+	private final Fetcher<Content> delegate;
+	private final AliasWriter store;
 
-	public CanonicalisingLocalRemoteFetcher(Fetcher<Description> delegate, List<Canonicaliser> chain, ContentWriter store) {
+	public CanonicalisingLocalRemoteFetcher(Fetcher<Content> delegate, List<Canonicaliser> chain, AliasWriter store) {
 		this.delegate = delegate;
 		this.chain = chain;
 		this.store = store;
 	}
 
 	@Override
-	public Description fetch(String uri) {
+	public Content fetch(String uri) {
 		Set<String> aliases = Sets.newHashSet();
 		String currentUri = uri;
 		for (int i = 0; i < MAX_CANONICALISATIONS; i++) {
 			try {
-				Description bean = delegate.fetch(currentUri);
+				Content bean = delegate.fetch(currentUri);
 				if (bean == null) {
 					return null;
 				} else {
@@ -72,7 +71,7 @@ public class CanonicalisingLocalRemoteFetcher implements Fetcher<Description>, C
 		}
 	}
 
-	private Description saveAliases(Description bean, String canonicalUri, Set<String> aliases) {
+	private Content saveAliases(Content bean, String canonicalUri, Set<String> aliases) {
 		if (!aliases.isEmpty()) {
 			store.addAliases(canonicalUri, aliases);
 		}

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.content.ContentResolver;
-import org.uriplay.persistence.content.ContentWriter;
+import org.uriplay.persistence.content.mongo.AliasWriter;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -34,10 +34,10 @@ import com.google.common.collect.Sets;
 @Controller
 public class AliasController {
 
-	private final ContentWriter writer;
+	private final AliasWriter writer;
 	private final ContentResolver finder;
 
-	public AliasController(ContentWriter writer, ContentResolver finder) {
+	public AliasController(AliasWriter writer, ContentResolver finder) {
 		this.writer = writer;
 		this.finder = finder;
 	}

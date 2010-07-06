@@ -19,16 +19,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.uriplay.media.entity.Equiv;
-import org.uriplay.persistence.equiv.EquivStore;
+import org.uriplay.persistence.equiv.EquivalentUrlStore;
 
 import com.google.common.collect.Sets;
 
 @Controller
 public class EquivController {
 
-	private final EquivStore store;
+	private final EquivalentUrlStore store;
 
-	public EquivController(EquivStore store) {
+	public EquivController(EquivalentUrlStore store) {
 		this.store = store;
 	}
 	

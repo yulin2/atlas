@@ -46,7 +46,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="healthController" class="org.uriplay.system.HealthController"/>
 	
 	<bean id="aliasController" class="org.uriplay.system.AliasController">
-	   <constructor-arg ref="contentWriter"/>
+	   <constructor-arg ref="aliasWriter"/>
 	   <constructor-arg ref="contentResolver"/>
 	</bean>
 	

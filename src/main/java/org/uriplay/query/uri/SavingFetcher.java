@@ -26,7 +26,7 @@ import org.uriplay.persistence.system.Fetcher;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class SavingFetcher implements Fetcher<Object> {
+public class SavingFetcher implements Fetcher<Content> {
 
 	private final Fetcher<Content> delegateFetcher;
 	private final ContentWriter store;
@@ -36,7 +36,7 @@ public class SavingFetcher implements Fetcher<Object> {
 		this.store = store;
 	}
 
-	public Object fetch(String uri) {
+	public Content fetch(String uri) {
 		
 		Content bean = delegateFetcher.fetch(uri);
 		

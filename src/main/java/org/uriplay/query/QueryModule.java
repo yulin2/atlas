@@ -19,21 +19,20 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.uriplay.media.entity.Content;
 import org.uriplay.persistence.UriplayPersistenceModule;
 import org.uriplay.persistence.content.mongo.MongoDBQueryExecutor;
 import org.uriplay.persistence.content.mongo.MongoRoughSearch;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
-import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.query.content.UriFetchingQueryExecutor;
 import org.uriplay.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher;
+import org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher;
 
 @Configuration
 @Import(UriplayPersistenceModule.class)
 public class QueryModule {
 
-	private @Autowired @Qualifier("contentResolver") Fetcher<Content> localOrRemoteFetcher;
+	private @Autowired @Qualifier("contentResolver") CanonicalisingLocalRemoteFetcher localOrRemoteFetcher;
 	private @Autowired MongoRoughSearch contentStore;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {

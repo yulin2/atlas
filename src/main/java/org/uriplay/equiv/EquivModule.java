@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.uriplay.equiv.www.EquivController;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Item;
-import org.uriplay.persistence.equiv.EquivStore;
+import org.uriplay.persistence.equiv.EquivalentUrlStore;
 import org.uriplay.persistence.equiv.MongoEquivStore;
 import org.uriplay.remotesite.EquivGenerator;
 import org.uriplay.remotesite.freebase.FreebaseBrandEquivGenerator;
@@ -39,7 +39,7 @@ public class EquivModule {
 		return new EquivController(store());
 	}
 	
-	@Bean EquivStore store() {
+	public @Bean EquivalentUrlStore store() {
 		return new MongoEquivStore(mongo, "uriplay");
 	}
 	

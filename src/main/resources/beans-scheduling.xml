@@ -175,7 +175,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	 <constructor-arg>
 		 <bean class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
 			<constructor-arg ref="savingFetcher" />
-			<constructor-arg ref="contentWriter" />
+			<constructor-arg ref="aliasWriter" />
 			<constructor-arg>
 				<list>
 	                <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>

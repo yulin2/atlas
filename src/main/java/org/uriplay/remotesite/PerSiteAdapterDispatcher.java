@@ -17,6 +17,7 @@ package org.uriplay.remotesite;
 
 import java.util.List;
 
+import org.uriplay.media.entity.Content;
 import org.uriplay.persistence.system.Fetcher;
 
 
@@ -27,12 +28,12 @@ import org.uriplay.persistence.system.Fetcher;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class PerSiteAdapterDispatcher implements Fetcher<Object> {
+public class PerSiteAdapterDispatcher implements Fetcher<Content> {
 
-	private List<SiteSpecificAdapter<?>> adapters;
+	private List<SiteSpecificAdapter<? extends Content>> adapters;
 
-	public Object fetch(String uri) {
-		SiteSpecificAdapter<?> adapter = findMatchingAdapterFor(uri);
+	public Content fetch(String uri) {
+		SiteSpecificAdapter<? extends Content> adapter = findMatchingAdapterFor(uri);
 		if (adapter != null) {
 			return adapter.fetch(uri);
 		} else {
@@ -40,8 +41,8 @@ public class PerSiteAdapterDispatcher implements Fetcher<Object> {
 		}
 	}
 
-	private SiteSpecificAdapter<?> findMatchingAdapterFor(String uri) {
-		for (SiteSpecificAdapter<?> adapter : adapters) {
+	private SiteSpecificAdapter<? extends Content> findMatchingAdapterFor(String uri) {
+		for (SiteSpecificAdapter<? extends Content> adapter : adapters) {
 			if (adapter.canFetch(uri)) {
 				return adapter;
 			}
@@ -49,7 +50,7 @@ public class PerSiteAdapterDispatcher implements Fetcher<Object> {
 		throw new NoMatchingAdapterException("No configured adapter matched URI " + uri);
 	}
 
-	public void setAdapters(List<SiteSpecificAdapter<?>> adapters) {
+	public void setAdapters(List<SiteSpecificAdapter<? extends Content>> adapters) {
 		this.adapters = adapters;
 	}
 }

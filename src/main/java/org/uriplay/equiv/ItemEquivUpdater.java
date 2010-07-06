@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.uriplay.media.entity.Equiv;
 import org.uriplay.media.entity.Item;
-import org.uriplay.persistence.equiv.EquivStore;
+import org.uriplay.persistence.equiv.EquivalentUrlStore;
 import org.uriplay.remotesite.EquivGenerator;
 
 public class ItemEquivUpdater implements EquivUpdater<Item> {
     
     private final List<EquivGenerator<Item>> equivGenerators;
-    private final EquivStore equivStore;
+    private final EquivalentUrlStore equivStore;
 
-    public ItemEquivUpdater(List<EquivGenerator<Item>> equivGenerators, EquivStore equivStore) {
+    public ItemEquivUpdater(List<EquivGenerator<Item>> equivGenerators, EquivalentUrlStore equivStore) {
         this.equivGenerators = equivGenerators;
         this.equivStore = equivStore;
     }
