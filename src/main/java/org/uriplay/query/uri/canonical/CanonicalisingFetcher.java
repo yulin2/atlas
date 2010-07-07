@@ -13,7 +13,7 @@ import org.uriplay.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Sets;
 
-public class CanonicalisingLocalRemoteFetcher implements Fetcher<Content>, ContentResolver {
+public class CanonicalisingFetcher implements Fetcher<Content>, ContentResolver {
 
 	private static final int MAX_CANONICALISATIONS = 5;
 	private final Log log = LogFactory.getLog(getClass());
@@ -22,7 +22,7 @@ public class CanonicalisingLocalRemoteFetcher implements Fetcher<Content>, Conte
 	private final Fetcher<Content> delegate;
 	private final AliasWriter store;
 
-	public CanonicalisingLocalRemoteFetcher(Fetcher<Content> delegate, List<Canonicaliser> chain, AliasWriter store) {
+	public CanonicalisingFetcher(Fetcher<Content> delegate, List<Canonicaliser> chain, AliasWriter store) {
 		this.delegate = delegate;
 		this.chain = chain;
 		this.store = store;

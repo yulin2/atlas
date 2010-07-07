@@ -87,12 +87,7 @@ public class WikipediaSparqlGraphExtractor implements ContentExtractor<Wikipedia
 				}
 			}
 		}
-		if (rootDescription instanceof Item) {
-			((Item) rootDescription).setContainedInUris(containedInUris(source));
-		} 
-		if (rootDescription instanceof Playlist) {
-			((Playlist) rootDescription).setContainedInUris(containedInUris(source));
-		}
+		rootDescription.setContainedInUris(containedInUris(source));
 		rootDescription.addAlias(source.getCanonicalDbpediaUri());
 		return rootDescription;
 	}

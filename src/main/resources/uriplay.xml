@@ -9,16 +9,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   - Application context definition for URIplay. See uriplay-servlet.xml for webapp config.
   -->
 
-    <import resource="classpath:beans-scheduling.xml" />
     <import resource="classpath:beans-short-url-services.xml" />
-    <import resource="classpath:beans-tracking.xml" />
     <import resource="classpath:uriplay-servlet.xml" />
 
     <bean id="contextConfigurer" class="com.metabroadcast.common.webapp.properties.ContextConfigurer" init-method="init" />
-
-   <bean id="mongo" class="com.mongodb.Mongo">
-        <constructor-arg value="${mongo.host}" type="java.lang.String" />
-    </bean>
 
     <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
         <constructor-arg ref="urlShorteningServices"/>

@@ -29,14 +29,22 @@ import org.uriplay.persistence.system.Fetcher;
 public class SavingFetcher implements Fetcher<Content> {
 
 	private final Fetcher<Content> delegateFetcher;
-	private final ContentWriter store;
+	private ContentWriter store;
 
 	public SavingFetcher(Fetcher<Content> delegateFetcher, ContentWriter store) {
 		this.delegateFetcher = delegateFetcher;
 		this.store = store;
 	}
+	
+	public void setStore(ContentWriter store) {
+		this.store = store;
+	}
 
 	public Content fetch(String uri) {
+		
+		if (store == null) {
+			throw new IllegalStateException();
+		}
 		
 		Content bean = delegateFetcher.fetch(uri);
 		

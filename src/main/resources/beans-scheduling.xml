@@ -173,7 +173,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="perPublisherUpdater" class="org.uriplay.remotesite.PerPublisherItemUpdater">
 	 <constructor-arg ref="queryExecutor"/>
 	 <constructor-arg>
-		 <bean class="org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher">
+		 <bean class="org.uriplay.query.uri.canonical.CanonicalisingFetcher">
 			<constructor-arg ref="savingFetcher" />
 			<constructor-arg ref="aliasWriter" />
 			<constructor-arg>
@@ -191,6 +191,40 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	    </util:list>
 	  </property>
   </bean>   
+  
+  
+  <bean id="manualUpdateMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <props>
+                <prop key="/system/c4/update">c4UpdateController</prop>
+                <prop key="/system/bbc/update">bbcUpdateController</prop>
+                <prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
+                <prop key="/system/orphans/update">orphanUpdateController</prop>
+                <prop key="/system/hulu/update">huluUpdateController</prop>
+            </props>
+        </property>
+    </bean>
+  
+   <bean name="huluUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+        <constructor-arg ref="huluBrandsUpdater"/>
+   </bean>
+   
+    
+    <bean id="c4UpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+        <constructor-arg ref="c4BrandsUpdater"/>
+    </bean>
+    
+    <bean id="bbcUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+        <constructor-arg ref="bbcBrandsUpdater"/>
+    </bean>
+
+    <bean id="bbcScheduleUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+        <constructor-arg ref="bbcSchedulesUpdater"/>
+    </bean>
+    
+    <bean id="orphanUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+        <constructor-arg ref="perPublisherUpdater"/>
+    </bean>
   
   <bean id="conditionalRunner" abstract="true" class="com.metabroadcast.common.webapp.runnables.IpAddressBasedConditionalRunner">
   	<property name="shouldRunOnMachine" value="${scheduled.tasks.machine.ip}" />

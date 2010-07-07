@@ -33,12 +33,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				<prop key="/api/1.0/doc*">uriFetchingControllerV1</prop>
 
 				<prop key="/2.0/any*">anyTypeController</prop>
-
-				<prop key="/system/c4/update">c4UpdateController</prop>
-				<prop key="/system/bbc/update">bbcUpdateController</prop>
-				<prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
-				<prop key="/system/orphans/update">orphanUpdateController</prop>
-                <prop key="/system/hulu/update">huluUpdateController</prop>
 			</props>
 		</property>
 	</bean>
@@ -49,26 +43,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	   <constructor-arg ref="aliasWriter"/>
 	   <constructor-arg ref="contentResolver"/>
 	</bean>
-	
-	<bean id="c4UpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
-		<constructor-arg ref="c4BrandsUpdater"/>
-	</bean>
-	
-	<bean id="bbcUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
-		<constructor-arg ref="bbcBrandsUpdater"/>
-	</bean>
 
-	<bean id="bbcScheduleUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
-		<constructor-arg ref="bbcSchedulesUpdater"/>
-	</bean>
-    
-    <bean id="huluUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
-        <constructor-arg ref="huluBrandsUpdater"/>
-    </bean>
-	
-	<bean id="orphanUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
-		<constructor-arg ref="perPublisherUpdater"/>
-	</bean>
 	
 	<bean id="newQueryApiController" class="org.uriplay.query.v2.QueryController">
 		<constructor-arg ref="queryExecutor"/>

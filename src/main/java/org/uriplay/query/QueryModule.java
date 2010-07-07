@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.uriplay.persistence.UriplayPersistenceModule;
 import org.uriplay.persistence.content.AggregateContentListener;
 import org.uriplay.persistence.content.ContentListener;
 import org.uriplay.persistence.content.QueueingContentListener;
@@ -30,13 +28,12 @@ import org.uriplay.persistence.content.query.UniqueContentForUriQueryExecutor;
 import org.uriplay.query.content.UriFetchingQueryExecutor;
 import org.uriplay.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher;
-import org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher;
+import org.uriplay.query.uri.canonical.CanonicalisingFetcher;
 
 @Configuration
-@Import(UriplayPersistenceModule.class)
 public class QueryModule {
 
-	private @Autowired @Qualifier("contentResolver") CanonicalisingLocalRemoteFetcher localOrRemoteFetcher;
+	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	private @Autowired MongoRoughSearch contentStore;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	
