@@ -26,6 +26,7 @@ import org.uriplay.persistence.content.QueueingContentListener;
 import org.uriplay.persistence.content.mongo.MongoDBQueryExecutor;
 import org.uriplay.persistence.content.mongo.MongoRoughSearch;
 import org.uriplay.persistence.content.query.KnownTypeQueryExecutor;
+import org.uriplay.persistence.content.query.UniqueContentForUriQueryExecutor;
 import org.uriplay.query.content.UriFetchingQueryExecutor;
 import org.uriplay.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.uriplay.query.content.fuzzy.InMemoryFuzzySearcher;
@@ -40,7 +41,7 @@ public class QueryModule {
 	private @Autowired AggregateContentListener aggregateContentListener;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
-		return new MongoDBQueryExecutor(contentStore);
+		return new UniqueContentForUriQueryExecutor(new MongoDBQueryExecutor(contentStore));
 	}
 
 	@Bean KnownTypeQueryExecutor mongoDbQueryExcutorThatFiltersUriQueries() {
