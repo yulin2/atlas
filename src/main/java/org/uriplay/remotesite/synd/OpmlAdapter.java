@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.synd;
 
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.persistence.system.RemoteSiteClient;
@@ -31,12 +31,12 @@ import com.sun.syndication.feed.opml.Opml;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OpmlAdapter implements SiteSpecificAdapter<Description> {
+public class OpmlAdapter implements SiteSpecificAdapter<Content> {
 
 	private final RemoteSiteClient<Opml> opmlClient;
 	private final ContentExtractor<OpmlSource, Playlist> graphExtractor;
 	
-	public OpmlAdapter(Fetcher<Object> delegateFetcher) {
+	public OpmlAdapter(Fetcher<Content> delegateFetcher) {
 		this(new OpmlFeedClient(), new OpmlGraphExtractor(delegateFetcher));
 	}
 

@@ -29,7 +29,6 @@ import org.uriplay.persistence.system.Fetcher;
 public class LocalOrRemoteFetcher implements Fetcher<Content>, ContentResolver {
 
 	private final ContentResolver localStore;
-	
 	private final Fetcher<Content> remoteFetcher;
 	
 	public LocalOrRemoteFetcher(ContentResolver localStore, Fetcher<Content> remoteFetcher) {

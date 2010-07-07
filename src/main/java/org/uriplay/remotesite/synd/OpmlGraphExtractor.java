@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Duration;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Item;
@@ -42,10 +43,10 @@ import com.sun.syndication.feed.opml.Outline;
  */
 public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist> {
 
-	private final Fetcher<Object> delegateFetcher;
+	private final Fetcher<Content> delegateFetcher;
 	private final BbcPodcastGenreMap genreMap = new BbcPodcastGenreMap();
 
-	public OpmlGraphExtractor(Fetcher<Object> delegateFetcher) {
+	public OpmlGraphExtractor(Fetcher<Content> delegateFetcher) {
 		this.delegateFetcher = delegateFetcher;
 	}
 

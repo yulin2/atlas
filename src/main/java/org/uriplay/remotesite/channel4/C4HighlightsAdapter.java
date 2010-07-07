@@ -14,8 +14,6 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.channel4;
 
-import javax.xml.bind.JAXBException;
-
 import org.uriplay.media.entity.Brand;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -35,7 +33,7 @@ public class C4HighlightsAdapter extends BaseC4PlaylistClient {
 	private static final String HIGHLIGHTS_URI = "http://www.channel4.com/programmes/4od/highlights";
 	private static final String CURRENT_MOST_POPULAR_URI = "http://www.channel4.com/programmes/4od/most-popular";
 	
-	public C4HighlightsAdapter() throws JAXBException {
+	public C4HighlightsAdapter() {
 		this(new C4HomePageClient(), new C4AtomBackedBrandAdapter());
 	}
 	

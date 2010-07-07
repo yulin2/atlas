@@ -18,8 +18,6 @@ package org.uriplay.remotesite.bbc;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.remotesite.ContentExtractor;
@@ -48,7 +46,7 @@ public class BbcIplayerFeedAdapter extends SyndicationAdapter<Playlist> implemen
 	private static final Pattern CHANNEL_URI_PATTERN = Pattern.compile("http://feeds.bbc.co.uk/iplayer/bbc_([^/]+)/list");
 	private static final Pattern highlightsFeedPattern = Pattern.compile("http://feeds.bbc.co.uk/iplayer/(popular|highlights)/(tv|radio)");
 	
-	public BbcIplayerFeedAdapter() throws JAXBException {
+	public BbcIplayerFeedAdapter() {
 		this(new SyndicationFeedClient(), new BbcIplayerGraphExtractor());
 	}
 	

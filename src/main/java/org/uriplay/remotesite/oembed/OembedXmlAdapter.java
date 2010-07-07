@@ -17,8 +17,6 @@ package org.uriplay.remotesite.oembed;
 
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
 import org.uriplay.feeds.OembedItem;
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
@@ -43,7 +41,7 @@ public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 	private Integer maxHeight;
 	private String publisher;
 
-	public OembedXmlAdapter() throws JAXBException {
+	public OembedXmlAdapter() {
 		this(new OembedXmlClient(), new OembedGraphExtractor());
 	}
 	

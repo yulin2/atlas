@@ -17,8 +17,6 @@ package org.uriplay.remotesite.ted;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.query.uri.canonical.Canonicaliser;
@@ -43,7 +41,7 @@ public class TedTalkAdapter implements SiteSpecificAdapter<Item> {
 	private static final Pattern CANONICAL_URI_PATTERN = Pattern.compile(TED_BASE_URI + "([^\\s/]+).html");
 	private static final Pattern ALIAS_URI_PATTERN = Pattern.compile("http://www.ted.com/talks/lang/eng/([^\\s/]+).html");
 
-	public TedTalkAdapter() throws JAXBException {
+	public TedTalkAdapter() {
 		this(new TedTalkClient(), new TedTalkGraphExtractor());
 	}
 	

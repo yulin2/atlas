@@ -20,70 +20,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg value="${mongo.host}" type="java.lang.String" />
     </bean>
 
-    <bean id="huluAllBrandsAdapter" class="org.uriplay.remotesite.hulu.HuluAllBrandsAdapter">
-        <constructor-arg>
-            <ref bean="huluBrandAdapter" />
-        </constructor-arg>
-        <property name="contentStore" ref="contentWriter" />
-    </bean>
-
-    <bean id="huluBrandAdapter" class="org.uriplay.remotesite.hulu.HuluBrandAdapter">
-        <property name="episodeAdapter">
-            <bean class="org.uriplay.remotesite.hulu.HuluItemAdapter" />
-        </property>
-    </bean>
-
-    <bean id="huluItemAdapter" class="org.uriplay.remotesite.hulu.HuluItemAdapter">
-        <property name="contentStore" ref="contentWriter" />
-        <property name="brandAdapter" ref="huluBrandAdapter" />
-    </bean>
-    
     <bean class="org.uriplay.remotesite.tinyurl.ShortenedUrlCanonicaliser">
         <constructor-arg ref="urlShorteningServices"/>
     </bean>
 
-    <bean id="remoteFetcher" class="org.uriplay.remotesite.PerSiteAdapterDispatcher">
-        <property name="adapters">
-
-            <!-- Adapters in this list are tried in order until one matches the fetched URI -->
-            <list>
-                <bean class="org.uriplay.remotesite.youtube.YouTubeAdapter" />
-                <bean class="org.uriplay.remotesite.ted.TedTalkAdapter" />
-                <bean class="org.uriplay.remotesite.channel4.C4AtomBackedBrandAdapter" />
-                <bean class="org.uriplay.remotesite.channel4.C4HighlightsAdapter" />
-                <bean class="org.uriplay.remotesite.channel4.C4BrandAtoZAdapter" />
-                <bean class="org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter" />
-                <bean class="org.uriplay.remotesite.bliptv.BlipTvAdapter" />
-                <bean class="org.uriplay.remotesite.itv.ItvBrandAdapter" />
-                <bean class="org.uriplay.remotesite.bbc.BbcIplayerFeedAdapter" />
-                <bean class="org.uriplay.remotesite.bbc.BbcProgrammeAdapter" />
-                <bean class="org.uriplay.remotesite.bbc.BbcPodcastAdapter" />
-                <ref bean="huluAllBrandsAdapter" />
-                <ref bean="huluBrandAdapter" />
-                <ref bean="huluItemAdapter" />
-                <bean class="org.uriplay.remotesite.hulu.HuluRssAdapter" />
-
-                <bean class="org.uriplay.remotesite.vimeo.VimeoAdapter">
-                    <property name="acceptedUriPattern" value="http://vimeo.com/[\d]+" />
-                    <property name="oembedEndpoint" value="http://www.vimeo.com/api/oembed.xml" />
-                    <property name="maxWidth" value="400" />
-                    <property name="publisher" value="vimeo.com" />
-                </bean>
-                <bean class="org.uriplay.remotesite.oembed.OembedXmlAdapter">
-                    <property name="acceptedUriPattern" value="http://www.flickr.com/photos/[^/]+/[\d]+" />
-                    <property name="oembedEndpoint" value="http://www.flickr.com/services/oembed/" />
-                    <property name="publisher" value="flickr.com" />
-                </bean>
-                <bean class="org.uriplay.remotesite.synd.OpmlAdapter">
-                    <constructor-arg ref="remoteFetcher" />
-                </bean>
-                <bean class="org.uriplay.remotesite.wikipedia.WikipediaSparqlAdapter" />
-                <bean class="org.uriplay.remotesite.imdb.ImdbAdapter">
-                    <constructor-arg ref="remoteFetcher" />
-                </bean>
-            </list>
-        </property>
-    </bean>
 
     <util:properties id="rdfNsPrefixes">
         <prop key="http://uriplay.org/elements/">play</prop>

@@ -17,8 +17,6 @@ package org.uriplay.remotesite.bliptv;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
 import org.uriplay.media.entity.Item;
 import org.uriplay.persistence.system.RemoteSiteClient;
 import org.uriplay.query.uri.canonical.Canonicaliser;
@@ -41,7 +39,7 @@ public class BlipTvAdapter implements SiteSpecificAdapter<Item> {
 	private static final Pattern CANONICAL_URI_PATTERN = Pattern.compile("http://blip.tv/file/[\\d]+");
 	private static final Pattern ALIAS_PATTERN = Pattern.compile("(http://blip.tv/file/[\\d]+).*");
 
-	public BlipTvAdapter() throws JAXBException {
+	public BlipTvAdapter() {
 		this(new BlipTvClient(), new BlipTvGraphExtractor());
 	}
 	

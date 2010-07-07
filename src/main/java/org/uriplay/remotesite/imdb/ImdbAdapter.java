@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.imdb;
 
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -35,22 +35,22 @@ import com.hp.hpl.jena.sparql.core.ResultBinding;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class ImdbAdapter implements SiteSpecificAdapter<Description> {
+public class ImdbAdapter implements SiteSpecificAdapter<Content> {
 
 	private final SparqlEndpoint sparqlEndpoint;
-	private final Fetcher<Object> fetcher;
+	private final Fetcher<Content> fetcher;
 	
-	public ImdbAdapter(Fetcher<Object> fetcher) {
+	public ImdbAdapter(Fetcher<Content> fetcher) {
 		this(new DbpediaSparqlEndpoint(), fetcher); 
 	}
 	
-	ImdbAdapter(SparqlEndpoint sparqlEndpoint, Fetcher<Object> fetcher) {
+	ImdbAdapter(SparqlEndpoint sparqlEndpoint, Fetcher<Content> fetcher) {
 		this.sparqlEndpoint = sparqlEndpoint;
 		this.fetcher = fetcher;
 	}
 
 	@Override
-	public Description fetch(String imdbUri) {
+	public Content fetch(String imdbUri) {
 		String dbpediaUri = null;
 		try {
 			ImdbSource source = new ImdbSource(null, imdbUri);
@@ -58,7 +58,7 @@ public class ImdbAdapter implements SiteSpecificAdapter<Description> {
 			if (dbpediaUri == null) {
 				return null;
 			}
-			Description description = (Description) fetcher.fetch(dbpediaUri);
+			Content description = fetcher.fetch(dbpediaUri);
 			String wikipediaUri = new WikipediaSparqlSource(dbpediaUri).getCanonicalWikipediaUri();
 			description.addAlias(wikipediaUri);
 			description.addAlias(dbpediaUri);

@@ -20,14 +20,14 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.SiteSpecificAdapter;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.uriplay.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
-public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
+public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
 
 	static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile("^http://www\\.bbc\\.co\\.uk/programmes/([^/\\.]+)$");
 	
@@ -53,7 +53,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Description> {
 		return matcher.matches();
 	}
 	
-	public Description fetch(String uri) {
+	public Content fetch(String uri) {
 		try {
 			SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
 			if (content == null) {

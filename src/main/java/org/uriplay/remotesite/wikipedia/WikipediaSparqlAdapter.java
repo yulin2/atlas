@@ -20,7 +20,7 @@ import static org.uriplay.media.vocabulary.DBPO.TELEVISION_SHOW;
 
 import java.util.Set;
 
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.FetchException;
 import org.uriplay.remotesite.SiteSpecificAdapter;
@@ -38,22 +38,22 @@ import com.hp.hpl.jena.sparql.core.ResultBinding;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class WikipediaSparqlAdapter implements SiteSpecificAdapter<Description> {
+public class WikipediaSparqlAdapter implements SiteSpecificAdapter<Content> {
 
 	private final SparqlEndpoint sparqlEndpoint;
-	private final ContentExtractor<WikipediaSparqlSource, Description> propertyExtractor;
+	private final ContentExtractor<WikipediaSparqlSource, Content> propertyExtractor;
 	
 	public WikipediaSparqlAdapter() {
 		this(new DbpediaSparqlEndpoint(), new WikipediaSparqlGraphExtractor()); 
 	}
 	
-	WikipediaSparqlAdapter(SparqlEndpoint sparqlEndpoint, ContentExtractor<WikipediaSparqlSource, Description> propertyExtractor) {
+	WikipediaSparqlAdapter(SparqlEndpoint sparqlEndpoint, ContentExtractor<WikipediaSparqlSource, Content> propertyExtractor) {
 		this.sparqlEndpoint = sparqlEndpoint;
 		this.propertyExtractor = propertyExtractor;
 	}
 
 	@Override
-	public Description fetch(String uri) {
+	public Content fetch(String uri) {
 		
 		WikipediaSparqlSource source = new WikipediaSparqlSource(uri);
 		

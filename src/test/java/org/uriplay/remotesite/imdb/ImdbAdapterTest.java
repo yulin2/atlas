@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.remotesite.FetchException;
@@ -58,7 +59,7 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 	final Description WIKIPEDIA_REPRESENTATION = new Description();
 	
 	SparqlEndpoint sparqlEndpoint;
-	Fetcher<Object> fetcher;
+	Fetcher<Content> fetcher;
 	ImdbAdapter adapter;
 	ResultSet resultSet = mock(ResultSet.class);
 	ImdbSource imdbSource = new ImdbSource(resultSet, IMDB_LINK);

@@ -19,12 +19,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.uriplay.media.entity.Brand;
-import org.uriplay.media.entity.Description;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Item;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
@@ -54,13 +52,13 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	
 	private final BbcProgrammeGraphExtractor programmeGraphExtractor;
 	
-	private final SiteSpecificAdapter<Description> brandFetcher;
+	private final SiteSpecificAdapter<Content> brandFetcher;
 
-	public BbcIplayerGraphExtractor() throws JAXBException {
+	public BbcIplayerGraphExtractor() {
 		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeAdapter());
 	}
 	
-	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, SiteSpecificAdapter<Description> brandFetcher) {
+	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, SiteSpecificAdapter<Content> brandFetcher) {
 		this.episodeClient = episodeClient;
 		this.versionClient = versionClient;
 		this.brandFetcher = brandFetcher;

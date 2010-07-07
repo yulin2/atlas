@@ -29,6 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.uriplay.media.TransportType;
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Broadcast;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Encoding;
 import org.uriplay.media.entity.Episode;
@@ -69,7 +70,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 	
 	RemoteSiteClient<SlashProgrammesRdf> episodeRdfClient = mock(RemoteSiteClient.class, "episodeClient");
 	RemoteSiteClient<SlashProgrammesVersionRdf> versionRdfClient = mock(RemoteSiteClient.class, "versionClient");
-	SiteSpecificAdapter<Description> brandClient = mock(SiteSpecificAdapter.class);
+	SiteSpecificAdapter<Content> brandClient = mock(SiteSpecificAdapter.class);
 	
 	SlashProgrammesVersion version = new SlashProgrammesVersion().withResourceUri("/programmes/b00k2vtr#programme");
 			

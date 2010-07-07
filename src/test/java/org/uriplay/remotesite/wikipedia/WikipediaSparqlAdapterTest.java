@@ -26,6 +26,7 @@ import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Content;
 import org.uriplay.remotesite.ContentExtractor;
 import org.uriplay.remotesite.sparql.SparqlEndpoint;
 
@@ -46,7 +47,7 @@ public class WikipediaSparqlAdapterTest extends MockObjectTestCase {
 
 	WikipediaSparqlAdapter adapter;
 	SparqlEndpoint sparqlEndpoint = mock(SparqlEndpoint.class);
-	ContentExtractor<WikipediaSparqlSource, org.uriplay.media.entity.Description> propertyExtractor = mock(ContentExtractor.class);
+	ContentExtractor<WikipediaSparqlSource, Content> propertyExtractor = mock(ContentExtractor.class);
 	ResultSet resultSet = mock(ResultSet.class);
 	Binding binding = mock(Binding.class);
 	Model model = mock(Model.class);

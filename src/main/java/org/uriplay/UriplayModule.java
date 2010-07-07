@@ -17,7 +17,6 @@ package org.uriplay;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,20 +24,14 @@ import org.springframework.context.annotation.ImportResource;
 import org.uriplay.equiv.EquivModule;
 import org.uriplay.media.entity.Content;
 import org.uriplay.persistence.UriplayPersistenceModule;
-import org.uriplay.persistence.content.ContentResolver;
-import org.uriplay.persistence.content.ContentWriter;
 import org.uriplay.persistence.content.mongo.AliasWriter;
-import org.uriplay.persistence.equiv.EquivalentContentFinder;
-import org.uriplay.persistence.equiv.EquivalentContentMerger;
-import org.uriplay.persistence.equiv.EquivalentContentMergingContentWriter;
-import org.uriplay.persistence.equiv.EquivalentUrlFinder;
 import org.uriplay.persistence.system.Fetcher;
 import org.uriplay.query.QueryModule;
 import org.uriplay.query.uri.LocalOrRemoteFetcher;
 import org.uriplay.query.uri.SavingFetcher;
 import org.uriplay.query.uri.canonical.Canonicaliser;
 import org.uriplay.query.uri.canonical.CanonicalisingLocalRemoteFetcher;
-import org.uriplay.remotesite.PerSiteAdapterDispatcher;
+import org.uriplay.remotesite.RemoteSiteModule;
 import org.uriplay.remotesite.bbc.BbcUriCanonicaliser;
 import org.uriplay.remotesite.bliptv.BlipTvAdapter;
 import org.uriplay.remotesite.dailymotion.DailyMotionItemAdapter;
@@ -52,27 +45,22 @@ import org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser;
 import com.google.common.collect.Lists;
 
 @Configuration
-@Import({EquivModule.class, QueryModule.class, UriplayPersistenceModule.class})
 @ImportResource("classpath:uriplay.xml")
+@Import({EquivModule.class, QueryModule.class, RemoteSiteModule.class, UriplayPersistenceModule.class, UriplayWriterModule.class})
 public class UriplayModule {
 	
-	private @Autowired @Qualifier("persistentWriter") ContentWriter contentWriter;
+	private @Autowired UriplayPersistenceModule persistence;
 	
-	private @Autowired EquivalentUrlFinder finder;
 	private @Autowired AliasWriter aliasWriter;
-	private @Autowired @Qualifier("mongoContentStore") ContentResolver  mongoResolver;
 	
 	private @Autowired ShortenedUrlCanonicaliser shortUrlCanonicaliser;
-
-	private @Autowired PerSiteAdapterDispatcher remoteFetcher;
 	
-	public @Bean ContentWriter contentWriter() {		
-		return new EquivalentContentMergingContentWriter(contentWriter, new EquivalentContentMerger(new EquivalentContentFinder(finder, mongoResolver)));
-	}
+	private @Autowired RemoteSiteModule remote;
+
+	private @Autowired UriplayWriterModule writer;
 	
 	public @Bean CanonicalisingLocalRemoteFetcher contentResolver() {
-		
-		Fetcher<Content> localOrRemoteFetcher = new LocalOrRemoteFetcher(mongoResolver, savingFetcher());
+		Fetcher<Content> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.mongoContentStore(), savingFetcher());
 		
 		List<Canonicaliser> canonicalisers = Lists.newArrayList();
 		canonicalisers.add(new BbcUriCanonicaliser());
@@ -89,6 +77,6 @@ public class UriplayModule {
 	}
 	
 	public @Bean Fetcher<Content> savingFetcher() {
-		return new SavingFetcher(remoteFetcher, contentWriter());
+		return new SavingFetcher(remote.remoteFetcher(), writer.contentWriter());
 	}
 }

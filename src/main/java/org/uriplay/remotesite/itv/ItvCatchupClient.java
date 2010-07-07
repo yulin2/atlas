@@ -45,13 +45,17 @@ public class ItvCatchupClient implements RemoteSiteClient<List<ItvProgramme>> {
 
 	private static final Log log = LogFactory.getLog(ItvCatchupClient.class);
 	
-	public ItvCatchupClient() throws JAXBException {
+	public ItvCatchupClient() {
 		this(HttpClients.screenScrapingClient());
 	}
 	
-	public ItvCatchupClient(SimpleHttpClient httpClient) throws JAXBException {
+	public ItvCatchupClient(SimpleHttpClient httpClient) {
 		this.httpClient = httpClient;
-		context = JAXBContext.newInstance(ItvProgrammes.class, ItvProgramme.class);
+		try {
+			context = JAXBContext.newInstance(ItvProgrammes.class, ItvProgramme.class);
+		} catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public List<ItvProgramme> get(String uri) throws Exception {

@@ -28,6 +28,7 @@ import static org.uriplay.remotesite.wikipedia.WikipediaSparqlSource.TITLE_ID;
 import java.util.Set;
 
 import org.uriplay.media.entity.Brand;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Description;
 import org.uriplay.media.entity.Episode;
 import org.uriplay.media.entity.Item;
@@ -48,13 +49,13 @@ import com.hp.hpl.jena.sparql.core.ResultBinding;
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author Lee Denison (lee@metabroadcast.com)
  */
-public class WikipediaSparqlGraphExtractor implements ContentExtractor<WikipediaSparqlSource, Description> {
+public class WikipediaSparqlGraphExtractor implements ContentExtractor<WikipediaSparqlSource, Content> {
 
-	public Description extract(WikipediaSparqlSource source) {
+	public Content extract(WikipediaSparqlSource source) {
 
 		String rootUri = source.getCanonicalWikipediaUri();
 		
-		Description rootDescription = rootDescription(source);
+		Content rootDescription = rootDescription(source);
 		if (rootDescription == null) {
 			return null;
 		}
@@ -110,10 +111,10 @@ public class WikipediaSparqlGraphExtractor implements ContentExtractor<Wikipedia
 		return Sets.newHashSet();
 	}
 
-	private Description rootDescription(WikipediaSparqlSource source) {
+	private Content rootDescription(WikipediaSparqlSource source) {
 		Set<String> rootTypes = source.getRootTypes();
 		for (String type : rootTypes) {
-			Description description = beanFor(type);
+			Content description = beanFor(type);
 			if (description != null) {
 				return description;
 			}
@@ -154,7 +155,7 @@ public class WikipediaSparqlGraphExtractor implements ContentExtractor<Wikipedia
 		return beanFor(articleType);
 	}
 	
-	private Description beanFor(String articleType) {
+	private Content beanFor(String articleType) {
 
 		if (TELEVISION_EPISODE.equals(articleType)) {
 			return new Episode();

@@ -14,15 +14,17 @@ permissions and limitations under the License. */
 
 package org.uriplay.remotesite.vimeo;
 
-import javax.xml.bind.JAXBException;
-
 import org.uriplay.remotesite.oembed.OembedXmlAdapter;
 import org.uriplay.remotesite.oembed.OembedXmlClient;
 
 public class VimeoAdapter extends OembedXmlAdapter {
 
-	public VimeoAdapter() throws JAXBException {
+	public VimeoAdapter() {
 		super(new OembedXmlClient(), new VimeoOembedGraphExtractor());
+		setAcceptedUriPattern("http://vimeo.com/[\\d]+");
+		setOembedEndpoint("http://www.vimeo.com/api/oembed.xml");
+		setMaxWidth(400);
+		setPublisher("vimeo.com");
 	}
 
 }

@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
+import org.uriplay.media.entity.Content;
 import org.uriplay.media.entity.Countries;
 import org.uriplay.media.entity.Country;
 import org.uriplay.media.entity.Encoding;
@@ -58,7 +59,7 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 	static final String LOCATION1_URI = "http://downloads.bbc.co.uk/a.mp3";
 	static final String LOCATION2_URI = "http://feed1.com/a.mp3";
 	
-	Fetcher<Object> fetcher = mock(Fetcher.class);
+	Fetcher<Content> fetcher = mock(Fetcher.class);
 	
 	OpmlGraphExtractor extractor = new OpmlGraphExtractor(fetcher);
 	Opml feed;

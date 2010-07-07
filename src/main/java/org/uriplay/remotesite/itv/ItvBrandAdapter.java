@@ -16,8 +16,6 @@ package org.uriplay.remotesite.itv;
 
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import org.uriplay.media.entity.Brand;
 import org.uriplay.media.entity.Playlist;
 import org.uriplay.persistence.system.RemoteSiteClient;
@@ -38,7 +36,7 @@ public class ItvBrandAdapter implements SiteSpecificAdapter<Playlist> {
 
 	public static final String ITV_URI = "http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml";
 
-	public ItvBrandAdapter() throws JAXBException {
+	public ItvBrandAdapter() {
 		this(new ItvCatchupClient(), new ItvGraphExtractor());
 	}
 	

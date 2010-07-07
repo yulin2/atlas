@@ -36,13 +36,17 @@ public class OembedXmlClient implements RemoteSiteClient<OembedItem> {
 	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
 	
-	public OembedXmlClient() throws JAXBException {
+	public OembedXmlClient() {
 		this(HttpClients.webserviceClient());
 	}
 	
-	public OembedXmlClient(SimpleHttpClient httpClient) throws JAXBException {
+	public OembedXmlClient(SimpleHttpClient httpClient) {
 		this.httpClient = httpClient;
-		context = JAXBContext.newInstance(OembedItem.class);
+		try {
+			context = JAXBContext.newInstance(OembedItem.class);
+		} catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public OembedItem get(String uri) throws Exception {
