@@ -56,7 +56,7 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 	static final String WIKIPEDIA_LINK = "http://en.wikipedia.org/wiki/The_Sopranos";
 	static final Resource resource = new ResourceImpl(DBPEDIA_LINK);
 
-	final Description WIKIPEDIA_REPRESENTATION = new Description();
+	final Description WIKIPEDIA_REPRESENTATION = new Content();
 	
 	SparqlEndpoint sparqlEndpoint;
 	Fetcher<Content> fetcher;
