@@ -38,7 +38,7 @@ This will download all the dependencies, compile the code and run the tests (mak
     
 This will startup Atlas locally using the lovely [Jetty](http://jetty.codehaus.org/jetty/) and you'll be able to go to:
 
-    [http://localhost:8080/2.0/brands.json?uri=http://www.bbc.co.uk/programmes/b006m86d](http://localhost:8080/2.0/brands.json?uri=http://www.bbc.co.uk/programmes/b006m86d)
+    http://localhost:8080/2.0/brands.json?uri=http://www.bbc.co.uk/programmes/b006m86d
     
 If you have an empty database then this will go off to the BBC, grab the metadata for Eastenders, store it and return it to you.
 
