@@ -7,7 +7,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <description>Atlas 2.0 API</description>
     <build>
-        <finalName>uriplay</finalName>
+        <finalName>atlas</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

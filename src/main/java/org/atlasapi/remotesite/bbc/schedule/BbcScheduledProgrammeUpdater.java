@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.bbc.schedule;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.xml.bind.JAXBException;
 
