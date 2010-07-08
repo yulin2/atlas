@@ -45,7 +45,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     static final Log LOG = LogFactory.getLog(HuluBrandAdapter.class);
 
     public HuluBrandAdapter() {
-        this(HttpClients.webserviceClient(), new HuluBrandContentExtractor());
+        this(HttpClients.screenScrapingClient(), new HuluBrandContentExtractor());
     }
 
     public HuluBrandAdapter(SimpleHttpClient httpClient, ContentExtractor<HtmlNavigator, Brand> extractor) {
@@ -55,9 +55,9 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
     @Override
     public Brand fetch(String uri) {
-        try {
-            LOG.info("Retrieving Hulu brand: " + uri + " with " + httpClient.getClass() + " : " + httpClient.toString());
-            String content = httpClient.getContentsOf(uri);
+        LOG.info("Retrieving Hulu brand: " + uri + " with " + httpClient.getClass() + " : " + httpClient.toString());
+        String content = getContent(uri);
+        if (content != null) {
             HtmlNavigator navigator = new HtmlNavigator(content);
 
             Brand brand = extractor.extract(navigator);
@@ -78,8 +78,8 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
             LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getItems().size() + " episodes");
             return brand;
-        } catch (HttpException e) {
-            throw new FetchException("Unable to retrieve brand from Hulu: " + uri, e);
+        } else {
+            throw new FetchException("Unable to retrieve brand from Hulu: " + uri + " after a number of attempts");
         }
     }
 
@@ -110,5 +110,20 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
     public void setEpisodeAdapter(SiteSpecificAdapter<Episode> episodeAdapter) {
         this.episodeAdapter = episodeAdapter;
+    }
+
+    private String getContent(String uri) {
+        String content = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                content = httpClient.getContentsOf(uri);
+                if (content != null) {
+                    break;
+                }
+            } catch (HttpException e) {
+                LOG.warn("Error retrieving hulu brand: " + uri + " attempt " + i + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
+            }
+        }
+        return content;
     }
 }

@@ -29,11 +29,11 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
     public HuluAllBrandsAdapter() {
-        this(HttpClients.webserviceClient(), new HuluBrandAdapter());
+        this(HttpClients.screenScrapingClient(), new HuluBrandAdapter());
     }
 
     public HuluAllBrandsAdapter(SiteSpecificAdapter<Brand> brandAdapter) {
-        this(HttpClients.webserviceClient(), brandAdapter);
+        this(HttpClients.screenScrapingClient(), brandAdapter);
     }
 
     public HuluAllBrandsAdapter(SimpleHttpClient httpClient, SiteSpecificAdapter<Brand> brandAdapter) {
