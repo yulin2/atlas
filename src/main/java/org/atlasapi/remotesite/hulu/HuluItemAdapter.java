@@ -128,7 +128,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
                     break;
                 }
             } catch (HttpException e) {
-                LOG.warn("Error retrieving hulu item: " + uri + " attempt " + i + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
+                LOG.warn("Error retrieving hulu item: " + uri + " attempt " + i + " with message: " + e.getMessage());
             }
         }
         return content;

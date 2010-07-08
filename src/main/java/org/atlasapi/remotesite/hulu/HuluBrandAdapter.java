@@ -121,7 +121,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
                     break;
                 }
             } catch (HttpException e) {
-                LOG.warn("Error retrieving hulu brand: " + uri + " attempt " + i + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
+                LOG.warn("Error retrieving hulu brand: " + uri + " attempt " + i + " with message: " + e.getMessage());
             }
         }
         return content;
