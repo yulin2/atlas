@@ -24,6 +24,7 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.synd.SyndFeedImpl;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -31,11 +32,11 @@ import com.sun.syndication.feed.synd.SyndFeed;
  */
 public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 
-	RemoteSiteClient<SyndFeed> feedClient;
-	ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
-	BbcIplayerFeedAdapter adapter;
-	SyndFeed feed = null;
-	SyndicationSource iplayerSource;
+	private RemoteSiteClient<SyndFeed> feedClient;
+	private ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
+	private BbcIplayerFeedAdapter adapter;
+	private SyndFeed feed = new SyndFeedImpl();
+	private SyndicationSource iplayerSource;
 	
 	@SuppressWarnings("unchecked")
 	@Override

@@ -14,8 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
-import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 /**
@@ -23,14 +21,11 @@ import org.jmock.integration.junit3.MockObjectTestCase;
  */
 public class YoutubeUriCanonicaliserTest extends MockObjectTestCase {
 
-	Fetcher<Object> fetcher;
-	YoutubeUriCanonicaliser canonicaliser;
+	private YoutubeUriCanonicaliser canonicaliser;
 	
 	@Override
-	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 		super.setUp();
-		fetcher = mock(Fetcher.class);
 		canonicaliser = new YoutubeUriCanonicaliser();
 	}
 
