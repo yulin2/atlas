@@ -23,14 +23,14 @@ public class PerPublisherItemUpdater implements Runnable {
 
 	private static Log LOG = LogFactory.getLog(PerPublisherItemUpdater.class);
 	
-	private final Fetcher<Content> uriplayFetcher;
+	private final Fetcher<Content> fetcher;
 	private final KnownTypeQueryExecutor contentStore;
 
 	private Iterable<String> publishers;
 
 	public PerPublisherItemUpdater(KnownTypeQueryExecutor contentStore, Fetcher<Content> fetcher) {
 		this.contentStore = contentStore;
-		this.uriplayFetcher = fetcher;
+		this.fetcher = fetcher;
 	}
 
 	private void update(String publisher) {
@@ -40,7 +40,7 @@ public class PerPublisherItemUpdater implements Runnable {
 		
 		for (Item item : items) {
 			try {
-				uriplayFetcher.fetch(item.getCanonicalUri());
+				fetcher.fetch(item.getCanonicalUri());
 				LOG.info("Updating info from:" + item.getCanonicalUri());
 			} catch (Exception e) {
 				LOG.warn((e));
