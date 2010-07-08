@@ -14,19 +14,13 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.uri;
 
-import java.util.Set;
-
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.query.uri.SavingFetcher;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
-
-import com.google.common.collect.Sets;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -40,7 +34,6 @@ public class SavingFetcherTest extends MockObjectTestCase {
 	String URI = "http://example.com";
 	Item item1 = new Item();
 	Brand brand = new Brand();
-	Set<Description> itemAndBrand = Sets.<Description>newHashSet(item1, brand);
 	
 	public void testFetchesItemsFromDelegateAndSavesToStore() throws Exception {
 		

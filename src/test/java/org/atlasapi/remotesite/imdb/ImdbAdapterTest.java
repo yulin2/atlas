@@ -26,8 +26,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.imdb.ImdbAdapter;
-import org.atlasapi.remotesite.imdb.ImdbSource;
 import org.atlasapi.remotesite.sparql.SparqlEndpoint;
 import org.atlasapi.remotesite.sparql.SparqlQuery;
 import org.jmock.Expectations;
@@ -64,7 +62,6 @@ public class ImdbAdapterTest extends MockObjectTestCase {
 	Fetcher<Content> fetcher;
 	ImdbAdapter adapter;
 	ResultSet resultSet = mock(ResultSet.class);
-	ImdbSource imdbSource = new ImdbSource(resultSet, IMDB_LINK);
 	Binding binding = mock(Binding.class);
 	Model model = mock(Model.class);
 	ResultBinding resultBinding = new ResultBinding(model, binding);

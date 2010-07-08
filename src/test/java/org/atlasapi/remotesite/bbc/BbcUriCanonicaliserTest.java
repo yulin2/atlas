@@ -14,20 +14,15 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
-import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
-@SuppressWarnings("unchecked")
 public class BbcUriCanonicaliserTest extends MockObjectTestCase {
 
-	Fetcher<Object> fetcher;
 	BbcUriCanonicaliser canonicaliser;
 	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		fetcher = mock(Fetcher.class);
 		canonicaliser = new BbcUriCanonicaliser();
 	}
 

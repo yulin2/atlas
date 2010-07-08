@@ -40,7 +40,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
  */
 public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 	
-	private final String URI = "http://example.com";
+	private static final String URI = "http://example.com";
 	
 	private final SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
 
