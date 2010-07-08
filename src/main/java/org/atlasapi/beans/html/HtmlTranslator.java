@@ -43,7 +43,7 @@ public class HtmlTranslator implements BeanGraphWriter {
 
 	public HtmlTranslator() throws IOException {
 		header = readHtmlFrom("/html/header.htmlf");
-		footer = readHtmlFrom("/html/footer.htmlf");
+		footer = readHtmlFrom("/html/footer.htmlf"); 
 	}
 	
 	private Iterable<Object> rootsOf(Collection<Object> beans) {
