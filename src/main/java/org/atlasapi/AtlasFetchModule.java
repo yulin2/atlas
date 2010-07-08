@@ -43,6 +43,7 @@ import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -58,14 +59,22 @@ public class AtlasFetchModule {
 	@Import({EquivModule.class})
 	public static class WriterModule {
 	
+		private @Value("${equivalence.enabled}") boolean enableEquivalence;
+		
 		private @Autowired EquivalentUrlFinder finder;
 		private @Autowired ContentPersistenceModule persistence;
 		private @Autowired RemoteSiteModule remote;
 		private @Autowired ReaderModule reader;
 	
 		public @Bean ContentWriter contentWriter() {		
-			EquivalentContentMerger merger = new EquivalentContentMerger(new EquivalentContentFinder(finder, reader.contentResolverThatDoesntSave()));
-			EquivalentContentMergingContentWriter writer = new EquivalentContentMergingContentWriter(persistence.persistentWriter(), merger);
+			
+			ContentWriter writer = persistence.persistentWriter();
+			
+			if (enableEquivalence) {
+				EquivalentContentMerger merger = new EquivalentContentMerger(new EquivalentContentFinder(finder, reader.contentResolverThatDoesntSave()));
+				writer = new EquivalentContentMergingContentWriter(writer, merger);
+			}
+			
 			remote.contentWriters().add(writer);
 			return writer;
 		}
