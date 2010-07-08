@@ -285,8 +285,8 @@
     </properties>
 
     <scm>
-        <connection>scm:svn:https://uriplay.googlecode.com/svn/uriplay/trunk/</connection>
-        <developerConnection>scm:svn:http://uriplay.googlecode.com/svn/uriplay/trunk/</developerConnection>
+        <connection>scm:git:git://github.com/atlas/atlas.git</connection>
+        <developerConnection>scm:git:git://github.com/atlas/atlas.git</developerConnection>
     </scm>
 
     <distributionManagement>
