@@ -225,6 +225,32 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			public String compact(String url) {
 				return "ted:" + matchAgainst(url, tedPattern);
 			}	
+		},
+		
+		WIKI {
+			
+			private final Pattern WIKI_CURIE_PATTERN = Pattern.compile(name().toLowerCase() + "(:[a-z]{2})?:(.+)");
+
+			@Override
+			public String expand(String curie) {
+				Matcher matcher = WIKI_CURIE_PATTERN.matcher(curie);
+				if (matcher.matches()) {
+					String subdomain = matcher.group(1) == null ? "en" : matcher.group(1).substring(1);
+					return String.format("http://%s.wikipedia.org/%s", subdomain, matcher.group(2));
+				}
+				return null;
+			}
+
+			private final Pattern WIKI_FULL_URL_PATTERN = Pattern.compile("https?://([a-z]{2})\\.wikipedia.org/([^/]+)");
+
+			@Override
+			public String compact(String url) {
+				Matcher matcher = WIKI_FULL_URL_PATTERN.matcher(url);
+				if (matcher.matches()) {
+					return String.format("%s:%s:%s", name().toLowerCase(), matcher.group(1), matcher.group(2));
+				}
+				return null;
+			}	
 		};
 		
 		public abstract String expand(String curie);
@@ -260,7 +286,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			// no matching algorithm
 			return Maybe.nothing();
 		}
-		return Maybe.just(algorithm.expand(curie));
+		return Maybe.fromPossibleNullValue(algorithm.expand(curie));
 	}
 
 	private String prefixOf(String curie) {

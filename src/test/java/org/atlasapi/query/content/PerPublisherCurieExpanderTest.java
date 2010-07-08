@@ -9,13 +9,10 @@ import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorith
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.ITV;
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.TED;
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.VIM;
+import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.WIKI;
 import static org.atlasapi.query.content.PerPublisherCurieExpander.CurieAlgorithm.YT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-
-import org.atlasapi.query.content.CurieExpander;
-import org.atlasapi.query.content.PerPublisherCurieExpander;
-
 import junit.framework.TestCase;
 
 import com.metabroadcast.common.base.Maybe;
@@ -164,5 +161,14 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 		assertThat(FB.compact("http://graph.facebook.com/101"), is("fb:101"));
 	}
 	
+	public void testExpandsWikipediaCuries() throws Exception {
+		assertThat(expander.expand("wiki:en:foo"), is(Maybe.just("http://en.wikipedia.org/foo")));
+
+		// handy shortcut
+		assertThat(expander.expand("wiki:foo"), is(Maybe.just("http://en.wikipedia.org/foo")));
+	}
 	
+	public void testProducesWikipediaCuries() throws Exception {
+		assertThat(WIKI.compact("http://en.wikipedia.org/foo"), is("wiki:en:foo"));
+	}
 }
