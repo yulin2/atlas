@@ -78,6 +78,37 @@ public class QueryController {
 		return new ModelAndView(VIEW, RequestNs.GRAPH, executePlaylistQuery(request));
 	}
 	
+	@RequestMapping("/api/2.0/item.*")
+    public ModelAndView apiItem(HttpServletRequest request) {
+        return item(request);
+    }
+    
+    @RequestMapping("/api/2.0/items.*")
+    public ModelAndView apiItems(HttpServletRequest request) {
+        return items(request);
+    }
+    
+
+    @RequestMapping("/api/2.0/brand.*")
+    public ModelAndView apiBrand(HttpServletRequest request) {
+        return brand(request);
+    }
+    
+    @RequestMapping("/api/2.0/brands.*")
+    public ModelAndView apiBrands(HttpServletRequest request) {
+        return brands(request);
+    }
+    
+    @RequestMapping("/api/2.0/playlist.*")
+    public ModelAndView apiPlaylist(HttpServletRequest request) {
+        return playlist(request);
+    }
+    
+    @RequestMapping("/api/2.0/playlists.*")
+    public ModelAndView apiPlaylists(HttpServletRequest request) {
+        return playlists(request);
+    }
+	
 	private List<Item> executeItemQuery(HttpServletRequest request) {
 		return executor.executeItemQuery(build(request, Item.class));
 	}

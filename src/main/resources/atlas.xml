@@ -6,11 +6,11 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
     <!--
-  - Application context definition for URIplay. See uriplay-servlet.xml for webapp config.
+  - Application context definition for Atlas. See atlas-servlet.xml for webapp config.
   -->
 
     <import resource="classpath:beans-short-url-services.xml" />
-    <import resource="classpath:uriplay-servlet.xml" />
+    <import resource="classpath:atlas-servlet.xml" />
 
     <bean id="contextConfigurer" class="com.metabroadcast.common.webapp.properties.ContextConfigurer" init-method="init" />
 

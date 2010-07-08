@@ -31,12 +31,15 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				<prop key="/api/1.0/list*">listControllerV1</prop>
 				<prop key="/api/1.0/lists*">listsControllerV1</prop>
 				<prop key="/api/1.0/doc*">uriFetchingControllerV1</prop>
-
 				<prop key="/2.0/any*">anyTypeController</prop>
+                <prop key="/">rootRedirectController</prop>
 			</props>
 		</property>
 	</bean>
 	
+    <bean id="rootRedirectController" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="redirect:http://docs.atlasapi.org"/>
+    </bean>
 	<bean id="healthController" class="org.atlasapi.system.HealthController"/>
 	
 	<bean id="aliasController" class="org.atlasapi.system.AliasController">
