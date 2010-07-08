@@ -52,6 +52,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 		this.policyClient = policyClient;
 	}
 
+	public BbcProgrammeGraphExtractor() {
+		this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient());
+	}
+
 	public Item extract(BbcProgrammeSource source) {
 		
 		String episodeUri = source.getUri();

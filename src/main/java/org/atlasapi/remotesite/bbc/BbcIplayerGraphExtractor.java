@@ -50,19 +50,19 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	private final RemoteSiteClient<SlashProgrammesRdf> episodeClient;
 	private final RemoteSiteClient<SlashProgrammesVersionRdf> versionClient;
 	
-	private final BbcProgrammeGraphExtractor programmeGraphExtractor;
+	private final ContentExtractor<BbcProgrammeSource, Item> programmeGraphExtractor;
 	
 	private final SiteSpecificAdapter<Content> brandFetcher;
 
 	public BbcIplayerGraphExtractor() {
-		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeAdapter());
+		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeAdapter(), new BbcProgrammeGraphExtractor());
 	}
 	
-	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, SiteSpecificAdapter<Content> brandFetcher) {
+	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, SiteSpecificAdapter<Content> brandFetcher, ContentExtractor<BbcProgrammeSource, Item> extractor) {
 		this.episodeClient = episodeClient;
 		this.versionClient = versionClient;
 		this.brandFetcher = brandFetcher;
-		this.programmeGraphExtractor = new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient());
+		this.programmeGraphExtractor = extractor;
 	}
 
 	@SuppressWarnings("unchecked")

@@ -32,8 +32,10 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcIplayerGraphExtractor;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf;
@@ -49,6 +51,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
@@ -96,7 +99,22 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		super.setUp();
 		feed = createFeed("bbc-one-feed.atom.xml");
 		source = new SyndicationSource(feed, FEED_URI);
-		extractor = new BbcIplayerGraphExtractor(episodeRdfClient, versionRdfClient, brandClient);
+		BbcSeriesNumberResolver seriesResolver = new BbcSeriesNumberResolver() {
+			
+			@Override
+			public Maybe<Integer> seriesNumberFor(String seriesUri) {
+				return Maybe.nothing();
+			}
+		};
+		
+		BbcProgrammesPolicyClient policyClient = new BbcProgrammesPolicyClient() {
+			@Override
+			public Maybe<Policy> policyForUri(String episodeUri) {
+				return Maybe.nothing();
+			}
+		};
+		ContentExtractor<BbcProgrammeSource, Item> contentExtractor = new BbcProgrammeGraphExtractor(seriesResolver, policyClient);
+		extractor = new BbcIplayerGraphExtractor(episodeRdfClient, versionRdfClient, brandClient, contentExtractor);
 	}
 	
 	public void testCreatesEpisodesFromFeedEntries() throws Exception {
