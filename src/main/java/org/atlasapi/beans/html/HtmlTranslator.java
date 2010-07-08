@@ -7,15 +7,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.atlasapi.beans.BeanGraphWriter;
-import org.atlasapi.feeds.Defect;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -26,9 +23,11 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.util.ChildFinder;
 import org.springframework.core.io.ClassPathResource;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.url.UrlEncoding;
 
 /**
  * {@link BeanGraphWriter} that translates the full URIplay object model
@@ -53,12 +52,7 @@ public class HtmlTranslator implements BeanGraphWriter {
 	
 	public void writeTo(Collection<Object> fullGraph, OutputStream stream) {
 		Iterable<Object> beansToProcess = beansToProcess(fullGraph);
-		Writer writer;
-		try {
-			writer = new OutputStreamWriter(stream, "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			throw new Defect("incorrect encoding specified");
-		}
+		Writer writer = new OutputStreamWriter(stream, Charsets.UTF_8);
 		try {
 			
 			beginPage(writer);
@@ -295,11 +289,7 @@ public class HtmlTranslator implements BeanGraphWriter {
 	}
 
 	private static String constructLink(String url, String title, String format) {
-		try {
-			return String.format("<a href=\"/2.0/doc.%s?uri=%s\">%s</a>", format, URLEncoder.encode(url, "UTF-8"), htmlEscape(title));
-		} catch (UnsupportedEncodingException e) {
-			throw new Defect("incorrect encoding specified");
-		}
+		return String.format("<a href=\"/2.0/any.%s?uri=%s\">%s</a>", format, UrlEncoding.encode(url), htmlEscape(title));
 	}
 
 	private static void beginDefinitionList(String cssClass, Writer writer) throws IOException {
@@ -380,12 +370,12 @@ public class HtmlTranslator implements BeanGraphWriter {
 
 	private static String queryApiGenreLink(String genreUrl) {
 		String format = "html";
-		return String.format("<a href=\"/2.0/query/items.%s?genre-contains=%s\">%s</a>", format, lastPartOf(genreUrl), htmlEscape(genreUrl));
+		return String.format("<a href=\"/2.0/items.%s?genre-contains=%s\">%s</a>", format, lastPartOf(genreUrl), htmlEscape(genreUrl));
 	}
 	
 	private static String queryApiPublisherLink(String publisher) {
 		String format = "html";
-		return String.format("<a href=\"/2.0/query/items.%s?publisher=%s\">%s</a>", format, publisher, publisher);
+		return String.format("<a href=\"/2.0/items.%s?publisher=%s\">%s</a>", format, publisher, publisher);
 	}
 
 
