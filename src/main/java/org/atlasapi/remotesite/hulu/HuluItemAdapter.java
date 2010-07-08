@@ -50,7 +50,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     private ContentWriter contentStore;
 
     public HuluItemAdapter() {
-        this(HttpClients.webserviceClient(), new HuluItemContentExtractor());
+        this(HttpClients.screenScrapingClient(), new HuluItemContentExtractor());
     }
 
     public HuluItemAdapter(SimpleHttpClient httpClient, HuluItemContentExtractor extractor) {
@@ -60,9 +60,9 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
     @Override
     public Episode fetch(String uri) {
-        try {
-            LOG.info("Retrieving hulu episode: " + uri);
-            String content = httpClient.getContentsOf(uri);
+        LOG.info("Retrieving hulu episode: " + uri);
+        String content = getContent(uri);
+        if (content != null) {
             HtmlNavigator navigator = new HtmlNavigator(content);
 
             Episode episode = extractor.extract(navigator);
@@ -72,8 +72,8 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
             }
 
             return episode;
-        } catch (HttpException e) {
-            throw new FetchException("Unable to retrieve from Hulu episode: " + uri, e);
+        } else {
+            throw new FetchException("Unable to retrieve from Hulu episode: " + uri + " after multiple attempts");
         }
     }
 
@@ -117,5 +117,20 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
     public void setBrandAdapter(SiteSpecificAdapter<Brand> brandAdapter) {
         this.brandAdapter = brandAdapter;
+    }
+
+    private String getContent(String uri) {
+        String content = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                content = httpClient.getContentsOf(uri);
+                if (content != null) {
+                    break;
+                }
+            } catch (HttpException e) {
+                LOG.warn("Error retrieving hulu item: " + uri + " attempt " + i + " with message: " + e.getMessage());
+            }
+        }
+        return content;
     }
 }
