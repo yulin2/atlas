@@ -57,8 +57,6 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		result.addItem(item);
 		graph.add(result);
 		
-		System.out.println(item.getBroadcasts());
-		
 		new JaxbXmlTranslator().writeTo(graph, stream);
 		
 		String output = stream.toString();

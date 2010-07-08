@@ -13,15 +13,18 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.util.ChildFinder;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 
 /**
  * {@link BeanGraphWriter} that translates the full URIplay object model
@@ -97,7 +100,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simplePlaylist.setAliases(fullPlayList.getAliases());
 		simplePlaylist.setCurie(fullPlayList.getCurie());
 		simplePlaylist.setTitle(fullPlayList.getTitle());
-		simplePlaylist.setPublisher(fullPlayList.getPublisher());
+		simplePlaylist.setPublisher(toPublisherDetails(fullPlayList.getPublisher()));
 		simplePlaylist.setDescription(fullPlayList.getDescription());
 		
 		simplePlaylist.setImage(fullPlayList.getImage());
@@ -187,13 +190,32 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		
 		simpleItem.setTitle(fullItem.getTitle());
 		simpleItem.setDescription(fullItem.getDescription());
-		simpleItem.setPublisher(fullItem.getPublisher());
+		simpleItem.setPublisher(toPublisherDetails(fullItem.getPublisher()));
 		simpleItem.setImage(fullItem.getImage());
 		simpleItem.setThumbnail(fullItem.getThumbnail());
 		simpleItem.setGenres(fullItem.getGenres());
 		simpleItem.setTags(fullItem.getTags());
 		
 		
+	}
+
+	private static PublisherDetails toPublisherDetails(String publisherUri) {
+		if (publisherUri == null) {
+			return null;
+		}
+		
+		PublisherDetails details = new PublisherDetails(publisherUri);
+		
+		Maybe<Publisher> possiblePublisher = Publisher.fromKey(publisherUri);
+		if (possiblePublisher.hasValue()) {
+			Publisher publisher = possiblePublisher.requireValue();
+			if (publisher.country() != null) {
+				details.setCountry(publisher.country().code());
+			}
+			details.setName(publisher.title());
+		}
+		
+		return details;
 	}
 
 	private static void copyProperties(Version version, org.atlasapi.media.entity.simple.Version simpleLocation) {

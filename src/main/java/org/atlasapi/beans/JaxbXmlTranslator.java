@@ -30,6 +30,7 @@ import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.vocabulary.PLAY;
 import org.atlasapi.media.vocabulary.PO;
 import org.xml.sax.SAXException;
@@ -48,7 +49,7 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 	private JAXBContext context;
 
 	public JaxbXmlTranslator() throws JAXBException {
-		context = JAXBContext.newInstance(ContentQueryResult.class, Playlist.class, Item.class, Location.class, Broadcast.class);
+		context = JAXBContext.newInstance(ContentQueryResult.class, Playlist.class, Item.class, Location.class, Broadcast.class, PublisherDetails.class);
 	}
 	
 	public void writeTo(Collection<Object> graph, OutputStream stream) {
