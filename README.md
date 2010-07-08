@@ -2,10 +2,10 @@ Build and Run Atlas
 ===================
 
 The Atlas source-code is hosted at http://github.com/atlasapi and is split across 5 projects:
-* http://github.com/atlasapi/atlas
-* http://github.com/atlasapi/atlas-persistence
-* http://github.com/atlasapi/atlas-model
-* http://github.com/atlasapi/atlas-feeds
+*   [http://github.com/atlasapi/atlas]
+*   http://github.com/atlasapi/atlas-persistence
+*   http://github.com/atlasapi/atlas-model
+*   http://github.com/atlasapi/atlas-feeds
 
 Additionally, http://github.com/atlasapi/atlas-client hosts the Java client library. http://github.com/atlasapi/atlas is the main entry point and you don't need the others unless you're interested in updating them too.
 
