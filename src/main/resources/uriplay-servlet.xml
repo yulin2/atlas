@@ -14,7 +14,7 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
 	<!--
-     - Application context definition for the uriplay DispatcherServlet.
+     - Application context definition for the Atlas DispatcherServlet.
      -->
 	<context:annotation-config />
 	
@@ -37,39 +37,39 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		</property>
 	</bean>
 	
-	<bean id="healthController" class="org.uriplay.system.HealthController"/>
+	<bean id="healthController" class="org.atlasapi.system.HealthController"/>
 	
-	<bean id="aliasController" class="org.uriplay.system.AliasController">
+	<bean id="aliasController" class="org.atlasapi.system.AliasController">
 	   <constructor-arg ref="aliasWriter"/>
 	   <constructor-arg ref="contentResolver"/>
 	</bean>
 
 	
-	<bean id="newQueryApiController" class="org.uriplay.query.v2.QueryController">
+	<bean id="newQueryApiController" class="org.atlasapi.query.v2.QueryController">
 		<constructor-arg ref="queryExecutor"/>
 	</bean>
 	
-	<bean id="uriFetchingControllerV1" class="org.uriplay.query.v1.UriFetchingController">
+	<bean id="uriFetchingControllerV1" class="org.atlasapi.query.v1.UriFetchingController">
 		<constructor-arg ref="remoteFetcher" />
 	</bean>
 	
 	<bean id="itemControllerV1" parent="uriFetchingControllerV1">
-		<constructor-arg><bean class="org.uriplay.beans.SingleItemProjector" /></constructor-arg> 
+		<constructor-arg><bean class="org.atlasapi.beans.SingleItemProjector" /></constructor-arg> 
 	</bean>
 	
 	<bean id="listControllerV1"  parent="uriFetchingControllerV1">
-		<constructor-arg><bean class="org.uriplay.beans.FlatteningProjector" /></constructor-arg> 
+		<constructor-arg><bean class="org.atlasapi.beans.FlatteningProjector" /></constructor-arg> 
 	</bean>
 	
 	<bean id="listsControllerV1" parent="uriFetchingControllerV1">
-		<constructor-arg><bean class="org.uriplay.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
+		<constructor-arg><bean class="org.atlasapi.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
 	</bean>
 	
-	<bean id="anyTypeController" class="org.uriplay.query.v2.AnyTypeFetchingController">
+	<bean id="anyTypeController" class="org.atlasapi.query.v2.AnyTypeFetchingController">
 		<constructor-arg ref="queryExecutor" />
 	</bean>
 
-	<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="org/uriplay/http-error" p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">
+	<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="org/uriplay/http-error" p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">
 		<constructor-arg>
 			<bean class="org.springframework.web.servlet.view.JstlView">
 				<constructor-arg value="/WEB-INF/templates/org/uriplay/http-error.jsp" />
@@ -77,7 +77,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		</constructor-arg>
 	</bean>
 				
-	<bean class="org.uriplay.views.ExtensionBasedContentNegotiatingViewResolver" p:order="#{T(org.springframework.core.Ordered).LOWEST_PRECEDENCE}">
+	<bean class="org.atlasapi.views.ExtensionBasedContentNegotiatingViewResolver" p:order="#{T(org.springframework.core.Ordered).LOWEST_PRECEDENCE}">
 		<property name="mediaTypes">
 			<map>
 				<entry key="xml" value="application/xml" />
@@ -92,76 +92,76 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		</property>
 		<property name="viewResolvers">
 			<list>
-				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_RDF_XML" />
 							<constructor-arg ref="rdfXmlTranslator" />
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="TEXT_HTML" />
 							<constructor-arg>
-								<bean class="org.uriplay.beans.html.HtmlTranslator" />
+								<bean class="org.atlasapi.beans.html.HtmlTranslator" />
 							</constructor-arg>
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_XML" />
 							<constructor-arg ref="simpleXmlTranslator" />
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_JSON" />
 							<constructor-arg ref="simpleJsonTranslator" />
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_ATOM_XML" />
 							<constructor-arg>
-								<bean class="org.uriplay.beans.AtomFeedTranslator" />
+								<bean class="org.atlasapi.beans.AtomFeedTranslator" />
 							</constructor-arg>
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_RSS_XML" />
 							<constructor-arg>
-								<bean class="org.uriplay.beans.RssFeedTranslator" />
+								<bean class="org.atlasapi.beans.RssFeedTranslator" />
 							</constructor-arg>
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean id="oembedJsonViewResolver" class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean id="oembedJsonViewResolver" class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_OEMBED_JSON" />
 							<constructor-arg>
-								<bean class="org.uriplay.beans.OembedJsonTranslator" />
+								<bean class="org.atlasapi.beans.OembedJsonTranslator" />
 							</constructor-arg>
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean id="oembedXmlViewResolver" class="org.uriplay.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean id="oembedXmlViewResolver" class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
 					<constructor-arg>
-						<bean class="org.uriplay.beans.view.BeanGraphWriterView">
+						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_OEMBED_XML" />
 							<constructor-arg>
-								<bean class="org.uriplay.beans.OembedXmlTranslator" />
+								<bean class="org.atlasapi.beans.OembedXmlTranslator" />
 							</constructor-arg>
 						</bean>
 					</constructor-arg>
@@ -176,22 +176,22 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 
     
-	<bean id="simpleXmlTranslator" class="org.uriplay.beans.FullToSimpleModelTranslator">
-		<constructor-arg><bean class="org.uriplay.beans.JaxbXmlTranslator" /></constructor-arg>
+	<bean id="simpleXmlTranslator" class="org.atlasapi.beans.FullToSimpleModelTranslator">
+		<constructor-arg><bean class="org.atlasapi.beans.JaxbXmlTranslator" /></constructor-arg>
 	</bean>
 
-	<bean id="simpleJsonTranslator" class="org.uriplay.beans.FullToSimpleModelTranslator">
+	<bean id="simpleJsonTranslator" class="org.atlasapi.beans.FullToSimpleModelTranslator">
 		<constructor-arg ref="jsonTranslator" />
 	</bean>
     
-    <bean id="jsonTranslator" class="org.uriplay.beans.JsonTranslator" scope="request">
+    <bean id="jsonTranslator" class="org.atlasapi.beans.JsonTranslator" scope="request">
         <aop:scoped-proxy/>
     </bean>
 
-    <bean class="org.uriplay.persistence.servlet.StatusCodeExceptionResolver">
+    <bean class="org.atlasapi.persistence.servlet.StatusCodeExceptionResolver">
 		<property name="exceptionMappings">  
 			<map>  
-     			<entry key="org.uriplay.persistence.servlet.ContentNotFoundException" value="org/uriplay/http-error" />  
+     			<entry key="org.atlasapi.persistence.servlet.ContentNotFoundException" value="org/uriplay/http-error" />  
 		    </map>  
 		</property>  
 	</bean> 

@@ -52,7 +52,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <property name="runnable">
    		<bean parent="conditionalRunner">
     		<constructor-arg>
- 					 <bean class="org.uriplay.persistence.system.UriRefresher">
+ 					 <bean class="org.atlasapi.persistence.system.UriRefresher">
  					 	<property name="contentStore" ref="contentWriter"/>
                         <property name="fetcher" ref="remoteFetcher"/>
  					 	<property name="missingContentShouldBeMarkedAsUnavailable" value="false"/>
@@ -74,7 +74,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <property name="runnable">
         <bean parent="conditionalRunner">
             <constructor-arg>
-                <bean class="org.uriplay.tracking.PlaylistFromMentionsGenerator">
+                <bean class="org.atlasapi.tracking.PlaylistFromMentionsGenerator">
                    <constructor-arg ref="contentResolver"/>
                    <constructor-arg ref="contentWriter"/>
                    <constructor-arg ref="contentMentionStore"/>
@@ -133,9 +133,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </property>
   </bean>
   
-  <bean id="c4BrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+  <bean id="c4BrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
 	 <property name="uris">
-	 	<bean class="org.uriplay.persistence.system.AToZUriSource">
+	 	<bean class="org.atlasapi.persistence.system.AToZUriSource">
 	 		<constructor-arg value="http://www.channel4.com/programmes/atoz/"/>
 	 		<constructor-arg value=""/>
 	 		<constructor-arg value="true"/>
@@ -143,17 +143,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	 </property>
   </bean>
   
-  <bean id="itvBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+  <bean id="itvBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
 	 <property name="uri" value="http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml" />
   </bean>
   
-  <bean id="huluBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+  <bean id="huluBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
    <property name="uri" value="http://www.hulu.com/browse/alphabetical/episodes" />
   </bean>
   
-  <bean id="bbcBrandsUpdater" class="org.uriplay.persistence.system.UriRefresher" parent="brandsUpdater">
+  <bean id="bbcBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
 	 <property name="uris">
-	 	<bean class="org.uriplay.persistence.system.AToZUriSource">
+	 	<bean class="org.atlasapi.persistence.system.AToZUriSource">
 	 		<constructor-arg value="http://feeds.bbc.co.uk/iplayer/atoz/"/>
 	 		<constructor-arg value="/list"/>
 	 		<constructor-arg value="true"/>
@@ -161,24 +161,24 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	 </property>
   </bean>
 
-  <bean id="bbcSchedulesUpdater" class="org.uriplay.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
+  <bean id="bbcSchedulesUpdater" class="org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
 	 <constructor-arg ref="contentResolver"/>
 	 <property name="uris">
-	    <bean class="org.uriplay.remotesite.bbc.schedule.DatedBbcScheduleUriSource">
+	    <bean class="org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource">
 		    <property name="daysToLookAhead" value="5" />
 	     </bean>
 	  </property>
   </bean>    
   
-  <bean id="perPublisherUpdater" class="org.uriplay.remotesite.PerPublisherItemUpdater">
+  <bean id="perPublisherUpdater" class="org.atlasapi.remotesite.PerPublisherItemUpdater">
 	 <constructor-arg ref="queryExecutor"/>
 	 <constructor-arg>
-		 <bean class="org.uriplay.query.uri.canonical.CanonicalisingFetcher">
+		 <bean class="org.atlasapi.query.uri.canonical.CanonicalisingFetcher">
 			<constructor-arg ref="savingFetcher" />
 			<constructor-arg ref="aliasWriter" />
 			<constructor-arg>
 				<list>
-	                <bean class="org.uriplay.remotesite.youtube.YoutubeUriCanonicaliser"/>
+	                <bean class="org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser"/>
 				</list>
 			</constructor-arg>
 		</bean>
@@ -205,24 +205,24 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         </property>
     </bean>
   
-   <bean name="huluUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+   <bean name="huluUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="huluBrandsUpdater"/>
    </bean>
    
     
-    <bean id="c4UpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+    <bean id="c4UpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="c4BrandsUpdater"/>
     </bean>
     
-    <bean id="bbcUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+    <bean id="bbcUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="bbcBrandsUpdater"/>
     </bean>
 
-    <bean id="bbcScheduleUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+    <bean id="bbcScheduleUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="bbcSchedulesUpdater"/>
     </bean>
     
-    <bean id="orphanUpdateController" class="org.uriplay.persistence.system.ContentUpdateController">
+    <bean id="orphanUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="perPublisherUpdater"/>
     </bean>
   

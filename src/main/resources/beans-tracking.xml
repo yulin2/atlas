@@ -10,7 +10,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <bean init-method="run" parent="conditionalRunner" lazy-init="false">
         <constructor-arg>
-            <bean id="keywordTracker" class="org.uriplay.tracking.twitter.KeywordTracker" destroy-method="shutdown">
+            <bean id="keywordTracker" class="org.atlasapi.tracking.twitter.KeywordTracker" destroy-method="shutdown">
                 <constructor-arg value="${twitter.tracker.filter.hashtag}" />
                 <constructor-arg ref="statusProcessor"/>
                 
@@ -49,9 +49,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </bean>
     
     
-    <bean id="statusProcessor" class="org.uriplay.tracking.twitter.LinkExtractingStatusProcessor">
+    <bean id="statusProcessor" class="org.atlasapi.tracking.twitter.LinkExtractingStatusProcessor">
         <constructor-arg>
-            <bean class="org.uriplay.tracking.ContentResolvingUriMentionListener">
+            <bean class="org.atlasapi.tracking.ContentResolvingUriMentionListener">
                 <constructor-arg ref="contentResolver"/>
                 <constructor-arg ref="contentMentionStore"/>
             </bean>

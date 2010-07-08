@@ -13,16 +13,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   -->
 
   <util:list id="resourceTypes">
-    <value>org.uriplay.media.entity.Playlist</value>
-    <value>org.uriplay.media.entity.Description</value>
-    <value>org.uriplay.media.entity.Item</value>
-    <value>org.uriplay.media.entity.Brand</value>
-    <value>org.uriplay.media.entity.Episode</value>
-    <value>org.uriplay.media.entity.Version</value>
-    <value>org.uriplay.media.entity.Broadcast</value>
-    <value>org.uriplay.media.entity.Encoding</value>
-    <value>org.uriplay.media.entity.Location</value>
-    <value>org.uriplay.media.entity.Policy</value>
+    <value>org.atlasapi.media.entity.Playlist</value>
+    <value>org.atlasapi.media.entity.Description</value>
+    <value>org.atlasapi.media.entity.Item</value>
+    <value>org.atlasapi.media.entity.Brand</value>
+    <value>org.atlasapi.media.entity.Episode</value>
+    <value>org.atlasapi.media.entity.Version</value>
+    <value>org.atlasapi.media.entity.Broadcast</value>
+    <value>org.atlasapi.media.entity.Encoding</value>
+    <value>org.atlasapi.media.entity.Location</value>
+    <value>org.atlasapi.media.entity.Policy</value>
   </util:list>
 
 </beans>
