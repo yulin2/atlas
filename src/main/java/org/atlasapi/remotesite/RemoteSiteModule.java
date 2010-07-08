@@ -97,7 +97,7 @@ public class RemoteSiteModule {
 		 return dispatcher;
 	}
 	
-	public ContentWriters contentWriters() {
+	public @Bean ContentWriters contentWriters() {
 		return new ContentWriters();
 	}
 }
