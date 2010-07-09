@@ -20,7 +20,7 @@ import org.atlasapi.persistence.content.QueueingContentListener;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.content.query.UniqueContentForUriQueryExecutor;
+import org.atlasapi.query.content.UniqueContentForUriQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.InMemoryFuzzySearcher;
