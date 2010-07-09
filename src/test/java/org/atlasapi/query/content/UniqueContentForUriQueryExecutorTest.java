@@ -22,9 +22,9 @@ public class UniqueContentForUriQueryExecutorTest extends MockObjectTestCase {
     public void testShouldRemoveDuplicateBrand() {
         final ContentQuery query = query().equalTo(Attributes.BRAND_URI, "wikipedia:glee").build();
         
-        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee");
+        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         brand1.addAlias("wikipedia:glee");
-        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee");
+        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee", Publisher.C4);
         brand2.addAlias("wikipedia:glee");
         
         final List<Brand> brands = Lists.newArrayList(brand1, brand2);
@@ -43,9 +43,9 @@ public class UniqueContentForUriQueryExecutorTest extends MockObjectTestCase {
     public void testShouldRetrieveCanonical() {
         final ContentQuery query = query().equalTo(Attributes.BRAND_URI, "http://channel4.com/glee").build();
         
-        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee");
+        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         brand1.addAlias("wikipedia:glee");
-        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee");
+        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee", Publisher.C4);
         brand2.addAlias("wikipedia:glee");
         
         final List<Brand> brands = Lists.newArrayList(brand1, brand2);
@@ -64,9 +64,9 @@ public class UniqueContentForUriQueryExecutorTest extends MockObjectTestCase {
     public void testShouldRetrieveCanonicalPutInFirst() {
         final ContentQuery query = query().equalTo(Attributes.BRAND_URI, "hulu:glee").build();
         
-        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee");
+        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         brand1.addAlias("wikipedia:glee");
-        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee");
+        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee", Publisher.C4);
         brand2.addAlias("wikipedia:glee");
         
         final List<Brand> brands = Lists.newArrayList(brand1, brand2);
@@ -85,12 +85,10 @@ public class UniqueContentForUriQueryExecutorTest extends MockObjectTestCase {
     public void testShouldRemoveDuplicateBrandForLocation() {
         final ContentQuery query = query().equalTo(Attributes.BRAND_URI, "wikipedia:glee").equalTo(Attributes.POLICY_AVAILABLE_COUNTRY, Lists.newArrayList("uk")).build();
         
-        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee");
+        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         brand1.addAlias("wikipedia:glee");
-        brand1.setPublisher(Publisher.HULU.key());
-        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee");
+        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee", Publisher.C4);
         brand2.addAlias("wikipedia:glee");
-        brand2.setPublisher(Publisher.C4.key());
         
         final List<Brand> brands = Lists.newArrayList(brand1, brand2);
         
@@ -108,12 +106,10 @@ public class UniqueContentForUriQueryExecutorTest extends MockObjectTestCase {
     public void testShouldNotRemoveCanoncialBrandForLocation() {
         final ContentQuery query = query().equalTo(Attributes.BRAND_URI, "http://www.hulu.com/glee").equalTo(Attributes.POLICY_AVAILABLE_COUNTRY, Lists.newArrayList("uk")).build();
         
-        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee");
+        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         brand1.addAlias("wikipedia:glee");
-        brand1.setPublisher(Publisher.HULU.key());
-        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee");
+        Brand brand2 = new Brand("http://channel4.com/glee", "c4:glee", Publisher.C4);
         brand2.addAlias("wikipedia:glee");
-        brand2.setPublisher(Publisher.C4.key());
         
         final List<Brand> brands = Lists.newArrayList(brand1, brand2);
         
@@ -131,12 +127,10 @@ public class UniqueContentForUriQueryExecutorTest extends MockObjectTestCase {
     public void testShouldRemoveDuplicateItemForLocation() {
         final ContentQuery query = query().equalTo(Attributes.ITEM_URI, "wikipedia:glee").equalTo(Attributes.POLICY_AVAILABLE_COUNTRY, Lists.newArrayList("uk")).build();
         
-        Item item1 = new Item("http://www.hulu.com/glee", "hulu:glee");
+        Item item1 = new Item("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         item1.addAlias("wikipedia:glee");
-        item1.setPublisher(Publisher.HULU.key());
-        Item item2 = new Item("http://channel4.com/glee", "c4:glee");
+        Item item2 = new Item("http://channel4.com/glee", "c4:glee", Publisher.C4);
         item2.addAlias("wikipedia:glee");
-        item2.setPublisher(Publisher.C4.key());
         
         final List<Item> items = Lists.newArrayList(item1, item2);
         
@@ -168,7 +162,7 @@ public class UniqueContentForUriQueryExecutorTest extends MockObjectTestCase {
     public void testShouldWorkReturnJustOne() {
         final ContentQuery query = query().equalTo(Attributes.BRAND_URI, "wikipedia:glee").build();
         
-        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee");
+        Brand brand1 = new Brand("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         brand1.addAlias("wikipedia:glee");
         
         final List<Brand> brands = Lists.newArrayList(brand1);
