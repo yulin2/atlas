@@ -48,7 +48,7 @@ public class HuluItemAdapterTest extends TestCase {
         boolean foundLink = false;
         boolean foundEmbed = false;
         for (Location location: encoding.getAvailableAt()) {
-            if (location.getEmbedCode() != null) {
+            if (location.getTransportType() == TransportType.EMBED) {
                 foundEmbed = true;
                 assertEmbedLocation(location);
             } else {
@@ -62,7 +62,11 @@ public class HuluItemAdapterTest extends TestCase {
     
     private void assertEmbedLocation(Location location) {
         assertNotNull(location);
-        assertNotNull(location.getEmbedCode());
+        if (location.getEmbedCode() != null) {
+            assertNotNull(location.getEmbedCode());
+        } else {
+            assertNotNull(location.getUri());
+        }
         assertEquals(TransportType.EMBED, location.getTransportType());
         assertEquals(true, location.getAvailable());
         assertEquals(Boolean.valueOf(true), location.getTransportIsLive());
