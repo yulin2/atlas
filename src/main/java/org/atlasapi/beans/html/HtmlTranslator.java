@@ -371,7 +371,7 @@ public class HtmlTranslator implements BeanGraphWriter {
 
 	private static String queryApiGenreLink(String genreUrl) {
 		String format = "html";
-		return String.format("<a href=\"/2.0/items.%s?genre-contains=%s\">%s</a>", format, lastPartOf(genreUrl), htmlEscape(genreUrl));
+		return String.format("<a href=\"/2.0/items.%s?genre=%s&amp;limit=20\">%s</a>", format, htmlEscape(genreUrl), lastPartOf(genreUrl));
 	}
 	
 	private static String queryApiPublisherLink(Publisher publisher) {
