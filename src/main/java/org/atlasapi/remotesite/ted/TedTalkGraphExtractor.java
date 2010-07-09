@@ -18,6 +18,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
@@ -27,7 +28,6 @@ import com.metabroadcast.common.media.MimeType;
 
 public class TedTalkGraphExtractor  {
 
-	private static final String TED_PUBLISHER = "ted.com";
 
 	public Item extractFrom(HtmlDescriptionSource src) {
 		Encoding encoding = encoding();
@@ -45,12 +45,11 @@ public class TedTalkGraphExtractor  {
 	
 	private Item item(HtmlDescriptionSource src) {
 		String uri = src.getUri();
-		Item item = new Item(uri, PerPublisherCurieExpander.CurieAlgorithm.TED.compact(uri));
+		Item item = new Item(uri, PerPublisherCurieExpander.CurieAlgorithm.TED.compact(uri), Publisher.TED);
 
 		HtmlDescriptionOfItem htmlItem = src.getItem();
 		item.setTitle(htmlItem.getTitle());
 		item.setDescription(htmlItem.getDescription());
-		item.setPublisher(TED_PUBLISHER);
 		item.setThumbnail(htmlItem.getThumbnail());
 		item.setIsLongForm(true);
 		return item;

@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.channel4.C4BrandExtractor;
 import org.jmock.integration.junit3.MockObjectTestCase;
@@ -40,7 +41,7 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		assertThat(brand.getAliases(), hasItem("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od"));
 		assertThat(brand.getCurie(), is("c4:ramsays-kitchen-nightmares"));
 		assertThat(brand.getTitle(), is("Ramsay's Kitchen Nightmares"));
-		assertThat(brand.getPublisher(), is("channel4.com"));
+		assertThat(brand.getPublisher(), is(Publisher.C4));
 		assertThat(brand.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_200x113.jpg"));
 		assertThat(brand.getImage(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_625x352.jpg"));
 
@@ -49,7 +50,7 @@ public class C4BrandExtractorTest extends MockObjectTestCase {
 		assertThat(firstEpisode.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"));
 		assertThat(firstEpisode.getCurie(), is("c4:ramsays-kitchen-nightmares_2922045"));
 		assertThat(firstEpisode.getTitle(), is("Series 1 Episode 1"));
-		assertThat(firstEpisode.getPublisher(), is("channel4.com"));
+		assertThat(firstEpisode.getPublisher(), is(Publisher.C4));
 		assertThat(firstEpisode.getSeriesNumber(), is(1));
 		assertThat(firstEpisode.getEpisodeNumber(), is(1));
 		assertThat(firstEpisode.getDescription(), startsWith("Gordon Ramsay visits Bonapartes in Silsden, West Yorkshire."));

@@ -62,6 +62,8 @@ public abstract class GenericPodcastGraphExtractor extends PodcastGraphExtractor
 			playlist.addItem(item);
 		}
 		
+		playlist.setPublisher(publisher());
+		
 		return playlist;
 	}
 

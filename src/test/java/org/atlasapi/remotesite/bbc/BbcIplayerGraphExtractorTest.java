@@ -33,6 +33,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -66,7 +67,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 	
 	static final String BRAND_URI = "http://www.bbc.co.uk/programmes/b006v04h";
 	
-	static final Brand BRAND = new Brand(BRAND_URI, "curie"); {{ BRAND.setTitle("Spotlight"); }}
+	static final Brand BRAND = new Brand(BRAND_URI, "curie", Publisher.BBC); {{ BRAND.setTitle("Spotlight"); }}
 	
 	static final String EPISODE_2_URI = "http://www.bbc.co.uk/programmes/b00kjbrc";
 
@@ -132,7 +133,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		Playlist playlist = extractor.extract(source);
 		assertThat(playlist.getCanonicalUri(), is(FEED_URI));
 		assertThat(playlist.getCurie(), is("bbc:atoz_a"));
-		assertThat(playlist.getPublisher(), is("bbc.co.uk"));
+		assertThat(playlist.getPublisher(), is(Publisher.BBC));
 
 		System.out.println(playlist.getPlaylists());
 		
@@ -151,7 +152,7 @@ public class BbcIplayerGraphExtractorTest extends MockObjectTestCase {
 		
 		assertThat(episode.getEpisodeNumber(), is(6));
 		
-		assertThat(episode.getPublisher(), is("bbc.co.uk"));
+		assertThat(episode.getPublisher(), is(Publisher.BBC));
 	
 		
 		Set<String> expectedGenres = bbcGenreUris("factual/politics", "news");

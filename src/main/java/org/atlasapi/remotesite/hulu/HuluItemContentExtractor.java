@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -36,6 +37,8 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
     public Episode extract(HtmlNavigator source) {
         try {
             Episode item = new Episode();
+            item.setPublisher(Publisher.HULU);
+            
             Version version = new Version();
             Encoding encoding = new Encoding();
             Location embedLocation = new Location();
@@ -128,7 +131,6 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                     
                     item.addAlias(videoLink);
                     item.setDescription((String) attributes.get("video_description"));
-                    item.setPublisher("hulu.com");
                     item.setIsLongForm(true);
                     
                     item.setBrand(brandFrom(attributes));
@@ -151,7 +153,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
 
 	private Brand brandFrom(Map<String, Object> attributes) {
 		String brandUri = (String) attributes.get("show_link");
-		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri));
+		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri), Publisher.HULU);
 		brand.setDescription((String) attributes.get("show_description"));
 		brand.setTitle((String) attributes.get("show_title"));
 		return brand;

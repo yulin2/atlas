@@ -23,6 +23,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemGraphExtractor;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
@@ -65,7 +66,7 @@ public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
 		assertThat(item.getTitle(), is("News News News"));
 		assertThat(item.getDescription(), is("The News"));
 		
-		assertThat(item.getPublisher(), is("dailymotion.com"));
+		assertThat(item.getPublisher(), is(Publisher.DAILYMOTION));
 		assertThat(item.getCurie(), is("dm:xbqomc_dont-do-anything_fun"));
 		
 		assertThat(item.getThumbnail(), is("thumbnail.image"));

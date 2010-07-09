@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
@@ -42,8 +43,6 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	static final String FULL_IMAGE_EXTENSION = "_640_360.jpg";
 	static final String THUMBNAIL_EXTENSION = "_150_84.jpg";
 
-	static final String BBC_PUBLISHER = "bbc.co.uk";
-	
 	private final BbcSeriesNumberResolver seriesResolver;
 	private final BbcProgrammesPolicyClient policyClient;
 	
@@ -147,7 +146,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	private Item item(String episodeUri, SlashProgrammesContainerRef container, SlashProgrammesRdf episode, String slashProgrammesUri) {
 		String curie = BbcUriCanonicaliser.curieFor(episodeUri);
 		
-		Item item = episode.brand() == null ? new Item(episodeUri, curie) : new Episode(episodeUri, curie);
+		Item item = episode.brand() == null ? new Item(episodeUri, curie, Publisher.BBC) : new Episode(episodeUri, curie, Publisher.BBC);
 		
 		Maybe<Integer> seriesNumber = seriesNumber(episode);
 		
@@ -176,8 +175,6 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 		
 		item.setIsLongForm(true);
 		
-		item.setPublisher(BBC_PUBLISHER);
-
 		item.setThumbnail(thumbnailUrlFrom(episodeUri));
 		item.setImage(imageUrlFrom(episodeUri));
 		

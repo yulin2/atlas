@@ -30,6 +30,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.youtube.YouTubeGraphExtractor;
 import org.atlasapi.remotesite.youtube.YouTubeSource;
@@ -118,7 +119,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 		assertThat(item.getDescription(), is("Description of video"));
 		assertThat(item.getGenres(), is((Set<String>) Sets.<String>newHashSet("http://ref.atlasapi.org/genres/youtube/News", "http://ref.atlasapi.org/genres/atlas/news")));
 		assertThat(item.getTags(), is((Set<String>) Sets.<String>newHashSet("http://ref.atlasapi.org/tags/funny")));
-		assertThat(item.getPublisher(), is("youtube.com"));
+		assertThat(item.getPublisher(), is(Publisher.YOUTUBE));
 		assertThat(item.getThumbnail(),  is(THUMBNAIL_URI));
 		assertThat(item.getImage(), is(IMAGE_URI));
 		assertThat(item.getCurie(),  is("yt:otA7tjinFX4"));

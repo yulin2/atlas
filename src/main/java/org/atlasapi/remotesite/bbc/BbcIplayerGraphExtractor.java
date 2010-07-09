@@ -25,6 +25,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -68,11 +69,8 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	@SuppressWarnings("unchecked")
 	public Playlist extract(SyndicationSource source) {
 		
-		Playlist playlist = new Playlist(source.getUri(), PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(source.getUri()));
+		Playlist playlist = new Playlist(source.getUri(), PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(source.getUri()), Publisher.BBC);
 
-		
-		playlist.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
-		
 		Map<String, Brand> brandLookup = Maps.newHashMap();
 		
 		for (SyndEntry entry : (List<SyndEntry>) source.getFeed().getEntries()) {

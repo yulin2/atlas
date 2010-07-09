@@ -6,13 +6,14 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Equiv;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
 
 public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
     private FreebaseBrandEquivGenerator generator = new FreebaseBrandEquivGenerator();
     
     public void testShouldRetrieveWikipediaEquivForGlee() {
-        Brand brand = new Brand("http://www.hulu.com/glee", "hulu:glee");
+        Brand brand = new Brand("http://www.hulu.com/glee", "hulu:glee", Publisher.HULU);
         brand.setTitle("Glee");
         
         List<Equiv> equivs = generator.equivalent(brand);
@@ -28,7 +29,7 @@ public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
     }
     
     public void testShouldRetrieveWikipediaEquivForCDWM() {
-        Brand brand = new Brand("http://www.channel4.com/programmes/come-dine-with-me", "c4:glee");
+        Brand brand = new Brand("http://www.channel4.com/programmes/come-dine-with-me", "c4:glee", Publisher.C4);
         brand.setTitle("Come Dine With Me");
         
         List<Equiv> equivs = generator.equivalent(brand);

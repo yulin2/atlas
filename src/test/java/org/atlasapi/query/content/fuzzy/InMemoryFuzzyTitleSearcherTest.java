@@ -24,6 +24,7 @@ import java.util.List;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentListener;
 import org.atlasapi.query.content.fuzzy.InMemoryFuzzySearcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
@@ -131,7 +132,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	}
 
 	private Brand brand(String uri, String title) {
-		Brand b = new Brand(uri, uri);
+		Brand b = new Brand(uri, uri, Publisher.BBC);
 		b.setTitle(title);
 		return b;
 	}

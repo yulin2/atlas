@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.is;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.Matchers.EncodingMatcher;
 import org.atlasapi.remotesite.bliptv.BlipTvGraphExtractor;
@@ -68,7 +69,7 @@ public class BlipTvGraphExtractorTest extends MockObjectTestCase {
 		
 		assertThat(item.getTitle(), is("News News News"));
 		assertThat(item.getDescription(), is("The News"));
-		assertThat(item.getPublisher(), is("blip.tv"));
+		assertThat(item.getPublisher(), is(Publisher.BLIP));
 		assertThat(item.getCurie(), is("blip:2276955"));
 		assertThat(item.getThumbnail(), is("thumbnail.image"));
 

@@ -23,6 +23,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 
@@ -36,22 +37,18 @@ import com.google.common.collect.Lists;
  */
 public class ItvGraphExtractor implements ContentExtractor<ItvBrandSource, List<Brand>> {
 
-	private static final String ITV_PUBLISHER = "itv.com";
-		
 	private Brand brand(ItvProgramme sourceBrand) {
 		String uri = sourceBrand.url();
-		Brand brand = new Brand(uri, curieFrom(uri));
+		Brand brand = new Brand(uri, curieFrom(uri), Publisher.ITV);
 		brand.setTitle(sourceBrand.title());
-		brand.setPublisher(ITV_PUBLISHER);
 		return brand;
 	}
 	
 	private Episode episode(ItvEpisode sourceEpisode, ItvProgramme sourceBrand) {
 		String uri = sourceEpisode.url();
-		Episode episode = new Episode(uri, curieFrom(uri));
+		Episode episode = new Episode(uri, curieFrom(uri), Publisher.ITV);
 		episode.setTitle(sourceEpisode.date());
 		episode.setDescription(sourceEpisode.description());
-		episode.setPublisher(ITV_PUBLISHER);
 		episode.setThumbnail(sourceBrand.thumbnail());
 		episode.setIsLongForm(true);
 		return episode;
