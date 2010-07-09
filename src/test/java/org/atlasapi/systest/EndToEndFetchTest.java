@@ -41,7 +41,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.persistence.MongoTestHelper;
@@ -52,7 +51,6 @@ public class EndToEndFetchTest extends TestCase {
 
 	private static final String HULU_BRAND_URL = "http://www.hulu.com/hill-street-blues";
 	private static final String C4_BRAND_URL = "http://www.channel4.com/programmes/hill-street-blues";
-	private static final String BBC_BRAND_URL = "http://www.bbc.co.uk/programmes/b006m86d";
 	private static final String WIKIPEDIA_URL = "http://en.wikipedia.org/one-tree-hill";
 	
 	private ApplicationContext applicationContext = new AnnotationConfigApplicationContext(UriplayModelWithLocalMongo.class);
@@ -62,11 +60,9 @@ public class EndToEndFetchTest extends TestCase {
 		EquivalentUrlStore equivStore = applicationContext.getBean(EquivalentUrlStore.class);
 
 		equivStore.store(new Equiv(C4_BRAND_URL, WIKIPEDIA_URL));
-		equivStore.store(new Equiv(C4_BRAND_URL, BBC_BRAND_URL));
 
 		Brand c4Brand = queryForBrand(C4_BRAND_URL);
 		
-		// BBC Should not be an alias since it can be resolved with the BBC Brands adaptor
 		assertEquals(Sets.newHashSet(WIKIPEDIA_URL, C4_BRAND_URL + "/4od"), c4Brand.getAliases());
 
 		assertEquals(c4Brand, queryForBrand(WIKIPEDIA_URL));
@@ -75,7 +71,7 @@ public class EndToEndFetchTest extends TestCase {
 
 		Brand huluBrand = queryForBrand(HULU_BRAND_URL);
 
-		assertEquals(Sets.newHashSet(WIKIPEDIA_URL), huluBrand.getAliases());
+		assertEquals(Sets.newHashSet(WIKIPEDIA_URL, C4_BRAND_URL, C4_BRAND_URL + "/4od"), huluBrand.getAliases());
 		
 		// check that the hulu brand has been merged with the C4 brand
 		// commented out as there is currently no overlap
