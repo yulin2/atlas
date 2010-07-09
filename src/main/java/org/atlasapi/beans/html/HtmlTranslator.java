@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.util.ChildFinder;
 import org.springframework.core.io.ClassPathResource;
@@ -373,9 +374,12 @@ public class HtmlTranslator implements BeanGraphWriter {
 		return String.format("<a href=\"/2.0/items.%s?genre-contains=%s\">%s</a>", format, lastPartOf(genreUrl), htmlEscape(genreUrl));
 	}
 	
-	private static String queryApiPublisherLink(String publisher) {
+	private static String queryApiPublisherLink(Publisher publisher) {
+		if (publisher == null) {
+			return "";
+		}
 		String format = "html";
-		return String.format("<a href=\"/2.0/items.%s?publisher=%s\">%s</a>", format, publisher, publisher);
+		return String.format("<a href=\"/2.0/items.%s?publisher=%s\">%s</a>", format, publisher.key(), publisher.title());
 	}
 
 

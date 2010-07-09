@@ -30,6 +30,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -61,8 +62,6 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
 	private static final Namespace NS_MEDIA_RSS = Namespace.getNamespace("http://search.yahoo.com/mrss/");
 	
-	private static final String C4_PUBLISHER = "channel4.com";
-
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
 	
 	private static final String IMAGE_SIZE = "625x352";
@@ -84,10 +83,9 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		String fourOdUri = ((Link) source.getAlternateLinks().get(0)).getHref();
 		String brandUri = fourOdUri.replace("/4od", "");
 
-		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri));
+		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), Publisher.C4);
 		brand.addAlias(fourOdUri);
 		brand.setTitle(title(source));
-		brand.setPublisher(C4_PUBLISHER);
 		
 		addImages(brand, source.getLogo());
 		
@@ -99,14 +97,13 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 			
 			String itemUri = ((Link) entry.getAlternateLinks().get(0)).getHref();
 			
-			Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri));
+			Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
 
 			episode.setTitle(title(entry));
 			if ((episode.getTitle() == null || episode.getTitle().equals(brand.getTitle())) && episodeNumber != null && seriesNumber != null) {
 				episode.setTitle(String.format(EPISODE_TITLE_TEMPLATE , seriesNumber, episodeNumber));
 			}
 			
-			episode.setPublisher(C4_PUBLISHER);
 			episode.setEpisodeNumber(episodeNumber);
 			episode.setSeriesNumber(seriesNumber);
 			

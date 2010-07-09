@@ -18,6 +18,7 @@ package org.atlasapi.remotesite.bbc;
 import java.util.List;
 
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.synd.GenericPodcastGraphExtractor;
 import org.atlasapi.remotesite.synd.SyndicationSource;
 import org.jdom.Element;
@@ -44,14 +45,13 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 	}
 
 	@Override
-	protected String publisher() {
-		return BbcProgrammeGraphExtractor.BBC_PUBLISHER;
+	protected Publisher publisher() {
+		return Publisher.BBC;
 	}
 	
 	@Override
 	public Playlist extract(SyndicationSource source) {
 		Playlist playlist = super.extract(source);
-		playlist.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
 
 //		Don't include a /programmes link this creates duplicate aliases
 //		TODO: Reinstate this code

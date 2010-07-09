@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
@@ -81,7 +82,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
 	
 	private Brand emptyBrand(SlashProgrammesContainerRef brandRef) {
 		String brandUri = brandRef.uri();
-		Brand brand = new Brand(brandUri, BbcUriCanonicaliser.curieFor(brandUri));
+		Brand brand = new Brand(brandUri, BbcUriCanonicaliser.curieFor(brandUri), Publisher.BBC);
 		brand.setTitle(brandRef.title());
 		if (brandRef.getDepiction() != null) {
 			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());
@@ -93,8 +94,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
 		}
 		brand.setGenres(genreMap.map(brandRef.genreUris()));
 		brand.setDescription(brandRef.description());
-		brand.setPublisher(BbcProgrammeGraphExtractor.BBC_PUBLISHER);
-		return brand;
+ 		return brand;
 	}
 
 	private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {

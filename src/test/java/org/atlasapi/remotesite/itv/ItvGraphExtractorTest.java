@@ -22,6 +22,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.itv.ItvBrandSource;
 import org.atlasapi.remotesite.itv.ItvEpisode;
@@ -69,14 +70,14 @@ public class ItvGraphExtractorTest extends MockObjectTestCase {
 		Brand brand = Iterables.getOnlyElement(extractor.extract(source));
 
 		assertThat(brand.getCanonicalUri(), is(BRAND_URI));
-		assertThat(brand.getPublisher(), is("itv.com"));
+		assertThat(brand.getPublisher(), is(Publisher.ITV));
 		assertThat(brand.getCurie(), is("itv:1-2773"));
 
 		Episode episode = (Episode) Iterables.getOnlyElement(brand.getItems());
 		assertThat(episode.getCanonicalUri(), is(EPISODE1_URI));
 		
 		assertThat(episode.getDescription(), is("latest episode"));
-		assertThat(episode.getPublisher(), is("itv.com"));
+		assertThat(episode.getPublisher(), is(Publisher.ITV));
 		assertThat(episode.getCurie(), is("itv:5-100109"));
 		assertThat(episode.getIsLongForm(), is(true));
 		assertThat(episode.getThumbnail(), is(THUMBNAIL_URL));

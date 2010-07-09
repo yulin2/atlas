@@ -17,6 +17,7 @@ package org.atlasapi.remotesite;
 import java.util.List;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
 import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
@@ -86,7 +87,7 @@ public class RemoteSiteModule {
 		 OembedXmlAdapter flickrAdapter = new OembedXmlAdapter();
 		 flickrAdapter.setAcceptedUriPattern("http://www.flickr.com/photos/[^/]+/[\\d]+");
 		 flickrAdapter.setOembedEndpoint("http://www.flickr.com/services/oembed/");
-		 flickrAdapter.setPublisher("flickr.com");
+		 flickrAdapter.setPublisher(Publisher.FLICKR);
 		 
 		 adapters.add(flickrAdapter);
 		 adapters.add(new OpmlAdapter(dispatcher));

@@ -25,6 +25,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.synd.GenericPodcastGraphExtractor;
 import org.atlasapi.remotesite.synd.SyndicationSource;
@@ -47,6 +48,8 @@ import com.sun.syndication.feed.synd.SyndFeedImpl;
  */
 public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 
+	private static final Publisher aPublisher = Publisher.BBC;
+	
 	static final String PODCAST_URI = "http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml";
 	static final String ENTRY_URI = "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900.mp3";
 	static final String LOCATION_URI = "http://downloads.bbc.co.uk/podcasts/radio4/bh/bh_20090125-0900.mp3";
@@ -55,6 +58,11 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		@Override
 		protected String itemUri(SyndEntry entry) {
 			return entry.getLink();
+		}
+
+		@Override
+		protected Publisher publisher() {
+			return aPublisher;
 		}
 	};
 	
@@ -88,6 +96,7 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 		
 		Playlist playlist = extractor.extract(source);
 		assertThat(playlist.getCanonicalUri(), is(PODCAST_URI));
+		assertThat(playlist.getPublisher(), is(aPublisher));
 		
 		Item item = Iterables.getOnlyElement(playlist.getItems());
 		

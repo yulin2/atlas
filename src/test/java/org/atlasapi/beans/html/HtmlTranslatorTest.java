@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.joda.time.Duration;
 
@@ -26,7 +27,7 @@ public class HtmlTranslatorTest extends TestCase {
 		item.setDescription("Sunday morning interview show");
 		item.setCanonicalUri("http://www.bbc.co.uk/tomorrowsworld");
 		item.setGenres(Sets.newHashSet("http://ref.atlasapi.org/genres/comedy"));
-		item.setPublisher("bbc.co.uk");
+		item.setPublisher(Publisher.BBC);
 		
 		Version version = new Version();
 		item.addVersion(version);
@@ -43,7 +44,6 @@ public class HtmlTranslatorTest extends TestCase {
 		encoding.addAvailableAt(location);
 		
 		location.setUri("http://www.bbc.co.uk/iplayer/episode/b00lkyfb/The_Andrew_Marr_Show_05_07_2009/");
-		
 		
 		Set<Object> graph = Sets.newHashSet();
 		graph.add(item);

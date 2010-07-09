@@ -22,6 +22,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.reference.entity.ContainerFormat;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -32,19 +33,13 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.common.media.MimeType;
 
 /**
- * {@link BeanGraphExtractor} that processes the result of a query to the YouTube
+ * {@link ContentExtractor} that processes the result of a query to the YouTube
  * GData API
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, Item> {
 	
-	private static final String YOUTUBE_PUBLISHER = "youtube.com";
-	
-
-	public YouTubeGraphExtractor() {
-	}
-
 	@Override
 	public Item extract(YouTubeSource source) {
 		
@@ -88,7 +83,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 	}
 	
 	private Item item(YouTubeSource source) {
-		Item item = new Item(source.getUri(), YoutubeUriCanonicaliser.curieFor(source.getUri()));
+		Item item = new Item(source.getUri(), YoutubeUriCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
 
 		item.setTitle(source.getVideoTitle());
 		item.setDescription(source.getDescription());
@@ -96,7 +91,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 		item.setGenres(new YouTubeGenreMap().map(source.getCategories()));
 		item.setTags(source.getTags());
 		
-		item.setPublisher(YOUTUBE_PUBLISHER);
 		item.setThumbnail(source.getThumbnailImageUri());
 		item.setImage(source.getImageUri());
 		if (source.getVideos().size() > 0) {

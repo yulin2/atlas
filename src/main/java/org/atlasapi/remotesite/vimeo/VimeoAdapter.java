@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.vimeo;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.oembed.OembedXmlClient;
 
@@ -24,7 +25,7 @@ public class VimeoAdapter extends OembedXmlAdapter {
 		setAcceptedUriPattern("http://vimeo.com/[\\d]+");
 		setOembedEndpoint("http://www.vimeo.com/api/oembed.xml");
 		setMaxWidth(400);
-		setPublisher("vimeo.com");
+		setPublisher(Publisher.VIMEO);
 	}
 
 }

@@ -4,7 +4,6 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Set;
 
-import org.atlasapi.beans.BeanGraphWriter;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Countries;
@@ -16,15 +15,14 @@ import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
-import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.util.ChildFinder;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.base.Maybe;
 
 /**
  * {@link BeanGraphWriter} that translates the full URIplay object model
@@ -195,26 +193,21 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simpleItem.setThumbnail(fullItem.getThumbnail());
 		simpleItem.setGenres(fullItem.getGenres());
 		simpleItem.setTags(fullItem.getTags());
-		
-		
 	}
 
-	private static PublisherDetails toPublisherDetails(String publisherUri) {
-		if (publisherUri == null) {
+	private static PublisherDetails toPublisherDetails(Publisher publisher) {
+
+		if (publisher == null) {
 			return null;
 		}
 		
-		PublisherDetails details = new PublisherDetails(publisherUri);
+		PublisherDetails details = new PublisherDetails(publisher.key());
 		
-		Maybe<Publisher> possiblePublisher = Publisher.fromKey(publisherUri);
-		if (possiblePublisher.hasValue()) {
-			Publisher publisher = possiblePublisher.requireValue();
-			if (publisher.country() != null) {
-				details.setCountry(publisher.country().code());
-			}
-			details.setName(publisher.title());
+		if (publisher.country() != null) {
+			details.setCountry(publisher.country().code());
 		}
 		
+		details.setName(publisher.title());
 		return details;
 	}
 

@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.remotesite.FetchException;
@@ -80,7 +81,7 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
             }
             
             // Returning empty playlist
-            return new Playlist(URL, "hulu:all_brands");
+            return new Playlist(URL, "hulu:all_brands", Publisher.HULU);
         } catch (Exception e) {
             LOG.warn("Error retrieving all hulu brands: " + uri + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
             throw new FetchException("Unable to retrieve all hulu brands", e);

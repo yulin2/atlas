@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.feeds.OembedItem;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -39,7 +40,7 @@ public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 	private Pattern acceptedUriPattern;
 	private Integer maxWidth;
 	private Integer maxHeight;
-	private String publisher;
+	private Publisher publisher;
 
 	public OembedXmlAdapter() {
 		this(new OembedXmlClient(), new OembedGraphExtractor());
@@ -102,7 +103,7 @@ public class OembedXmlAdapter implements SiteSpecificAdapter<Item> {
 		this.maxHeight = maxHeight;
 	}
 	
-	public void setPublisher(String publisher) {
+	public void setPublisher(Publisher publisher) {
 		this.publisher = publisher;
 	}
 

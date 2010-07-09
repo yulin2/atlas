@@ -21,6 +21,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -31,8 +32,6 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.common.media.MimeType;
 
 public class BlipTvGraphExtractor implements ContentExtractor<HtmlDescriptionSource, Item>  {
-
-	private static final String BLIP_TV_PUBLISHER = "blip.tv";
 
 	public Item extract(HtmlDescriptionSource src) {
 		
@@ -98,11 +97,10 @@ public class BlipTvGraphExtractor implements ContentExtractor<HtmlDescriptionSou
 	}
 
 	private Item item(String itemUri, HtmlDescriptionOfItem htmlItem) {
-		Item item = new Item(itemUri, PerPublisherCurieExpander.CurieAlgorithm.BLIP.compact(itemUri));
+		Item item = new Item(itemUri, PerPublisherCurieExpander.CurieAlgorithm.BLIP.compact(itemUri), Publisher.BLIP);
 		
 		item.setTitle(htmlItem.getTitle());
 		item.setDescription(htmlItem.getDescription());
-		item.setPublisher(BLIP_TV_PUBLISHER);
 		item.setThumbnail(htmlItem.getThumbnail());
 		return item;
 	}

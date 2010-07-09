@@ -25,6 +25,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
@@ -64,7 +65,7 @@ public class TedTalkGraphExtractorTest extends MockObjectTestCase {
 		assertThat(item.getCanonicalUri(), is(ITEM_URI));
 		assertThat(item.getTitle(), is("News News News"));
 		assertThat(item.getDescription(), is("The News"));
-		assertThat(item.getPublisher(), is("ted.com"));
+		assertThat(item.getPublisher(), is(Publisher.TED));
 		assertThat(item.getCurie(), is("ted:elizabeth_gilbert_on_genius"));
 		assertThat(item.getIsLongForm(), is(true));
 		assertThat(item.getThumbnail(), is("thumbnail.image"));

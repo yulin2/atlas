@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -34,11 +35,10 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
                         
                         String brandUri = new HuluBrandCanonicaliser().canonicalise((String) attributes.get("show_link"));
                         
-                        brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri));
+                        brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(brandUri), Publisher.HULU);
 
                         brand.setDescription((String) attributes.get("show_description"));
                         brand.setTitle((String) attributes.get("show_title"));
-                        brand.setPublisher("hulu.com");
 
                         if (attributes.containsKey("images") && attributes.get("images") instanceof List) {
                             List<Map<String, Object>> images = (List<Map<String, Object>>) attributes.get("images");
@@ -67,7 +67,7 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
             
             for (Element element : source.allElementsMatching("//div[@id='episode-container']/div/ul/li/a']")) {
                 String episodeUri = element.getAttributeValue("href");
-				Episode episode = new Episode(episodeUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(episodeUri));
+				Episode episode = new Episode(episodeUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(episodeUri), Publisher.HULU);
                 brand.addItem(episode);
             }
 

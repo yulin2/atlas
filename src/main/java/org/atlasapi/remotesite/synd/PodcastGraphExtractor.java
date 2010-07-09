@@ -24,6 +24,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.reference.entity.AudioFormat;
 import org.atlasapi.media.reference.entity.ContainerFormat;
 import org.atlasapi.media.reference.entity.VideoFormat;
@@ -97,7 +98,5 @@ public abstract class PodcastGraphExtractor {
 		return feed.getEntries();
 	}
 	
-	protected String publisher() {
-		return null;
-	}
+	protected abstract Publisher publisher();
 }

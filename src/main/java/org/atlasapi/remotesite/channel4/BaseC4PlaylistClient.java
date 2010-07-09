@@ -7,6 +7,7 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.FetchException;
@@ -38,7 +39,7 @@ public abstract class BaseC4PlaylistClient implements SiteSpecificAdapter<Playli
 				brandList.addAll(brandListingPage.getBrandList());
 			}
 			
-			Playlist playlist = new Playlist(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri));
+			Playlist playlist = new Playlist(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), Publisher.C4);
 			
 			for (HtmlBrandSummary brandRef : brandList) {
 				Brand brand = brandClient.fetch(brandRef.getBrandPage());

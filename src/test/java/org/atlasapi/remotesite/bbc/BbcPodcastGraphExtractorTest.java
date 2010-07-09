@@ -24,6 +24,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.bbc.BbcPodcastGraphExtractor;
 import org.atlasapi.remotesite.synd.SyndicationSource;
@@ -99,7 +100,7 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		
 		//assertThat(representation, hasPropertyValue(PODCAST_URI, "aliases", Sets.newHashSet(SLASH_PROGRAMMES_URI)));
 		assertThat(item.getTitle(), is("BH"));
-		assertThat(item.getPublisher(), is("bbc.co.uk"));
+		assertThat(item.getPublisher(), is(Publisher.BBC));
 		assertThat(item.getDescription(), is("Broadcasting House"));
 	}
 	

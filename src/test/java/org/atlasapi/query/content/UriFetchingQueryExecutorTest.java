@@ -21,6 +21,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
@@ -35,8 +36,8 @@ import com.google.common.collect.ImmutableList;
 @SuppressWarnings("unchecked")
 public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 
-	private static final Item item1 = new Item("item1", "curie:1");
-	private static final Item item2 = new Item("item2", "curie:2");
+	private static final Item item1 = new Item("item1", "curie:1", Publisher.BBC);
+	private static final Item item2 = new Item("item2", "curie:2", Publisher.BBC);
 	private static final ContentQuery queryForItem1 = query().equalTo(Attributes.ITEM_URI, "item1").build();
 
 	private Fetcher<Content> fetcher = mock(Fetcher.class);
@@ -91,7 +92,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 	
 	public void testThatItemInBrandQueriesWork() throws Exception {
 		
-		final Brand brand = new Brand("brand1", "brand:1");
+		final Brand brand = new Brand("brand1", "brand:1", Publisher.BBC);
 		brand.addItem(item1);
 		
 		

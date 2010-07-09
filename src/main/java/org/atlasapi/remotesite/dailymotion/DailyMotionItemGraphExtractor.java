@@ -19,6 +19,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -28,8 +29,6 @@ import org.atlasapi.remotesite.html.HtmlDescriptionSource;
 import com.metabroadcast.common.media.MimeType;
 
 public class DailyMotionItemGraphExtractor implements ContentExtractor<HtmlDescriptionSource, Item>  {
-
-	private static final String DAILYMOTION_PUBLISHER = "dailymotion.com";
 
 	@Override
 	public Item extract(HtmlDescriptionSource src) {
@@ -54,7 +53,7 @@ public class DailyMotionItemGraphExtractor implements ContentExtractor<HtmlDescr
 		item.setCanonicalUri(itemUri);
 		item.setTitle(htmlItem.getTitle());
 		item.setDescription(htmlItem.getDescription());
-		item.setPublisher(DAILYMOTION_PUBLISHER);
+		item.setPublisher(Publisher.DAILYMOTION);
 		item.setThumbnail(htmlItem.getThumbnail());
 		item.setCurie(PerPublisherCurieExpander.CurieAlgorithm.DM.compact(itemUri));
 		return item;
