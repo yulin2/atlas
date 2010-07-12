@@ -45,7 +45,7 @@ public class DateTimeInQueryParser {
 	public DateTime parse(String value) throws MalformedDateTimeException {
 		
 		if (!StringUtils.isBlank(value) && StringUtils.isNumeric(value)) {
-			return new DateTime(Long.valueOf(value), DateTimeZones.UTC);
+			return new DateTime(Long.valueOf(value) * 1000, DateTimeZones.UTC);
 		}
 		
 		Matcher matcher = EXPRESSION.matcher(value);

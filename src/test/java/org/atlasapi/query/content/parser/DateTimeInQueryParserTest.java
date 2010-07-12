@@ -21,6 +21,7 @@ import org.atlasapi.query.content.parser.DateTimeInQueryParser.MalformedDateTime
 import org.joda.time.DateTime;
 
 import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
 
 public class DateTimeInQueryParserTest extends TestCase {
@@ -32,7 +33,7 @@ public class DateTimeInQueryParserTest extends TestCase {
 		
 		DateTimeInQueryParser parser = new DateTimeInQueryParser(clock);
 		
-		assertEquals(parser.parse("1010101").getMillis(), 1010101);
+		assertEquals(new DateTime(2009, 2, 13, 23, 31, 30, 0, DateTimeZones.UTC), parser.parse("1234567890"));
 
 		assertEquals(parser.parse("now"), now);
 
