@@ -35,7 +35,7 @@ public class YouTubeGenreMapTest extends TestCase {
 	
 	GenreMap genreMap = new YouTubeGenreMap();
 	
-	public void testMapsGenresFromYoutubeGenresToUriplayGenres() throws Exception {
+	public void testMapsGenresFromYoutubeGenresToAtlasGenres() throws Exception {
 		
 		Set<String> genres = Sets.newHashSet("http://ref.atlasapi.org/genres/youtube/comedy");
 		assertThat(genreMap.map(genres), hasItem("http://ref.atlasapi.org/genres/atlas/comedy"));

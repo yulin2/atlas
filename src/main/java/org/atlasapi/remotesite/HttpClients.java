@@ -8,7 +8,7 @@ import com.metabroadcast.common.media.MimeType;
 
 public class HttpClients {
 
-    private static final String URIPLAY_USER_AGENT = "Mozilla/5.0 (compatible; atlas/1.0; +http://atlasapi.org)";
+    private static final String ATLAS_USER_AGENT = "Mozilla/5.0 (compatible; atlas/1.0; +http://atlasapi.org)";
 
     /**
      * @return A {@link SimpleHttpClient} that is configured to work
@@ -17,7 +17,7 @@ public class HttpClients {
      */
     public static SimpleHttpClient webserviceClient() {
         return new SimpleHttpClientBuilder()
-            .withUserAgent(URIPLAY_USER_AGENT)
+            .withUserAgent(ATLAS_USER_AGENT)
             .withSocketTimeout(30, TimeUnit.SECONDS)
             .withRetries(3)
         .build();
@@ -25,7 +25,7 @@ public class HttpClients {
 
 	public static SimpleHttpClient screenScrapingClient() {
 		return new SimpleHttpClientBuilder()
-	        .withUserAgent(URIPLAY_USER_AGENT)
+	        .withUserAgent(ATLAS_USER_AGENT)
 	        .withSocketTimeout(50, TimeUnit.SECONDS)
 	        .withConnectionTimeout(10, TimeUnit.SECONDS)
 	        .withAcceptHeader(MimeType.TEXT_HTML)

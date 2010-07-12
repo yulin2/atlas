@@ -45,7 +45,7 @@ public class YouTubeSourceTest extends TestCase {
 		assertNull(source.getDescription());
 	}
 	
-	public void testGeneratesUriplayGenresAndTagsUrisForCategories() throws Exception {
+	public void testGeneratesGenresAndTagsUrisForCategories() throws Exception {
 		
 		VideoEntry entry = new VideoEntry() { 
 			@Override
