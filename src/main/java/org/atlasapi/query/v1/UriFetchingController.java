@@ -44,7 +44,7 @@ import com.google.common.collect.Lists;
 @Controller
 public class UriFetchingController {
 
-	private static final String VIEW = "uriplayModel";
+	private static final String VIEW = "contentModel";
 	
 	private final Projector projector;
 	private final Fetcher<Description> localOrRemoteFetcher;

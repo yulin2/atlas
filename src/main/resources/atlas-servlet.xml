@@ -71,14 +71,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="anyTypeController" class="org.atlasapi.query.v2.AnyTypeFetchingController">
 		<constructor-arg ref="queryExecutor" />
 	</bean>
-
-	<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="org/uriplay/http-error" p:order="#{T(org.springframework.core.Ordered).HIGHEST_PRECEDENCE}">
-		<constructor-arg>
-			<bean class="org.springframework.web.servlet.view.JstlView">
-				<constructor-arg value="/WEB-INF/templates/org/uriplay/http-error.jsp" />
-			</bean>
-		</constructor-arg>
-	</bean>
 				
 	<bean class="org.atlasapi.views.ExtensionBasedContentNegotiatingViewResolver" p:order="#{T(org.springframework.core.Ordered).LOWEST_PRECEDENCE}">
 		<property name="mediaTypes">
@@ -95,7 +87,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		</property>
 		<property name="viewResolvers">
 			<list>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_RDF_XML" />
@@ -103,7 +95,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="TEXT_HTML" />
@@ -113,7 +105,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_XML" />
@@ -121,7 +113,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_JSON" />
@@ -129,7 +121,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_ATOM_XML" />
@@ -139,7 +131,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_RSS_XML" />
@@ -149,7 +141,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean id="oembedJsonViewResolver" class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean id="oembedJsonViewResolver" class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_OEMBED_JSON" />
@@ -159,7 +151,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean id="oembedXmlViewResolver" class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="uriplayModel">
+				<bean id="oembedXmlViewResolver" class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
 							<constructor-arg value="APPLICATION_OEMBED_XML" />
@@ -190,12 +182,4 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <bean id="jsonTranslator" class="org.atlasapi.beans.JsonTranslator" scope="request">
         <aop:scoped-proxy/>
     </bean>
-
-    <bean class="org.atlasapi.persistence.servlet.StatusCodeExceptionResolver">
-		<property name="exceptionMappings">  
-			<map>  
-     			<entry key="org.atlasapi.persistence.servlet.ContentNotFoundException" value="org/uriplay/http-error" />  
-		    </map>  
-		</property>  
-	</bean> 
 </beans>
