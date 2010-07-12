@@ -34,17 +34,27 @@ public class DateTimeInQueryParserTest extends TestCase {
 		
 		assertEquals(parser.parse("1010101").getMillis(), 1010101);
 
-		assertEquals(parser.parse("now()"), now);
+		assertEquals(parser.parse("now"), now);
 
-		assertEquals(parser.parse("now()+hours(1)"), now.plusHours(1));
-		assertEquals(parser.parse("now() - hours(1)"), now.minusHours(1));
+		assertEquals(parser.parse("now.plus.1h"), now.plusHours(1));
+		assertEquals(parser.parse("now.plus.PT1H"), now.plusHours(1));
+
+		assertEquals(parser.parse("now.minus.1h"), now.minusHours(1));
+
+		assertEquals(parser.parse("now.minus.1s"), now.minusSeconds(1));
+
+		assertEquals(parser.parse("now.minus.1m"), now.minusMinutes(1));
+
+		assertEquals(parser.parse("now.minus.PT1M"), now.minusMinutes(1));
+		
+		assertEquals(parser.parse("now.minus.P1M"), now.minusMonths(1));
 
 		assertIsMalformed(parser, "");
 		assertIsMalformed(parser, "-");
 		assertIsMalformed(parser, "+");
-		assertIsMalformed(parser, "now()+");
-		assertIsMalformed(parser, "now()+bob");
-		assertIsMalformed(parser, "now()+bob(10)");
+		assertIsMalformed(parser, "now.plus");
+		assertIsMalformed(parser, "now.plus.bob");
+		assertIsMalformed(parser, "now.plus.bob10");
 	}
 	
 	private void assertIsMalformed(DateTimeInQueryParser parser, String value) {
