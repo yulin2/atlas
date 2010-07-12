@@ -14,13 +14,14 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.content.parser;
 
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
+import org.joda.time.Period;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -28,8 +29,9 @@ import com.metabroadcast.common.time.SystemClock;
 
 public class DateTimeInQueryParser {
 
-	private final static Pattern EXPRESSION = Pattern.compile("now\\(\\)(?:\\s?([+-])\\s?([a-zA-Z]+)\\((\\d+)\\)|)");
-	
+	private final static Pattern EXPRESSION = Pattern.compile("now(?:\\.(plus|minus)\\.((?:P)?[a-zA-Z0-9]+)|)");
+
+	private final PeriodFormatter isoParser = ISOPeriodFormat.standard();
 	private final Clock clock;
 
 	public DateTimeInQueryParser(Clock clock) {
@@ -43,7 +45,7 @@ public class DateTimeInQueryParser {
 	public DateTime parse(String value) throws MalformedDateTimeException {
 		
 		if (!StringUtils.isBlank(value) && StringUtils.isNumeric(value)) {
-			return new DateTime(Long.valueOf(value), DateTimeZones.UTC);
+			return new DateTime(Long.valueOf(value) * 1000, DateTimeZones.UTC);
 		}
 		
 		Matcher matcher = EXPRESSION.matcher(value);
@@ -53,11 +55,11 @@ public class DateTimeInQueryParser {
 				return clock.now();
 			}
 			else  {
-				Duration duration = durationFrom(matcher.group(2), matcher.group(3));
-				if ("+".equals(operator)) {
-					return clock.now().plus(duration);
+				Period period = periodFrom(matcher.group(2));
+				if ("plus".equals(operator)) {
+					return clock.now().plus(period);
 				} else {
-					return clock.now().minus(duration);
+					return clock.now().minus(period);
 				}
 			}
 		}
@@ -65,10 +67,13 @@ public class DateTimeInQueryParser {
 		throw new MalformedDateTimeException();
 	}
 	
-	private Duration durationFrom(String unit, String value) {
+	private Period periodFrom(String period) {
+		period = period.toUpperCase();
 		try {
-			TimeUnit timeUnit = TimeUnit.valueOf(unit.toUpperCase());
-			return new Duration(timeUnit.toMillis(Long.valueOf(value)));
+			if (!period.startsWith("P")) {
+				period = "PT" + period;
+			}
+			return isoParser.parsePeriod(period);
 		} catch (IllegalArgumentException e) {
 			throw new MalformedDateTimeException(e);
 		}

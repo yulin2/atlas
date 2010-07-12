@@ -183,20 +183,20 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 	
 	public void testTransmittedAfter() {
 		Map<String, String[]> params = Maps.newHashMap();
-		params.put("broadcast.transmissionTime-after", new String[] {"101"});
-		check(params, query().after(BROADCAST_TRANSMISSION_TIME, new DateTime(101L, DateTimeZones.UTC)));
+		params.put("broadcast.transmissionTime-after", new String[] {"1"});
+		check(params, query().after(BROADCAST_TRANSMISSION_TIME, new DateTime(1000L, DateTimeZones.UTC)));
 	}
 	
 	public void testTransmittedBefore() {
 		Map<String, String[]> params = Maps.newHashMap();
-		params.put("broadcast.transmissionTime-before", new String[] {"101"});
-		check(params, query().before(BROADCAST_TRANSMISSION_TIME, new DateTime(101L, DateTimeZones.UTC)));
+		params.put("broadcast.transmissionTime-before", new String[] {"1"});
+		check(params, query().before(BROADCAST_TRANSMISSION_TIME, new DateTime(1000L, DateTimeZones.UTC)));
 	}
 	
 	public void testTransmissionTimeEquals() throws Exception {
-		DateTime when = new DateTime(1010101, DateTimeZones.UTC);
+		DateTime when = new DateTime(2000, DateTimeZones.UTC);
 		Map<String, String[]> params = Maps.newHashMap();
-		params.put("broadcast.transmissionTime", new String[] { String.valueOf(when.getMillis()) });
+		params.put("broadcast.transmissionTime", new String[] { String.valueOf(when.getMillis() / 1000L) });
 		check(params, query().before(BROADCAST_TRANSMISSION_TIME, when.plusSeconds(1)).after(BROADCAST_TRANSMISSION_END_TIME, when));
 	}
 	
@@ -240,7 +240,7 @@ public class QueryStringBackedQueryBuilderTest extends MockObjectTestCase {
 		params.put("transmissionTime-after", new String[] { "10101" });
 		
 		new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter());
-		check(params, query().after(Attributes.BROADCAST_TRANSMISSION_TIME, new DateTime(10101, DateTimeZones.UTC)), Item.class);
+		check(params, query().after(Attributes.BROADCAST_TRANSMISSION_TIME, new DateTime(10101 * 1000, DateTimeZones.UTC)), Item.class);
 	}
 	
 	public void testAliases() throws Exception {
