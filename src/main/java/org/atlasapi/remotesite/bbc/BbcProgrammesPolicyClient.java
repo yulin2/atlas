@@ -64,7 +64,7 @@ public class BbcProgrammesPolicyClient {
 		}
 	}
 	
-	private static final Pattern START_END_FORMAT = Pattern.compile("<dcterms:valid>[^<]*start=(.+);[^<]*end=(.+);", Pattern.DOTALL);
+	private static final Pattern START_END_FORMAT = Pattern.compile("<dcterms:valid>.*?start=([^;]+);.*?end=([^;]+);", Pattern.DOTALL);
 	private static final Pattern RESTRICTION_PATTERN = Pattern.compile("<media:restriction relationship=\"allow\"[^>]*>([a-zA-Z]+)<");
 	
 	private Maybe<Policy> policyFromAtom(String data) {
