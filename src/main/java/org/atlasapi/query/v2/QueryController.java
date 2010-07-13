@@ -35,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class QueryController {
-	private static final String VIEW = "uriplayModel";
+	private static final String VIEW = "contentModel";
 
 	private final KnownTypeQueryExecutor executor;
 	private final QueryStringBackedQueryBuilder builder = new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter());

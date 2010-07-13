@@ -50,7 +50,7 @@ public class YouTubeGdataClientTest extends TestCase {
 		assertThat(entry.getTitle().getPlainText(), containsString("BBC News 24"));
 		assertThat(entry.getHtmlLink().getHref(), startsWith("http://www.youtube.com/watch?v=pdyYe7sDlhA&feature=youtube_gdata")); // should remove youtube_gdata flag
 		MediaContent content = (MediaContent) entry.getContent();
-		assertThat(content.getUri(), startsWith("http://www.youtube.com/v/pdyYe7sDlhA")); // but has more params including uriplay.org
+		assertThat(content.getUri(), startsWith("http://www.youtube.com/v/pdyYe7sDlhA")); // but has more params 
 
 		YouTubeMediaGroup mediaGroup = entry.getMediaGroup();
 		assertThat(mediaGroup.getDescription().getPlainTextContent(), startsWith("On May 8th 2006"));

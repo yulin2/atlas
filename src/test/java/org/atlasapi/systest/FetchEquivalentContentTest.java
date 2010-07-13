@@ -63,7 +63,7 @@ public class FetchEquivalentContentTest extends TestCase {
 	
 	private static final Fetcher<Content> fetcher = new StubFetcher().respondTo(C4_GLEE).respondTo(HULU_GLEE);
 	
-	private ApplicationContext applicationContext = new AnnotationConfigApplicationContext(UriplayModuleWithLocalMongoAndFakeFetchers.class);
+	private ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AtlasModuleWithLocalMongoAndFakeFetchers.class);
 	
 	public void testResolvingContent() throws Exception {
 		
@@ -131,7 +131,7 @@ public class FetchEquivalentContentTest extends TestCase {
 	@Configuration
 	@ImportResource("classpath:atlas.xml")
 	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
-	public static class UriplayModuleWithLocalMongoAndFakeFetchers {
+	public static class AtlasModuleWithLocalMongoAndFakeFetchers {
 		
 		public @Bean Mongo mongo() {
 			return MongoTestHelper.anEmptyMongo();

@@ -23,7 +23,7 @@ public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 		schedule.withProgrammes(Lists.newArrayList(new Programme("episode", "b00abcd"), new Programme("episode", "b00efgh"), new Programme("brand", "b00xyz")));
 	}
 	
-	public void testMakesUriplayFetchExtractedEpisodePid() throws Exception {
+	public void testFetchExtractedEpisodePid() throws Exception {
 		
 		BbcScheduledProgrammeUpdater scheduleFetcher = new BbcScheduledProgrammeUpdater(scheduleClient, fetcher);
 		

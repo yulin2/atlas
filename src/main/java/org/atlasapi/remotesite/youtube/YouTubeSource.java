@@ -42,8 +42,8 @@ import com.google.gdata.util.common.base.Charsets;
  */
 class YouTubeSource extends BaseSource {
 	
-	private static final String URIPLAY_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
-	private static final String URIPLAY_TAGS_SCHEME = "http://ref.atlasapi.org/tags/";
+	private static final String ATLAS_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
+	private static final String ATLAS_TAGS_SCHEME = "http://ref.atlasapi.org/tags/";
 	private static final String GDATA_KEYWORDS_CAT_SCHEME = "http://gdata.youtube.com/schemas/2007/keywords.cat";
 	
 	private final VideoEntry videoEntry;
@@ -128,7 +128,7 @@ class YouTubeSource extends BaseSource {
 		Set<String> result = Sets.newHashSet();
 		List<MediaCategory> categories = videoEntry.getMediaGroup().getCategories();
 		for (MediaCategory category : categories) {
-			result.add(URIPLAY_GENRES_SCHEME + category.getContent());
+			result.add(ATLAS_GENRES_SCHEME + category.getContent());
 		}
 		return result;
 	}
@@ -139,7 +139,7 @@ class YouTubeSource extends BaseSource {
 		for (Category category : categories) {
 			if (category.getScheme().equals(GDATA_KEYWORDS_CAT_SCHEME)) {
 				try {
-					result.add(URIPLAY_TAGS_SCHEME + URLEncoder.encode(category.getTerm().toLowerCase(), Charsets.UTF_8.name()));
+					result.add(ATLAS_TAGS_SCHEME + URLEncoder.encode(category.getTerm().toLowerCase(), Charsets.UTF_8.name()));
 				} catch (UnsupportedEncodingException e) {
 					throw new Defect("UTF-8 not found");
 				}
