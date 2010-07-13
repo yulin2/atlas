@@ -70,7 +70,7 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
                         episode.setBrand(brand);
                         episodes.add(episode);
                     } catch (FetchException fe) {
-                        LOG.warn("Failed to retrieve episode: " + item.getCanonicalUri() + " with message: " + fe.getMessage() + " with cause: " + fe.getCause().getMessage());
+                        LOG.warn("Failed to retrieve episode: " + item.getCanonicalUri() + " with message: " + fe.getMessage());
                     }
                 }
                 brand.setItems(episodes);
