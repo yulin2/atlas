@@ -65,7 +65,7 @@ public class WikipediaSparqlAdapter implements SiteSpecificAdapter<Content> {
 			String articleType = source.determineItemType(rootTypes);
 			
 			if (rootTypes.isEmpty() && articleType == null) {
-				throw new FetchException("No information available for: " + uri);
+				return null;
 			}
 		
 			performSubsequentQuery(source, articleType);
