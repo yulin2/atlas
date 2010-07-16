@@ -75,10 +75,10 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 		
 		for (SyndEntry entry : (List<SyndEntry>) source.getFeed().getEntries()) {
 			
-			// remove this clause to include radio content
-			if (isRadioProgramme(entry)) {
-				continue;
-			}
+//			// remove this clause to include radio content
+//			if (isRadioProgramme(entry)) {
+//				continue;
+//			}
 			
 			String episodeUri = episodeUriFrom(selfLink(entry));
 			if (episodeUri == null || !BbcProgrammeAdapter.SLASH_PROGRAMMES_URL_PATTERN.matcher(episodeUri).matches()) {

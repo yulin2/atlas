@@ -74,8 +74,11 @@ public class KeywordTracker implements Runnable {
 	}
 	
 	public void shutdown() {
-		stream.cleanup();
-		statusUpdateListener.shutdown();
+	    if (stream != null) {
+	        stream.cleanup();
+	    }
+	    if (statusUpdateListener != null) {
+	        statusUpdateListener.shutdown();
+	    }
 	}
-
 }
