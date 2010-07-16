@@ -64,25 +64,13 @@ public class RemoteSiteModule {
 		 adapters.add(new BbcIplayerFeedAdapter());
 		 adapters.add(new BbcProgrammeAdapter());
 		 adapters.add(new BbcPodcastAdapter());
-
-		 HuluItemAdapter huluItemAdapter = new HuluItemAdapter();
 		 
-		 HuluBrandAdapter huluBrandAdapter = new HuluBrandAdapter();
-		 huluBrandAdapter.setEpisodeAdapter(new HuluItemAdapter());
-
-		 huluItemAdapter.setContentStore(contentWriters());
-		 huluItemAdapter.setBrandAdapter(huluBrandAdapter);
-		 
-		 HuluAllBrandsAdapter allBrands = new HuluAllBrandsAdapter(huluBrandAdapter);
-		 allBrands.setContentStore(contentWriters());
-		 
-		 adapters.add(huluItemAdapter);
-		 adapters.add(huluBrandAdapter);
-		 adapters.add(allBrands);
+		 adapters.add(huluItemAdapter());
+		 adapters.add(huluBrandAdapter());
+		 adapters.add(huluAllBrandsAdapter());
 		 
 		 adapters.add(new HuluRssAdapter());
 		 adapters.add(new VimeoAdapter());
-
 		 
 		 OembedXmlAdapter flickrAdapter = new OembedXmlAdapter();
 		 flickrAdapter.setAcceptedUriPattern("http://www.flickr.com/photos/[^/]+/[\\d]+");
@@ -100,5 +88,24 @@ public class RemoteSiteModule {
 	
 	public @Bean ContentWriters contentWriters() {
 		return new ContentWriters();
+	}
+	
+	public @Bean HuluItemAdapter huluItemAdapter() {
+	    HuluItemAdapter huluItemAdapter = new HuluItemAdapter();
+	    huluItemAdapter.setContentStore(contentWriters());
+        huluItemAdapter.setBrandAdapter(huluBrandAdapter());
+        return huluItemAdapter;
+	}
+	
+	public @Bean HuluBrandAdapter huluBrandAdapter() {
+	    HuluBrandAdapter huluBrandAdapter = new HuluBrandAdapter();
+        huluBrandAdapter.setEpisodeAdapter(new HuluItemAdapter());
+        return huluBrandAdapter;
+	}
+	
+	public @Bean HuluAllBrandsAdapter huluAllBrandsAdapter() {
+	    HuluAllBrandsAdapter allBrands = new HuluAllBrandsAdapter(huluBrandAdapter());
+        allBrands.setContentStore(contentWriters());
+        return allBrands;
 	}
 }

@@ -19,6 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
@@ -80,6 +82,11 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     @Override
     public boolean canFetch(String uri) {
         return ALIAS_PATTERN.matcher(uri).matches();
+    }
+    
+    @PreDestroy
+    public void destroy() {
+        executor.shutdown();
     }
 
     class BrandHydratingJob implements Runnable {
