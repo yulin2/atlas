@@ -24,7 +24,9 @@ import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.gdata.data.youtube.VideoEntry;
+import com.google.gdata.util.InvalidEntryException;
 import com.google.gdata.util.ResourceNotFoundException;
+import com.google.gdata.util.ServiceForbiddenException;
 
 /**
  * {@link SiteSpecificAdapter} for querying data about video clips from YouTube.
@@ -52,8 +54,18 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 		try {
 			VideoEntry videoEntry = gdataClient.get(uri);
 			return contentExtractor.extract(new YouTubeSource(videoEntry, uri));
-		} catch (ResourceNotFoundException e) {
-			throw new FetchException("Video not found on YouTube: " + uri, e);
+		}
+		catch (ServiceForbiddenException e) {
+			// video not visible
+			return null;
+		}
+		catch (InvalidEntryException e) {
+			// bad video id
+			return null;
+		}
+		catch (ResourceNotFoundException e) {
+			// not found
+			return null;
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);
 		}
