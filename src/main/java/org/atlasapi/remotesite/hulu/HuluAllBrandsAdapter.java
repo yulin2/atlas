@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
@@ -86,6 +88,11 @@ public class HuluAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
             LOG.warn("Error retrieving all hulu brands: " + uri + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
             throw new FetchException("Unable to retrieve all hulu brands", e);
         }
+    }
+    
+    @PreDestroy
+    public void destroy() {
+        executor.shutdown();
     }
 
     class BrandHydratingJob implements Runnable {
