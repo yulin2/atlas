@@ -81,19 +81,14 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 		}
 	}
 	
-	public void testWrapsExceptionIfGDataClientThrowsResourceNotFoundException() throws Exception {
+	public void tesRetunsNullIfGDataClientThrowsResourceNotFoundException() throws Exception {
 		
 		checking(new Expectations() {{
 			allowing(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); 
 				will(throwException(new ResourceNotFoundException("Video not found")));
 		}});
 		
-		try {
-			adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8");
-			fail("Should have thrown FetchException.");
-		} catch (FetchException fe) {
-			assertThat(fe.getMessage(), is("Video not found on YouTube: http://uk.youtube.com/watch?v=-OBxL8PiFc8"));
-		}
+		assertNull(adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8"));
 	}
 	
 	public void testCanFetchResourcesForYouTubeClipUris() throws Exception {
