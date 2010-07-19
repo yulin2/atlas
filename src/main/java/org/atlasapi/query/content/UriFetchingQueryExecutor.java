@@ -96,7 +96,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		}
 		
 		if (!foundAtLeastOneUri) {
-			return ImmutableList.of();
+			return found;
 		}
 
 		return executor.executeQuery(delegate, query);
