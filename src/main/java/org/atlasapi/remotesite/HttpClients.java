@@ -8,7 +8,7 @@ import com.metabroadcast.common.media.MimeType;
 
 public class HttpClients {
 
-    private static final String ATLAS_USER_AGENT = "Mozilla/5.0 (compatible; atlas/1.0; +http://atlasapi.org)";
+    public static final String ATLAS_USER_AGENT = "Mozilla/5.0 (compatible; atlas/1.0; +http://atlasapi.org)";
 
     /**
      * @return A {@link SimpleHttpClient} that is configured to work
