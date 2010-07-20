@@ -19,7 +19,7 @@ public class RedirectShortUrlResolver implements ShortUrlResolver {
 	private static final String LOCATION_HEADER = "Location";
 	private static final int HTTP_DEFAULT_PORT = 80;
 	
-	private final Duration timeout = Duration.standardSeconds(2);
+	private final Duration timeout = Duration.standardSeconds(4);
 	private final BasicHttpParams params;
 
 	
