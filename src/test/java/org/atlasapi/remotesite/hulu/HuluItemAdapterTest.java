@@ -81,7 +81,6 @@ public class HuluItemAdapterTest extends TestCase {
         assertNull(location.getEmbedCode());
         assertEquals(TransportType.LINK, location.getTransportType());
         assertEquals(true, location.getAvailable());
-        assertEquals(Boolean.valueOf(true), location.getTransportIsLive());
         assertNotNull(location.getPolicy());
         assertFalse(location.getPolicy().getAvailableCountries().isEmpty());
         assertEquals(Countries.US, location.getPolicy().getAvailableCountries().iterator().next());
