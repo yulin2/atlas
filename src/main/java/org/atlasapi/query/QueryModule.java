@@ -14,6 +14,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import javax.annotation.PreDestroy;
+
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ContentListener;
 import org.atlasapi.persistence.content.QueueingContentListener;
@@ -55,9 +57,20 @@ public class QueryModule {
 		return new InMemoryFuzzySearcher();
 	}
     
-    @Bean(destroyMethod="shutdown") ContentListener queueingContentListener() {
-        QueueingContentListener queueingContentListener = new QueueingContentListener(titleSearcher());
+    @Bean ContentListener queueingContentListener() {
+        QueueingContentListener queueingContentListener = queue();
         aggregateContentListener.addListener(queueingContentListener);
         return queueingContentListener;
     }
+
+	@Bean QueueingContentListener queue() {
+		QueueingContentListener listener = new QueueingContentListener(titleSearcher());
+		listener.start();
+		return listener;
+	}
+	
+	@PreDestroy
+	public void shutdown() {
+		queue().shutdown();
+	}
 }
