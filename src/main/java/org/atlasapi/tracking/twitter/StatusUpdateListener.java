@@ -1,12 +1,13 @@
 package org.atlasapi.tracking.twitter;
 
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.lucene.util.NamedThreadFactory;
 
 import twitter4j.Status;
 import twitter4j.StatusListener;
@@ -20,7 +21,7 @@ public class StatusUpdateListener implements StatusListener {
 	
 	static final Log LOG = LogFactory.getLog(KeywordTracker.class);
 	
-	private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(150);
+	private ExecutorService executorService = Executors.newCachedThreadPool(new NamedThreadFactory("StatusUpdateListener"));
 	private String filteredHashTag;
 
 	private StatusProcessor statusProcessor;
@@ -44,7 +45,7 @@ public class StatusUpdateListener implements StatusListener {
 			return;
 		}
 		
-		executorService.schedule(new StatusProcessingJob(status), 10, TimeUnit.SECONDS);
+		executorService.execute(new StatusProcessingJob(status));
 	}
 
 	
