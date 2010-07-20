@@ -262,6 +262,7 @@
     <properties>
         <atlas.version>${project.version}</atlas.version>
         <common.version>1.0-SNAPSHOT</common.version>
+        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
     </properties>
 
     <scm>
