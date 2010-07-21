@@ -40,203 +40,207 @@ import com.metabroadcast.common.base.Maybe;
 
 public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgrammeSource, Item> {
 
-	static final String FULL_IMAGE_EXTENSION = "_640_360.jpg";
-	static final String THUMBNAIL_EXTENSION = "_150_84.jpg";
+    static final String FULL_IMAGE_EXTENSION = "_640_360.jpg";
+    static final String THUMBNAIL_EXTENSION = "_150_84.jpg";
 
-	private final BbcSeriesNumberResolver seriesResolver;
-	private final BbcProgrammesPolicyClient policyClient;
-	
-	public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient) {
-		this.seriesResolver = seriesResolver;
-		this.policyClient = policyClient;
-	}
+    private final BbcSeriesNumberResolver seriesResolver;
+    private final BbcProgrammesPolicyClient policyClient;
 
-	public BbcProgrammeGraphExtractor() {
-		this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient());
-	}
+    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient) {
+        this.seriesResolver = seriesResolver;
+        this.policyClient = policyClient;
+    }
 
-	public Item extract(BbcProgrammeSource source) {
-		
-		String episodeUri = source.getUri();
-		
-		SlashProgrammesRdf episode = source.episode();
-		SlashProgrammesContainerRef container = episode.brand();
-		
-		if (container == null) {
-			container = episode.series();
-		}
-		
-		Location location = htmlLinkLocation(episodeUri);
-		
-		Encoding encoding = new Encoding();
-		encoding.addAvailableAt(location);
-		
-		Version version = version(source.version());
-		version.addManifestedAs(encoding);
-		
-		Item item = item(episodeUri, container, episode, source.getSlashProgrammesUri());
-		item.addVersion(version);
-		
-		return item;
-	}
-	
-	private Maybe<Integer> seriesNumber(SlashProgrammesRdf episode) {
-		if (episode.series() != null && episode.series().uri() != null) {
-			return seriesResolver.seriesNumberFor(episode.series().uri());
-		}
-		return Maybe.nothing();
-	}
+    public BbcProgrammeGraphExtractor() {
+        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient());
+    }
 
-	private Location htmlLinkLocation(String episodeUri) {
-		Location location = new Location();
-		location.setUri(iplayerPageFrom(episodeUri));
-		location.setTransportType(TransportType.LINK);
-		
-		Maybe<Policy> policy = policyClient.policyForUri(episodeUri);
-		
-		if (policy.hasValue()) {
-			location.setPolicy(policy.requireValue());
-		}
-		
-		location.setAvailable(policy.hasValue());
-		return location;
-	}
+    public Item extract(BbcProgrammeSource source) {
 
-	private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
-		Version version = new Version();
-		if (slashProgrammesVersion != null) {
-			if (slashProgrammesVersion.broadcastSlots() != null) {
-				version.setBroadcasts(broadcastsFrom(slashProgrammesVersion));
-			}
-		}
-		return version;
-	}
+        String episodeUri = source.getUri();
 
-	@VisibleForTesting
-	static Set<Broadcast> broadcastsFrom(SlashProgrammesVersionRdf slashProgrammesVersion) {
+        SlashProgrammesRdf episode = source.episode();
+        SlashProgrammesContainerRef container = episode.brand();
 
-		Set<Broadcast> broadcasts = Sets.newHashSet();
-		
-		Set<BbcBroadcast> bbcBroadcasts = Sets.newHashSet();
+        if (container == null) {
+            container = episode.series();
+        }
 
-		if (slashProgrammesVersion.broadcastSlots() != null) {
-			bbcBroadcasts.addAll(slashProgrammesVersion.broadcastSlots());
-		}
+        Location location = htmlLinkLocation(episodeUri);
 
-		for (BbcBroadcast bbcBroadcast : bbcBroadcasts) {
-			
-			Broadcast broadcast = new Broadcast(channelUrlFrom(bbcBroadcast.broadcastOn()), bbcBroadcast.broadcastDateTime(), bbcBroadcast.broadcastEndDateTime());
-			
-			if (bbcBroadcast.scheduleDate != null) {
-				broadcast.setScheduleDate(new LocalDate(bbcBroadcast.scheduleDate()));
-			}
-			broadcasts.add(broadcast);
-		}
-		
-		return broadcasts;
-	}
+        Encoding encoding = new Encoding();
+        encoding.addAvailableAt(location);
 
-	private static String channelUrlFrom(String broadcastOn) {
-		if (broadcastOn.contains("#")) {
-			broadcastOn = broadcastOn.substring(0, broadcastOn.indexOf('#'));
-		}
-		return "http://www.bbc.co.uk" + broadcastOn;
-	}
+        Item item = item(episodeUri, container, episode, source.getSlashProgrammesUri());
 
-	private Item item(String episodeUri, SlashProgrammesContainerRef container, SlashProgrammesRdf episode, String slashProgrammesUri) {
-		String curie = BbcUriCanonicaliser.curieFor(episodeUri);
-		
-		Item item = episode.brand() == null ? new Item(episodeUri, curie, Publisher.BBC) : new Episode(episodeUri, curie, Publisher.BBC);
-		
-		Maybe<Integer> seriesNumber = seriesNumber(episode);
-		
-		SlashProgrammesEpisode slashProgrammesEpisode = episode.episode();
-		item.setTitle(episodeTitle(slashProgrammesEpisode, seriesNumber));
-		
-		if (slashProgrammesEpisode != null) {
-			item.setDescription(slashProgrammesEpisode.description());
-			item.setGenres(new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
-		}
-		
-		if (item instanceof Episode) {
-			if (seriesNumber.hasValue()) {
-				((Episode) item).setSeriesNumber(seriesNumber.requireValue());
-			}
-			Integer episodeNumber = slashProgrammesEpisode.episodeNumber();
-			if (episodeNumber != null) {
-				((Episode) item).setEpisodeNumber(episodeNumber);
-			}
-		}
-		
-		Set<String> aliases = bbcAliasUrisFor(episodeUri);
-		if (!aliases.isEmpty()) {
-			item.setAliases(aliases);
-		}
-		
-		item.setIsLongForm(true);
-		
-		item.setThumbnail(thumbnailUrlFrom(episodeUri));
-		item.setImage(imageUrlFrom(episodeUri));
-		
-		return item;
-	}
+        if (source.version() != null) {
+            Version version = version(source.version());
+            version.addManifestedAs(encoding);
 
-	private static final Pattern titleIsEpisodeAndNumber = Pattern.compile("^Episode \\d+$");
-	
-	private String episodeTitle(SlashProgrammesEpisode slashProgrammesEpisode, Maybe<Integer> seriesNumber) {
-		String title = slashProgrammesEpisode.title();
-		if (seriesNumber.isNothing() || ! titleIsEpisodeAndNumber.matcher(title).matches()) {
-			return title;
-		}
-		return "Series " +  seriesNumber.requireValue() + " " + title;
-	}
+            item.addVersion(version);
+        }
 
-	static Set<String> bbcAliasUrisFor(String episodeUri) {
-		String pid = BbcUriCanonicaliser.bbcProgrammeIdFrom(episodeUri);
-		HashSet<String> aliases = Sets.newHashSet();
-		if (pid != null) {
-			aliases.add(String.format("http://www.bbc.co.uk/iplayer/episode/b00%s", pid));
-			aliases.add(String.format("http://www.bbc.co.uk/programmes/b00%s", pid));
-			aliases.add(String.format("http://bbc.co.uk/i/%s/", pid));
-			aliases.remove(episodeUri);
-		}
-		return aliases;
-	}
-	
-	private String imageUrlFrom(String episodeUri) {
-		return extractImageUrl(episodeUri, FULL_IMAGE_EXTENSION);
-	}
-	
-	private String thumbnailUrlFrom(String episodeUri) {
-		return extractImageUrl(episodeUri,  THUMBNAIL_EXTENSION);
-	}
-	
-	private final Pattern programmeIdPattern = Pattern.compile("(b00[a-z0-9]+).*");
-	
-	private String programmeIdFrom(String uri) {
-		Matcher matcher = programmeIdPattern.matcher(uri);
-		if (matcher.find()) {
-			return matcher.group(1);
-		}
-		return null;
-	}
-	
-	private String extractImageUrl(String episodeUri, String suffix) {
-		return "http://www.bbc.co.uk/iplayer/images/episode/" + programmeIdFrom(episodeUri) + suffix;
-	}
+        return item;
+    }
 
-	private String iplayerPageFrom(String episodeUri) {
-		return "http://www.bbc.co.uk/iplayer/episode/" + programmeIdFrom(episodeUri);
-	}
+    private Maybe<Integer> seriesNumber(SlashProgrammesRdf episode) {
+        if (episode.series() != null && episode.series().uri() != null) {
+            return seriesResolver.seriesNumberFor(episode.series().uri());
+        }
+        return Maybe.nothing();
+    }
 
-	@SuppressWarnings(value="unused")
-	private String embedCode(String locationUri, String epImageUrl) {
-		return "<embed width=\"640\" height=\"395\""
-				+ "flashvars=\"embedReferer=http://www.bbc.co.uk/iplayer/&amp;domId=bip-play-emp&amp;config=http://www.bbc.co.uk/emp/iplayer/config.xml&amp;playlist="+ locationUri + "&amp;holdingImage=" + epImageUrl + "&amp;config_settings_bitrateFloor=0&amp;config_settings_bitrateCeiling=2500&amp;config_settings_transportHeight=35&amp;config_settings_showPopoutCta=false&amp;config_messages_diagnosticsMessageBody=Insufficient bandwidth to stream this programme. Try downloading instead, or see our diagnostics page.&amp;config_settings_language=en&amp;guidance=unknown\""
-				+ "allowscriptaccess=\"always\"" + "allowfullscreen=\"true\" wmode=\"default\" "
-				+ "quality=\"high\"" + "bgcolor=\"#000000\"" + "name=\"bbc_emp_embed_bip-play-emp\" "
-				+ "id=\"bbc_emp_embed_bip-play-emp\" style=\"\" "
-				+ "src=\"http://www.bbc.co.uk/emp/9player.swf?revision=10344_10753\" "
-				+ "type=\"application/x-shockwave-flash\"/>";
-	}
+    private Location htmlLinkLocation(String episodeUri) {
+        Location location = new Location();
+        location.setUri(iplayerPageFrom(episodeUri));
+        location.setTransportType(TransportType.LINK);
+
+        Maybe<Policy> policy = policyClient.policyForUri(episodeUri);
+
+        if (policy.hasValue()) {
+            location.setPolicy(policy.requireValue());
+        }
+
+        location.setAvailable(policy.hasValue());
+        return location;
+    }
+
+    private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
+        Version version = new Version();
+        if (slashProgrammesVersion != null) {
+            if (slashProgrammesVersion.broadcastSlots() != null) {
+                version.setBroadcasts(broadcastsFrom(slashProgrammesVersion));
+            }
+        }
+        return version;
+    }
+
+    @VisibleForTesting
+    static Set<Broadcast> broadcastsFrom(SlashProgrammesVersionRdf slashProgrammesVersion) {
+
+        Set<Broadcast> broadcasts = Sets.newHashSet();
+
+        Set<BbcBroadcast> bbcBroadcasts = Sets.newHashSet();
+
+        if (slashProgrammesVersion.broadcastSlots() != null) {
+            bbcBroadcasts.addAll(slashProgrammesVersion.broadcastSlots());
+        }
+
+        for (BbcBroadcast bbcBroadcast : bbcBroadcasts) {
+
+            Broadcast broadcast = new Broadcast(channelUrlFrom(bbcBroadcast.broadcastOn()), bbcBroadcast.broadcastDateTime(), bbcBroadcast.broadcastEndDateTime());
+
+            if (bbcBroadcast.scheduleDate != null) {
+                broadcast.setScheduleDate(new LocalDate(bbcBroadcast.scheduleDate()));
+            }
+            broadcasts.add(broadcast);
+        }
+
+        return broadcasts;
+    }
+
+    private static String channelUrlFrom(String broadcastOn) {
+        if (broadcastOn.contains("#")) {
+            broadcastOn = broadcastOn.substring(0, broadcastOn.indexOf('#'));
+        }
+        return "http://www.bbc.co.uk" + broadcastOn;
+    }
+
+    private Item item(String episodeUri, SlashProgrammesContainerRef container, SlashProgrammesRdf episode, String slashProgrammesUri) {
+        String curie = BbcUriCanonicaliser.curieFor(episodeUri);
+
+        Item item = episode.brand() == null ? new Item(episodeUri, curie, Publisher.BBC) : new Episode(episodeUri, curie, Publisher.BBC);
+
+        Maybe<Integer> seriesNumber = seriesNumber(episode);
+
+        SlashProgrammesEpisode slashProgrammesEpisode = episode.episode();
+        item.setTitle(episodeTitle(slashProgrammesEpisode, seriesNumber));
+
+        if (slashProgrammesEpisode != null) {
+            item.setDescription(slashProgrammesEpisode.description());
+            item.setGenres(new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
+        }
+
+        if (item instanceof Episode) {
+            if (seriesNumber.hasValue()) {
+                ((Episode) item).setSeriesNumber(seriesNumber.requireValue());
+            }
+            Integer episodeNumber = slashProgrammesEpisode.episodeNumber();
+            if (episodeNumber != null) {
+                ((Episode) item).setEpisodeNumber(episodeNumber);
+            }
+        }
+
+        Set<String> aliases = bbcAliasUrisFor(episodeUri);
+        if (!aliases.isEmpty()) {
+            item.setAliases(aliases);
+        }
+
+        item.setIsLongForm(true);
+
+        item.setThumbnail(thumbnailUrlFrom(episodeUri));
+        item.setImage(imageUrlFrom(episodeUri));
+
+        return item;
+    }
+
+    private static final Pattern titleIsEpisodeAndNumber = Pattern.compile("^Episode \\d+$");
+
+    private String episodeTitle(SlashProgrammesEpisode slashProgrammesEpisode, Maybe<Integer> seriesNumber) {
+        String title = slashProgrammesEpisode.title();
+        if (seriesNumber.isNothing() || !titleIsEpisodeAndNumber.matcher(title).matches()) {
+            return title;
+        }
+        return "Series " + seriesNumber.requireValue() + " " + title;
+    }
+
+    static Set<String> bbcAliasUrisFor(String episodeUri) {
+        String pid = BbcUriCanonicaliser.bbcProgrammeIdFrom(episodeUri);
+        HashSet<String> aliases = Sets.newHashSet();
+        if (pid != null) {
+            aliases.add(String.format("http://www.bbc.co.uk/iplayer/episode/b00%s", pid));
+            aliases.add(String.format("http://www.bbc.co.uk/programmes/b00%s", pid));
+            aliases.add(String.format("http://bbc.co.uk/i/%s/", pid));
+            aliases.remove(episodeUri);
+        }
+        return aliases;
+    }
+
+    private String imageUrlFrom(String episodeUri) {
+        return extractImageUrl(episodeUri, FULL_IMAGE_EXTENSION);
+    }
+
+    private String thumbnailUrlFrom(String episodeUri) {
+        return extractImageUrl(episodeUri, THUMBNAIL_EXTENSION);
+    }
+
+    private final Pattern programmeIdPattern = Pattern.compile("(b00[a-z0-9]+).*");
+
+    private String programmeIdFrom(String uri) {
+        Matcher matcher = programmeIdPattern.matcher(uri);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private String extractImageUrl(String episodeUri, String suffix) {
+        return "http://www.bbc.co.uk/iplayer/images/episode/" + programmeIdFrom(episodeUri) + suffix;
+    }
+
+    private String iplayerPageFrom(String episodeUri) {
+        return "http://www.bbc.co.uk/iplayer/episode/" + programmeIdFrom(episodeUri);
+    }
+
+    @SuppressWarnings(value = "unused")
+    private String embedCode(String locationUri, String epImageUrl) {
+        return "<embed width=\"640\" height=\"395\""
+                + "flashvars=\"embedReferer=http://www.bbc.co.uk/iplayer/&amp;domId=bip-play-emp&amp;config=http://www.bbc.co.uk/emp/iplayer/config.xml&amp;playlist="
+                + locationUri
+                + "&amp;holdingImage="
+                + epImageUrl
+                + "&amp;config_settings_bitrateFloor=0&amp;config_settings_bitrateCeiling=2500&amp;config_settings_transportHeight=35&amp;config_settings_showPopoutCta=false&amp;config_messages_diagnosticsMessageBody=Insufficient bandwidth to stream this programme. Try downloading instead, or see our diagnostics page.&amp;config_settings_language=en&amp;guidance=unknown\""
+                + "allowscriptaccess=\"always\"" + "allowfullscreen=\"true\" wmode=\"default\" " + "quality=\"high\"" + "bgcolor=\"#000000\"" + "name=\"bbc_emp_embed_bip-play-emp\" "
+                + "id=\"bbc_emp_embed_bip-play-emp\" style=\"\" " + "src=\"http://www.bbc.co.uk/emp/9player.swf?revision=10344_10753\" " + "type=\"application/x-shockwave-flash\"/>";
+    }
 }
