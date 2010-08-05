@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import com.google.common.collect.Lists;
 
@@ -95,7 +96,7 @@ public class AtlasFetchModule {
 		
 		private @Autowired RemoteSiteModule remote;
 	
-		
+		@Primary
 		public @Bean CanonicalisingFetcher contentResolver() {
 			Fetcher<Content> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), savingFetcher());
 			

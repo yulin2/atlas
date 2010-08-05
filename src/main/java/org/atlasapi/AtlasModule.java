@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi;
 
 import org.atlasapi.equiv.EquivModule;
+import org.atlasapi.feeds.interlinking.InterlinkingModule;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
@@ -28,7 +29,7 @@ import com.mongodb.Mongo;
 
 @Configuration
 @ImportResource({"classpath:atlas.xml", "beans-scheduling.xml", "beans-tracking.xml"})
-@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
+@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, InterlinkingModule.class})
 public class AtlasModule {
 	
 	private @Value("${mongo.host}") String mongoHost;
