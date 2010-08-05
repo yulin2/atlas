@@ -25,7 +25,6 @@ import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
 /**

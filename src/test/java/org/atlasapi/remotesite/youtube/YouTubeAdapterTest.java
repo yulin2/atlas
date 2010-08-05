@@ -17,7 +17,6 @@ package org.atlasapi.remotesite.youtube;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 
@@ -25,8 +24,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.youtube.YouTubeAdapter;
-import org.atlasapi.remotesite.youtube.YouTubeSource;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
