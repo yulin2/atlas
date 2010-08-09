@@ -41,6 +41,7 @@ import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
+import org.atlasapi.remotesite.youtube.YouTubeFeedCanonicaliser;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,6 +114,7 @@ public class AtlasFetchModule {
 			List<Canonicaliser> canonicalisers = Lists.newArrayList();
 			canonicalisers.add(new BbcUriCanonicaliser());
 			canonicalisers.add(new YoutubeUriCanonicaliser());
+			canonicalisers.add(new YouTubeFeedCanonicaliser());
 			canonicalisers.add(new TedTalkAdapter.TedTalkCanonicaliser());
 			canonicalisers.add(new DailyMotionItemAdapter.DailyMotionItemCanonicaliser());
 			canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());

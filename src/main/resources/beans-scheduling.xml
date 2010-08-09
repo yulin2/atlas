@@ -59,6 +59,14 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 						  <list>
 						      <value>http://feeds.bbc.co.uk/iplayer/highlights/tv</value>
 						      <value>http://www.channel4.com/programmes/4od/highlights</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/top_rated</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/watch_on_mobile</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_responded</value>
+                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_recent</value>
 						  </list>
 					</property>
 					</bean>
