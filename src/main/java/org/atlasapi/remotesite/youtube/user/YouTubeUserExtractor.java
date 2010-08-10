@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.youtube.user;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
@@ -18,6 +20,7 @@ public class YouTubeUserExtractor implements ContentExtractor<YouTubeUserSource,
 
     private final ContentExtractor<YouTubeSource, Item> itemExtractor;
     private final YouTubePlaylistClient playlistClient;
+    private static final Log LOG = LogFactory.getLog(YouTubeUserExtractor.class);
 
     public YouTubeUserExtractor() {
         this(new YouTubeGraphExtractor(), new YouTubePlaylistClient());
@@ -32,23 +35,30 @@ public class YouTubeUserExtractor implements ContentExtractor<YouTubeUserSource,
     public Playlist extract(YouTubeUserSource source) {
         PlaylistLinkFeed feed = source.getPlaylistFeed();
 
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Retrieving playlists for user: "+source.getUri());
+        }
         Playlist userPlaylist = new Playlist(source.getUri(), YouTubeUserCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
 
         for (PlaylistLinkEntry entry : feed.getEntries()) {
             String playlistUrl = entry.getFeedUrl();
-            Playlist playlist = new Playlist(playlistUrl, YouTubePlaylistCanonicaliser.curieFor(playlistUrl), Publisher.YOUTUBE);
+            // Stopping sub-playlist creation, as they are impossible to reference
+            // Playlist playlist = new Playlist(playlistUrl, YouTubePlaylistCanonicaliser.curieFor(playlistUrl), Publisher.YOUTUBE);
 
             try {
                 PlaylistFeed playlistFeed = playlistClient.get(playlistUrl);
                 for (VideoEntry video : playlistFeed.getEntries()) {
-                    Item item = itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalise(video.getId())));
-                    playlist.addItem(item);
+                    if (video != null && video.getHtmlLink() != null && video.getHtmlLink().getHref() != null) {
+                        Item item = itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalise(video.getHtmlLink().getHref())));
+                        userPlaylist.addItem(item);
+                        // playlist.addItem(item);
+                    }
                 }
             } catch (Exception e) {
                 throw new FetchException("Unable to retrieve playlist: "+playlistUrl, e);
             }
             
-            userPlaylist.addPlaylist(playlist);
+            // userPlaylist.addPlaylist(playlist);
         }
 
         return userPlaylist;

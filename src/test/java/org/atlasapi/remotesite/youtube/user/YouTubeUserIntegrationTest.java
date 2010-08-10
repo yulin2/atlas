@@ -12,7 +12,7 @@ public class YouTubeUserIntegrationTest extends TestCase {
     private YouTubeUserAdapter adapter = new YouTubeUserAdapter();
     
     public void testShouldRetrievePlaylist() throws Exception {
-        String uri = "http://gdata.youtube.com/feeds/api/users/YTdebates/playlists";
+        String uri = "http://www.youtube.com/user/YTdebates";
         assertTrue(adapter.canFetch(uri));
         
         Playlist userPlaylist = adapter.fetch(uri);
@@ -21,7 +21,6 @@ public class YouTubeUserIntegrationTest extends TestCase {
         assertEquals(YouTubeUserCanonicaliser.curieFor(uri), userPlaylist.getCurie());
         assertEquals(Publisher.YOUTUBE, userPlaylist.getPublisher());
         
-        assertFalse(userPlaylist.getPlaylists().isEmpty());
-        assertTrue(userPlaylist.getItems().isEmpty());
+        assertFalse(userPlaylist.getItems().isEmpty());
     }
 }
