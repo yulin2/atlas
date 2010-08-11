@@ -1,91 +1,121 @@
 package org.atlasapi.remotesite.channel4;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-
-import java.util.Collections;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.media.TransportType;
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Countries;
-import org.atlasapi.media.entity.Country;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.channel4.C4BrandExtractor;
-import org.jmock.integration.junit3.MockObjectTestCase;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
-import org.springframework.core.io.ClassPathResource;
+import org.atlasapi.persistence.system.RemoteSiteClient;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+import com.google.common.io.Resources;
+import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.sun.syndication.feed.atom.Feed;
-import com.sun.syndication.io.WireFeedInput;
-import com.sun.syndication.io.XmlReader;
 
-public class C4BrandExtractorTest extends MockObjectTestCase {
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
+public class C4BrandExtractorTest extends TestCase {
+
+	private final AtomFeedBuilder series3Feed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-series-3.atom"));
+	private final AtomFeedBuilder series4Feed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-series-4.atom"));
+	private final AtomFeedBuilder brandFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares.atom"));
+	private final AtomFeedBuilder epsiodeGuideFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-episode-guide.atom"));
+	private final AtomFeedBuilder fourOdFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-4od.atom"));
+
+	private final RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
+		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", brandFeed.build())
+		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/4od.atom", fourOdFeed.build())
+		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", epsiodeGuideFeed.build())
+		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", series3Feed.build())
+		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4.atom", series4Feed.build());
+	
 	public void testExtractingABrand() throws Exception {
-		
-		Brand brand = new C4BrandExtractor().extract(ramsaysKitchenNighmaresFeed());
+		Brand brand = new C4AtomBackedBrandAdapter(feedClient).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		
 		assertThat(brand.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares"));
-		assertThat(brand.getAliases(), hasItem("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od"));
-		assertThat(brand.getCurie(), is("c4:ramsays-kitchen-nightmares"));
-		assertThat(brand.getTitle(), is("Ramsay's Kitchen Nightmares"));
-		assertThat(brand.getPublisher(), is(Publisher.C4));
-		assertThat(brand.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_200x113.jpg"));
-		assertThat(brand.getImage(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_625x352.jpg"));
 
-		Episode firstEpisode = (Episode) Iterables.get(brand.getItems(), 0);
+		Item firstItem = brand.getItems().get(0);
 		
-		assertThat(firstEpisode.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"));
-		assertThat(firstEpisode.getCurie(), is("c4:ramsays-kitchen-nightmares_2922045"));
-		assertThat(firstEpisode.getTitle(), is("Series 1 Episode 1"));
-		assertThat(firstEpisode.getPublisher(), is(Publisher.C4));
-		assertThat(firstEpisode.getSeriesNumber(), is(1));
-		assertThat(firstEpisode.getEpisodeNumber(), is(1));
-		assertThat(firstEpisode.getDescription(), startsWith("Gordon Ramsay visits Bonapartes in Silsden, West Yorkshire."));
-		assertThat(firstEpisode.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/series-1/ramsays-kitchen-nightmares-s1-20090617160732_200x113.jpg"));
-		assertThat(firstEpisode.getImage(), is("http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/series-1/ramsays-kitchen-nightmares-s1-20090617160732_625x352.jpg"));
+		assertThat(firstItem.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1"));
+
+		assertThat(firstItem.getAliases(), is((Set<String>) ImmutableSet.of("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921983", "tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1")));
 		
-		Version firstEpisodeVersion = Iterables.get(firstEpisode.getVersions(), 0);
-		assertThat(firstEpisodeVersion.getDuration(), is((48 * 60) + 55));
-		assertThat(firstEpisodeVersion.getRating(), is("http://ref.atlasapi.org/ratings/simple/adult"));
-		assertThat(firstEpisodeVersion.getRatingText(), is("Strong language throughout"));
-		assertThat(firstEpisodeVersion.getBroadcasts(), is(Collections.<Broadcast>emptySet()));
+		Version firstItemVersion = Iterables.getOnlyElement(firstItem.getVersions());
 		
-		Encoding firstEpsiodeEncoding = Iterables.get(firstEpisodeVersion.getManifestedAs(), 0); 
+		assertThat(firstItemVersion.getDuration(), is(2949));
+
+		Encoding firstItemEncoding = Iterables.getOnlyElement(firstItemVersion.getManifestedAs());
+		Location firstItemLocation = Iterables.getOnlyElement(firstItemEncoding.getAvailableAt());
+		assertThat(firstItemLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921983"));
 		
-		Location firstEpsiodeLocation = Iterables.get(firstEpsiodeEncoding.getAvailableAt(), 0); 
-		assertThat(firstEpsiodeLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"));
-		assertThat(firstEpsiodeLocation.getTransportType(), is(TransportType.LINK));
-		
-		Policy firstEpisodePolicy = firstEpsiodeLocation.getPolicy();
-		assertThat(firstEpisodePolicy.getAvailabilityStart(), is(new LocalDate(2009, 07, 01).toDateTimeAtStartOfDay()));
-		assertThat(firstEpisodePolicy.getAvailabilityEnd(), is(new LocalDate(2010, 12, 31).plusDays(1).toDateTimeAtStartOfDay()));
-		assertThat(firstEpisodePolicy.getAvailableCountries(), is((Set<Country>) Sets.newHashSet(Countries.GB, Countries.IE)));
-		
-		Episode episodeWithABroadcast = (Episode) Iterables.get(brand.getItems(), 4);
-		Version episodeWithABroadcastVersion = Iterables.get(episodeWithABroadcast.getVersions(), 0);
-		Broadcast episodeWithABroadcastBroadcast = Iterables.get(episodeWithABroadcastVersion.getBroadcasts(), 0);
-		assertThat(episodeWithABroadcastBroadcast.getTransmissionTime(), is(new DateTime("2009-06-10T23:05:00.000Z")));
-		assertThat(episodeWithABroadcastBroadcast.getBroadcastOn(), is("http://www.channel4.com/more4"));
+		Episode episodeNotOn4od = (Episode) find("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-5", brand.getItems());
+		assertThat(episodeNotOn4od.getVersions().size(), is(0));
 	}
 	
-	private Feed ramsaysKitchenNighmaresFeed() {
-		try {
-			return (Feed) new WireFeedInput().build(new XmlReader(new ClassPathResource("4od/ramsays-kitchen-nightmares.atom").getInputStream()));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+	
+	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries1IsAssumed() throws Exception {
+		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
+			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", brandFeed.build())
+			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", series3Feed.build());
+
+		Brand brand = new C4AtomBackedBrandAdapter(feedClient).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		assertThat(brand.getItems().size(), is(greaterThan(1)));
+	}
+	
+	
+	public void testThatWhenTheEpisodeGuideRedirectsToSeries1TheSeriesIsRead() throws Exception {
+		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
+			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", brandFeed.build())
+			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", series3Feed.build());
+
+		Brand brand = new C4AtomBackedBrandAdapter(feedClient).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		assertThat(brand.getItems().size(), is(greaterThan(1)));
+	}
+	
+	private static class StubC4AtomClient implements RemoteSiteClient<Feed> {
+
+		private Map<String, Feed> respondsTo = Maps.newHashMap();
+
+		@Override
+		public Feed get(String uri) throws Exception {
+			// Remove API key
+			uri = removeQueryString(uri);
+			Feed feed = respondsTo.get(uri);
+			if (feed == null) {
+				throw new HttpStatusCodeException(404, "Not found: " + uri);
+			}
+			return feed;
 		}
+
+		private String removeQueryString(String url) throws MalformedURLException {
+			String queryString = "?" + new URL(url).getQuery();
+			return url.replace(queryString, "");
+		}
+		
+		StubC4AtomClient respondTo(String url, Feed feed) {
+			respondsTo.put(url, feed);
+			return this;
+		}
+	}
+	
+	private final <T extends Content> T find(String uri, Iterable<T> episodes) {
+		for (T episode : episodes) {
+			if (episode.getCanonicalUri().equals(uri)) {
+				return episode;
+			}
+		}
+		throw new IllegalStateException("Not found");
 	}
 }

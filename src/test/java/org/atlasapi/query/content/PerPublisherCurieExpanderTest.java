@@ -53,7 +53,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	}
 	
 	public void testExpandsC4Curies() throws Exception {
-		assertThat(expander.expand("c4:grand-designs"), is(Maybe.just("http://www.channel4.com/programmes/grand-designs/4od")));
+		assertThat(expander.expand("c4:grand-designs"), is(Maybe.just("http://www.channel4.com/programmes/grand-designs")));
 		assertThat(expander.expand("c4:grand-designs_2921795"), is(Maybe.just("http://www.channel4.com/programmes/grand-designs/4od#2921795")));
 
 		assertThat(expander.expand("c4:atoz_a"), is(Maybe.just("http://www.channel4.com/programmes/atoz/a")));
@@ -61,10 +61,13 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 
 		assertThat(expander.expand("c4:highlights"), is(Maybe.just("http://www.channel4.com/programmes/4od/highlights")));
 		assertThat(expander.expand("c4:most-popular"), is(Maybe.just("http://www.channel4.com/programmes/4od/most-popular")));
+
+		assertThat(expander.expand("c4:ramsays-kitchen-nightmares-series-3"), is(Maybe.just("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3")));
+		assertThat(expander.expand("c4:ramsays-kitchen-nightmares-series-3-episode-1"), is(Maybe.just("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1")));
 	}
 	
 	public void testProducesC4Curies() throws Exception {
-		assertThat(C4.compact("http://www.channel4.com/programmes/grand-designs/4od"), is("c4:grand-designs"));
+		assertThat(C4.compact("http://www.channel4.com/programmes/grand-designs"), is("c4:grand-designs"));
 		assertThat(C4.compact("http://www.channel4.com/programmes/grand-designs/4od#2921795"), is("c4:grand-designs_2921795"));
 
 		assertThat(C4.compact("http://www.channel4.com/programmes/atoz/a"), is("c4:atoz_a"));
@@ -72,6 +75,10 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 		
 		assertThat(C4.compact("http://www.channel4.com/programmes/4od/highlights"), is("c4:highlights"));
 		assertThat(C4.compact("http://www.channel4.com/programmes/4od/most-popular"), is("c4:most-popular"));
+
+		assertThat(C4.compact("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3"), is("c4:ramsays-kitchen-nightmares-series-3"));
+
+		assertThat(C4.compact("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1"), is("c4:ramsays-kitchen-nightmares-series-3-episode-1"));
 	}
 	
 	public void testExpandsItvCuries() throws Exception {

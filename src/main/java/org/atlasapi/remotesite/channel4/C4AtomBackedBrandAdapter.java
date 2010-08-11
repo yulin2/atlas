@@ -24,21 +24,20 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
-import org.atlasapi.remotesite.support.atom.AtomClient;
 
 import com.sun.syndication.feed.atom.Feed;
 
 public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 
-	private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("(http://www.channel4.com/programmes/[^/\\s]+)(/4od)?");
+	private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://www.channel4.com/programmes/([^/\\s]+)(/4od)?");
 
 	private final Log log = LogFactory.getLog(getClass());
 	
 	private final RemoteSiteClient<Feed> feedClient;
 	private final ContentExtractor<Feed, Brand> extractor;
 	
-	public C4AtomBackedBrandAdapter() {
-		this(new AtomClient(), new C4BrandExtractor());
+	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> atomClient) {
+		this(atomClient, new C4BrandExtractor(atomClient));
 	}
 	
 	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> feedClient, ContentExtractor<Feed, Brand> extractor) {
@@ -64,10 +63,9 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 	private String atomUrl(String uri) {
 		Matcher matcher = BRAND_PAGE_PATTERN.matcher(uri);
 		if (!matcher.matches()) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Cannot fetch " + uri + " because it is not a valid C4 brand uri");
 		}
-		String programmeUri = matcher.group(1);
-		return programmeUri + "/4od.atom";
+		String webSafeName = matcher.group(1);
+		return C4AtomApi.createBrandRequest(webSafeName, ".atom");
 	}
-
 }

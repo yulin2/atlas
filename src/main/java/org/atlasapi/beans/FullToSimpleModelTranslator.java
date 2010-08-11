@@ -13,11 +13,13 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.PublisherDetails;
+import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.media.util.ChildFinder;
 
 import com.google.common.base.Predicates;
@@ -184,6 +186,20 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 				
 				simpleItem.setBrandSummary(brandSummary);
 			}
+			
+			if (episode.getSeries() != null) {
+				
+				Series series = episode.getSeries();
+				SeriesSummary seriesSummary = new SeriesSummary();
+
+				seriesSummary.setUri(series.getCanonicalUri());
+				seriesSummary.setCurie(series.getCurie());
+				seriesSummary.setTitle(series.getTitle());
+				seriesSummary.setDescription(series.getDescription());
+				
+				simpleItem.setSeriesSummary(seriesSummary);
+			}
+			
 		}
 		
 		simpleItem.setTitle(fullItem.getTitle());

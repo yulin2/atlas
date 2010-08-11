@@ -35,8 +35,8 @@ public class C4BrandAtoZAdapter extends BaseC4PlaylistClient implements SiteSpec
 	private static final String C4_ATOZ_URI_PREFIX = "http://www.channel4.com/programmes/atoz/";
 	private static final Pattern ATOZ = Pattern.compile(C4_ATOZ_URI_PREFIX + "([a-z]|0-9)");
 
-	public C4BrandAtoZAdapter() {
-		this(new C4BrandAtoZClient(), new C4AtomBackedBrandAdapter());
+	public C4BrandAtoZAdapter(C4AtomBackedBrandAdapter brandAdapter) {
+		this(new C4BrandAtoZClient(), brandAdapter);
 	}
 	
 	public C4BrandAtoZAdapter(RemoteSiteClient<BrandListingPage> brandListClient, SiteSpecificAdapter<Brand> brandClient) {

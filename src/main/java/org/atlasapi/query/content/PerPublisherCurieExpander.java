@@ -56,12 +56,12 @@ public class PerPublisherCurieExpander implements CurieExpander {
 					String[] components = withoutPrefix.split(separator);
 					return String.format("http://www.channel4.com/programmes/%s/4od#%s", components[0], components[1]);
 				} else {
-					return String.format("http://www.channel4.com/programmes/%s/4od", withoutPrefix);
+					return String.format("http://www.channel4.com/programmes/%s", withoutPrefix.replace("-series", "/episode-guide/series").replace("-episode", "/episode"));
 				}
 			}
 
-			final Pattern c4BrandIdPattern = Pattern.compile("http://www.channel4.com/programmes/([^\\./&=]+).*");
-			final Pattern c4ItemIdPattern = Pattern.compile("http://www.channel4.com/programmes/[^\\./&=]+/4od#([^\\./&=]+).*");
+			final Pattern c4BrandIdPattern = Pattern.compile("http://www.channel4.com/programmes/([^\\./&=]+)(?:/episode-guide/(series-\\d+)(?:/(episode-\\d+))?)?");
+			final Pattern c4odPattern = Pattern.compile("http://www.channel4.com/programmes/([^\\./&=]+)/4od#([^\\./&=]+).*");
 
 			@Override
 			public String compact(String url) {
@@ -74,11 +74,25 @@ public class PerPublisherCurieExpander implements CurieExpander {
 				if (curie.hasValue()) {
 					return curie.requireValue();
 				}
-				String itemId = matchAgainst(url, c4ItemIdPattern);
-				if (itemId == null) {
-					return "c4:" + matchAgainst(url, c4BrandIdPattern);
+				
+				Matcher itemMatcher = c4odPattern.matcher(url);
+				if (itemMatcher.matches()) {
+					return String.format("%s:%s_%s", this.name().toLowerCase(), itemMatcher.group(1), itemMatcher.group(2));
 				}
-				return "c4:" + matchAgainst(url, c4BrandIdPattern) + separator + itemId;
+
+				Matcher brandIdMatcher = c4BrandIdPattern.matcher(url);
+				if (brandIdMatcher.matches()) {
+					String brandIdPossiblyWithSeries = brandIdMatcher.group(1);
+					if (brandIdMatcher.group(2) != null) {
+						brandIdPossiblyWithSeries += "-" + brandIdMatcher.group(2);
+					}
+					if (brandIdMatcher.group(3) != null) {
+						brandIdPossiblyWithSeries += "-" + brandIdMatcher.group(3);
+					}
+					return String.format("%s:%s", this.name().toLowerCase(), brandIdPossiblyWithSeries);
+				}
+				
+				return null;
 			}
 		},
 		ITV {
