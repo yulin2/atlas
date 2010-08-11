@@ -43,6 +43,7 @@ import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
 import org.atlasapi.remotesite.wikipedia.WikipediaSparqlAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeAdapter;
+import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,6 +63,9 @@ public class RemoteSiteModule {
 		 List<SiteSpecificAdapter<? extends Content>> adapters = Lists.newArrayList();
 		 
 		 adapters.add(new YouTubeAdapter());
+		 adapters.add(new YouTubeFeedAdapter());
+		 // Commented out for now, as it generates too much gdata traffic
+		 //adapters.add(new YouTubeUserAdapter());
 		 adapters.add(new TedTalkAdapter());
 		 
 		 RemoteSiteClient<Feed> c4AtomFetcher = new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);

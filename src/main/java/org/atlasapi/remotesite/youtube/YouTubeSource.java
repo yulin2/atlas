@@ -40,7 +40,7 @@ import com.google.gdata.util.common.base.Charsets;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-class YouTubeSource extends BaseSource {
+public class YouTubeSource extends BaseSource {
 	
 	private static final String ATLAS_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
 	private static final String ATLAS_TAGS_SCHEME = "http://ref.atlasapi.org/tags/";
@@ -48,7 +48,7 @@ class YouTubeSource extends BaseSource {
 	
 	private final VideoEntry videoEntry;
 	
-	YouTubeSource(VideoEntry entry, String uri) {
+	public YouTubeSource(VideoEntry entry, String uri) {
 		super(uri);
 		videoEntry = entry;
 	}
