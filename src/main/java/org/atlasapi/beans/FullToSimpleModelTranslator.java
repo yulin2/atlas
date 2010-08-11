@@ -187,9 +187,9 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 				simpleItem.setBrandSummary(brandSummary);
 			}
 			
-			if (episode.getSeries() != null) {
+			Series series = episode.getSeriesSummary();
+			if (series != null) {
 				
-				Series series = episode.getSeries();
 				SeriesSummary seriesSummary = new SeriesSummary();
 
 				seriesSummary.setUri(series.getCanonicalUri());
