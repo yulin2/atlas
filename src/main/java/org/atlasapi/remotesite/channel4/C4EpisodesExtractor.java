@@ -20,6 +20,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Countries;
@@ -48,6 +50,8 @@ import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
 
 public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>> {
+    
+    private static final Log LOG = LogFactory.getLog(C4EpisodesExtractor.class);
 
 	private static final String DC_DURATION = "dc:relation.Duration";
 	private static final String DC_GUIDANCE = "dc:relation.Guidance";
@@ -108,7 +112,8 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 				itemUri = extarctUriFromLink(source, entry);
 			}
 			if (itemUri == null) {
-				throw new IllegalStateException("Cannot extract canonical URI for entry with id " + entry.getId());
+			    LOG.warn("Unable to derive URI for c4 episode with id: "+entry.getId());
+			    continue;
 			}
 			
 			Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
