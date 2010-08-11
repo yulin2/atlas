@@ -40,7 +40,6 @@ import org.atlasapi.remotesite.vimeo.VimeoAdapter;
 import org.atlasapi.remotesite.wikipedia.WikipediaSparqlAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
-import org.atlasapi.remotesite.youtube.user.YouTubeUserAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -57,7 +56,8 @@ public class RemoteSiteModule {
 		 
 		 adapters.add(new YouTubeAdapter());
 		 adapters.add(new YouTubeFeedAdapter());
-		 adapters.add(new YouTubeUserAdapter());
+		 // Commented out for now, as it generates too much gdata traffic
+		 //adapters.add(new YouTubeUserAdapter());
 		 adapters.add(new TedTalkAdapter());
 		 adapters.add(new C4AtomBackedBrandAdapter());
 		 adapters.add(new C4HighlightsAdapter());
