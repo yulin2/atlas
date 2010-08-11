@@ -24,10 +24,6 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.itv.ItvBrandSource;
-import org.atlasapi.remotesite.itv.ItvEpisode;
-import org.atlasapi.remotesite.itv.ItvGraphExtractor;
-import org.atlasapi.remotesite.itv.ItvProgramme;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;

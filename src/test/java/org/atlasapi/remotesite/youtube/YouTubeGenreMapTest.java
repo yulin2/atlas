@@ -24,7 +24,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.genres.GenreMap;
-import org.atlasapi.remotesite.youtube.YouTubeGenreMap;
 
 import com.google.common.collect.Sets;
 

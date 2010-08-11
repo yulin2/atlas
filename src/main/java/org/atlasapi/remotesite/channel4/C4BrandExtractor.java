@@ -7,10 +7,14 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -28,10 +32,12 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
+    private static final Log LOG = LogFactory.getLog(C4BrandExtractor.class);
     private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
 	private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
 	private final C4SeriesExtractor seriesExtractor = new C4SeriesExtractor();
 	private final C4EpisodesExtractor itemExtrator = new C4EpisodesExtractor().includeOnDemands().includeBroadcasts();
+	private final C4EpisodeBroadcastExtractor broadcastExtractor = new C4EpisodeBroadcastExtractor();
 	private final RemoteSiteClient<Feed> feedClient;
 
 	public C4BrandExtractor() {
@@ -65,6 +71,9 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 				}
 			}
 		}
+		
+		populateBroadcasts(items, brand);
+		
 		brand.setItems(items);
 		return brand;
 	}
@@ -144,6 +153,34 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		} catch (Exception e) {
 			throw new FetchException("could not read on demand info for " + brand.getCanonicalUri(), e);
 		} 
+	}
+	
+	private void populateBroadcasts(List<Episode> episodes, Brand brand) {
+	    try {
+            Feed epg = fetch(brand, "/epg.atom");
+            List<Episode> broadcastEpisodes = broadcastExtractor.extract(epg);
+            
+            for (Episode broadcastEpisode: broadcastEpisodes) {
+                for (Episode episode: episodes) {
+                    if (episode.getCanonicalUri().equals(broadcastEpisode.getCanonicalUri())) {
+                        Broadcast broadcast = broadcastEpisode.getVersions().iterator().next().getBroadcasts().iterator().next();
+                        Version version = episode.getVersions().iterator().next();
+                        
+                        for (Broadcast currentBroadcast: version.getBroadcasts()) {
+                            if (currentBroadcast.equals(broadcast)) {
+                                currentBroadcast.setAliases(broadcast.getAliases());
+                                return;
+                            }
+                        }
+                        
+                        version.addBroadcast(broadcast);
+                        return;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Unable to retrieve epg information for brand: "+brand.getCanonicalUri());
+        }
 	}
 
 	private static <T extends Content> Map<String, T> toMap(Iterable<T> contents) {

@@ -23,12 +23,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.beans.JaxbXmlTranslator;
 import org.atlasapi.media.entity.simple.Broadcast;
+import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 import org.atlasapi.media.entity.simple.Playlist;
-import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Sets;

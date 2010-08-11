@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
-import org.atlasapi.remotesite.ted.TedTalkClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;

@@ -7,7 +7,6 @@ import junit.framework.TestCase;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Equiv;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
 
 public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
     private FreebaseBrandEquivGenerator generator = new FreebaseBrandEquivGenerator();

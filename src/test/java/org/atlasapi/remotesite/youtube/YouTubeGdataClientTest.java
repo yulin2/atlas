@@ -25,7 +25,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.youtube.YouTubeGDataClient;
 
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;

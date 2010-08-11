@@ -38,8 +38,6 @@ import java.util.Set;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
-import org.atlasapi.remotesite.wikipedia.WikipediaSparqlGraphExtractor;
-import org.atlasapi.remotesite.wikipedia.WikipediaSparqlSource;
 import org.atlasapi.remotesite.youtube.YouTubeGraphExtractor;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;

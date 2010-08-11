@@ -7,14 +7,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Set;
 
-import org.atlasapi.beans.BeanGraphWriter;
-import org.atlasapi.beans.FullToSimpleModelTranslator;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.Item;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.vimeo;
 
-import org.atlasapi.remotesite.vimeo.VimeoOembedGraphExtractor;
-
 import junit.framework.TestCase;
 
 /**

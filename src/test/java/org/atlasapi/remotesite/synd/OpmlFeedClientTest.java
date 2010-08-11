@@ -17,9 +17,6 @@ package org.atlasapi.remotesite.synd;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-
-import org.atlasapi.remotesite.synd.OpmlFeedClient;
-
 import junit.framework.TestCase;
 
 import com.sun.syndication.feed.opml.Opml;

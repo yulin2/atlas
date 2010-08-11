@@ -26,9 +26,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.beans.ProjectionException;
-import org.atlasapi.beans.Projector;
-import org.atlasapi.beans.SingleItemProjector;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;

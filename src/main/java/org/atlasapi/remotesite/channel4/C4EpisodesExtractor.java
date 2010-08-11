@@ -41,7 +41,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -53,20 +52,20 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
     
     private static final Log LOG = LogFactory.getLog(C4EpisodesExtractor.class);
 
-	private static final String DC_DURATION = "dc:relation.Duration";
-	private static final String DC_GUIDANCE = "dc:relation.Guidance";
-	private static final String DC_TERMS_AVAILABLE = "dcterms:available";
-	private static final String DC_TX_DATE = "dc:date.TXDate";
-	private static final String DC_TX_CHANNEL = "dc:relation.TXChannel";
-	private static final String EPISODE_TITLE_TEMPLATE = "Series %s Episode %s";
-	private static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
-	private static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
+	public static final String DC_GUIDANCE = "dc:relation.Guidance";
+	public static final String DC_TERMS_AVAILABLE = "dcterms:available";
+	public static final String DC_TX_DATE = "dc:date.TXDate";
+	public static final String DC_START_TIME = "dc:relation.TXStartTime";
+	public static final String DC_TX_CHANNEL = "dc:relation.TXChannel";
+	public static final String EPISODE_TITLE_TEMPLATE = "Series %s Episode %s";
+	public static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
+	public static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
 
 	private static final Namespace NS_MEDIA_RSS = Namespace.getNamespace("http://search.yahoo.com/mrss/");
 	
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
 
-	private static Map<String, String> CHANNEL_LOOKUP = channelLookup(); 
+	public static Map<String, String> CHANNEL_LOOKUP = channelLookup(); 
 	
 	private static Map<String, String> channelLookup() {
 		Map<String, String> channelLookup = Maps.newHashMap();
@@ -100,12 +99,12 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		List<Episode> episodes = Lists.newArrayList();
 		
 		for (Entry entry : (List<Entry>) source.getEntries()) {
-			Map<String, String> lookup = foreignElementLookup(entry);
+			Map<String, String> lookup = C4AtomApi.foreignElementLookup(entry);
 			
-			Integer seriesNumber = readAsNumber(lookup, DC_SERIES_NUMBER);
-			Integer episodeNumber = readAsNumber(lookup, DC_EPISODE_NUMBER);
+			Integer seriesNumber = C4AtomApi.readAsNumber(lookup, DC_SERIES_NUMBER);
+			Integer episodeNumber = C4AtomApi.readAsNumber(lookup, DC_EPISODE_NUMBER);
 			
-			String itemUri = canonicalUri(entry);
+			String itemUri = C4AtomApi.canonicalUri(entry);
 			
 			if (itemUri == null) {
 				// fall back to hacking the uri out of the feed
@@ -118,7 +117,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			
 			Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
 
-			String fourOdUri = fourOdUri(entry);
+			String fourOdUri = C4AtomApi.fourOdUri(entry);
 			if (fourOdUri != null) {
 				episode.addAlias(fourOdUri);
 			}
@@ -153,7 +152,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			episode.setIsLongForm(true);
 			episode.setDescription(description(entry));
 			
-			Version version = version(fourOdUri(entry), lookup, availableCountries);
+			Version version = version(C4AtomApi.fourOdUri(entry), lookup, availableCountries);
 			if (version != null) {
 				episode.addVersion(version);
 			}
@@ -173,43 +172,8 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
-	private String fourOdUri(Entry entry) {
-		List<Link> links = entry.getAlternateLinks();
-		
-		for (Link link : links) {
-			String href = link.getHref();
-			if (href.contains("4od#")) {
-				return href;
-			}
-		}
-		return null;
-	}
-	
-	@SuppressWarnings("unchecked")
-	private String canonicalUri(Entry entry) {
-		List<Link> links = entry.getAlternateLinks();
-		
-		for (Link link : links) {
-			String href = link.getHref();
-			if (C4AtomApi.isACanonicalEpisodeUri(href)) {
-				return href;
-			}
-		}
-		return null;
-	}
 	
 	
-	
-
-	private Integer readAsNumber(Map<String, String> lookup, String key) {
-		String value = lookup.get(key);
-		if (Strings.isNullOrEmpty(value)) {
-			return null;
-		}
-		return Integer.valueOf(value);
-	}
-
 	private String description(Entry entry) {
 		com.sun.syndication.feed.atom.Content description = entry.getSummary();
 		if (description == null) {
@@ -255,7 +219,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 
 	private Version version(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
 		Version version = new Version();
-		Duration duration = durationFrom(lookup);
+		Duration duration = C4AtomApi.durationFrom(lookup);
 		
 		if (duration != null) {
 			version.setDuration(duration);
@@ -290,18 +254,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	}
 
 
-	private Duration durationFrom(Map<String, String> lookup) {
-		String durationString = lookup.get(DC_DURATION);
-		if (durationString == null) {
-			return null;
-		}
-		List<String> parts = Lists.newArrayList(Splitter.on(":").split(durationString));
-		int duration = 0;
-		for (String part : parts) {
-			duration = (duration * 60) + Integer.valueOf(part);
-		}
-		return Duration.standardSeconds(duration);
-	}
+	
 
 	@SuppressWarnings("unchecked")
 	private Element mediaGroup(Entry syndEntry) {
@@ -312,18 +265,4 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		}
 		return null;
 	}
-	
-	@SuppressWarnings("unchecked")
-	private Map<String, String> foreignElementLookup(Entry entry) {
-		return foreignElementLookup((Iterable<Element>) entry.getForeignMarkup());
-	}
-
-	private Map<String, String> foreignElementLookup(Iterable<Element> foreignMarkup) {
-		Map<String, String> foreignElementLookup = Maps.newHashMap();
-		for (Element element : foreignMarkup) {
-			foreignElementLookup.put(element.getNamespacePrefix() + ":" + element.getName(), element.getText());
-		}
-		return foreignElementLookup;
-	}
-	
 }

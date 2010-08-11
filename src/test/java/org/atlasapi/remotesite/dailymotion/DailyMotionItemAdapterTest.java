@@ -18,7 +18,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
 import org.jmock.Expectations;

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.beans.html.HtmlTranslator;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;

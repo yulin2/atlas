@@ -25,8 +25,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.oembed.OembedGraphExtractor;
-import org.atlasapi.remotesite.oembed.OembedSource;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;

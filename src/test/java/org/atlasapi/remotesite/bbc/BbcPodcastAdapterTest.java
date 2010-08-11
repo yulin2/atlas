@@ -24,7 +24,6 @@ import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.synd.SyndicationSource;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;

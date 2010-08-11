@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.beans;
 
-import org.atlasapi.beans.FeedTranslator;
 import org.atlasapi.feeds.RomeSyndicationFeed;
 import org.atlasapi.feeds.SyndicationFeed;
 

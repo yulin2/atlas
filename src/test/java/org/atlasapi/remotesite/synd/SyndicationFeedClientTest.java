@@ -25,7 +25,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.remotesite.synd.SyndicationFeedClient;
 import org.jdom.Element;
 
 import com.sun.syndication.feed.synd.SyndEntry;

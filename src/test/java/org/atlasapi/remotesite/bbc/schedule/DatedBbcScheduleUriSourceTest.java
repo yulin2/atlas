@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Iterator;
 
-import org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;

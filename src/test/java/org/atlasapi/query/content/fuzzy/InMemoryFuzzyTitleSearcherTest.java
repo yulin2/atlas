@@ -26,7 +26,6 @@ import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentListener;
-import org.atlasapi.query.content.fuzzy.InMemoryFuzzySearcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Lists;

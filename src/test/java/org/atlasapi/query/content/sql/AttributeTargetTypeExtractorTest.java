@@ -27,7 +27,6 @@ import junit.framework.TestCase;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.query.content.sql.AttributeTargetTypeExtractor;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Sets;

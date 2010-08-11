@@ -20,9 +20,6 @@ import static org.hamcrest.Matchers.is;
 import java.util.List;
 
 import org.atlasapi.remotesite.FixedResponseHttpClient;
-import org.atlasapi.remotesite.channel4.BrandListingPage;
-import org.atlasapi.remotesite.channel4.C4HomePageClient;
-import org.atlasapi.remotesite.channel4.HtmlBrandSummary;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.io.Resources;

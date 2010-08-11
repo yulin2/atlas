@@ -19,8 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import org.atlasapi.remotesite.FixedResponseHttpClient;
-import org.atlasapi.remotesite.bbc.BbcSlashProgrammesVersionRdfClient;
-import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;

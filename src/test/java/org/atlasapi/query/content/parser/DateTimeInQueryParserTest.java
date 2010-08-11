@@ -16,7 +16,6 @@ package org.atlasapi.query.content.parser;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.query.content.parser.DateTimeInQueryParser;
 import org.atlasapi.query.content.parser.DateTimeInQueryParser.MalformedDateTimeException;
 import org.joda.time.DateTime;
 

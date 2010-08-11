@@ -18,9 +18,6 @@ package org.atlasapi.remotesite.imdb;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-
-import org.atlasapi.remotesite.imdb.ImdbSource;
-
 import junit.framework.TestCase;
 
 /**

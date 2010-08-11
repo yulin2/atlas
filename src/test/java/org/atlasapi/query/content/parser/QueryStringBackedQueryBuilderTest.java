@@ -16,7 +16,23 @@ package org.atlasapi.query.content.parser;
 
 
 import static org.atlasapi.content.criteria.ContentQueryBuilder.query;
-import static org.atlasapi.content.criteria.attribute.Attributes.*;
+import static org.atlasapi.content.criteria.attribute.Attributes.BRAND_GENRE;
+import static org.atlasapi.content.criteria.attribute.Attributes.BRAND_TAG;
+import static org.atlasapi.content.criteria.attribute.Attributes.BRAND_TITLE;
+import static org.atlasapi.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_END_TIME;
+import static org.atlasapi.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
+import static org.atlasapi.content.criteria.attribute.Attributes.EPISODE_POSITION;
+import static org.atlasapi.content.criteria.attribute.Attributes.ITEM_GENRE;
+import static org.atlasapi.content.criteria.attribute.Attributes.ITEM_PUBLISHER;
+import static org.atlasapi.content.criteria.attribute.Attributes.ITEM_TAG;
+import static org.atlasapi.content.criteria.attribute.Attributes.ITEM_TITLE;
+import static org.atlasapi.content.criteria.attribute.Attributes.LOCATION_AVAILABLE;
+import static org.atlasapi.content.criteria.attribute.Attributes.LOCATION_TRANSPORT_TYPE;
+import static org.atlasapi.content.criteria.attribute.Attributes.PLAYLIST_GENRE;
+import static org.atlasapi.content.criteria.attribute.Attributes.PLAYLIST_TAG;
+import static org.atlasapi.content.criteria.attribute.Attributes.PLAYLIST_TITLE;
+import static org.atlasapi.content.criteria.attribute.Attributes.POLICY_AVAILABLE_COUNTRY;
+import static org.atlasapi.content.criteria.attribute.Attributes.VERSION_DURATION;
 
 import java.util.Map;
 
@@ -29,8 +45,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
-import org.atlasapi.query.content.parser.QueryStringBackedQueryBuilder;
-import org.atlasapi.query.content.parser.WebProfileDefaultQueryAttributesSetter;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 

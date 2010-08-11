@@ -27,8 +27,6 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.synd.GenericPodcastGraphExtractor;
-import org.atlasapi.remotesite.synd.SyndicationSource;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;

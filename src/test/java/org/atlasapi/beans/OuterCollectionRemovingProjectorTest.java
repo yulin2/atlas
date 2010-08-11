@@ -28,8 +28,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.beans.OuterCollectionRemovingProjector;
-import org.atlasapi.beans.ProjectionException;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;

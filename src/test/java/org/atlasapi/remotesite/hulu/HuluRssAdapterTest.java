@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.hulu;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
-import org.atlasapi.remotesite.hulu.HuluRssAdapter;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 

@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.feeds.OembedItem;
-import org.atlasapi.remotesite.oembed.OembedXmlClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;

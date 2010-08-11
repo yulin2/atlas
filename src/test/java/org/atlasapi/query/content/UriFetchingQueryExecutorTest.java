@@ -24,7 +24,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
