@@ -29,6 +29,8 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 		series.setTitle(source.getTitle());
 		series.setDescription(source.getSubtitle().getValue());
 		
+		C4AtomApi.addImages(series, source.getLogo());
+		
 		series.setDescription(series.getDescription());
 		
 		series.setItems(episodesExtractor.extract(source));
