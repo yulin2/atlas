@@ -29,6 +29,7 @@ import com.sun.syndication.feed.atom.Link;
 public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
     private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
+    
 	private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
 	private final C4SeriesExtractor seriesExtractor = new C4SeriesExtractor();
 	private final C4EpisodesExtractor itemExtrator = new C4EpisodesExtractor().includeOnDemands().includeBroadcasts();
@@ -69,16 +70,31 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		return brand;
 	}
 
+	
+	private static Pattern ID_PATTERN = Pattern.compile("tag:www.channel4.com,2009:/programmes/([a-z0-9\\-]+)/episode-guide(?:/series-(\\d+)(?:/episode-(\\d+))?)?");
+	
 	private List<Series> fetchSeries(Brand brand) {
 		Feed episodeGuide = readEpisodeGuide(brand);
 		
-		// The episode guide points directly to a series
-		if (episodeGuide.getId().contains("series")) {
-			return ImmutableList.of(seriesExtractor.extract(episodeGuide));
-		} else {
-			return  loadSeriesFromFeeds(extractSeriesAtomFeedsFrom(episodeGuide));
+		Matcher matcher = ID_PATTERN.matcher(episodeGuide.getId());
 		
+		if (!matcher.matches()) {
+			throw new FetchException("Series guide id not recognised: " + episodeGuide.getId());
 		}
+		
+		// the feed has a series number
+		if (matcher.group(2) != null) {
+			// the feed also has an episode number, this is not the right feed -- read the series feed instead
+			if (matcher.group(3) != null) {
+				int seriesNumber = Integer.valueOf(matcher.group(2));
+				return loadSeriesFromFeeds(ImmutableList.of(C4AtomApi.requestForBrand(brand.getCanonicalUri(), "/episode-guide/series-" + seriesNumber + ".atom")));
+			} else {
+				// the feed is a series, pass to extractor
+				return ImmutableList.of(seriesExtractor.extract(episodeGuide));
+			}
+		}
+		// a real series guide
+		return loadSeriesFromFeeds(extractSeriesAtomFeedsFrom(episodeGuide));
 	}
 
 	private List<Series> loadSeriesFromFeeds(List<String> seriesFeeds) {
@@ -114,22 +130,30 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		try {
 			return fetch(brand, "/episode-guide.atom");
 		} catch (HttpStatusCodeException e) {
-		    if (e.getStatusCode() == 403 && e.getResponse() != null) {
+		    if (e.getStatusCode() == 403) {
 		        Matcher matcher = BAD_EPISODE_REDIRECT.matcher(e.getResponse().finalUrl());
 		        if (matcher.find()) {
 		            try {
                         return fetch(brand, matcher.group(1)+".atom");
 		            } catch (HttpStatusCodeException e1) {
-		                try {
-		                    return fetch(brand, "/episode-guide/series-1.atom");
-		                } catch (Exception e2) {}
+		                return fetchDefaultSeriesOrGiveUp(brand);
                     } catch (Exception e1) {}
 		        }
+		    } 
+		    if (e.getStatusCode() == HttpServletResponse.SC_NOT_FOUND) {
+               return fetchDefaultSeriesOrGiveUp(brand);
 		    }
-		    
 		    throw new FetchException("could not fetch series guide for " + brand.getCanonicalUri(), e);
 		} catch (Exception e) {
 			throw new FetchException("could not read episode guide for ", e);
+		}
+	}
+
+	private Feed fetchDefaultSeriesOrGiveUp(Brand brand) {
+		try {
+			return fetch(brand, "/episode-guide/series-1.atom");
+		} catch (Exception e) {
+			throw new FetchException("Could not find any series information for " + brand.getCanonicalUri(), e);
 		}
 	}
 	
