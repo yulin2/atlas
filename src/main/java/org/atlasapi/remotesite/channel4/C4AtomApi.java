@@ -77,7 +77,11 @@ public class C4AtomApi {
 	}
 
 	public static String episodeUri(String webSafeBrandName, int seriesNumber, int episodeNumber) {
-		return PROGRAMMES_BASE + webSafeBrandName + "/episode-guide/series-" + seriesNumber + "/episode-" + episodeNumber;
+		return seriesUriFor(webSafeBrandName, seriesNumber) + "/episode-" + episodeNumber;
+	}
+
+	public static String seriesUriFor(String webSafeBrandName, int seriesNumber) {
+		return PROGRAMMES_BASE + webSafeBrandName + "/episode-guide/series-" + seriesNumber;
 	}
 	
 	@SuppressWarnings("unchecked")
