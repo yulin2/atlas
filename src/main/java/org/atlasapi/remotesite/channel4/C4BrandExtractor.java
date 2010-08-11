@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,6 +28,7 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
+    private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("^.*(\\/episode-guide\\/series-\\d+.atom)$");
 	private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
 	private final C4SeriesExtractor seriesExtractor = new C4SeriesExtractor();
 	private final C4EpisodesExtractor itemExtrator = new C4EpisodesExtractor().includeOnDemands().includeBroadcasts();
@@ -68,14 +71,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
 	private List<Series> fetchSeries(Brand brand) {
 		Feed episodeGuide = readEpisodeGuide(brand);
-		// the episode guide is a broken redirect
-		if (episodeGuide == null) {
-			try {
-				episodeGuide = fetch(brand, "/episode-guide/series-1.atom");
-			} catch (Exception e) {
-				throw new FetchException("could not fetch series guide for " + brand.getCanonicalUri(), e);
-			}
-		}
+		
 		// The episode guide points directly to a series
 		if (episodeGuide.getId().contains("series")) {
 			return ImmutableList.of(seriesExtractor.extract(episodeGuide));
@@ -117,11 +113,22 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 	private Feed readEpisodeGuide(Brand brand) {
 		try {
 			return fetch(brand, "/episode-guide.atom");
-		} 
-		catch (HttpStatusCodeException e) {
-			return null;
-		}
-		catch (Exception e) {
+		} catch (HttpStatusCodeException e) {
+		    if (e.getStatusCode() == 403 && e.getResponse() != null) {
+		        Matcher matcher = BAD_EPISODE_REDIRECT.matcher(e.getResponse().finalUrl());
+		        if (matcher.matches()) {
+		            try {
+                        return fetch(brand, matcher.group(1));
+		            } catch (HttpStatusCodeException e1) {
+		                try {
+		                    return fetch(brand, "/episode-guide/series-1.atom");
+		                } catch (Exception e2) {}
+                    } catch (Exception e1) {}
+		        }
+		    }
+		    
+		    throw new FetchException("could not fetch series guide for " + brand.getCanonicalUri(), e);
+		} catch (Exception e) {
 			throw new FetchException("could not read episode guide for ", e);
 		}
 	}

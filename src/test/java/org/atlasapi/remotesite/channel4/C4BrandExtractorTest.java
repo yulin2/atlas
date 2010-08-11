@@ -1,5 +1,9 @@
 package org.atlasapi.remotesite.channel4;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -20,11 +24,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.sun.syndication.feed.atom.Feed;
-
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.*;
 
 public class C4BrandExtractorTest extends TestCase {
 
@@ -66,14 +69,26 @@ public class C4BrandExtractorTest extends TestCase {
 	
 	
 	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries1IsAssumed() throws Exception {
+	    HttpResponse response = new HttpResponse("error", 403).withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
 		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", brandFeed.build())
+			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", series3Feed.build());
 
 		Brand brand = new C4AtomBackedBrandAdapter(feedClient).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		assertThat(brand.getItems().size(), is(greaterThan(1)));
 	}
 	
+	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries3IsReturned() throws Exception {
+	    HttpResponse response = new HttpResponse("error", 403).withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
+        RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
+            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", brandFeed.build())
+            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
+            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", series4Feed.build());
+
+        Brand brand = new C4AtomBackedBrandAdapter(feedClient).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+        assertThat(brand.getItems().size(), is(greaterThan(1)));
+    }
 	
 	public void testThatWhenTheEpisodeGuideRedirectsToSeries1TheSeriesIsRead() throws Exception {
 		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
@@ -86,17 +101,19 @@ public class C4BrandExtractorTest extends TestCase {
 	
 	private static class StubC4AtomClient implements RemoteSiteClient<Feed> {
 
-		private Map<String, Feed> respondsTo = Maps.newHashMap();
+		private Map<String, Object> respondsTo = Maps.newHashMap();
 
 		@Override
 		public Feed get(String uri) throws Exception {
 			// Remove API key
 			uri = removeQueryString(uri);
-			Feed feed = respondsTo.get(uri);
-			if (feed == null) {
+			Object response = respondsTo.get(uri);
+			if (response == null) {
 				throw new HttpStatusCodeException(404, "Not found: " + uri);
+			} else if (response instanceof HttpException) {
+			    throw (HttpException) response;
 			}
-			return feed;
+			return (Feed) response;
 		}
 
 		private String removeQueryString(String url) throws MalformedURLException {
@@ -107,6 +124,11 @@ public class C4BrandExtractorTest extends TestCase {
 		StubC4AtomClient respondTo(String url, Feed feed) {
 			respondsTo.put(url, feed);
 			return this;
+		}
+		
+		StubC4AtomClient respondTo(String url, HttpException exception) {
+		    respondsTo.put(url, exception);
+		    return this;
 		}
 	}
 	
