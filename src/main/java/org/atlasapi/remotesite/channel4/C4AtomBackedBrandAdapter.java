@@ -18,6 +18,8 @@ package org.atlasapi.remotesite.channel4;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
@@ -25,6 +27,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
+import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.sun.syndication.feed.atom.Feed;
 
 public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
@@ -55,6 +58,12 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 		try {
 			log.info("Fetching C4 brand " + uri);
 			return extractor.extract(feedClient.get(atomUrl(uri)));
+		} catch (HttpStatusCodeException e) {
+			if (HttpServletResponse.SC_NOT_FOUND == e.getStatusCode()) {
+				// Return null to signify Brand not found on C4
+				return null;
+			}
+			throw new RuntimeException(e);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
