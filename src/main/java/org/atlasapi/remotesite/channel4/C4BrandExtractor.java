@@ -28,7 +28,7 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
-    private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("^.*(\\/episode-guide\\/series-\\d+.atom)$");
+    private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
 	private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
 	private final C4SeriesExtractor seriesExtractor = new C4SeriesExtractor();
 	private final C4EpisodesExtractor itemExtrator = new C4EpisodesExtractor().includeOnDemands().includeBroadcasts();
@@ -116,9 +116,9 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 		} catch (HttpStatusCodeException e) {
 		    if (e.getStatusCode() == 403 && e.getResponse() != null) {
 		        Matcher matcher = BAD_EPISODE_REDIRECT.matcher(e.getResponse().finalUrl());
-		        if (matcher.matches()) {
+		        if (matcher.find()) {
 		            try {
-                        return fetch(brand, matcher.group(1));
+                        return fetch(brand, matcher.group(1)+".atom");
 		            } catch (HttpStatusCodeException e1) {
 		                try {
 		                    return fetch(brand, "/episode-guide/series-1.atom");
