@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
 
 public class C4AtomApi {
@@ -22,10 +23,16 @@ public class C4AtomApi {
     public static final String DC_DURATION = "dc:relation.Duration";
 	private static final String PROGRAMMES_BASE = "http://www.channel4.com/programmes/";
 	
-	public static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(Pattern.quote(PROGRAMMES_BASE) + "([a-z0-9\\-]+)");
-	private static final Pattern CANONICAL_EPISODE_URI_PATTERN = Pattern.compile(Pattern.quote(PROGRAMMES_BASE) + "[a-z0-9\\-]+/episode-guide/series-\\d+/episode-\\d+");
+	private static final String WEB_SAFE_NAME_PATTERN = "[a-z0-9\\-]+";
+	private static final String FEED_ID_PREFIX_PATTERN = "tag:www.channel4.com,\\d{4}:/programmes/";
+	
+	public static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(String.format("%s(%s)", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
+	private static final Pattern CANONICAL_EPISODE_URI_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
 
-	private static final Pattern FEED_ID_PATTERN = Pattern.compile("tag:www.channel4.com,\\d{4}:/programmes/([a-z0-9\\-]+)/.*");
+	private static final Pattern ANY_FEED_ID_PATTERN = Pattern.compile(String.format("%s(%s)/.*", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
+
+	private static final Pattern BRAND_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
+	private static final Pattern SERIES_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
 
 	private static final String API_BASE_URL = "http://api.channel4.com/programmes/";
 
@@ -69,7 +76,7 @@ public class C4AtomApi {
 	}
 
 	public static String webSafeNameFromAnyFeedId(String id) {
-		Matcher matcher = FEED_ID_PATTERN.matcher(id);
+		Matcher matcher = ANY_FEED_ID_PATTERN.matcher(id);
 		if (matcher.matches()) {
 			return matcher.group(1);
 		}
@@ -152,4 +159,12 @@ public class C4AtomApi {
         }
         return Duration.standardSeconds(duration);
     }
+
+	public static boolean isABrandFeed(Feed source) {
+		return BRAND_PAGE_ID_PATTERN.matcher(source.getId()).matches();
+	}
+
+	public static boolean isASeriesFeed(Feed source) {
+		return SERIES_PAGE_ID_PATTERN.matcher(source.getId()).matches();
+	}
 }

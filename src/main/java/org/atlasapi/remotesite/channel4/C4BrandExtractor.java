@@ -33,6 +33,7 @@ import com.sun.syndication.feed.atom.Link;
 public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
     private static final Log LOG = LogFactory.getLog(C4BrandExtractor.class);
+    
     private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
 
     private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();

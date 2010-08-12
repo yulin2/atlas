@@ -44,6 +44,7 @@ import org.joda.time.LocalDate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
@@ -121,6 +122,8 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			if (fourOdUri != null) {
 				episode.addAlias(fourOdUri);
 			}
+			
+			episode.setLastUpdated(new DateTime(source.getUpdated(), DateTimeZones.UTC));
 			
 			episode.addAlias(entry.getId());
 
