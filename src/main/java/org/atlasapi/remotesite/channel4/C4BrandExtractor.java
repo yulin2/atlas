@@ -72,6 +72,16 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
                     episode.setTitle("Series " + episode.getSeriesNumber() + " Episode " + episode.getEpisodeNumber());
                 }
             }
+            
+            if (episode.getImage() == null) {
+                if (episode.getSeriesSummary().getImage() != null) {
+                    episode.setImage(episode.getSeriesSummary().getImage());
+                    episode.setThumbnail(episode.getSeriesSummary().getThumbnail());
+                } else {
+                    episode.setImage(brand.getImage());
+                    episode.setThumbnail(brand.getThumbnail());
+                }
+            }
         }
 
         populateBroadcasts(items, brand);
