@@ -4,8 +4,10 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Preconditions;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
 
@@ -25,6 +27,8 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 
 		brand.setTitle(source.getTitle());
 		brand.setDescription(source.getSubtitle().getValue());
+		
+		brand.setLastUpdated(new DateTime(source.getUpdated(), DateTimeZones.UTC));
 		
 		C4AtomApi.addImages(brand, source.getLogo());
 		

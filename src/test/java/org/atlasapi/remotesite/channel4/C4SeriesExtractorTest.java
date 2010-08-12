@@ -11,9 +11,11 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4SeriesExtractorTest extends TestCase {
 
@@ -42,10 +44,11 @@ public class C4SeriesExtractorTest extends TestCase {
 		assertThat(firstEpisode.getCurie(), is("c4:ramsays-kitchen-nightmares-series-3-episode-1"));
 
 		assertThat(series.getSeriesNumber(), is(3));
+
+		assertThat(series.getLastUpdated(), is(new DateTime("2010-08-09T16:49:33.651Z", DateTimeZones.UTC)));
 		
 		assertThat(firstEpisode.getSeriesNumber(), is(3));
 		assertThat(firstEpisode.getEpisodeNumber(), is(1));
-
 
 		// since this is not a /4od feed there should be no On Demand entries
 		assertThat(firstEpisode.getVersions(), is((Set) ImmutableSet.of()));
