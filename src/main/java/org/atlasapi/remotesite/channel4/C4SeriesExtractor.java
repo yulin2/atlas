@@ -8,6 +8,7 @@ import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Preconditions;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
@@ -21,6 +22,8 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 	@Override
 	public Series extract(Feed source) {
 
+		Preconditions.checkArgument(C4AtomApi.isASeriesFeed(source), "Not a series feed, feed has id: " + source.getId());
+		
 		String uri = seriesUriFrom(source);
 		
 		Series series = new Series(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri));

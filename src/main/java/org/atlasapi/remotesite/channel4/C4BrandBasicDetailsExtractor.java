@@ -16,6 +16,8 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 	@Override
 	public Brand extract(Feed source) {
 		
+		Preconditions.checkArgument(C4AtomApi.isABrandFeed(source), "Not a brand feed");
+		
 		String brandUri = brandUriFrom(source);
 		
 		Preconditions.checkArgument(brandUri != null && C4AtomApi.isACanonicalBrandUri(brandUri), "URI of feed is not a canonical Brand URI, got: " + brandUri);
