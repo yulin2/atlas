@@ -140,7 +140,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
                     } catch (Exception e1) {}
 		        }
 		    } 
-		    if (e.getStatusCode() == HttpServletResponse.SC_NOT_FOUND) {
+		    if (e.getStatusCode() == HttpServletResponse.SC_NOT_FOUND || e.getStatusCode() == 400) {
                return fetchDefaultSeriesOrGiveUp(brand);
 		    }
 		    throw new FetchException("could not fetch series guide for " + brand.getCanonicalUri(), e);
