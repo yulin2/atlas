@@ -16,8 +16,10 @@ package org.atlasapi.remotesite;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
@@ -28,6 +30,7 @@ import org.atlasapi.remotesite.channel4.ApiKeyAwareClient;
 import org.atlasapi.remotesite.channel4.C4AtomBackedBrandAdapter;
 import org.atlasapi.remotesite.channel4.C4BrandAtoZAdapter;
 import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
+import org.atlasapi.remotesite.channel4.DefaultToSavedOnErrorSiteSpecificAdapter;
 import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluAllBrandsAdapter;
@@ -36,6 +39,8 @@ import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluRssAdapter;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
+import org.atlasapi.remotesite.logging.AdapterLog;
+import org.atlasapi.remotesite.logging.CommonsLoggingAdapterLog;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
@@ -44,6 +49,7 @@ import org.atlasapi.remotesite.vimeo.VimeoAdapter;
 import org.atlasapi.remotesite.wikipedia.WikipediaSparqlAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -56,7 +62,12 @@ public class RemoteSiteModule {
 
 	private @Value("${c4.apiKey}") String c4ApiKey;
 	
+	private @Autowired MongoDbBackedContentStore contentStore;
+	
 	public @Bean Fetcher<Content> remoteFetcher() {
+		
+		AdapterLog log = new CommonsLoggingAdapterLog();
+		
 		
 		 PerSiteAdapterDispatcher dispatcher = new PerSiteAdapterDispatcher();
 		 
@@ -68,13 +79,13 @@ public class RemoteSiteModule {
 		 //adapters.add(new YouTubeUserAdapter());
 		 adapters.add(new TedTalkAdapter());
 		 
-		 RemoteSiteClient<Feed> c4AtomFetcher = new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
-		 C4AtomBackedBrandAdapter brandFetcher = new C4AtomBackedBrandAdapter(c4AtomFetcher);
+		 C4AtomBackedBrandAdapter c4BrandFetcher = c4BrandFetcher();
 		
-		 adapters.add(brandFetcher);
+		 adapters.add(c4BrandFetcher);
+		 adapters.add(new C4HighlightsAdapter(c4BrandFetcher));
 		 
-		 adapters.add(new C4HighlightsAdapter(brandFetcher));
-		 adapters.add(new C4BrandAtoZAdapter(brandFetcher));
+		 adapters.add(new C4BrandAtoZAdapter(new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, log)));
+		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
 		 adapters.add(new ItvBrandAdapter());
@@ -101,6 +112,11 @@ public class RemoteSiteModule {
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;
+	}
+
+	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {
+		RemoteSiteClient<Feed> c4AtomFetcher = new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
+		return new C4AtomBackedBrandAdapter(c4AtomFetcher);
 	}
 	
 	public @Bean ContentWriters contentWriters() {
