@@ -33,7 +33,7 @@ import com.sun.syndication.feed.atom.Link;
 public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
     private static final Log LOG = LogFactory.getLog(C4BrandExtractor.class);
-    
+
     private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
 
     private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
@@ -97,14 +97,21 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
             // -- read the series feed instead
             if (matcher.group(3) != null) {
                 int seriesNumber = Integer.valueOf(matcher.group(2));
-                return loadSeriesFromFeeds(ImmutableList.of(C4AtomApi.requestForBrand(brand.getCanonicalUri(), "/episode-guide/series-" + seriesNumber + ".atom")));
+                return setSeriesTitles(loadSeriesFromFeeds(ImmutableList.of(C4AtomApi.requestForBrand(brand.getCanonicalUri(), "/episode-guide/series-" + seriesNumber + ".atom"))), brand);
             } else {
                 // the feed is a series, pass to extractor
-                return ImmutableList.of(seriesExtractor.extract(episodeGuide));
+                return setSeriesTitles(ImmutableList.of(seriesExtractor.extract(episodeGuide)), brand);
             }
         }
         // a real series guide
-        return loadSeriesFromFeeds(extractSeriesAtomFeedsFrom(episodeGuide));
+        return setSeriesTitles(loadSeriesFromFeeds(extractSeriesAtomFeedsFrom(episodeGuide)), brand);
+    }
+
+    private List<Series> setSeriesTitles(List<Series> series, Brand brand) {
+        for (Series sery : series) {
+            sery.setTitle(brand.getTitle() + " - Series " + sery.getSeriesNumber());
+        }
+        return series;
     }
 
     private List<Series> loadSeriesFromFeeds(List<String> seriesFeeds) {
