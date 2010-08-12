@@ -1,14 +1,25 @@
 package org.atlasapi.remotesite.channel4;
 
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Content;
+import org.jdom.Element;
+import org.joda.time.Duration;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.sun.syndication.feed.atom.Entry;
+import com.sun.syndication.feed.atom.Link;
 
 public class C4AtomApi {
 
+    public static final String DC_DURATION = "dc:relation.Duration";
 	private static final String PROGRAMMES_BASE = "http://www.channel4.com/programmes/";
 	
 	public static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(Pattern.quote(PROGRAMMES_BASE) + "([a-z0-9\\-]+)");
@@ -72,4 +83,73 @@ public class C4AtomApi {
 	public static String seriesUriFor(String webSafeBrandName, int seriesNumber) {
 		return PROGRAMMES_BASE + webSafeBrandName + "/episode-guide/series-" + seriesNumber;
 	}
+	
+	@SuppressWarnings("unchecked")
+    public static String canonicalUri(Entry entry) {
+        List<Link> links = entry.getAlternateLinks();
+        
+        for (Link link : links) {
+            String href = link.getHref();
+            if (C4AtomApi.isACanonicalEpisodeUri(href)) {
+                return href;
+            }
+        }
+        
+        links = entry.getOtherLinks();
+        for (Link link : links) {
+            String href = link.getHref();
+            if (C4AtomApi.isACanonicalEpisodeUri(href)) {
+                return href;
+            }
+        }
+        
+        return null;
+    }
+	
+	@SuppressWarnings("unchecked")
+    public static Map<String, String> foreignElementLookup(Entry entry) {
+        return foreignElementLookup((Iterable<Element>) entry.getForeignMarkup());
+    }
+
+    public static Map<String, String> foreignElementLookup(Iterable<Element> foreignMarkup) {
+        Map<String, String> foreignElementLookup = Maps.newHashMap();
+        for (Element element : foreignMarkup) {
+            foreignElementLookup.put(element.getNamespacePrefix() + ":" + element.getName(), element.getText());
+        }
+        return foreignElementLookup;
+    }
+    
+    public static Integer readAsNumber(Map<String, String> lookup, String key) {
+        String value = lookup.get(key);
+        if (Strings.isNullOrEmpty(value)) {
+            return null;
+        }
+        return Integer.valueOf(value);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static String fourOdUri(Entry entry) {
+        List<Link> links = entry.getAlternateLinks();
+        
+        for (Link link : links) {
+            String href = link.getHref();
+            if (href.contains("4od#")) {
+                return href;
+            }
+        }
+        return null;
+    }
+    
+    public static Duration durationFrom(Map<String, String> lookup) {
+        String durationString = lookup.get(DC_DURATION);
+        if (durationString == null) {
+            return null;
+        }
+        List<String> parts = Lists.newArrayList(Splitter.on(":").split(durationString));
+        int duration = 0;
+        for (String part : parts) {
+            duration = (duration * 60) + Integer.valueOf(part);
+        }
+        return Duration.standardSeconds(duration);
+    }
 }

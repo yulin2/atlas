@@ -24,7 +24,6 @@ import org.atlasapi.persistence.testing.DummyContentData;
 import org.atlasapi.persistence.tracking.ContentMention;
 import org.atlasapi.persistence.tracking.ContentMentionStore;
 import org.atlasapi.persistence.tracking.TrackingSource;
-import org.atlasapi.tracking.PlaylistFromMentionsGenerator;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

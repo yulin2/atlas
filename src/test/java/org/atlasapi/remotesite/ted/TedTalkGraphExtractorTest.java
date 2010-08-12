@@ -29,7 +29,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
-import org.atlasapi.remotesite.ted.TedTalkGraphExtractor;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;

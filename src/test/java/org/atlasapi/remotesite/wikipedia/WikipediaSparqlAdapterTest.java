@@ -23,8 +23,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.sparql.SparqlEndpoint;
-import org.atlasapi.remotesite.wikipedia.WikipediaSparqlAdapter;
-import org.atlasapi.remotesite.wikipedia.WikipediaSparqlSource;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

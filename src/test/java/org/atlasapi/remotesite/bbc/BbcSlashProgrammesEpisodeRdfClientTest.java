@@ -22,8 +22,6 @@ import static org.hamcrest.Matchers.startsWith;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.remotesite.bbc.BbcSlashProgrammesEpisodeRdfClient;
-import org.atlasapi.remotesite.bbc.SlashProgrammesRdf;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.jmock.Expectations;

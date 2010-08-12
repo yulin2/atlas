@@ -17,7 +17,6 @@ package org.atlasapi;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.AtlasModule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 

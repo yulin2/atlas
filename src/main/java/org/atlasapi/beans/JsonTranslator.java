@@ -25,7 +25,6 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
 
-import org.atlasapi.beans.BeanGraphWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Charsets;

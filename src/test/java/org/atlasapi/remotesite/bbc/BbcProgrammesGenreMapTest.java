@@ -20,8 +20,6 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Set;
 
-import org.atlasapi.remotesite.bbc.BbcProgrammesGenreMap;
-
 import junit.framework.TestCase;
 
 import com.google.common.collect.Sets;

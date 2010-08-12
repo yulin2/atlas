@@ -26,7 +26,6 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.bbc.BbcPodcastGraphExtractor;
 import org.atlasapi.remotesite.synd.SyndicationSource;
 import org.jdom.Attribute;
 import org.jdom.Element;

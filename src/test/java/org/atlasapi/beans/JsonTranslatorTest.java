@@ -23,7 +23,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.beans.JsonTranslator;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 

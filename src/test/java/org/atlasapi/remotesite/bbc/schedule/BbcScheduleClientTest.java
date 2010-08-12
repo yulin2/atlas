@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.remotesite.bbc.schedule.BbcScheduleClient;
-import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;

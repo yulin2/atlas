@@ -25,9 +25,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
-import org.atlasapi.remotesite.channel4.BrandListingPage;
-import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
-import org.atlasapi.remotesite.channel4.HtmlBrandSummary;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 

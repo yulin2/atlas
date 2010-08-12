@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.remotesite.bbc.SeriesFetchingBbcSeriesNumberResolver;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;

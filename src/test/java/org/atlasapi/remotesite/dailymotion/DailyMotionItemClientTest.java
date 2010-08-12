@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.remotesite.dailymotion.DailyMotionItemClient;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;

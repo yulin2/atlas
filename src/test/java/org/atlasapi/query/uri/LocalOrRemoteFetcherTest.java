@@ -20,7 +20,6 @@ import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 

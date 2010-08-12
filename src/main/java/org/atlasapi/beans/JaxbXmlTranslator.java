@@ -24,12 +24,11 @@ import javax.xml.bind.Marshaller;
 
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
-import org.atlasapi.beans.BeanGraphWriter;
 import org.atlasapi.media.entity.simple.Broadcast;
+import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 import org.atlasapi.media.entity.simple.Playlist;
-import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.vocabulary.PLAY;
 import org.atlasapi.media.vocabulary.PO;

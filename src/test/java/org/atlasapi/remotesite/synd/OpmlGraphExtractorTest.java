@@ -34,8 +34,6 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.remotesite.synd.OpmlGraphExtractor;
-import org.atlasapi.remotesite.synd.OpmlSource;
 import org.atlasapi.remotesite.youtube.YouTubeGraphExtractor;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;

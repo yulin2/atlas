@@ -9,7 +9,6 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser;
 
 public class HuluItemAdapterTest extends TestCase {

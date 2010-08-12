@@ -4,8 +4,6 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.remotesite.youtube.user.YouTubeUserAdapter;
-import org.atlasapi.remotesite.youtube.user.YouTubeUserCanonicaliser;
 
 public class YouTubeUserIntegrationTest extends TestCase {
 

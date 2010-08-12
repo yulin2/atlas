@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.ted;
 
-import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser;
 import org.jmock.integration.junit3.MockObjectTestCase;
 

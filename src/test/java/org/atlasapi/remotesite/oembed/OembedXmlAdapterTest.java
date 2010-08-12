@@ -25,8 +25,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.oembed.OembedSource;
-import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 

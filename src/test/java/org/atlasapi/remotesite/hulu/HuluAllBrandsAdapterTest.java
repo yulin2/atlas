@@ -4,7 +4,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
-import org.atlasapi.remotesite.hulu.HuluAllBrandsAdapter;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 

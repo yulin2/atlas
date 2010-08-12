@@ -17,9 +17,6 @@ package org.atlasapi.remotesite.sparql;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-
-import org.atlasapi.remotesite.sparql.SparqlQuery;
-
 import junit.framework.TestCase;
 
 /**

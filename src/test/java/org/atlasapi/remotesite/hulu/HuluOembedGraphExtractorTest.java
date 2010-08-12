@@ -16,9 +16,6 @@ package org.atlasapi.remotesite.hulu;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-
-import org.atlasapi.remotesite.hulu.HuluOembedGraphExtractor;
-
 import junit.framework.TestCase;
 
 /**

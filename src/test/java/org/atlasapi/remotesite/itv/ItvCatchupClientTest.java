@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.remotesite.itv.ItvCatchupClient;
-import org.atlasapi.remotesite.itv.ItvEpisode;
-import org.atlasapi.remotesite.itv.ItvProgramme;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;

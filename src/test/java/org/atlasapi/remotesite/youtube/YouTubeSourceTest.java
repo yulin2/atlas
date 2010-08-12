@@ -25,7 +25,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.remotesite.youtube.YouTubeSource;
 import org.atlasapi.remotesite.youtube.YouTubeSource.Video;
 import org.joda.time.Duration;
 
