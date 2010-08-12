@@ -52,6 +52,7 @@ public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<
                 DateTime txStart = fmt.parseDateTime(startTime);
                 Broadcast broadcast = new Broadcast(txChannel, txStart, duration);
                 broadcast.addAlias(entry.getId());
+                broadcast.setLastUpdated(new DateTime(entry.getUpdated(), DateTimeZones.UTC));
                 version.addBroadcast(broadcast);
                 episodes.add(episode);
             }

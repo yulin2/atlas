@@ -155,7 +155,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			episode.setIsLongForm(true);
 			episode.setDescription(description(entry));
 			
-			Version version = version(C4AtomApi.fourOdUri(entry), lookup, availableCountries);
+			Version version = version(C4AtomApi.fourOdUri(entry), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC));
 			if (version != null) {
 				episode.addVersion(version);
 			}
@@ -193,10 +193,11 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
         return title.getValue();
     }
 	
-	private Location location(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
+	private Location location(String uri, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
 		Location location = new Location();
 		location.setUri(uri);
 		location.setTransportType(TransportType.LINK);
+		location.setLastUpdated(lastUpdated);
 		
 		// The feed only contains available content
 		location.setAvailable(true);
@@ -220,7 +221,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	}
 
 
-	private Version version(String uri, Map<String, String> lookup, Set<Country> availableCountries) {
+	private Version version(String uri, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
 		Version version = new Version();
 		Duration duration = C4AtomApi.durationFrom(lookup);
 		
@@ -242,13 +243,14 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			if (txChannel != null) {
 				DateTime txStart = new DateTime(txDate);
 				Broadcast broadcast = new Broadcast(txChannel, txStart, duration);
+				broadcast.setLastUpdated(lastUpdated);
 				version.addBroadcast(broadcast);
 			}
 		}
 		
 		if (include4odInfo) {
 			Encoding encoding = new Encoding();
-			encoding.addAvailableAt(location(uri, lookup, availableCountries));
+			encoding.addAvailableAt(location(uri, lookup, availableCountries, lastUpdated));
 			version.addManifestedAs(encoding);
 		}
 		

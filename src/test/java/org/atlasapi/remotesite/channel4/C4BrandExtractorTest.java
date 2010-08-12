@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -28,6 +29,7 @@ import com.google.common.io.Resources;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpStatusCodeException;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
 
 public class C4BrandExtractorTest extends TestCase {
@@ -83,8 +85,10 @@ public class C4BrandExtractorTest extends TestCase {
 	            for (Broadcast broadcast: version.getBroadcasts()) {
 	                if (broadcast.getBroadcastDuration() == 60*55) {
 	                    assertTrue(broadcast.getAliases().contains("tag:www.channel4.com,2009:slot/39861"));
+	                    assertEquals(new DateTime("2010-08-11T14:06:33.341Z", DateTimeZones.UTC), broadcast.getLastUpdated());
 	                    found = true;
 	                } else {
+	                    assertEquals(new DateTime("2010-04-27T09:49:40.803Z", DateTimeZones.UTC), broadcast.getLastUpdated());
 	                    assertTrue(broadcast.getAliases().isEmpty());
 	                }
 	            }

@@ -214,6 +214,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
                     for (Broadcast currentBroadcast : version.getBroadcasts()) {
                         if (currentBroadcast.equals(broadcast)) {
                             currentBroadcast.setAliases(broadcast.getAliases());
+                            currentBroadcast.setLastUpdated(broadcast.getLastUpdated());
                             return;
                         }
                     }
