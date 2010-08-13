@@ -1,0 +1,1508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:base="http://www.channel4.com">
+  <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide</id>
+  <title type="text">Dispatches</title>
+  <subtitle type="html">Dispatches goes undercover in some African churches in the UK, where evangelical pastors perpetuate a strong belief in witchcraft</subtitle>
+  <updated>2010-08-13T13:55:01.098Z</updated>
+  <author>
+    <name>Channel 4 Television</name>
+  </author>
+  <logo>http://www.channel4.com/assets/programmes/images/dispatches/9d40ee7d-da11-4703-8364-582edc9f6bcd_200x113.jpg</logo>
+  <link href="http://api.channel4.com/programmes/dispatches.atom?apikey=API_KEY" rel="up" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/programmes/dispatches/episode-guide.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+  <link href="http://www.channel4.com/programmes/dispatches/episode-guide" rel="alternate" type="text/html"/>
+  <dc:relation.BrandFlattened>true</dc:relation.BrandFlattened>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-67/episode-1</id>
+    <title type="text">Britain's Witch Children</title>
+    <summary type="html">Dispatches goes undercover in some African churches in the UK, where evangelical pastors perpetuate a strong belief in witchcraft. They preach that some people are possessed by evil spirits, and that these spirits bring bad luck into the lives of others.
+
+The only way to rid the possessed from the witchcraft spell and lift their curse is to 'deliver' them: a kind of exorcism that can be very traumatic. Some pastors charge significant sums of money to perform these deliverances. 
+
+Often it is children who are denounced as witches by these pastors, and this labelling can lead to the physical and emotional abuse of those children at the hands of their families. In extreme cases it has led to the deaths of some children. 
+
+In parts of Africa, branding a child a witch is now outlawed, but in Britain this practise is perfectly legal, despite the fact it can have horrific consequences. 
+
+Dispatches reveals just what goes on behind closed doors in these African churches, exposing the pastors who exploit the religious beliefs of the most vulnerable.</summary>
+    <updated>2010-08-13T13:55:01.099Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3109015" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-67/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-67/episode-1/3c087168-a793-4717-9804-e71214101fb5_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>67</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-66/episode-1</id>
+    <title type="text">Gun Nation</title>
+    <summary type="html">For two years, Dispatches has followed an undercover police operation as it tracked a criminal gang trying to smuggle guns into Britain. 
+
+The painstaking work of Lancashire's Serious and Organised Crime Unit culminated in the seizure of a vehicle in Dover containing drugs, weapons and ammunition, and led to the successful conviction of over 20 people involved in this international crime ring. 
+
+Operation Greengage exposed the trade in illegal weapons in one northern town. In Gun Nation, Dispatches examines the shocking proliferation of guns on Britain's streets.</summary>
+    <updated>2010-08-13T13:55:01.100Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-66/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-66/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-66/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-66/episode-1/436be2b3-b2ef-48c7-9daa-97c5ee08cfd5_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>66</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-65/episode-1</id>
+    <title type="text">Africa's Last Taboo</title>
+    <summary type="html">Gay people in Africa are facing increased persecution in a continent where two thirds of countries retain laws against homosexuals. 
+
+Award-winning filmmaker Sorious Samura investigates for Dispatches what it is like to be a gay person in Africa, discovering shocking levels of prejudice and hate, driven by governments, religious organisations and communities. 
+
+Samura looks at the impact extreme homophobia is having on gay people's lives, tracking down the victims of a recent mob attack in Kenya, speaking to gay men who have spent time in prison for their sexuality and meeting African homosexuals who are often forced into secret lives. 
+
+He discovers that AIDS is spreading at an alarming rate among gay men in Africa who are not being given vital sex education and health care by governments that are opposed to homosexuality. As a result, many gay men are dying needlessly. 
+
+Samura goes in search of what is driving homophobia in Africa, finding Muslims and Christians working closely together to target homosexuals and visiting American pastors helping to spread anti-gay sentiment. 
+
+Dispatches shows that homosexuality is not an African freedom, revealing a major, but little reported, human rights issue, in a continent where millions of gay people live in constant fear of rejection by their communities, of physical and verbal abuse, and even imprisonment.</summary>
+    <updated>2010-08-13T13:55:01.100Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-65/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-65/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-65/episode-1/81dc85ad-2045-49a8-9a21-247d601e673d_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>65</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-64/episode-1</id>
+    <title type="text">How to Save £100 Billion - Live</title>
+    <summary type="html">Filmed live on the eve of the emergency budget announcement, Dispatches sets out controversial cuts that could save Britain £100 billion. Krishnan Guru-Murthy presents a team of experts who believe their radical proposals could get Britain's budget back in shape; but can the nation stomach such swingeing cuts or tax increases? 
+
+Ideas such as: placing VAT on food and children's clothing, slashing benefits for the middle classes; cutting defence spending and merging our three armed forces; reducing the pay of public service workers and closing down final salary pension schemes. 
+
+Could Britain make changes to that most scared of institutions, the NHS, and charge those on higher incomes for GP visits, or roll out a system of health insurance? 
+
+A studio of 800 people vote for or against these cuts: cuts which would potentially mean that cherished frontline services would be protected.
+
+
+&lt;b&gt;Online, you can track your suggestions for savings and see which are the most popular.  If you are following the debate on twitter, use #chopornot. (Click the Chop or Not link to the left of this paragraph to find out more).&lt;/b&gt;</summary>
+    <updated>2010-08-13T13:55:01.101Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-64/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-64/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3105953" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-64/episode-1/65233e8c-6b31-498a-8ddc-9c091b2c9178_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>64</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-63/episode-1</id>
+    <title type="text">How the Banks Won</title>
+    <summary type="html">As the government prepares an emergency budget to help pay for the bank bailout, Will Hutton investigates the banks and what they've done with our money.
+
+He discovers that while ordinary taxpayers take the pain, for the banks it's largely business as usual. 
+
+Hutton analyses the banks' accounts and shows how they are using government-guaranteed funds to gamble with derivatives as they did before the crash. He also reveals how the banks are still paying vast salaries and bonuses, and City head hunters tell Dispatches how the banks hide the sums they're really paying out. 
+
+With the help of former and current members of the Bank of England's monetary policy committee, Hutton shows how the banks' booming margins come from the free and near-free money the government and taxpayers gave them to save the banking system. 
+
+He also investigates the banks' intense lobbying to resist government plans for reform and highlights recent research from the OECD on how Britain is internationally unusual in the extent to which bankers have key roles in the civil service and government. 
+
+Featuring high-powered contributors such as President Obama's banking advisor Paul Volcker, former Chancellor Alastair Darling, former City minister Lord Myners and current Business Secretary Vince Cable, Hutton shows why without urgent reform we risk the prospect of another crash - this time there won't be any money left for a bail-out - plus the certainty of British business being starved of vital funding. 
+
+With the Eurozone crisis fuelling fears of another banking crash, this programme is an urgent and shocking call to action.</summary>
+    <updated>2010-08-13T13:55:01.102Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-63/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-63/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-63/episode-1/4e8553e1-e2bf-4c29-9f53-f50c74d7d4ca_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>63</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-62/episode-1</id>
+    <title type="text">Undercover Social Worker</title>
+    <summary type="html">In the wake of the tragic death of Baby P and other high-profile cases of child abuse and murder, Dispatches investigates allegations that child protection procedures and practices continue to be inadequate. 
+
+A Dispatches reporter worked undercover in a UK social services department for three months, discovering what child protection services are actually like on the ground. 
+
+His disturbing investigation uncovers a lack of resources, inadequate staff support and training, high workloads, poor morale and overwhelming amounts of red tape and 'box-ticking', reducing the time that social workers can spend helping children.
+
+The programme also raises questions about what is actually being done to protect some of Britain's most vulnerable children.</summary>
+    <updated>2010-08-13T13:55:01.102Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-62/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-62/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-62/episode-1/b9b536d9-bf97-4474-929d-f22f670beb0c_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>62</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-61/episode-1</id>
+    <title type="text">The Lost Girls of South Africa</title>
+    <summary type="html">In South Africa a child is raped every three minutes and AIDS continues to spread with epidemic ferocity.  
+
+Dispatches follows four girls aged 11 to 13 as they struggle to come to terms with the crimes committed against them and fight the social stigma that comes with the abuse.
+
+From the multi-BAFTA-winning True Vision team, this is an intimate and deeply moving portrayal of the tragic impact of child abuse in a post-apartheid South Africa still coming to terms with its difficult and violent past.</summary>
+    <updated>2010-08-13T13:55:01.103Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-61/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-61/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3082230" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-61/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-61/episode-1/2d281da7-ce67-46f0-9c2c-ad97aecc9bdd_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>61</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-60/episode-1</id>
+    <title type="text">Election Uncovered</title>
+    <summary type="html">Journalist Ben Laurance analyses the political parties' campaigns in the run up to polling day. 
+
+He investigates each party's campaign and gets a real taste of what's happening behind the scenes in the run up to the election. 
+
+The programme looks at the debates, how the leaders have been styled and their performances fine-tuned as they compete to get their policies across to the British public and asks what impact the debates have really had on informing the voter. 
+
+Ben examines how the parties are financing their campaigns, considers the voting postcode lottery and reports on the work of two teams of foreign election observers as they travel the country to assess just how democratic our elections are.</summary>
+    <updated>2010-08-13T13:55:01.104Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-60/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-60/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-60/episode-1/2dc9de47-3237-4be7-b427-41ee8e6dc717_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>60</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-58/episode-1</id>
+    <title type="text">Tracing the Marathon's Millions</title>
+    <summary type="html">Journalist Ben Laurance looks at what it costs to stage the London Marathon, how much money it generates and the extent of its charitable giving. 
+
+In 2009, 36,000 participants in the London Marathon raised a phenomenal £47 million, cementing the Marathon's place as the biggest one-day fundraising event in the world. 
+
+In the course of his investigation, Ben discovers who the lucky recipients are of some of the money distributed by the London Marathon race organisers. He also talks to leading charities about the amount they pay to take part, the competition for places, and asks why hundreds of desperate charities are left without a place in Britain's biggest fundraising event.</summary>
+    <updated>2010-08-13T13:55:01.104Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-58/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-58/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-58/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-58/episode-1/989fcfe0-368f-48d1-a7c7-3564b0637178_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>58</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-57/episode-1</id>
+    <title type="text">Politicians for Hire</title>
+    <summary type="html">Following the scandal surrounding MPs' expenses, Dispatches delves into the mostly unregulated world of political lobbying. The programme reveals how politicians are offering to help companies and lobby the government for salaries of up to £5,000 a day.
+
+Journalist Antony Barnett leads an undercover investigation which examines:  
+
+- How senior politicians are seeking to trade on their Westminster connections to earn money from lucrative positions in the private sector.
+
+- Whether the regulations safeguarding the public interest in this regard are both adequate and effective.  
+
+Dispatches set up a fictional US public affairs company and contacted several senior politicians and asked them if they were interested in a position on the advisory board of our bogus London office. The programme-makers contacted 20 politicians, 15 agreed to meet and ten were invited in for interviews.  Nine of the interviews were filmed secretly and genuine issues of public interest arise from these: the public is entitled to know how retiring politicians see themselves and the services they are offering the corporate and business world in their life after Westminster. 
+
+Most suggested that our US company's clients could get privileged access into the corridors of powers; some agreed to help us win government contracts and lobby the right people. Some even boasted about what they have already achieved for private corporate interests while still serving as MPs. 
+
+Those politicians featured in undercover filming are Geoff Hoon, Stephen Byers, Patricia Hewitt, Baroness Sally Morgan, Margaret Moran and Sir John Butterfill.</summary>
+    <updated>2010-08-13T13:55:01.105Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-57/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-57/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-57/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-57/episode-1/4c6838e0-e234-4e7b-9c36-20048177a8cb_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>57</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-56/episode-1</id>
+    <title type="text">Children of Gaza</title>
+    <summary type="html">In December 2008, the Israeli Defence Force unleashed a campaign to destroy the ability of Hamas to launch rockets and mortars into Israel. Around 300 children were among the 1,300 Palestinians that were killed. 
+
+After the ceasefire, BAFTA-winning filmmaker Jezza Neumann arrived in Gaza to follow the lives of three children over a year. 
+
+Surrounded by the remnants of the demolished Gaza Strip and increasingly isolated by the blockade that prevents anyone from rebuilding their homes and their lives, Children of Gaza is a shocking, touching and uniquely intimate reflection on extraordinary courage in the face of great adversity.</summary>
+    <updated>2010-08-13T13:55:01.106Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-56/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-56/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3076167" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-56/episode-1/d01a0517-11f5-4e1f-9c54-3846d8a1c9ef_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>56</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-55/episode-1</id>
+    <title type="text">Cameron Uncovered</title>
+    <summary type="html">Award-winning columnist and writer Andrew Rawnsley has caused a furore while lifting the lid on Gordon Brown's premiership. Now Rawnsley presents an inside portrait of David Cameron and the government that might be... 
+
+According to opinion polls, after 13 years in the political wilderness, the Conservatives under David Cameron's leadership seem likely to form the next government. He has been working hard to change his party's image from 'the nasty party' and to demonstrate economic competence. 
+
+Yet many voters still don't feel they know his new Tories. How does Cameron operate? Do his closest colleagues work as a party within a party, creating disgruntled outsiders? How much harsher will their cuts in public services be than Labour's? Will they really lead the country out of recession faster than Gordon Brown? Can the so-called 'toffs' identify with the concerns of the vast majority of the population? 
+
+Rawnsley interviews the man who could be Prime Minister, and his colleagues George Osborne, William Hague and Michael Gove, the men who hope to run our economy, foreign affairs and education system. He gets an opponent's perspective from Lord Mandelson. 
+
+The programme reveals how these ministerial hopefuls plan to put their policies into action the day after the election. They've promised a budget within 50 days. What can we expect to happen to taxes, wages, public services and unemployment? Have they really done the homework that would get them off to a running start? 
+
+The country seems to want change. But has David Cameron, whose only experience outside politics has been in public relations, done no more than just tinker with the presentation of old Tory attitudes and added some more diverse candidates to the old mix?</summary>
+    <updated>2010-08-13T13:55:01.106Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-55/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-55/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-55/episode-1/b76aeba6-f200-4f31-b657-751a39a12fa9_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>55</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-54/episode-1</id>
+    <title type="text">Britain's Islamic Republic</title>
+    <summary type="html">Dispatches investigates a fundamentalist Islamic group headquartered in Britain, and its claims to have placed its 'brothers' in positions of political power here. 
+
+Using undercover recordings, investigative journalist Andrew Gilligan reveals the group's ambitions to create a worldwide 'Islamic social and political order,' and the concerns of a mainstream party that they are being 'infiltrated'; and talks to the Muslims who want to stop it.</summary>
+    <updated>2010-08-13T13:55:01.107Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-54/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-54/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-54/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-54/episode-1/1342ad94-601a-4923-9030-e2c584463a78_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>54</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-53/episode-2</id>
+    <title type="text">Kids Don't Count (Part 2 of 2)</title>
+    <summary type="html">In the second half of this two-part special, maths specialist Richard Dunne returns to Barton Hill Primary School, with Countdown's Rachel Riley, to help the pupils with their mental arithmetic.
+
+Kids Don't Count asks why and how we are failing Britain's children when it comes to maths. The programmes follow a class of final-year primary school pupils in Bristol as their staff adopt a radical approach to teaching, in a bid to improve the maths ability of these children before they head off to secondary school. 
+
+In the first programme, the Head drafted in maths specialist Richard Dunne. Children who had previously struggled with maths thrived under his programme, which taught them how to understand abstract concepts and relate sums to the real world, and gave them lots of opportunities to repeat the basics so they could be memorised. 
+
+But as their SATs approached, under pressure to improve results, the Head temporarily set aside Dunne's methods.
+
+In this second programme, the SATs are over but many of the children have lost enthusiasm for the subject and still do not have a grasp of the basic building blocks for maths. 
+
+Dunne returns to Barton Hill to help the children with their mental arithmetic, joined by Countdown presenter Rachel Riley, who visits the school to help encourage the children to tackle their maths demons. 
+
+Sitting in on a maths lesson, Riley is shocked that many of the children struggle to do sums in their heads and do not know their times tables. In a bid to inspire the children in a subject she feels passionate about, she organises a 'children versus adults' Countdown competition at the school.
+
+
+&lt;b&gt;You can play the maths quiz online by clicking on the link in the left hand side of this page.&lt;/b&gt;</summary>
+    <updated>2010-08-13T13:55:01.107Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-53/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-53/episode-2" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3057301" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-53/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-53/episode-2/7c41583c-c717-4da7-8ad5-e201c08ea517_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>53</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-53/episode-1</id>
+    <title type="text">Kids Don't Count (Part 1 of 2)</title>
+    <summary type="html">In 2009 more than one in five children left primary school having failed to grasp the basic maths skills required by the national curriculum. In a two-part special, Dispatches asks why and how are we failing Britain's children when it comes to maths.  
+
+Dispatches follows a class of final-year pupils at Barton Hill Primary School in Bristol as their staff adopt a radical approach to teaching, in a bid to improve the maths ability of these children before they head off to secondary school. 
+
+The problem couldn't be more urgent. Research shows that failing to grasp the fundamentals of maths at primary school leaves only a one in ten chance of catching up by the age of 16. 
+
+Dispatches hears from leading lights in the worlds of business and academia - including the CEO of Sainsbury's, Justin King, and George Davies, formerly of Next and Asda - about the impact on the economy and on adult life of leaving school without basic maths skills.  
+
+In a provocative nationwide exercise, Dispatches examines the standard of primary maths teaching in this country by testing the teachers. No tricks; just 27 questions that a bright 11-year-old would be able to answer. The shocking results are revealed in the programme.
+
+
+&lt;b&gt;You can play a shortened version of the maths test by clicking the 'maths quiz' link in the left-hand column of this page.&lt;/b&gt;</summary>
+    <updated>2010-08-13T13:55:01.108Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-53/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-53/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3057300" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-53/episode-1/88b4bdba-b055-4496-b6fa-addcbfd4e7dc_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>53</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-51/episode-1</id>
+    <title type="text">Post Office Undercover</title>
+    <summary type="html">Two reporters go undercover as agency postmen to find out if the Royal Mail has delivered on claims that it is modernising and improving its service.
+
+In 2004 and again in 2005, Dispatches went undercover to investigate the Royal Mail. These reports exposed serious systemic and individual failures within the organisation, resulting in an enquiry by the postal regulator, followed by a fine of almost ten million pounds. Five years on, the Royal Mail claims it is modernising and improving its service. 
+
+The reporters find an antiquated system with lax security, poorly trained agency workers - many of whom are clearly not up to the job - damaged and defective equipment and allegations of stealing. 
+
+Out on their rounds, they are bombarded with complaints from angry members of the public who have experienced damaged mail, delays and poor service, and behind the scenes some managers and workers express contempt for the customer and their concerns. 
+
+Joining just before the busy Christmas period, when an industrial truce has been publicly announced by both management and the unions, both reporters find that normal service is far from being resumed. Managers tell the reporters that disputes with unions over working times and the size of postmen's rounds are causing continued disruptions to the service. 
+
+With over four million pounds a year being paid in compensation to customers for lost post and a recent dip in Royal Mail's delivery performance, Dispatches asks if the organisation is fit for purpose.</summary>
+    <updated>2010-08-13T13:55:01.109Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-51/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-51/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-51/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-51/episode-1/1850f056-1bc6-4963-af09-efc437658e43_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>51</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-50/episode-1</id>
+    <title type="text">Afghanistan: Behind Enemy Lines</title>
+    <summary type="html">While most new troops stationed in Afghanistan head to the volatile south of the country, a new frontline, operating almost under the radar of NATO, is encircling the north of the country. 
+
+The insurgents are aiming to take over the countryside surrounding the towns and cities and to block the main supply route, the Kunduz-Baghlan road, which services coalition troops across much of Afghanistan since the traditional route through Pakistan became too treacherous. 
+
+Dispatches goes inside the enemy camp in northern Afghanistan as award-winning Afghan reporter Najibullah Quraishi is granted access to an army of extreme Islamic combatants. 
+
+Quraishi spent almost two weeks with the Central Group of fighters, known to be among the most dangerous and fanatical factions involved in the war, with Chechens, Arabs and other foreign fighters in their ranks and with close links to Al Qaeda and Osama bin Laden. He captures their leisure time, training and planning and accompanies them on an operation targeting the Afghan army.</summary>
+    <updated>2010-08-13T13:55:01.111Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-50/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-50/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3111511" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-50/episode-1/450dc171-4471-4363-bdb8-bea7a61276ea_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>50</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-46/episode-1</id>
+    <title type="text">The Slumdog Children of Mumbai</title>
+    <summary type="html">Dispatches reveals the brutal reality of life on the streets and in the slums of Mumbai, following the daily struggles of four young children to survive.  
+
+A few weeks after running away from his abusive stepmother, 11-year-old Salam is living rough outside the main train station. Befriended by a gang of begging boys, run by 20-year-old Asif, Salam speaks fondly of his new 'brother'. But it soon appears that there is a much darker side to being in Asif's gang.  
+
+Deepa (pictured) is lucky to be alive after rats attacked her when she was just three months old. Now aged seven, she runs barefoot through the hectic Mumbai traffic to sell flowers to help support her family, doing shifts of up to 20 hours at a time. She lives with her grandmother and brothers in a slum with no electricity or sanitation, next to an open rubbish dump. They survive on less than £1 day since her alcoholic father died two years earlier and her mother abandoned them.  
+
+Twins Hussain and Hussan, aged 11, live in a shanty town, balanced precariously on a 10-foot-wide water pipe. Five days a week they collect scrap metal and plastic bottles to sell so they can earn money to eat. They also fish utensils out of the canal that runs alongside their back door to sell, despite the risk of cholera and infection. They say they like where they live; 'We are emperors of the night!' jokes Hussan. But they don't want to think about their futures.  
+
+Dispatches provides a deeply moving portrait of the lives of India's real slumdogs, blighted by substance abuse, hardship and heartache, yet proof of the infinite resilience of children, and forced to reach adulthood long before they should.</summary>
+    <updated>2010-08-13T13:55:01.117Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-46/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-46/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3049095" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-46/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-46/episode-1/4349179a-e868-45de-81c0-3604582f8fd1_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>46</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-47/episode-1</id>
+    <title type="text">My Family and Alzheimer's</title>
+    <summary type="html">In 2009, Fiona Phillips investigated the struggle of Alzheimer's sufferers and their families to get adequate care and support in Dispatches: Mum, Dad, Alzheimer's and Me. 
+
+In this update, she returns to the issue, examining whether there has been any improvement in the provision of financial support and respite care available for them and their carers. 
+
+Fiona's father has Alzheimer's and her mother died after developing an aggressive, early-onset form of the disease. Fiona continues to face her own dilemma about how best to care for her father as his condition deteriorates.</summary>
+    <updated>2010-08-13T13:55:01.118Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-47/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-47/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-47/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-47/episode-1/070d6ec1-eb6e-4831-96ff-168f2d4ff05d_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>47</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-44/episode-1</id>
+    <title type="text">Christmas on Credit</title>
+    <summary type="html">As banks and building societies close their doors to all but the least 'risky' borrowers, Dispatches reporter Jane Moore investigates a highly lucrative financial industry that has stepped in to provide loans to the millions of people denied credit elsewhere. 
+
+She discovers that many of the loans offered by some of these doorstep operators, payday lenders, and rent-to-buy companies come with sky-high interest rates that can financially overwhelm families already steeped in debt. And the sting in the tail is that these loans are entirely legal. 
+
+While the Bank of England's rate remains at an all-time low, these companies are able to charge whatever interest they like. 
+
+The programme asks why the Government has resisted calls to impose interest rate 'caps' on the various loans on offer, allowing the market to be so under-regulated that foreign loan companies are switching their operations to Britain. 
+
+In the run-up to Christmas, the impact of these high interest rate charges can be financially devastating for some families. Dispatches visits areas of the country where whole streets, and sometimes virtually entire estates, are in hoc to such lenders.</summary>
+    <updated>2010-08-13T13:55:01.119Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-44/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-44/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-44/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-44/episode-1/5568661f-d3f9-43d1-9638-2f5f35fd0d69_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>44</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-6/episode-6</id>
+    <title type="text">Lords, Billionaires and the Russian Connection</title>
+    <summary type="html">Dispatches investigates the elusive Russian oligarchs who have been trying to buy up our football teams, newspapers and car companies. 
+
+Reporter Antony Barnett examines the relationship between Russia's richest men and Britain's political elite. He discovers that members of the House of Lords are a prized attraction in Moscow.
+
+
+&lt;b&gt;Who Knows Who&lt;/b&gt; (Channel4.com) maps the relationships between the Russian oligarchs and the British peers and business contacts. Click on the left-hand links of the individuals to see how the rich and powerful are linked.</summary>
+    <updated>2010-08-13T13:55:01.120Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-6" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-6.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-6/1e9071b6-93b6-48df-9c2c-956c455ee118_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>6</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>6</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-43/episode-1</id>
+    <title type="text">Return to Africa's Witch Children</title>
+    <summary type="html">In 2008 a Bafta and Emmy Award-winning Dispatches told the story of how children in Africa's Niger Delta were being denounced by Christian pastors as witches and wizards and then killed, tortured or abandoned by their own families. 
+
+The film, which prompted international outrage against a practice conducted in the name of Jesus, forced the Nigerian authorities and the UN to act. 
+
+Child rights legislation came into force making it illegal to brand children as witches and some pastors were arrested. Financial support also poured in to assist a small British charity (Stepping Stones Nigeria) providing the only safe refuge for hundreds of youngsters attacked after claims that they were possessed by the Devil.
+
+In Return to Africa's Witch Children, Dispatches reveals what happened to some of the children and church leaders who originally featured, and discovers that even now children as young as two are still being stigmatised as witches and treated as outcasts. 
+
+Gary Foxcroft of Lancaster-based charity Stepping Stones Nigeria also returns to Nigeria and discovers that since his last visit the rescue centre that houses many of these children was the target of an attack. He also learns that the number of children living there has in fact risen. 
+
+Two-and-a-half-year-old Ellin is one such child. She was found at the side of the road, her body having been severely burnt with boiling water. Nwanakwo Udo Edet, around eight years old, wasn't so fortunate. He had acid poured over him after being labelled a wizard and later died.</summary>
+    <updated>2010-08-13T13:55:01.122Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-43/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-43/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-43/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-43/episode-1/e51be50d-ded4-48f7-853d-66aac7ba9203_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>43</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-42/episode-1</id>
+    <title type="text">Inside Britain's Israel Lobby</title>
+    <summary type="html">Dispatches investigates one of the most powerful and influential political lobbies in Britain, which is working in support of the interests of the State of Israel.  
+
+Despite wielding great influence among the highest realms of British politics and media, little is known about the individuals and groups which collectively are known as the pro-Israel lobby.  
+
+Political commentator Peter Oborne sets out to establish who they are, how they are funded, how they work and what influence they have, from the key groups to the wealthy individuals who help bankroll the lobbying.  
+
+He investigates how accountable, transparent and open to scrutiny the lobby is, particularly in regard to its funding and financial support of MPs.  
+
+The pro-Israel lobby aims to shape the debate about Britain's relationship with Israel and future foreign policies relating to it. 
+
+Oborne examines how the lobby operates from within parliament and the tactics it employs behind the scenes when engaging with print and broadcast media.</summary>
+    <updated>2010-08-13T13:55:01.123Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-42/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-42/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-42/episode-1/7d3a3403-84d0-4e46-ad9e-14a9b5089bbe_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>42</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-6/episode-5</id>
+    <title type="text">What's in Your Breakfast?</title>
+    <summary type="html">It is the most important meal of the day, but all too often, breakfast in the UK is far from healthy.  
+
+In this edition of Dispatches, reporter Jane Moore reveals how nutritious the nation's breakfasts really are and the marketing techniques employed by this lucrative industry.  Manufacturers are using health claims to sell their breakfast cereals, drinks and bars.
+
+Dispatches investigates the evidence provided to support these claims and asks if some of the healthy-sounding cereals and pro-biotic yoghurts are all they are cracked up to be. 
+
+Moore uncovers what is actually in your breakfast food.  Do you really know just how much sugar and salt are in children's cereals, particularly those marketed as 'healthy'?  
+
+Moore finds that the unwillingness of retailers and manufacturers to adopt the traffic light systems recommended by food standards authorities is confusing things further. Even if you want to eat the right thing, it is not always easy to tell what that is. 
+
+She also tests the regulators' rules on 'healthy' branding by baking a cake that could still make many of the health claims made by cereals. 
+
+Moore examines the recent shifts in cereal marketing which enable manufacturers to stay ahead of the regulators. With advertising of sugary children's foods banned during kids TV programming, Moore discovers that their marketing has moved to prime-time TV and the internet.</summary>
+    <updated>2010-08-13T13:55:01.123Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-5.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-5" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-5.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-5/b7faf507-37b1-4338-9a33-803566c31fd7_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>6</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>5</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-39/episode-1</id>
+    <title type="text">Ready for a Riot</title>
+    <summary type="html">The death of Ian Tomlinson during the G20 protests in April 2009 and the images of police batons raining down on protestors have put the spotlight on the tactics police deploy during public demonstrations. 
+
+Dispatches has been given exclusive access to the Metropolitan Police to find out what training officers are given.  
+
+The programme looks at how the police are taught to judge the level of force required to suppress disorder, and examines controversial crowd control tactics like 'containment', which brings protestors face-to-face with heavily-protected and armed police officers.  
+
+Dispatches asks why, if the vast majority of protests pass off peacefully, police training still focuses on the worst-case scenario of riots and petrol bombs, and hears from critics of the current training who argue it is out of step with 21st century protest.  
+
+The programme examines the evolution of this training and asks whether the requirements of health and safety legislation have had an adverse effect on policing public order: whether the rules designed to protect the police from harm actually put them at greater risk.  
+
+And when Climate Camp returned to the capital in summer 2009, Dispatches was there to find out if lessons had been learnt from the events of G20.</summary>
+    <updated>2010-08-13T13:55:01.124Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-39/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-39/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-39/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-39/episode-1/2119169e-95f1-4bf8-bffa-7dab16b09186_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>39</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-3/episode-6</id>
+    <title type="text">Who Took Your Pension?</title>
+    <summary type="html">Dispatches lifts the lid on the pensions crisis. The programme names some of the blue-chip companies that have abandoned final salary pension schemes. It shows how widespread the problem of underperforming pensions is, and how difficult it is to get full compensation if things go wrong. 
+
+Dispatches also reveals the extent to which public sector pensions are under threat, and how far private pensions have failed to deliver in the recession. The programme asks whether the government has failed to protect pensions, and examines their ideas for tackling the crisis in the future.</summary>
+    <updated>2010-08-13T13:55:01.125Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-6" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-6.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-6/a984caaf-92f6-468b-a385-60a74cef467c_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>6</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-38/episode-1</id>
+    <title type="text">MPs, Planes and Gravy Trains</title>
+    <summary type="html">Alex Thomson investigates how MPs have spent their 82-day summer recess, and what is expected of them during this time.  
+
+With publicly funded trips jetting off all around the globe, who are the frequent fliers and how accountable are these visits?  
+
+Dispatches travels around the world in 82 days to look at what is on offer during the summer break and how open and transparent our elected representatives really are. 
+
+Thomson examines whether taxpayers are getting value for their money from their elected representatives, with politicians desperate to regain trust after the expenses scandal in May 2009.</summary>
+    <updated>2010-08-13T13:55:01.126Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-38/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-38/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-38/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-38/episode-1/2e1484ad-4674-45b3-b86c-1b3e7b6c1b92_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>38</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-37/episode-1</id>
+    <title type="text">Cops on the Cheap?</title>
+    <summary type="html">They're known as 'Blunkett's Bobbies' or 'Plastic Police'. There are 16,500 Police Community Support Officers (PCSOs) walking the 'beat', costing the taxpayer hundreds of millions of pounds per year. 
+
+Critics have always attacked them for providing policing on the cheap and a political gimmick, but their supporters say they have been useful in curbing antisocial behaviour and visible reassurance to the public. 
+
+Filming with PCSOs at work on the streets of Lancashire, Dispatches investigates whether PCSOs have proven to be a policing success story or an expensive mistake.</summary>
+    <updated>2010-08-13T13:55:01.127Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-37/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-37/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-37/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-37/episode-1/20765365-4de5-4001-b952-f1a187df9369_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>37</dc:relation.SeriesNumber>
+
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-3/episode-5</id>
+    <title type="text">Middle Class and Jobless</title>
+    <summary type="html">Dispatches examines one of the biggest surprises of the credit crunch: middle-class unemployment.  
+
+From company directors to university graduates, this film follows the experience of several people who have found themselves out of work and desperately in search of a job, with some going to extraordinary lengths to try to secure one.  
+
+Dispatches highlights the practical realities of trying to find work, even when armed with a degree or a glowing CV.</summary>
+    <updated>2010-08-13T13:55:01.128Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-5.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-5" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-5.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-5/5dae391f-b5bc-4c76-8ba3-9b56a5e971ce_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>5</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-34/episode-1</id>
+    <title type="text">The War Against Street Weapons</title>
+    <summary type="html">Last year, as chair of Channel 4's Street Weapons Commission, Cherie Booth QC said that the use of guns and knives among young people had become so widespread that she feared for the safety of her own children. Since then, the police and government have taken steps to deal with the problem. But are they doing enough?
+
+To answer that question, Cherie joins police patrols on Britain's toughest streets, talks to young offenders behind bars, and visits a pioneering scheme combating Glasgow's violent gang culture. 
+
+The Street Weapons Commission Report - published in 2008 - set out a series of practical recommendations about what could be done to tackle the problem of street weapons in the UK. But one year on, the problem hasn't gone away and Cherie feels passionately that more must be done.</summary>
+    <updated>2010-08-13T13:55:01.129Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-34/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-34/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2933702" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-34/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-34/episode-1/1b19724c-296d-4fa9-9a0c-b0f2adea3ae8_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>34</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-32/episode-1</id>
+    <title type="text">Bankrolling Mugabe</title>
+    <summary type="html">Dispatches investigates how Robert Mugabe and politicians in his ZANU-PF party are still clinging on to power in Zimbabwe, focusing on the businessmen who are benefiting from or supporting his campaign of political violence. 
+
+According to opposition politicians in Zimbabwe, those businessmen include well-known figures and companies based in the City of London. Following last year's disputed elections and political violence, a power-sharing 'National Unity Government' was established in Zimbabwe.  Robert Mugabe remains as President, with the leader of the Movement for Democratic Change, Morgan Tsvangirai , Prime Minister. Tsvangirai has been touring the world trying to get aid to Zimbabwe to help its hungry people and restart its decaying economy. 
+
+However, working undercover in Zimbabwe, Dispatches reporter Aidan Hartley discovers that Mugabe has maintained his grip on the police, army and central bank, enabling him and his allies to continue carrying out violence and corruption on a vast scale.</summary>
+    <updated>2010-08-13T13:55:01.130Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-32/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-32/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-32/episode-1/607caee8-91db-4af4-a2a7-f1544672a2a8_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>32</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-33/episode-1</id>
+    <title type="text">Undercover Debt Collector</title>
+    <summary type="html">Dispatches goes undercover to investigate one of Britain's least loved but booming industries - the debt collection business. 
+
+Presented by Jane Moore, the programme reveals some of the tactics deployed to get debtors to pay up, and talks to those unfortunate enough to be on the receiving end of this treatment. 
+
+Reporter Tom Randall gets a job as a debt collector inside one of the UK's fastest-growing agencies. He discovers that in recession-hit Britian some of the biggest high-street businesses are cutting their losses and selling on their bad debts to agencies for as little as 16 pence in the pound. Agencies who buy up these debts are entitled to pursue debtors for the full amount.  
+
+In this multi-billion pound industry the stakes are high; Dispatches reveals the lengths that collectors will go to to recover their debts.</summary>
+    <updated>2010-08-13T13:55:01.130Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-33/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-33/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-33/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-33/episode-1/b1a830a2-20f8-41c4-9701-69524827dc8b_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>33</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-31/episode-1</id>
+    <title type="text">The Children Britain Betrayed</title>
+    <summary type="html">Almost 10 years after the death of Victoria Climbié, Dispatches investigates the failures still present in Britain's child protection system. With a child being killed by their parent or carer every seven days in the UK, and over 160 child killings since 2004, journalist Peter Oborne examines how such horrific murders might be prevented in the future.
+
+The death of Baby Peter in 2007 focussed attention on the failures of social services but as Dispatches demonstrates, the failures in child protection reach beyond the realms of just social work departments to include police forces, health services and -  as one mother claims - even the family court system.</summary>
+    <updated>2010-08-13T13:55:01.131Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-31/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-31/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-31/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-31/episode-1/e9263daa-8514-495d-b71a-4e1718bde066_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>31</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-30/episode-1</id>
+    <title type="text">Terror in Mumbai</title>
+    <summary type="html">The untold story of 2008's terrorist attack, in the words of its victims and the gunmen. The programme contains graphic images and descriptions of the atrocity which may upset some viewers. Produced and directed by award-winning filmmaker Dan Reed, Terror in Mumbai tells the story of what happened when 10 gunmen held one of the world's busiest cities hostage; killing and wounding hundreds of people while holding India's crack security forces at bay. 
+
+Featuring footage of the attacks and interviews with senior police officers and hostages, including the testimony from Kasab - the sole surviving gunman, Dispatches reveals what happened, hour by hour, from the perspective of the security forces, the terrorists, their masterminds and the victims.
+
+Award: Bafta; current affairs. 2010</summary>
+    <updated>2010-08-13T13:55:01.132Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-30/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-30/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2972589" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-30/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-30/episode-1/dispatches-s30e1-20090623115042_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>30</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-3/episode-4</id>
+    <title type="text">Rape in the City</title>
+    <summary type="html">In the wake of two recent, high-profile cases in which young women were brutally attacked and raped by groups of young men, journalist Sorious Samura investigates gang rape in the UK. 
+
+Using data collected from various sources, including the crown courts, barristers and rape referral centres, Dispatches attempts to discover the extent and cause of the problem. Four young victims describe their traumatic experiences, while Samura also talks to groups of teenagers about their attitudes to sex and relationships. He is appalled to hear what the boys consider to be acceptable sexual activity and the fears expressed by the girls. 
+
+While knife crimes and street weapons dominate the agenda on violent crime, Dispatches hears from youth workers, police officers and academics who believe this devastating type of attack requires more attention.</summary>
+    <updated>2010-08-13T13:55:01.133Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-4" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-4/dispatches-s3e4-20090616104834_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>4</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-26/episode-1</id>
+    <title type="text">Afghanistan's Dirty War</title>
+    <summary type="html">As the US apologises for the recent killing of civilians in air strikes on the Farah province of Afghanistan,  Dispatches examines the effect these military operations are having on US-Afghan relations. 
+
+Directed by Emmy and Bafta award-winning film-maker Tom Roberts, this programme investigates a similar American assault on the village of Azizabad last year, in which scores of civilians, including dozens of women and children were killed. 
+
+The film examines the reaction of the US forces - which initially declared the operation a success and denied any civilian deaths - and looks at how, despite evidence to the contrary, the US army remains robust in denying any wrongdoing.</summary>
+    <updated>2010-08-13T13:55:01.134Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-26/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-26/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-26/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-26/episode-1/69ee5a5b-ea3f-4607-93ac-1b16bba96470_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>26</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-25/episode-1</id>
+    <title type="text">Crash Gordon</title>
+    <summary type="html">In the first account of its kind on television, award-winning journalist Andrew Rawnsley presents the inside political story of the credit crunch. The programme features exclusive interviews with senior figures close to the economic crisis, including cabinet ministers, senior politicians and former treasury insiders. 
+
+As Prime Minister, Gordon Brown has presided over the biggest recession in 75 years. Rawnsley examines the key moments, showing how Brown as Prime Minister inherited the economic problems of his own 10 years as chancellor. The programme charts the roller coaster journey of Brown's fortunes from the moment the credit crunch began.</summary>
+    <updated>2010-08-13T13:55:01.136Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-25/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-25/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-25/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-25/episode-1/dispatches-s25e1-20090602105418_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>25</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-18/episode-1</id>
+    <title type="text">Orphans of Burma's Cyclone</title>
+    <summary type="html">As Burma's pro-democracy leader, Aung San Suu Kyi, faces trial by the country's military government, this timely and remarkable Dispatches film follows the lives of eight Burmese orphans as they struggle to survive the aftermath of Cyclone Nargis.
+
+Filmed covertly over the course of a year by two Burmese cameramen, who risked an instant 30 year jail sentence if caught, Orphans of Burma's Cyclone exposes the official intransigence of one of the world's most brutal and secretive regimes and, for the first time, reveals what day-to-day life is like for the ordinary people of Burma.</summary>
+    <updated>2010-08-13T13:55:01.137Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-18/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-18/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2935401" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-18/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-18/episode-1/dispatches-s18e1-20090522121328_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>18</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-3/episode-3</id>
+    <title type="text">Britain's Bankers: Still Cashing In</title>
+    <summary type="html">Britain's top bankers helped bring the economy to the brink of ruin; their gambling triggered thousands of job losses and exposed taxpayers to over a trillion pounds of possible risk. In this edition of Dispatches, journalist Jane Moore investigates exactly how much these former bosses have been rewarded for these failings - and how much they are still raking in. 
+
+To establish the exact figures, Moore works with an expert to break down the complex pay packets of former leading bankers. She shows the extraordinary number of ways bankers were remunerated, from a variety of incentives and huge pension pots, to funds for 'extras' such as dentist bills. Moore reveals how much these former bosses have been paid; and how some have been awarded millions more than has been previously made public.</summary>
+    <updated>2010-08-13T13:55:01.138Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-3.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-3" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-3/dispatches-s3e3-20090512125921_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>3</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-14/episode-1</id>
+    <title type="text">Lost in Care</title>
+    <summary type="html">Part of the Britain's Forgotten Children season, this programme reveals the scandals of the British care system and asks, is it working or failing our children?
+
+Reporter Rageh Omaar examines each stage of state provision for the 25,000 children who enter the care system every year, from adoption and fostering to residential care homes. Why do so many babies have to wait for adoption? Why are so many kids shunted from foster parent to foster parent? And why has residential care become a refuge of last resort, and a potential school for failure and crime?</summary>
+    <updated>2010-08-13T13:55:01.139Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-14/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-14/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-14/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches-adoption/series-1/episode-1/dispatches-adoption-s1e1-20090415182430_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>14</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-13/episode-2</id>
+    <title type="text">Crash - How Long Will It Last?</title>
+    <summary type="html">In the second half of this special two-part Dispatches, economist and author Will Hutton continues the definitive insider's account of how Britain's economy went from boom to bust. 
+
+Hutton reveals how those who tried to warn of the impending financial disaster were shouted down, ignored or fired. As a result, the repercussions of the collapse of Lehman Brothers hit an unprepared and vulnerable UK, and left the government frantically trying to prevent a banking collapse from turning the UK into an economic wasteland. 
+
+Despite the collapse of Northern Rock a year before, the government, the regulators and the banks had largely ignored the warning signals that more collapses would follow. Hutton looks at the weeks that followed Lehman's collapse: weeks that will go down as some of the most crucial in Britain's economic history. 
+
+Nationalising key banks, and then underwriting the banks' bad loans, prevented meltdown, but at a terrible cost that will haunt us for years to come. Dispatches reveals the mistakes that lead to the current crisis and asks: what will it take to lift the UK out of the biggest recession in living memory?</summary>
+    <updated>2010-08-13T13:55:01.140Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-13/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-13/episode-2" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-13/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-13/episode-2/dispatches-s13e2-20090420114213_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>13</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-13/episode-1</id>
+    <title type="text">Crash - How the Banks Went Bust</title>
+    <summary type="html">Just before he became Prime Minister in 2007, chancellor Gordon Brown congratulated the city on their ingenuity and creativity during his tenure: 'An era that history will record as the beginning of a new golden age for the city of London'. He couldn't have been more wrong. 
+
+Now, thanks to the financial crash, Britain is facing economic catastrophe. The debts the UK is incurring will take generations to pay off. But how did the economy get from boom to bust? In this two-part special, economist and author Will Hutton gives the definitive insider's account of what went wrong. 
+
+Talking to the key players in government, Wall Street and the City, Hutton unveils the true extent of the greed, ambition and reckless risk-taking that is now carrying the economy into the worst recession for a century. 
+
+Is it really true that no one saw it coming? Or could the recession have been prevented?</summary>
+    <updated>2010-08-13T13:55:01.141Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-13/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-13/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-13/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-13/episode-1/dispatches-s13e1-20090414153855_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>13</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-12/episode-1</id>
+    <title type="text">The Westminster Gravy Train</title>
+    <summary type="html">In May 2008, freedom-of-information campaigner Heather Brooke won a court battle that should have prompted the release of all politicians' expense claims. A year later, with those expenses still to be published and the flow of leaked information ever increasing, Heather studies the information that is available to piece together a forensic insight into how public money is being spent. 
+
+As well as a series of apparent inconsistencies and hard-to-explain expense claims, Dispatches investigates the controversial role of patronage and lobbying in both the House of Commons and the House of Lords - to what extent can this serve personal rather than public interests? 
+
+The programme also shows the damage that has been caused by protracted delays in releasing MPs full expenses, and asks how harmful these claims may be to the reputation of Parliament and its members.</summary>
+    <updated>2010-08-13T13:55:01.142Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-12/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-12/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2924749" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-12/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-12/episode-1/dispatches-s12e1-20090414152808_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>12</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-6/episode-4</id>
+    <title type="text">Afghanistan - Mission Impossible?</title>
+    <summary type="html">As war in Afghanistan persists and British soldiers continue to lose their lives fighting an insurgency that many commentators say they can't defeat, reporter Stephen Grey investigates whether our military is engaged in an impossible mission.
+
+In an unprecedented series of interviews, senior military commanders - including Air Chief Marshal Sir Jock Stirrup, chief of the defence staff, and General Sir Richard Dannatt, chief of the general staff - reveal what they think of the successes, failures and lessons learned during Britain's three-year intervention into Helmand province.</summary>
+    <updated>2010-08-13T13:55:01.143Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-4" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2925167" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-4/dispatches-s6e4-20090414174421_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>6</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>4</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-7/episode-1</id>
+    <title type="text">The Trouble with Boris</title>
+    <summary type="html">As the first anniversary of Boris Johnson's election as Mayor of London approaches, Dispatches takes a look at his first 11 months in office to find out where he is taking the nation's capital in the build-up to the 2012 Olympics.
+
+After a shaky start and a spate of high-profile resignations - including that of the Metropolitan Police Commissioner Sir Ian Blair - Mayor Johnson has seemingly confounded his critics and made good progress at City Hall. But does he have a strategy to take London forward as the capital faces economic crisis?
+
+Reporter Antony Barnett examines some of Boris' big ideas - including building a new international airport, introducing a cycle-hire scheme to the capital, getting rid of bendy buses, protecting the capital's skyline, cutting down on public waste and making his mayoralty more open and accountable. All very well, but are they coherent and achievable?</summary>
+    <updated>2010-08-13T13:55:01.144Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-7/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-7/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-7/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-7/episode-1/dispatches-s7e1-20090320105447_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>7</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-11/episode-1</id>
+    <title type="text">Confessions of a Nurse</title>
+    <summary type="html">As patient numbers and pressures increase, Dispatches investigates the reality of work for nurses around the country and examines whether patient care is being compromised in NHS hospitals. 
+
+In candid interviews, nurses - mostly speaking anonymously for fear of jeopardising their careers - describe what life is really like on many wards. They speak of their frustrations with the health service system and make shocking admissions. 
+
+One nurse reveals: 'The most worrying thing for me is to find a patient dead behind a closed curtain.'
+
+Dispatches also reveals the results of a specially commissioned YouGov survey of NHS nurses. Among other things, the survey uncovers the high percentage of nurses who have witnessed poor practice and the number who say they have too many patients to look after properly. 
+
+Senior nurses speak frankly about how lack of regular staff and a heavy dependence on inexperienced agency nurses could put patients' lives in danger.</summary>
+    <updated>2010-08-13T13:55:01.145Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-11/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-11/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-11/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-11/episode-1/dispatches-s11e1-20090320111058_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>11</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-9/episode-1</id>
+    <title type="text">Pakistan's Taliban Generation</title>
+    <summary type="html">Award-winning Pakistani journalist Sharmeen Obaid-Chinoy investigates how the war on terror is creating a generation of child terrorists in her homeland - children prepared to kill both inside and outside Pakistan.
+
+Sharmeen investigates how the Taliban are recruiting increasingly younger fighters to their campaign. She meets a 14-year-old boy in her home city of Karachi who is desperate to become a suicide bomber.  She then follows the elite unit of the anti-terror police squad - who warn that the Taliban are hiding out in the city's sprawling slums and recruiting children from small madrassas in deprived neighbourhoods. 
+
+Sharmeen also interviews a Taliban commander responsible for child recruitment, who reveals that children as young as five are now being used by the Taliban.</summary>
+    <updated>2010-08-13T13:55:01.146Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-9/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-9/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3090892" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-9/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-9/episode-1/dispatches-s9e1-20090309110528_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>9</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-5/episode-1</id>
+    <title type="text">How They Squander Our Billions</title>
+    <summary type="html">As the country enters a nasty recession and we feel the need to tighten our belts, journalist and broadcaster Jane Moore examines how the government is wasting billions of pounds of taxpayers' money each year. 
+
+Jane investigates a variety of controversial public projects that have had millions, if not billions, spent on them and attempts to discover where the money went, who sanctioned the spending and why so little appears to have been done to prevent massive waste and excess. 
+
+Dispatches also highlights the findings of a report that details the escalation in government public sector spending and sets out what needs to be done to stop the waste. Public spending wastage is reported to have cost every household nearly £50,000 over the past 11 years.</summary>
+    <updated>2010-08-13T13:55:01.147Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-5/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-5/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-5/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-5/episode-1/dispatches-s5e1-20090320111643_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>5</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-4/episode-1</id>
+    <title type="text">The Problem Princes</title>
+    <summary type="html">Channel 4 News presenter Alex Thomson investigates the roles currently adopted by the royal princes and asks how their activities are shaping the modern monarchy that Prince William will inherit. 
+
+Thomson delves into just how transparent the Royals' finances are, both in relation to what they cost the tax payer and concerning some of the older princes' personal business and property dealings. 
+
+Thomson also examines claims that the Palace are not averse to media manipulation, investigating the handling of stories such as William's commandeering of an RAF helicopter to visit a stag party on the Isle of Wight and for a visit to his girlfriend's parents. 
+
+As Prince William is unlikely to be crowned King anytime soon, Dispatches looks at how he might occupy himself until his coronation - if he might follow the examples of either Edward or Andrew, or if there are princely lessons to be learnt from his uncles.</summary>
+    <updated>2010-08-13T13:55:01.148Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-4/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-4/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-4/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-4/episode-1/dispatches-s4e1-20090320111840_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-3/episode-2</id>
+    <title type="text">The Big Job Hunt</title>
+    <summary type="html">Four months after leaving his post as minister of trade, Lord Digby Jones examines how the government is tackling the unemployment crisis.
+
+Lord Jones analyses each of Gordon Brown's pledges to help people back into work and training - to see whether the system for handling the newly unemployed is working. Drawing on his political and business experience as former director of the CBI, he unpicks government announcements and statistics to uncover the scale of the problem and see just how dire the situation is for those who have lost their jobs.
+
+Travelling across the UK, Lord Jones meets people who have recently lost their jobs in construction, car-manufacturing, retail, IT and property development to find out whether the government measures are helping them back into work. And Dispatches reveals exclusive research on the nature of job vacancies available, and examines just how successful Job Centres are at placing people in work.</summary>
+    <updated>2010-08-13T13:55:01.149Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-2" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-2/dispatches-s3e2_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-10/episode-4</id>
+    <title type="text">Too Old to Work</title>
+    <summary type="html">With the number of unemployed in the UK nudging two million, Dispatches reveals the ageism rife amongst employers and recruitment agencies. The investigation reveals that being 'older' - even just over 45-years-old - is a risk in the workplace. Older workers are more likely to lose their jobs and fail to secure another position. 
+
+The programme looks at the challenges facing older job seekers and how the mandatory retirement age, introduced in 2006, has forced tens of thousands out of their positions, against their will. Dispatches also features the results of two exclusive YouGov surveys on attitudes towards older workers and the effects forced retirement can have on those still wanting to work.</summary>
+    <updated>2010-08-13T13:55:01.150Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-10/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-10/episode-4" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-10/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-4/episode-4/dispatches-s4e4_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>10</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>4</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-6/episode-1</id>
+    <title type="text">Congo's Forgotten Children</title>
+    <summary type="html">Deborah Davies examines how the children of Congo are being affected by the latest fighting that is tearing their country apart. An entire generation has been scarred by a seemingly endless conflict - in the last 12 years at least three million children have died as a result of fighting and the hunger and disease that war creates.
+
+The long-running conflict is largely ignored by the rest of the world, but last November Congo briefly hit the headlines as rebel troops seized control of a large area of Eastern Congo. The Dispatches team were the only journalists to reach the town of Kanyabayonga. Children describe how they ran and hid in dense forest to avoid the fighting. In the panic many were separated from their parents. They spent up to three weeks with little food, no clean water and no shelter - and as a result many became ill and died.</summary>
+    <updated>2010-08-13T13:55:01.151Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2925166" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-1/dispatches-s6e1-20090304151359_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>6</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-6/episode-3</id>
+    <title type="text">Unseen Gaza</title>
+    <summary type="html">Is what has been presented on our screens and in our papers a true reflection of events on the ground in Gaza? And how do these reports differ to those aired in other countries? 
+
+With reporters unable to enter Gaza, attempted media manipulation from both sides and strict regulations governing what images that can be shown on British TV, Jon Snow asks a range of journalists from at home and abroad about the challenges of getting the full story. 
+
+Featuring images that haven't before been aired on mainstream television, Jon also examines the difference between the coverage at home and that in the US, Europe and the Middle East. He compares the coverage available on terrestrial channels with satellite TV and the internet and investigates the extent to which some British Muslims are by-passing the mainstream British media and looking elsewhere for their information. 
+
+To what extent does the choice of news outlet affect opinion of the conflict?</summary>
+    <updated>2010-08-13T13:55:01.152Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-3.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-3" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2926706" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/unseen-gaza/series-1/episode-3/unseen-gaza-s1e3_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>6</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>3</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-3/episode-1</id>
+    <title type="text">The True Cost of Cheap Food</title>
+    <summary type="html">As the credit crunch bites, thousands of families are cutting back by swapping expensive premium-range food for cheaper budget lines - but at what cost? Food critic and author Jay Rayner examines what goes into these budget products and asks why, too often, low cost means low quality.
+
+Dispatches also follows two families in Leeds as they try to reduce their weekly shopping bill - one by choosing supermarket value brands and the other by shopping at local independent stores. Are supermarkets really cheaper? And what will each family choose to eat?</summary>
+    <updated>2010-08-13T13:55:01.153Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-1/dispatches-s3e1_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-2/episode-1</id>
+    <title type="text">Mum, Dad, Alzheimer's and Me</title>
+    <summary type="html">Fiona Phillips investigates the struggle of Alzheimer's sufferers and their families to get adequate care and support.
+
+
+&lt;b&gt;Monday 11 January 2010&lt;/b&gt;
+In this update, Fiona returns to the issue, examining whether there has been any improvement in the provision of financial support and respite care available for them and their carers. Fiona's father has Alzheimer's and her mother died after developing an aggressive, early-onset form of the disease. Fiona continues to face her own dilemma about how best to care for her father as his condition deteriorates.
+
+&lt;b&gt;Mum, Dad, Alzheimer's and Me&lt;/b&gt;
+The number of people suffering from dementia, the majority with Alzheimer's, is projected to rise from 700,000 to over 1 million by 2025 and 1.7 million by 2051.  Fiona investigates whether the level of financial support for sufferers, and respite care for those looking after them, is adequate. And with numbers set to increase, is the Government prepared to cope? 
+
+Fiona's father has been recently diagnosed with Alzheimer's and her mother died after developing an aggressive, early-onset form of the disease. As Fiona faces her own dilemma about the care of her father, she talks to families around the country about the difficulties they have faced in obtaining help, from both the NHS and local authorities.</summary>
+    <updated>2010-08-13T13:55:01.154Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-2/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-2/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-2/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-2/episode-1/dispatches-s2e1-20090320112226_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>2</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-1/episode-1</id>
+    <title type="text">Britain's Challenging Children</title>
+    <summary type="html">With primary schools across the country being stretched by the violent and disruptive behaviour of a small minority, Dispatches reveals the results of an extensive, in-depth survey of teachers to identify the impact on their ability to teach, and documents the efforts of five schools which are tackling the problem head on. 
+
+The survey, the largest if its kind ever undertaken and supported by the teaching union NASUWT, reveals the extent of deteriorating standards of behaviour in classrooms across the UK. With millions of teaching hours being lost; it's the majority of well-behaved kids that are paying the price.  
+
+But while the crises in classrooms appear to be escalating for many schools, Britain's Challenging Children follows the efforts of five primaries trying innovative methods to regain a calm teaching environment. Filmed as observational documentary, in Glasgow, Wigan and Luton, Dispatches explore what works by focussing on their most challenging pupils. 
+
+Through early intervention methods such as parental outreach, target-setting for badly behaved children and 'nurture groups', these schools go beyond punitive measures, to address why children are acting out - helping the individual child to get back on track, and the rest of the class to get on with their work.</summary>
+    <updated>2010-08-13T13:55:01.155Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-1/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-1/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-1/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-1/episode-1/dispatches-s1e1_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-21/episode-1</id>
+    <title type="text">Iraq: The Legacy</title>
+    <summary type="html">Peter Oborne returns to Iraq in a follow-up to his Dispatches film, Iraq: The Betrayal. His aim is to find out whether - as Barack Obama hoped in the build-up to his presidency - that it is 'safe' for Western forces to leave.
+
+Oborne begins his investigation when he accompanies Foreign Secretary David Miliband on his first visit to Iraq to witness the handover ceremony at Basra Airport, as British forces pass provincial control to the local Iraqis. Obornes examines whether the army been driven out by the Shi'ite militia in thrall to Iran.
+
+He also asks whether there is a future for the Iraqis in the area who worked for the British army, and finds out whether government promises to help them have been broken.</summary>
+    <updated>2010-08-13T13:55:01.156Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-21/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-21/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2933649" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/iraq-the-legacy/series-13/episode-1/iraq-the-legacy-s13e1-20090527110700_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>21</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-8/episode-1</id>
+    <title type="text">Saving Africa's Witch Children</title>
+    <summary type="html">In some of the poorest parts of Nigeria, where evangelical religious fervour is combined with a belief in sorcery and black magic, many thousands of children are being blamed for catastrophes, death and famine: and branded witches. Denounced as Satan made flesh by powerful pastors and prophetesses, these children are abandoned, tortured, starved and murdered: all in the name of Jesus Christ. 
+
+This Dispatches special follows the work of one Englishman, Gary Foxcroft, who has devoted his life to helping these desperate and vulnerable children. Gary's charity, Stepping Stones Nigeria, raises funds to help Sam Itauma who, five years ago, rescued four children accused of witchcraft. He now struggles to care for over 150 in a makeshift shelter and school called CRARN (Child Rights and Rehabilitation Network).</summary>
+    <updated>2010-08-13T13:55:01.156Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-8/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-8/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3008630" rel="alternate" type="text/html" title="4oD"/>
+    <link href="http://api.channel4.com/programmes/dispatches/video/series-8/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-8/episode-1/dispatches-s8e1-20090305175645_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>8</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-35/episode-1</id>
+    <title type="text">Mum Loves Drugs, Not Me</title>
+    <summary type="html">In this Dispatches film, award-winning filmmakers Brian Woods and Kate Blewett reveal the devastating impact that illegal drugs have on neglected children, whose childhoods are blighted by chaos.
+
+It's estimated that around 350,000 children in the UK have parents with a serious drug problem - with 10 babies being born to heroin-addicted mothers every day. Yet in contrast to the billions of pounds spent on helping the users themselves, there is a serious lack of specialist help for their children - many of whom are at serious risk.</summary>
+    <updated>2010-08-13T13:55:01.157Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-35/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-35/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-35/episode-1/c492db4c-3e2f-408e-a13e-e5228a15aabf_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>35</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-10/episode-6</id>
+    <title type="text">The Human Cost of the Credit Crunch</title>
+    <summary type="html">Dispatches travels across Britain to meet the families who feel let down after more than a decade of struggling to better themselves. Having thought there lives were getting better, these families now see themselves sliding back down the social ladder.
+
+And as we get poorer, Dispatches discovers we are becoming more vulnerable to those who prey on our need for quick money to pay our bills, keep our homes and even feed our children. The programme also finds the key groups who Tony Blair won over - the aspiring middle classes and solid working class voters - are now deeply disillusioned.</summary>
+    <updated>2010-08-13T13:55:01.158Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-10/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-10/episode-6" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-10/episode-6/5733346f-6ea6-44b0-9707-1fa5130b2288_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>10</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>6</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-59/episode-1</id>
+    <title type="text">Cameron's Money Men</title>
+    <summary type="html">Originally broadcast in 2008, Antony Barnett investigates the funding of the Tories under Cameron and examines how the party is using its newfound resources to ensure its leader becomes the next Prime Minister.</summary>
+    <updated>2010-08-13T13:55:01.159Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-59/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-59/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3057145" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-59/episode-1/b85d5a9f-1863-4a70-8cc3-165046a4bebe_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>59</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-29/episode-1</id>
+    <title type="text">What's In Your Wine?</title>
+    <summary type="html">With wine consumption in the UK hitting record levels, Jane Moore investigates the many different substances - including fish and dairy products - that can be used to produce wine but which rarely appear on the label of the average bottle.
+
+The health benefits of the occasional glass of red wine are widely-acknowledged but Dispatches reveals how a great deal of the wine we consume is enhanced, sweetened or flavoured, creating a drink that one critic describes as no better than, 'an alcoholic cola'.</summary>
+    <updated>2010-08-13T13:55:01.160Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-29/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-29/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-29/episode-1/dispatches-s29e1-20090619175231_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>29</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-24/episode-1</id>
+    <title type="text">Undercover Mosque: The Return</title>
+    <summary type="html">A year-and-a-half after the critically acclaimed film Undercover Mosque was first screened, Dispatches goes undercover again to see whether extremist beliefs continue to be promoted in certain key British Muslim institutions. The film also investigates the role of the Saudi Arabian religious establishment in spreading a hard-line, fundamentalist Islamic ideology in the UK - the very ideology the Government claims to be tackling.</summary>
+    <updated>2010-08-13T13:55:01.161Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-24/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-24/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2921253" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-24/episode-1/dispatches-s24e1-20090529155728_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>24</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-237/episode-1</id>
+    <title type="text">Gordon Brown: Where Did It All Go Wrong?</title>
+    <summary type="html">Andrew Rawnsley assesses Gordon Brown's first year as prime minister. Includes interviews with cabinet ministers, politicians, his intimates and his opponents.</summary>
+    <updated>2010-08-13T13:55:01.162Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-237/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-237/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2921254" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-237/episode-1/dccc2d55-650c-4a2e-a041-562eebf0bc64_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>237</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-20/episode-1</id>
+    <title type="text">Undercover in Tibet</title>
+    <summary type="html">Tibetan exile Tash Despa returns to the homeland he risked his life escaping from to carry out secret filming with the award-winning, Bafta-nominated director Jezza Neumann. 
+
+At the risk to its makers of imprisonment and deportation, this Dispatches film reveals the hidden reality of life under Chinese occupation in Tibet, uncovering evidence of the 'cultural genocide' described by the Dalai Lama.
+
+Along the way, Tash finds the nomadic way of life being forcefully wiped out as native Tibetans are stripped of their land and livestock and resettled in concrete camps. He meets victims of arbitrary arrests, detention, torture and 'disappearances' and uncovers evidence of enforced sterilisations on ethnic Tibetan women. His film reveals the regime of terror that dominates daily life in Tibet and makes freedom of expression impossible.</summary>
+    <updated>2010-08-13T13:55:01.163Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-20/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-20/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2931525" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-20/episode-1/dispatches-s20e1-20090527182139_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>20</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-23/episode-1</id>
+    <title type="text">Jon Snow's Hidden Iraq</title>
+    <summary type="html">Five years after the invasion, Channel 4 News anchor Jon Snow examines the brutal reality of life inside post-invasion Iraq, meeting a variety of its citizens - from victims of bomb blasts and war widows, to human rights activists and politicians. 
+
+While the coalition forces herald its burgeoning democracy, Snow ties together reports and unseen footage of recent violence and human rights abuses from beyond the Green Zone, which paint a picture of a fragmented state on the brink of anarchy and collapse.
+
+Filmed in 2008, deploying regional video journalists and specialist cameramen into areas few Western journalists could ever contemplate, Jon Snow's Hidden Iraq ventures behind the rhetoric to uncover what life on the ground is really like for Iraqis.</summary>
+    <updated>2010-08-13T13:55:01.164Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-23/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-23/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2928385" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-22/episode-1/dispatches-s22e1-20090529124744_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>23</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-16/episode-1</id>
+    <title type="text">Britain Under Water</title>
+    <summary type="html">Dispatches investigates what the authorities are doing to protect the public from an increased risk of flooding and questions whether adequate resources are being spent on flood defences.
+
+Reporter Antony Barnett reports on the increasing numbers of new homes being built on flood plains and examines mounting concerns about the vulnerability of Britain's dams and energy installations. Which British towns are most at risk from flooding, and how much will homeowners have to pay to keep flood waters at bay?</summary>
+    <updated>2010-08-13T13:55:01.164Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-16/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-16/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2926052" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-16/episode-1/dispatches-s16e1-20090520170801_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>16</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-15/episode-1</id>
+    <title type="text">Abortion: What We Need to Know</title>
+    <summary type="html">Featuring the findings of a survey into doctors' opinions on abortion, Dispatches reveals why many doctors would like to see the law changed, and lifts the lid on the private debates that are happening within the medical profession.
+
+Reporter Deborah Davies investigates the medical advancements that are impacting on pre-term infant survival. At what point does foetal movement stop being a reflex and start being what could be a reaction to pain? Leading experts in both the fields of foetal development and nervous systems debate the current timescales.</summary>
+    <updated>2010-08-13T13:55:01.165Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-15/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-15/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3073877" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-15/episode-1/dispatches-s15e1-20090520165152_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>15</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-22/episode-1</id>
+    <title type="text">China's Stolen Children</title>
+    <summary type="html">More than a decade after producing The Dying Rooms - a powerful film about the neglect of abandoned babies in Chinese orphanages - the same award-winning team returns to a very different China, where the infamous One Child Policy has created the horrific side-effect of a boom in stolen children.
+
+It is estimated that 70,000 children are kidnapped in China every year and traded on the black market. This special Dispatches programme features extraordinary access to those directly involved, including devastated parents desperately searching for their stolen son, a man who brokers the deals and has sold his own offspring, and prospective parents grappling with giving up their soon-to-be-born daughter.
+
+Beautiful, haunting and deeply tragic, this film takes us into the heart of modern China - a place where girl babies are being sold for as little as £200, detectives specialise in finding kidnapped children and child traffickers buy and sell human lives. The film provides an intimate portrait of the crisis that this stringent government policy has created among China's poorest people.</summary>
+    <updated>2010-08-13T13:55:01.167Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-22/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-22/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2921464" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-22/episode-1/dispatches-s22e1-20090610162918_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>22</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-28/episode-1</id>
+    <title type="text">Iraq's Death Squads</title>
+    <summary type="html">Iraq's Death Squads follows on from a previous Dispatches investigation that revealed the close links between high-ranking Shia politicians and the death squads that rampage through Iraq's main cities.
+
+Reporter Deborah Davies asks whether the Iraqi government, infiltrated by Shia militia to the shocking extent exposed by Saddam's execution, has any real determination, or ability, to bring about an end to the bloodletting.</summary>
+    <updated>2010-08-13T13:55:01.168Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-28/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-28/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-28/episode-1/dispatches-s28e1-20090619154632_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>28</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-19/episode-1</id>
+    <title type="text">Undercover Mosque</title>
+    <summary type="html">Dispatches undertakes an extensive investigation into a number of British mosques to reveal how a message of hatred and segregation is being spread throughout the UK. Filming undercover at mosques run by key organisations, whose public faces are presented as moderate and mainstream, our reporter finds preachers condemning the idea of integration into British society, condemning British democracy as un-Islamic and praising the Taliban for killing British soldiers.
+
+The investigation examines how such extreme messages are influenced by the religious establishment of Saudi Arabia and reveals how the influence of Wahabism extends to influential organisations that advise the British government on inter-community relations and prevention of terrorism.
+
+Undercover Mosque also features interviews with moderate British Muslim figures who are speaking out against the influence of Saudi Arabia's extreme brand of Islam, which they claim  is seeking to overturn Islamic traditions of diversity and peaceful co-existence.</summary>
+    <updated>2010-08-13T13:55:01.169Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-19/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-19/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-21/episode-1/dispatches-s21e1-20090529113105_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>19</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-17/episode-1</id>
+    <title type="text">Burma's Secret War</title>
+    <summary type="html">Dispatches exposes the surge in violence inflicted on the Burmese people by their own regime. Enslaved by a brutal military dictatorship which wields absolute power, Burma is a secretive state where suppression reigns and dissent is not tolerated. 
+
+Journalist Evan Williams, who is banned from entering the country after reporting on Burma for more than 10 years, goes undercover to investigate the mass ethnic cleansing, forced labour and vicious clamping down of political opposition that characterise the dictatorship.</summary>
+    <updated>2010-08-13T13:55:01.170Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-17/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-17/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-17/episode-1/dispatches-s17e1-20090520173429_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>17</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-49/episode-1</id>
+    <title type="text">Re-Opening The Post</title>
+    <summary type="html">Fourteen months after the original Royal Mail undercover investigation, Dispatches returns to secretly film and establish whether the service, as they claim, has dramatically improved. Has Chief Exec Adam Crozier taken control of untrained staff, outdated machinery, ineffective managers and poor industrial relations as he promised?</summary>
+    <updated>2010-08-13T13:55:01.171Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-49/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-49/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-49/episode-1/762c4299-1b17-4387-81c0-11a56865165e_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>49</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-52/episode-1</id>
+    <title type="text">MMR: What They Didn't Tell You</title>
+    <summary type="html">In February 1998 Dr Andrew Wakefield claimed to have discovered a possible link between the MMR vaccine and autism. A global health scare ensued.
+
+Fear spread among parents who were unsure what immunisation choices to make in light of the new research. Worried parents of autistic children, who had already been given the MMR jab, began to seriously question their choice of vaccination. The world's press was shocked by the story. 
+
+But what was going on behind the scenes? Dispatches investigates the facts that parents weren't told about the MMR scare.</summary>
+    <updated>2010-08-13T13:55:01.171Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-52/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-52/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-52/episode-1/aebcd1c2-879a-4d3c-a26a-11d631493a64_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>52</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-48/episode-1</id>
+    <title type="text">Third Class Post</title>
+    <summary type="html">A six-month investigation exposing the laziness, ineptitude and theft within the Royal Mail that has huge implications for the safety of all our post. 
+
+Dispatches reporter Simon Barnes goes undercover inside the Royal Mail to reveal a damning catalogue of skiving workers, ineffective managers and gangs of criminals stealing millions of pounds from the post.</summary>
+    <updated>2010-08-13T13:55:01.172Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-48/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-48/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-48/episode-1/17b950a4-6576-4ef8-9739-e15eb76276be_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>48</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-41/episode-1</id>
+    <title type="text">Young, Nazi and Proud</title>
+    <summary type="html">As the British National Party seeks to present itself as a more electable proposition, Dispatches reporter David Modell spends eight months with Mark Collett, leader of the Young BNP (pictured left), to reveal the future face of the far right in Britain. 
+
+From the BNP's electoral inroads in this year's local elections to their annual Red, White and Blue festival and confrontations with the Anti-Nazi League, Modell follows Collet into the murky world of right-wing politics and offers a shocking insight into the thoughts and beliefs of the far right's most outspoken youth leader. 
+
+Award: Bafta; current affairs (2003).</summary>
+    <updated>2010-08-13T13:55:01.172Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-41/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-41/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-41/episode-1/34565f76-4abf-4f0d-a481-31f2f7b5eff2_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>41</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-40/episode-1</id>
+    <title type="text">Sex on the Street</title>
+    <summary type="html">In an unprecedented investigation that took almost a year and involved interviewing 110 street prostitutes in 18 towns and cities, a terrifying pattern of violence emerged. One that, until now, has gone unreported.
+
+Presented by award-winning journalist Maggie O'Kane, this eye opening documentary exposes the scandal that makes Britain's street workers the most physically brutalised, and least protected, group in society.</summary>
+    <updated>2010-08-13T13:55:01.175Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-40/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-40/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-40/episode-1/8e3475f1-a27a-4a77-be21-70439bc911fa_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>40</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-27/episode-1</id>
+    <title type="text">Beneath the Veil</title>
+    <summary type="html">Beneath the Veil follows freelance journalist Saira Shah as she travels covertly through her father's homeland of Afghanistan. Visiting major towns and small villages, Shah's journey reveals how the fundamentalist Taliban regime affects the lives of ordinary people. 
+
+This award-winning film, filmed in late 2000 and early 2001, is a devastating portrait of a country savaged by war and religious extremism, where journalists are no longer welcome, and where the rest of the world seems as distant as another planet.</summary>
+    <updated>2010-08-13T13:55:01.178Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-27/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-27/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#2933745" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-27/episode-1/dispatches-s27e1-20090619152601_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>27</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-36/episode-1</id>
+    <title type="text">The Torture Trail</title>
+    <summary type="html">Dispatches infiltrates the most secretive arms fair in the world and reveals how weapons that can be used for torture are sold by British companies throughout the world. This disturbing investigation reveals the businessmen who profit from this trade and the politicians who allow it to occur, and speaks to some of its victims.</summary>
+    <updated>2010-08-13T13:55:01.180Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-36/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-36/episode-1" rel="alternate" type="text/html"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-36/episode-1/5aa60ebc-a9d1-4844-9642-8e68a6484509_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>36</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-45/episode-1</id>
+    <title type="text">Gordon Brown's Missing Billions</title>
+    <summary type="html">In an edition from 2005, economist Andrew Dilnot looks at where Gordon Brown's policies have gone wrong, and examines the consequences for all of us. Brown's misjudgements, Dilnot warns, are something we will all ultimately have to pay for.</summary>
+    <updated>2010-08-13T13:55:01.181Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-45/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-45/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3012007" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-45/episode-1/630b76a0-a8b0-4df6-acf0-e94a2b60d97f_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:relation.SeriesNumber>45</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+
+</feed>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:base="http://www.channel4.com">
+  <id>tag:www.channel4.com,2009:/programmes/dispatches</id>
+  <title type="text">Dispatches</title>
+  <subtitle type="html">Dispatches goes undercover in some African churches in the UK, where evangelical pastors perpetuate a strong belief in witchcraft</subtitle>
+  <updated>2010-08-13T14:07:59.239Z</updated>
+  <author>
+    <name>Channel 4 Television</name>
+  </author>
+  <logo>http://www.channel4.com/assets/programmes/images/dispatches/9d40ee7d-da11-4703-8364-582edc9f6bcd_145x82.jpg</logo>
+  <link href="http://www.channel4.com/programmes/dispatches" rel="alternate" type="text/html"/>
+  <link href="http://api.channel4.com/programmes/dispatches.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/programmes/dispatches/episode-guide.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+  <link href="http://api.channel4.com/programmes/dispatches/4od.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="4oD"/>
+  <link href="http://api.channel4.com/programmes/dispatches/video.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+  <entry>
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-67/episode-1</id>
+    <title type="text">Britain's Witch Children</title>
+    <summary type="html">Dispatches goes undercover in some African churches in the UK, where evangelical pastors perpetuate a strong belief in witchcraft. They preach that some people are possessed by evil spirits, and that these spirits bring bad luck into the lives of others.
+
+The only way to rid the possessed from the witchcraft spell and lift their curse is to 'deliver' them: a kind of exorcism that can be very traumatic. Some pastors charge significant sums of money to perform these deliverances. 
+
+Often it is children who are denounced as witches by these pastors, and this labelling can lead to the physical and emotional abuse of those children at the hands of their families. In extreme cases it has led to the deaths of some children. 
+
+In parts of Africa, branding a child a witch is now outlawed, but in Britain this practise is perfectly legal, despite the fact it can have horrific consequences. 
+
+Dispatches reveals just what goes on behind closed doors in these African churches, exposing the pastors who exploit the religious beliefs of the most vulnerable.</summary>
+    <updated>2010-08-13T14:07:59.240Z</updated>
+    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1" rel="alternate" type="text/html"/>
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3109015" rel="alternate" type="text/html" title="4oD"/>
+    <media:content>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-67/episode-1/3c087168-a793-4717-9804-e71214101fb5_200x113.jpg" height="113" width="200"/>
+    </media:content>
+    <dc:date.Last>2010-07-26T19:00:00.000Z</dc:date.Last>
+    <dc:relation.LastChannel>C4</dc:relation.LastChannel>
+  </entry>
+
+</feed>
