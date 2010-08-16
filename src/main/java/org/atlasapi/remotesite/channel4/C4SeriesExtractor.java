@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
@@ -16,8 +17,11 @@ import com.sun.syndication.feed.atom.Link;
 public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 
 	private static final Pattern SERIES_ID = Pattern.compile("series-(\\d+)");
+	private final C4EpisodesExtractor episodesExtractor; 
 	
-	private final C4EpisodesExtractor episodesExtractor = new C4EpisodesExtractor();
+	public C4SeriesExtractor(AdapterLog log) {
+		this.episodesExtractor = new C4EpisodesExtractor(log);
+	}
 	
 	@Override
 	public Series extract(Feed source) {

@@ -21,7 +21,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.MongoLoggingAdapter;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
@@ -55,8 +54,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Lists;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.mongodb.Mongo;
 import com.sun.syndication.feed.atom.Feed;
 
 @Configuration
@@ -65,13 +62,11 @@ public class RemoteSiteModule {
 	private @Value("${c4.apiKey}") String c4ApiKey;
 	
 	private @Autowired MongoDbBackedContentStore contentStore;
-	private @Autowired Mongo mongo;
+	private @Autowired AdapterLog log;
 	
 	public @Bean Fetcher<Content> remoteFetcher() {
 		
-		AdapterLog log = adapterLog();
-		
-		 PerSiteAdapterDispatcher dispatcher = new PerSiteAdapterDispatcher();
+		 PerSiteAdapterDispatcher dispatcher = new PerSiteAdapterDispatcher(log);
 		 
 		 List<SiteSpecificAdapter<? extends Content>> adapters = Lists.newArrayList();
 		 
@@ -116,13 +111,9 @@ public class RemoteSiteModule {
 		 return dispatcher;
 	}
 
-	protected @Bean AdapterLog adapterLog() {
-		return new MongoLoggingAdapter(new DatabasedMongo(mongo, "atlas"));
-	}
-
 	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {
 		RemoteSiteClient<Feed> c4AtomFetcher = new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
-		return new C4AtomBackedBrandAdapter(c4AtomFetcher);
+		return new C4AtomBackedBrandAdapter(c4AtomFetcher, log);
 	}
 	
 	public @Bean ContentWriters contentWriters() {

@@ -47,7 +47,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	   <constructor-arg ref="contentResolver"/>
 	</bean>
 
-	
 	<bean id="newQueryApiController" class="org.atlasapi.query.v2.QueryController">
 		<constructor-arg ref="queryExecutor"/>
 	</bean>
@@ -161,14 +160,18 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-					<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
-					<property name="prefix" value="/WEB-INF/templates/" />
-					<property name="suffix" value=".jsp" />
-				</bean>
+				 <bean class="com.metabroadcast.common.webapp.soy.SoyTemplateViewResolver">
+                    <constructor-arg ref="soyRenderer"/>
+                    <property name="namespace" value="atlas.templates"/>
+               </bean>
 			</list>
 		</property>
 	</bean>
+ 
+    <bean id="soyRenderer" class="com.metabroadcast.common.webapp.soy.SoyTemplateRenderer">
+        <property name="prefix" value="/WEB-INF/templates/" />
+        <property name="suffix" value=".soy" />
+    </bean>
 
     
 	<bean id="simpleXmlTranslator" class="org.atlasapi.beans.FullToSimpleModelTranslator">

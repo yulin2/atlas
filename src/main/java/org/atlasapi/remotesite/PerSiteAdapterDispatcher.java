@@ -18,6 +18,9 @@ package org.atlasapi.remotesite;
 import java.util.List;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.Fetcher;
 
 
@@ -31,11 +34,21 @@ import org.atlasapi.persistence.system.Fetcher;
 public class PerSiteAdapterDispatcher implements Fetcher<Content> {
 
 	private List<SiteSpecificAdapter<? extends Content>> adapters;
+	private final AdapterLog log;
+
+	public PerSiteAdapterDispatcher(AdapterLog log) {
+		this.log = log;
+	}
 
 	public Content fetch(String uri) {
 		SiteSpecificAdapter<? extends Content> adapter = findMatchingAdapterFor(uri);
 		if (adapter != null) {
-			return adapter.fetch(uri);
+			try {
+				return adapter.fetch(uri);
+			} catch (RuntimeException e) {
+				log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(adapter.getClass()));
+				throw e;
+			}
 		} else {
 			return null;
 		}

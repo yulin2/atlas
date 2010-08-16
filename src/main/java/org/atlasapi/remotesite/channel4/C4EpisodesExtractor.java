@@ -20,8 +20,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Countries;
@@ -32,6 +30,9 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Attribute;
@@ -51,8 +52,6 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>> {
     
-    private static final Log LOG = LogFactory.getLog(C4EpisodesExtractor.class);
-
 	public static final String DC_GUIDANCE = "dc:relation.Guidance";
 	public static final String DC_TERMS_AVAILABLE = "dcterms:available";
 	public static final String DC_TX_DATE = "dc:date.TXDate";
@@ -66,7 +65,13 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
 
-	public static Map<String, String> CHANNEL_LOOKUP = channelLookup(); 
+	public static Map<String, String> CHANNEL_LOOKUP = channelLookup();
+	private final AdapterLog log; 
+	
+	public C4EpisodesExtractor(AdapterLog log) {
+		this.log = log;
+	}
+	
 	
 	private static Map<String, String> channelLookup() {
 		Map<String, String> channelLookup = Maps.newHashMap();
@@ -112,7 +117,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 				itemUri = extarctUriFromLink(source, entry);
 			}
 			if (itemUri == null) {
-			    LOG.warn("Unable to derive URI for c4 episode with id: "+entry.getId());
+			    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Unable to derive URI for c4 episode with id: " + entry.getId()).withSource(this.getClass()));
 			    continue;
 			}
 			

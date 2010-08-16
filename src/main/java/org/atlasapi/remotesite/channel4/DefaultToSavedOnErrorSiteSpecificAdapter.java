@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.channel4;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 public class DefaultToSavedOnErrorSiteSpecificAdapter<T> implements SiteSpecificAdapter<T> {
@@ -28,7 +29,7 @@ public class DefaultToSavedOnErrorSiteSpecificAdapter<T> implements SiteSpecific
 		try {
 			return delegate.fetch(uri);
 		} catch (Exception e) {
-			log.record(new AdapterLogEntry().withCause(e).withUri(uri).withSource(delegate.getClass()));
+			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(uri).withSource(delegate.getClass()));
 			return (T) contentStore.findByUri(uri);
 		}
 	}

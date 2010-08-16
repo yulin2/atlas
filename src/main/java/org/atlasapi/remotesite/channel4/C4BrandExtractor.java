@@ -15,10 +15,10 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.jdom.Element;
 
 import com.google.common.collect.ImmutableList;
@@ -40,26 +40,26 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
     private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
 
     private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
-    private final C4SeriesExtractor seriesExtractor = new C4SeriesExtractor();
+    private final C4SeriesExtractor seriesExtractor;
     
-    private final C4EpisodesExtractor fourOditemExtrator = new C4EpisodesExtractor().includeOnDemands().includeBroadcasts();
-    private final C4EpisodesExtractor flattenedBrandExtrator = new C4EpisodesExtractor();
+    private final C4EpisodesExtractor fourOditemExtrator;
+    private final C4EpisodesExtractor flattenedBrandExtrator;
     
     private final C4EpisodeBroadcastExtractor broadcastExtractor = new C4EpisodeBroadcastExtractor();
     private final RemoteSiteClient<Feed> feedClient;
 
-    public C4BrandExtractor() {
-        this(new AtomClient());
-    }
 
-    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient) {
+    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, AdapterLog log) {
         feedClient = atomClient;
+        fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands().includeBroadcasts();
+        flattenedBrandExtrator = new C4EpisodesExtractor(log);
+        seriesExtractor = new C4SeriesExtractor(log);
     }
 
     @Override
     public Brand extract(Feed source) {
         Brand brand = basicDetailsExtractor.extract(source);
-
+        
         List<Episode> items = itemsFor(brand);
 
         Map<String, Episode> onDemandEpisodes = onDemandEpisodes(brand);

@@ -18,6 +18,7 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -34,7 +35,7 @@ public class C4FourOdEpisodesExtractorTest extends MockObjectTestCase {
 	
 	public void testExtractingEpisodes() throws Exception {
 		
-		List<Episode> episodes = new C4EpisodesExtractor().includeBroadcasts().includeOnDemands().extract(fourOdFeed.build());
+		List<Episode> episodes = new C4EpisodesExtractor(new NullAdapterLog()).includeBroadcasts().includeOnDemands().extract(fourOdFeed.build());
 
 		Episode firstEpisode = (Episode) Iterables.get(episodes, 0);
 		
