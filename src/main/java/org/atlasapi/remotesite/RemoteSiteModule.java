@@ -20,6 +20,8 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.MongoLoggingAdapter;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
@@ -39,8 +41,6 @@ import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluRssAdapter;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
-import org.atlasapi.remotesite.logging.AdapterLog;
-import org.atlasapi.remotesite.logging.CommonsLoggingAdapterLog;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
@@ -55,6 +55,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.mongodb.Mongo;
 import com.sun.syndication.feed.atom.Feed;
 
 @Configuration
@@ -63,11 +65,11 @@ public class RemoteSiteModule {
 	private @Value("${c4.apiKey}") String c4ApiKey;
 	
 	private @Autowired MongoDbBackedContentStore contentStore;
+	private @Autowired Mongo mongo;
 	
 	public @Bean Fetcher<Content> remoteFetcher() {
 		
-		AdapterLog log = new CommonsLoggingAdapterLog();
-		
+		AdapterLog log = adapterLog();
 		
 		 PerSiteAdapterDispatcher dispatcher = new PerSiteAdapterDispatcher();
 		 
@@ -112,6 +114,10 @@ public class RemoteSiteModule {
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;
+	}
+
+	protected @Bean AdapterLog adapterLog() {
+		return new MongoLoggingAdapter(new DatabasedMongo(mongo, "atlas"));
 	}
 
 	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {

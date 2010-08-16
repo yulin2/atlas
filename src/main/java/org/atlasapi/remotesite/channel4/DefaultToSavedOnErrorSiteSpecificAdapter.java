@@ -1,9 +1,9 @@
 package org.atlasapi.remotesite.channel4;
 
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
-import org.atlasapi.remotesite.logging.AdapterLog;
-import org.atlasapi.remotesite.logging.AdapterLogEntry;
 
 public class DefaultToSavedOnErrorSiteSpecificAdapter<T> implements SiteSpecificAdapter<T> {
 
