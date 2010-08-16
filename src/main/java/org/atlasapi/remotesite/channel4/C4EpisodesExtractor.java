@@ -155,7 +155,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			episode.setIsLongForm(true);
 			episode.setDescription(description(entry));
 			
-			Version version = version(C4AtomApi.fourOdUri(entry), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC));
+			Version version = version(C4AtomApi.fourOdUri(entry), entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC));
 			if (version != null) {
 				episode.addVersion(version);
 			}
@@ -193,9 +193,10 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
         return title.getValue();
     }
 	
-	private Location location(String uri, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
+	private Location location(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
 		Location location = new Location();
 		location.setUri(uri);
+		location.addAlias(locationId);
 		location.setTransportType(TransportType.LINK);
 		location.setLastUpdated(lastUpdated);
 		
@@ -221,7 +222,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	}
 
 
-	private Version version(String uri, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
+	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
 		Version version = new Version();
 		Duration duration = C4AtomApi.durationFrom(lookup);
 		
@@ -250,7 +251,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		
 		if (include4odInfo) {
 			Encoding encoding = new Encoding();
-			encoding.addAvailableAt(location(uri, lookup, availableCountries, lastUpdated));
+			encoding.addAvailableAt(location(uri, locationId, lookup, availableCountries, lastUpdated));
 			version.addManifestedAs(encoding);
 		}
 		

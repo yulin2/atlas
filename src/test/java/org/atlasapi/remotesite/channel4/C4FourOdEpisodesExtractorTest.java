@@ -62,6 +62,7 @@ public class C4FourOdEpisodesExtractorTest extends MockObjectTestCase {
 		Location firstEpsiodeLocation = Iterables.get(firstEpsiodeEncoding.getAvailableAt(), 0); 
 		
 		assertThat(firstEpsiodeLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"));
+		assertThat(firstEpsiodeLocation.getAliases(), is((Set<String>) ImmutableSet.of("tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/4od%232922045")));
 
 		assertThat(firstEpsiodeLocation.getTransportType(), is(TransportType.LINK));
 		
