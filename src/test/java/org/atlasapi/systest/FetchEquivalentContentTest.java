@@ -33,6 +33,8 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.persistence.equiv.EquivalentUrlStore;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.v2.QueryController;
@@ -139,6 +141,10 @@ public class FetchEquivalentContentTest extends TestCase {
 		
 		public @Bean Fetcher<Content> remoteFetcher() {
 			return fetcher;
+		}
+		
+		public @Bean AdapterLog log() {
+			return new NullAdapterLog();
 		}
 	}
 }
