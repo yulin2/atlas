@@ -40,7 +40,7 @@ public class C4FourOdEpisodesExtractorTest extends MockObjectTestCase {
 		Episode firstEpisode = (Episode) Iterables.get(episodes, 0);
 		
 		assertThat(firstEpisode.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1"));
-		assertThat(firstEpisode.getAliases(), is((Set<String>) ImmutableSet.of("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045", "tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/4od%232922045")));
+		assertThat(firstEpisode.getAliases(), is((Set<String>) ImmutableSet.of("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045")));
 		
 		assertThat(firstEpisode.getCurie(), is("c4:ramsays-kitchen-nightmares-series-1-episode-1"));
 		assertThat(firstEpisode.getTitle(), is("Series 1 Episode 1"));
