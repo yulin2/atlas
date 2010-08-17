@@ -33,6 +33,7 @@ public class C4AtomApi {
 
 	private static final Pattern BRAND_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
 	private static final Pattern SERIES_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
+	private static final Pattern EPISODE_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
 
 	private static final String API_BASE_URL = "http://api.channel4.com/programmes/";
 
@@ -166,5 +167,9 @@ public class C4AtomApi {
 
 	public static boolean isASeriesFeed(Feed source) {
 		return SERIES_PAGE_ID_PATTERN.matcher(source.getId()).matches();
+	}
+
+	public static boolean isAnEpisodeId(String id) {
+		return EPISODE_PAGE_ID_PATTERN.matcher(id).matches();
 	}
 }

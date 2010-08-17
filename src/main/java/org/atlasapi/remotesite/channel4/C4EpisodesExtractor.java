@@ -130,7 +130,9 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			
 			episode.setLastUpdated(new DateTime(source.getUpdated(), DateTimeZones.UTC));
 			
-			episode.addAlias(entry.getId());
+			if (C4AtomApi.isAnEpisodeId(entry.getId())) {
+				episode.addAlias(entry.getId());
+			}
 
 			episode.setTitle(title(entry));
 			
