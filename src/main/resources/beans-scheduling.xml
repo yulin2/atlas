@@ -15,7 +15,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="updateHuluBrandsScheduledTask" />
             <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateMentionsScheduledTask" />
-            <ref bean="updateC4BrandsScheduledTask" />
         </list>
     </property>
     <property name="daemon" value="true" />
@@ -25,6 +24,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <property name="triggers">
             <list>
                 <ref bean="updateBbcSchedulesScheduledTask" />
+                <ref bean="updateC4BrandsScheduledTask" />
             </list>
         </property>
     </bean>
@@ -40,6 +40,22 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
           <!-- run every morning at 5 AM -->
         <property name="cronExpression" value="0 0 5 * * ?" />
     </bean>
+    
+    <bean id="updateC4BrandsScheduledTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
+         <property name="jobDetail">
+            <bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+                <property name="targetObject">
+                    <bean parent="conditionalRunner">
+                        <constructor-arg ref="c4BrandsUpdater" />
+                     </bean>
+                </property>
+                <property name="targetMethod" value="run" />
+                <property name="concurrent" value="false" />
+            </bean>
+        </property>
+          <!-- run every morning at 5 AM -->
+        <property name="cronExpression" value="0 0 5 * * ?" />
+   </bean>
     
     <bean id="bbcSchedulesUpdate" parent="conditionalRunner">
    		<constructor-arg ref="bbcSchedulesUpdater"/>
@@ -128,16 +144,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   	<property name="contentStore" ref="contentWriter"/>
 	<property name="fetcher" ref="remoteFetcher"/>
 	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
-  </bean>
-  
-  <bean id="updateC4BrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-    <property name="delay"  value="1020000" />
-    <property name="period" value="3600000" />
-    <property name="runnable">
-        <bean parent="conditionalRunner">
-            <constructor-arg ref="c4BrandsUpdater" />
-        </bean>
-    </property>
   </bean>
   
   <bean id="c4BrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
