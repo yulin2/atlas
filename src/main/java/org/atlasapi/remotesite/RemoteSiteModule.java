@@ -113,7 +113,7 @@ public class RemoteSiteModule {
 
 	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {
 		RemoteSiteClient<Feed> c4AtomFetcher = new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
-		return new C4AtomBackedBrandAdapter(c4AtomFetcher, log);
+		return new C4AtomBackedBrandAdapter(c4AtomFetcher, contentStore, log);
 	}
 	
 	public @Bean ContentWriters contentWriters() {

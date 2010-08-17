@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -19,8 +20,8 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 	private static final Pattern SERIES_ID = Pattern.compile("series-(\\d+)");
 	private final C4EpisodesExtractor episodesExtractor; 
 	
-	public C4SeriesExtractor(AdapterLog log) {
-		this.episodesExtractor = new C4EpisodesExtractor(log);
+	public C4SeriesExtractor(ContentResolver contentResolver, AdapterLog log) {
+		this.episodesExtractor = new C4EpisodesExtractor(contentResolver, log);
 	}
 	
 	@Override
