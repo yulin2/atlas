@@ -20,6 +20,7 @@ import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
+import org.atlasapi.tracking.TrackingModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,8 +30,8 @@ import org.springframework.context.annotation.ImportResource;
 import com.mongodb.Mongo;
 
 @Configuration
-@ImportResource({"classpath:atlas.xml", "beans-scheduling.xml", "beans-tracking.xml"})
-@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, InterlinkingModule.class, AtlasLoggingModule.class})
+@ImportResource({"classpath:atlas.xml", "beans-scheduling.xml"})
+@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, InterlinkingModule.class, AtlasLoggingModule.class, TrackingModule.class})
 public class AtlasModule {
 	
 	private @Value("${mongo.host}") String mongoHost;
