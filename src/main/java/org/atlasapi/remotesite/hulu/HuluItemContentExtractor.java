@@ -159,7 +159,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
 	}
 	
 	public static Set<String> getTags(HtmlNavigator source) throws JaxenException {
-	    List<Element> elements = source.allElementsMatching("//li[@class='tags-content-cell']/a");
+	    List<Element> elements = source.allElementsMatching("//*[@class='tags-content-cell']/a");
         Set<String> tags = Sets.newHashSet();
         for (Element element : elements) {
             tags.add("http://ref.atlasapi.org/tags/" + element.getAttributeValue("href").replace("/search/search_tag?query=", ""));
