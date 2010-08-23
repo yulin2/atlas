@@ -21,6 +21,8 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
@@ -76,12 +78,16 @@ public class RemoteSiteModule {
 		 //adapters.add(new YouTubeUserAdapter());
 		 adapters.add(new TedTalkAdapter());
 		 
-		 C4AtomBackedBrandAdapter c4BrandFetcher = c4BrandFetcher();
-		
-		 adapters.add(c4BrandFetcher);
-		 adapters.add(new C4HighlightsAdapter(c4BrandFetcher));
-		 
-		 adapters.add(new C4BrandAtoZAdapter(new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, log)));
+		if (!"DISABLED".equals(c4ApiKey)) {
+			C4AtomBackedBrandAdapter c4BrandFetcher = c4BrandFetcher();
+			adapters.add(c4BrandFetcher);
+			adapters.add(new C4HighlightsAdapter(c4BrandFetcher));
+			adapters.add(new C4BrandAtoZAdapter(new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, log)));
+		} else {
+			log.record(new AdapterLogEntry(Severity.INFO)
+				.withDescription("Not installing C4 Adapters because API Key not present")
+				.withSource(getClass()));
+		}
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
