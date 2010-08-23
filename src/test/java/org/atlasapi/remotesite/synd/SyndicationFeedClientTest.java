@@ -67,8 +67,8 @@ public class SyndicationFeedClientTest extends TestCase {
 
 			assertThat(syndEntry.getTitle(), containsString("BH"));
 		//	assertThat(syndEntry.getDescription().getValue(), containsString("Paddy O'Connell"));
-			assertThat(syndEntry.getUri(), startsWith("http://downloads.bbc.co.uk/podcasts/radio4"));
-			assertThat(syndEntry.getLink(), startsWith("http://downloads.bbc.co.uk/podcasts/radio4"));
+			assertThat(syndEntry.getUri(), startsWith("http://downloads.bbc.co.uk/podcasts"));
+			assertThat(syndEntry.getLink(), startsWith("http://downloads.bbc.co.uk/podcasts"));
 		}
 	}
 
