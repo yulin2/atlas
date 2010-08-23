@@ -9,7 +9,7 @@ import org.apache.lucene.util.NamedThreadFactory;
 
 import twitter4j.Status;
 
-import com.metabroadcast.common.social.buzz.twitter.TweetProcessor;
+import com.metabroadcast.common.social.twitter.stream.TweetProcessor;
 
 public class QueueingTweetProcessor implements TweetProcessor {
 
