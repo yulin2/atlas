@@ -12,8 +12,9 @@ import org.joda.time.DateTime;
 import twitter4j.Status;
 
 import com.google.common.collect.Sets;
+import com.metabroadcast.purple.core.buzz.twitter.TweetProcessor;
 
-public class LinkExtractingStatusProcessor implements StatusProcessor {
+public class LinkExtractingStatusProcessor implements TweetProcessor {
 
 	private final UrlExtractor urlExtractor = new MessageToSafeHtmlConverter();
 	private final PossibleContentUriMentionListener listener;
