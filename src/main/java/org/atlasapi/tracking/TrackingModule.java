@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableSet;
-import com.metabroadcast.common.social.buzz.twitter.TweetProcessor;
-import com.metabroadcast.common.social.buzz.twitter.stream.TwitterFilteredPipe;
+import com.metabroadcast.common.social.twitter.stream.TweetProcessor;
+import com.metabroadcast.common.social.twitter.stream.TwitterFilteredPipe;
 
 @Configuration
 public class TrackingModule {
