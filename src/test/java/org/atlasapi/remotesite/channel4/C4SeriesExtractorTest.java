@@ -25,7 +25,7 @@ public class C4SeriesExtractorTest extends TestCase {
 	@SuppressWarnings("unchecked")
 	public void testParsingASeries() throws Exception {
 		
-		Series series = new C4SeriesExtractor(new NullAdapterLog()).extract(seriesFeed.build());
+		Series series = new C4SeriesExtractor(null, new NullAdapterLog()).extract(seriesFeed.build());
 		
 		assertThat(series.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3"));
 		assertThat(series.getCurie(), is("c4:ramsays-kitchen-nightmares-series-3"));

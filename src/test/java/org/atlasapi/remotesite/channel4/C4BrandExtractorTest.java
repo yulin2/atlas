@@ -11,6 +11,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
@@ -18,6 +19,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
@@ -56,9 +58,10 @@ public class C4BrandExtractorTest extends TestCase {
 		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/epg.atom", rknEpgFeed.build());
 	
 	private final static AdapterLog nullLog = new NullAdapterLog();
+	private final StubContentResolver contentResolver = new StubContentResolver();
 	
 	public void testExtractingABrand() throws Exception {
-		Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		
 		assertThat(brand.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares"));
 
@@ -81,7 +84,7 @@ public class C4BrandExtractorTest extends TestCase {
 	}
 	
 	public void testThatBroadcastIsExtractedFromEpg() throws Exception {
-	    Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+	    Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 	    
 	    boolean found = false;
 	    for (Item item: brand.getItems()) {
@@ -106,6 +109,45 @@ public class C4BrandExtractorTest extends TestCase {
 	    assertTrue(found);
 	}
 	
+	public void testOldEpisodeWithBroadcast() throws Exception {
+	    Episode episode = new Episode("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4/episode-5", "c4:ramsays-kitchen-nightmares_series-4_episode-5", Publisher.C4);
+	    Version version = new Version();
+	    episode.addVersion(version);
+	    Broadcast oldBroadcast = new Broadcast("some channel", new DateTime(), new DateTime());
+	    oldBroadcast.addAlias("tag:www.channel4.com:someid");
+	    version.addBroadcast(oldBroadcast);
+	    contentResolver.respondTo(episode);
+	    
+	    Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+        
+        boolean found = false;
+        boolean foundOld = false;
+        for (Item item: brand.getItems()) {
+            if (item.getCanonicalUri().equals("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4/episode-5")) {
+                assertFalse(item.getVersions().isEmpty());
+                version = item.getVersions().iterator().next();
+                
+                assertEquals(3, version.getBroadcasts().size());
+                for (Broadcast broadcast: version.getBroadcasts()) {
+                    if (broadcast.getBroadcastDuration() == 60*55) {
+                        assertTrue(broadcast.getAliases().contains("tag:www.channel4.com,2009:slot/39861"));
+                        assertEquals(new DateTime("2010-08-11T14:06:33.341Z", DateTimeZones.UTC), broadcast.getLastUpdated());
+                        found = true;
+                    } else if (broadcast.getAliases().contains("tag:www.channel4.com:someid")) {
+                        assertFalse(broadcast.isActivelyPublished());
+                        foundOld = true;
+                    } else {
+                        assertEquals(new DateTime("2010-04-27T09:49:40.803Z", DateTimeZones.UTC), broadcast.getLastUpdated());
+                        assertTrue(broadcast.getAliases().isEmpty());
+                    }
+                }
+            }
+        }
+        
+        assertTrue(found);
+        assertTrue(foundOld);
+	}
+	
 	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries1IsAssumed() throws Exception {
 	    HttpResponse response = new HttpResponse("error", 403).withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
 		
@@ -114,7 +156,7 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
-		Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		assertThat(brand.getItems().size(), is(greaterThan(1)));
 	}
 	
@@ -126,7 +168,7 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
-		Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		assertThat(brand.getItems().size(), is(greaterThan(1)));
 	}
 	
@@ -137,7 +179,7 @@ public class C4BrandExtractorTest extends TestCase {
             .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
             .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries4Feed.build());
 
-        Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+        Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
         assertThat(brand.getItems().size(), is(greaterThan(1)));
     }
 	
@@ -147,7 +189,7 @@ public class C4BrandExtractorTest extends TestCase {
          .respondTo("http://api.channel4.com/programmes/dispatches.atom", dispatchesBrandFeed.build())
          .respondTo("http://api.channel4.com/programmes/dispatches/episode-guide.atom", dispatchesEpisodeGuideFeed.build());
 		 
-	     Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/dispatches");
+	     Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/dispatches");
 	     assertThat(brand.getItems().size(), is(greaterThan(1)));
 	     
 	     for (Item item : brand.getItems()) {
@@ -165,7 +207,7 @@ public class C4BrandExtractorTest extends TestCase {
            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", episodeFeed)
            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries3Feed.build());
 
-       Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+       Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
        assertThat(brand.getItems().size(), is(greaterThan(1)));
 	}
 	
@@ -174,7 +216,7 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", rknSeries3Feed.build());
 
-		Brand brand = new C4AtomBackedBrandAdapter(feedClient, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		Brand brand = new C4AtomBackedBrandAdapter(feedClient, null, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		assertThat(brand.getItems().size(), is(greaterThan(1)));
 	}
 	

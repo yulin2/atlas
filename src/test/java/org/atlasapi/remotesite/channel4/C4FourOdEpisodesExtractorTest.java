@@ -35,7 +35,7 @@ public class C4FourOdEpisodesExtractorTest extends MockObjectTestCase {
 	
 	public void testExtractingEpisodes() throws Exception {
 		
-		List<Episode> episodes = new C4EpisodesExtractor(new NullAdapterLog()).includeBroadcasts().includeOnDemands().extract(fourOdFeed.build());
+		List<Episode> episodes = new C4EpisodesExtractor(null, new NullAdapterLog()).includeBroadcasts().includeOnDemands().extract(fourOdFeed.build());
 
 		Episode firstEpisode = (Episode) Iterables.get(episodes, 0);
 		

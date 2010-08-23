@@ -15,6 +15,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -49,11 +50,11 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
     private final RemoteSiteClient<Feed> feedClient;
 
 
-    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, AdapterLog log) {
+    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, AdapterLog log) {
         feedClient = atomClient;
-        fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands().includeBroadcasts();
-        flattenedBrandExtrator = new C4EpisodesExtractor(log);
-        seriesExtractor = new C4SeriesExtractor(log);
+        fourOditemExtrator = new C4EpisodesExtractor(contentResolver, log).includeOnDemands().includeBroadcasts();
+        flattenedBrandExtrator = new C4EpisodesExtractor(contentResolver, log);
+        seriesExtractor = new C4SeriesExtractor(contentResolver, log);
     }
 
     @Override
