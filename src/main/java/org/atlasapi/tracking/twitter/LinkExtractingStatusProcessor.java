@@ -12,7 +12,7 @@ import org.joda.time.DateTime;
 import twitter4j.Status;
 
 import com.google.common.collect.Sets;
-import com.metabroadcast.purple.core.buzz.twitter.TweetProcessor;
+import com.metabroadcast.purple.common.social.buzz.twitter.TweetProcessor;
 
 public class LinkExtractingStatusProcessor implements TweetProcessor {
 
