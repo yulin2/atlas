@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -28,6 +29,7 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
@@ -60,18 +62,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         String episodeUri = source.getUri();
 
         SlashProgrammesRdf episode = source.episode();
-        SlashProgrammesContainerRef container = episode.brand();
-
-        if (container == null) {
-            container = episode.series();
-        }
 
         Location location = htmlLinkLocation(episodeUri);
 
         Encoding encoding = new Encoding();
         encoding.addAvailableAt(location);
 
-        Item item = item(episodeUri, container, episode, source.getSlashProgrammesUri());
+        Item item = item(episodeUri, episode, source.getSlashProgrammesUri());
 
         if (source.version() != null) {
             Version version = version(source.version());
@@ -146,11 +143,18 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         return "http://www.bbc.co.uk" + broadcastOn;
     }
 
-    private Item item(String episodeUri, SlashProgrammesContainerRef container, SlashProgrammesRdf episode, String slashProgrammesUri) {
+    private Item item(String episodeUri, SlashProgrammesRdf episode, String slashProgrammesUri) {
         String curie = BbcUriCanonicaliser.curieFor(episodeUri);
 
-        Item item = episode.brand() == null ? new Item(episodeUri, curie, Publisher.BBC) : new Episode(episodeUri, curie, Publisher.BBC);
+        SlashProgrammesContainerRef container = episode.brand();
+        
+		Item item = container == null ? new Item(episodeUri, curie, Publisher.BBC) : new Episode(episodeUri, curie, Publisher.BBC);
 
+		if (container != null) {
+			String brandUri = container.uri();
+			((Episode) item).setBrand(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(brandUri), Publisher.BBC));
+		}
+		
         Maybe<Integer> seriesNumber = seriesNumber(episode);
 
         SlashProgrammesEpisode slashProgrammesEpisode = episode.episode();
