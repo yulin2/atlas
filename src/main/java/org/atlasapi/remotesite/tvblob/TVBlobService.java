@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.tvblob;
 
 import java.util.List;
 
+import com.google.common.base.Preconditions;
+
 public class TVBlobService {
 
     private List<String> dvb_ids;
@@ -60,6 +62,7 @@ public class TVBlobService {
         return slug;
     }
     public void setSlug(String slug) {
+        Preconditions.checkNotNull(slug);
         this.slug = slug;
     }
     public Integer getHd() {
@@ -67,5 +70,15 @@ public class TVBlobService {
     }
     public void setHd(Integer hd) {
         this.hd = hd;
+    }
+    
+    @Override
+    public String toString() {
+        return "TVBlob service "+name+" with slug: "+slug;
+    }
+    
+    @Override
+    public int hashCode() {
+        return slug.hashCode();
     }
 }
