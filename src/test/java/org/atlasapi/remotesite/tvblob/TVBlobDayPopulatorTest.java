@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.ContentQueryBuilder;
 import org.atlasapi.content.criteria.attribute.Attributes;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -68,5 +69,14 @@ public class TVBlobDayPopulatorTest extends TestCase {
         
         assertTrue(foundMoreThanOneBroadcast);
         assertTrue(foundBrandWithMoreThanOneEpisode);
+        
+        query = ContentQueryBuilder.query().equalTo(Attributes.BRAND_URI, "http://tvblob.com/brand/269").build();
+        List<Brand> brands = store.dehydratedBrandsMatching(query);
+        
+        assertFalse(brands.isEmpty());
+        assertEquals(1, brands.size());
+        Brand brand = brands.get(0);
+        
+        assertEquals(2, brand.getItemUris().size());
     }
 }
