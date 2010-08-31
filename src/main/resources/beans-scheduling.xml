@@ -188,6 +188,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <constructor-arg ref="contentResolver" />
     <constructor-arg value="today" />
   </bean>
+  
+  <bean id="tvblobTomorrowUpdater" class="org.atlasapi.remotesite.tvblob.TVBlobServicesUpdater">
+    <constructor-arg ref="contentWriter"/>
+    <constructor-arg ref="contentResolver" />
+    <constructor-arg value="tomorrow" />
+  </bean>
 
   <bean id="bbcSchedulesUpdater" class="org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
 	 <constructor-arg ref="contentResolver"/>
@@ -230,6 +236,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <prop key="/system/orphans/update">orphanUpdateController</prop>
                 <prop key="/system/hulu/update">huluUpdateController</prop>
                 <prop key="/system/tvblob/update">tvblobUpdateController</prop>
+                <prop key="/system/tvblob-tomorrow/update">tvblobTomorrowUpdateController</prop>
             </props>
         </property>
     </bean>
