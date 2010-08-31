@@ -34,6 +34,7 @@ public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     public Playlist fetch(String uri) {
         try {
             LOG.info("Retrieving all Seesaw brands");
+            System.out.println("Attempting to load SeeSaw brands " + uri);
 
             Playlist globalPlaylist = new Playlist();
             String content;
@@ -47,7 +48,6 @@ public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
             if (content != null) {
                 HtmlNavigator navigator = new HtmlNavigator(content);
                 // these are all the links to viewable series / brand.. can we use these instead?
-                List<Element> seeLinks = navigator.allElementsMatching("//a[@class='seeLink']");
                 List<String> badUrls = Lists.newArrayList();
                 
                 List<Element> brandElements = navigator.allElementsMatching("//div[@class='programmeContent']/div[@class='toggleLI' or @class='clickableElement']");
@@ -57,7 +57,7 @@ public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                     String brandTitle = SeesawHelper.getFirstTextContent(titleElement);
                     
                     Element genreElement = navigator.firstElementOrNull("div[@class='genre']", brandElement);
-                    String brandGenre = SeesawHelper.getFirstLinkUri(genreElement);
+                    String brandGenre = SeesawHelper.getFirstTextContent(genreElement);
                     
                     Element actionContainer = navigator.firstElementOrNull("div[@class='action']", brandElement);
                     Element actionLink = navigator.firstElementOrNull("a[@class='seeLink']", actionContainer);
@@ -83,7 +83,6 @@ public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                     Brand brand = new Brand();
                     brand.setTitle(brandTitle);
                     brand.setPublisher(Publisher.SEESAW);
-                    brand.setGenres(Sets.newHashSet(brandGenre));
                     
                     for (String episodeContainerLink : episodeContainerLinks) {
                         if (episodeContainerLink.startsWith("http://")) {
@@ -99,6 +98,8 @@ public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                             
                             Playlist playlist = playlistAdapter.fetch(episodeContainerLink);
                             if (playlist != null) {
+                                brand.getGenres().addAll(playlist.getGenres());
+                                
                                 if (brand.getDescription() == null) {
                                     brand.setDescription(playlist.getDescription());
                                 }

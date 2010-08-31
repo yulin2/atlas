@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.FetchException;
@@ -31,7 +30,8 @@ public class SeesawPlaylistAdapter implements SiteSpecificAdapter<Playlist> {
     @Override
     public Playlist fetch(String uri) {
         try {
-            LOG.info("Retrieving all Seesaw brands");
+            LOG.info("Retrieving Seesaw playlist");
+            System.out.println("Attempting to load playlist " + uri);
 
             String content;
             try {
@@ -71,6 +71,8 @@ public class SeesawPlaylistAdapter implements SiteSpecificAdapter<Playlist> {
     private void addEpisode(String uri, Playlist playlist) {
         Episode episode = itemAdapter.fetch(uri);
         if (episode != null) {
+            playlist.getGenres().addAll(episode.getGenres());
+            
             Series series = episode.getSeriesSummary();
             if (series != null) {
                 playlist.setDescription(series.getDescription());

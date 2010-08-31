@@ -2,7 +2,10 @@ package org.atlasapi.remotesite.seesaw;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
@@ -23,10 +26,11 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
     
     @Override
     public Episode fetch(String uri) { 
-        LOG.info("Retrieving all Seesaw brands");
+        LOG.info("Retrieving SeeSaw item");
 
         String content = null;
-
+        System.out.println("Attempting to load item " + uri);
+        
         try {
             content = httpClient.getContentsOf(uri);
         } catch (HttpException e) {
@@ -40,12 +44,26 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
 
         if (content != null) {
             HtmlNavigator navigator = new HtmlNavigator(content);
-            return contentExtractor.extract(navigator);
+            Episode episode = contentExtractor.extract(navigator);
+            
+            setUris(uri, episode);
+            
+            return episode;
         } else {
             LOG.error("Unable to retrieve seesaw playlist: " + uri);
         }
         
         return null;
+    }
+    
+    private void setUris(String uri, Episode episode) {
+        for (Version version : episode.getVersions()) {
+            for (Encoding encoding : version.getManifestedAs()) {
+                for (Location location : encoding.getAvailableAt()) {
+                    location.setUri(uri);
+                }
+            }
+        }
     }
 
     @Override

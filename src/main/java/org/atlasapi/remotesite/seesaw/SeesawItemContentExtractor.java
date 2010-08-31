@@ -1,25 +1,48 @@
 package org.atlasapi.remotesite.seesaw;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Countries;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jaxen.JaxenException;
 import org.jdom.Element;
 
-import sun.util.logging.resources.logging;
+import com.google.common.collect.Sets;
 
 public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
+    static final Log LOG = LogFactory.getLog(SeesawItemContentExtractor.class);
+    
     @Override
     public Episode extract(HtmlNavigator source) {
         try {
             System.out.println("extracting episode");
             Episode episode = new Episode();
             episode.setPublisher(Publisher.SEESAW);
+            
+            Version version = new Version();
+            version.setProvider(Publisher.SEESAW);
+            Encoding encoding = new Encoding();
+            Location linkLocation = new Location();
+            linkLocation.setTransportType(TransportType.LINK);
+            linkLocation.setAvailable(true);
+            linkLocation.setPolicy(ukPolicy());
+            encoding.addAvailableAt(linkLocation);
+            version.addManifestedAs(encoding);
+            
+            episode.addVersion(version);
             
             Element infoElem = source.firstElementOrNull("//div[@class='information']");
             List<Element> headers = source.allElementsMatching("h3", infoElem);
@@ -81,28 +104,58 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 }
             }
             
-            Element programmeInfoElem = source.firstElementOrNull("//h3[text()='About this programme:']/following-sibling::*", infoElem);
+            Element playerInfoElem = source.firstElementOrNull("//*[@class='programInfo']");
+            if (playerInfoElem != null) {
+                String info = SeesawHelper.getAllTextContent(playerInfoElem);
+                Pattern pattern = Pattern.compile(".*\\((\\d+) mins\\).*", Pattern.DOTALL);
+                Matcher matcher = pattern.matcher(info);
+                if (matcher.matches()) {
+                    try {
+                        Integer duration = Integer.valueOf(matcher.group(1));
+                        System.out.println("Duration " + duration);
+                        version.setPublishedDuration(duration);
+                    }
+                    catch (NumberFormatException e) {
+                        LOG.debug("Exception when trying to parse duration: ", e);
+                    }
+                }
+                
+            }
+            
+            Element programmeInfoElem = source.firstElementOrNull("//*[text()='About this programme:']/following-sibling::*", infoElem);
             if (programmeInfoElem != null) {
                 String progDesc = SeesawHelper.getFirstTextContent(programmeInfoElem).trim();
                 System.out.println("desc: " + progDesc);
                 episode.setDescription(progDesc);
             }
-            Element seriesInfoElem = source.firstElementOrNull("//h3[text()='About this series:']/parent::div/div", infoElem);
+            Element seriesInfoElem = source.firstElementOrNull("//*[text()='About this series:']/parent::div/div", infoElem);
             if (seriesInfoElem != null) {
                 String seriesInfo = SeesawHelper.getFirstTextContent(seriesInfoElem).trim();
                 System.out.println("serDesc: " + seriesInfo);
             }
             
-            Element dateElem = source.firstElementOrNull("//h3[text()='Date: ']/following-sibling::*", infoElem);
+            Element dateElem = source.firstElementOrNull("//*[text()='Date: ']/following-sibling::*", infoElem);
             if (dateElem != null) {
                 String date = SeesawHelper.getFirstTextContent(dateElem).trim();
                 System.out.println("date: " + date);
             }
             
-            Element categoryElem = source.firstElementOrNull("//h3[text()='Categories: ']/following-sibling::*", infoElem);
+            Element categoryElem = source.firstElementOrNull("//*[text()='Categories: ']/following-sibling::*", infoElem);
             if (categoryElem != null) {
                 String category = SeesawHelper.getFirstTextContent(categoryElem).trim();
+                String categoryLink = SeesawHelper.getFirstLinkUri(categoryElem);
+                
+                episode.setGenres(Sets.newHashSet(categoryLink));
                 System.out.println("category: " + category);
+            }
+            
+            Element externalLinksElem = source.firstElementOrNull("//*[text()='External Links']/following-sibling::*", infoElem);
+            if (externalLinksElem != null) {
+                List<String> links = SeesawHelper.getAllLinkUris(externalLinksElem);
+                System.out.println("external links:");
+                for (String link : links) {
+                    System.out.println(link);
+                }
             }
             
             return episode;
