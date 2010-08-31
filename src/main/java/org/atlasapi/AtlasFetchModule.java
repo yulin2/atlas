@@ -22,6 +22,7 @@ import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.ContentPersistenceModule;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.content.mongo.AliasWriter;
 import org.atlasapi.persistence.equiv.EquivalentContentFinder;
 import org.atlasapi.persistence.equiv.EquivalentContentMerger;
@@ -72,10 +73,11 @@ public class AtlasFetchModule {
 		public @Bean ContentWriter contentWriter() {		
 			
 			ContentWriter writer = persistence.persistentWriter();
+			DefinitiveContentWriter definitiveWriter = persistence.definitiveWriter();
 			
 			if (enableEquivalence) {
 				EquivalentContentMerger merger = new EquivalentContentMerger(new EquivalentContentFinder(finder, reader.contentResolverThatDoesntSave()));
-				writer = new EquivalentContentMergingContentWriter(writer, merger);
+				writer = new EquivalentContentMergingContentWriter(writer, definitiveWriter, merger);
 			}
 			
 			remote.contentWriters().add(writer);

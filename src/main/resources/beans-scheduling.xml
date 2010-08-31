@@ -15,6 +15,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="updateHuluBrandsScheduledTask" />
             <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateMentionsScheduledTask" />
+            <!-- <ref bean="updateTVBlobScheduledTask" /> -->
         </list>
     </property>
     <property name="daemon" value="true" />
@@ -118,8 +119,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </property>
   </bean>
   
-  
-  
   <bean id="updateItvBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
     <property name="delay"  value="1340000" />
     <property name="period" value="1800000" />
@@ -137,6 +136,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <bean parent="conditionalRunner">
         <constructor-arg ref="huluBrandsUpdater" />
     </bean>
+    </property>
+  </bean>
+  
+  <bean id="updateTVBlobScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="2540000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+        <bean parent="conditionalRunner">
+            <constructor-arg ref="tvblobUpdater" />
+        </bean>
     </property>
   </bean>
   
@@ -172,6 +181,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	 		<constructor-arg value="true"/>
 	 	</bean>
 	 </property>
+  </bean>
+  
+  <bean id="tvblobUpdater" class="org.atlasapi.remotesite.tvblob.TVBlobServicesUpdater">
+    <constructor-arg ref="contentWriter"/>
+    <constructor-arg ref="contentResolver" />
+    <constructor-arg value="today" />
   </bean>
 
   <bean id="bbcSchedulesUpdater" class="org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
@@ -214,6 +229,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
                 <prop key="/system/orphans/update">orphanUpdateController</prop>
                 <prop key="/system/hulu/update">huluUpdateController</prop>
+                <prop key="/system/tvblob/update">tvblobUpdateController</prop>
             </props>
         </property>
     </bean>
@@ -233,6 +249,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <bean id="bbcScheduleUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="bbcSchedulesUpdater"/>
+    </bean>
+    
+    <bean id="tvblobUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
+        <constructor-arg ref="tvblobUpdater"/>
     </bean>
     
     <bean id="orphanUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
