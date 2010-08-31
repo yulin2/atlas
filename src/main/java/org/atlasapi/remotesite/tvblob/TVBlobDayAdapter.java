@@ -6,23 +6,31 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Playlist;
-import org.atlasapi.remotesite.ContentExtractor;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.SiteSpecificAdapter;
 
-public class TVBlobDayAdapter implements SiteSpecificAdapter<Playlist> {
+public class TVBlobDayAdapter {
 
     private static final Pattern URL_PATTERN = Pattern
                     .compile("http://epgadmin.tvblob.com/api/(\\w+)/programmes/schedules/(.+)(\\.\\w*)?");
+    private final DefinitiveContentWriter contentStore;
+    private final ContentResolver contentResolver;
+    
+    static final Log LOG = LogFactory.getLog(TVBlobDayAdapter.class);
+    
+    public TVBlobDayAdapter(DefinitiveContentWriter contentStore, ContentResolver contentResolver) {
+        this.contentStore = contentStore;
+        this.contentResolver = contentResolver;
+    }
 
-    @Override
-    public boolean canFetch(String uri) {
+    public boolean canPopulate(String uri) {
         return URL_PATTERN.matcher(uri).matches();
     }
 
-    @Override
-    public Playlist fetch(String uri) {
+    public void populate(String uri) {
         Matcher matcher = URL_PATTERN.matcher(uri);
         String channelSlug = null;
         if (matcher.matches()) {
@@ -30,11 +38,14 @@ public class TVBlobDayAdapter implements SiteSpecificAdapter<Playlist> {
         }
 
         InputStream is = null;
-        ContentExtractor<InputStream, Playlist> extractor = new TVBlobDayExtractor(channelSlug);
-        Playlist playlist = null;
+        TVBlobDayPopulator populator = new TVBlobDayPopulator(contentStore, contentResolver, channelSlug);
         try {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Retrieving "+uri);
+            }
+            
             is = new URL(uri).openStream();
-            playlist = extractor.extract(is);
+            populator.populate(is);
         } catch (Exception e) {
             throw new FetchException("Unable to retrieve source "+uri, e);
         } finally {
@@ -44,7 +55,5 @@ public class TVBlobDayAdapter implements SiteSpecificAdapter<Playlist> {
                 } catch (IOException e) {}
             }
         }
-        
-        return playlist;
     }
 }

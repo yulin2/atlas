@@ -2,51 +2,51 @@ package org.atlasapi.remotesite.tvblob;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.remotesite.FetchException;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 import org.joda.time.DateTime;
 
-import com.google.inject.internal.Lists;
-import com.google.inject.internal.Maps;
+import com.google.inject.internal.Sets;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlist> {
+public class TVBlobDayPopulator {
 
     private static final String BASE_URL = "http://tvblob.com/";
     private static final String BASE_CHANNEL_URL = BASE_URL + "channel/";
     private static final String BASE_CURIE = "tvblob:";
 
-    private final String channelSlug;
     private final String channel;
     private final JsonFactory jsonF = new JsonFactory();
 
-    static final Log LOG = LogFactory.getLog(TVBlobDayExtractor.class);
+    static final Log LOG = LogFactory.getLog(TVBlobDayPopulator.class);
+    private final DefinitiveContentWriter contentStore;
+    private final ContentResolver contentResolver;
+    private Integer expireAfterDays;
 
-    public TVBlobDayExtractor(String channelSlug) {
-        this.channelSlug = channelSlug;
+    public TVBlobDayPopulator(DefinitiveContentWriter contentStore, ContentResolver contentResolver, String channelSlug) {
+        this.contentStore = contentStore;
+        this.contentResolver = contentResolver;
         this.channel = BASE_CHANNEL_URL + channelSlug;
     }
 
-    @Override
-    public Playlist extract(InputStream source) {
-        Map<String, Episode> episodes = Maps.newHashMap();
+    public void populate(InputStream source) {
         JsonParser jp = null;
+        int numBroadcasts = 0;
 
         try {
             jp = jsonF.createJsonParser(source);
@@ -74,9 +74,9 @@ public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlis
                             } else if ("start".equals(fieldName)) {
                                 start = new DateTime(jp.getText(), DateTimeZones.ROME);
                             } else if ("serie".equals(fieldName)) {
-                                brand = getBrand(jp, channelSlug);
+                                brand = getBrand(jp);
                             } else if ("episode".equals(fieldName)) {
-                                episode = getEpisode(jp, channelSlug);
+                                episode = getEpisode(jp);
                             }
                         }
 
@@ -84,18 +84,34 @@ public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlis
                             Broadcast broadcast = new Broadcast(channel, start.toDateTime(DateTimeZones.UTC), end
                                             .toDateTime(DateTimeZones.UTC));
                             broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
-
-                            if (episodes.containsKey(episode.getCanonicalUri())) {
-                                episode = episodes.get(episode.getCanonicalUri());
-                            }
-
-                            if (brand != null) {
-                                episode.setBrand(brand);
+                            
+                            Content currentContent = contentResolver.findByUri(episode.getCanonicalUri());
+                            if (currentContent != null && currentContent instanceof Episode) {
+                                episode = (Episode) currentContent;
                             }
 
                             Version version = episode.getVersions().iterator().next();
-                            version.addBroadcast(broadcast);
-                            episodes.put(episode.getCanonicalUri(), episode);
+                            Set<Broadcast> broadcasts = version.getBroadcasts();
+                            broadcasts.add(broadcast);
+                            version.setBroadcasts(expireBroadcasts(broadcasts));
+                            
+                            if (brand != null) {
+                                brand.addItem(episode);
+                                Content currentBrand = contentResolver.findByUri(brand.getCanonicalUri());
+                                if (currentBrand != null && currentBrand instanceof Brand) {
+                                    for (Item item: ((Brand) currentBrand).getItems()) {
+                                        if (! brand.getItems().contains(item)) {
+                                            brand.addItem(item);
+                                        }
+                                    }
+                                }
+                                
+                                contentStore.createOrUpdateDefinitivePlaylist(brand);
+                            } else {
+                                contentStore.createOrUpdateDefinitiveItem(episode);
+                            }
+                            
+                            numBroadcasts++;
                         }
                     }
 
@@ -112,26 +128,13 @@ public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlis
                 }
             }
         }
-
-        String date = new DateTime(DateTimeZones.UTC).toString("yyyyMMdd");
-        Playlist playlist = new Playlist(BASE_URL + "playlist/" + date, BASE_CURIE + "playlist_" + channelSlug + "_"
-                        + date, Publisher.TVBLOB);
-        playlist.setItems(asItems(episodes.values()));
-
-        return playlist;
-    }
-
-    private List<Item> asItems(Collection<Episode> episodes) {
-        List<Item> items = Lists.newArrayList();
-
-        for (Episode episode : episodes) {
-            items.add(episode);
+        
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Persisted "+numBroadcasts+" broadcasts / episodes for "+channel);
         }
-
-        return items;
     }
 
-    private Brand getBrand(JsonParser jp, String channelSlug) {
+    private Brand getBrand(JsonParser jp) {
         try {
 
             if (jp.getCurrentToken() == JsonToken.START_OBJECT) {
@@ -150,8 +153,8 @@ public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlis
                 }
 
                 if (pid != null) {
-                    Brand brand = new Brand(BASE_URL + "brand/" + channelSlug + "/" + pid, BASE_CURIE + "brand_"
-                                    + channelSlug + "_" + pid, Publisher.TVBLOB);
+                    Brand brand = new Brand(BASE_URL + "brand/" + pid, BASE_CURIE + "brand_"
+                                    + "_" + pid, Publisher.TVBLOB);
                     brand.setTitle(title);
                     brand.setLastUpdated(new DateTime(DateTimeZones.UTC));
 
@@ -164,7 +167,7 @@ public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlis
         return null;
     }
 
-    private Episode getEpisode(JsonParser jp, String channelSlug) {
+    private Episode getEpisode(JsonParser jp) {
         try {
             if (jp.getCurrentToken() == JsonToken.START_OBJECT) {
                 String title = null;
@@ -188,11 +191,11 @@ public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlis
                 }
 
                 if (pid != null) {
-                    Episode episode = new Episode(BASE_URL + "episode/" + channelSlug + "/" + pid, BASE_CURIE
-                                    + "episode_" + channelSlug + "_" + pid, Publisher.TVBLOB);
+                    Episode episode = new Episode(BASE_URL + "episode/" + pid, BASE_CURIE+ "episode_" + pid, Publisher.TVBLOB);
                     episode.setDescription(shortSynopsis);
                     episode.setTitle(title(title, subTitle));
                     episode.setLastUpdated(new DateTime(DateTimeZones.UTC));
+                    episode.setIsLongForm(true);
                     Version version = new Version();
                     episode.addVersion(version);
                     return episode;
@@ -212,5 +215,26 @@ public class TVBlobDayExtractor implements ContentExtractor<InputStream, Playlis
             return title;
         }
         return subTitle;
+    }
+    
+    private Set<Broadcast> expireBroadcasts(Set<Broadcast> broadcasts) {
+        if (expireAfterDays == null) {
+            return broadcasts;
+        }
+        
+        Set<Broadcast> relevantBroadcasts = Sets.newHashSet();
+        DateTime weekAgo = new DateTime(DateTimeZones.UTC).minusDays(expireAfterDays);
+        
+        for (Broadcast broadcast: broadcasts) {
+            if (broadcast.getTransmissionTime().isAfter(weekAgo)) {
+                relevantBroadcasts.add(broadcast);
+            }
+        }
+        
+        return relevantBroadcasts;
+    }
+    
+    public void setExpireAfterDays(Integer expireAfterDays) {
+        this.expireAfterDays = expireAfterDays;
     }
 }
