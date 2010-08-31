@@ -262,6 +262,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="tvblobUpdater"/>
     </bean>
     
+    <bean id="tvblobTomorrowUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
+        <constructor-arg ref="tvblobTomorrowUpdater"/>
+    </bean>
+    
     <bean id="orphanUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="perPublisherUpdater"/>
     </bean>
