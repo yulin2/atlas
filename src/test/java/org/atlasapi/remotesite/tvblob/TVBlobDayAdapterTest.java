@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.tvblob;
 
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.DefinitiveContentWriter;
@@ -13,14 +14,15 @@ public class TVBlobDayAdapterTest extends MockObjectTestCase {
     private DefinitiveContentWriter writer = mock(DefinitiveContentWriter.class);
     private TVBlobDayAdapter adapter = new TVBlobDayAdapter(writer, resolver);
 
-    public void ignoreShouldRetrieveToday() throws Exception {
+    public void testShouldRetrieveToday() throws Exception {
         checking(new Expectations() {{
             allowing(resolver).findByUri((String) with(anything())); will(returnValue(null));
             allowing(writer).createOrUpdateDefinitiveItem((Episode) with(anything()));
+            allowing(writer).createOrUpdateDefinitivePlaylist((Brand) with(anything()));
         }});
         
         DateTime begin = new DateTime();
-        adapter.populate("http://epgadmin.tvblob.com/api/raiuno/programmes/schedules/tomorrow.json");
+        adapter.populate("http://epgadmin.tvblob.com/api/cielo/programmes/schedules/today.json");
         DateTime end = new DateTime();
         
         Period period = new Period(begin, end);
@@ -28,6 +30,6 @@ public class TVBlobDayAdapterTest extends MockObjectTestCase {
     }
     
     public void testCanFetch() {
-        assertTrue(adapter.canPopulate("http://epgadmin.tvblob.com/api/raiuno/programmes/schedules/tomorrow.json"));
+        assertTrue(adapter.canPopulate("http://epgadmin.tvblob.com/api/raiuno/programmes/schedules/today.json"));
     }
 }

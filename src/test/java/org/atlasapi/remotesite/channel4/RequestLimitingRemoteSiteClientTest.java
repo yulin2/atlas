@@ -31,6 +31,9 @@ public class RequestLimitingRemoteSiteClientTest extends TestCase {
 		long duration = System.currentTimeMillis() - timeBefore;
 		
 		assertEquals(4, delegatedRequests.get());
+		if (duration < 1000 || duration > 2000) {
+		    System.err.println("Duration is unacceptably "+duration+" milliseconds");
+		}
 		assertTrue(duration >= 1000 && duration <= 2000);
 	}
 }
