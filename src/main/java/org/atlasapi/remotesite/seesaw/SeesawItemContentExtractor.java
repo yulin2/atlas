@@ -13,7 +13,6 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.html.HtmlNavigator;
@@ -111,7 +110,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 Matcher matcher = pattern.matcher(info);
                 if (matcher.matches()) {
                     try {
-                        Integer duration = Integer.valueOf(matcher.group(1));
+                        Integer duration = Integer.valueOf(matcher.group(1)) * 60;
                         System.out.println("Duration " + duration);
                         version.setPublishedDuration(duration);
                     }
@@ -160,7 +159,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
             
             return episode;
         } catch (JaxenException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         

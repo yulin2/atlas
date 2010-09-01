@@ -1,20 +1,18 @@
-package org.atlasapi.remotesite.seesaw;
+package org.atlasapi.remotesite.seesaw.selftest;
 
-import java.util.List;
+import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.atlasapi.remotesite.seesaw.SeesawAtoZBrandsAdapter;
 
-public class SeesawAllBrandsAdapterTest  extends MockObjectTestCase{
+public class SeesawAtoZBrandsAdapterTest  extends TestCase{
 
-    SiteSpecificAdapter<Brand> brandAdapter = mock(SiteSpecificAdapter.class);
-    SeesawAllBrandsAdapter adapter = new SeesawAllBrandsAdapter(HttpClients.webserviceClient());
+    SiteSpecificAdapter<Playlist> adapter = new SeesawAtoZBrandsAdapter(HttpClients.webserviceClient());
 
     public void testShouldGetBrand() throws Exception {
         Playlist aToH = adapter.fetch("http://www.seesaw.com/AtoZ/A");
@@ -48,8 +46,6 @@ public class SeesawAllBrandsAdapterTest  extends MockObjectTestCase{
         assertTrue(containsPlaylist("IPC World Swimming Championships", iToO));
         assertTrue(containsPlaylist("Jamie Oliver: Eat to Save Your Life", iToO));
         assertTrue(containsPlaylist("The Thick of It", pToZ));
-        
-        
     }
     
     private boolean containsPlaylist(String title, Playlist playlist) {

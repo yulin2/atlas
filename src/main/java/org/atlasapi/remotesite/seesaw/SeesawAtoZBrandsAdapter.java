@@ -9,23 +9,27 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.FetchException;
+import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jaxen.JaxenException;
 import org.jdom.Element;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
+public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     private static final String URL = "http://www.seesaw.com/AtoZ";
-    static final Log LOG = LogFactory.getLog(SeesawAllBrandsAdapter.class);
+    static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
     private final SimpleHttpClient httpClient;
     private final SiteSpecificAdapter<Playlist> playlistAdapter;
     
-    public SeesawAllBrandsAdapter(SimpleHttpClient httpClient) {
+    public SeesawAtoZBrandsAdapter() {
+        this(HttpClients.screenScrapingClient());
+    }
+    
+    public SeesawAtoZBrandsAdapter(SimpleHttpClient httpClient) {
         this.httpClient = httpClient;
         this.playlistAdapter = new SeesawPlaylistAdapter(httpClient);
     }
@@ -87,13 +91,13 @@ public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                     for (String episodeContainerLink : episodeContainerLinks) {
                         if (episodeContainerLink.startsWith("http://")) {
                             if (brand.getCanonicalUri() == null) {
-                                String canonicalUri = getCanonicalUri(episodeContainerLink);
+                                String canonicalUri = SeesawHelper.getCanonicalUriFromLink(episodeContainerLink);
                                 System.out.println("brand uri = " + canonicalUri);
                                 brand.setCanonicalUri(canonicalUri);
                             }
                             
                             if (brand.getCurie() == null) {
-                                brand.setCurie(getCurie(episodeContainerLink));
+                                brand.setCurie(SeesawHelper.getCurieFromLink(episodeContainerLink));
                             }
                             
                             Playlist playlist = playlistAdapter.fetch(episodeContainerLink);
@@ -132,19 +136,7 @@ public class SeesawAllBrandsAdapter implements SiteSpecificAdapter<Playlist> {
         return null;
     }
     
-    private String getCanonicalUri(String contentLink) {
-        return "http://www.seesaw.com/" + getBrandId(contentLink);
-    }
     
-    private String getCurie(String contentLink) {
-        return "seesaw:" + getBrandId(contentLink);
-    }
-    
-    private String getBrandId(String contentLink) {
-        contentLink = contentLink.substring(contentLink.indexOf("-") + 1);
-        contentLink = contentLink.substring(contentLink.indexOf("-") + 1);
-        return contentLink.toLowerCase();
-    }
     
     @Override
     public boolean canFetch(String uri) {

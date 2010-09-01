@@ -18,7 +18,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class SeesawPlaylistAdapter implements SiteSpecificAdapter<Playlist> {
     private static final String URL = "http://www.seesaw.com/TV/";
-    static final Log LOG = LogFactory.getLog(SeesawAllBrandsAdapter.class);
+    static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
     private final SimpleHttpClient httpClient;
     private final SiteSpecificAdapter<Episode> itemAdapter;
     

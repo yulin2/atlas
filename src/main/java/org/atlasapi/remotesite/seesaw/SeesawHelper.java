@@ -7,6 +7,9 @@ import org.jdom.Element;
 import com.google.common.collect.Lists;
 
 public class SeesawHelper {
+    private final static String curiePrefix = "seesaw:";
+    private final static String urlPrefix = "http://www.seesaw.com/brands/";
+    
     static String getFirstTextContent(Element element) {
         if (!element.getText().equals("")) {
             return element.getText();
@@ -63,5 +66,27 @@ public class SeesawHelper {
         }
         
         return uris;
+    }
+    
+    static String getCanonicalUriFromLink(String contentLink) {
+        return urlPrefix + getBrandId(contentLink);
+    }
+    
+    static String getCanonicalUriFromTitle(String title) {
+        return urlPrefix + title.toLowerCase();
+    }
+    
+    static String getCurieFromLink(String contentLink) {
+        return curiePrefix + getBrandId(contentLink);
+    }
+    
+    static String getCurieFromTitle(String title) {
+        return curiePrefix + title.toLowerCase();
+    }
+    
+    private static String getBrandId(String contentLink) {
+        contentLink = contentLink.substring(contentLink.indexOf("-") + 1);
+        contentLink = contentLink.substring(contentLink.indexOf("-") + 1);
+        return contentLink.toLowerCase();
     }
 }
