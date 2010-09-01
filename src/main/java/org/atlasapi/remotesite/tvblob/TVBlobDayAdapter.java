@@ -10,7 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.DefinitiveContentWriter;
-import org.atlasapi.remotesite.FetchException;
 
 public class TVBlobDayAdapter {
 
@@ -39,6 +38,7 @@ public class TVBlobDayAdapter {
 
         InputStream is = null;
         TVBlobDayPopulator populator = new TVBlobDayPopulator(contentStore, contentResolver, channelSlug);
+        populator.setExpireAfterDays(30);
         try {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Retrieving "+uri);
@@ -47,7 +47,7 @@ public class TVBlobDayAdapter {
             is = new URL(uri).openStream();
             populator.populate(is);
         } catch (Exception e) {
-            throw new FetchException("Unable to retrieve source "+uri, e);
+            LOG.warn("Unable to retrieve source "+uri, e);
         } finally {
             if (is != null) {
                 try {

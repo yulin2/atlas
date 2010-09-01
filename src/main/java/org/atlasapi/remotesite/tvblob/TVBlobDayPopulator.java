@@ -87,7 +87,7 @@ public class TVBlobDayPopulator {
                             
                             Content currentContent = contentResolver.findByUri(episode.getCanonicalUri());
                             if (currentContent != null && currentContent instanceof Episode) {
-                                episode = (Episode) currentContent;
+                                episode.setVersions(((Episode) currentContent).getVersions());
                             }
 
                             Version version = episode.getVersions().iterator().next();

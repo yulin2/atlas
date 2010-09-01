@@ -15,7 +15,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="updateHuluBrandsScheduledTask" />
             <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateMentionsScheduledTask" />
-            <!-- <ref bean="updateTVBlobScheduledTask" /> -->
+            <ref bean="updateTVBlobScheduledTask" />
+            <ref bean="updateTVBlobTomorrowScheduledTask" />
         </list>
     </property>
     <property name="daemon" value="true" />
@@ -145,6 +146,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <property name="runnable">
         <bean parent="conditionalRunner">
             <constructor-arg ref="tvblobUpdater" />
+        </bean>
+    </property>
+  </bean>
+  
+  <bean id="updateTVBlobTomorrowScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="3040000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+        <bean parent="conditionalRunner">
+            <constructor-arg ref="tvblobTomorrowUpdater" />
         </bean>
     </property>
   </bean>
