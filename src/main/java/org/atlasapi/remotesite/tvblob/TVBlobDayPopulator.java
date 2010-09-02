@@ -81,10 +81,9 @@ public class TVBlobDayPopulator {
                         }
 
                         if (start != null && end != null && episode != null) {
-                            Broadcast broadcast = new Broadcast(channel, start.toDateTime(DateTimeZones.UTC), end
-                                            .toDateTime(DateTimeZones.UTC));
+                            Broadcast broadcast = new Broadcast(channel, start.toDateTime(DateTimeZones.UTC), end.toDateTime(DateTimeZones.UTC));
                             broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
-                            
+
                             Content currentContent = contentResolver.findByUri(episode.getCanonicalUri());
                             if (currentContent != null && currentContent instanceof Episode) {
                                 episode.setVersions(((Episode) currentContent).getVersions());
@@ -94,23 +93,23 @@ public class TVBlobDayPopulator {
                             Set<Broadcast> broadcasts = version.getBroadcasts();
                             broadcasts.add(broadcast);
                             version.setBroadcasts(expireBroadcasts(broadcasts));
-                            
+
                             if (brand != null) {
                                 brand.addItem(episode);
                                 Content currentBrand = contentResolver.findByUri(brand.getCanonicalUri());
                                 if (currentBrand != null && currentBrand instanceof Brand) {
-                                    for (Item item: ((Brand) currentBrand).getItems()) {
-                                        if (! brand.getItems().contains(item)) {
+                                    for (Item item : ((Brand) currentBrand).getItems()) {
+                                        if (!brand.getItems().contains(item)) {
                                             brand.addItem(item);
                                         }
                                     }
                                 }
-                                
+
                                 contentStore.createOrUpdateDefinitivePlaylist(brand);
                             } else {
                                 contentStore.createOrUpdateDefinitiveItem(episode);
                             }
-                            
+
                             numBroadcasts++;
                         }
                     }
@@ -128,9 +127,9 @@ public class TVBlobDayPopulator {
                 }
             }
         }
-        
+
         if (LOG.isInfoEnabled()) {
-            LOG.info("Persisted "+numBroadcasts+" broadcasts / episodes for "+channel);
+            LOG.info("Persisted " + numBroadcasts + " broadcasts / episodes for " + channel);
         }
     }
 
@@ -153,8 +152,7 @@ public class TVBlobDayPopulator {
                 }
 
                 if (pid != null) {
-                    Brand brand = new Brand(BASE_URL + "brand/" + pid, BASE_CURIE + "brand_"
-                                    + "_" + pid, Publisher.TVBLOB);
+                    Brand brand = new Brand(BASE_URL + "brand/" + pid, BASE_CURIE + "brand_" + pid, Publisher.TVBLOB);
                     brand.setTitle(title);
                     brand.setLastUpdated(new DateTime(DateTimeZones.UTC));
 
@@ -191,7 +189,7 @@ public class TVBlobDayPopulator {
                 }
 
                 if (pid != null) {
-                    Episode episode = new Episode(BASE_URL + "episode/" + pid, BASE_CURIE+ "episode_" + pid, Publisher.TVBLOB);
+                    Episode episode = new Episode(BASE_URL + "episode/" + pid, BASE_CURIE + "episode_" + pid, Publisher.TVBLOB);
                     episode.setDescription(shortSynopsis);
                     episode.setTitle(title(title, subTitle));
                     episode.setLastUpdated(new DateTime(DateTimeZones.UTC));
@@ -209,31 +207,31 @@ public class TVBlobDayPopulator {
 
     private String title(String title, String subTitle) {
         if (title != null) {
-            if (subTitle != null) {
+            if (subTitle != null && ! "null".equals(subTitle)) {
                 title = title + " - " + subTitle;
             }
             return title;
         }
         return subTitle;
     }
-    
+
     private Set<Broadcast> expireBroadcasts(Set<Broadcast> broadcasts) {
         if (expireAfterDays == null) {
             return broadcasts;
         }
-        
+
         Set<Broadcast> relevantBroadcasts = Sets.newHashSet();
         DateTime weekAgo = new DateTime(DateTimeZones.UTC).minusDays(expireAfterDays);
-        
-        for (Broadcast broadcast: broadcasts) {
+
+        for (Broadcast broadcast : broadcasts) {
             if (broadcast.getTransmissionTime().isAfter(weekAgo)) {
                 relevantBroadcasts.add(broadcast);
             }
         }
-        
+
         return relevantBroadcasts;
     }
-    
+
     public void setExpireAfterDays(Integer expireAfterDays) {
         this.expireAfterDays = expireAfterDays;
     }
