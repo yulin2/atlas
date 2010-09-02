@@ -68,8 +68,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                         episode.setSeriesNumber(seriesNumber);
                     }
                     catch (NumberFormatException e) {
-                        e.printStackTrace();
-                        // something is messed up at their end, let's ignore
+                        LOG.warn("Unable to parse int", e);
                     }
                     
                 }
@@ -91,8 +90,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                         System.out.println("Episode number: " + episodeNumber);
                     }
                     catch (NumberFormatException e) {
-                        e.printStackTrace();
-                        // something is messed up at their end, let's ignore
+                        LOG.warn("Unable to parse int", e);
                     }
                 }
                 
@@ -100,7 +98,13 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                     String episodeTitle = episodeText.substring(episodeText.indexOf(": ") + 2, episodeText.length());
                     episode.setTitle(episodeTitle);
                     System.out.println("title: " + episodeTitle);
+                } else if (episode.getEpisodeNumber() != null){
+                    episode.setTitle("Episode "+episode.getEpisodeNumber());
                 }
+            }
+            
+            if (episode.getTitle() == null) {
+                episode.setTitle(title);
             }
             
             Element playerInfoElem = source.firstElementOrNull("//*[@class='programInfo']");
@@ -126,11 +130,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 String progDesc = SeesawHelper.getFirstTextContent(programmeInfoElem).trim();
                 System.out.println("desc: " + progDesc);
                 episode.setDescription(progDesc);
-            }
-            Element seriesInfoElem = source.firstElementOrNull("//*[text()='About this series:']/parent::div/div", infoElem);
-            if (seriesInfoElem != null) {
-                String seriesInfo = SeesawHelper.getFirstTextContent(seriesInfoElem).trim();
-                System.out.println("serDesc: " + seriesInfo);
             }
             
             Element dateElem = source.firstElementOrNull("//*[text()='Date: ']/following-sibling::*", infoElem);
@@ -170,5 +169,4 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
         policy.addAvailableCountry(Countries.GB);
         return policy;
     }
-
 }

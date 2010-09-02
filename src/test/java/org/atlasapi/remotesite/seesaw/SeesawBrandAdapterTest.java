@@ -9,8 +9,8 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
-public class SeesawContentPageAdapterTest extends TestCase {
-    SiteSpecificAdapter<Brand> adapter = new SeesawContentPageAdapter(HttpClients.webserviceClient());
+public class SeesawBrandAdapterTest extends TestCase {
+    SiteSpecificAdapter<Brand> adapter = new SeesawBrandAdapter(HttpClients.webserviceClient());
     
     public void testShouldGetBrand() {
         Brand galactica = adapter.fetch("http://www.seesaw.com/TV/Drama/b-28373-Battlestar-Galactica");
@@ -30,25 +30,9 @@ public class SeesawContentPageAdapterTest extends TestCase {
         assertEquals(Integer.valueOf(42 * 60), firstVersion.getPublishedDuration());
     }
     
-    public void testShouldGetSeries() {
-        Brand thirtyRock = adapter.fetch("http://www.seesaw.com/TV/Comedy/s-29158-30-Rock");
-        assertEquals("30 Rock", thirtyRock.getTitle());
-        assertTrue(thirtyRock.getItems().size() > 0);
-        assertTrue(thirtyRock.getGenres().contains("http://www.seesaw.com/TV/Comedy"));
-        Item firstItem = thirtyRock.getItems().get(0);
-        assertTrue(firstItem instanceof Episode);
-        Episode firstEpisode = (Episode) firstItem;
-        assertEquals("Pilot", firstEpisode.getTitle());
-    }
-    
-    public void testShouldGetProgram() {
-        Brand afghanStar = adapter.fetch("http://www.seesaw.com/TV/Factual/p-1167-Afghan-Star");
-        assertEquals("Afghan Star", afghanStar.getTitle());
-        assertEquals(1, afghanStar.getItems().size());
-    }
-    
     public void testShouldBeAbleToFetch() {
-        assertTrue(adapter.canFetch("http://www.seesaw.com/TV/Factual/p-1167-Afghan-Star"));
+        assertTrue(adapter.canFetch("http://www.seesaw.com/TV/Factual/b-1167-Afghan-Star"));
+        assertFalse(adapter.canFetch("http://www.seesaw.com/TV/Factual/p-1167-Afghan-Star"));
         assertFalse(adapter.canFetch("http://www.seesaw.com/AtoZ/A"));
     }
 }

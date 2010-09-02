@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
@@ -23,7 +24,7 @@ public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     private static final String URL = "http://www.seesaw.com/AtoZ";
     static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
     private final SimpleHttpClient httpClient;
-    private final SiteSpecificAdapter<Playlist> playlistAdapter;
+    private final SiteSpecificAdapter<Series> seriesAdapter;
     
     public SeesawAtoZBrandsAdapter() {
         this(HttpClients.screenScrapingClient());
@@ -31,22 +32,20 @@ public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
     
     public SeesawAtoZBrandsAdapter(SimpleHttpClient httpClient) {
         this.httpClient = httpClient;
-        this.playlistAdapter = new SeesawPlaylistAdapter(httpClient);
+        this.seriesAdapter = new SeesawSeriesAdapter(httpClient);
     }
 
     @Override
     public Playlist fetch(String uri) {
         try {
-            LOG.info("Retrieving all Seesaw brands");
-            System.out.println("Attempting to load SeeSaw brands " + uri);
+            LOG.info("Retrieving all Seesaw brands: "+uri);
 
             Playlist globalPlaylist = new Playlist();
             String content;
             try {
                 content = httpClient.getContentsOf(uri);
             } catch (HttpException e) {
-                LOG.warn("Error retrieving seesaw brands: " + uri + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
-                return null;
+                throw new FetchException("Error retrieving seesaw brands: " + uri, e);
             }
 
             if (content != null) {
@@ -97,18 +96,18 @@ public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                             }
                             
                             if (brand.getCurie() == null) {
-                                brand.setCurie(SeesawHelper.getCurieFromLink(episodeContainerLink));
+                                brand.setCurie(SeesawHelper.getBrandCurieFromLink(episodeContainerLink));
                             }
                             
-                            Playlist playlist = playlistAdapter.fetch(episodeContainerLink);
-                            if (playlist != null) {
-                                brand.getGenres().addAll(playlist.getGenres());
+                            Series series = seriesAdapter.fetch(episodeContainerLink);
+                            if (series != null) {
+                                brand.getGenres().addAll(series.getGenres());
                                 
                                 if (brand.getDescription() == null) {
-                                    brand.setDescription(playlist.getDescription());
+                                    brand.setDescription(series.getDescription());
                                 }
                                 
-                                for (Item item : playlist.getItems()) {
+                                for (Item item : series.getItems()) {
                                     brand.addItem(item);
                                 }
                             }
@@ -125,14 +124,11 @@ public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
             } else {
                 LOG.error("Unable to retrieve seesaw brands: " + uri);
             }
-            
-            // Returning empty playlist
-            //new Playlist(URL, "hulu:all_brands", Publisher.HULU);
         } catch (JaxenException e) {
-            LOG.warn("Error retrieving all hulu brands: " + uri + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
-            e.printStackTrace();
+            LOG.warn("Error retrieving all hulu brands: " + uri + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage(), e);
             throw new FetchException("Unable to retrieve all hulu brands", e);
         }
+        
         return null;
     }
     

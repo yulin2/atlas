@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.seesaw;
 
+import java.util.regex.Pattern;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Encoding;
@@ -14,7 +16,7 @@ import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
-    private static final String URL = "http://www.seesaw.com/TV/";
+    private final Pattern seesawContentPagePattern = Pattern.compile("http://www.seesaw.com/(.*)/p-[0-9]+-(.*)");
     static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
     private final SimpleHttpClient httpClient;
     private final ContentExtractor<HtmlNavigator, Episode> contentExtractor;
@@ -68,7 +70,6 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
 
     @Override
     public boolean canFetch(String uri) {
-        // TODO Auto-generated method stub
-        return false;
+        return seesawContentPagePattern.matcher(uri).matches();
     }
 }

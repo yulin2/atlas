@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
@@ -16,22 +15,20 @@ import org.jdom.Element;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class SeesawPlaylistAdapter implements SiteSpecificAdapter<Playlist> {
-    private static final String URL = "http://www.seesaw.com/TV/";
+public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
     static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
     private final SimpleHttpClient httpClient;
     private final SiteSpecificAdapter<Episode> itemAdapter;
     
-    public SeesawPlaylistAdapter(SimpleHttpClient httpClient) {
+    public SeesawSeriesAdapter(SimpleHttpClient httpClient) {
         this.httpClient = httpClient;
         itemAdapter = new SeesawItemAdapter(httpClient);
     }
     
     @Override
-    public Playlist fetch(String uri) {
+    public Series fetch(String uri) {
         try {
             LOG.info("Retrieving Seesaw playlist");
-            System.out.println("Attempting to load playlist " + uri);
 
             String content;
             try {
@@ -43,20 +40,27 @@ public class SeesawPlaylistAdapter implements SiteSpecificAdapter<Playlist> {
 
             if (content != null) {
                 HtmlNavigator navigator = new HtmlNavigator(content);
-                Playlist playlist = new Playlist();
+                Series series = new Series(uri, SeesawHelper.getCurieFromLink(uri));
+                
+                Element seriesInfoElem = navigator.firstElementOrNull("//div[@class='information']//*[text()='About this series:']/parent::div/div");
+                if (seriesInfoElem != null) {
+                    String seriesInfo = SeesawHelper.getFirstTextContent(seriesInfoElem).trim();
+                    System.out.println("serDesc: " + seriesInfo);
+                    series.setDescription(seriesInfo);
+                }
                 
                 List<Element> targetLinkElements = navigator.allElementsMatching("//a[contains(@class,'targetLink')]");
                 
                 if (targetLinkElements.isEmpty()) {
-                    addEpisode(uri, playlist);
+                    addEpisode(uri, series);
                 }
                 else {
                     for (Element targetLinkElement : targetLinkElements) {
-                        addEpisode(targetLinkElement.getAttributeValue("href"), playlist);
+                        addEpisode(targetLinkElement.getAttributeValue("href"), series);
                     }
                 }
                 
-                return playlist;
+                return series;
             } else {
                 LOG.error("Unable to retrieve seesaw playlist: " + uri);
             }
@@ -68,23 +72,24 @@ public class SeesawPlaylistAdapter implements SiteSpecificAdapter<Playlist> {
         return null;
     }
 
-    private void addEpisode(String uri, Playlist playlist) {
+    private void addEpisode(String uri, Series series) {
         Episode episode = itemAdapter.fetch(uri);
         if (episode != null) {
-            playlist.getGenres().addAll(episode.getGenres());
+            series.getGenres().addAll(episode.getGenres());
             
-            Series series = episode.getSeriesSummary();
-            if (series != null) {
-                playlist.setDescription(series.getDescription());
+            if (episode.getSeriesNumber() != null) {
+                series.withSeriesNumber(episode.getSeriesNumber());
+                if (series.getTitle() == null) {
+                    series.setTitle("Series "+series.getSeriesNumber());
+                }
             }
             
-            playlist.addItem(episode);
+            series.addItem(episode);
         }
     }
 
     @Override
     public boolean canFetch(String uri) {
-        return uri.startsWith(URL);
+        return false;
     }
-
 }

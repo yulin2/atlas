@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
@@ -18,24 +19,21 @@ import org.jdom.Element;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class SeesawContentPageAdapter implements SiteSpecificAdapter<Brand> {
+public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
     
-    private final Pattern seesawContentPagePattern = Pattern.compile("http://www.seesaw.com/(.*)/([bsp])-[0-9]+-(.*)");
+    private final Pattern seesawContentPagePattern = Pattern.compile("http://www.seesaw.com/(.*)/b-[0-9]+-(.*)");
     private final Pattern seriesLinkPattern = Pattern.compile("\\?/player.episodelist:.*/([0-9]+)"); //?/player.episodelist:updateepisodesevent/28458
-    private final String BRAND = "b";
-    private final String SERIES = "s";
-    private final String PROGRAM = "p";
     private SimpleHttpClient httpClient;
-    private SiteSpecificAdapter<Playlist> playlistAdapter;
-    private static final Log LOG = LogFactory.getLog(SeesawContentPageAdapter.class);
+    private SiteSpecificAdapter<Series> seriesAdapter;
+    private static final Log LOG = LogFactory.getLog(SeesawBrandAdapter.class);
     
-    public SeesawContentPageAdapter() {
+    public SeesawBrandAdapter() {
         this(HttpClients.screenScrapingClient());
     }
     
-    public SeesawContentPageAdapter(SimpleHttpClient httpClient) {
+    public SeesawBrandAdapter(SimpleHttpClient httpClient) {
         this.httpClient = httpClient;
-        this.playlistAdapter = new SeesawPlaylistAdapter(httpClient);
+        this.seriesAdapter = new SeesawSeriesAdapter(httpClient);
     }
     
     @Override
@@ -52,17 +50,10 @@ public class SeesawContentPageAdapter implements SiteSpecificAdapter<Brand> {
             Matcher matcher = seesawContentPagePattern.matcher(uri);
             if (matcher.matches()) {
                 String pageSection = matcher.group(1);
-                String pageType = matcher.group(2);
-                String brandName = matcher.group(3);
+                String brandName = matcher.group(2);
                 
-                /* TODO: 
-                 * if brand page, check we don't already have this brand
-                 */
-                Brand brand = new Brand(SeesawHelper.getCanonicalUriFromTitle(brandName), SeesawHelper.getCurieFromTitle(brandName), Publisher.SEESAW);
-                if (pageType.equalsIgnoreCase(BRAND)) {
-                    brand.setCanonicalUri(uri);
-                    brand.addAlias(SeesawHelper.getCanonicalUriFromTitle(brandName));
-                }
+                Brand brand = new Brand(uri, SeesawHelper.getCurieFromTitle(brandName), Publisher.SEESAW);
+                brand.addAlias(SeesawHelper.getCanonicalUriFromTitle(brandName));
                 
                 HtmlNavigator navigator = new HtmlNavigator(content);
                 Element title = navigator.firstElementOrNull("//*[@id='title']");
@@ -74,13 +65,13 @@ public class SeesawContentPageAdapter implements SiteSpecificAdapter<Brand> {
                     List<String> seriesUris = SeesawHelper.getAllLinkUris(seriesList);
                     for (String seriesUri : seriesUris) {
                         String properSeriesUri = getSeriesUriFromJavascriptLink(seriesUri, pageSection, brandName);
-                        Playlist playlist = playlistAdapter.fetch(properSeriesUri);
-                        addPlaylistToBrand(playlist, brand);
+                        Playlist series = seriesAdapter.fetch(properSeriesUri);
+                        addSeriesToBrand(series, brand);
                     }
                 }
                 else {
-                    Playlist playlist = playlistAdapter.fetch(uri);
-                    addPlaylistToBrand(playlist, brand);
+                    Playlist series = seriesAdapter.fetch(uri);
+                    addSeriesToBrand(series, brand);
                 }
                 
                 return brand;
@@ -96,7 +87,7 @@ public class SeesawContentPageAdapter implements SiteSpecificAdapter<Brand> {
         return matcher.matches();
     }
     
-    private void addPlaylistToBrand(Playlist playlist, Brand brand) {
+    private void addSeriesToBrand(Playlist playlist, Brand brand) {
         if (playlist != null) {
             brand.getGenres().addAll(playlist.getGenres());
             

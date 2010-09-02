@@ -44,7 +44,7 @@ import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawAtoZBrandsAdapter;
-import org.atlasapi.remotesite.seesaw.SeesawContentPageAdapter;
+import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
 import org.atlasapi.remotesite.seesaw.selftest.SeesawSelfTestController;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
@@ -117,7 +117,7 @@ public class RemoteSiteModule {
 		 adapters.add(new ImdbAdapter(dispatcher));
 		 
 		 adapters.add(new SeesawAtoZBrandsAdapter());
-		 adapters.add(new SeesawContentPageAdapter());
+		 adapters.add(new SeesawBrandAdapter());
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;

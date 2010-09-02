@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.seesaw;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jdom.Element;
 
@@ -9,6 +11,7 @@ import com.google.common.collect.Lists;
 public class SeesawHelper {
     private final static String curiePrefix = "seesaw:";
     private final static String urlPrefix = "http://www.seesaw.com/brands/";
+    final static Pattern seesawLinkPattern = Pattern.compile("http://www.seesaw.com/.*/[bsp]-([0-9]+)-(.*)");
     
     static String getFirstTextContent(Element element) {
         if (!element.getText().equals("")) {
@@ -76,7 +79,7 @@ public class SeesawHelper {
         return urlPrefix + title.toLowerCase();
     }
     
-    static String getCurieFromLink(String contentLink) {
+    static String getBrandCurieFromLink(String contentLink) {
         return curiePrefix + getBrandId(contentLink);
     }
     
@@ -84,9 +87,23 @@ public class SeesawHelper {
         return curiePrefix + title.toLowerCase();
     }
     
+    static String getCurieFromLink(String contentLink) {
+        return curiePrefix + getId(contentLink);
+    }
+    
+    private static String getId(String contentLink) {
+        Matcher matcher = seesawLinkPattern.matcher(contentLink);
+        if (matcher.matches()) {
+            return matcher.group(1) + "-" + matcher.group(2);
+        }
+        return null;
+    }
+    
     private static String getBrandId(String contentLink) {
-        contentLink = contentLink.substring(contentLink.indexOf("-") + 1);
-        contentLink = contentLink.substring(contentLink.indexOf("-") + 1);
-        return contentLink.toLowerCase();
+        Matcher matcher = seesawLinkPattern.matcher(contentLink);
+        if (matcher.matches()) {
+            return matcher.group(2);
+        }
+        return null;
     }
 }
