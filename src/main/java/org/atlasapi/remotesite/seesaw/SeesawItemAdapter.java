@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 
@@ -20,6 +21,10 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
     static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
     private final SimpleHttpClient httpClient;
     private final ContentExtractor<HtmlNavigator, Episode> contentExtractor;
+    
+    public SeesawItemAdapter() {
+        this(HttpClients.screenScrapingClient());
+    }
     
     public SeesawItemAdapter(SimpleHttpClient httpClient) {
         this.httpClient = httpClient;
@@ -59,6 +64,9 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
     }
     
     private void setUris(String uri, Episode episode) {
+        episode.setCanonicalUri(uri);
+        episode.setCurie(SeesawHelper.getCurieFromLink(uri));
+        
         for (Version version : episode.getVersions()) {
             for (Encoding encoding : version.getManifestedAs()) {
                 for (Location location : encoding.getAvailableAt()) {

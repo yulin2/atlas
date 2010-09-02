@@ -28,7 +28,7 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
     @Override
     public Series fetch(String uri) {
         try {
-            LOG.info("Retrieving Seesaw playlist");
+            LOG.info("Retrieving Seesaw playlist: "+uri);
 
             String content;
             try {
@@ -45,7 +45,6 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
                 Element seriesInfoElem = navigator.firstElementOrNull("//div[@class='information']//*[text()='About this series:']/parent::div/div");
                 if (seriesInfoElem != null) {
                     String seriesInfo = SeesawHelper.getFirstTextContent(seriesInfoElem).trim();
-                    System.out.println("serDesc: " + seriesInfo);
                     series.setDescription(seriesInfo);
                 }
                 

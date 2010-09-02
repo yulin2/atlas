@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.HttpClients;
@@ -65,12 +65,12 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
                     List<String> seriesUris = SeesawHelper.getAllLinkUris(seriesList);
                     for (String seriesUri : seriesUris) {
                         String properSeriesUri = getSeriesUriFromJavascriptLink(seriesUri, pageSection, brandName);
-                        Playlist series = seriesAdapter.fetch(properSeriesUri);
+                        Series series = seriesAdapter.fetch(properSeriesUri);
                         addSeriesToBrand(series, brand);
                     }
                 }
                 else {
-                    Playlist series = seriesAdapter.fetch(uri);
+                    Series series = seriesAdapter.fetch(uri);
                     addSeriesToBrand(series, brand);
                 }
                 
@@ -87,15 +87,19 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
         return matcher.matches();
     }
     
-    private void addSeriesToBrand(Playlist playlist, Brand brand) {
-        if (playlist != null) {
-            brand.getGenres().addAll(playlist.getGenres());
+    private void addSeriesToBrand(Series series, Brand brand) {
+        if (series != null) {
+            brand.getGenres().addAll(series.getGenres());
             
             if (brand.getDescription() == null) {
-                brand.setDescription(playlist.getDescription());
+                brand.setDescription(series.getDescription());
             }
             
-            for (Item item : playlist.getItems()) {
+            for (Item item : series.getItems()) {
+                Episode episode = (Episode) item;
+                if (series.getCanonicalUri().equals(brand.getCanonicalUri())) {
+                    episode.setSeries(null);
+                }
                 brand.addItem(item);
             }
         }
