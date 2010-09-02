@@ -207,7 +207,7 @@ public class TVBlobDayPopulator {
 
     private String title(String title, String subTitle) {
         if (title != null) {
-            if (subTitle != null) {
+            if (subTitle != null && ! "null".equals(subTitle)) {
                 title = title + " - " + subTitle;
             }
             return title;
