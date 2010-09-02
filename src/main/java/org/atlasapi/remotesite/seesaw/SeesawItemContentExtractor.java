@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.seesaw;
 
+import java.util.Currency;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,15 +15,19 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jaxen.JaxenException;
 import org.jdom.Element;
 
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.currency.Price;
 
 public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
     static final Log LOG = LogFactory.getLog(SeesawItemContentExtractor.class);
+    private final Pattern poundsPricePattern = Pattern.compile(".*£([0-9]+)\\.([0-9]{2})");
+    private final Pattern pencePricePattern = Pattern.compile(".*([0-9]{2})p");
     
     @Override
     public Episode extract(HtmlNavigator source) {
@@ -154,6 +159,30 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 for (String link : links) {
                     System.out.println(link);
                 }
+            }
+            
+            Element priceElem = source.firstElementOrNull("//*[@id='episodePriceSpan']");
+            if (priceElem != null) {
+                linkLocation.getPolicy().setRevenueContract(RevenueContract.PAY_TO_RENT);
+                
+                Integer amount = null;
+                Matcher poundsMatcher = poundsPricePattern.matcher(priceElem.getText());
+                Matcher penceMatcher = pencePricePattern.matcher(priceElem.getText());
+                if (poundsMatcher.matches()) {
+                    amount = (Integer.valueOf(poundsMatcher.group(1)) * 100) + Integer.valueOf(poundsMatcher.group(2));
+                }
+                else if (penceMatcher.matches()) {
+                    amount = Integer.valueOf(penceMatcher.group(1));
+                }
+                if (amount != null) {
+                    linkLocation.getPolicy().setPrice(new Price(Currency.getInstance("GBP"), amount));
+                }
+                else {
+                    LOG.debug("Could not find price of rentable content");
+                }
+            }
+            else {
+                linkLocation.getPolicy().setRevenueContract(RevenueContract.FREE_TO_VIEW);
             }
             
             return episode;

@@ -277,6 +277,13 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 			if (policy.getAvailableCountries() != null) {
 				simpleLocation.setAvailableCountries(Countries.toCodes(policy.getAvailableCountries()));
 			}
+			if (policy.getRevenueContract() != null) {
+			    simpleLocation.setRevenueContract(policy.getRevenueContract().key());
+			}
+			if (policy.getPrice() != null) {
+			    simpleLocation.setPrice(policy.getPrice().getAmount());
+			    simpleLocation.setCurrency(policy.getPrice().getCurrency().getCurrencyCode());
+			}
 		}
 		
 		simpleLocation.setTransportIsLive(location.getTransportIsLive());

@@ -1,13 +1,20 @@
 package org.atlasapi.remotesite.seesaw;
 
+import java.util.Currency;
+
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+
+import com.metabroadcast.common.currency.Price;
 
 public class SeesawBrandAdapterTest extends TestCase {
     SiteSpecificAdapter<Brand> adapter = new SeesawBrandAdapter(HttpClients.webserviceClient());
@@ -28,6 +35,14 @@ public class SeesawBrandAdapterTest extends TestCase {
         assertTrue(firstItem.getVersions().size() > 0);
         Version firstVersion = firstItem.getVersions().iterator().next();
         assertEquals(Integer.valueOf(42 * 60), firstVersion.getPublishedDuration());
+        
+        assertTrue(firstVersion.getManifestedAs().size() > 0);
+        Encoding firstEncoding = firstVersion.getManifestedAs().iterator().next();
+        assertTrue(firstEncoding.getAvailableAt().size() > 0);
+        Location firstLocation = firstEncoding.getAvailableAt().iterator().next();
+        assertNotNull(firstLocation.getPolicy());
+        assertEquals(RevenueContract.PAY_TO_RENT, firstLocation.getPolicy().getRevenueContract());
+        assertEquals(new Price(Currency.getInstance("GBP"), 99), firstLocation.getPolicy().getPrice());
     }
     
     public void testShouldBeAbleToFetch() {
