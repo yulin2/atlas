@@ -59,9 +59,6 @@ public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                     Element titleElement = navigator.firstElementOrNull("div[@class='header narrow']", brandElement);
                     String brandTitle = SeesawHelper.getFirstTextContent(titleElement);
                     
-                    Element genreElement = navigator.firstElementOrNull("div[@class='genre']", brandElement);
-                    String brandGenre = SeesawHelper.getFirstTextContent(genreElement);
-                    
                     Element actionContainer = navigator.firstElementOrNull("div[@class='action']", brandElement);
                     Element actionLink = navigator.firstElementOrNull("a[@class='seeLink']", actionContainer);
                     
@@ -77,7 +74,6 @@ public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                         List<Element> seriesElements = navigator.allElementsMatching("div[@class='moreInfo']/ul/li/div[@class='header narrow']/*/a", brandElement);
                         
                         for (Element seriesElement : seriesElements) {
-                            String seriesTitle = seriesElement.getAttributeValue("title");
                             String seriesLink = seriesElement.getAttributeValue("href");
                             episodeContainerLinks.add(seriesLink);
                         }
@@ -91,7 +87,6 @@ public class SeesawAtoZBrandsAdapter implements SiteSpecificAdapter<Playlist> {
                         if (episodeContainerLink.startsWith("http://")) {
                             if (brand.getCanonicalUri() == null) {
                                 String canonicalUri = SeesawHelper.getCanonicalUriFromLink(episodeContainerLink);
-                                System.out.println("brand uri = " + canonicalUri);
                                 brand.setCanonicalUri(canonicalUri);
                             }
                             

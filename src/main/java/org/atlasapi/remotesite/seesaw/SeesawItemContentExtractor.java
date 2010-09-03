@@ -32,7 +32,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
     @Override
     public Episode extract(HtmlNavigator source) {
         try {
-            System.out.println("extracting episode");
             Episode episode = new Episode();
             episode.setPublisher(Publisher.SEESAW);
             
@@ -63,9 +62,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                     episodeText = headers.get(1).getText();
                 }
                 
-                System.out.println("series: " + seriesText);
-                System.out.println("episode: " + episodeText);
-                
                 if (seriesText != null && seriesText.startsWith("Series ")) {
                     try {
                         int seriesNumber = Integer.parseInt(seriesText.substring("Series ".length(), seriesText.length()));
@@ -92,7 +88,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                         int episodeNumber = Integer.parseInt(episodeText.substring("Episode ".length(), 
                             episodeText.contains(":") ? episodeText.indexOf(":") : episodeText.length()));
                         episode.setEpisodeNumber(episodeNumber);
-                        System.out.println("Episode number: " + episodeNumber);
                     }
                     catch (NumberFormatException e) {
                         LOG.warn("Unable to parse int", e);
@@ -102,7 +97,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 if (episodeText.contains(": ")) {
                     String episodeTitle = episodeText.substring(episodeText.indexOf(": ") + 2, episodeText.length());
                     episode.setTitle(episodeTitle);
-                    System.out.println("title: " + episodeTitle);
                 } else if (episode.getEpisodeNumber() != null){
                     episode.setTitle("Episode "+episode.getEpisodeNumber());
                 }
@@ -120,7 +114,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 if (matcher.matches()) {
                     try {
                         Integer duration = Integer.valueOf(matcher.group(1)) * 60;
-                        System.out.println("Duration " + duration);
                         version.setPublishedDuration(duration);
                     }
                     catch (NumberFormatException e) {
@@ -133,14 +126,13 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
             Element programmeInfoElem = source.firstElementOrNull("//*[text()='About this programme:']/following-sibling::*", infoElem);
             if (programmeInfoElem != null) {
                 String progDesc = SeesawHelper.getFirstTextContent(programmeInfoElem).trim();
-                System.out.println("desc: " + progDesc);
                 episode.setDescription(progDesc);
             }
             
             Element dateElem = source.firstElementOrNull("//*[text()='Date: ']/following-sibling::*", infoElem);
             if (dateElem != null) {
+                @SuppressWarnings("unused")
                 String date = SeesawHelper.getFirstTextContent(dateElem).trim();
-                System.out.println("date: " + date);
             }
             
             Element categoryElem = source.firstElementOrNull("//*[text()='Categories: ']/following-sibling::*", infoElem);
@@ -154,11 +146,9 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
             
             Element externalLinksElem = source.firstElementOrNull("//*[text()='External Links']/following-sibling::*", infoElem);
             if (externalLinksElem != null) {
+                // TODO: use external links as aliases
+                @SuppressWarnings("unused")
                 List<String> links = SeesawHelper.getAllLinkUris(externalLinksElem);
-                System.out.println("external links:");
-                for (String link : links) {
-                    System.out.println(link);
-                }
             }
             
             Element priceElem = source.firstElementOrNull("//*[@id='episodePriceSpan']");

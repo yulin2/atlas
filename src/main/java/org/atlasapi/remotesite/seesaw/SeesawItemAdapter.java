@@ -34,9 +34,7 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
     @Override
     public Episode fetch(String uri) { 
         LOG.info("Retrieving SeeSaw item");
-
         String content = null;
-        System.out.println("Attempting to load item " + uri);
         
         try {
             content = httpClient.getContentsOf(uri);
