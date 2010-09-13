@@ -30,7 +30,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
 public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
 
-    static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile("^http://www\\.bbc\\.co\\.uk/programmes/([^/\\.]+)$");
+    static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile("^http://www\\.bbc\\.co\\.uk/programmes/(b00[^/\\.]+)$");
 
     private final BbcSlashProgrammesEpisodeRdfClient episodeClient;
     private final ContentExtractor<BbcProgrammeSource, Item> contentExtractor;
