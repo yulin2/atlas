@@ -59,9 +59,19 @@ public class LogViewingController {
 		return new SimpleModel()
 			.put("id", entry.id())
 			.put("source", entry.classNameOfSource())
-			.put("description", entry.description())
+			.put("description", descriptionOrExceptionMessage(entry))
 			.put("uri", entry.uri())
 			.put("severity", entry.severity())
 			.put("time", entry.timestamp().toString());
+	}
+
+	private String descriptionOrExceptionMessage(AdapterLogEntry entry) {
+		if (entry.description() != null) {
+			return entry.description();
+		}
+		if (entry.exceptionSummary() != null) {
+			return entry.exceptionSummary().message();
+		}
+		return null;
 	}
 }
