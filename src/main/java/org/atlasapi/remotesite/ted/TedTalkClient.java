@@ -18,11 +18,15 @@ package org.atlasapi.remotesite.ted;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class TedTalkClient implements RemoteSiteClient<HtmlDescriptionOfItem>  {
@@ -39,7 +43,12 @@ public class TedTalkClient implements RemoteSiteClient<HtmlDescriptionOfItem>  {
 
 	public HtmlDescriptionOfItem get(String uri) throws Exception {
 		
-		HtmlNavigator html = new HtmlNavigator(client.getContentsOf(uri));
+		HtmlNavigator html = fetchHtml(uri);
+		
+		if (html == null) {
+			return null;
+		}
+
 		HtmlDescriptionOfItem item = new HtmlDescriptionOfItem();
 
 		item.setTitle(html.metaTagContents("title"));
@@ -50,6 +59,17 @@ public class TedTalkClient implements RemoteSiteClient<HtmlDescriptionOfItem>  {
 		item.setFlashFile(flashFileUri);
 		item.setThumbnail(extractThumbnailUriFrom(html));
 		return item;
+	}
+
+	private HtmlNavigator fetchHtml(String uri) throws HttpException, HttpStatusCodeException {
+		try {
+			return new HtmlNavigator(client.getContentsOf(uri));
+		} catch (HttpStatusCodeException e) {
+			if (HttpServletResponse.SC_NOT_FOUND == e.getStatusCode()) {
+				return null;
+			} 
+			throw e;
+		}
 	}
 
 	private String extractThumbnailUriFrom(HtmlNavigator html) {

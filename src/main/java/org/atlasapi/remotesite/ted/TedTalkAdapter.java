@@ -53,6 +53,10 @@ public class TedTalkAdapter implements SiteSpecificAdapter<Item> {
 	public Item fetch(String uri) {
 		try {
 			HtmlDescriptionOfItem dmItem = itemClient.get(uri);
+			if (dmItem == null) {
+				// Item page was not found on Ted.com
+				return null;
+			}
 			return propertyExtractor.extractFrom(new HtmlDescriptionSource(dmItem, uri));
 		} catch (Exception e) {
 			throw new FetchException("Problem processing html page from ted.com", e);
