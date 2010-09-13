@@ -101,7 +101,7 @@ public class WikipediaSparqlGraphExtractor implements ContentExtractor<Wikipedia
 				ResultBinding resultBinding = (ResultBinding) containedInProperties.next();
 				RDFNode containedInNode = resultBinding.get(CONTAINED_IN_ID);
 				if (containedInNode != null && containedInNode.isResource()) {
-					String containedInUri = resultBinding.getResource(CONTAINED_IN_ID).getURI();
+					String containedInUri = ((Resource) containedInNode).getURI();
 					containedIn.add(containedInUri);
 				}
 			}
