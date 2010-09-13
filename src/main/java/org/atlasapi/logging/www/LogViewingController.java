@@ -11,13 +11,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
 
 @Controller
 public class LogViewingController {
 
+	private static final int MAX_LOG_ENTRIES_TO_SHOW = 500;
+	
 	private final LogReader log;
 
 	public LogViewingController(LogReader log) {
@@ -26,7 +28,7 @@ public class LogViewingController {
 	
 	@RequestMapping("/system/log")
 	public String showLog(Map<String, Object> model) throws IOException {
-		model.put("logEntries", toModel(ImmutableList.copyOf(log.read())));
+		model.put("logEntries", toModel(Iterables.limit(log.read(), MAX_LOG_ENTRIES_TO_SHOW)));
 		return "system/log/show";
 	}
 	
@@ -45,7 +47,7 @@ public class LogViewingController {
 		return cause.fullTrace();
 	}
 
-	private SimpleModelList toModel(ImmutableList<AdapterLogEntry> entries) {
+	private SimpleModelList toModel(Iterable<AdapterLogEntry> entries) {
 		SimpleModelList list = new SimpleModelList();
 		for (AdapterLogEntry entry : entries) {
 			list.add(toModel(entry));
@@ -59,6 +61,7 @@ public class LogViewingController {
 			.put("source", entry.classNameOfSource())
 			.put("description", entry.description())
 			.put("uri", entry.uri())
-			.put("severity", entry.severity());
+			.put("severity", entry.severity())
+			.put("time", entry.timestamp().toString());
 	}
 }
