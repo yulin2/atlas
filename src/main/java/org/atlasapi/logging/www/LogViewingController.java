@@ -7,6 +7,8 @@ import java.util.Map;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.LogReader;
 import org.atlasapi.persistence.logging.AdapterLogEntry.ExceptionSummary;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,7 +64,7 @@ public class LogViewingController {
 			.put("description", descriptionOrExceptionMessage(entry))
 			.put("uri", entry.uri())
 			.put("severity", entry.severity())
-			.put("time", entry.timestamp().toString());
+			.put("time", entry.timestamp().toString(DateTimeFormat.forPattern("dd/MM HH:mm:ss")));
 	}
 
 	private String descriptionOrExceptionMessage(AdapterLogEntry entry) {

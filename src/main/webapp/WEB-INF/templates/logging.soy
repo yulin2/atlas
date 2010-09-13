@@ -24,11 +24,11 @@ table {
 <body>
 <table>
     <thead>
-        <tr><th>Severity</th><th>Source</th><th>Description</th><th>Trace</th></th>
+        <tr><th>Timestamp</th><th>Severity</th><th>Source</th><th>Description</th><th>Trace</th></th>
     </thead>
     <tbody>
         {foreach $row in $logEntries}
-            <tr><td>{$row.severity}</td><td>{$row.source}</td><td>{if $row.description}{$row.description}{/if}</td><td><a href="/system/log/{$row.id}/trace">Show trace</a></tr>
+            <tr><td>{$row.time}</td><td>{$row.severity}</td><td>{$row.source}</td><td>{if $row.description}{$row.description}{/if}</td><td><a href="/system/log/{$row.id}/trace">Show trace</a></tr>
         {/foreach}
     </tbody>
 <table>
