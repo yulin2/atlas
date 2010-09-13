@@ -53,7 +53,7 @@ public class BbcProgrammesPolicyClient {
 		if (matcher.find()) {
 			return matcher.group(1);
 		}
-		throw new IllegalArgumentException("Uri does not contain a PID");
+		throw new IllegalArgumentException("Uri does not contain a PID, was: " + episodeUri);
 	}
 
 	private Maybe<Policy> policyForEpisodeWithPid(String pid) {
