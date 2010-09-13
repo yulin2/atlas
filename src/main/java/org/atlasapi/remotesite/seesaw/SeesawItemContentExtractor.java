@@ -65,7 +65,6 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 if (seriesText != null && seriesText.startsWith("Series ")) {
                     try {
                         int seriesNumber = Integer.parseInt(seriesText.substring("Series ".length(), seriesText.length()));
-                        System.out.print("Series number: " + seriesNumber + " / ");
                         episode.setSeriesNumber(seriesNumber);
                     }
                     catch (NumberFormatException e) {
@@ -137,11 +136,10 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
             
             Element categoryElem = source.firstElementOrNull("//*[text()='Categories: ']/following-sibling::*", infoElem);
             if (categoryElem != null) {
-                String category = SeesawHelper.getFirstTextContent(categoryElem).trim();
+                //String category = SeesawHelper.getFirstTextContent(categoryElem).trim();
                 String categoryLink = SeesawHelper.getFirstLinkUri(categoryElem);
                 
                 episode.setGenres(Sets.newHashSet(categoryLink));
-                System.out.println("category: " + category);
             }
             
             Element externalLinksElem = source.firstElementOrNull("//*[text()='External Links']/following-sibling::*", infoElem);
@@ -177,7 +175,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
             
             return episode;
         } catch (JaxenException e) {
-            e.printStackTrace();
+            LOG.warn("Error extracting seesaw item", e);
         }
         
         return null;

@@ -56,30 +56,34 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
     @Override
     public Brand fetch(String uri) {
         LOG.info("Retrieving Hulu brand: " + uri + " with " + httpClient.getClass() + " : " + httpClient.toString());
-        String content = getContent(uri);
-        if (content != null) {
-            HtmlNavigator navigator = new HtmlNavigator(content);
+        try {
+            String content = getContent(uri);
+            if (content != null) {
+                HtmlNavigator navigator = new HtmlNavigator(content);
 
-            Brand brand = extractor.extract(navigator);
-            List<Item> episodes = Lists.newArrayList();
+                Brand brand = extractor.extract(navigator);
+                List<Item> episodes = Lists.newArrayList();
 
-            if (episodeAdapter != null) {
-                for (Item item : brand.getItems()) {
-                    try {
-                        Episode episode = episodeAdapter.fetch(item.getCanonicalUri());
-                        episode.setBrand(brand);
-                        episodes.add(episode);
-                    } catch (FetchException fe) {
-                        LOG.warn("Failed to retrieve episode: " + item.getCanonicalUri() + " with message: " + fe.getMessage());
+                if (episodeAdapter != null) {
+                    for (Item item : brand.getItems()) {
+                        try {
+                            Episode episode = episodeAdapter.fetch(item.getCanonicalUri());
+                            episode.setBrand(brand);
+                            episodes.add(episode);
+                        } catch (FetchException fe) {
+                            LOG.warn("Failed to retrieve episode: " + item.getCanonicalUri() + " with message: " + fe.getMessage());
+                        }
                     }
+                    brand.setItems(episodes);
                 }
-                brand.setItems(episodes);
-            }
 
-            LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getItems().size() + " episodes");
-            return brand;
-        } else {
-            throw new FetchException("Unable to retrieve brand from Hulu: " + uri + " after a number of attempts");
+                LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getItems().size() + " episodes");
+                return brand;
+            } else {
+                throw new FetchException("Unable to retrieve brand from Hulu: " + uri + " after a number of attempts");
+            }
+        } catch (Exception e) {
+            throw new FetchException("Error retrieving Brand: " + uri + " with error: " + e.getMessage(), e);
         }
     }
 
