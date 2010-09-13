@@ -5,11 +5,15 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.util.Currency;
 import java.util.Set;
 
+import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
@@ -21,6 +25,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.media.MimeType;
 
 /**
@@ -71,6 +76,7 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		version.addManifestedAs(encoding);
 		Location location = new Location();
 		location.setUri("http://example.com");
+		location.setPolicy(new Policy().withRevenueContract(RevenueContract.PAY_TO_BUY).withPrice(new Price(Currency.getInstance("GBP"), 99)).withAvailableCountries(Countries.GB));
 		encoding.addAvailableAt(location);
 		fullItem.addVersion(version);
 		fullItem.setTitle("Collings and Herrin");
@@ -84,6 +90,11 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		assertThat(simpleLocation.getUri(), is("http://example.com"));
 		assertThat(simpleLocation.getDataContainerFormat(), is(MimeType.VIDEO_3GPP.toString()));
 		assertThat(simpleLocation.getRatingText(), is("adults only"));
+		assertThat(simpleLocation.getRevenueContract(), is("pay_to_buy"));
+		assertThat(simpleLocation.getCurrency(), is("GBP"));
+		assertThat(simpleLocation.getPrice(), is(99));
+		assertThat(simpleLocation.getAvailableCountries().size(), is(1));
+		assertThat(simpleLocation.getAvailableCountries().iterator().next(), is("GB"));
 		assertThat(simpleItem.getTitle(), is("Collings and Herrin"));
 	}
 }

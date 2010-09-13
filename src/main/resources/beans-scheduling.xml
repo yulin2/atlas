@@ -17,6 +17,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="updateMentionsScheduledTask" />
             <ref bean="updateTVBlobScheduledTask" />
             <ref bean="updateTVBlobTomorrowScheduledTask" />
+            <ref bean="updateSeesawAtoZScheduledTask" />
         </list>
     </property>
     <property name="daemon" value="true" />
@@ -160,6 +161,16 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </property>
   </bean>
   
+  <bean id="updateSeesawAtoZScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
+    <property name="delay"  value="3440000" />
+    <property name="period" value="1800000" />
+    <property name="runnable">
+        <bean parent="conditionalRunner">
+            <constructor-arg ref="seesawAtoZUpdater" />
+        </bean>
+    </property>
+  </bean>
+  
   <bean id="brandsUpdater" abstract="true">
   	<property name="contentStore" ref="contentWriter"/>
 	<property name="fetcher" ref="remoteFetcher"/>
@@ -192,6 +203,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	 		<constructor-arg value="true"/>
 	 	</bean>
 	 </property>
+  </bean>
+  
+  <bean id="seesawAtoZUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
+   <property name="uris">
+   	<list>
+   		<value>http://www.seesaw.com/AtoZ/A</value>
+   		<value>http://www.seesaw.com/AtoZ/I</value>
+   		<value>http://www.seesaw.com/AtoZ/Q</value>
+   		<value>http://www.seesaw.com/AtoZ/0</value>
+   	</list>
+   </property>
   </bean>
   
   <bean id="tvblobUpdater" class="org.atlasapi.remotesite.tvblob.TVBlobServicesUpdater">
@@ -248,6 +270,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <prop key="/system/hulu/update">huluUpdateController</prop>
                 <prop key="/system/tvblob/update">tvblobUpdateController</prop>
                 <prop key="/system/tvblob-tomorrow/update">tvblobTomorrowUpdateController</prop>
+                <prop key="/system/seesaw/update">seesawUpdateController</prop>
             </props>
         </property>
     </bean>
@@ -279,6 +302,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     
     <bean id="orphanUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="perPublisherUpdater"/>
+    </bean>
+    
+     <bean id="seesawUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
+        <constructor-arg ref="seesawAtoZUpdater"/>
     </bean>
   
   <bean id="conditionalRunner" abstract="true" class="com.metabroadcast.common.webapp.runnables.IpAddressBasedConditionalRunner">

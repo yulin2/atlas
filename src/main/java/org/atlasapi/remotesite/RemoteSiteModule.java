@@ -43,6 +43,10 @@ import org.atlasapi.remotesite.hulu.HuluRssAdapter;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
+import org.atlasapi.remotesite.seesaw.SeesawAtoZBrandsAdapter;
+import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
+import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
+import org.atlasapi.remotesite.seesaw.selftest.SeesawSelfTestController;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
@@ -113,6 +117,10 @@ public class RemoteSiteModule {
 		 adapters.add(new WikipediaSparqlAdapter());
 		 adapters.add(new ImdbAdapter(dispatcher));
 		 
+		 adapters.add(new SeesawAtoZBrandsAdapter());
+		 adapters.add(new SeesawBrandAdapter());
+		 adapters.add(new SeesawItemAdapter());
+		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;
 	}
@@ -143,5 +151,9 @@ public class RemoteSiteModule {
 	    HuluAllBrandsAdapter allBrands = new HuluAllBrandsAdapter(huluBrandAdapter());
         allBrands.setContentStore(contentWriters());
         return allBrands;
+	}
+	
+	public @Bean SeesawSelfTestController seesawSelfTestController() {
+	    return new SeesawSelfTestController();
 	}
 }
