@@ -38,6 +38,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.sparql.core.ResultBinding;
 
@@ -98,8 +99,11 @@ public class WikipediaSparqlGraphExtractor implements ContentExtractor<Wikipedia
 		if (containedInProperties != null) {
 			while (containedInProperties.hasNext()) {
 				ResultBinding resultBinding = (ResultBinding) containedInProperties.next();
-				String containedInUri = resultBinding.getResource(CONTAINED_IN_ID).getURI();
-				containedIn.add(containedInUri);
+				RDFNode containedInNode = resultBinding.get(CONTAINED_IN_ID);
+				if (containedInNode != null && containedInNode.isResource()) {
+					String containedInUri = resultBinding.getResource(CONTAINED_IN_ID).getURI();
+					containedIn.add(containedInUri);
+				}
 			}
 			return containedIn;
 		}
