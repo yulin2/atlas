@@ -13,7 +13,8 @@ public class SeesawHelper {
     private final static String urlPrefix = "http://www.seesaw.com/brands/";
     final static Pattern seesawLinkPattern = Pattern.compile("http://www.seesaw.com/.*/[bsp]-([0-9]+)-(.*)");
     
-    static String getFirstTextContent(Element element) {
+    @SuppressWarnings("unchecked")
+	static String getFirstTextContent(Element element) {
         if (!element.getText().equals("")) {
             return element.getText();
         }
@@ -30,18 +31,18 @@ public class SeesawHelper {
         return "";
     }
     
-    static String getAllTextContent(Element element) {
+    @SuppressWarnings("unchecked")
+	static String getAllTextContent(Element element) {
         String text = element.getText().trim();
-        
         List<Element> children = element.getChildren();
         for (Element child : children) {
             text += getAllTextContent(child);
         }
-        
         return text;
     }
     
-    static String getFirstLinkUri(Element element) {
+    @SuppressWarnings("unchecked")
+	static String getFirstLinkUri(Element element) {
         if (element.getName().equals("a")) {
             return element.getAttributeValue("href");
         }
@@ -53,11 +54,11 @@ public class SeesawHelper {
                 return link;
             }
         }
-        
         return "";
     }
     
-    static List<String> getAllLinkUris(Element element) {
+    @SuppressWarnings("unchecked")
+	static List<String> getAllLinkUris(Element element) {
         List<String> uris = Lists.newArrayList();
         if (element.getName().equals("a")) {
             uris.add(element.getAttributeValue("href"));
