@@ -82,4 +82,9 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
 			throw new RuntimeException(e);
 		}
 	}
+
+    @Override
+    public HttpResponse put(String arg0, PostData arg1) throws HttpException {
+        throw new UnsupportedOperationException();
+    }
 }
