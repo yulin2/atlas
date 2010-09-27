@@ -46,6 +46,7 @@ import org.atlasapi.util.stats.Score;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.query.Selection;
+import com.metabroadcast.common.units.ByteCount;
 
 public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 
@@ -59,8 +60,8 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 
 	protected static final int MAX_RESULTS = 5000;
 	
-	private final Directory brandsDir = new RAMDirectory();
-	private final Directory itemsDir = new RAMDirectory();
+	private final RAMDirectory brandsDir = new RAMDirectory();
+	private final RAMDirectory itemsDir = new RAMDirectory();
 
 	public InMemoryFuzzySearcher() {
 		try {
@@ -243,6 +244,33 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 			if (writer != null) {
 				closeWriter(writer);
 			}
+		}
+	}
+
+	public IndexStats stats() {
+		return new IndexStats(ByteCount.bytes(brandsDir.sizeInBytes()), ByteCount.bytes(itemsDir.sizeInBytes()));
+	}
+	
+	public static class IndexStats {
+
+		private final ByteCount brandsIndexSize;
+		private final ByteCount itemsIndexSize;
+
+		public IndexStats(ByteCount brandsIndexSize, ByteCount itemsIndexSize) {
+			this.brandsIndexSize = brandsIndexSize;
+			this.itemsIndexSize = itemsIndexSize;
+		}
+		
+		public ByteCount getBrandsIndexSize() {
+			return brandsIndexSize;
+		}
+		
+		public ByteCount getItemsIndexSize() {
+			return itemsIndexSize;
+		}
+
+		public ByteCount getTotalIndexSize() {
+			return brandsIndexSize.plus(itemsIndexSize);
 		}
 	}
 }

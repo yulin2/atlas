@@ -25,6 +25,7 @@ import org.atlasapi.query.content.UniqueContentForUriQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.InMemoryFuzzySearcher;
+import org.atlasapi.query.content.fuzzy.InMemoryIndexProbe;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,6 +55,10 @@ public class QueryModule {
 	
 	@Bean InMemoryFuzzySearcher titleSearcher() {
 		return new InMemoryFuzzySearcher();
+	}
+	
+	@Bean InMemoryIndexProbe inMemoryIndexProbe() {
+		return new InMemoryIndexProbe(titleSearcher());
 	}
     
     @Bean ContentListener queueingContentListener() {
