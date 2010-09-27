@@ -13,8 +13,8 @@ import org.atlasapi.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser;
 
 public class HuluItemAdapterTest extends TestCase {
     
-    String episodeUrl = "http://www.hulu.com/watch/153788";
-    String vanityUrl = episodeUrl+"/glee-journey-to-regionals";
+    String episodeUrl = "http://www.hulu.com/watch/178226";
+    String vanityUrl = episodeUrl+"/glee-audition";
     HuluItemAdapter adapter = new HuluItemAdapter();
 
     public void testShouldRetrieveHuluItem() throws Exception {
@@ -27,14 +27,14 @@ public class HuluItemAdapterTest extends TestCase {
         assertEquals("http://www.hulu.com/glee", brand.getCanonicalUri());
         assertNotNull(brand.getDescription());
 
-        assertEquals("Journey to Regionals", item.getTitle());
+        assertEquals("Audition", item.getTitle());
         assertEquals(episodeUrl, item.getCanonicalUri());
         assertFalse(item.getTags().isEmpty());
         assertNotNull(item.getDescription());
         assertNotNull(item.getThumbnail());
         assertNotNull(item.getImage());
-        assertEquals(Integer.valueOf(1), item.getSeriesNumber());
-        assertEquals(Integer.valueOf(22), item.getEpisodeNumber());
+        assertEquals(Integer.valueOf(2), item.getSeriesNumber());
+        assertEquals(Integer.valueOf(1), item.getEpisodeNumber());
 
         Version version = item.getVersions().iterator().next();
         assertNotNull(version);
