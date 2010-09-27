@@ -1,5 +1,6 @@
 package org.atlasapi.tracking;
 
+import org.atlasapi.logging.HealthModule;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.tracking.MongoDBBackedContentMentionStore;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.social.twitter.stream.TweetProcessor;
 import com.metabroadcast.common.social.twitter.stream.TwitterFilteredPipe;
+import com.metabroadcast.common.webapp.health.HealthProbe;
 
 @Configuration
 public class TrackingModule {
@@ -51,12 +53,19 @@ public class TrackingModule {
 	
 
 	public @Bean TwitterFilteredPipe trackingTwitterPipe() {
-        QueueingTweetProcessor processor = new QueueingTweetProcessor(tweetProcessor());
-		final TwitterFilteredPipe pipe = new TwitterFilteredPipe(processor, twitterUsername, twitterPassword);
+		final TwitterFilteredPipe pipe = new TwitterFilteredPipe(tweetQueue(), twitterUsername, twitterPassword);
         pipe.setKeywords(KEYWORDS);
         pipe.start();
         return pipe;
     }
+	
+	@Bean HealthProbe tweetQueueProbe() {
+		return new BuzzMessageQueueProbe(tweetQueue());
+	}
+
+	@Bean QueueingTweetProcessor tweetQueue() {
+		return new QueueingTweetProcessor(tweetProcessor());
+	}
 
 	@Bean TweetProcessor tweetProcessor() {
 		return new LinkExtractingStatusProcessor(new ContentResolvingUriMentionListener(contentResolver, mentionListener));

@@ -1,7 +1,7 @@
 package org.atlasapi.tracking.twitter;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,13 +18,13 @@ public class QueueingTweetProcessor implements TweetProcessor {
 	private final Log log = LogFactory.getLog(getClass());
 	
 	private final TweetProcessor delegate;
-	private final ExecutorService executor;
+	private final ThreadPoolExecutor executor;
 	
 	public QueueingTweetProcessor(TweetProcessor delegate) {
-		this(delegate, Executors.newFixedThreadPool(MAX_THREADS, new NamedThreadFactory("tweet-processor")));
+		this(delegate, (ThreadPoolExecutor) Executors.newFixedThreadPool(MAX_THREADS, new NamedThreadFactory("tweet-processor")));
 	}
 
-	public QueueingTweetProcessor(TweetProcessor delegate, ExecutorService executor) {
+	public QueueingTweetProcessor(TweetProcessor delegate, ThreadPoolExecutor executor) {
 		this.delegate = delegate;
 		this.executor = executor;
 	}
@@ -41,5 +41,13 @@ public class QueueingTweetProcessor implements TweetProcessor {
 				}
 			}
 		});
+	}
+
+	public int queueSize() {
+		return executor.getQueue().size();
+	}
+	
+	public int activeThreads() {
+		return executor.getActiveCount();
 	}
 }
