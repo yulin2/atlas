@@ -190,7 +190,9 @@ public class TVBlobDayPopulator {
 
                 if (pid != null) {
                     Episode episode = new Episode(BASE_URL + "episode/" + pid, BASE_CURIE + "episode_" + pid, Publisher.TVBLOB);
-                    episode.setDescription(shortSynopsis);
+                    if (shortSynopsis != null && shortSynopsis.length() > 0 && !shortSynopsis.equals("null")) {
+                        episode.setDescription(shortSynopsis);
+                    }
                     episode.setTitle(title(title, subTitle));
                     episode.setLastUpdated(new DateTime(DateTimeZones.UTC));
                     episode.setIsLongForm(true);
