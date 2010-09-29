@@ -36,6 +36,7 @@ public class C4AtomApi {
 	private static final Pattern EPISODE_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
 
 	private static final String API_BASE_URL = "http://api.channel4.com/programmes/";
+	private static final String ATOZ_BASE_URL = "http://api.channel4.com/programmes/atoz/";
 
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("(http.+?)\\d+x\\d+(\\.[a-zA-Z]+)");
 	
@@ -69,8 +70,11 @@ public class C4AtomApi {
 
 	public static String createBrandRequest(String webSafeName, String extension) {
 		return API_BASE_URL + webSafeName + extension;
-
 	}
+	
+	public static String createAtoZRequest(String webSafeName, String extension) {
+        return ATOZ_BASE_URL + webSafeName + extension;
+    }
 
 	public static boolean isACanonicalEpisodeUri(String href) {
 		return CANONICAL_EPISODE_URI_PATTERN.matcher(href).matches();

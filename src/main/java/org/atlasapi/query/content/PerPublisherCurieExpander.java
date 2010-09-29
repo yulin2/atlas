@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
 import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
-import org.atlasapi.remotesite.channel4.C4BrandAtoZAdapter;
 import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
@@ -43,7 +42,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			final String separator = "_";
 			@Override
 			public String expand(String curie) {
-				Maybe<String> uri = C4BrandAtoZAdapter.expand(curie);
+				Maybe<String> uri = expandC4Curie(curie);
 				if (uri.hasValue()) {
 					return uri.requireValue();
 				}
@@ -66,7 +65,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			@Override
 			public String compact(String url) {
 				
-				Maybe<String> curie = C4BrandAtoZAdapter.compact(url);
+				Maybe<String> curie = compactC4Uri(url);
 				if (curie.hasValue()) {
 					return curie.requireValue();
 				}
@@ -310,5 +309,23 @@ public class PerPublisherCurieExpander implements CurieExpander {
 		}
 		return curie.substring(0, index);
 	}
+	
+	private static final String C4_ATOZ_CURIE_PREFIX = "c4:atoz_";
+    private static final String C4_ATOZ_URI_PREFIX = "http://www.channel4.com/programmes/atoz/";
+    private static final Pattern ATOZ = Pattern.compile(C4_ATOZ_URI_PREFIX + "([a-z]|0-9)");
 
+	private static Maybe<String> compactC4Uri(String uri) {
+        Matcher matcher = ATOZ.matcher(uri);
+        if (matcher.matches()) {
+            return Maybe.just(C4_ATOZ_CURIE_PREFIX +  matcher.group(1));
+        }
+        return Maybe.nothing();
+    }
+
+    private static Maybe<String> expandC4Curie(String curie) {
+        if (curie.startsWith(C4_ATOZ_CURIE_PREFIX)) {
+            return Maybe.just(C4_ATOZ_URI_PREFIX + curie.substring(C4_ATOZ_CURIE_PREFIX.length()));
+        }
+        return Maybe.nothing();
+    }
 }
