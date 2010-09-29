@@ -18,7 +18,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
     private final Pattern seesawContentPagePattern = Pattern.compile("http://www.seesaw.com/(.*)/p-[0-9]+-(.*)");
-    static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
+    static final Log LOG = LogFactory.getLog(SeesawItemAdapter.class);
     private final SimpleHttpClient httpClient;
     private final ContentExtractor<HtmlNavigator, Episode> contentExtractor;
     
@@ -33,7 +33,9 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
     
     @Override
     public Episode fetch(String uri) { 
-        LOG.info("Retrieving SeeSaw item");
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Retrieving SeeSaw item: "+uri);
+        }
         String content = null;
         
         try {

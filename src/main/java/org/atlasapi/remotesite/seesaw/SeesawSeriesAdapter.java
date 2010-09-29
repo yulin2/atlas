@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.seesaw;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,7 +18,9 @@ import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
-    static final Log LOG = LogFactory.getLog(SeesawAtoZBrandsAdapter.class);
+    private final Pattern seesawContentPagePattern = Pattern.compile("http://www.seesaw.com/(.*)/s-[0-9]+-(.*)");
+    
+    static final Log LOG = LogFactory.getLog(SeesawSeriesAdapter.class);
     private final SimpleHttpClient httpClient;
     private final SiteSpecificAdapter<Episode> itemAdapter;
     
@@ -28,7 +32,9 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
     @Override
     public Series fetch(String uri) {
         try {
-            LOG.info("Retrieving Seesaw playlist: "+uri);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Retrieving Seesaw playlist: "+uri);
+            }
 
             String content;
             try {
@@ -79,7 +85,9 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
             if (episode.getSeriesNumber() != null) {
                 series.withSeriesNumber(episode.getSeriesNumber());
                 if (series.getTitle() == null) {
-                    series.setTitle("Series "+series.getSeriesNumber());
+                    String title = episode.getBrand() != null ? episode.getBrand()+" - " : "";
+                    title+= "Series "+series.getSeriesNumber();
+                    series.setTitle(title);
                 }
             }
             
@@ -89,6 +97,7 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
 
     @Override
     public boolean canFetch(String uri) {
-        return false;
+        Matcher matcher = seesawContentPagePattern.matcher(uri);
+        return matcher.matches();
     }
 }

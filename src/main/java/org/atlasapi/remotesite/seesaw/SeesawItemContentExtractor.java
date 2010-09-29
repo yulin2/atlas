@@ -28,6 +28,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
     static final Log LOG = LogFactory.getLog(SeesawItemContentExtractor.class);
     private final Pattern poundsPricePattern = Pattern.compile(".*\\u00A3([0-9]+)\\.([0-9]{2})");
     private final Pattern pencePricePattern = Pattern.compile(".*([0-9]{2})p");
+    private final Pattern seriesPattern = Pattern.compile("^.*Series (\\d+).*$");
     
     @Override
     public Episode extract(HtmlNavigator source) {
@@ -62,13 +63,12 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                     episodeText = headers.get(1).getText();
                 }
                 
-                if (seriesText != null && seriesText.startsWith("Series ")) {
-                    try {
-                        int seriesNumber = Integer.parseInt(seriesText.substring("Series ".length(), seriesText.length()));
-                        episode.setSeriesNumber(seriesNumber);
-                    }
-                    catch (NumberFormatException e) {
-                        LOG.warn("Unable to parse int", e);
+                if (seriesText != null) {
+                    Matcher matcher = seriesPattern.matcher(seriesText);
+                    if (matcher.find()) {
+                        episode.setSeriesNumber(Integer.valueOf(matcher.group(1)));
+                    } else {
+                        LOG.warn("Unable to parse series number: "+seriesText);
                     }
                     
                 }
@@ -89,7 +89,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                         episode.setEpisodeNumber(episodeNumber);
                     }
                     catch (NumberFormatException e) {
-                        LOG.warn("Unable to parse int", e);
+                        LOG.warn("Unable to parse episode number: "+episodeText, e);
                     }
                 }
                 

@@ -10,7 +10,6 @@ import com.google.common.collect.Lists;
 
 public class SeesawHelper {
     private final static String curiePrefix = "seesaw:";
-    private final static String urlPrefix = "http://www.seesaw.com/brands/";
     final static Pattern seesawLinkPattern = Pattern.compile("http://www.seesaw.com/.*/[bsp]-([0-9]+)-(.*)");
     
     @SuppressWarnings("unchecked")
@@ -70,14 +69,6 @@ public class SeesawHelper {
         }
         
         return uris;
-    }
-    
-    static String getCanonicalUriFromLink(String contentLink) {
-        return urlPrefix + getBrandId(contentLink);
-    }
-    
-    static String getCanonicalUriFromTitle(String title) {
-        return urlPrefix + title.toLowerCase();
     }
     
     static String getBrandCurieFromLink(String contentLink) {

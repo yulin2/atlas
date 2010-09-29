@@ -53,7 +53,6 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
                 String brandName = matcher.group(2);
                 
                 Brand brand = new Brand(uri, SeesawHelper.getCurieFromTitle(brandName), Publisher.SEESAW);
-                brand.addAlias(SeesawHelper.getCanonicalUriFromTitle(brandName));
                 
                 HtmlNavigator navigator = new HtmlNavigator(content);
                 Element title = navigator.firstElementOrNull("//*[@id='title']");
