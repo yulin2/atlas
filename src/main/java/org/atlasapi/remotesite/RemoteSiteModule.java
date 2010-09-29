@@ -30,8 +30,8 @@ import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.channel4.ApiKeyAwareClient;
+import org.atlasapi.remotesite.channel4.C4AtoZAtomAdapter;
 import org.atlasapi.remotesite.channel4.C4AtomBackedBrandAdapter;
-import org.atlasapi.remotesite.channel4.C4BrandAtoZAdapter;
 import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
 import org.atlasapi.remotesite.channel4.DefaultToSavedOnErrorSiteSpecificAdapter;
 import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
@@ -43,10 +43,8 @@ import org.atlasapi.remotesite.hulu.HuluRssAdapter;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
-import org.atlasapi.remotesite.seesaw.SeesawAtoZBrandsAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
-import org.atlasapi.remotesite.seesaw.selftest.SeesawSelfTestController;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
@@ -86,7 +84,7 @@ public class RemoteSiteModule {
 			C4AtomBackedBrandAdapter c4BrandFetcher = c4BrandFetcher();
 			adapters.add(c4BrandFetcher);
 			adapters.add(new C4HighlightsAdapter(c4BrandFetcher));
-			adapters.add(new C4BrandAtoZAdapter(new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, log)));
+			adapters.add(new C4AtoZAtomAdapter(c4AtomFetcher(), new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, log)));
 		} else {
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("Not installing C4 Adapters because API Key not present")
@@ -117,17 +115,19 @@ public class RemoteSiteModule {
 		 adapters.add(new WikipediaSparqlAdapter());
 		 adapters.add(new ImdbAdapter(dispatcher));
 		 
-		 adapters.add(new SeesawAtoZBrandsAdapter());
 		 adapters.add(new SeesawBrandAdapter());
 		 adapters.add(new SeesawItemAdapter());
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;
 	}
+	
+	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {
+	    return new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
+	}
 
 	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {
-		RemoteSiteClient<Feed> c4AtomFetcher = new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
-		return new C4AtomBackedBrandAdapter(c4AtomFetcher, contentStore, log);
+		return new C4AtomBackedBrandAdapter(c4AtomFetcher(), contentStore, log);
 	}
 	
 	public @Bean ContentWriters contentWriters() {
@@ -151,9 +151,5 @@ public class RemoteSiteModule {
 	    HuluAllBrandsAdapter allBrands = new HuluAllBrandsAdapter(huluBrandAdapter());
         allBrands.setContentStore(contentWriters());
         return allBrands;
-	}
-	
-	public @Bean SeesawSelfTestController seesawSelfTestController() {
-	    return new SeesawSelfTestController();
 	}
 }
