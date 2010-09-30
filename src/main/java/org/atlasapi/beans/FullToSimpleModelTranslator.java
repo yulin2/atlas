@@ -2,10 +2,13 @@ package org.atlasapi.beans;
 
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -17,13 +20,16 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.media.util.ChildFinder;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -80,7 +86,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 
 		org.atlasapi.media.entity.simple.Playlist simplePlaylist = new org.atlasapi.media.entity.simple.Playlist();
 		
-		copyBasicPlaylistAttributes(fullPlayList, simplePlaylist);
+		copyBasicContentAttributes(fullPlayList, simplePlaylist);
 		
 		for (Playlist fullSubList : fullPlayList.getPlaylists()) {
 			simplePlaylist.addPlaylist(simplePlaylistFrom(fullSubList, processed));
@@ -94,21 +100,29 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		
 		return simplePlaylist;
 	}
+	
+	private static void copyBasicContentAttributes(Content content, Description simpleDescription) {
+		simpleDescription.setUri(content.getCanonicalUri());
+		simpleDescription.setAliases(content.getAliases());
+		simpleDescription.setCurie(content.getCurie());
+		simpleDescription.setTitle(content.getTitle());
+		simpleDescription.setPublisher(toPublisherDetails(content.getPublisher()));
+		simpleDescription.setDescription(content.getDescription());
+		simpleDescription.setImage(content.getImage());
+		simpleDescription.setThumbnail(content.getThumbnail());
+		simpleDescription.setContainedIn(content.getContainedInUris());
+		simpleDescription.setGenres(content.getGenres());
+		simpleDescription.setTags(content.getTags());
+		simpleDescription.setClips(clipToSimple(content.getClips()));
+	}
 
-	private static void copyBasicPlaylistAttributes(Playlist fullPlayList, org.atlasapi.media.entity.simple.Playlist simplePlaylist) {
-		simplePlaylist.setUri(fullPlayList.getCanonicalUri());
-		simplePlaylist.setAliases(fullPlayList.getAliases());
-		simplePlaylist.setCurie(fullPlayList.getCurie());
-		simplePlaylist.setTitle(fullPlayList.getTitle());
-		simplePlaylist.setPublisher(toPublisherDetails(fullPlayList.getPublisher()));
-		simplePlaylist.setDescription(fullPlayList.getDescription());
-		
-		simplePlaylist.setImage(fullPlayList.getImage());
-		simplePlaylist.setThumbnail(fullPlayList.getThumbnail());
-		
-		simplePlaylist.setContainedIn(fullPlayList.getContainedInUris());
-		simplePlaylist.setGenres(fullPlayList.getGenres());
-		simplePlaylist.setTags(fullPlayList.getTags());
+	private static List<Item> clipToSimple(List<Clip> clips) {
+		return Lists.transform(clips, new Function<Clip, Item>() {
+			@Override
+			public Item apply(Clip clip) {
+				return simpleItemFrom(clip);
+			}
+		});
 	}
 
 	static org.atlasapi.media.entity.simple.Item simpleItemFrom(org.atlasapi.media.entity.Item fullItem) {
@@ -159,15 +173,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 	}
 
 	private static void copyProperties(org.atlasapi.media.entity.Item fullItem, Item simpleItem) {
-		
-		simpleItem.setUri(fullItem.getCanonicalUri());
-		simpleItem.setAliases(fullItem.getAliases());
-		simpleItem.setCurie(fullItem.getCurie());
-		
-		Set<String> containedInUris = fullItem.getContainedInUris();
-		for (String uri : containedInUris) {
-			simpleItem.addContainedIn(uri);
-		}
+		copyBasicContentAttributes(fullItem, simpleItem);
 		
 		if (fullItem instanceof Episode) {
 			Episode episode = (Episode) fullItem;
@@ -202,13 +208,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 			
 		}
 		
-		simpleItem.setTitle(fullItem.getTitle());
-		simpleItem.setDescription(fullItem.getDescription());
-		simpleItem.setPublisher(toPublisherDetails(fullItem.getPublisher()));
-		simpleItem.setImage(fullItem.getImage());
-		simpleItem.setThumbnail(fullItem.getThumbnail());
-		simpleItem.setGenres(fullItem.getGenres());
-		simpleItem.setTags(fullItem.getTags());
+	
 	}
 
 	private static PublisherDetails toPublisherDetails(Publisher publisher) {
