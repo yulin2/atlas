@@ -38,6 +38,9 @@ public class DatedBbcScheduleUriSourceTest extends MockObjectTestCase {
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/10/30.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcthree/programmes/schedules/2009/10/30.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcfour/programmes/schedules/2009/10/30.xml"));
+		assertThat(source.next(), is("http://www.bbc.co.uk/radio2/programmes/schedules/2009/10/30.xml"));
+		assertThat(source.next(), is("http://www.bbc.co.uk/radio1/programmes/schedules/england/2009/10/30.xml"));
+		assertThat(source.next(), is("http://www.bbc.co.uk/radio4/programmes/schedules/fm/2009/10/30.xml"));
 		
 		assertFalse(source.hasNext());
 		
@@ -55,14 +58,23 @@ public class DatedBbcScheduleUriSourceTest extends MockObjectTestCase {
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/10/30.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcthree/programmes/schedules/2009/10/30.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcfour/programmes/schedules/2009/10/30.xml"));
+		assertThat(source.next(), is("http://www.bbc.co.uk/radio2/programmes/schedules/2009/10/30.xml"));
+        assertThat(source.next(), is("http://www.bbc.co.uk/radio1/programmes/schedules/england/2009/10/30.xml"));
+        assertThat(source.next(), is("http://www.bbc.co.uk/radio4/programmes/schedules/fm/2009/10/30.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcone/programmes/schedules/london/2009/10/31.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/10/31.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcthree/programmes/schedules/2009/10/31.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcfour/programmes/schedules/2009/10/31.xml"));
+		assertThat(source.next(), is("http://www.bbc.co.uk/radio2/programmes/schedules/2009/10/31.xml"));
+        assertThat(source.next(), is("http://www.bbc.co.uk/radio1/programmes/schedules/england/2009/10/31.xml"));
+        assertThat(source.next(), is("http://www.bbc.co.uk/radio4/programmes/schedules/fm/2009/10/31.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcone/programmes/schedules/london/2009/11/01.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/01.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcthree/programmes/schedules/2009/11/01.xml"));
 		assertThat(source.next(), is("http://www.bbc.co.uk/bbcfour/programmes/schedules/2009/11/01.xml"));
+		assertThat(source.next(), is("http://www.bbc.co.uk/radio2/programmes/schedules/2009/11/01.xml"));
+        assertThat(source.next(), is("http://www.bbc.co.uk/radio1/programmes/schedules/england/2009/11/01.xml"));
+        assertThat(source.next(), is("http://www.bbc.co.uk/radio4/programmes/schedules/fm/2009/11/01.xml"));
 		
 		assertFalse(source.hasNext());
 		

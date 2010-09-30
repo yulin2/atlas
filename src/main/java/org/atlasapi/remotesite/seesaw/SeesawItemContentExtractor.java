@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
@@ -29,6 +30,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
     private final Pattern poundsPricePattern = Pattern.compile(".*\\u00A3([0-9]+)\\.([0-9]{2})");
     private final Pattern pencePricePattern = Pattern.compile(".*([0-9]{2})p");
     private final Pattern seriesPattern = Pattern.compile("^.*Series (\\d+).*$");
+    private final GenreMap genreMap = new SeesawGenreMap();
     
     @Override
     public Episode extract(HtmlNavigator source) {
@@ -139,7 +141,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 //String category = SeesawHelper.getFirstTextContent(categoryElem).trim();
                 String categoryLink = SeesawHelper.getFirstLinkUri(categoryElem);
                 
-                episode.setGenres(Sets.newHashSet(categoryLink));
+                episode.setGenres(genreMap.map(Sets.newHashSet(categoryLink)));
             }
             
             Element externalLinksElem = source.firstElementOrNull("//*[text()='External Links']/following-sibling::*", infoElem);

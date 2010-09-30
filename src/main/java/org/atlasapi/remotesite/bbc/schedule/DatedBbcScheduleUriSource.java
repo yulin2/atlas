@@ -53,6 +53,10 @@ public class DatedBbcScheduleUriSource implements Iterable<String> {
 			channelSchedules.add(String.format("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/%d/%02d/%02d.xml", year, month, day));
 			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcthree/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
 			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcfour/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
+			
+			channelSchedules.add(String.format("http://www.bbc.co.uk/radio2/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
+			channelSchedules.add(String.format("http://www.bbc.co.uk/radio1/programmes/schedules/england/%d/%02d/%02d.xml", year, month, day));
+			channelSchedules.add(String.format("http://www.bbc.co.uk/radio4/programmes/schedules/fm/%d/%02d/%02d.xml", year, month, day));
 		}
 		return Collections.unmodifiableList(channelSchedules );
 	}

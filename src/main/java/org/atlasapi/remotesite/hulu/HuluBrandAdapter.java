@@ -92,13 +92,13 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 
     @Override
     public boolean canFetch(String uri) {
-        return Pattern.compile(BASE_URI + "[a-z\\-]+").matcher(uri).matches() && !uri.startsWith("http://www.hulu.com/browse");
+        return Pattern.compile(BASE_URI + "[a-z\\-]+").matcher(uri).matches() && !ignoredUrl(uri);
     }
 
     public static class HuluBrandCanonicaliser implements Canonicaliser {
         @Override
         public String canonicalise(String uri) {
-            if (uri.startsWith("http://www.hulu.com/watch") || uri.startsWith("http://www.hulu.com/feed")) {
+            if (ignoredUrl(uri)) {
                 return null;
             }
 
@@ -136,5 +136,9 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
 	        }
         }
         throw new FetchException("Unable to retrieve brand from Hulu: " + uri + " after a number of attempts");
+    }
+    
+    private static boolean ignoredUrl(String uri) {
+        return uri.startsWith("http://www.hulu.com/browse") || uri.startsWith("http://www.hulu.com/trailers") || uri.startsWith("http://www.hulu.com/movie-trailers") || uri.startsWith("http://www.hulu.com/search") || uri.startsWith("http://www.hulu.com/watch") || uri.startsWith("http://www.hulu.com/feed");
     }
 }
