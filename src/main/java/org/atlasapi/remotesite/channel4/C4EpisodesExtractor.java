@@ -22,11 +22,13 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Country;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
@@ -39,7 +41,6 @@ import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Attribute;
 import org.jdom.Element;
-import org.jdom.Namespace;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -63,8 +64,6 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	public static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
 	public static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
 
-	private static final Namespace NS_MEDIA_RSS = Namespace.getNamespace("http://search.yahoo.com/mrss/");
-	
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
 
 	public static Map<String, String> CHANNEL_LOOKUP = channelLookup();
@@ -97,95 +96,149 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		return this;
 	}
 	
-	private static final Pattern SERIES_AND_EPISODE_NUMBER = Pattern.compile("series-(\\d+)/episode-(\\d+)");
-	
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<Episode> extract(Feed source) {
-		
-		String feedTitle = Strings.nullToEmpty(source.getTitle());
-		
-		List<Episode> episodes = Lists.newArrayList();
+		return (List) extractItems(source, true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Clip> extractClips(Feed source) {
+		return (List) extractItems(source, false);
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<Item> extractItems(Feed source, boolean isEpisode) {
+		List<Item> items = Lists.newArrayList();
 		
 		for (Entry entry : (List<Entry>) source.getEntries()) {
 			Map<String, String> lookup = C4AtomApi.foreignElementLookup(entry);
-			
-			Integer seriesNumber = C4AtomApi.readAsNumber(lookup, DC_SERIES_NUMBER);
-			Integer episodeNumber = C4AtomApi.readAsNumber(lookup, DC_EPISODE_NUMBER);
-			
-			String itemUri = C4AtomApi.canonicalUri(entry);
-			
-			if (itemUri == null) {
-				// fall back to hacking the uri out of the feed
-				itemUri = extarctUriFromLink(source, entry);
-			}
-			if (itemUri == null) {
-			    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Unable to derive URI for c4 episode with id: " + entry.getId()).withSource(this.getClass()));
-			    continue;
-			}
-			
-			Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
 
-			String fourOdUri = C4AtomApi.fourOdUri(entry);
-			if (fourOdUri != null) {
-				episode.addAlias(fourOdUri);
+			
+			Item episode = isEpisode ? createEpisode(source, entry, lookup) : createClip(source, entry, lookup);
+			
+			if (episode == null) {
+				continue;
 			}
 			
 			episode.setLastUpdated(new DateTime(source.getUpdated(), DateTimeZones.UTC));
 			
-			if (C4AtomApi.isAnEpisodeId(entry.getId())) {
-				episode.addAlias(entry.getId());
-			}
+			
+			episode.setDescription(description(entry));
+			
+			Element mediaGroup = C4AtomApi.mediaGroup(entry);
 
-			episode.setTitle(title(entry));
-			
-			if ((Strings.isNullOrEmpty(episode.getTitle()) || feedTitle.startsWith(episode.getTitle())) && episodeNumber != null && seriesNumber != null) {
-				episode.setTitle(String.format(EPISODE_TITLE_TEMPLATE , seriesNumber, episodeNumber));
-			}
-			
-			episode.setEpisodeNumber(episodeNumber);
-			episode.setSeriesNumber(seriesNumber);
-			
-			Element mediaGroup = mediaGroup(entry);
-			
-			Set<Country> availableCountries = null;
 			
 			if (mediaGroup != null) {
-				Element thumbnail = mediaGroup.getChild("thumbnail", NS_MEDIA_RSS);
+				Element thumbnail = mediaGroup.getChild("thumbnail", C4AtomApi.NS_MEDIA_RSS);
 				if (thumbnail != null) {
 					Attribute thumbnailUri = thumbnail.getAttribute("url");
 					C4AtomApi.addImages(episode, thumbnailUri.getValue());
 				}
-				Element restriction = mediaGroup.getChild("restriction", NS_MEDIA_RSS);
-				if (restriction != null && restriction.getValue() != null) {
-					availableCountries = Countries.fromDelimtedList(restriction.getValue());
-				}
 			}
 			
-			episode.setIsLongForm(true);
-			episode.setDescription(description(entry));
-			
-			Episode oldEpisode = null;
-			if (contentResolver != null && (include4odInfo || inlcudeBroadcasts)) {
-			    Content oldContent = contentResolver.findByUri(episode.getCanonicalUri());
-			    if (oldContent instanceof Episode) {
-			        oldEpisode = (Episode) oldContent;
-			    }
-			}
-			
-			Version version = version(C4AtomApi.fourOdUri(entry), entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC), oldEpisode);
+			Version version = versionFor(entry, episode, mediaGroup, lookup);
+		
 			if (version != null) {
 				episode.addVersion(version);
 			}
-			episodes.add(episode);
+			items.add(episode);
 		}
-		return episodes;
+		return items;
+	}
+	
+	
+	private Clip createClip(Feed source, Entry entry, Map<String, String> lookup) {
+
+		String clipUri = C4AtomApi.clipUri(entry);
+		
+		if (clipUri == null) {
+		    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Unable to derive URI for C4 clip with id: " + entry.getId()).withSource(this.getClass()));
+		    return null;
+		}
+		
+		Clip episode = new Clip(clipUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(clipUri), Publisher.C4);
+
+		String fourOdUri = C4AtomApi.fourOdUri(entry);
+		if (fourOdUri != null) {
+			episode.addAlias(fourOdUri);
+		}
+
+		episode.setTitle(title(entry));
+
+		episode.setIsLongForm(true);
+		return episode;
+	}
+
+	private Item createEpisode(Feed source, Entry entry, Map<String, String> lookup) {
+		
+		String feedTitle = Strings.nullToEmpty(source.getTitle());
+
+		Integer seriesNumber = C4AtomApi.readAsNumber(lookup, DC_SERIES_NUMBER);
+		Integer episodeNumber = C4AtomApi.readAsNumber(lookup, DC_EPISODE_NUMBER);
+		
+		String itemUri = C4AtomApi.canonicalUri(entry);
+		
+		if (itemUri == null) {
+			// fall back to hacking the uri out of the feed
+			itemUri = extarctUriFromLink(source, entry);
+		}
+		if (itemUri == null) {
+		    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Unable to derive URI for c4 episode with id: " + entry.getId()).withSource(this.getClass()));
+		    return null;
+		}
+		
+		Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
+
+		String fourOdUri = C4AtomApi.fourOdUri(entry);
+		if (fourOdUri != null) {
+			episode.addAlias(fourOdUri);
+		}
+		
+		
+		if (C4AtomApi.isAnEpisodeId(entry.getId())) {
+			episode.addAlias(entry.getId());
+		}
+
+		episode.setTitle(title(entry));
+		
+		if ((Strings.isNullOrEmpty(episode.getTitle()) || feedTitle.startsWith(episode.getTitle())) && episodeNumber != null && seriesNumber != null) {
+			episode.setTitle(String.format(EPISODE_TITLE_TEMPLATE , seriesNumber, episodeNumber));
+		}
+		
+		episode.setEpisodeNumber(episodeNumber);
+		episode.setSeriesNumber(seriesNumber);
+		episode.setIsLongForm(true);
+		return episode;
+	}
+
+	public Version versionFor(Entry entry, Item episode, Element mediaGroup, Map<String, String> lookup) {
+		Set<Country> availableCountries = null;
+		if (mediaGroup != null) {
+			Element restriction = mediaGroup.getChild("restriction", C4AtomApi.NS_MEDIA_RSS);
+			if (restriction != null && restriction.getValue() != null) {
+				availableCountries = Countries.fromDelimtedList(restriction.getValue());
+			}
+		}
+		
+		Episode oldEpisode = null;
+		if (contentResolver != null && (include4odInfo || inlcudeBroadcasts)) {
+		    Content oldContent = contentResolver.findByUri(episode.getCanonicalUri());
+		    if (oldContent instanceof Episode) {
+		        oldEpisode = (Episode) oldContent;
+		    }
+		}
+		String uri = C4AtomApi.fourOdUri(entry);
+		if (uri == null) {
+			uri = C4AtomApi.clipUri(entry);
+		}
+		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC), oldEpisode);
 	}
 
 	@SuppressWarnings("unchecked")
 	private String extarctUriFromLink(Feed source, Entry entry) {
 		for (Link link : (List<Link>) entry.getOtherLinks()) {
-			Matcher matcher = SERIES_AND_EPISODE_NUMBER.matcher(link.getHref());
+			Matcher matcher = C4AtomApi.SERIES_AND_EPISODE_NUMBER_IN_ANY_URI.matcher(link.getHref());
 			if (matcher.find()) {
 				return C4AtomApi.episodeUri(C4AtomApi.webSafeNameFromAnyFeedId(source.getId()), Integer.valueOf(matcher.group(1)), Integer.valueOf(matcher.group(2)));	
 			}
@@ -314,13 +367,5 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
     }
 	
 
-	@SuppressWarnings("unchecked")
-	private Element mediaGroup(Entry syndEntry) {
-		for (Element element : (List<Element>) syndEntry.getForeignMarkup()) {
-			if (NS_MEDIA_RSS.equals(element.getNamespace()) && "group".equals(element.getName())) {
-				return element;
-			}
-		}
-		return null;
-	}
+	
 }

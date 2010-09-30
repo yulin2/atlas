@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Content;
 import org.jdom.Element;
+import org.jdom.Namespace;
 import org.joda.time.Duration;
 
 import com.google.common.base.Preconditions;
@@ -19,12 +20,16 @@ import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
 
 public class C4AtomApi {
+	
+	public static final Namespace NS_MEDIA_RSS = Namespace.getNamespace("http://search.yahoo.com/mrss/");
 
     public static final String DC_DURATION = "dc:relation.Duration";
 	private static final String PROGRAMMES_BASE = "http://www.channel4.com/programmes/";
 	
 	private static final String WEB_SAFE_NAME_PATTERN = "[a-z0-9\\-]+";
 	private static final String FEED_ID_PREFIX_PATTERN = "tag:www.channel4.com,\\d{4}:/programmes/";
+	
+	public static final Pattern SERIES_AND_EPISODE_NUMBER_IN_ANY_URI = Pattern.compile("series-(\\d+)/episode-(\\d+)");
 	
 	public static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(String.format("%s(%s)", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
 	private static final Pattern CANONICAL_EPISODE_URI_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
@@ -176,4 +181,27 @@ public class C4AtomApi {
 	public static boolean isAnEpisodeId(String id) {
 		return EPISODE_PAGE_ID_PATTERN.matcher(id).matches();
 	}
+
+	public static String clipUri(Entry entry) {
+		 Element mediaGroup = mediaGroup(entry);
+		 if (mediaGroup == null) {
+			 return null;
+		 }
+		 Element player = mediaGroup.getChild("player", NS_MEDIA_RSS);
+		 if (player == null) {
+			 return null;
+		 }
+		 return player.getAttributeValue("url");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Element mediaGroup(Entry syndEntry) {
+		for (Element element : (List<Element>) syndEntry.getForeignMarkup()) {
+			if (NS_MEDIA_RSS.equals(element.getNamespace()) && "group".equals(element.getName())) {
+				return element;
+			}
+		}
+		return null;
+	}
+	
 }
