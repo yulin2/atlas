@@ -49,14 +49,16 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
     private final C4EpisodeBroadcastExtractor broadcastExtractor = new C4EpisodeBroadcastExtractor();
     private final C4ClipExtractor clipExtractor;
     private final RemoteSiteClient<Feed> feedClient;
+	private final C4PreviousVersionDataMerger versionMerger;
 
 
     public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, AdapterLog log) {
         feedClient = atomClient;
-        fourOditemExtrator = new C4EpisodesExtractor(contentResolver, log).includeOnDemands().includeBroadcasts();
-        flattenedBrandExtrator = new C4EpisodesExtractor(contentResolver, log);
+        fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands().includeBroadcasts();
+        flattenedBrandExtrator = new C4EpisodesExtractor(log);
         seriesExtractor = new C4SeriesExtractor(contentResolver, log);
-        clipExtractor = new C4ClipExtractor(atomClient, new C4EpisodesExtractor(contentResolver, log).includeOnDemands());
+        clipExtractor = new C4ClipExtractor(atomClient, new C4EpisodesExtractor(log).includeOnDemands());
+        versionMerger = new C4PreviousVersionDataMerger(contentResolver);
     }
 
     @Override
@@ -92,6 +94,10 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
         populateBroadcasts(items, brand);
 
+        for (Episode episode : items) {
+			versionMerger.merge(episode);
+		}
+        
         brand.setItems(items);
         
         clipExtractor.fetchAndAddClipsTo(brand);

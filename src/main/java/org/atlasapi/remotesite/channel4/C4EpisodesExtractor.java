@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Country;
 import org.atlasapi.media.entity.Encoding;
@@ -33,7 +32,6 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -68,10 +66,8 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 
 	public static Map<String, String> CHANNEL_LOOKUP = channelLookup();
 	private final AdapterLog log;
-    private final ContentResolver contentResolver; 
 	
-	public C4EpisodesExtractor(ContentResolver contentResolver, AdapterLog log) {
-		this.contentResolver = contentResolver;
+	public C4EpisodesExtractor(AdapterLog log) {
         this.log = log;
 	}
 	
@@ -221,18 +217,12 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			}
 		}
 		
-		Episode oldEpisode = null;
-		if (contentResolver != null && (include4odInfo || inlcudeBroadcasts)) {
-		    Content oldContent = contentResolver.findByUri(episode.getCanonicalUri());
-		    if (oldContent instanceof Episode) {
-		        oldEpisode = (Episode) oldContent;
-		    }
-		}
+		
 		String uri = C4AtomApi.fourOdUri(entry);
 		if (uri == null) {
 			uri = C4AtomApi.clipUri(entry);
 		}
-		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC), oldEpisode);
+		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -293,7 +283,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	}
 
 
-	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated, Episode oldEpisode) {
+	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
 		Version version = new Version();
 		Duration duration = C4AtomApi.durationFrom(lookup);
 		
@@ -318,8 +308,6 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 				broadcast.setLastUpdated(lastUpdated);
 				version.addBroadcast(broadcast);
 			}
-			
-			addInactiveBroadcasts(version, oldEpisode);
 		}
 		
 		if (include4odInfo) {
@@ -327,45 +315,8 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			encoding.addAvailableAt(location(uri, locationId, lookup, availableCountries, lastUpdated));
 			version.addManifestedAs(encoding);
 		}
-		addUnavailableLocations(version, oldEpisode);
 				
 		return version.getBroadcasts().isEmpty() && version.getManifestedAs().isEmpty() ? null : version;
 	}
-
-	private void addInactiveBroadcasts(Version version, Episode oldEpisode) {
-	    if (oldEpisode != null) {
-    	    for (Version oldVersion: oldEpisode.getVersions()) {
-    	        for (Broadcast broadcast: oldVersion.getBroadcasts()) {
-    	            if (! version.getBroadcasts().contains(broadcast)) {
-    	                if (broadcast.isActivelyPublished()) {
-    	                    broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
-    	                }
-    	                broadcast.setIsActivelyPublished(Boolean.FALSE);
-    	                version.addBroadcast(broadcast);
-    	            }
-    	        }
-    	    }
-	    }
-	}
-	
-	private void addUnavailableLocations(Version version, Episode oldEpisode) {
-	    if (oldEpisode != null) {
-    	    if (version.getManifestedAs().isEmpty() && !oldEpisode.getVersions().isEmpty()) {
-    	        Version oldVersion = oldEpisode.getVersions().iterator().next();
-    	        version.setManifestedAs(oldVersion.getManifestedAs());
-    	        
-    	        for (Encoding encoding: version.getManifestedAs()) {
-    	            for (Location location: encoding.getAvailableAt()) {
-    	                if (location.getAvailable()) {
-    	                    location.setLastUpdated(new DateTime(DateTimeZones.UTC));
-    	                }
-    	                location.setAvailable(false);
-    	            }
-    	        }
-    	    }
-	    }
-    }
-	
-
 	
 }
