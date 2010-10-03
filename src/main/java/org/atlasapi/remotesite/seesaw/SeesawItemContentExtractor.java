@@ -30,6 +30,7 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
     private final Pattern poundsPricePattern = Pattern.compile(".*\\u00A3([0-9]+)\\.([0-9]{2})");
     private final Pattern pencePricePattern = Pattern.compile(".*([0-9]{2})p");
     private final Pattern seriesPattern = Pattern.compile("^.*Series (\\d+).*$");
+    private final Pattern imagePattern = Pattern.compile("(/i/ccp/\\d+/\\d+.JPG)", Pattern.CASE_INSENSITIVE);
     private final GenreMap genreMap = new SeesawGenreMap();
     
     @Override
@@ -149,6 +150,14 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                 // TODO: use external links as aliases
                 @SuppressWarnings("unused")
                 List<String> links = SeesawHelper.getAllLinkUris(externalLinksElem);
+            }
+            
+            List<Element> scriptElements = source.allElementsMatching("//script");
+            for (Element scriptElement: scriptElements) {
+                Matcher matcher = imagePattern.matcher(scriptElement.getValue());
+                if (matcher.find()) {
+                    episode.setImage("http://www.seesaw.com"+matcher.group(1));
+                }
             }
             
             Element priceElem = source.firstElementOrNull("//*[@id='episodePriceSpan']");
