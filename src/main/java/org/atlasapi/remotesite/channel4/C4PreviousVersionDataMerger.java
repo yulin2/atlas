@@ -6,6 +6,7 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.joda.time.DateTime;
@@ -28,6 +29,12 @@ class C4PreviousVersionDataMerger {
 		if (oldItem == null || oldItem.nativeVersions().isEmpty()) {
 			// can't merge if this is the first time we've seen
 			// the item
+			return;
+		}
+		
+		if (!Publisher.C4.equals(oldItem.getPublisher())) {
+			// sanity check, if the item we got back was not in the C4 namespace
+			// then we shouldn't do anything
 			return;
 		}
 		
