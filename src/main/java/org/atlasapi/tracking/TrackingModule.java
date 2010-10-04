@@ -1,6 +1,5 @@
 package org.atlasapi.tracking;
 
-import org.atlasapi.logging.HealthModule;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.tracking.MongoDBBackedContentMentionStore;
