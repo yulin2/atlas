@@ -24,6 +24,7 @@ public class SeesawItemAdapterTest extends TestCase {
         
         Episode southPark = adapter.fetch("http://www.seesaw.com/TV/Comedy/p-24525-Weight-Gain-4000");
         assertEquals("Weight Gain 4000", southPark.getTitle());
+        assertEquals("http://www.seesaw.com/i/ccp/00000158/15894.jpg", southPark.getImage());
         
         assertTrue(southPark.getVersions().size() > 0);
         Version firstVersion = southPark.getVersions().iterator().next();

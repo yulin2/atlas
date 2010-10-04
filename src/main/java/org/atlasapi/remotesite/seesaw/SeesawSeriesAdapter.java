@@ -91,6 +91,10 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
                 }
             }
             
+            if (series.getImage() == null && episode.getImage() != null) {
+                series.setImage(episode.getImage());
+            }
+            
             series.addItem(episode);
         }
     }

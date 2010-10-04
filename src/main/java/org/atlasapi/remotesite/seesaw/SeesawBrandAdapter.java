@@ -93,6 +93,9 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
             if (brand.getDescription() == null) {
                 brand.setDescription(series.getDescription());
             }
+            if (brand.getImage() == null && series.getImage() != null) {
+                brand.setImage(series.getImage());
+            }
             
             for (Item item : series.getItems()) {
                 Episode episode = (Episode) item;
