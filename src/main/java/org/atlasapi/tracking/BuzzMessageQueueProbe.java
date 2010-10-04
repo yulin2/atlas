@@ -17,7 +17,7 @@ public class BuzzMessageQueueProbe implements HealthProbe  {
 	public ProbeResult probe() {
 		ProbeResult result = new ProbeResult(title());
 		result.addInfo("queue size", queue.queueSize() + " messages");
-		result.addInfo("active threads", queue.queueSize() + " threads");
+		result.addInfo("active threads", queue.activeThreads() + " threads");
 		return result;
 	}
 
