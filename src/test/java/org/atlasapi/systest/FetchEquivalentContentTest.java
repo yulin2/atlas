@@ -52,6 +52,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.persistence.MongoTestHelper;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.mongodb.Mongo;
 
@@ -135,8 +136,8 @@ public class FetchEquivalentContentTest extends TestCase {
 	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
 	public static class AtlasModuleWithLocalMongoAndFakeFetchers {
 		
-		public @Bean Mongo mongo() {
-			return MongoTestHelper.anEmptyMongo();
+		public @Bean DatabasedMongo db() {
+			return MongoTestHelper.anEmptyTestDatabase();
 		}
 		
 		public @Bean Fetcher<Content> remoteFetcher() {
