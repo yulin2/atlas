@@ -35,7 +35,7 @@ public class DefaultToSavedOnErrorSiteSpecificAdapter<T> implements SiteSpecific
 		} catch (Exception e) {
 			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(uri).withSource(delegate.getClass()));
 			Content found = contentStore.findByUri(uri);
-			if (publisher.equals(found.getPublisher())) {
+			if (found != null && publisher.equals(found.getPublisher())) {
 				return (T) found;
 			}
 			return null;
