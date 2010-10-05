@@ -64,6 +64,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 				                            "<aliases>" +
 				                              "<alias>http://www.bbc.co.uk/p/bluepeter</alias>" +
 				                            "</aliases>" +
+				                            "<clips/>" +
 				                            "<play:containedIn/>" +
 				                            "<play:genres/>" +
 				                            "<play:tags/>" +
@@ -102,6 +103,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 		assertThat(stream.toString(), containsString("<play:item>" +
 														"<aliases/>" +
+														"<clips/>" +
 														"<play:containedIn/>" +
 														"<play:genres/>" +
 														"<play:tags/>" +

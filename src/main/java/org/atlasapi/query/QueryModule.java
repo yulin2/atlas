@@ -14,12 +14,14 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ContentListener;
 import org.atlasapi.persistence.content.QueueingContentListener;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.UniqueContentForUriQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
@@ -27,10 +29,13 @@ import org.atlasapi.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.InMemoryFuzzySearcher;
 import org.atlasapi.query.content.fuzzy.InMemoryIndexProbe;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
+import org.atlasapi.remotesite.health.BroadcasterProbe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.metabroadcast.common.webapp.health.HealthProbe;
 
 @Configuration
 public class QueryModule {
@@ -41,6 +46,14 @@ public class QueryModule {
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
 		return new UniqueContentForUriQueryExecutor(new MongoDBQueryExecutor(contentStore));
+	}
+	
+	public @Bean HealthProbe c4Probe() {
+		return new BroadcasterProbe(Publisher.C4, new AToZUriSource("http://www.channel4.com/programmes/atoz/", "", true), mongoQueryExecutor());
+	}
+	
+	public @Bean HealthProbe bbcProbe() {
+		return new BroadcasterProbe(Publisher.BBC, new AToZUriSource("http://feeds.bbc.co.uk/iplayer/atoz/", "/list", true), mongoQueryExecutor());
 	}
 
 	@Bean KnownTypeQueryExecutor mongoDbQueryExcutorThatFiltersUriQueries() {

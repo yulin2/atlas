@@ -39,7 +39,9 @@ import com.google.gson.GsonBuilder;
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class JsonTranslator implements BeanGraphWriter {
+	
     public static final String CALLBACK = "callback";
+    
     @Autowired
     private HttpServletRequest request;
 

@@ -49,7 +49,7 @@ public class C4AtoZAtomAdapter implements SiteSpecificAdapter<Playlist> {
         try {
             Playlist playlist = new Playlist(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), Publisher.C4);
             
-            Boolean hasNext = false;
+            boolean hasNext = false;
             String currentPage = atomUrl(uri);
             do {
                 Feed feed = feedClient.get(currentPage);
@@ -58,7 +58,9 @@ public class C4AtoZAtomAdapter implements SiteSpecificAdapter<Playlist> {
                     String brandUri = extarctUriFromLinks(entry);
                     if (brandUri != null && brandAdapter.canFetch(brandUri)) {
                         Brand brand = brandAdapter.fetch(brandUri);
-                        playlist.addPlaylist(brand);
+                        if (brand != null) {
+                        	playlist.addPlaylist(brand);
+                        }
                     }
                 }
                 

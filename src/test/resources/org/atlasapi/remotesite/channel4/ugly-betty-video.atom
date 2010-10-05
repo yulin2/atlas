@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:fh="http://purl.org/syndication/history/1.0">
+  <id>tag:www.channel4.com,2009:/programmes/ugly-betty/video</id>
+  <title type="text">Ugly Betty Clips</title>
+  <subtitle type="html">Smash-hit US comedy drama. In the superficial world of high fashion, image is everything. How can an ordinary girl - a slightly plump plain Jane from Queens - possibly fit in?</subtitle>
+  <updated>2010-09-29T14:04:33.892Z</updated>
+  <author>
+    <name>Channel 4 Television</name>
+  </author>
+  <logo>http://www.channel4.com/assets/programmes/images/ugly-betty/51a6f4d8-6a17-4425-bb5c-1d9fd45cd3eb_200x113.jpg</logo>
+  <link href="http://www.channel4.com/programmes/ugly-betty/video" rel="alternate" type="text/html"/>
+  <link href="http://api.channel4.com/programmes/ugly-betty/video.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/programmes/ugly-betty.atom?apikey=API_KEY" rel="up" type="application/atom+xml"/>
+  <fh:complete/>
+  <dc:relation.Sharable>false</dc:relation.Sharable>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/008/004</id>
+    <title type="text">Hey Bobby</title>
+    <updated>2010-09-29T14:04:33.893Z</updated>
+    <summary type="html">Hilda finds it hard to resist Bobby's bulging biceps</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-8/hey-bobby.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-8/hey-bobby" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-8.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-8/hey-bobby"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-8/hey-bobby/45bd1920-b957-414c-8b5a-4f7bb5c514d2_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-08-30; end=2010-11-28; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>1:00</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>8</dc:relation.EpisodeNumber>
+  </entry>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/007/005</id>
+    <title type="text">We've Been Expecting You</title>
+    <updated>2010-09-29T14:04:33.894Z</updated>
+    <summary type="html">Betty's off to see the Community of the Phoenix</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-7/weve-been-expecting-you.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-7/weve-been-expecting-you" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-7.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-7/weve-been-expecting-you"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-7/weve-been-expecting-you/7494e8ec-a18e-45a0-bebf-c0d36491d8f8_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-08-23; end=2010-11-21; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>0:49</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>7</dc:relation.EpisodeNumber>
+  </entry>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/006/004</id>
+    <title type="text">Hey Chipmunk</title>
+    <updated>2010-09-29T14:04:33.894Z</updated>
+    <summary type="html">Betty tries to pluck up the courage to ask Hilda's rebellious high school boyfriend Bobby out on a date</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-6/hey-chipmunk.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-6/hey-chipmunk" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-6.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-6/hey-chipmunk"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-6/chipmunk/4f63e991-2530-4591-a545-7768fff71826_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-08-16; end=2010-11-14; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>1:00</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>6</dc:relation.EpisodeNumber>
+  </entry>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/005/001</id>
+    <title type="text">Ep 5: Charity Event</title>
+    <updated>2010-09-29T14:04:33.895Z</updated>
+    <summary type="html">Wilhelmina uses Mark's idea of a charity event to improve her public image. Meanwhile Betty is delighted to receive an invite</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-5/ep-5-charity-event.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-5/ep-5-charity-event" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-5.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-5/ep-5-charity-event"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-5/ep-5-chairty-event/1ab874b2-b3aa-4765-9155-7ac4b5d659c9_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-08-09; end=2010-11-07; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>0:59</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>5</dc:relation.EpisodeNumber>
+  </entry>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/004/002</id>
+    <title type="text">Ep 4: Betty's New Assistant Is...</title>
+    <updated>2010-09-29T14:04:33.896Z</updated>
+    <summary type="html">Who will be Betty's new assistant?</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-4/ep-4-bettys-new-assistant-is.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-4/ep-4-bettys-new-assistant-is" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-4/ep-4-bettys-new-assistant-is"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-4/bettys-new-assistant-is/9f473b05-1311-436f-827b-a745e50baf2f_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-08-02; end=2010-10-31; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>1:00</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>4</dc:relation.EpisodeNumber>
+  </entry>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/003/002</id>
+    <title type="text">Ep 3: Seek &amp; Destroy</title>
+    <updated>2010-09-29T14:04:33.896Z</updated>
+    <summary type="html">Marc plots to destroy Betty's career for his own - will he succeed?</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-3/ep-3-seek-destroy.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-3/ep-3-seek-destroy" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-3/ep-3-seek-destroy"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-3/seek-destroy/1dc60064-e70d-43f2-b9c1-6167e71c5cda_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-07-26; end=2010-10-24; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>0:45</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>3</dc:relation.EpisodeNumber>
+  </entry>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/002/001</id>
+    <title type="text">Ep 2: Get the Liar!</title>
+    <updated>2010-09-29T14:04:33.897Z</updated>
+    <summary type="html">Betty's anti-malaria photoshoot is scuppered by Daniel's neediness and Matt's scornful attitude. Can she get her team back on her side?</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-2/ep-2-get-the-liar.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-2/ep-2-get-the-liar" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-2/ep-2-get-the-liar"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-2/get-the-liar/f4af97c1-b1f7-4a24-a679-d4fe773fc5b8_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-07-19; end=2010-10-17; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>0:53</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
+  </entry>
+  <entry xmlns:dcterms="http://purl.org/dc/terms">
+
+    <id>tag:www.channel4.com,2009:clip/CGS_CLIP_48475/001/002</id>
+    <title type="text">Ep 1: New Position</title>
+    <updated>2010-09-29T14:04:33.897Z</updated>
+    <summary type="html">Betty's first day as Associate Features Editor of Mode Magazine</summary>
+    <link href="http://api.channel4.com/programmes/ugly-betty/video/series-4/episode-1/ep-1-new-position.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-1/ep-1-new-position" rel="alternate" type="text/html"/>
+    <link href="http://api.channel4.com/programmes/ugly-betty/episode-guide/series-4/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
+    <media:group>
+      <media:player url="http://www.channel4.com/programmes/ugly-betty/video/series-4/episode-1/ep-1-new-position"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/ugly-betty/series-4/episode-1/new-position/7105903f-e755-43b0-9ec1-13b320a2e8c7_200x113.jpg" width="200" height="113"/>
+      <media:rating>nonadult</media:rating>
+      <media:copyright url="http://www.channel4.com/terms_and_conditions.html">Terms and Conditions</media:copyright>
+      <media:restriction relationship="allow" type="country">uk ie</media:restriction>
+      <media:rights status="official"/>
+    </media:group>
+    <dcterms:available>start=2010-07-12; end=2010-10-10; scheme=W3C-DTF</dcterms:available>
+    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.Duration>1:00</dc:relation.Duration>
+    <dc:relation.SeriesNumber>4</dc:relation.SeriesNumber>
+    <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+  </entry>
+
+</feed>

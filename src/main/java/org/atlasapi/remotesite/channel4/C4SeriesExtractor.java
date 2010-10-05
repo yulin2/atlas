@@ -21,7 +21,7 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 	private final C4EpisodesExtractor episodesExtractor; 
 	
 	public C4SeriesExtractor(ContentResolver contentResolver, AdapterLog log) {
-		this.episodesExtractor = new C4EpisodesExtractor(contentResolver, log);
+		this.episodesExtractor = new C4EpisodesExtractor(log);
 	}
 	
 	@Override

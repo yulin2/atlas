@@ -84,7 +84,7 @@ public class RemoteSiteModule {
 			C4AtomBackedBrandAdapter c4BrandFetcher = c4BrandFetcher();
 			adapters.add(c4BrandFetcher);
 			adapters.add(new C4HighlightsAdapter(c4BrandFetcher));
-			adapters.add(new C4AtoZAtomAdapter(c4AtomFetcher(), new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, log)));
+			adapters.add(new C4AtoZAtomAdapter(c4AtomFetcher(), new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, Publisher.C4, log)));
 		} else {
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("Not installing C4 Adapters because API Key not present")
