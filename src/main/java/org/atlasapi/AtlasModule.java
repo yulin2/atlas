@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.mongodb.Mongo;
 
 @Configuration
@@ -36,10 +37,11 @@ import com.mongodb.Mongo;
 public class AtlasModule {
 	
 	private @Value("${mongo.host}") String mongoHost;
+	private @Value("${mongo.dbName}") String dbName;
 
-	public @Bean Mongo mongo() {
+	public @Bean DatabasedMongo mongo() {
 		try {
-			return new Mongo(mongoHost);
+			return new DatabasedMongo(new Mongo(mongoHost), dbName);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

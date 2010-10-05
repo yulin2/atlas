@@ -27,7 +27,7 @@ public class TVBlobDayPopulatorTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        this.store = new MongoDbBackedContentStore(MongoTestHelper.anEmptyMongo(), "testing");
+        this.store = new MongoDbBackedContentStore(MongoTestHelper.anEmptyTestDatabase());
         extractor = new TVBlobDayPopulator(store, store, "raiuno");
     }
     

@@ -7,15 +7,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.mongodb.Mongo;
 
 @Configuration
 public class AtlasLoggingModule {
 	
-	private @Autowired Mongo mongo;
+	private @Autowired DatabasedMongo db;
 	
 	public @Bean MongoLoggingAdapter adapterLog() {
-		return new MongoLoggingAdapter(new DatabasedMongo(mongo, "atlas"));
+		return new MongoLoggingAdapter(db);
 	}
 	
 	public @Bean LogViewingController logView() {

@@ -29,12 +29,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
-import com.mongodb.Mongo;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 @Configuration
 public class EquivModule {
 
-	private @Autowired Mongo mongo;
+	private @Autowired DatabasedMongo db;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	
 	@Bean EquivController manualEquivAssignmentController() {
@@ -42,7 +42,7 @@ public class EquivModule {
 	}
 	
 	public @Bean EquivalentUrlStore store() {
-		return new MongoEquivStore(mongo, "atlas");
+		return new MongoEquivStore(db);
 	}
 	
 	@Bean EquivContentListener equivContentListener() {
