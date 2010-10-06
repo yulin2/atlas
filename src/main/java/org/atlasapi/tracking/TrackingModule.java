@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.social.twitter.stream.TweetProcessor;
 import com.metabroadcast.common.social.twitter.stream.TwitterFilteredPipe;
@@ -54,7 +55,9 @@ public class TrackingModule {
 	public @Bean TwitterFilteredPipe trackingTwitterPipe() {
 		final TwitterFilteredPipe pipe = new TwitterFilteredPipe(tweetQueue(), twitterUsername, twitterPassword);
         pipe.setKeywords(KEYWORDS);
-        pipe.start();
+        if (!Strings.isNullOrEmpty(twitterUsername) && !Strings.isNullOrEmpty(twitterPassword)) {
+        	pipe.start();
+        }
         return pipe;
     }
 	
