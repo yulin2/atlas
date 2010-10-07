@@ -32,7 +32,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
  */
 public class C4HomePageClient implements RemoteSiteClient<BrandListingPage> {
 
-	private static final String MOST_POPULAR_SECTION_TITLE = "Hot on Channel 4";
+	private static final String MOST_POPULAR_SECTION_TITLE = "Current Most Popular";
 
 	private static final String MOST_POPULAR_URI_FRAGMENT = "programmes/4od/most-popular";
 	
