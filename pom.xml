@@ -45,7 +45,12 @@
             <artifactId>atlas-feeds</artifactId>
             <version>${atlas.version}</version>
         </dependency>
-          <dependency>
+        <dependency>
+            <groupId>org.atlasapi</groupId>
+            <artifactId>atlas-applications</artifactId>
+            <version>${atlas.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.atlasapi</groupId>
             <artifactId>atlas-persistence</artifactId>
             <version>${atlas.version}</version>
@@ -238,13 +243,13 @@
             <scope>runtime</scope>
         </dependency>
         <dependency>
-            <groupId>com.metabroadcast.common.webapp</groupId>
-            <artifactId>common-webapp</artifactId>
+            <groupId>com.metabroadcast.common.social</groupId>
+            <artifactId>common-social</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.metabroadcast.common.social</groupId>
-            <artifactId>common-social</artifactId>
+            <groupId>com.metabroadcast.common.webapp</groupId>
+            <artifactId>common-webapp</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>

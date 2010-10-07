@@ -101,6 +101,8 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                     episode.setTitle(episodeTitle);
                 } else if (episode.getEpisodeNumber() != null){
                     episode.setTitle("Episode "+episode.getEpisodeNumber());
+                } else {
+                    episode.setTitle(episodeText);
                 }
             }
             
