@@ -27,7 +27,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <property name="triggers">
             <list>
                 <ref bean="updateBbcSchedulesScheduledTask" />
-                <ref bean="updateC4BrandsScheduledTask" />
             </list>
         </property>
     </bean>
@@ -43,22 +42,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
           <!-- run every morning at 5 AM -->
         <property name="cronExpression" value="0 0 5 * * ?" />
     </bean>
-    
-    <bean id="updateC4BrandsScheduledTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
-         <property name="jobDetail">
-            <bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-                <property name="targetObject">
-                    <bean parent="conditionalRunner">
-                        <constructor-arg ref="c4BrandsUpdater" />
-                     </bean>
-                </property>
-                <property name="targetMethod" value="run" />
-                <property name="concurrent" value="false" />
-            </bean>
-        </property>
-          <!-- run every morning at 5 AM -->
-        <property name="cronExpression" value="0 0 5 * * ?" />
-   </bean>
     
     <bean id="bbcSchedulesUpdate" parent="conditionalRunner">
    		<constructor-arg ref="bbcSchedulesUpdater"/>
@@ -177,16 +160,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
   </bean>
   
-  <bean id="c4BrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
-	 <property name="uris">
-	 	<bean class="org.atlasapi.persistence.system.AToZUriSource">
-	 		<constructor-arg value="http://www.channel4.com/programmes/atoz/"/>
-	 		<constructor-arg value=""/>
-	 		<constructor-arg value="true"/>
-	 	</bean>
-	 </property>
-  </bean>
-  
   <bean id="itvBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
 	 <property name="uri" value="http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml" />
   </bean>
@@ -272,9 +245,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="huluBrandsUpdater"/>
    </bean>
    
-    
     <bean id="c4UpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="c4BrandsUpdater"/>
+        <constructor-arg ref="c4AtozUpdater"/>
     </bean>
     
     <bean id="bbcUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">

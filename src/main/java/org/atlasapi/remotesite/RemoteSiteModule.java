@@ -16,25 +16,15 @@ package org.atlasapi.remotesite;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
 import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
-import org.atlasapi.remotesite.channel4.ApiKeyAwareClient;
-import org.atlasapi.remotesite.channel4.C4AtoZAtomAdapter;
-import org.atlasapi.remotesite.channel4.C4AtomBackedBrandAdapter;
-import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
-import org.atlasapi.remotesite.channel4.DefaultToSavedOnErrorSiteSpecificAdapter;
-import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
+import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluAllBrandsAdapter;
 import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
@@ -45,7 +35,6 @@ import org.atlasapi.remotesite.itv.ItvBrandAdapter;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
-import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
@@ -53,20 +42,19 @@ import org.atlasapi.remotesite.wikipedia.WikipediaSparqlAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
-import com.sun.syndication.feed.atom.Feed;
 
 @Configuration
+@Import(C4Module.class)
 public class RemoteSiteModule {
 
-	private @Value("${c4.apiKey}") String c4ApiKey;
-	
-	private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired AdapterLog log;
+	private @Autowired C4Module c4Module; 
+	
 	
 	public @Bean Fetcher<Content> remoteFetcher() {
 		
@@ -80,16 +68,7 @@ public class RemoteSiteModule {
 		 //adapters.add(new YouTubeUserAdapter());
 		 adapters.add(new TedTalkAdapter());
 		 
-		if (!"DISABLED".equals(c4ApiKey)) {
-			C4AtomBackedBrandAdapter c4BrandFetcher = c4BrandFetcher();
-			adapters.add(c4BrandFetcher);
-			adapters.add(new C4HighlightsAdapter(c4BrandFetcher));
-			adapters.add(new C4AtoZAtomAdapter(c4AtomFetcher(), new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher, contentStore, Publisher.C4, log)));
-		} else {
-			log.record(new AdapterLogEntry(Severity.INFO)
-				.withDescription("Not installing C4 Adapters because API Key not present")
-				.withSource(getClass()));
-		}
+		 adapters.addAll(c4Module.adapters());
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
@@ -120,14 +99,6 @@ public class RemoteSiteModule {
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;
-	}
-	
-	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {
-	    return new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
-	}
-
-	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {
-		return new C4AtomBackedBrandAdapter(c4AtomFetcher(), contentStore, log);
 	}
 	
 	public @Bean ContentWriters contentWriters() {
