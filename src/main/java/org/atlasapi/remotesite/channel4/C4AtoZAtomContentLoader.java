@@ -5,8 +5,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -30,11 +32,13 @@ public class C4AtoZAtomContentLoader implements Runnable {
     private final SiteSpecificAdapter<Brand> brandAdapter;
 	private final AdapterLog log;
 	private final ContentWriter writer;
+	private final ContentResolver resolver;
     
-    public C4AtoZAtomContentLoader(RemoteSiteClient<Feed> feedClient, SiteSpecificAdapter<Brand> brandAdapter, ContentWriter writer, AdapterLog log) {
+    public C4AtoZAtomContentLoader(RemoteSiteClient<Feed> feedClient, SiteSpecificAdapter<Brand> brandAdapter, ContentWriter writer, ContentResolver resolver, AdapterLog log) {
         this.feedClient = feedClient;
         this.brandAdapter = brandAdapter;
 		this.writer = writer;
+		this.resolver = resolver;
 		this.log = log;
     }
 
@@ -59,7 +63,7 @@ public class C4AtoZAtomContentLoader implements Runnable {
                 }
             } while (hasNext);
             
-        	writer.createOrUpdatePlaylist(playlist, true);
+        	writer.createOrUpdatePlaylistSkeleton(playlist);
     }
 
 	@SuppressWarnings("unchecked")
@@ -67,12 +71,25 @@ public class C4AtoZAtomContentLoader implements Runnable {
 		for (Entry entry: (List<Entry>) feed.getEntries()) {
 		    String brandUri = extarctUriFromLinks(entry);
 		    if (brandUri != null && brandAdapter.canFetch(brandUri)) {
-		        Brand brand = brandAdapter.fetch(brandUri);
+		        Brand brand = fetchBrand(brandUri);
 		        if (brand != null) {
 		        	playlist.addPlaylist(brand);
 		        	writer.createOrUpdatePlaylist(brand, true);
 		        }
 		    }
+		}
+	}
+
+	private Brand fetchBrand(String brandUri) {
+		try {
+			return brandAdapter.fetch(brandUri);
+		} catch (Exception e) {
+			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(brandUri).withSource(brandAdapter.getClass()));
+			Content found = resolver.findByUri(brandUri);
+			if (found != null && Publisher.C4.equals(found.getPublisher())) {
+				return (Brand) found;
+			}
+			return null;
 		}
 	}
     

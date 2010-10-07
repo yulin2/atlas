@@ -4,9 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -52,7 +50,7 @@ public class C4Module {
 	}
 
 	@Bean C4AtoZAtomContentLoader c4AtozUpdater() {
-		return new C4AtoZAtomContentLoader(c4AtomFetcher(),  new DefaultToSavedOnErrorSiteSpecificAdapter<Brand>(c4BrandFetcher(), contentStore, Publisher.C4, log), contentStore, log);
+		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentStore, contentStore, log);
 	}
 	
 	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {

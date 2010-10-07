@@ -54,7 +54,7 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 		brandAdapter = mock(SiteSpecificAdapter.class);
 		itemClient = mock(RemoteSiteClient.class);
 		writer = mock(ContentWriter.class);
-		adapter = new C4AtoZAtomContentLoader(itemClient, brandAdapter, writer, new NullAdapterLog());
+		adapter = new C4AtoZAtomContentLoader(itemClient, brandAdapter, writer, null, new NullAdapterLog());
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
