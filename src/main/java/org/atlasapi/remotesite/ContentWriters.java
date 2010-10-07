@@ -43,4 +43,11 @@ public class ContentWriters implements ContentWriter {
 	public void add(ContentWriter writer) {
 		this.writers.add(writer);
 	}
+
+	@Override
+	public void createOrUpdatePlaylistSkeleton(Playlist playlist) {
+		for (ContentWriter writer : writers) {
+			writer.createOrUpdatePlaylistSkeleton(playlist);
+		}
+	}
 }
