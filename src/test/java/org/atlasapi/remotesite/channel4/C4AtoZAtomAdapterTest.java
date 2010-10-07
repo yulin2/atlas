@@ -65,7 +65,7 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 			
 			one(writer).createOrUpdatePlaylist(brand101, true);
 			one(writer).createOrUpdatePlaylist(brand202, true);
-			one(writer).createOrUpdatePlaylist(new Playlist(uri, null), true);
+			one(writer).createOrUpdatePlaylistSkeleton(new Playlist(uri, null));
 
 			allowing(brandAdapter).fetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(brand101));
 			allowing(brandAdapter).fetch("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(brand202));
