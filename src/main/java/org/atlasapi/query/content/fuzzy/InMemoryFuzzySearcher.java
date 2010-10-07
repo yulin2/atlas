@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.content.fuzzy;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,6 +38,8 @@ import org.apache.lucene.search.Searcher;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.SimpleFSDirectory;
+import org.apache.lucene.store.SingleInstanceLockFactory;
 import org.apache.lucene.util.Version;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
@@ -45,6 +48,7 @@ import org.atlasapi.util.stats.Score;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.units.ByteCount;
 
@@ -61,7 +65,8 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	protected static final int MAX_RESULTS = 5000;
 	
 	private final RAMDirectory brandsDir = new RAMDirectory();
-	private final RAMDirectory itemsDir = new RAMDirectory();
+	private final File itemsDirFile = Files.createTempDir();
+	private final SimpleFSDirectory itemsDir = goAheadMakeMyDir(itemsDirFile);
 
 	public InMemoryFuzzySearcher() {
 		try {
@@ -70,6 +75,14 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	private SimpleFSDirectory goAheadMakeMyDir(File itemsDirFile) {
+	    try {
+            return new SimpleFSDirectory(itemsDirFile, new SingleInstanceLockFactory());
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to setup FS directory for lucene", e);
+        }
 	}
 	
 	private static void closeWriter(IndexWriter writer) {
@@ -248,7 +261,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	}
 
 	public IndexStats stats() {
-		return new IndexStats(ByteCount.bytes(brandsDir.sizeInBytes()), ByteCount.bytes(itemsDir.sizeInBytes()));
+		return new IndexStats(ByteCount.bytes(brandsDir.sizeInBytes()), ByteCount.bytes(itemsDir.fileLength(itemsDirFile.getAbsolutePath())));
 	}
 	
 	public static class IndexStats {
