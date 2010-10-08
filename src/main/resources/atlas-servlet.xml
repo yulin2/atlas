@@ -166,6 +166,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
                </bean>
 			</list>
 		</property>
+         <property name="defaultViews">
+            <list>
+                <bean class="com.metabroadcast.common.webapp.json.JsonView" />
+            </list>
+        </property>
 	</bean>
  
     <bean id="soyRenderer" class="com.metabroadcast.common.webapp.soy.SoyTemplateRenderer">

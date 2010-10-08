@@ -27,7 +27,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <property name="triggers">
             <list>
                 <ref bean="updateBbcSchedulesScheduledTask" />
-                <ref bean="updateC4BrandsScheduledTask" />
             </list>
         </property>
     </bean>
@@ -43,22 +42,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
           <!-- run every morning at 5 AM -->
         <property name="cronExpression" value="0 0 5 * * ?" />
     </bean>
-    
-    <bean id="updateC4BrandsScheduledTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
-         <property name="jobDetail">
-            <bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-                <property name="targetObject">
-                    <bean parent="conditionalRunner">
-                        <constructor-arg ref="c4BrandsUpdater" />
-                     </bean>
-                </property>
-                <property name="targetMethod" value="run" />
-                <property name="concurrent" value="false" />
-            </bean>
-        </property>
-          <!-- run every morning at 5 AM -->
-        <property name="cronExpression" value="0 0 5 * * ?" />
-   </bean>
     
     <bean id="bbcSchedulesUpdate" parent="conditionalRunner">
    		<constructor-arg ref="bbcSchedulesUpdater"/>
@@ -77,7 +60,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
  					 	<property name="uris">
 						  <list>
 						      <value>http://feeds.bbc.co.uk/iplayer/highlights/tv</value>
-						      <value>http://www.channel4.com/programmes/4od/highlights</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/top_rated</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured</value>
@@ -177,16 +159,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
   </bean>
   
-  <bean id="c4BrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
-	 <property name="uris">
-	 	<bean class="org.atlasapi.persistence.system.AToZUriSource">
-	 		<constructor-arg value="http://www.channel4.com/programmes/atoz/"/>
-	 		<constructor-arg value=""/>
-	 		<constructor-arg value="true"/>
-	 	</bean>
-	 </property>
-  </bean>
-  
   <bean id="itvBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
 	 <property name="uri" value="http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml" />
   </bean>
@@ -256,6 +228,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="manualUpdateMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
             <props>
+                <prop key="/system/c4/highlights/update">c4HighlightsUpdateController</prop>
                 <prop key="/system/c4/update">c4UpdateController</prop>
                 <prop key="/system/bbc/update">bbcUpdateController</prop>
                 <prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
@@ -272,9 +245,12 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="huluBrandsUpdater"/>
    </bean>
    
-    
     <bean id="c4UpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="c4BrandsUpdater"/>
+        <constructor-arg ref="c4AtozUpdater"/>
+    </bean>
+    
+    <bean id="c4HighlightsUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
+        <constructor-arg ref="c4HighlightsUpdater"/>
     </bean>
     
     <bean id="bbcUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">

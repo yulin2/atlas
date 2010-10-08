@@ -54,7 +54,7 @@ public class HtmlBrandSummary {
 	}
 
 	public String getBrandPage() {
-		return SLASH_PROGS_URL + id + "/4od";
+		return SLASH_PROGS_URL + id;
 	}
 
 	public String getImageUrl() {
