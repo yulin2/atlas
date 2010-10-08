@@ -27,7 +27,8 @@ import com.sun.syndication.feed.atom.Feed;
 @Configuration
 public class C4Module {
 
-	private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
+	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
+	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	
 	private final SimpleScheduler scheduler = new SimpleScheduler();
 	
@@ -38,9 +39,10 @@ public class C4Module {
 	@PostConstruct
 	public void startBackgroundTasks(){
 		if (!"DISABLED".equals(c4ApiKey)) {
-			scheduler.schedule(c4AtozUpdater(), AT_NIGHT);			;
+			scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);			;
+			scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);			;
 			log.record(new AdapterLogEntry(Severity.INFO)
-				.withDescription("C4 update scheduled task installed")
+				.withDescription("C4 update scheduled tasks installed")
 				.withSource(C4AtoZAtomContentLoader.class));
 		} else {
 			log.record(new AdapterLogEntry(Severity.INFO)
@@ -51,6 +53,10 @@ public class C4Module {
 
 	@Bean C4AtoZAtomContentLoader c4AtozUpdater() {
 		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentStore, contentStore, log);
+	}
+	
+	@Bean C4HighlightsAdapter c4HighlightsUpdater() {
+		return new C4HighlightsAdapter(contentStore, log);
 	}
 	
 	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {

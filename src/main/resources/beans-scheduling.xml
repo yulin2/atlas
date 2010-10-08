@@ -60,7 +60,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
  					 	<property name="uris">
 						  <list>
 						      <value>http://feeds.bbc.co.uk/iplayer/highlights/tv</value>
-						      <value>http://www.channel4.com/programmes/4od/highlights</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/top_rated</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured</value>
@@ -229,6 +228,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="manualUpdateMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
             <props>
+                <prop key="/system/c4/highlights/update">c4HighlightsUpdateController</prop>
                 <prop key="/system/c4/update">c4UpdateController</prop>
                 <prop key="/system/bbc/update">bbcUpdateController</prop>
                 <prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
@@ -247,6 +247,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    
     <bean id="c4UpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="c4AtozUpdater"/>
+    </bean>
+    
+    <bean id="c4HighlightsUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
+        <constructor-arg ref="c4HighlightsUpdater"/>
     </bean>
     
     <bean id="bbcUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
