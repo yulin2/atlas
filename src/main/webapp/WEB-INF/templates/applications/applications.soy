@@ -1,0 +1,53 @@
+{namespace atlas.templates.applications}
+
+/**
+ * @param applications
+ */
+{template .index}
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Atlas Applications</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script src="/js/base.js"></script>
+	<script src="/js/soyutils.js"></script>
+	<script type="text/javascript" src="/js/generated/applications-widgets-js_templates.js"></script>
+	<script src="/js/applications.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+	<link rel="stylesheet" type="text/css" href="/css/colorbox.css" />
+</head>
+<body>
+	<div id="wrapper">
+		<header>
+			<h1>Applications</h1>
+		</header>
+		<div id="content">
+			<h2>Current Applications</h2>
+			<ul id="applications-list" data-apps="{length($applications)}">
+				{foreach $application in $applications}
+						<li><a class="app-link" href="/admin/applications/{$application.slug}">{$application.title}</a></li>
+					{ifempty}
+						<li>No applications : - (</li>
+				{/foreach}
+			</ul>
+			<h2>Create New Application</h2>
+			<form id="create" action="/admin/applications" method="post">
+				<p><label for="slug">Application Slug:</label><input id="slug" name="slug" type="text" placeholder="slug" /></p>
+				<p><label for="title">Application Title:</label><input id="title" name="title" type="text" placeholder="Title" /></p>
+				<p><input type="submit" value="Create" /></p>
+			</form>
+		</div>
+	</div>
+</body>
+</html>
+{/template}
+
+/**
+ * @param application
+ */
+{template .application}
+{call atlas.templates.applications.widgets.applicationContent}
+{param application: $application /}
+{/call}
+{/template}
