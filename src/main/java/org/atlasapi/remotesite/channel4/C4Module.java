@@ -31,8 +31,7 @@ public class C4Module {
 
 	private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	
-	private final SimpleScheduler scheduler = new SimpleScheduler();
-	
+	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
 	private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired AdapterLog log;

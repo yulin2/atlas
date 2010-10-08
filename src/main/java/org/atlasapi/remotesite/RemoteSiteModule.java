@@ -47,6 +47,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 @Import(C4Module.class)
@@ -55,6 +56,9 @@ public class RemoteSiteModule {
 	private @Autowired AdapterLog log;
 	private @Autowired C4Module c4Module; 
 	
+	public @Bean SimpleScheduler scheduler() {
+	    return new SimpleScheduler();
+	}
 	
 	public @Bean Fetcher<Content> remoteFetcher() {
 		
