@@ -48,9 +48,9 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 		assertThat(mostPopular.size(), is(5));
 		
 		HtmlBrandSummary firstBrand = mostPopular.get(0);
-		assertThat(firstBrand.getTitle(), is("You Have Been Watching"));
-		assertThat(firstBrand.getId(), is("you-have-been-watching"));
-		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/you-have-been-watching/4od"));
+		assertThat(firstBrand.getTitle(), is("Rude Tube"));
+		assertThat(firstBrand.getId(), is("rude-tube"));
+		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/rude-tube/4od"));
 
 	}
 	
@@ -62,17 +62,17 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 		
 		List<HtmlBrandSummary> highlights = page.getBrandList();
 		
-		assertThat(highlights.size(), is(14));
+		assertThat(highlights.size(), is(10));
 		
 		HtmlBrandSummary firstBrand = highlights.get(0);
-		assertThat(firstBrand.getTitle(), is("Facejacker"));
-		assertThat(firstBrand.getId(), is("facejacker"));
-		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/facejacker/4od"));
+		assertThat(firstBrand.getTitle(), is("Tsunami: Caught on Camera"));
+		assertThat(firstBrand.getId(), is("tsunami-caught-on-camera"));
+		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/tsunami-caught-on-camera/4od"));
 		
-		HtmlBrandSummary lastBrand = highlights.get(13);
-		assertThat(lastBrand.getTitle(), is("90210"));
-		assertThat(lastBrand.getId(), is("90210"));
-		assertThat(lastBrand.getBrandPage(), is("http://www.channel4.com/programmes/90210/4od"));
+		HtmlBrandSummary lastBrand = highlights.get(9);
+		assertThat(lastBrand.getTitle(), is("Father Ted"));
+		assertThat(lastBrand.getId(), is("father-ted"));
+		assertThat(lastBrand.getBrandPage(), is("http://www.channel4.com/programmes/father-ted/4od"));
 
 	}
 }
