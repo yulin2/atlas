@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.SingleItemProjector;
 import org.atlasapi.beans.SinglePlaylistProjector;
 import org.atlasapi.content.criteria.ContentQuery;
@@ -27,6 +28,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.servlet.RequestNs;
+import org.atlasapi.query.content.parser.ApplicationConfigurationIncludingQueryBuilder;
 import org.atlasapi.query.content.parser.QueryStringBackedQueryBuilder;
 import org.atlasapi.query.content.parser.WebProfileDefaultQueryAttributesSetter;
 import org.springframework.stereotype.Controller;
@@ -38,13 +40,14 @@ public class QueryController {
 	private static final String VIEW = "contentModel";
 
 	private final KnownTypeQueryExecutor executor;
-	private final QueryStringBackedQueryBuilder builder = new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter());
+	private final ApplicationConfigurationIncludingQueryBuilder builder;
 	
 	private final SingleItemProjector itemProjector = new SingleItemProjector();
 	private final SinglePlaylistProjector playlistProjector = new SinglePlaylistProjector();
 	
-	public QueryController(KnownTypeQueryExecutor executor) {
+	public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher) {
 		this.executor = executor;
+		this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter()), configFetcher) ;
 	}
 	
 	@RequestMapping("/2.0/item.*")

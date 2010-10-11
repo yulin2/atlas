@@ -14,10 +14,20 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.channel4;
 
-import org.atlasapi.media.entity.Brand;
+import java.util.List;
+
+import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 
 /**
@@ -25,7 +35,7 @@ import com.metabroadcast.common.base.Maybe;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class C4HighlightsAdapter extends BaseC4PlaylistClient {
+public class C4HighlightsAdapter implements Runnable {
 
 	private static final String C4_HIGHLIGHTS_CURIE = "c4:highlights";
 	private static final String C4_MOST_POPULAR_CURIE = "c4:most-popular";
@@ -33,12 +43,18 @@ public class C4HighlightsAdapter extends BaseC4PlaylistClient {
 	private static final String HIGHLIGHTS_URI = "http://www.channel4.com/programmes/4od/highlights";
 	private static final String CURRENT_MOST_POPULAR_URI = "http://www.channel4.com/programmes/4od/most-popular";
 	
-	public C4HighlightsAdapter(C4AtomBackedBrandAdapter brandAdapter) {
-		this(new C4HomePageClient(), brandAdapter);
+	private final RemoteSiteClient<BrandListingPage> brandListClient;
+	private final ContentWriter writer;
+	private final AdapterLog log;
+	
+	public C4HighlightsAdapter(ContentWriter writer, AdapterLog log) {
+		this(new C4HomePageClient(), writer, log);
 	}
 	
-	public C4HighlightsAdapter(RemoteSiteClient<BrandListingPage> brandListClient, SiteSpecificAdapter<Brand> brandClient) {
-		super(brandListClient, brandClient);
+	public C4HighlightsAdapter(RemoteSiteClient<BrandListingPage> brandListClient, ContentWriter writer, AdapterLog log) {
+		this.brandListClient = brandListClient;
+		this.writer = writer;
+		this.log = log;
 	}
 
 	public boolean canFetch(String uri) {
@@ -63,5 +79,41 @@ public class C4HighlightsAdapter extends BaseC4PlaylistClient {
 			return Maybe.just(CURRENT_MOST_POPULAR_URI);
 		}
 		return Maybe.nothing();
+	}
+	
+	
+	public final Playlist load(String uri) throws Exception {
+		List<HtmlBrandSummary> brandList = Lists.newArrayList();
+		
+		BrandListingPage brandListingPage = brandListClient.get(uri);
+		brandList.addAll(brandListingPage.getBrandList());
+
+		while (brandListingPage.hasNextPageLink()) {
+			brandListingPage = brandListClient.get(brandListingPage.getNextPageLink());
+			brandList.addAll(brandListingPage.getBrandList());
+		}
+		
+		Playlist playlist = new Playlist(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), Publisher.C4);
+		
+		for (HtmlBrandSummary brandRef : brandList) {
+			playlist.addPlaylistUri(brandRef.getBrandPage());
+		}
+		return playlist;
+	}
+
+	@Override
+	public void run() {
+		for (String uri : ImmutableList.of(HIGHLIGHTS_URI, CURRENT_MOST_POPULAR_URI)) {
+			loadAndSavePlaylist(uri);
+		}
+	}
+
+	private void loadAndSavePlaylist(String uri) {
+		try {
+			Playlist playlist = load(uri);
+			writer.createOrUpdatePlaylistSkeleton(playlist);
+		} catch (Exception e) {
+			log.record(new AdapterLogEntry(Severity.WARN).withUri(uri).withCause(e).withSource(getClass()).withDescription("Failed to load highlights feed"));
+		}
 	}
 }

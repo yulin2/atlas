@@ -50,7 +50,7 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 		HtmlBrandSummary firstBrand = mostPopular.get(0);
 		assertThat(firstBrand.getTitle(), is("Rude Tube"));
 		assertThat(firstBrand.getId(), is("rude-tube"));
-		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/rude-tube/4od"));
+		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/rude-tube"));
 
 	}
 	
@@ -67,12 +67,12 @@ public class C4HomepageClientTest extends MockObjectTestCase {
 		HtmlBrandSummary firstBrand = highlights.get(0);
 		assertThat(firstBrand.getTitle(), is("Tsunami: Caught on Camera"));
 		assertThat(firstBrand.getId(), is("tsunami-caught-on-camera"));
-		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/tsunami-caught-on-camera/4od"));
+		assertThat(firstBrand.getBrandPage(), is("http://www.channel4.com/programmes/tsunami-caught-on-camera"));
 		
 		HtmlBrandSummary lastBrand = highlights.get(9);
 		assertThat(lastBrand.getTitle(), is("Father Ted"));
 		assertThat(lastBrand.getId(), is("father-ted"));
-		assertThat(lastBrand.getBrandPage(), is("http://www.channel4.com/programmes/father-ted/4od"));
+		assertThat(lastBrand.getBrandPage(), is("http://www.channel4.com/programmes/father-ted"));
 
 	}
 }
