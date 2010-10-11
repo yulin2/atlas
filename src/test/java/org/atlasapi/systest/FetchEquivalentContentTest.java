@@ -18,10 +18,13 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
+
 import junit.framework.TestCase;
 
 import org.atlasapi.AtlasFetchModule;
-import org.atlasapi.application.ApplicationModule;
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
@@ -50,8 +53,10 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
@@ -133,7 +138,7 @@ public class FetchEquivalentContentTest extends TestCase {
 
 	@Configuration
 	@ImportResource("classpath:atlas.xml")
-	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, ApplicationModule.class})
+	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
 	public static class AtlasModuleWithLocalMongoAndFakeFetchers {
 		
 		public @Bean DatabasedMongo db() {
@@ -147,5 +152,22 @@ public class FetchEquivalentContentTest extends TestCase {
 		public @Bean AdapterLog log() {
 			return new NullAdapterLog();
 		}
+		
+		public @Bean ApplicationConfigurationFetcher configFetcher() {
+			return new DummyApplicationFetcher();
+		}
+	}
+	
+	public static class DummyApplicationFetcher implements ApplicationConfigurationFetcher {
+
+		@Override
+		public Maybe<ApplicationConfiguration> configurationFor(
+				HttpServletRequest request) {
+			ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
+			applicationConfiguration.setIncludedPublishers(ImmutableSet.copyOf(Publisher.values()));
+			return Maybe.just(applicationConfiguration);
+		}
+		
+		
 	}
 }

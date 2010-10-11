@@ -9,9 +9,11 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
@@ -91,6 +93,40 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		assertTrue( results.size() > 0);
 		for (Brand brand : results) {
 			assertEquals(Publisher.BBC, brand.getPublisher());
+		}
+	}
+	
+	public void testAllVersionAreOfRightPublisher() {
+		ApplicationConfiguration config = new ApplicationConfiguration();
+		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		
+		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
+		uglyBettyC4.setTitle("Ugly Betty Episode One");
+		Version c4Version = new Version();
+		c4Version.setProvider(Publisher.C4);
+		Version huluVersion = new Version();
+		huluVersion.setProvider(Publisher.HULU);
+		uglyBettyC4.setVersions(ImmutableSet.of(c4Version, huluVersion));
+		
+		Playlist ubC4 = new Brand("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
+		ubC4.setDescription("blah blah blah");
+		ubC4.setTitle("Ugly Betty");
+		ubC4.addItem(uglyBettyC4);
+		
+		store.createOrUpdatePlaylist(ubC4, true);
+		
+		store.createOrUpdateItem(uglyBettyC4);
+		
+		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(config);
+		
+		List<Item> results = queryExecutor.executeItemQuery(query);
+		
+		assertTrue( results.size() > 0);
+		for (Item item : results) {
+			assertEquals(Publisher.C4, item.getPublisher());
+			for (Version version : item.getVersions()) {
+				assertEquals(Publisher.C4, version.getProvider());
+			}
 		}
 	}
 }
