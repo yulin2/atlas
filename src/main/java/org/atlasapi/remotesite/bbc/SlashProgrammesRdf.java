@@ -146,6 +146,9 @@ class SlashProgrammesRdf {
 		@XmlAttribute(name="about", namespace=RDF.NS)
 		private String uri;
 		
+		@XmlElement(namespace=PO.NS, name="episode")
+		protected Set<SlashProgrammesEpisodeRef> episodes;
+		
 		public String uri() {
 			return BASE_URI + uri.replace("#programme", "");
 		}
@@ -186,7 +189,16 @@ class SlashProgrammesRdf {
 			resourceUri = uri;
 			return this;
 		}
+	}
+	
+	static class SlashProgrammesEpisodeRef {
 
+		@XmlAttribute(name="resource", namespace=RDF.NS)
+		private String resourceUri;
+
+		public String resourceUri() {
+			return resourceUri;
+		}
 	}
 
 	static String BASE_URI = "http://www.bbc.co.uk";

@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -55,8 +56,8 @@ public class BbcIplayerGraphExtractor implements ContentExtractor<SyndicationSou
 	
 	private final SiteSpecificAdapter<Content> brandFetcher;
 
-	public BbcIplayerGraphExtractor() {
-		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeAdapter(), new BbcProgrammeGraphExtractor());
+	public BbcIplayerGraphExtractor(AdapterLog log) {
+		this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeAdapter(log), new BbcProgrammeGraphExtractor());
 	}
 	
 	public BbcIplayerGraphExtractor(RemoteSiteClient<SlashProgrammesRdf> episodeClient, RemoteSiteClient<SlashProgrammesVersionRdf> versionClient, SiteSpecificAdapter<Content> brandFetcher, ContentExtractor<BbcProgrammeSource, Item> extractor) {

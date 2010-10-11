@@ -26,6 +26,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class BbcProgrammesPolicyClient {
@@ -59,7 +60,13 @@ public class BbcProgrammesPolicyClient {
 	private Maybe<Policy> policyForEpisodeWithPid(String pid) {
 		try {
 			return policyFromAtom(client.getContentsOf(EPISODE_FEED_BASE_URI + pid));
-		} catch (Exception e) {
+		} catch (HttpException e) {
+			if (e.wasNotFound()) {
+				return Maybe.nothing();
+			}
+			throw new RuntimeException(e);
+		}
+		catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

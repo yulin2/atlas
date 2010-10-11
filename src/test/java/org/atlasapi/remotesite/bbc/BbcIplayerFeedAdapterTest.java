@@ -33,7 +33,7 @@ public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 
 	private RemoteSiteClient<SyndFeed> feedClient;
 	private ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
-	private BbcIplayerFeedAdapter adapter;
+	private BbcIplayerHightlightsAdapter adapter;
 	private SyndFeed feed = new SyndFeedImpl();
 	private SyndicationSource iplayerSource;
 	
@@ -43,7 +43,7 @@ public class BbcIplayerFeedAdapterTest extends MockObjectTestCase {
 		super.setUp();
 		feedClient = mock(RemoteSiteClient.class);
 		propertyExtractor = mock(ContentExtractor.class);
-		adapter = new BbcIplayerFeedAdapter(feedClient, propertyExtractor);
+		adapter = new BbcIplayerHightlightsAdapter(feedClient, propertyExtractor);
 		iplayerSource = new SyndicationSource(feed, "http://feeds.bbc.co.uk/iplayer/bbc_one/list");
 	}
 	
