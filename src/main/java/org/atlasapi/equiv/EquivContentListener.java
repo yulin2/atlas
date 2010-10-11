@@ -16,20 +16,18 @@ public class EquivContentListener implements ContentListener {
         this.itemEquivUpdater = itemEquivUpdater;
     }
 
-    @SuppressWarnings("static-access")
     @Override
-    public void brandChanged(Collection<Brand> brands, changeType changeType) {
-        if (changeType == changeType.CONTENT_UPDATE) {
+    public void brandChanged(Collection<Brand> brands, changeType type) {
+        if (changeType.CONTENT_UPDATE.equals(type)) {
             for (Brand brand: brands) {
                 brandUpdater.update(brand);
             }
         }
     }
 
-    @SuppressWarnings("static-access")
     @Override
-    public void itemChanged(Collection<Item> items, changeType changeType) {
-        if (changeType == changeType.CONTENT_UPDATE) {
+    public void itemChanged(Collection<Item> items, changeType type) {
+        if (changeType.CONTENT_UPDATE.equals(type)) {
             for (Item item: items) {
                 itemEquivUpdater.update(item);
             }
