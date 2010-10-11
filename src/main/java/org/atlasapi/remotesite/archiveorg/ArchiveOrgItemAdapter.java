@@ -13,7 +13,6 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -53,7 +52,7 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
             String identifier = getFirstValue(metadata.get("identifier"));
             String title = getFirstValue(metadata.get("title"));
             
-            Item item = new Item(uri, "arc:" + identifier, Publisher.ICTOMORROW);
+            Item item = new Item(uri, "arc:" + identifier, Publisher.ARCHIVE_ORG);
             item.setTitle(title);
             Version version = new Version();
             
