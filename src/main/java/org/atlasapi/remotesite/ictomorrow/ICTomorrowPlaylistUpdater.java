@@ -62,9 +62,11 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
                 
                 Item item = null;
                 Element itemElement = itemsElement.get(i);
+                String contentHandle = itemElement.getAttributeValue("ContentHandle");
                 String uri = itemElement.getFirstChildElement("Key").getValue();
                 if (itemAdapter.canFetch(uri)) {
                     item = itemAdapter.fetch(uri);
+                    item.addAlias(getICTomorrowAlias(contentHandle));
                 }
                 
                 if (item != null) {
@@ -79,6 +81,10 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
             System.err.println(e.getMessage());
            log.debug("API Exception while updating playlist", e);
         }
+    }
+    
+    private String getICTomorrowAlias(String contentHandle) {
+        return "http://ictomorrow.co.uk/contentHandle/" + contentHandle;
     }
 }
 
