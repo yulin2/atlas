@@ -48,7 +48,7 @@ public class ICTomorrowModule {
     }
     
     public @Bean ArchiveOrgItemAdapter archiveOrgItemAdapter() {
-        return new ArchiveOrgItemAdapter(HttpClients.webserviceClient());
+        return new ArchiveOrgItemAdapter(HttpClients.webserviceClient(), log);
     }
 
     public @Bean ICTomorrowPlaylistUpdater ictomorrowPlaylistUpdater() {

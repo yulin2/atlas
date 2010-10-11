@@ -10,6 +10,9 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.codehaus.jackson.JsonParseException;
@@ -29,9 +32,13 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
     private static final String ARCHIVE_ORG_DOWNLOAD_TEMPLATE = "http://www.archive.org/download/%1$s";
     
     private final SimpleHttpClient client;
+    private final ObjectMapper jsonMapper;
+    private final AdapterLog log;
     
-    public ArchiveOrgItemAdapter(SimpleHttpClient client) {
+    public ArchiveOrgItemAdapter(SimpleHttpClient client, AdapterLog log) {
         this.client = client;
+        this.log = log;
+        this.jsonMapper = new ObjectMapper();
     }
     
     @SuppressWarnings("unchecked")
@@ -39,13 +46,9 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
     public Item fetch(String uri) {
         try {
             HttpResponse res = client.get(uri + JSON_OUTPUT_PARAMETER);
-            String body = res.body();
-            //System.out.println(body);
-            ObjectMapper jsonMapper = new ObjectMapper();
-            Map<String, Object> json = jsonMapper.readValue(body, Map.class);
-            Map<String, Object> metadata = (Map<String, Object>) json.get("metadata");
             
-            System.out.println(metadata);
+            Map<String, Object> json = jsonMapper.readValue(res.body(), Map.class);
+            Map<String, Object> metadata = (Map<String, Object>) json.get("metadata");
             
             String identifier = getFirstValue(metadata.get("identifier"));
             String title = getFirstValue(metadata.get("title"));
@@ -98,16 +101,13 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
             
             return item;
         } catch (HttpException e) {
-            e.printStackTrace();
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(uri).withSource(ArchiveOrgItemAdapter.class));
         } catch (JsonParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(uri).withSource(ArchiveOrgItemAdapter.class));
         } catch (JsonMappingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(uri).withSource(ArchiveOrgItemAdapter.class));
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(uri).withSource(ArchiveOrgItemAdapter.class));
         }
         
         return null;
@@ -123,14 +123,6 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
         return null;
     }
     
-    public static void main(String[] args) {
-        String uri = "http://www.archive.org/details/merry_melodies_falling_hare";
-        ArchiveOrgItemAdapter adapter = new ArchiveOrgItemAdapter(HttpClients.webserviceClient());
-        if (adapter.canFetch(uri)) {
-            adapter.fetch(uri);
-        }
-    }
-
     @Override
     public boolean canFetch(String uri) {
         return uri.startsWith(ITEM_PREFIX);
