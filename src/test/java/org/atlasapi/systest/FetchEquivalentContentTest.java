@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import junit.framework.TestCase;
 
 import org.atlasapi.AtlasFetchModule;
+import org.atlasapi.application.ApplicationModule;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
@@ -54,7 +55,6 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
-import com.mongodb.Mongo;
 
 public class FetchEquivalentContentTest extends TestCase {
 
@@ -133,7 +133,7 @@ public class FetchEquivalentContentTest extends TestCase {
 
 	@Configuration
 	@ImportResource("classpath:atlas.xml")
-	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
+	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, ApplicationModule.class})
 	public static class AtlasModuleWithLocalMongoAndFakeFetchers {
 		
 		public @Bean DatabasedMongo db() {
