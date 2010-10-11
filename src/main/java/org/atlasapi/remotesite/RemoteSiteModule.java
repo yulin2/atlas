@@ -30,6 +30,7 @@ import org.atlasapi.remotesite.hulu.HuluAllBrandsAdapter;
 import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluRssAdapter;
+import org.atlasapi.remotesite.ictomorrow.ICTomorrowModule;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
@@ -50,7 +51,7 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-@Import(C4Module.class)
+@Import({C4Module.class, ICTomorrowModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
