@@ -147,7 +147,7 @@ class SlashProgrammesRdf {
 		private String uri;
 		
 		@XmlElement(namespace=PO.NS, name="episode")
-		protected Set<SlashProgrammesEpisodeRef> episodes;
+		protected List<SlashProgrammesEpisodeRef> episodes;
 		
 		public String uri() {
 			return BASE_URI + uri.replace("#programme", "");
