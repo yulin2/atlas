@@ -27,7 +27,7 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
     private static final String ITEM_PREFIX = "http://www.archive.org/details/";
     private static final String JSON_OUTPUT_PARAMETER = "&output=json";
     
-    private static final String ARCHIVE_ORG_EMBED_TEMPLATE = "<object width=\"640\" height=\"506\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\"><param value=\"true\" name=\"allowfullscreen\"/><param value=\"always\" name=\"allowscriptaccess\"/><param value=\"high\" name=\"quality\"/><param value=\"true\" name=\"cachebusting\"/><param value=\"#000000\" name=\"bgcolor\"/><param name=\"movie\" value=\"http://www.archive.org/flow/flowplayer.commercial-3.2.1.swf\" /><param value=\"config={'key':'#$aa4baff94a9bdcafce8','playlist':['format=Thumbnail?.jpg',{'autoPlay':false,'url':'%1$s_512kb.mp4'}],'clip':{'autoPlay':true,'baseUrl':'http://www.archive.org/download/%1$s/','scaling':'fit','provider':'h264streaming'},'canvas':{'backgroundColor':'#000000','backgroundGradient':'none'},'plugins':{'controls':{'playlist':false,'fullscreen':true,'height':26,'backgroundColor':'#000000','autoHide':{'fullscreenOnly':true}},'h264streaming':{'url':'http://www.archive.org/flow/flowplayer.pseudostreaming-3.2.1.swf'}},'contextMenu':[{},'-','Flowplayer v3.2.1']}\" name=\"flashvars\"/><embed src=\"http://www.archive.org/flow/flowplayer.commercial-3.2.1.swf\" type=\"application/x-shockwave-flash\" width=\"640\" height=\"506\" allowfullscreen=\"true\" allowscriptaccess=\"always\" cachebusting=\"true\" bgcolor=\"#000000\" quality=\"high\" flashvars=\"config={'key':'#$aa4baff94a9bdcafce8','playlist':['format=Thumbnail?.jpg',{'autoPlay':false,'url':'%1$s_512kb.mp4'}],'clip':{'autoPlay':true,'baseUrl':'http://www.archive.org/download/%1$s/','scaling':'fit','provider':'h264streaming'},'canvas':{'backgroundColor':'#000000','backgroundGradient':'none'},'plugins':{'controls':{'playlist':false,'fullscreen':true,'height':26,'backgroundColor':'#000000','autoHide':{'fullscreenOnly':true}},'h264streaming':{'url':'http://www.archive.org/flow/flowplayer.pseudostreaming-3.2.1.swf'}},'contextMenu':[{},'-','Flowplayer v3.2.1']}\"> </embed></object>";
+    private static final String ARCHIVE_ORG_EMBED_TEMPLATE = "<object width=\"640\" height=\"506\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\"><param value=\"true\" name=\"allowfullscreen\"/><param value=\"always\" name=\"allowscriptaccess\"/><param value=\"high\" name=\"quality\"/><param value=\"true\" name=\"cachebusting\"/><param value=\"#000000\" name=\"bgcolor\"/><param name=\"movie\" value=\"http://www.archive.org/flow/flowplayer.commercial-3.2.1.swf\" /><param value=\"config={'key':'#$aa4baff94a9bdcafce8','playlist':['format=Thumbnail?.jpg',{'autoPlay':false,'url':'%2$s'}],'clip':{'autoPlay':true,'baseUrl':'http://www.archive.org/download/%1$s/','scaling':'fit','provider':'h264streaming'},'canvas':{'backgroundColor':'#000000','backgroundGradient':'none'},'plugins':{'controls':{'playlist':false,'fullscreen':true,'height':26,'backgroundColor':'#000000','autoHide':{'fullscreenOnly':true}},'h264streaming':{'url':'http://www.archive.org/flow/flowplayer.pseudostreaming-3.2.1.swf'}},'contextMenu':[{},'-','Flowplayer v3.2.1']}\" name=\"flashvars\"/><embed src=\"http://www.archive.org/flow/flowplayer.commercial-3.2.1.swf\" type=\"application/x-shockwave-flash\" width=\"640\" height=\"506\" allowfullscreen=\"true\" allowscriptaccess=\"always\" cachebusting=\"true\" bgcolor=\"#000000\" quality=\"high\" flashvars=\"config={'key':'#$aa4baff94a9bdcafce8','playlist':['format=Thumbnail?.jpg',{'autoPlay':false,'url':'%2$s'}],'clip':{'autoPlay':true,'baseUrl':'http://www.archive.org/download/%1$s/','scaling':'fit','provider':'h264streaming'},'canvas':{'backgroundColor':'#000000','backgroundGradient':'none'},'plugins':{'controls':{'playlist':false,'fullscreen':true,'height':26,'backgroundColor':'#000000','autoHide':{'fullscreenOnly':true}},'h264streaming':{'url':'http://www.archive.org/flow/flowplayer.pseudostreaming-3.2.1.swf'}},'contextMenu':[{},'-','Flowplayer v3.2.1']}\"> </embed></object>";
     private static final String ARCHIVE_ORG_DOWNLOAD_TEMPLATE = "http://www.archive.org/download/%1$s";
     
     private final SimpleHttpClient client;
@@ -57,18 +57,7 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
             Version version = new Version();
             
             Encoding encoding = new Encoding();
-            
-            Location embedLocation = new Location();
-            embedLocation.setTransportType(TransportType.EMBED);
-            embedLocation.setAvailable(true);
-            embedLocation.setEmbedCode(String.format(ARCHIVE_ORG_EMBED_TEMPLATE, identifier));
-            encoding.addAvailableAt(embedLocation);
-            
-            Location linkLocation = new Location();
-            linkLocation.setTransportType(TransportType.LINK);
-            linkLocation.setAvailable(true);
-            linkLocation.setUri(uri);
-            encoding.addAvailableAt(linkLocation);
+            String downloadFilename = null;
             
             Map<String, Object> files = (Map<String, Object>) json.get("files");
             boolean firstThumbnail = true;
@@ -77,6 +66,7 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
                 String format = (String) file.get("format");
                 if (format != null) {
                     if (format.contains("MPEG4")) { // || format.equals("MPEG2") || format.equals("Ogg Video")
+                        downloadFilename = fileName.replace("/", "");
                         Location downloadLocation = new Location();
                         downloadLocation.setTransportType(TransportType.DOWNLOAD);
                         downloadLocation.setAvailable(true);
@@ -94,6 +84,21 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
                     }
                 }
             }
+            
+            if (downloadFilename == null) {
+                downloadFilename = identifier+"_512kb.mp4";
+            }
+            Location embedLocation = new Location();
+            embedLocation.setTransportType(TransportType.EMBED);
+            embedLocation.setAvailable(true);
+            embedLocation.setEmbedCode(String.format(ARCHIVE_ORG_EMBED_TEMPLATE, identifier, downloadFilename));
+            encoding.addAvailableAt(embedLocation);
+            
+            Location linkLocation = new Location();
+            linkLocation.setTransportType(TransportType.LINK);
+            linkLocation.setAvailable(true);
+            linkLocation.setUri(uri);
+            encoding.addAvailableAt(linkLocation);
             
             version.addManifestedAs(encoding);
             item.setVersions(ImmutableSet.of(version));
