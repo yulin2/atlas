@@ -60,7 +60,7 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
             }
             
             Elements itemsElement = metadataFile.getChildElements("Item");
-            Playlist ictomorrowPlaylist = new Playlist("http://ictomorrow.co.uk", "ict:all", Publisher.ICTOMORROW);
+            Playlist ictomorrowPlaylist = new Playlist("http://ictomorrow.co.uk/all-content", "ict:all", Publisher.ICTOMORROW);
             ictomorrowPlaylist.setTitle("Classic Telly");
             ictomorrowPlaylist.setDescription("Classic TV provided by ICTomorrow");
             
@@ -73,6 +73,7 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
                     item = new Item(uri, "ict:" + itemName.toLowerCase(), Publisher.ICTOMORROW);
                     Version version = new Version();
                     Encoding encoding = new Encoding();
+                    
                     /*Location downloadLocation = new Location();
                     downloadLocation.setTransportType(TransportType.DOWNLOAD);
                     downloadLocation.setAvailable(true);
@@ -109,44 +110,6 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
             }
             
             contentWriter.createOrUpdatePlaylistSkeleton(ictomorrowPlaylist);
-            
-            /* <Item ContentHandle="2">
-                <Key>http://www.innovate10.co.uk/1234</Key>
-                <ItemCategory />
-                <Characteristic Name="Source" Value="innovate" />
-                <BaseXML>Innovate 10 is the leading networking, conference and exhibition event for businesses to meet other businesses, government and academia with the aim of making innovation happen ? creating opportunity and growth for the future.</BaseXML>
-                <Title>Visit Innovate</Title>
-                <ContentProvider>Technology Strategy Board</ContentProvider>
-                <LicenseTemplateName>Generic No Approval</LicenseTemplateName>
-            </Item>
-            <Item ContentHandle="3">
-                <Key>http://www.archive.org/details/Betty_Boop_Judge_For_a_Day_1935</Key>
-                <ItemCategory />
-                <Characteristic Name="Channel-Title" Value="Internet Archive - Collection: classic_cartoons" />
-                <Characteristic Name="Keywords" Value="Betty Boop, Fleischer Studios" />
-                <Characteristic Name="Link" Value="http://www.archive.org/details/Betty_Boop_Judge_For_a_Day_1935" />
-                <Characteristic Name="Pub-date" Value="Wed, 01 Oct 2008 07:45:08 GMT" />
-                <Characteristic Name="Source" Value="Archive.org" />
-                <Characteristic Name="WebMaster" Value="info@archive.org (Info Box)" />
-                <BaseXML>&lt;img width="160" style="padding-right:3px;float:left;" src="http://www.archive.org/services/get-item-image.php?identifier=Betty_Boop_Judge_For_a_Day_1935&amp;mediatype=movies&amp;collection=classic_cartoons"/&gt;&lt;p&gt;Betty is the cleaner a the local courthouse. On the bus ride to work one day, she grows tired of all the liberties her fellow citizens take. She falls asleep and dreams about what she'd do if she were the judge....&lt;/p&gt;&lt;p&gt;This item belongs to: movies/classic_cartoons.&lt;/p&gt;&lt;p&gt;This item has files of the following types: 512Kb MPEG4, Animated GIF, DivX, Metadata, Ogg Video, Thumbnail&lt;/p&gt;</BaseXML>
-                <Title>Betty Boop: Judge For a Day</Title>
-                <ContentProvider>Archive.org content</ContentProvider>
-                <LicenseTemplateName>Generic No Approval</LicenseTemplateName>
-            </Item>
-            <Item ContentHandle="4">
-                <Key>http://www.archive.org/details/Betty_Boop_a_Language_All_My_Own_1935</Key>
-                <ItemCategory />
-                <Characteristic Name="Channel-Title" Value="Internet Archive - Collection: classic_cartoons" />
-                <Characteristic Name="Keywords" Value="Betty Boop, Fleischer Studios" />
-                <Characteristic Name="Link" Value="http://www.archive.org/details/Betty_Boop_a_Language_All_My_Own_1935" />
-                <Characteristic Name="Pub-date" Value="Wed, 01 Oct 2008 06:41:06 GMT" />
-                <Characteristic Name="Source" Value="Archive.org" />
-                <Characteristic Name="WebMaster" Value="info@archive.org (Info Box)" />
-                <BaseXML>&lt;img width="160" style="padding-right:3px;float:left;" src="http://www.archive.org/services/get-item-image.php?identifier=Betty_Boop_a_Language_All_My_Own_1935&amp;mediatype=movies&amp;collection=classic_cartoons"/&gt;&lt;p&gt;Betty flies to Japan to do a show, and sings the title number. She then dons a kimono, and sings it again in Japanese. (http://en.wikipedia.org/wiki/A_Language_All_My_Own).&lt;/p&gt;&lt;p&gt;This item belongs to: movies/classic_cartoons.&lt;/p&gt;&lt;p&gt;This item has files of the following types: 512Kb MPEG4, Animated GIF, DivX, Metadata, Ogg Video, Thumbnail&lt;/p&gt;</BaseXML>
-                <Title>Betty Boop: A Language All My Own</Title>
-                <ContentProvider>Archive.org content</ContentProvider>
-                <LicenseTemplateName>Generic No Approval</LicenseTemplateName>
-            </Item> */
         } catch (ICTomorrowApiException e) {
             System.err.println(e.getMessage());
            log.debug("API Exception while updating playlist", e);
