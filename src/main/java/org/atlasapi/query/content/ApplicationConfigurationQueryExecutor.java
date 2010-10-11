@@ -44,7 +44,8 @@ public class ApplicationConfigurationQueryExecutor implements
 		Iterable<String> publisherKeys = Iterables.transform(configuration.getIncludedPublishers(), Publisher.TO_KEY);
 		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
 			Attributes.BRAND_PUBLISHER.createQuery(Operators.EQUALS, publisherKeys),
-			Attributes.ITEM_PUBLISHER.createQuery(Operators.EQUALS, publisherKeys)
+			Attributes.ITEM_PUBLISHER.createQuery(Operators.EQUALS, publisherKeys),
+			Attributes.VERSION_PROVIDER.createQuery(Operators.EQUALS, configuration.getIncludedPublishers() )
 		);
 		return new ContentQuery(queryAtoms);
 	}

@@ -31,8 +31,7 @@ public class C4Module {
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	
-	private final SimpleScheduler scheduler = new SimpleScheduler();
-	
+	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
 
 	private @Autowired MongoDbBackedContentStore contentStore;
