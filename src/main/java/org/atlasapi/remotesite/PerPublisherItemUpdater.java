@@ -10,6 +10,7 @@ import org.atlasapi.content.criteria.ContentQueryBuilder;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
@@ -34,7 +35,7 @@ public class PerPublisherItemUpdater implements Runnable {
 	}
 
 	private void update(String publisher) {
-		ContentQueryBuilder publisherEqualsQuery = query().equalTo(Attributes.ITEM_PUBLISHER, publisher);
+		ContentQueryBuilder publisherEqualsQuery = query().equalTo(Attributes.ITEM_PUBLISHER, Publisher.fromKey(publisher).requireValue());
 		
 		List<Item> items = contentStore.executeItemQuery(publisherEqualsQuery.build());
 		
