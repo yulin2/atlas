@@ -3,7 +3,7 @@ package org.atlasapi.query.content;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
+import org.atlasapi.remotesite.bbc.BbcIplayerHightlightsAdapter;
 import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
@@ -21,7 +21,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 
 			@Override
 			public String expand(String curie) {
-				Maybe<String> uri = BbcIplayerFeedAdapter.expand(curie);
+				Maybe<String> uri = BbcIplayerHightlightsAdapter.expand(curie);
 				if (uri.hasValue()) {
 					return uri.requireValue();
 				}
@@ -30,7 +30,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 
 			@Override
 			public String compact(String url) {
-				Maybe<String> curie = BbcIplayerFeedAdapter.compact(url);
+				Maybe<String> curie = BbcIplayerHightlightsAdapter.compact(url);
 				if (curie.hasValue()) {
 					return curie.requireValue();
 				}

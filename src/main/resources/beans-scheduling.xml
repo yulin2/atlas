@@ -10,7 +10,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="contentUpdateTimerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
     <property name="scheduledTimerTasks">
         <list>
-            <ref bean="updateBbcBrandsScheduledTask" />
             <ref bean="updateItvBrandsScheduledTask" />
             <ref bean="updateHuluBrandsScheduledTask" />
             <ref bean="updatePlaylistsScheduledTask" />
@@ -22,30 +21,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </property>
     <property name="daemon" value="true" />
   </bean>
-  
-  	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="triggers">
-            <list>
-                <ref bean="updateBbcSchedulesScheduledTask" />
-            </list>
-        </property>
-    </bean>
-	
-	<bean id="updateBbcSchedulesScheduledTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
-        <property name="jobDetail">
-            <bean class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-                <property name="targetObject" ref="bbcSchedulesUpdate" />
-                <property name="targetMethod" value="run" />
-                <property name="concurrent" value="false" />
-            </bean>
-        </property>
-          <!-- run every morning at 5 AM -->
-        <property name="cronExpression" value="0 0 5 * * ?" />
-    </bean>
-    
-    <bean id="bbcSchedulesUpdate" parent="conditionalRunner">
-   		<constructor-arg ref="bbcSchedulesUpdater"/>
-   </bean>
   
    <bean id="updatePlaylistsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
     <property name="delay"  value="300000" />
@@ -59,7 +34,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
  					 	<property name="missingContentShouldBeMarkedAsUnavailable" value="false"/>
  					 	<property name="uris">
 						  <list>
-						      <value>http://feeds.bbc.co.uk/iplayer/highlights/tv</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/top_rated</value>
                               <value>http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured</value>
@@ -92,17 +66,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         </bean>
     </property>
   </bean>
-  
-  <bean id="updateBbcBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-    <property name="delay"  value="640000" />
-    <property name="period" value="1800000" />
-    <property name="runnable">
-   		<bean parent="conditionalRunner">
-    		<constructor-arg ref="bbcBrandsUpdater" />
- 		</bean>
-    </property>
-  </bean>
-  
+    
   <bean id="updateItvBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
     <property name="delay"  value="1340000" />
     <property name="period" value="1800000" />
@@ -167,16 +131,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    <property name="uri" value="http://www.hulu.com/browse/alphabetical/episodes" />
   </bean>
   
-  <bean id="bbcBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
-	 <property name="uris">
-	 	<bean class="org.atlasapi.persistence.system.AToZUriSource">
-	 		<constructor-arg value="http://feeds.bbc.co.uk/iplayer/atoz/"/>
-	 		<constructor-arg value="/list"/>
-	 		<constructor-arg value="true"/>
-	 	</bean>
-	 </property>
-  </bean>
-  
   <bean id="tvblobUpdater" class="org.atlasapi.remotesite.tvblob.TVBlobServicesUpdater">
     <constructor-arg ref="contentWriter"/>
     <constructor-arg ref="contentResolver" />
@@ -193,15 +147,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <constructor-arg ref="savingFetcher" />
   </bean>
 
-  <bean id="bbcSchedulesUpdater" class="org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
-	 <constructor-arg ref="contentResolver"/>
-	 <property name="uris">
-	    <bean class="org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource">
-		    <property name="daysToLookAhead" value="5" />
-	     </bean>
-	  </property>
-  </bean>    
-  
   <bean id="perPublisherUpdater" class="org.atlasapi.remotesite.PerPublisherItemUpdater">
 	 <constructor-arg ref="queryExecutor"/>
 	 <constructor-arg>
@@ -231,7 +176,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <prop key="/system/c4/highlights/update">c4HighlightsUpdateController</prop>
                 <prop key="/system/c4/update">c4UpdateController</prop>
                 <prop key="/system/bbc/update">bbcUpdateController</prop>
-                <prop key="/system/bbc-schedule/update">bbcScheduleUpdateController</prop>
+                <prop key="/system/bbc/highlights/update">bbcHighlightsUpdateController</prop>
                 <prop key="/system/orphans/update">orphanUpdateController</prop>
                 <prop key="/system/hulu/update">huluUpdateController</prop>
                 <prop key="/system/tvblob/update">tvblobUpdateController</prop>
@@ -252,13 +197,13 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <bean id="c4HighlightsUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="c4HighlightsUpdater"/>
     </bean>
+
+    <bean id="bbcHighlightsUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
+        <constructor-arg ref="bbcHighlightsUpdater"/>
+    </bean>
     
     <bean id="bbcUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="bbcBrandsUpdater"/>
-    </bean>
-
-    <bean id="bbcScheduleUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="bbcSchedulesUpdater"/>
+        <constructor-arg ref="bbcFeedsUpdater"/>
     </bean>
     
     <bean id="tvblobUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
@@ -277,8 +222,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="seesawUpdater"/>
     </bean>
   
-  <bean id="conditionalRunner" abstract="true" class="com.metabroadcast.common.webapp.runnables.IpAddressBasedConditionalRunner">
-  	<property name="shouldRunOnMachine" value="${scheduled.tasks.machine.ip}" />
-  </bean>
+   <bean id="conditionalRunner" abstract="true" class="com.metabroadcast.common.webapp.runnables.IpAddressBasedConditionalRunner">
+   	<property name="shouldRunOnMachine" value="${scheduled.tasks.machine.ip}" />
+   </bean>
    
 </beans>

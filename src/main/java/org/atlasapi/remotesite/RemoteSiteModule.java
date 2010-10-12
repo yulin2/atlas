@@ -20,7 +20,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.remotesite.bbc.BbcIplayerFeedAdapter;
+import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
@@ -30,6 +30,7 @@ import org.atlasapi.remotesite.hulu.HuluAllBrandsAdapter;
 import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluRssAdapter;
+import org.atlasapi.remotesite.ictomorrow.ICTomorrowModule;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itv.ItvBrandAdapter;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
@@ -38,7 +39,6 @@ import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
-import org.atlasapi.remotesite.wikipedia.WikipediaSparqlAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,14 +47,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-@Import(C4Module.class)
+@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
 	private @Autowired C4Module c4Module; 
 	
+	private @Autowired BbcModule bbcModule; 
+	
+	public @Bean SimpleScheduler scheduler() {
+	    return new SimpleScheduler();
+	}
 	
 	public @Bean Fetcher<Content> remoteFetcher() {
 		
@@ -69,12 +75,13 @@ public class RemoteSiteModule {
 		 adapters.add(new TedTalkAdapter());
 		 
 		 adapters.addAll(c4Module.adapters());
+		 adapters.addAll(bbcModule.adapters());
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
 		 adapters.add(new ItvBrandAdapter());
-		 adapters.add(new BbcIplayerFeedAdapter());
-		 adapters.add(new BbcProgrammeAdapter());
+		 adapters.add(new BbcProgrammeAdapter(log));
+
 		 adapters.add(new BbcPodcastAdapter());
 		 
 		 adapters.add(huluItemAdapter());
@@ -91,7 +98,10 @@ public class RemoteSiteModule {
 		 
 		 adapters.add(flickrAdapter);
 		 adapters.add(new OpmlAdapter(dispatcher));
-		 adapters.add(new WikipediaSparqlAdapter());
+		 
+		 // avoid overloading with equiv requests
+		 // adapters.add(new WikipediaSparqlAdapter());
+		 
 		 adapters.add(new ImdbAdapter(dispatcher));
 		 
 		 adapters.add(new SeesawBrandAdapter());

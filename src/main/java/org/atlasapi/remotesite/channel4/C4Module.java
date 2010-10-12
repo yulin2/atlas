@@ -10,6 +10,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.joda.time.LocalTime;
@@ -30,10 +31,11 @@ public class C4Module {
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	
-	private final SimpleScheduler scheduler = new SimpleScheduler();
-	
+	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
+
 	private @Autowired MongoDbBackedContentStore contentStore;
+	private @Autowired ContentWriters contentWriter;
 	private @Autowired AdapterLog log;
 	
 	@PostConstruct
@@ -52,11 +54,11 @@ public class C4Module {
 	}
 
 	@Bean C4AtoZAtomContentLoader c4AtozUpdater() {
-		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentStore, contentStore, log);
+		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentWriter, contentStore, log);
 	}
 	
 	@Bean C4HighlightsAdapter c4HighlightsUpdater() {
-		return new C4HighlightsAdapter(contentStore, log);
+		return new C4HighlightsAdapter(contentWriter, log);
 	}
 	
 	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {

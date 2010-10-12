@@ -24,7 +24,11 @@ public class SlashProgrammesAtoZRdf {
         List<String> pids = Lists.newArrayList();
         if (programmes != null) {
             for (BbcProgramme programme: programmes) {
-                pids.add(programme.pid());
+                String pid = programme.pid();
+                // don't include clips
+                if (pid.startsWith("b00")) {
+                	pids.add(pid);
+                }
             }
         }
         return pids;

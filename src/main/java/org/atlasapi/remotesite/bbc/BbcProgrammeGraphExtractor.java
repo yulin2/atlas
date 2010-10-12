@@ -63,17 +63,15 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
         SlashProgrammesRdf episode = source.episode();
 
-        Location location = htmlLinkLocation(episodeUri);
-
-        Encoding encoding = new Encoding();
-        encoding.addAvailableAt(location);
 
         Item item = item(episodeUri, episode, source.getSlashProgrammesUri());
 
         if (source.version() != null) {
+        	Location location = htmlLinkLocation(episodeUri);
+        	Encoding encoding = new Encoding();
+        	encoding.addAvailableAt(location);
             Version version = version(source.version());
             version.addManifestedAs(encoding);
-
             item.addVersion(version);
         }
 
