@@ -55,7 +55,7 @@ public class BbcBrandExtractor  {
 		
 		if (brandRef.series != null) {
 			for (SlashProgrammesSeriesRef seriesRef : brandRef.series) {
-				String seriesPid = pidFrom(seriesRef.resourceUri());
+				String seriesPid = BbcFeeds.pidFrom(seriesRef.resourceUri());
 				if (seriesPid == null) {
 					log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(seriesRef.resourceUri()).withDescription("Could not extract PID from series ref " + seriesRef.resourceUri() + " for brand with uri " + brand.getCanonicalUri()));
 					continue;
@@ -88,7 +88,7 @@ public class BbcBrandExtractor  {
 	private List<String> episodesFrom(List<String> uriFragments) {
 		List<String> uris = Lists.newArrayListWithCapacity(uriFragments.size());
 		for (String uri : uriFragments) {
-			String pid = pidFrom(uri);
+			String pid = BbcFeeds.pidFrom(uri);
 			if (pid == null) {
 				log.record(new AdapterLogEntry(Severity.WARN).withUri(uri).withSource(getClass()).withDescription("Could not extract PID from: " + uri));
 				continue;
@@ -121,15 +121,5 @@ public class BbcBrandExtractor  {
 		}
 		container.setGenres(genreMap.map(brandRef.genreUris()));
 		container.setDescription(brandRef.description());
-	}
-
-	private static final Pattern PID_FINDER = Pattern.compile("(b00[a-z0-9]+)");
-	
-	private String pidFrom(String uri) {
-		Matcher matcher = PID_FINDER.matcher(uri);
-		if (matcher.find()) {
-			return matcher.group(1);
-		}
-		return null;
 	}
 }

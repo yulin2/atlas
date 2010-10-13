@@ -16,7 +16,6 @@ package org.atlasapi.remotesite.bbc;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.TransportType;
@@ -216,22 +215,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         return extractImageUrl(episodeUri, THUMBNAIL_EXTENSION);
     }
 
-    private final Pattern programmeIdPattern = Pattern.compile("(b00[a-z0-9]+).*");
 
-    private String programmeIdFrom(String uri) {
-        Matcher matcher = programmeIdPattern.matcher(uri);
-        if (matcher.find()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
 
     private String extractImageUrl(String episodeUri, String suffix) {
-        return "http://www.bbc.co.uk/iplayer/images/episode/" + programmeIdFrom(episodeUri) + suffix;
+        return "http://www.bbc.co.uk/iplayer/images/episode/" + BbcFeeds.pidFrom(episodeUri) + suffix;
     }
 
     private String iplayerPageFrom(String episodeUri) {
-        return "http://www.bbc.co.uk/iplayer/episode/" + programmeIdFrom(episodeUri);
+        return "http://www.bbc.co.uk/iplayer/episode/" + BbcFeeds.pidFrom(episodeUri);
     }
 
     @SuppressWarnings(value = "unused")

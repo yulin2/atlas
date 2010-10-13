@@ -27,6 +27,7 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	public void testExpandsBbcCuries() throws Exception {
 		
 		assertThat(expander.expand("bbc:b006mk25"), is(Maybe.just("http://www.bbc.co.uk/programmes/b006mk25")));
+		assertThat(expander.expand("bbc:p006mk25"), is(Maybe.just("http://www.bbc.co.uk/programmes/p006mk25")));
 
 		assertThat(expander.expand("bbc:atoz_a"), is(Maybe.just("http://feeds.bbc.co.uk/iplayer/atoz/a/list")));
 		assertThat(expander.expand("bbc:atoz_0-9"), is(Maybe.just("http://feeds.bbc.co.uk/iplayer/atoz/0-9/list")));
@@ -42,6 +43,8 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	
 	public void testProducesBbcCuries() throws Exception {
 		assertThat(BBC.compact("http://www.bbc.co.uk/programmes/b006mk25"), is("bbc:b006mk25"));
+		assertThat(BBC.compact("http://www.bbc.co.uk/programmes/p006mk25"), is("bbc:p006mk25"));
+		
 		assertThat(BBC.compact("http://feeds.bbc.co.uk/iplayer/atoz/a/list"), is("bbc:atoz_a"));
 		assertThat(BBC.compact("http://feeds.bbc.co.uk/iplayer/atoz/0-9/list"), is("bbc:atoz_0-9"));
 		assertThat(BBC.compact("http://feeds.bbc.co.uk/iplayer/bbc_one/list"), is("bbc:bbc_one"));

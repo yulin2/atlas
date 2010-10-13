@@ -32,7 +32,6 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 public class BbcProgrammesPolicyClient {
 
 	private static final String EPISODE_FEED_BASE_URI = "http://feeds.bbc.co.uk/iplayer/episode/";
-	private static final Pattern PID_PATTERN = Pattern.compile("(b00[^\\s]+)");
 	
 	private final SimpleHttpClient client;
 
@@ -48,13 +47,12 @@ public class BbcProgrammesPolicyClient {
 		return policyForEpisodeWithPid(pidFrom(episodeUri));
 	}
 	
-	
 	private static String pidFrom(String episodeUri) {
-		Matcher matcher = PID_PATTERN.matcher(episodeUri);
-		if (matcher.find()) {
-			return matcher.group(1);
+		String pid = BbcFeeds.pidFrom(episodeUri);
+		if (pid == null) {
+			throw new IllegalArgumentException("Uri does not contain a PID, was: " + episodeUri);
 		}
-		throw new IllegalArgumentException("Uri does not contain a PID, was: " + episodeUri);
+		return pid;
 	}
 
 	private Maybe<Policy> policyForEpisodeWithPid(String pid) {

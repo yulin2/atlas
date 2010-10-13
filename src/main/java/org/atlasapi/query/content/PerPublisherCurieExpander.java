@@ -34,7 +34,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 				if (curie.hasValue()) {
 					return curie.requireValue();
 				}
-				return "bbc:b00" + BbcUriCanonicaliser.bbcProgrammeIdFrom(url);
+				return "bbc:" + BbcUriCanonicaliser.bbcProgrammeIdFrom(url);
 			}
 		},
 		C4 {
