@@ -7,15 +7,21 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesBase;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
-import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisodeRef;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesRef;
 
-public class BbcBrandExtractor implements ContentExtractor<SlashProgrammesContainerRef, Brand> {
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
+public class BbcBrandExtractor  {
 
 	// Some Brands have a lot of episodes, if there are more than this number we
 	// only look at the most recent episodes
@@ -24,72 +30,106 @@ public class BbcBrandExtractor implements ContentExtractor<SlashProgrammesContai
 	private static final BbcProgrammesGenreMap genreMap = new BbcProgrammesGenreMap();
 	private static final Pattern IMAGE_STEM = Pattern.compile("^(.+)_[0-9]+_[0-9]+\\.[a-zA-Z]+$");
 
-	private final BbcProgrammeAdapter itemExtractor;
+	private final BbcProgrammeAdapter subContentExtractor;
 	private final AdapterLog log;
 
-	public BbcBrandExtractor(BbcProgrammeAdapter itemExtractor, AdapterLog log) {
-		this.itemExtractor = itemExtractor;
+	public BbcBrandExtractor(BbcProgrammeAdapter subContentExtractor, AdapterLog log) {
+		this.subContentExtractor = subContentExtractor;
 		this.log = log;
 	}
+	
+	public Series extractSeriesFrom(SlashProgrammesSeriesContainer rdfSeries) {
+		Series series = new Series();
+		populatePlaylistAttributes(series, rdfSeries);
+		List<String> episodeUris = episodesFrom(rdfSeries.episodeResourceUris());
+		addDirectlyIncludedEpisodesTo(series, episodeUris);
+    	return series;
+	}
 
-	@Override
-	public Brand extract(SlashProgrammesContainerRef brandRef) {
-		Brand brand = createBrandFrom(brandRef);
+	public Brand extractBrandFrom(SlashProgrammesContainerRef brandRef) {
+		Brand brand = new Brand();
+		populatePlaylistAttributes(brand, brandRef);
+
+		List<String> episodes = brandRef.episodes == null ? ImmutableList.<String>of() : episodesFrom(brandRef.episodeResourceUris());
+		addDirectlyIncludedEpisodesTo(brand, episodes);
 		
-		if (brandRef.episodes == null) {
-			return brand;
-		}
-
-		for (SlashProgrammesEpisodeRef episodeRef : mostRecent(brandRef.episodes)) {
-			String pid = pidFrom(episodeRef);
-			if (pid == null) {
-				log.record(new AdapterLogEntry(Severity.WARN).withUri(episodeRef.resourceUri()).withSource(getClass()).withDescription("Could not extract PID from: " + episodeRef.resourceUri()));
-				continue;
+		if (brandRef.series != null) {
+			for (SlashProgrammesSeriesRef seriesRef : brandRef.series) {
+				String seriesPid = pidFrom(seriesRef.resourceUri());
+				if (seriesPid == null) {
+					log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(seriesRef.resourceUri()).withDescription("Could not extract PID from series ref " + seriesRef.resourceUri() + " for brand with uri " + brand.getCanonicalUri()));
+					continue;
+				}
+				String uri = "http://www.bbc.co.uk/programmes/" + seriesPid;
+				Series series = (Series) subContentExtractor.fetch(uri);
+				if (series == null) {
+					log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
+					continue;
+				}
+				for (Item item : series.getItems()) {
+					brand.addItem(item);
+				}
 			}
-			Content found = itemExtractor.fetch("http://www.bbc.co.uk/programmes/" + pid);
-			if (!(found instanceof Item)) {
-				log.record(new AdapterLogEntry(Severity.WARN).withUri(episodeRef.resourceUri()).withSource(getClass()).withDescription("Expected episode got a brand for PID: " + pid));
-				continue;
-			} 
-			brand.addItem((Item) found); 
 		}
 		return brand;
 	}
 
-	private List<SlashProgrammesEpisodeRef> mostRecent(List<SlashProgrammesEpisodeRef> episodes) {
+	private void addDirectlyIncludedEpisodesTo(Playlist playlist, List<String> episodes) {
+		for (String episodeUri : mostRecent(episodes)) {
+			Content found = subContentExtractor.fetch(episodeUri);
+			if (!(found instanceof Item)) {
+				log.record(new AdapterLogEntry(Severity.WARN).withUri(episodeUri).withSource(getClass()).withDescription("Expected Item for PID: " + episodeUri));
+				continue;
+			} 
+			playlist.addItem((Item) found); 
+		}
+	}
+
+	private List<String> episodesFrom(List<String> uriFragments) {
+		List<String> uris = Lists.newArrayListWithCapacity(uriFragments.size());
+		for (String uri : uriFragments) {
+			String pid = pidFrom(uri);
+			if (pid == null) {
+				log.record(new AdapterLogEntry(Severity.WARN).withUri(uri).withSource(getClass()).withDescription("Could not extract PID from: " + uri));
+				continue;
+			}
+			uris.add("http://www.bbc.co.uk/programmes/" + pid);
+		}
+		return uris;
+	}
+
+	private <T> List<T> mostRecent(List<T> episodes) {
 		if (episodes.size() < MAX_EPISODES) {
 			return episodes;
 		}
 		return episodes.subList(episodes.size() - MAX_EPISODES, episodes.size());
 	}
 
-	private Brand createBrandFrom(SlashProgrammesContainerRef brandRef) {
+	private void populatePlaylistAttributes(Playlist container, SlashProgrammesBase brandRef) {
 		String brandUri = brandRef.uri();
-		Brand brand = new Brand(brandUri, BbcUriCanonicaliser.curieFor(brandUri), Publisher.BBC);
-		brand.setTitle(brandRef.title());
+		container.setCanonicalUri(brandUri);
+		container.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
+		container.setPublisher(Publisher.BBC);
+		container.setTitle(brandRef.title());
 		if (brandRef.getDepiction() != null) {
 			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());
 			if (matcher.matches()) {
 				String base = matcher.group(1);
-				brand.setImage(base + BbcProgrammeGraphExtractor.FULL_IMAGE_EXTENSION);
-				brand.setThumbnail(base + BbcProgrammeGraphExtractor.THUMBNAIL_EXTENSION);
+				container.setImage(base + BbcProgrammeGraphExtractor.FULL_IMAGE_EXTENSION);
+				container.setThumbnail(base + BbcProgrammeGraphExtractor.THUMBNAIL_EXTENSION);
 			}
 		}
-		brand.setGenres(genreMap.map(brandRef.genreUris()));
-		brand.setDescription(brandRef.description());
-		return brand;
+		container.setGenres(genreMap.map(brandRef.genreUris()));
+		container.setDescription(brandRef.description());
 	}
 
 	private static final Pattern PID_FINDER = Pattern.compile("(b00[a-z0-9]+)");
 	
-	private String pidFrom(SlashProgrammesEpisodeRef episodeRef) {
-		Matcher matcher = PID_FINDER.matcher(episodeRef.resourceUri());
+	private String pidFrom(String uri) {
+		Matcher matcher = PID_FINDER.matcher(uri);
 		if (matcher.find()) {
 			return matcher.group(1);
 		}
 		return null;
 	}
-	
-	
-
 }
