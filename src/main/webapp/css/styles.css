@@ -1,8 +1,16 @@
 * {
     margin:0;
     padding:0;
-
 }
+
+.mod:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
 div.clearBox {
     clear:both;
 }
@@ -24,7 +32,7 @@ li {
 	list-style-type:none;
 }
 
-h1, h2 {
+h1, h2, h3 {
 	font-weight:100;
 }
 
@@ -45,6 +53,10 @@ header {
 h2 {
 	margin:12px;
 	border-bottom:1px solid #ccc;
+}
+
+h3 {
+	margin:12px 24px;
 }
 
 #applications-list {
@@ -97,4 +109,30 @@ input[type="submit"]:hover, input[type="submit"]:focus {
 	background-color:#eee;
 	border-color:#666;
 	outline:none;
+}
+
+input[type="checkbox"] {
+	margin:5px;
+}
+
+#app-publishers, #app-ips {
+	padding-left: 5%;
+	margin-bottom:25px;
+}
+
+#app-publishers li {
+	margin: 2px;
+	display: block;
+	float: left;
+	width: 40%;
+}
+
+#app-publishers li label {
+	display:block;
+	padding:5px;
+}
+
+#app-publishers li label:hover {
+	background-color:#eee;
+	cursor:pointer;
 }
