@@ -27,7 +27,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
-import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
@@ -74,9 +73,9 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
             }
 
             return episode;
-        } else {
-            throw new FetchException("Unable to retrieve from Hulu episode: " + uri + " after multiple attempts");
         }
+        
+        return null;
     }
 
     @Override

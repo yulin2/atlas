@@ -12,8 +12,8 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class TVBlobServicesClient implements RemoteSiteClient<List<TVBlobService>>{
 
-    private ObjectMapper mapper = new ObjectMapper();
-    private SimpleHttpClient client = HttpClients.webserviceClient();
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final SimpleHttpClient client = HttpClients.webserviceClient();
 
     @SuppressWarnings("unchecked")
     @Override
