@@ -25,22 +25,23 @@ import com.google.common.collect.Lists;
 public class BbcUriCanonicaliser implements Canonicaliser {
 
 	private static final List<Pattern> alternateUris = Lists.newArrayList(
-			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/programmes/b00([^\\./]+)(\\.rdf)?"),
-			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/b00([^\\./]+)"),
-			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/b00([^\\./]+)/.*?(?<!\\.rdf)"),
-			Pattern.compile("https?://(?:www\\.)?fanhu.bz.*?b00([^\\./]+).*"),
+			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/programmes/([bp]00[^\\./]+)(\\.rdf)?"),
+			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/([bp]00[^\\./]+)"),
+			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/([bp]00[^\\./]+)/.*?(?<!\\.rdf)"),
+			Pattern.compile("https?://(?:www\\.)?fanhu.bz.*?([bp]00[^\\./]+).*"),
 			Pattern.compile("https?://bbc\\.co\\.uk/i/([^\\.]+?)/?")
 	);
-
-	private String canonicalUriFor(String programmeId) {
-		return "http://www.bbc.co.uk/programmes/b00" + programmeId;
-	}
 
 	public static String bbcProgrammeIdFrom(String uri) {
 		for (Pattern p : alternateUris) {
 			Matcher matcher = p.matcher(uri);
 			if (matcher.matches()) {
-				return matcher.group(1);
+				String pid = matcher.group(1);
+				if (pid.startsWith("b00") || pid.startsWith("p00")) {
+					return pid;
+				} else {
+					return "b00" + pid;
+				}
 			}
 		}
 		return null;
@@ -52,12 +53,12 @@ public class BbcUriCanonicaliser implements Canonicaliser {
 		if (programmeId == null) {
 			return null;
 		}
-		return canonicalUriFor(programmeId);
+		return BbcFeeds.slashProgrammesUriForPid(programmeId);
 	}
 
 	// Curie [ bbc:b00abcd ]
 	static String curieFor(String episodeUri) {
 		String pid = bbcProgrammeIdFrom(episodeUri);
-		return "bbc:b00" + pid;
+		return "bbc:" + pid;
 	}
 }

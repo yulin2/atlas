@@ -73,12 +73,10 @@ public class SeriesFetchingBbcSeriesNumberResolver implements BbcSeriesNumberRes
 	}
 
 	private String canonicaliseAndCheckUri(String seriesUri) {
-		if (seriesUri.endsWith("#programme")) {
-			 seriesUri.replace("#programme", "");
+		String pid = BbcFeeds.pidFrom(seriesUri);
+		if (pid == null) {
+			throw new IllegalArgumentException("Uri for series does not contain a PID: " + seriesUri);
 		}
-		if (!BbcProgrammeAdapter.SLASH_PROGRAMMES_URL_PATTERN.matcher(seriesUri).matches()) {
-			throw new IllegalArgumentException("Uri is not a bbc series: " + seriesUri);
-		}
-		return seriesUri + ".rdf";
+		return BbcFeeds.slashProgrammesUriForPid(pid) + ".rdf";
 	}
 }
