@@ -1,9 +1,9 @@
 {namespace atlas.templates.applications}
 
 /**
- * @param applications
+ *
  */
-{template .index}
+{template .head}
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -17,11 +17,25 @@
 	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
 	<link rel="stylesheet" type="text/css" href="/css/colorbox.css" />
 </head>
+{/template}
+
+/**
+ *
+ */
+{template .header}
+	<header>
+		<h1>Applications</h1>
+	</header>
+{/template}
+
+/**
+ * @param applications
+ */
+{template .index}
+{call atlas.templates.applications.head /}
 <body>
 	<div id="wrapper">
-		<header>
-			<h1>Applications</h1>
-		</header>
+		{call atlas.templates.applications.header /}
 		<div id="content">
 			<h2>Current Applications</h2>
 			<ul id="applications-list" data-apps="{length($applications)}">
@@ -47,7 +61,14 @@
  * @param application
  */
 {template .application}
-{call atlas.templates.applications.widgets.applicationContent}
-{param application: $application /}
-{/call}
+{call atlas.templates.applications.head /}
+<body>
+	<div id="wrapper">
+		{call atlas.templates.applications.header /}
+		{call atlas.templates.applications.widgets.applicationContent}
+			{param application: $application /}
+		{/call}
+	</div>
+</body>
+</html>
 {/template}
