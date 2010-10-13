@@ -24,6 +24,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
 public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
@@ -61,7 +62,6 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
             if (content == null) {
                 return null;
             }
-
             if (content.episode() != null) {
                 SlashProgrammesVersionRdf version = null;
                 if (content.episode().versions() != null && !content.episode().versions().isEmpty()) {
@@ -70,8 +70,13 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
                 BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version);
                 return itemExtractor.extract(source);
             }
+            SlashProgrammesSeriesContainer rdfSeries = content.series();
+			if (rdfSeries != null) {
+            	return brandExtractor.extractSeriesFrom(rdfSeries);
+            }
+            
             if (content.brand() != null) {
-                return brandExtractor.extract(content.brand());
+                return brandExtractor.extractBrandFrom(content.brand());
             }
             return null;
 

@@ -21,7 +21,6 @@ public class BbcSlashProgrammesAtoZUpdater implements Runnable {
     private static final String ATOZ_BASE = "http://www.bbc.co.uk/%s/programmes/a-z/all.rdf";
     private static final String SLASH_PROGRAMMES_BASE_URI = "http://www.bbc.co.uk/programmes/";
 
-
     private final RemoteSiteClient<SlashProgrammesAtoZRdf> client;
     private final BbcProgrammeAdapter fetcher;
     private final List<String> channels = ImmutableList.of("bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd", "radio1", "radio2", "radio3", "radio4");

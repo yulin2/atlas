@@ -27,6 +27,8 @@ import org.apache.commons.lang.StringUtils;
 import org.atlasapi.media.vocabulary.PO;
 import org.atlasapi.media.vocabulary.RDF;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.sparql.vocabulary.FOAF;
@@ -45,7 +47,7 @@ class SlashProgrammesRdf {
 	private SlashProgrammesContainerRef brand;
 	
 	@XmlElement(namespace=PO.NS, name="Series")
-	private SlashProgrammesContainerRef series;
+	private SlashProgrammesSeriesContainer series;
 	
 	static class SlashProgrammesEpisode extends SlashProgrammesBase {
 		
@@ -94,6 +96,9 @@ class SlashProgrammesRdf {
 	
 	static class SlashProgrammesBase {
 		
+		@XmlAttribute(name="about", namespace=RDF.NS)
+		protected String uri;
+		
 		@XmlElement(namespace=DC.NS, name="title")
 		protected String title;
 		
@@ -139,25 +144,73 @@ class SlashProgrammesRdf {
 		public FoafDepiction getDepiction() {
 			return depiction;
 		}
-	}
-	
-	static class SlashProgrammesContainerRef extends SlashProgrammesBase {
-
-		@XmlAttribute(name="about", namespace=RDF.NS)
-		private String uri;
-		
-		@XmlElement(namespace=PO.NS, name="episode")
-		protected List<SlashProgrammesEpisodeRef> episodes;
 		
 		public String uri() {
 			return BASE_URI + uri.replace("#programme", "");
 		}
+	}
+	
+	static class SlashProgrammesSeriesContainer extends SlashProgrammesBase {
 
+		@XmlElement(namespace=PO.NS, name="episode")
+		private List<SlashProgrammesEpisodeWrapper> wrappedEpisodes;
+		
+		public List<SlashProgrammesContainerRef> episodes() {
+			if (wrappedEpisodes == null) {
+				return ImmutableList.of();
+			}
+			return Lists.transform(wrappedEpisodes, SlashProgrammesEpisodeWrapper.UNWRAP);
+		}
+		
+		public List<String> episodeResourceUris() {
+			if (wrappedEpisodes == null) {
+				return ImmutableList.of();
+			}
+			return Lists.transform(wrappedEpisodes, new Function<SlashProgrammesEpisodeWrapper, String>() {
+				@Override
+				public String apply(SlashProgrammesEpisodeWrapper from) {
+					return from.episode.uri;
+				}
+			});
+		}
+	}
+	
+	static class SlashProgrammesEpisodeWrapper {
+
+		static Function<SlashProgrammesEpisodeWrapper, SlashProgrammesContainerRef> UNWRAP = new Function<SlashProgrammesEpisodeWrapper, SlashProgrammesContainerRef>() {
+			@Override
+			public SlashProgrammesContainerRef apply(SlashProgrammesEpisodeWrapper from) {
+				return from.episode;
+			}
+		};
+		
+		@XmlElement(name="Episode", namespace=PO.NS)
+		private SlashProgrammesContainerRef episode;
+		
+	}
+	
+	
+	static class SlashProgrammesContainerRef extends SlashProgrammesBase {
+
+		@XmlElement(namespace=PO.NS, name="episode")
+		protected List<SlashProgrammesEpisodeRef> episodes;
+		
+		@XmlElement(namespace=PO.NS, name="series")
+		protected List<SlashProgrammesSeriesRef> series;
+		
 		public SlashProgrammesContainerRef withUri(String uri) {
 			this.uri = uri;
 			return this;
 		}
-		
+
+		public List<String> episodeResourceUris() {
+			return Lists.transform(episodes, new Function<SlashProgrammesEpisodeRef, String>() {
+				@Override
+				public String apply(SlashProgrammesEpisodeRef from) {
+					return from.resourceUri;
+				}
+			});
+		}
 	}
 	
 	static class SlashProgrammesVersion {
@@ -200,6 +253,16 @@ class SlashProgrammesRdf {
 			return resourceUri;
 		}
 	}
+	
+	static class SlashProgrammesSeriesRef {
+
+		@XmlAttribute(name="resource", namespace=RDF.NS)
+		private String resourceUri;
+
+		public String resourceUri() {
+			return resourceUri;
+		}
+	}
 
 	static String BASE_URI = "http://www.bbc.co.uk";
 	
@@ -233,7 +296,7 @@ class SlashProgrammesRdf {
 		return brand;
 	}
 
-	public SlashProgrammesContainerRef series() {
+	public SlashProgrammesSeriesContainer series() {
 		return series;
 	}
 	

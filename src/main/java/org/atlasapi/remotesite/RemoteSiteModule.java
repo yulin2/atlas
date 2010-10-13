@@ -48,6 +48,7 @@ import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
 @Import({C4Module.class, ICTomorrowModule.class, BbcModule.class})
@@ -60,6 +61,10 @@ public class RemoteSiteModule {
 	
 	public @Bean SimpleScheduler scheduler() {
 	    return new SimpleScheduler();
+	}
+	
+	public @Bean ManualTaskTrigger manualTaskTrigger() {
+	    return new ManualTaskTrigger(scheduler());
 	}
 	
 	public @Bean Fetcher<Content> remoteFetcher() {

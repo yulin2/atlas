@@ -173,10 +173,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="manualUpdateMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
         <property name="mappings">
             <props>
-                <prop key="/system/c4/highlights/update">c4HighlightsUpdateController</prop>
-                <prop key="/system/c4/update">c4UpdateController</prop>
-                <prop key="/system/bbc/update">bbcUpdateController</prop>
-                <prop key="/system/bbc/highlights/update">bbcHighlightsUpdateController</prop>
                 <prop key="/system/orphans/update">orphanUpdateController</prop>
                 <prop key="/system/hulu/update">huluUpdateController</prop>
                 <prop key="/system/tvblob/update">tvblobUpdateController</prop>
@@ -189,23 +185,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    <bean name="huluUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="huluBrandsUpdater"/>
    </bean>
-   
-    <bean id="c4UpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="c4AtozUpdater"/>
-    </bean>
-    
-    <bean id="c4HighlightsUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="c4HighlightsUpdater"/>
-    </bean>
-
-    <bean id="bbcHighlightsUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="bbcHighlightsUpdater"/>
-    </bean>
-    
-    <bean id="bbcUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="bbcFeedsUpdater"/>
-    </bean>
-    
+      
     <bean id="tvblobUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="tvblobUpdater"/>
     </bean>

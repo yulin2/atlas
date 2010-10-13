@@ -30,8 +30,8 @@ public class BbcModule {
 	
 	private @Autowired ContentWriters contentWriters;
 	private @Autowired AdapterLog log;
+	private @Autowired SimpleScheduler scheduler;
 	
-	private final SimpleScheduler scheduler = new SimpleScheduler();
 	private @Value("${bbc.scheduledUpdates}") String enabled;
 	
 	@PostConstruct 
