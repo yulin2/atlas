@@ -22,6 +22,7 @@ import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.AToZUriSource;
+import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.UniqueContentForUriQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
@@ -63,7 +64,7 @@ public class QueryModule {
 	}
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
-		return new CurieResolvingQueryExecutor(new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher())));
+		return new ApplicationConfigurationQueryExecutor(new CurieResolvingQueryExecutor(new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()))));
 	}
 	
 	@Bean InMemoryFuzzySearcher titleSearcher() {
