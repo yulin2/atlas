@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.atlasapi.remotesite.bbc.BbcIplayerHightlightsAdapter;
 import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
-import org.atlasapi.remotesite.itv.ItvBrandAdapter;
+import org.atlasapi.remotesite.itv.ItvMercuryBrandAdapter;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 
 import com.metabroadcast.common.base.Maybe;
@@ -95,46 +95,21 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			}
 		},
 		ITV {
-			
-			private static final String ITV_CATCHUP_CURIE = "itv:catchup";
+			private static final String ITV_CURIE = "itv:";
 			
 			@Override
 			public String expand(String curie) {
-				if (ITV_CATCHUP_CURIE.equals(curie)) {
-					return ItvBrandAdapter.ITV_URI;
+				if (curie.startsWith(ITV_CURIE)) {
+				    return ItvMercuryBrandAdapter.BASE_URL+curie.replace(ITV_CURIE, "");
 				}
-				
-				String withoutPrefix = curie.substring(curie.indexOf(":") + 1);
-				if (withoutPrefix.contains("-")) {
-					String[] components = withoutPrefix.split("-");
-					if ("1".equals(components[0])) {
-						return "http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&Filter=" + components[1];
-					} 
-					
-					if ("5".equals(components[0])) {
-						return "http://www.itv.com/ITVPlayer/Video/default.html?ViewType=5&Filter=" + components[1];
-					}
-				}
-				
 				return null;
 			}
 
-			final Pattern itvBrandIdPattern = Pattern.compile("http://www.itv.com/ITVPlayer/Programmes/default.html\\?ViewType=1&Filter=(\\d+)");
-			final Pattern itvItemIdPattern = Pattern.compile("http://www.itv.com/ITVPlayer/Video/default.html\\?ViewType=5&Filter=(\\d+)");
-
 			@Override
 			public String compact(String url) {
-				if (ItvBrandAdapter.ITV_URI.equals(url)) {
-					return ITV_CATCHUP_CURIE;
-				}
-
-				String itemId = matchAgainst(url, itvItemIdPattern);
-				if (itemId != null) {
-					return "itv:5-" + itemId;
-				}
-				String brandId = matchAgainst(url, itvBrandIdPattern);
-				if (brandId != null) {
-					return "itv:1-" + brandId;
+				Matcher matcher = ItvMercuryBrandAdapter.BRAND_URL.matcher(url);
+				if (matcher.matches()) {
+				    return ITV_CURIE+matcher.group(1);
 				}
 
 				return null;

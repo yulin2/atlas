@@ -10,7 +10,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="contentUpdateTimerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
     <property name="scheduledTimerTasks">
         <list>
-            <ref bean="updateItvBrandsScheduledTask" />
             <ref bean="updateHuluBrandsScheduledTask" />
             <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateMentionsScheduledTask" />
@@ -66,16 +65,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         </bean>
     </property>
   </bean>
-    
-  <bean id="updateItvBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-    <property name="delay"  value="1340000" />
-    <property name="period" value="1800000" />
-    <property name="runnable">
-   		<bean parent="conditionalRunner">
-    		<constructor-arg ref="itvBrandsUpdater" />
- 		</bean>
-    </property>
-  </bean>
   
   <bean id="updateHuluBrandsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
     <property name="delay"  value="1940000" />
@@ -121,10 +110,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   	<property name="contentStore" ref="contentWriter"/>
 	<property name="fetcher" ref="remoteFetcher"/>
 	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
-  </bean>
-  
-  <bean id="itvBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">
-	 <property name="uri" value="http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml" />
   </bean>
   
   <bean id="huluBrandsUpdater" class="org.atlasapi.persistence.system.UriRefresher" parent="brandsUpdater">

@@ -13,7 +13,7 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 public class ItvMercuryEpisodeAdapter implements SiteSpecificAdapter<Episode> {
     
     private final static Pattern EPISODE_URL = Pattern.compile("https?://www.itv.com/itvplayer/video/?.*Filter=(\\d+)");
-    private final static String BASE_API = "http://mercury.itv.com/api/json/dotcom/Episode/Index/";
+    public final static String BASE_API = "http://mercury.itv.com/api/json/dotcom/Episode/Index/";
     private final RemoteSiteClient<Map<String, Object>> client;
     private final ContentExtractor<Map<String, Object>, Episode> episodeExtractor;
     

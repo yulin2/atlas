@@ -25,6 +25,7 @@ public class ItvMercuryClient implements RemoteSiteClient<Map<String, Object>> {
     @SuppressWarnings("unchecked")
     @Override
     public Map<String, Object> get(String url) throws Exception {
-        return mapper.convertValue(httpClient.getContentsOf(url), Map.class);
+        String contents = httpClient.getContentsOf(url);
+        return mapper.readValue(contents, Map.class);
     }
 }
