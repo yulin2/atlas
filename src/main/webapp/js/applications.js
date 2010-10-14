@@ -37,7 +37,7 @@ addApplication = function(slug, data) {
 	if (appList.attr('data-apps') == 0) {
 		appList.children().slideUp().remove();
 	}
-	appList.append('<li style="display:none"><a class="app-link" href="#!/'+slug+'">'+title+'</a></li>');
+	appList.append('<li style="display:none"><a class="app-link" href="admin/applications/'+slug+'">'+title+'</a></li>');
 	appList.children().last().slideDown();
 	appList.attr('data-apps', appList.children().length);
 }
