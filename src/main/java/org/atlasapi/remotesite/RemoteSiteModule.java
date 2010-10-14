@@ -32,7 +32,7 @@ import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.hulu.HuluRssAdapter;
 import org.atlasapi.remotesite.ictomorrow.ICTomorrowModule;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
-import org.atlasapi.remotesite.itv.ItvBrandAdapter;
+import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
@@ -51,13 +51,14 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class})
+@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
 	private @Autowired C4Module c4Module; 
 	
 	private @Autowired BbcModule bbcModule; 
+	private @Autowired ItvModule itvModule;
 	
 	public @Bean SimpleScheduler scheduler() {
 	    return new SimpleScheduler();
@@ -81,10 +82,10 @@ public class RemoteSiteModule {
 		 
 		 adapters.addAll(c4Module.adapters());
 		 adapters.addAll(bbcModule.adapters());
+		 adapters.addAll(itvModule.adapters());
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
-		 adapters.add(new ItvBrandAdapter());
 		 adapters.add(new BbcProgrammeAdapter(log));
 
 		 adapters.add(new BbcPodcastAdapter());

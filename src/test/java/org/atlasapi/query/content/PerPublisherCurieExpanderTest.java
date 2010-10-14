@@ -85,17 +85,13 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 	}
 	
 	public void testExpandsItvCuries() throws Exception {
-		assertThat(expander.expand("itv:1-2773"), is(Maybe.just("http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&Filter=2773")));
-		assertThat(expander.expand("itv:5-100109"), is(Maybe.just("http://www.itv.com/ITVPlayer/Video/default.html?ViewType=5&Filter=100109")));
-
-		assertThat(expander.expand("itv:catchup"), is(Maybe.just("http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml")));
+		assertThat(expander.expand("itv:...Do%20the%20Funniest%20Things"), is(Maybe.just("http://www.itv.com/itvplayer/video/?Filter=...Do%20the%20Funniest%20Things")));
+		assertThat(expander.expand("itv:123"), is(Maybe.just("http://www.itv.com/itvplayer/video/?Filter=123")));
 	}
 	
 	public void testProducesItvCuries() throws Exception {
-		assertThat(ITV.compact("http://www.itv.com/ITVPlayer/Programmes/default.html?ViewType=1&Filter=2773"), is("itv:1-2773"));
-		assertThat(ITV.compact("http://www.itv.com/ITVPlayer/Video/default.html?ViewType=5&Filter=100109"), is("itv:5-100109"));
-
-		assertThat(ITV.compact("http://www.itv.com/_data/xml/CatchUpData/CatchUp360/CatchUpMenu.xml"), is("itv:catchup"));
+		assertThat(ITV.compact("http://www.itv.com/itvplayer/video/?Filter=123"), is("itv:123"));
+		assertThat(ITV.compact("http://www.itv.com/itvplayer/video/?Filter=...Do%20the%20Funniest%20Things"), is("itv:...Do%20the%20Funniest%20Things"));
 	}
 	
 	public void testExpandsYoutubeCuries() throws Exception {
