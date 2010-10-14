@@ -69,16 +69,15 @@ h3 {
 
 form p {
 	margin: 15px 0;
-	text-align:right;
-	padding-right:10px;
+	padding: 0 10px;
 }
 
-#create {
+#create, #ipaddress {
 	width:400px;
+	text-align:right;
 	border:1px solid #ccc;
 	background-color:#eee;
 	margin:24px auto 24px auto;
-	
 }
 
 input[type="text"] {
@@ -135,4 +134,21 @@ input[type="checkbox"] {
 #app-publishers li label:hover {
 	background-color:#eee;
 	cursor:pointer;
+}
+
+#app-ips li {
+	margin:5px;
+	padding:5px;
+	width:110px;
+	float:left;
+	display:block;
+}
+
+#app-ips li:hover {
+	background-color: #eee;
+}
+
+#app-ips li span:last-child {
+	cursor:pointer;
+	margin:5px;
 }

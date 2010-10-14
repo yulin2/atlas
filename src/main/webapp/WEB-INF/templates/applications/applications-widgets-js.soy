@@ -8,16 +8,21 @@
 <h3>API Key</h3>
 <p style="margin-left:48px">{$application.credentials.apiKey}</p>
 <h3>IP Addresses</h3>
-<ul id="app-ips">
-{foreach $address in $application.credentials.ipAddresses}
-	<li>$address</li>
+<ul id="app-ips" class="mod" data-app="{$application.slug}" data-ips="{length($application.credentials.ipRanges)}">
+{foreach $range in $application.credentials.ipRanges}
+	<li><span>{$range}</span><span style="display:none;opacity:0">✖</span></li>
 	{ifempty}
-	<li>No IP Addresses</li>
+	<li>No Addresses</li>
 {/foreach}
 </ul>
-
+<form id="ipaddress" method="post" action="/admin/applications/{$application.slug}/ipranges" data-app="{$application.slug}">
+	<p>
+		<label>IP Address: <input type="text" name="ipaddress" placeholder="CIDR" required /></label>
+		<input type="submit" value="Add" />
+	</p>
+</form>
 <h3>Publishers</h3>
-<ul id="app-publishers" class="mod">
+<ul id="app-publishers" class="mod" data-app="{$application.slug}">
 {foreach $publisher in $application.configuration.publishers}
 	<li>
 		<label>
@@ -27,27 +32,4 @@
 	</li>
 {/foreach}
 </ul>
-{literal}
-<script type="application/javascript">
-	$("input.app-publisher").change(function(){
-		var checkbox = $(this);
-		var checked =  $(this).is(":checked")
-		$.ajax({
-			type: checked ? "post" : "delete",
-			url: "/admin/applications/{/literal}{$application.slug}{literal}/publishers"+(checked?"":"/"+$(this).attr("value"))+".json",
-			data: ({pubkey : $(this).attr("value")}),
-			success:function(responseData, textStatus, XMLHttpRequest) {
-				checkbox.closest('label').stop().animate({opacity: 0.25}, 500, function() {
-					checkbox.closest('label').animate({opacity: 1});
-				});
-			},
-			error:function(textStatus) {
-				checkbox.attr("checked", !checked);
-				console.log("fail:", textStatus);
-			}
-		});
-		return false;
-	});
-</script>
-{/literal}
 {/template}
