@@ -3,6 +3,8 @@ package org.atlasapi.remotesite.itv;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
@@ -16,6 +18,7 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
 
     private final ItvMercuryEpisodeExtractor episodeExtractor = new ItvMercuryEpisodeExtractor();
     private final static ItvGenreMap genreMap = new ItvGenreMap();
+    private final static Pattern IMAGE = Pattern.compile(".*\\d+x\\d+(/.+.jpg)");
 
     @SuppressWarnings("unchecked")
     @Override
@@ -48,13 +51,15 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
                         String curie = "itv:" + id;
                         brand = new Brand(uri, curie, Publisher.ITV);
                         brand.setTitle(title);
+                        brand.addAlias(UrlEncoding.decode(uri));
                         
                         brand.setDescription((String) progInfo.get("ShortSynopsis"));
                         brand.setGenres(genres((String) progInfo.get("Genres")));
                         if (progInfo.containsKey("AdditionalContentUri")) {
                             brand.addAlias((String) progInfo.get("AdditionalContentUri"));
                         }
-                        brand.setImage((String) progInfo.get("ImageUri"));
+                        brand.setImage(getImage((String) progInfo.get("ImageUri")));
+                        brand.setThumbnail(getThumbnail((String) progInfo.get("ImageUri")));
 
                         List<Map<String, Object>> episodes = (List<Map<String, Object>>) programme.get("Episodes");
                         for (Map<String, Object> episodeInfo : episodes) {
@@ -79,5 +84,21 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
             }
         }
         return ImmutableSet.of();
+    }
+    
+    static protected String getImage(String imageUrl) {
+        Matcher matcher = IMAGE.matcher(imageUrl);
+        if (matcher.matches()) {
+            return "http://www.itv.com//img/217x122"+matcher.group(1);
+        }
+        return null;
+    }
+    
+    static protected String getThumbnail(String imageUrl) {
+        Matcher matcher = IMAGE.matcher(imageUrl);
+        if (matcher.matches()) {
+            return "http://www.itv.com//img/118x65"+matcher.group(1);
+        }
+        return null;
     }
 }
