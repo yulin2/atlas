@@ -70,6 +70,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	
 	<bean id="anyTypeController" class="org.atlasapi.query.v2.AnyTypeFetchingController">
 		<constructor-arg ref="queryExecutor" />
+		<constructor-arg ref="configFetcher"/>
 	</bean>
 				
 	<bean class="org.atlasapi.views.ExtensionBasedContentNegotiatingViewResolver" p:order="#{T(org.springframework.core.Ordered).LOWEST_PRECEDENCE}">
