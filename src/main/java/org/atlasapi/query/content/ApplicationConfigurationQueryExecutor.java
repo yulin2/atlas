@@ -47,11 +47,11 @@ public class ApplicationConfigurationQueryExecutor implements
 	private ContentQuery queryForItems(ContentQuery query) {
 		AtomicQuery atom = mergeAttribute(Attributes.VERSION_PROVIDER, query);
 		
-		if (QueryConcernsTypeDecider.concernsVersionOrBelow(query)) {
-			query = ContentQuery.joinTo(query, new ContentQuery(atom));
-		} else {
+//		if (QueryConcernsTypeDecider.concernsVersionOrBelow(query)) {
+//			query = ContentQuery.joinTo(query, new ContentQuery(atom));
+//		} else {
 			query.setSoftConstraints(ImmutableSet.of(atom));
-		}
+//		}
 		
 		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
 			mergeAttribute(Attributes.ITEM_PUBLISHER,query)
