@@ -20,6 +20,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
@@ -27,6 +28,7 @@ import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.servlet.ContentNotFoundException;
 import org.atlasapi.persistence.servlet.RequestNs;
+import org.atlasapi.query.content.parser.ApplicationConfigurationIncludingQueryBuilder;
 import org.atlasapi.query.content.parser.QueryStringBackedQueryBuilder;
 import org.atlasapi.query.content.parser.WebProfileDefaultQueryAttributesSetter;
 import org.atlasapi.remotesite.FetchException;
@@ -50,10 +52,11 @@ public class AnyTypeFetchingController {
 	private static final String VIEW = "contentModel";
 	
 	private final KnownTypeQueryExecutor executor;
-	private final QueryStringBackedQueryBuilder builder = new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter());
+	private final ApplicationConfigurationIncludingQueryBuilder builder;
 
-	public AnyTypeFetchingController(KnownTypeQueryExecutor queryExecutor) {
+	public AnyTypeFetchingController(KnownTypeQueryExecutor queryExecutor, ApplicationConfigurationFetcher configFetcher) {
 		this.executor = queryExecutor;
+		this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter()), configFetcher) ;
 	}
 
 	@RequestMapping(method=RequestMethod.GET)
