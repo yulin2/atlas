@@ -25,7 +25,7 @@ public class BbcBrandExtractor  {
 
 	// Some Brands have a lot of episodes, if there are more than this number we
 	// only look at the most recent episodes
-	private static final int MAX_EPISODES = 200;
+	private static final int MAX_EPISODES = 1000;
 
 	private static final BbcProgrammesGenreMap genreMap = new BbcProgrammesGenreMap();
 	private static final Pattern IMAGE_STEM = Pattern.compile("^(.+)_[0-9]+_[0-9]+\\.[a-zA-Z]+$");
