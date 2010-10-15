@@ -138,8 +138,7 @@ input[type="checkbox"] {
 
 #app-ips li {
 	margin:5px;
-	padding:5px;
-	width:110px;
+	padding:5px 21px 5px 5px;
 	float:left;
 	display:block;
 }
@@ -150,5 +149,5 @@ input[type="checkbox"] {
 
 #app-ips li span:last-child {
 	cursor:pointer;
-	margin:5px;
+	margin:2px;
 }

@@ -92,12 +92,15 @@ appendIp = function(){
 }
 
 $("#app-ips li").live('mouseover', function(){
+	$(this).css({padding: '5px'});
 	$(this).children().last().css({display:"inline"}).stop().animate({opacity:1});
 });
 
 $("#app-ips li").live('mouseout', function(){
+	var cont = $(this);
 	$(this).children().last().stop().animate({opacity:0}, function(){
 		$(this).css({display:"none"});
+		cont.css({padding: '5px 21px 5px 5px'});
 	});
 });
 
