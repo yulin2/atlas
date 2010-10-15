@@ -47,7 +47,7 @@
 			</ul>
 			<h2>Create New Application</h2>
 			<form id="create" action="/admin/applications" method="post">
-				<p><label for="slug">Application Slug:</label><input id="slug" name="slug" type="text" placeholder="slug" /></p>
+				<p><label for="slug">Application Slug:</label><input id="slug" name="slug" type="text" placeholder="slug" pattern="[0-9a-z\-]+" /></p>
 				<p><label for="title">Application Title:</label><input id="title" name="title" type="text" placeholder="Title" /></p>
 				<p><input type="submit" value="Create" /></p>
 			</form>
