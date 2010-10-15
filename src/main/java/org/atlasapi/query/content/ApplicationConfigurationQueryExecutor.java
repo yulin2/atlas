@@ -1,19 +1,24 @@
 package org.atlasapi.query.content;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.QueryConcernsTypeDecider;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 public class ApplicationConfigurationQueryExecutor implements
 		KnownTypeQueryExecutor {
@@ -40,24 +45,27 @@ public class ApplicationConfigurationQueryExecutor implements
 	}
 
 	private ContentQuery queryForItems(ContentQuery query) {
-		AtomicQuery atom = Attributes.VERSION_PROVIDER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers());
-		if (QueryConcernsTypeDecider.concernsVersionOrBelow(query)) {
-			query = ContentQuery.joinTo(query, new ContentQuery(atom));
-		} else {
+		AtomicQuery atom = mergeAttribute(Attributes.VERSION_PROVIDER, query);
+		
+//		if (QueryConcernsTypeDecider.concernsVersionOrBelow(query)) {
+//			query = ContentQuery.joinTo(query, new ContentQuery(atom));
+//		} else {
 			query.setSoftConstraints(ImmutableSet.of(atom));
-		}
+//		}
 		
 		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-			Attributes.ITEM_PUBLISHER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers())
+			mergeAttribute(Attributes.ITEM_PUBLISHER,query)
 		);
 		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 	
+	
 	private ContentQuery queryForBrands(ContentQuery query) {
 		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
-			 Attributes.VERSION_PROVIDER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers()),
-			 Attributes.ITEM_PUBLISHER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers())
+			mergeAttribute(Attributes.VERSION_PROVIDER, query),
+			mergeAttribute(Attributes.ITEM_PUBLISHER,query)
 		);
+		
 		if (QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
 			query = ContentQuery.joinTo(query, new ContentQuery(softs));
 		} else {
@@ -65,17 +73,18 @@ public class ApplicationConfigurationQueryExecutor implements
 		}
 		
 		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-			Attributes.BRAND_PUBLISHER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers())
+			mergeAttribute(Attributes.BRAND_PUBLISHER, query)
 		);
 		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 	
 	private ContentQuery queryForPlaylists(ContentQuery query) {
 		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
-			Attributes.VERSION_PROVIDER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers()),
-			Attributes.ITEM_PUBLISHER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers()),
-			Attributes.BRAND_PUBLISHER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers())
+			mergeAttribute(Attributes.VERSION_PROVIDER, query),
+			mergeAttribute(Attributes.ITEM_PUBLISHER,query),
+			mergeAttribute(Attributes.BRAND_PUBLISHER, query)
 		);
+		
 		if (QueryConcernsTypeDecider.concernsBrandOrBelow(query)) {
 			query = ContentQuery.joinTo(query, new ContentQuery(softs));
 		} else {
@@ -83,8 +92,24 @@ public class ApplicationConfigurationQueryExecutor implements
 		}
 		
 		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-			Attributes.PLAYLIST_PUBLISHER.createQuery(Operators.EQUALS, query.getConfiguration().getIncludedPublishers())
+				 mergeAttribute(Attributes.PLAYLIST_PUBLISHER, query)
 		);
 		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
+	}
+
+	private AtomicQuery mergeAttribute(Attribute<?> attr, ContentQuery query){
+		Set<Publisher> configPublishers = query.getConfiguration().getIncludedPublishers();
+		Map<Attribute<?>, List<?>> operandMap = query.operandMap();
+		
+		Set<?> values;
+		List<?> queryValues = operandMap.get(attr);
+		if (queryValues == null) {
+			values = configPublishers;
+		} else {
+			Set<Publisher> pubIntersection = Sets.intersection(configPublishers, ImmutableSet.copyOf(queryValues));
+			values = pubIntersection.isEmpty() ? configPublishers : pubIntersection;
+		}
+		
+		return attr.createQuery(Operators.EQUALS, values);
 	}
 }
