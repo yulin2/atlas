@@ -41,7 +41,7 @@ public class BbcSlashProgrammesAtoZUpdater implements Runnable {
 
     @Override
     public void run() {
-    	ExecutorService executor = Executors.newFixedThreadPool(5);
+    	ExecutorService executor = Executors.newFixedThreadPool(7);
         for (String channel : channels) {
             String uri = String.format(ATOZ_BASE, channel);
             try {
