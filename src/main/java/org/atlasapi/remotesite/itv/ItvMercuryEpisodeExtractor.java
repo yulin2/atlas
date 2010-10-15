@@ -74,6 +74,8 @@ public class ItvMercuryEpisodeExtractor implements ContentExtractor<Map<String, 
         episode.setDescription(desc);
         episode.setGenres(genres);
         episode.setImage((String) source.get("PosterFrameUri"));
+        episode.setImage(ItvMercuryBrandExtractor.getImage((String) source.get("PosterFrameUri")));
+        episode.setThumbnail(ItvMercuryBrandExtractor.getThumbnail((String) source.get("PosterFrameUri")));
 
         Version version = new Version();
         episode.addVersion(version);

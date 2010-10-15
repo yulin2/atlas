@@ -37,7 +37,7 @@ addApplication = function(slug, data) {
 	if (appList.attr('data-apps') == 0) {
 		appList.children().slideUp().remove();
 	}
-	appList.append('<li style="display:none"><a class="app-link" href="admin/applications/'+slug+'">'+title+'</a></li>');
+	appList.append('<li style="display:none"><a class="app-link" href="/admin/applications/'+slug+'">'+title+'</a></li>');
 	appList.children().last().slideDown();
 	appList.attr('data-apps', appList.children().length);
 }
@@ -76,6 +76,7 @@ $("form#ipaddress").live('submit', function(){
 			}else{
 				appendIp();
 			}
+			$("input[name='ipaddress']").val("");
 		},
 		error:function(textStatus) {
 			console.log("failure")
@@ -88,7 +89,6 @@ appendIp = function(){
 	$('#app-ips').append('<li style="display:none"><span>'+$("input[name='ipaddress']").val()+'</span><span style="display:none;opacity:0">✖</span></li>');
 	$('#app-ips').children().last().fadeIn();
 	$('#app-ips').attr('data-ips', $('#app-ips').children().length)
-	console.log($('#app-ips').attr('data-ips'));
 }
 
 $("#app-ips li").live('mouseover', function(){
