@@ -114,6 +114,7 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 		simpleDescription.setGenres(content.getGenres());
 		simpleDescription.setTags(content.getTags());
 		simpleDescription.setClips(clipToSimple(content.getClips()));
+		simpleDescription.setSameAs(content.getEquivalentTo());
 	}
 
 	private static List<Item> clipToSimple(List<Clip> clips) {

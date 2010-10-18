@@ -1,4 +1,4 @@
-goog.require('atlas.templates.applications');
+goog.require('atlas.templates.applications.widgets');
 
 $(document).ready(function() {
 
@@ -21,7 +21,30 @@ $(document).ready(function() {
 		});	
 		return false;
 	});
+	
+	$(window).hashchange( function(){
+		var loc = location.hash.substring(2)
+		if( loc.length > 0 ){
+			$.getJSON('/admin/applications/'+loc+'.json', function(data){
+				$.colorbox({
+					html: atlas.templates.applications.widgets.applicationContent(data),
+					maxWidth:'500px',
+					onClosed:function(){
+						window.location.hash = "";	
+					}
+				});
+			});
+		}
+	})
+	
+	$(window).hashchange();
+});
 
+$("a.app-link").live('click', function(){
+	var parts = $(this).attr('href').split('/');
+	var appName = parts[parts.length-1];
+	window.location.hash = window.location.hash + "!" + appName;
+	return false;
 });
 
 addApplication = function(slug, data) {
@@ -76,7 +99,6 @@ $("form#ipaddress").live('submit', function(){
 			}else{
 				appendIp();
 			}
-			$("input[name='ipaddress']").val("");
 		},
 		error:function(textStatus) {
 			console.log("failure")
@@ -88,16 +110,20 @@ $("form#ipaddress").live('submit', function(){
 appendIp = function(){
 	$('#app-ips').append('<li style="display:none"><span>'+$("input[name='ipaddress']").val()+'</span><span style="display:none;opacity:0">✖</span></li>');
 	$('#app-ips').children().last().fadeIn();
-	$('#app-ips').attr('data-ips', $('#app-ips').children().length)
+	$('#app-ips').attr('data-ips', $('#app-ips').children().length);
+	$("input[name='ipaddress']").val("");
 }
 
 $("#app-ips li").live('mouseover', function(){
+	$(this).css({padding: '5px'});
 	$(this).children().last().css({display:"inline"}).stop().animate({opacity:1});
 });
 
 $("#app-ips li").live('mouseout', function(){
+	var cont = $(this);
 	$(this).children().last().stop().animate({opacity:0}, function(){
 		$(this).css({display:"none"});
+		cont.css({padding: '5px 21px 5px 5px'});
 	});
 });
 

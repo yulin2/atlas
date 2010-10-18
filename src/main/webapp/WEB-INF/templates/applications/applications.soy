@@ -12,6 +12,8 @@
 	<script src="/js/base.js"></script>
 	<script src="/js/soyutils.js"></script>
 	<script type="text/javascript" src="/js/generated/applications-widgets-js_templates.js"></script>
+	<script src="/js/jquery.ba-hashchange.js"></script>
+	<script src="/js/jquery.colorbox.js"></script>
 	<script src="/js/applications.js"></script>
 	
 	<link rel="stylesheet" type="text/css" href="/css/styles.css" />
@@ -24,7 +26,7 @@
  */
 {template .header}
 	<header>
-		<h1>Applications</h1>
+		<h1><a href="/admin/applications">Applications</a></h1>
 	</header>
 {/template}
 
@@ -47,7 +49,7 @@
 			</ul>
 			<h2>Create New Application</h2>
 			<form id="create" action="/admin/applications" method="post">
-				<p><label for="slug">Application Slug:</label><input id="slug" name="slug" type="text" placeholder="slug" /></p>
+				<p><label for="slug">Application Slug:</label><input id="slug" name="slug" type="text" placeholder="slug" pattern="[0-9a-z\-]+" /></p>
 				<p><label for="title">Application Title:</label><input id="title" name="title" type="text" placeholder="Title" /></p>
 				<p><input type="submit" value="Create" /></p>
 			</form>
