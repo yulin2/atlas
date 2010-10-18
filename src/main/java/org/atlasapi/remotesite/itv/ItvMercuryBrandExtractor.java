@@ -95,10 +95,11 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
     }
     
     static protected String getThumbnail(String imageUrl) {
-        Matcher matcher = IMAGE.matcher(imageUrl);
-        if (matcher.matches()) {
-            return "http://www.itv.com//img/118x65"+matcher.group(1);
-        }
-        return null;
+        return imageUrl;
+//        Matcher matcher = IMAGE.matcher(imageUrl);
+//        if (matcher.matches()) {
+//            return "http://www.itv.com//img/118x65"+matcher.group(1);
+//        }
+//        return null;
     }
 }
