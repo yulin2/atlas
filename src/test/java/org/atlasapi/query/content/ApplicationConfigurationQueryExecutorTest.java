@@ -7,7 +7,6 @@ import junit.framework.TestCase;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.attribute.Attributes;
-import org.atlasapi.content.criteria.operator.Operator;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
@@ -47,7 +46,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      */
     public void testItemWithNoVersionsIsNotFiltered() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
 		uglyBettyC4.setTitle("Ugly Betty Episode One");
@@ -79,7 +78,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      */
 	public void testOnlyVersionsWithConfiguredProvidersPassFilter() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
 		uglyBettyC4.setTitle("Ugly Betty Episode One");
@@ -117,7 +116,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      */
 	public void testItemPassesFilterWhereAllVersionsFailFilterWhenQueryDoesntSpecifyVersionOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
 		uglyBettyC4.setTitle("Ugly Betty Episode One");
@@ -134,7 +133,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		assertEquals( 1, results.size() );
 		assertEquals( 0, results.get(0).getVersions().size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executeItemQuery(query);
@@ -150,7 +149,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      */
 	public void testItemFailsFilterWhereAllVersionsFailFilterWhenQuerySpecifiesVersionOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
 		uglyBettyC4.setTitle("Ugly Betty Episode One");
@@ -167,7 +166,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		assertEquals( 0, results.size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		assertEquals( 1, queryExecutor.executeItemQuery(query).size() );
@@ -178,7 +177,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
     public void testBrandWithNoItemsIsNotFiltered() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Brand ubC4 = new Brand("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		ubC4.setDescription("blah blah blah");
@@ -199,7 +198,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     
     public void testBrandWithBadPublisherIsFiltered() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC));
 		
 		Brand ubC4 = new Brand("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		ubC4.setDescription("blah blah blah");
@@ -213,7 +212,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		assertEquals( 0, results.size());
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executeBrandQuery(query);
@@ -223,7 +222,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     
 	public void testOnlyItemsWithConfiguredPublisherPassFilter() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
 		uglyBettyC4.setTitle("Ugly Betty Episode One");
@@ -253,7 +252,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testBrandPassesFilterWhereAllItemsFailFilterWhenQueryDoesntSpecifyItemOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
 		uglyBettyHulu.setTitle("Ugly Betty Episode One");
@@ -272,7 +271,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		assertEquals( 1, results.size() );
 		assertEquals( 0, results.get(0).getItems().size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executeBrandQuery(query);
@@ -283,7 +282,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testBrandFailsFilterWhereAllItemsFailFilterWhenQuerySpecifiesItemOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
 		uglyBettyHulu.setTitle("Ugly Betty Episode One");
@@ -302,7 +301,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		assertEquals( 0, results.size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		assertEquals( 1, queryExecutor.executeItemQuery(query).size() );
@@ -310,7 +309,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testBrandPassesFilterWhereAllItemsFailFilterWhenQueryDoesntSpecifyVersionOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.C4);
 		uglyBettyHulu.setTitle("Ugly Betty Episode One");
@@ -333,7 +332,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		assertEquals( 1, results.get(0).getItems().size() );
 		assertEquals( 0, results.get(0).getItems().get(0).getVersions().size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executeBrandQuery(query);
@@ -345,7 +344,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testBrandFailsFilterWhereAllItemsFailFilterWhenQueryDoesSpecifyVersionOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.C4);
 		uglyBettyHulu.setTitle("Ugly Betty Episode One");
@@ -367,7 +366,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		assertEquals( 0, results.size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executeBrandQuery(query);
@@ -382,7 +381,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
     public void testPlaylistWithNoItemsIsNotFiltered() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		ubC4.setGenres(ImmutableSet.of("Fun"));
@@ -404,7 +403,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     
     public void testPlaylistWithBadPublisherIsFiltered() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		ubC4.setDescription("blah blah blah");
@@ -418,7 +417,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		assertEquals( 0, results.size());
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executePlaylistQuery(query);
@@ -428,7 +427,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     
 	public void testOnlyBrandsWithConfiguredPublisherPassFilter() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		ubC4.setGenres(ImmutableSet.of("Fun"));
@@ -457,7 +456,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testOnlySubPlaylistsWithConfiguredPublisherPassFilter() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		ubC4.setGenres(ImmutableSet.of("Fun"));
@@ -492,7 +491,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testPlaylistPassesFilterWhereAllSubPlaylistItemsFailFilterWhenQueryDoesntSpecifyItemOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist c4playlist = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		c4playlist.setGenres(ImmutableSet.of("Fun"));
@@ -522,7 +521,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		assertEquals( 0, results.get(0).getPlaylists().get(0).getItems().size() );
 //		assertEquals( 0, results.get(0).getPlaylists().get(0).getItems().get(0).getVersions().size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executePlaylistQuery(query);
@@ -535,7 +534,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testPlaylistFailsFilterWhereAllSubPlaylistsFailFilterWhenQueryDoesSpecifyBrandOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist c4playlist = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		c4playlist.setGenres(ImmutableSet.of("Fun"));
@@ -564,7 +563,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		assertEquals( 0, results.size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executePlaylistQuery(query);
@@ -575,7 +574,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	public void testPlaylistFailsFilterWhereAllSubPlaylistItemsFailFilterWhenQueryDoesSpecifyItemOrBelow() {
 		ApplicationConfiguration config = new ApplicationConfiguration();
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist c4playlist = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
 		c4playlist.setGenres(ImmutableSet.of("Fun"));
@@ -603,7 +602,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		assertEquals( 0, results.size() );
 		
-		config.setIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
+		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
 		query = query.copyWithApplicationConfiguration(config);
 		
 		results = queryExecutor.executePlaylistQuery(query);
