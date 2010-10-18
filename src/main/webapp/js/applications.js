@@ -99,7 +99,6 @@ $("form#ipaddress").live('submit', function(){
 			}else{
 				appendIp();
 			}
-			$("input[name='ipaddress']").val("");
 		},
 		error:function(textStatus) {
 			console.log("failure")
@@ -111,7 +110,8 @@ $("form#ipaddress").live('submit', function(){
 appendIp = function(){
 	$('#app-ips').append('<li style="display:none"><span>'+$("input[name='ipaddress']").val()+'</span><span style="display:none;opacity:0">✖</span></li>');
 	$('#app-ips').children().last().fadeIn();
-	$('#app-ips').attr('data-ips', $('#app-ips').children().length)
+	$('#app-ips').attr('data-ips', $('#app-ips').children().length);
+	$("input[name='ipaddress']").val("");
 }
 
 $("#app-ips li").live('mouseover', function(){

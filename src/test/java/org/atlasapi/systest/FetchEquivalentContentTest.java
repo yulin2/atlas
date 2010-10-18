@@ -163,8 +163,7 @@ public class FetchEquivalentContentTest extends TestCase {
 		@Override
 		public Maybe<ApplicationConfiguration> configurationFor(
 				HttpServletRequest request) {
-			ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-			applicationConfiguration.setIncludedPublishers(ImmutableSet.copyOf(Publisher.values()));
+			ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration().copyWithIncludedPublishers(ImmutableSet.copyOf(Publisher.values()));
 			return Maybe.just(applicationConfiguration);
 		}
 		
