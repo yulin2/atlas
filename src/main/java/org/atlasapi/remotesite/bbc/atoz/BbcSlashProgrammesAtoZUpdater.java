@@ -23,7 +23,7 @@ public class BbcSlashProgrammesAtoZUpdater implements Runnable {
 
     private final RemoteSiteClient<SlashProgrammesAtoZRdf> client;
     private final BbcProgrammeAdapter fetcher;
-    private final List<String> channels = ImmutableList.of("bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd", "radio1", "radio2", "radio3", "radio4");
+    private final List<String> channels = ImmutableList.of("radio2", "radio1", "radio3", "radio4", "bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd");
 	private final ContentWriter writer;
 	
 	private final AdapterLog log;
