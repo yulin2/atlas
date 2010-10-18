@@ -46,6 +46,10 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
         try {
             HttpResponse res = client.get(uri + JSON_OUTPUT_PARAMETER);
             
+            if (res.wasNotFound()) {
+            	return null;
+            }
+            
             Map<String, Object> json = jsonMapper.readValue(res.body(), Map.class);
             Map<String, Object> metadata = (Map<String, Object>) json.get("metadata");
             
