@@ -33,6 +33,7 @@ import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
 import org.atlasapi.remotesite.health.BroadcasterProbe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,6 +45,7 @@ public class QueryModule {
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	private @Autowired MongoRoughSearch contentStore;
 	private @Autowired AggregateContentListener aggregateContentListener;
+	private @Value("${applications.enabled}") String applicationsEnabled;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
 		return new UniqueContentForUriQueryExecutor(new MongoDBQueryExecutor(contentStore));
@@ -64,7 +66,11 @@ public class QueryModule {
 	}
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
-		return new ApplicationConfigurationQueryExecutor(new CurieResolvingQueryExecutor(new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()))));
+	    if (Boolean.parseBoolean(applicationsEnabled)) {
+	        return new ApplicationConfigurationQueryExecutor(new CurieResolvingQueryExecutor(new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()))));
+	    } else {
+	        return new CurieResolvingQueryExecutor(new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher())));
+	    }
 	}
 	
 	@Bean InMemoryFuzzySearcher titleSearcher() {
