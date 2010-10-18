@@ -1,4 +1,4 @@
-goog.require('atlas.templates.applications');
+goog.require('atlas.templates.applications.widgets');
 
 $(document).ready(function() {
 
@@ -21,7 +21,30 @@ $(document).ready(function() {
 		});	
 		return false;
 	});
+	
+	$(window).hashchange( function(){
+		var loc = location.hash.substring(2)
+		if( loc.length > 0 ){
+			$.getJSON('/admin/applications/'+loc+'.json', function(data){
+				$.colorbox({
+					html: atlas.templates.applications.widgets.applicationContent(data),
+					maxWidth:'500px',
+					onClosed:function(){
+						window.location.hash = "";	
+					}
+				});
+			});
+		}
+	})
+	
+	$(window).hashchange();
+});
 
+$("a.app-link").live('click', function(){
+	var parts = $(this).attr('href').split('/');
+	var appName = parts[parts.length-1];
+	window.location.hash = window.location.hash + "!" + appName;
+	return false;
 });
 
 addApplication = function(slug, data) {
