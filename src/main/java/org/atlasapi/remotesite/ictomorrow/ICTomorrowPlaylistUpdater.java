@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.ictomorrow;
 
+import java.util.List;
+
 import nu.xom.Element;
 import nu.xom.Elements;
 
@@ -13,6 +15,7 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowApiException;
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowApiHelper;
+import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowItemMetadata;
 
 public class ICTomorrowPlaylistUpdater implements Runnable {
     private final ICTomorrowApiHelper apiHelper;
@@ -30,21 +33,13 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
     @Override
     public void run() {
         try {
-            Element jobElement = apiHelper.getContentMetadata(null, null, null);
-            Integer jobId = Integer.valueOf(jobElement.getChildElements("job_id").get(0).getValue());
+            Integer jobId = apiHelper.getContentMetadata(null, null, null);
             
-            Element metadataFile = null;
-            while (metadataFile == null) {
-                Element returnData = apiHelper.getMetadataFile(jobId);
+            List<ICTomorrowItemMetadata> items = null;
+            while (items == null) {
+                items = apiHelper.getMetadataFile(jobId);
                 
-                String returnValue = returnData.getFirstChildElement("job_status").getValue();
-                if (returnValue.equals("COMPLETE")) {
-                    metadataFile = returnData.getFirstChildElement("Download", "http://www.innovateuk.org/testbed/DownloadContent/").getFirstChildElement("Items");
-                }
-                else if (returnValue.equals("FAILED")) {
-                    throw new ICTomorrowApiException("Metadata File processing failed " + jobId);
-                }
-                else {
+                if (items == null) {
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
@@ -53,20 +48,16 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
                 }
             }
             
-            Elements itemsElement = metadataFile.getChildElements("Item");
             Playlist ictomorrowPlaylist = new Playlist("http://ictomorrow.co.uk/all-content", "ict:all", Publisher.ICTOMORROW);
             ictomorrowPlaylist.setTitle("Classic Telly");
             ictomorrowPlaylist.setDescription("Classic TV provided by ICTomorrow");
             
-            for (int i = 0; i < itemsElement.size(); i++) {
-                
+            for (ICTomorrowItemMetadata itemMetadata : items) {
                 Item item = null;
-                Element itemElement = itemsElement.get(i);
-                String contentHandle = itemElement.getAttributeValue("ContentHandle");
-                String uri = itemElement.getFirstChildElement("Key").getValue();
-                if (itemAdapter.canFetch(uri)) {
-                    item = itemAdapter.fetch(uri);
-                    item.addAlias(getICTomorrowAlias(contentHandle));
+                
+                if (itemAdapter.canFetch(itemMetadata.getLink())) {
+                    item = itemAdapter.fetch(itemMetadata.getLink());
+                    item.addAlias(getICTomorrowAlias(itemMetadata.getContentHandle()));
                 }
                 
                 if (item != null) {
@@ -83,7 +74,7 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
         }
     }
     
-    private String getICTomorrowAlias(String contentHandle) {
+    private String getICTomorrowAlias(Integer contentHandle) {
         return "http://ictomorrow.co.uk/contentHandle/" + contentHandle;
     }
 }

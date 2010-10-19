@@ -20,18 +20,17 @@
 */
 #cboxOverlay{background: white;
 opacity: 0.5 !important;
-top: 56px;
 position:absolute;}
 
-#colorbox{-webkit-box-shadow:0px 0px 40px #999;}
+#colorbox{-webkit-box-shadow:0px 0px 40px #eee;}
 
-    #cboxContent{background: white;border: 1px solid #999;}
+    #cboxContent{background: white;border: 1px solid #ccc;}
         #cboxLoadedContent{margin-bottom:5px; padding:25px 10px 0 10px;}
         #cboxTitle{position:absolute; bottom:-25px; left:0; text-align:center; width:100%; font-weight:bold; color:#7C7C7C;}
         #cboxCurrent{position:absolute; bottom:-25px; left:58px; font-weight:bold; color:#7C7C7C;}
         
         #cboxClose{background:url(../images/close.png) center center no-repeat; width:32px; height:26px;
-				border: solid #999;
+				border: solid #ccc;
 				border-width: 0 0 1px 1px;
 				padding-top: 4px;
 				text-indent: -9999px;
