@@ -30,12 +30,12 @@ import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.simple.PublisherDetails;
-import org.atlasapi.media.vocabulary.PLAY;
+import org.atlasapi.media.vocabulary.DC;
+import org.atlasapi.media.vocabulary.PLAY_SIMPLE_XML;
 import org.atlasapi.media.vocabulary.PO;
 import org.xml.sax.SAXException;
 
 import com.google.common.collect.Iterables;
-import com.hp.hpl.jena.vocabulary.DC;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
 /**
@@ -85,8 +85,8 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 	private static final class UriplayNamespacePrefixMapper extends NamespacePrefixMapper {
 		@Override
 		public String getPreferredPrefix(String namespaceUri, String suggestion, boolean requirePrefix) {
-			if (PLAY.NS.equals(namespaceUri)) {
-				return PLAY.PREFIX;
+			if (PLAY_SIMPLE_XML.NS.equals(namespaceUri)) {
+				return PLAY_SIMPLE_XML.PREFIX;
 			} else if (PO.NS.equals(namespaceUri)) {
 				return PO.PREFIX;
 			} else if (DC.NS.equals(namespaceUri)) {
@@ -97,9 +97,7 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 
 		@Override
 		public String[] getPreDeclaredNamespaceUris() {
-		    return new String[] { PLAY.NS , PO.NS, "dc" };
+		    return new String[] { PLAY_SIMPLE_XML.NS , PO.NS, DC.NS};
 		}
 	}
-
-
 }
