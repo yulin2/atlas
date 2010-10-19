@@ -16,11 +16,16 @@ package org.atlasapi.beans;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Serializer;
 
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -35,6 +40,7 @@ import org.atlasapi.media.vocabulary.PLAY_SIMPLE_XML;
 import org.atlasapi.media.vocabulary.PO;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
 
@@ -100,4 +106,39 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 		    return new String[] { PLAY_SIMPLE_XML.NS , PO.NS, DC.NS};
 		}
 	}
+<<<<<<< HEAD
+=======
+
+	@Override
+	public void writeError(AtlasErrorSummary exception, OutputStream stream) {
+		try {
+			write(stream, xmlFrom(exception));
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	private Element xmlFrom(AtlasErrorSummary exception) {
+		Element error = new Element("error");
+		error.appendChild(stringElement("message", exception.message()));
+		error.appendChild(stringElement("code", exception.errorCode()));
+		error.appendChild(stringElement("id", exception.id()));
+		return error;
+	}
+
+	private void write(OutputStream out, Element xml) throws UnsupportedEncodingException, IOException {
+		Serializer serializer = new Serializer(out, Charsets.UTF_8.toString());
+		serializer.setIndent(4);
+		serializer.setLineSeparator("\n");
+		serializer.write(new Document(xml));
+	}
+	
+	protected Element stringElement(String name, String value) {
+		Element elem = new Element(name);
+		elem.appendChild(value);
+		return elem;
+	}
+>>>>>>> 5e7438c46d6ec4bb8fc7642081a7b9ea0100f09b
 }

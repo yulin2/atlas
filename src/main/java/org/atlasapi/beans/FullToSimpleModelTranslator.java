@@ -300,4 +300,8 @@ public class FullToSimpleModelTranslator implements BeanGraphWriter {
 	    
 	}
 
+	@Override
+	public void writeError(AtlasErrorSummary exception, OutputStream oStream) {
+		outputWriter.writeError(exception, oStream);
+	}
 }

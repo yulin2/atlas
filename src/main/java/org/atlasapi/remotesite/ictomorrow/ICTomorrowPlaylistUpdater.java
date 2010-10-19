@@ -33,7 +33,7 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
     @Override
     public void run() {
         try {
-            Integer jobId = apiHelper.getContentMetadata(null, null, null);
+            int jobId = apiHelper.getContentMetadata(null, null, null);
             
             List<ICTomorrowItemMetadata> items = null;
             while (items == null) {

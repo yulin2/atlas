@@ -18,6 +18,7 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 public class ApplicationConfigurationQueryExecutor implements
@@ -46,16 +47,10 @@ public class ApplicationConfigurationQueryExecutor implements
 
 	private ContentQuery queryForItems(ContentQuery query) {
 		AtomicQuery atom = mergeAttribute(Attributes.VERSION_PROVIDER, query);
+
+		query.setSoftConstraints(ImmutableSet.of(atom));
 		
-//		if (QueryConcernsTypeDecider.concernsVersionOrBelow(query)) {
-//			query = ContentQuery.joinTo(query, new ContentQuery(atom));
-//		} else {
-			query.setSoftConstraints(ImmutableSet.of(atom));
-//		}
-		
-		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-			mergeAttribute(Attributes.ITEM_PUBLISHER,query)
-		);
+		Iterable<AtomicQuery> queryAtoms = ImmutableSet.<AtomicQuery>of(mergeAttribute(Attributes.ITEM_PUBLISHER,query));
 		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 	
@@ -66,16 +61,16 @@ public class ApplicationConfigurationQueryExecutor implements
 			mergeAttribute(Attributes.ITEM_PUBLISHER,query)
 		);
 		
-		if (QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
-			query = ContentQuery.joinTo(query, new ContentQuery(softs));
-		} else {
+		if(!QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
 			query.setSoftConstraints(softs);
+			Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
+				mergeAttribute(Attributes.BRAND_PUBLISHER, query)
+			);
+			return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
+		} else {
+			query.setSoftConstraints(Iterables.concat(softs, ImmutableSet.<AtomicQuery>of(mergeAttribute(Attributes.BRAND_PUBLISHER, query))));
+			return query;
 		}
-		
-		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-			mergeAttribute(Attributes.BRAND_PUBLISHER, query)
-		);
-		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 	
 	private ContentQuery queryForPlaylists(ContentQuery query) {
@@ -85,15 +80,9 @@ public class ApplicationConfigurationQueryExecutor implements
 			mergeAttribute(Attributes.BRAND_PUBLISHER, query)
 		);
 		
-		if (QueryConcernsTypeDecider.concernsBrandOrBelow(query)) {
-			query = ContentQuery.joinTo(query, new ContentQuery(softs));
-		} else {
-			query.setSoftConstraints(softs);
-		}
+		query.setSoftConstraints(softs);
 		
-		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-				 mergeAttribute(Attributes.PLAYLIST_PUBLISHER, query)
-		);
+		Iterable<AtomicQuery> queryAtoms = ImmutableSet.<AtomicQuery>of(mergeAttribute(Attributes.PLAYLIST_PUBLISHER, query));
 		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 
