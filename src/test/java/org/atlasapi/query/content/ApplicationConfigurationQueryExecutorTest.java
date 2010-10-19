@@ -541,10 +541,10 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		c4playlist.setDescription("blah blah blah");
 		c4playlist.setTitle("Ugly Betty");
 		
-		Brand hulubrand = new Brand("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.HULU);
+		Brand hulubrand = new Brand("http://www.hulu.com/uglybetty/one", "c4:ugly-betty-one", Publisher.HULU);
 		hulubrand.setGenres(ImmutableSet.of("Joy"));
 		
-		Episode huluEpisode = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
+		Episode huluEpisode = new Episode("http://www.hulu.com/uglybetty/one/one", "hulu:ugly-betty-one", Publisher.HULU);
 		huluEpisode.setTitle("Ugly Betty Episode One");
 		
 		Version huluVersion = new Version();
@@ -568,8 +568,8 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		results = queryExecutor.executePlaylistQuery(query);
 		
-		assertEquals( 1, results.size() );
-		assertEquals( 1, results.get(0).getPlaylists().get(0).getItems().size() );
+		assertEquals( 2, results.size() );
+		assertEquals( 1, results.get(1).getPlaylists().get(0).getItems().size() );
 	}
 	
 	public void testPlaylistFailsFilterWhereAllSubPlaylistItemsFailFilterWhenQueryDoesSpecifyItemOrBelow() {

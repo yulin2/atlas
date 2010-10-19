@@ -66,11 +66,11 @@ public class ApplicationConfigurationQueryExecutor implements
 			mergeAttribute(Attributes.ITEM_PUBLISHER,query)
 		);
 		
-		if (QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
-			query = ContentQuery.joinTo(query, new ContentQuery(softs));
-		} else {
+//		if (QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
+//			query = ContentQuery.joinTo(query, new ContentQuery(softs));
+//		} else {
 			query.setSoftConstraints(softs);
-		}
+//		}
 		
 		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
 			mergeAttribute(Attributes.BRAND_PUBLISHER, query)
@@ -85,11 +85,11 @@ public class ApplicationConfigurationQueryExecutor implements
 			mergeAttribute(Attributes.BRAND_PUBLISHER, query)
 		);
 		
-		if (QueryConcernsTypeDecider.concernsBrandOrBelow(query)) {
-			query = ContentQuery.joinTo(query, new ContentQuery(softs));
-		} else {
+//		if (QueryConcernsTypeDecider.concernsBrandOrBelow(query)) {
+//			query = ContentQuery.joinTo(query, new ContentQuery(softs));
+//		} else {
 			query.setSoftConstraints(softs);
-		}
+//		}
 		
 		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
 				 mergeAttribute(Attributes.PLAYLIST_PUBLISHER, query)
