@@ -34,7 +34,7 @@ import com.mongodb.Mongo;
 
 @Configuration
 @ImportResource({"classpath:atlas.xml", "beans-scheduling.xml"})
-@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, TrackingModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, AtlasLoggingModule.class, HealthModule.class, ApplicationModule.class})
+@Import({AtlasLoggingModule.class, EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, TrackingModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class})
 public class AtlasModule {
 	
 	private @Value("${mongo.host}") String mongoHost;

@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.beans.AtlasErrorSummary;
 import org.atlasapi.beans.BeanGraphWriter;
 import org.atlasapi.persistence.servlet.RequestNs;
 import org.springframework.web.servlet.View;
@@ -49,17 +50,25 @@ public class BeanGraphWriterView implements View {
 		response.setCharacterEncoding("utf-8");
 		
 		if (model != null) {
-			
-			Collection<Object> beans = beanGraph(model);
-			writer.writeTo(beans, response.getOutputStream());
-
+			if (model.containsKey(RequestNs.GRAPH)) {
+				Collection<Object> beans = beanGraph(model);
+				writer.writeTo(beans, response.getOutputStream());
+			} else {
+				AtlasErrorSummary exception = extractException(model);
+				response.setStatus(exception.statusCode());
+				writer.writeError(exception, response.getOutputStream());
+			}
 		} else {
-			response.sendError(HttpServletResponse.SC_NO_CONTENT);
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	protected Collection<Object> beanGraph(Map<String, Object> model) {
 		return (Collection) model.get(RequestNs.GRAPH);
+	}
+	
+	protected AtlasErrorSummary extractException(Map<String, Object> model) {
+		return (AtlasErrorSummary) model.get(RequestNs.ERROR);
 	}
 }

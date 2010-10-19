@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.atlasapi.beans.AtlasErrorSummary;
 import org.atlasapi.beans.BeanGraphWriter;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Encoding;
@@ -535,6 +536,31 @@ public class HtmlTranslator implements BeanGraphWriter {
 		}
 		buf.append("</ul>");
 		return buf.toString();
+	}
+
+	@Override
+	public void writeError(AtlasErrorSummary exception, OutputStream stream) {
+		Writer writer = new OutputStreamWriter(stream, Charsets.UTF_8);
+		try {
+			
+			beginPage(writer);
+			
+			writer.write("<h1>Error "+exception.statusCode()+"</h1>");
+			writer.write("<p>" + exception.errorCode() + " : " + exception.message() + ".</p>");
+			writer.write("<p>Error ID : "+ exception.id() +"</p>");
+			
+			endPage(writer);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				writer.flush();
+				writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 }

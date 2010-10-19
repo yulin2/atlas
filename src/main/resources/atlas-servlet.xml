@@ -50,6 +50,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="newQueryApiController" class="org.atlasapi.query.v2.QueryController">
 		<constructor-arg ref="queryExecutor"/>
 		<constructor-arg ref="configFetcher"/>
+		<constructor-arg ref="adapterLog"/>
 	</bean>
 	
 	<bean id="uriFetchingControllerV1" class="org.atlasapi.query.v1.UriFetchingController">
@@ -162,10 +163,10 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				 <bean class="com.metabroadcast.common.webapp.soy.SoyTemplateViewResolver">
+				<bean class="com.metabroadcast.common.webapp.soy.SoyTemplateViewResolver">
                     <constructor-arg ref="soyRenderer"/>
                     <property name="namespace" value="atlas.templates"/>
-               </bean>
+                </bean>
 			</list>
 		</property>
          <property name="defaultViews">
