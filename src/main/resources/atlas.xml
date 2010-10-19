@@ -10,30 +10,8 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <import resource="classpath:beans-short-url-services.xml" />
     <import resource="classpath:atlas-servlet.xml" />
+    <import resource="classpath:atlas-feeds.xml" />
 
     <bean id="contextConfigurer" class="com.metabroadcast.common.webapp.properties.ContextConfigurer" init-method="init" />
-
-    <bean class="org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser">
-        <constructor-arg ref="urlShorteningServices"/>
-    </bean>
-
-
-    <util:properties id="rdfNsPrefixes">
-        <prop key="http://uriplay.org/elements/">play</prop>
-        <prop key="http://www.w3.org/1999/02/22-rdf-syntax-ns#">rdf</prop>
-        <prop key="http://www.w3.org/2000/01/rdf-schema#">rdfs</prop>
-        <prop key="http://purl.org/dc/elements/1.1/">dc</prop>
-        <prop key="http://purl.org/ontology/po/">po</prop>
-        <prop key="http://xmlns.com/foaf/0.1/">foaf</prop>
-        <prop key="http://rdfs.org/sioc/ns#">sioc</prop>
-        <prop key="http://purl.org/dc/terms/">dcterms</prop>
-    </util:properties>
-
-    <bean id="rdfXmlTranslator" class="org.atlasapi.rdf.beans.RdfXmlTranslator">
-        <constructor-arg>
-            <bean class="org.atlasapi.beans.NaiveTypeMap" />
-        </constructor-arg>
-        <property name="nsPrefixes" ref="rdfNsPrefixes" />
-    </bean>
 
 </beans>

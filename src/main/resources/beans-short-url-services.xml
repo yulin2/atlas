@@ -6,6 +6,10 @@
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
+    <bean class="org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser">
+        <constructor-arg ref="urlShorteningServices"/>
+    </bean>
+
 	<util:list id="urlShorteningServices">
 		<value>301url.com</value>
 		<value>http://6url.com</value>

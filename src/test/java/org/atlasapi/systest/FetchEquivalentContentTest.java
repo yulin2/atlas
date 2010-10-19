@@ -26,6 +26,7 @@ import org.atlasapi.AtlasFetchModule;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.equiv.EquivModule;
+import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
@@ -60,6 +61,7 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
+import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 
 public class FetchEquivalentContentTest extends TestCase {
 
@@ -137,10 +139,16 @@ public class FetchEquivalentContentTest extends TestCase {
 	}
 
 	@Configuration
-	@ImportResource("classpath:atlas.xml")
+	@ImportResource({"classpath:beans-short-url-services.xml","classpath:atlas-servlet.xml"})
 	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
 	public static class AtlasModuleWithLocalMongoAndFakeFetchers {
 		
+	    public @Bean ContextConfigurer config() {
+			ContextConfigurer c = new ContextConfigurer();
+			c.init();
+			return c;
+		}
+	    
 		public @Bean DatabasedMongo db() {
 			return MongoTestHelper.anEmptyTestDatabase();
 		}
@@ -149,10 +157,10 @@ public class FetchEquivalentContentTest extends TestCase {
 			return fetcher;
 		}
 		
-		public @Bean AdapterLog log() {
+		public @Bean AdapterLog adapterLog() {
 			return new NullAdapterLog();
 		}
-		
+
 		public @Bean ApplicationConfigurationFetcher configFetcher() {
 			return new DummyApplicationFetcher();
 		}

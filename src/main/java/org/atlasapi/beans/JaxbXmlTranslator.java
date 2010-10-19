@@ -106,9 +106,7 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 		    return new String[] { PLAY_SIMPLE_XML.NS , PO.NS, DC.NS};
 		}
 	}
-<<<<<<< HEAD
-=======
-
+	
 	@Override
 	public void writeError(AtlasErrorSummary exception, OutputStream stream) {
 		try {
@@ -139,6 +137,5 @@ public class JaxbXmlTranslator implements BeanGraphWriter {
 		Element elem = new Element(name);
 		elem.appendChild(value);
 		return elem;
-	}
->>>>>>> 5e7438c46d6ec4bb8fc7642081a7b9ea0100f09b
+	} 
 }
