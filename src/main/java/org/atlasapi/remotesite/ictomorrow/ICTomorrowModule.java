@@ -1,14 +1,11 @@
 package org.atlasapi.remotesite.ictomorrow;
 
-import java.util.concurrent.Executors;
-
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgItemAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +29,7 @@ public class ICTomorrowModule {
     private @Value("${ict.password}") String ictPassword;
     private @Autowired MongoDbBackedContentStore contentStore;
     private @Autowired AdapterLog log;
+    private @Autowired ArchiveOrgItemAdapter archiveOrgItemAdapter;
     
     
     @PostConstruct
@@ -48,11 +46,7 @@ public class ICTomorrowModule {
         }
     }
     
-    public @Bean ArchiveOrgItemAdapter archiveOrgItemAdapter() {
-        return new ArchiveOrgItemAdapter(HttpClients.webserviceClient(), log);
-    }
-
     public @Bean ICTomorrowPlaylistUpdater ictomorrowPlaylistUpdater() {
-        return new ICTomorrowPlaylistUpdater(new ICTomorrowApiHelper(new UsernameAndPassword(ictUsername, ictPassword)), contentStore, archiveOrgItemAdapter());
+        return new ICTomorrowPlaylistUpdater(new ICTomorrowApiHelper(new UsernameAndPassword(ictUsername, ictPassword)), contentStore, archiveOrgItemAdapter);
     }
 }

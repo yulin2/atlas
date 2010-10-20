@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.archiveorg;
 
 import java.util.Collection;
-import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
