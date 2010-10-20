@@ -2,9 +2,6 @@ package org.atlasapi.remotesite.ictomorrow;
 
 import java.util.List;
 
-import nu.xom.Element;
-import nu.xom.Elements;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Item;

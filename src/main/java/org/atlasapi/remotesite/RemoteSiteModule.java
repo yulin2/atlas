@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
+import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
@@ -51,11 +52,12 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class})
+@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
 	private @Autowired C4Module c4Module; 
+	private @Autowired ArchiveOrgModule archiveOrgModule;
 	
 	private @Autowired BbcModule bbcModule; 
 	private @Autowired ItvModule itvModule;
@@ -83,6 +85,7 @@ public class RemoteSiteModule {
 		 adapters.addAll(c4Module.adapters());
 		 adapters.addAll(bbcModule.adapters());
 		 adapters.addAll(itvModule.adapters());
+		 adapters.addAll(archiveOrgModule.adapters());
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());

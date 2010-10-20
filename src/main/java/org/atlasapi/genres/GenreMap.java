@@ -49,5 +49,21 @@ public abstract class GenreMap {
 		
 		return mappedGenres;
 	}
+	
+	public Set<String> mapRecognised(Set<String> sourceGenres) {
+	    Set<String> mappedGenres = Sets.newHashSet();
+        
+        if (sourceGenres == null) { return mappedGenres; }
+        
+        for (String sourceGenre : sourceGenres) {
+            String mappedGenre = genres.get(sourceGenre.toLowerCase());
+            if (mappedGenre != null) { 
+                mappedGenres.add(sourceGenre); 
+                mappedGenres.add(mappedGenre); 
+            }
+        }
+        
+        return mappedGenres;
+	}
 
 }
