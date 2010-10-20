@@ -66,14 +66,6 @@ public class ArchiveOrgItemAdapter implements SiteSpecificAdapter<Item>{
             
             Set<String> genreUris = getGenreUris(Sets.newHashSet(Splitter.on(";").trimResults().split(subjects)));
             Set<String> genres = genreMap.mapRecognised(genreUris);
-            if (!genres.isEmpty()) {
-                System.out.print("Genres: ");
-            
-                for (String genre : genres) {
-                    System.out.print(" " + genre);
-                }
-                System.out.println();
-            }
             item.setGenres(genres);
             
             Version version = new Version();

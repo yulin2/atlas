@@ -37,7 +37,6 @@ public class ICTomorrowModule {
     @PostConstruct
     public void startBackgroundTasks() {
         if (!"DISABLED".equals(ictUsername)) {
-            Executors.newSingleThreadExecutor().execute(ictomorrowPlaylistUpdater());
             scheduler.schedule(ictomorrowPlaylistUpdater(), AT_NIGHT);
             log.record(new AdapterLogEntry(Severity.INFO)
                 .withDescription("ICTomorrow update scheduled task installed")

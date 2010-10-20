@@ -35,7 +35,6 @@ public class ArchiveOrgModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        Executors.newSingleThreadExecutor().execute(archiveOrgPlaylistUpdater());
         scheduler.schedule(archiveOrgPlaylistUpdater(), AT_NIGHT);
         log.record(new AdapterLogEntry(Severity.INFO)
             .withDescription("Archive.org update scheduled task installed")
