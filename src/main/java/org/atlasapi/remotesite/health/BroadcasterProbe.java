@@ -11,6 +11,7 @@ import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.time.Clock;
@@ -40,7 +41,7 @@ public class BroadcasterProbe implements HealthProbe {
 		for (String uri : uris) {
 			Playlist playlist = queryForPlaylist(uri);
 			if (playlist != null) {
-				result.add(uri, playlist.getLastFetched().toString(DateTimeFormat.mediumDateTime()), playlist.getLastFetched().isAfter(clock.now().minus(maxStaleness)));
+				result.add(Strings.isNullOrEmpty(playlist.getTitle())?uri:playlist.getTitle(), playlist.getLastFetched().toString(DateTimeFormat.mediumDateTime()), playlist.getLastFetched().isAfter(clock.now().minus(maxStaleness)));
 			} else {
 				result.addFailure(uri, "not found");
 			}

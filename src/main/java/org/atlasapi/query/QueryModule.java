@@ -64,7 +64,7 @@ public class QueryModule {
 				"http://www.bbc.co.uk/programmes/b006qj9z", //Today
 				"http://www.bbc.co.uk/programmes/b006md2v", //Pierre Bleu
 				"http://www.bbc.co.uk/programmes/b0071b63", //L'apprentice
-				"http://www.bbc.co.uk/programmes/b009smwk", //Fear on Four
+				"http://www.bbc.co.uk/programmes/b007t9yb", //Match of the Day 2
 				"http://www.bbc.co.uk/programmes/b0087g39", //Helicopter Heroes
 				"http://www.bbc.co.uk/programmes/b006mk1s", //Mastermind
 				"http://www.bbc.co.uk/programmes/b006wknd" //Rob da Bank, yeh...
