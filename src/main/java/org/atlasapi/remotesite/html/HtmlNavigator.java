@@ -15,95 +15,46 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.html;
 
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
+import org.atlasapi.remotesite.xml.SimpleXmlNavigator;
 import org.jaxen.JaxenException;
-import org.jaxen.jdom.JDOMXPath;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.filter.ElementFilter;
-import org.jdom.input.SAXBuilder;
 
 import com.google.common.collect.Lists;
 
-/**
- * XPath-based navigator for finding elements in an HTML document.
- * Uses tagsoup parser to make the document more well-formed.
- *  
- * @author John Ayres (john@metabroadcast.com)
- * @author Robert Chatley (robert@metabroadcast.com)
- */
 public class HtmlNavigator {
-
-	private final Document doc;
+    
+    private final SimpleXmlNavigator navigator;
 
 	public HtmlNavigator(Document doc) {
-		this.doc = doc;
+		this.navigator = new SimpleXmlNavigator(doc);
 	}
 
 	public HtmlNavigator(Reader in) {
-		try {
-			this.doc = domFor(in);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		this.navigator = new SimpleXmlNavigator(in);
 	}
 	
 	public HtmlNavigator(String content) {
-	    this(new StringReader(content));
-	}
-
-	private static Document domFor(Reader in) throws Exception {
-		SAXBuilder builder = new SAXBuilder("org.ccil.cowan.tagsoup.Parser");
-		Document doc = builder.build(in);
-		removeNamespaces(doc);
-		return doc;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void removeNamespaces(Document doc) {
-		Element root = doc.getRootElement();
-		Iterator<Element> elements = root.getDescendants(new ElementFilter());
-		while (elements.hasNext()) {
-			Element element = elements.next();
-			removeNamespace(element);
-		}
-		removeNamespace(root);
-	}
-
-	private static void removeNamespace(Element element) {
-		if (element.getNamespace() != null) {
-			element.setNamespace(null);
-		}
+	    this.navigator = new SimpleXmlNavigator(content);
 	}
 
 	public Element firstElementOrNull(String xpath) {
-		return firstElementOrNull(xpath, doc);
+		return navigator.firstElementOrNull(xpath);
 	}
 
 	public Element firstElementOrNull(String xpath, Object fromNode) {
-		try {
-			List<Element> nodes = allElementsMatching(xpath, fromNode);
-			if (nodes == null || nodes.isEmpty()) {
-				return null;
-			} else {
-				return nodes.get(0);
-			}
-		} catch (JaxenException e) {
-			throw new RuntimeException(e);
-		}
+	    return navigator.firstElementOrNull(xpath, fromNode);
 	}
 
 	public List<Element> allElementsMatching(String xpath) throws JaxenException {
-		return allElementsMatching(xpath, doc);
+		return navigator.allElementsMatching(xpath);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public List<Element> allElementsMatching(String xpath, Object fromNode) throws JaxenException {
-		return new JDOMXPath(xpath).selectNodes(fromNode);
+		return navigator.allElementsMatching(xpath, fromNode);
 	}
 	
 	public String metaTagContents(String metaTagName) {
