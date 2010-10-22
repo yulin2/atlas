@@ -27,6 +27,7 @@ import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
+import org.atlasapi.remotesite.hbo.HboModule;
 import org.atlasapi.remotesite.hulu.HuluAllBrandsAdapter;
 import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
@@ -52,12 +53,13 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class})
+@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HboModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
 	private @Autowired C4Module c4Module; 
 	private @Autowired ArchiveOrgModule archiveOrgModule;
+	private @Autowired HboModule hboModule;
 	
 	private @Autowired BbcModule bbcModule; 
 	private @Autowired ItvModule itvModule;
@@ -86,6 +88,7 @@ public class RemoteSiteModule {
 		 adapters.addAll(bbcModule.adapters());
 		 adapters.addAll(itvModule.adapters());
 		 adapters.addAll(archiveOrgModule.adapters());
+		 adapters.addAll(hboModule.adapters());
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
