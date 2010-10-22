@@ -53,7 +53,7 @@ public class QueryModule {
 	}
 	
 	public @Bean HealthProbe c4Probe() {
-		return new BroadcasterProbe(Publisher.C4, new AToZUriSource("http://www.channel4.com/programmes/atoz/", "", true), mongoQueryExecutor());
+		return new BroadcasterProbe(Publisher.C4, new AToZUriSource("http://www.channel4.com/programmes/atoz/", "", true), contentStore);
 	}
 	
 	public @Bean HealthProbe bbcProbe() {
@@ -68,7 +68,7 @@ public class QueryModule {
 				"http://www.bbc.co.uk/programmes/b0087g39", //Helicopter Heroes
 				"http://www.bbc.co.uk/programmes/b006mk1s", //Mastermind
 				"http://www.bbc.co.uk/programmes/b006wknd" //Rob da Bank, yeh...
-		), mongoQueryExecutor());
+		), contentStore);
 	}
 
 	@Bean KnownTypeQueryExecutor mongoDbQueryExcutorThatFiltersUriQueries() {

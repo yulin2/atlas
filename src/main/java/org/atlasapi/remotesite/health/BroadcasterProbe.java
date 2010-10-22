@@ -7,7 +7,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
@@ -24,14 +24,14 @@ public class BroadcasterProbe implements HealthProbe {
 	private final Duration maxStaleness = Duration.standardHours(30);
 	
 	private final Publisher publisher;
-	private final KnownTypeQueryExecutor queryExecutor;
+	private final MongoRoughSearch contentStore;
 	private final Iterable<String> uris;
 	
 	
-	public BroadcasterProbe(Publisher publisher, Iterable<String> uris, KnownTypeQueryExecutor queryExecutor) {
+	public BroadcasterProbe(Publisher publisher, Iterable<String> uris, MongoRoughSearch contentStore) {
 		this.publisher = publisher;
 		this.uris = uris;
-		this.queryExecutor = queryExecutor;
+		this.contentStore = contentStore;
 	}
 	
 	@Override
@@ -49,7 +49,7 @@ public class BroadcasterProbe implements HealthProbe {
 	}
 
 	private Playlist queryForPlaylist(String letter) {
-		 List<Playlist> playlists = queryExecutor.executePlaylistQuery(new ContentQuery(Attributes.PLAYLIST_URI.createQuery(Operators.EQUALS, ImmutableList.of(letter))));
+		 List<Playlist> playlists = contentStore.dehydratedPlaylistsMatching(new ContentQuery(Attributes.PLAYLIST_URI.createQuery(Operators.EQUALS, ImmutableList.of(letter))));
 		 if (playlists.isEmpty()) {
 			 return null;
 		 }
