@@ -114,6 +114,9 @@ class SlashProgrammesRdf {
 		@XmlElement(namespace=PO.NS, name="long_synopsis")
 		protected String longSynopsis;
 		
+		@XmlElement(namespace=PO.NS, name="masterbrand")
+		private SlashProgrammesMasterbrand masterbrand;
+		
 		@XmlElement(namespace=PO.NS, name="genre")
 		protected Set<SlashProgrammesGenre> genres;
 		
@@ -147,6 +150,10 @@ class SlashProgrammesRdf {
 		
 		public String uri() {
 			return BASE_URI + uri.replace("#programme", "");
+		}
+
+		public SlashProgrammesMasterbrand getMasterbrand() {
+			return masterbrand;
 		}
 	}
 	
@@ -242,6 +249,22 @@ class SlashProgrammesRdf {
 			resourceUri = uri;
 			return this;
 		}
+	}
+	
+	static class SlashProgrammesMasterbrand {
+		
+		@XmlAttribute(name="resource", namespace=RDF.NS)
+		private String resourceUri;
+
+		public SlashProgrammesMasterbrand withResourceUri(String uri) {
+			this.resourceUri = uri;
+			return this;
+		}
+
+		public String getResourceUri() {
+			return resourceUri;
+		}
+		
 	}
 	
 	static class SlashProgrammesEpisodeRef {

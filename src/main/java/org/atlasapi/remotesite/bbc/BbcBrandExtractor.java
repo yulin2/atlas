@@ -111,6 +111,9 @@ public class BbcBrandExtractor  {
 		container.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
 		container.setPublisher(Publisher.BBC);
 		container.setTitle(brandRef.title());
+		if (brandRef.getMasterbrand() != null) {
+			container.setContentType(BbcMasterbrandContentTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull());
+		}
 		if (brandRef.getDepiction() != null) {
 			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());
 			if (matcher.matches()) {
