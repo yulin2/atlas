@@ -36,30 +36,34 @@ public class ItunesRssUpdater implements Runnable {
         Set<String> alreadyProcessed = Sets.newHashSet();
         
         for (String feedUri : feedUris) {
-            try {
-                String content = client.getContentsOf(feedUri);
+            processFeed(alreadyProcessed, feedUri);
+        }
+    }
+
+    private void processFeed(Set<String> alreadyProcessed, String feedUri) {
+        try {
+            String content = client.getContentsOf(feedUri);
+            
+            if (content != null) {
+                SimpleXmlNavigator navigator = new SimpleXmlNavigator(content);
                 
-                if (content != null) {
-                    SimpleXmlNavigator navigator = new SimpleXmlNavigator(content);
+                List<Element> linkElements = navigator.allElementsMatching("//entry/artist");
+                
+                for (Element linkElement : linkElements) {
+                    String brandUri = linkElement.getAttributeValue("href");
                     
-                    List<Element> linkElements = navigator.allElementsMatching("//entry/artist");
-                    
-                    for (Element linkElement : linkElements) {
-                        String brandUri = linkElement.getAttributeValue("href");
-                        
-                        if (!alreadyProcessed.contains(brandUri) && brandAdapter.canFetch(brandUri)) {
-                            Brand brand = brandAdapter.fetch(brandUri);
-                            if (brand != null) {
-                                contentWriter.createOrUpdatePlaylist(brand, true);
-                            }
-                            alreadyProcessed.add(brandUri);
+                    if (!alreadyProcessed.contains(brandUri) && brandAdapter.canFetch(brandUri)) {
+                        Brand brand = brandAdapter.fetch(brandUri);
+                        if (brand != null) {
+                            contentWriter.createOrUpdatePlaylist(brand, true);
                         }
+                        alreadyProcessed.add(brandUri);
                     }
                 }
             }
-            catch (Exception e) {
-                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(ItunesRssUpdater.class).withUri(feedUri));
-            }
+        }
+        catch (Exception e) {
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(ItunesRssUpdater.class).withUri(feedUri));
         }
     }
 }
