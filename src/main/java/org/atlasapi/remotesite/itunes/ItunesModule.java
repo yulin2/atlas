@@ -1,6 +1,7 @@
-package org.atlasapi.remotesite.hbo;
+package org.atlasapi.remotesite.itunes;
 
 import java.util.Collection;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -11,18 +12,20 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.hbo.HboSiteMapUpdater;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 
 @Configuration
-public class HboModule {
+public class ItunesModule {
     
     private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
     
@@ -30,31 +33,26 @@ public class HboModule {
     private @Autowired MongoDbBackedContentStore contentStore;
     private @Autowired AdapterLog log;
     
+    private Set<String> feeds = ImmutableSet.of("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toptvseasons/sf=143444/limit=300/xml");
+    
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(siteMapUpdater(), AT_NIGHT);
+        scheduler.schedule(itunesRssUpdater(), AT_NIGHT);
         log.record(new AdapterLogEntry(Severity.INFO)
-            .withDescription("HBO update scheduled task installed")
-            .withSource(HboSiteMapUpdater.class));
+            .withDescription("iTunes update scheduled task installed")
+            .withSource(ItunesRssUpdater.class));
     } 
     
-    public @Bean HboSiteMapUpdater siteMapUpdater() {
-        return new HboSiteMapUpdater(HttpClients.screenScrapingClient(), hboBrandAdapter(), contentStore, log);
+    public @Bean ItunesRssUpdater itunesRssUpdater() {
+        return new ItunesRssUpdater(feeds, HttpClients.webserviceClient(), contentStore, itunesBrandAdapter(), log);
     }
     
-    public @Bean HboAdapterHelper hboAdapterHelper() {
-        return new HboAdapterHelper();
-    }
-    
-    public @Bean HboItemAdapter hboEpisodeAdapter() {
-        return new HboItemAdapter(HttpClients.screenScrapingClient(), log, hboAdapterHelper());
-    }
-    
-    public @Bean HboBrandAdapter hboBrandAdapter() {
-        return new HboBrandAdapter(hboEpisodeAdapter(), HttpClients.screenScrapingClient(), log, hboAdapterHelper());
+    public @Bean ItunesBrandAdapter itunesBrandAdapter() {
+        return new ItunesBrandAdapter(HttpClients.webserviceClient(), log);
     }
     
     public Collection<SiteSpecificAdapter<? extends Content>> adapters() {
-        return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(hboBrandAdapter());
+        return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(itunesBrandAdapter());
     }
+    
 }

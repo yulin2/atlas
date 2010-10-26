@@ -29,18 +29,18 @@ public class ItvModule {
     }
     
     @Bean ItvUpdater updater() {
-        return new ItvUpdater(brandAdapter(), contentWriters, log);
+        return new ItvUpdater(itvBrandAdapter(), contentWriters, log);
     }
     
-    @Bean ItvMercuryBrandAdapter brandAdapter() {
+    @Bean ItvMercuryBrandAdapter itvBrandAdapter() {
         return new ItvMercuryBrandAdapter();
     }
     
-    @Bean ItvMercuryEpisodeAdapter episodeAdapter() {
+    @Bean ItvMercuryEpisodeAdapter itvEpisodeAdapter() {
         return new ItvMercuryEpisodeAdapter();
     }
     
     public Collection<SiteSpecificAdapter<? extends Content>> adapters() {
-        return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(episodeAdapter(), brandAdapter());
+        return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(itvEpisodeAdapter(), itvBrandAdapter());
     }
 }
