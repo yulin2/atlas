@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.archiveorg;
+package org.atlasapi.remotesite.hbo;
 
 import java.util.Collection;
 
@@ -22,33 +22,39 @@ import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
-public class ArchiveOrgModule {
+public class HboModule {
+    
     private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired MongoDbBackedContentStore contentStore;
     private @Autowired AdapterLog log;
     
-    private Iterable<String> playlists = ImmutableList.of("http://www.archive.org/search.php?query=collection:classic_tv", 
-                                                          "http://www.archive.org/search.php?query=collection:feature_films");
-    
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(archiveOrgPlaylistUpdater(), AT_NIGHT);
+        scheduler.schedule(siteMapUpdater(), AT_NIGHT);
         log.record(new AdapterLogEntry(Severity.INFO)
-            .withDescription("Archive.org update scheduled task installed")
-            .withSource(ArchiveOrgPlaylistsUpdater.class));
+            .withDescription("HBO update scheduled task installed")
+            .withSource(HboSiteMapUpdater.class));
     } 
     
-    public @Bean ArchiveOrgItemAdapter archiveOrgItemAdapter() {
-        return new ArchiveOrgItemAdapter(HttpClients.webserviceClient(), log);
+    public @Bean HboSiteMapUpdater siteMapUpdater() {
+        return new HboSiteMapUpdater(HttpClients.screenScrapingClient(), hboBrandAdapter(), contentStore, log);
     }
     
-    public @Bean ArchiveOrgPlaylistsUpdater archiveOrgPlaylistUpdater() {
-        return new ArchiveOrgPlaylistsUpdater(HttpClients.screenScrapingClient(), archiveOrgItemAdapter(), playlists, contentStore, log);
+    public @Bean HboAdapterHelper hboAdapterHelper() {
+        return new HboAdapterHelper();
+    }
+    
+    public @Bean HboItemAdapter hboEpisodeAdapter() {
+        return new HboItemAdapter(HttpClients.screenScrapingClient(), log, hboAdapterHelper());
+    }
+    
+    public @Bean HboBrandAdapter hboBrandAdapter() {
+        return new HboBrandAdapter(hboEpisodeAdapter(), HttpClients.screenScrapingClient(), log, hboAdapterHelper());
     }
     
     public Collection<SiteSpecificAdapter<? extends Content>> adapters() {
-        return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(archiveOrgItemAdapter());
+        return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(hboBrandAdapter());
     }
 }

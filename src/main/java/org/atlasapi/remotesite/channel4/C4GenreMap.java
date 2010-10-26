@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.channel4;
 
 
+import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.genres.GenreMap;
 
 
@@ -31,37 +32,37 @@ public class C4GenreMap extends GenreMap {
    //  meaningful URIplay genre.
 
    static {
-       genres.put("http://www.channel4.com/programmes/tags/animals",                   "http://ref.atlasapi.org/genres/atlas/animals");
-       genres.put("http://www.channel4.com/programmes/tags/animation",                 "http://ref.atlasapi.org/genres/atlas/film");
-       genres.put("http://www.channel4.com/programmes/tags/art-design-and-literature", "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/business-money",            "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/chat-shows",                "http://ref.atlasapi.org/genres/atlas/entertainment");
-       genres.put("http://www.channel4.com/programmes/tags/childrens-shows", 		   "http://ref.atlasapi.org/genres/atlas/childrens");
-       genres.put("http://www.channel4.com/programmes/tags/comedy",                    "http://ref.atlasapi.org/genres/atlas/comedy");
-       genres.put("http://www.channel4.com/programmes/tags/disability",                "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/documentaries",             "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/drama",                     "http://ref.atlasapi.org/genres/atlas/drama");
+       genres.put("http://www.channel4.com/programmes/tags/animals",                   AtlasGenre.ANIMALS);
+       genres.put("http://www.channel4.com/programmes/tags/animation",                 AtlasGenre.ANIMATION);
+       genres.put("http://www.channel4.com/programmes/tags/art-design-and-literature", AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/business-money",            AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/chat-shows",                AtlasGenre.ENTERTAINMENT);
+       genres.put("http://www.channel4.com/programmes/tags/childrens-shows", 		   AtlasGenre.CHILDRENS);
+       genres.put("http://www.channel4.com/programmes/tags/comedy",                    AtlasGenre.COMEDY);
+       genres.put("http://www.channel4.com/programmes/tags/disability",                AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/documentaries",             AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/drama",                     AtlasGenre.DRAMA);
        // ignored: http://www.channel4.com/programmes/tags/e4
-       genres.put("http://www.channel4.com/programmes/tags/education-and-learning",    "http://ref.atlasapi.org/genres/atlas/learning");
-       genres.put("http://www.channel4.com/programmes/tags/entertainment",             "http://ref.atlasapi.org/genres/atlas/entertainment");
-       genres.put("http://www.channel4.com/programmes/tags/family-and-parenting",      "http://ref.atlasapi.org/genres/atlas/lifestyle");
-       genres.put("http://www.channel4.com/programmes/tags/fashion-and-beauty",        "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/film",                      "http://ref.atlasapi.org/genres/atlas/film");
-       genres.put("http://www.channel4.com/programmes/tags/food",                      "http://ref.atlasapi.org/genres/atlas/lifestyle");
-       genres.put("http://www.channel4.com/programmes/tags/health-and-wellbeing",      "http://ref.atlasapi.org/genres/atlas/lifestyle");
-       genres.put("http://www.channel4.com/programmes/tags/history",                   "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/homes-and-gardens",         "http://ref.atlasapi.org/genres/atlas/lifestyle");
-       genres.put("http://www.channel4.com/programmes/tags/lifestyle",                 "http://ref.atlasapi.org/genres/atlas/lifestyle");
+       genres.put("http://www.channel4.com/programmes/tags/education-and-learning",    AtlasGenre.LEARNING);
+       genres.put("http://www.channel4.com/programmes/tags/entertainment",             AtlasGenre.ENTERTAINMENT);
+       genres.put("http://www.channel4.com/programmes/tags/family-and-parenting",      AtlasGenre.LIFESTYLE);
+       genres.put("http://www.channel4.com/programmes/tags/fashion-and-beauty",        AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/film",                      AtlasGenre.FILM);
+       genres.put("http://www.channel4.com/programmes/tags/food",                      AtlasGenre.LIFESTYLE);
+       genres.put("http://www.channel4.com/programmes/tags/health-and-wellbeing",      AtlasGenre.LIFESTYLE);
+       genres.put("http://www.channel4.com/programmes/tags/history",                   AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/homes-and-gardens",         AtlasGenre.LIFESTYLE);
+       genres.put("http://www.channel4.com/programmes/tags/lifestyle",                 AtlasGenre.LIFESTYLE);
        // ignored: http://www.channel4.com/programmes/tags/more4
-       genres.put("http://www.channel4.com/programmes/tags/music",                     "http://ref.atlasapi.org/genres/atlas/music");
-       genres.put("http://www.channel4.com/programmes/tags/news-current-affairs-and-politics", "http://ref.atlasapi.org/genres/atlas/news");
-       genres.put("http://www.channel4.com/programmes/tags/quizzes-and-gameshows",     "http://ref.atlasapi.org/genres/atlas/entertainment");
-       genres.put("http://www.channel4.com/programmes/tags/reality-shows",             "http://ref.atlasapi.org/genres/atlas/entertainment");
-       genres.put("http://www.channel4.com/programmes/tags/religion-and-belief",       "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/science-nature-and-the-environment", "http://ref.atlasapi.org/genres/atlas/factual");
-       genres.put("http://www.channel4.com/programmes/tags/sex-and-relationships",     "http://ref.atlasapi.org/genres/atlas/lifestyle");
+       genres.put("http://www.channel4.com/programmes/tags/music",                     AtlasGenre.MUSIC);
+       genres.put("http://www.channel4.com/programmes/tags/news-current-affairs-and-politics", AtlasGenre.NEWS);
+       genres.put("http://www.channel4.com/programmes/tags/quizzes-and-gameshows",     AtlasGenre.ENTERTAINMENT);
+       genres.put("http://www.channel4.com/programmes/tags/reality-shows",             AtlasGenre.ENTERTAINMENT);
+       genres.put("http://www.channel4.com/programmes/tags/religion-and-belief",       AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/science-nature-and-the-environment", AtlasGenre.FACTUAL);
+       genres.put("http://www.channel4.com/programmes/tags/sex-and-relationships",     AtlasGenre.LIFESTYLE);
        // ignored: http://www.channel4.com/programmes/tags/society-and-culture
-       genres.put("http://www.channel4.com/programmes/tags/sports-and-games",          "http://ref.atlasapi.org/genres/atlas/sports");
+       genres.put("http://www.channel4.com/programmes/tags/sports-and-games",          AtlasGenre.SPORT);
        // ignored: http://www.channel4.com/programmes/tags/us-shows
    }
 }

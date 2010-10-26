@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
+import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.genres.GenreMap;
 
 /**
@@ -26,21 +27,21 @@ import org.atlasapi.genres.GenreMap;
 class YouTubeGenreMap extends GenreMap {
 
     static {
-        genres.put("http://ref.atlasapi.org/genres/youtube/autos",         "http://ref.atlasapi.org/genres/atlas/lifestyle");
-        genres.put("http://ref.atlasapi.org/genres/youtube/comedy",        "http://ref.atlasapi.org/genres/atlas/comedy");
-        genres.put("http://ref.atlasapi.org/genres/youtube/education",     "http://ref.atlasapi.org/genres/atlas/learning");
-        genres.put("http://ref.atlasapi.org/genres/youtube/entertainment", "http://ref.atlasapi.org/genres/atlas/entertainment");
-        genres.put("http://ref.atlasapi.org/genres/youtube/film",          "http://ref.atlasapi.org/genres/atlas/film");
-        genres.put("http://ref.atlasapi.org/genres/youtube/games",         "http://ref.atlasapi.org/genres/atlas/entertainment");
-        genres.put("http://ref.atlasapi.org/genres/youtube/howto",         "http://ref.atlasapi.org/genres/atlas/lifestyle");
-        genres.put("http://ref.atlasapi.org/genres/youtube/movies",        "http://ref.atlasapi.org/genres/atlas/film");
-        genres.put("http://ref.atlasapi.org/genres/youtube/music",         "http://ref.atlasapi.org/genres/atlas/music");
-        genres.put("http://ref.atlasapi.org/genres/youtube/news",          "http://ref.atlasapi.org/genres/atlas/news");
-        genres.put("http://ref.atlasapi.org/genres/youtube/nonprofit",     "http://ref.atlasapi.org/genres/atlas/factual");
-        genres.put("http://ref.atlasapi.org/genres/youtube/people",        "http://ref.atlasapi.org/genres/atlas/entertainment");
-        genres.put("http://ref.atlasapi.org/genres/youtube/animals",       "http://ref.atlasapi.org/genres/atlas/animals");
-        genres.put("http://ref.atlasapi.org/genres/youtube/tech",          "http://ref.atlasapi.org/genres/atlas/factual");
-        genres.put("http://ref.atlasapi.org/genres/youtube/sports",        "http://ref.atlasapi.org/genres/atlas/sports");
-        genres.put("http://ref.atlasapi.org/genres/youtube/travel",        "http://ref.atlasapi.org/genres/atlas/factual");
+        genres.put("http://ref.atlasapi.org/genres/youtube/autos",         AtlasGenre.LIFESTYLE);
+        genres.put("http://ref.atlasapi.org/genres/youtube/comedy",        AtlasGenre.COMEDY);
+        genres.put("http://ref.atlasapi.org/genres/youtube/education",     AtlasGenre.LEARNING);
+        genres.put("http://ref.atlasapi.org/genres/youtube/entertainment", AtlasGenre.ENTERTAINMENT);
+        genres.put("http://ref.atlasapi.org/genres/youtube/film",          AtlasGenre.FILM);
+        genres.put("http://ref.atlasapi.org/genres/youtube/games",         AtlasGenre.ENTERTAINMENT);
+        genres.put("http://ref.atlasapi.org/genres/youtube/howto",         AtlasGenre.LIFESTYLE);
+        genres.put("http://ref.atlasapi.org/genres/youtube/movies",        AtlasGenre.FILM);
+        genres.put("http://ref.atlasapi.org/genres/youtube/music",         AtlasGenre.MUSIC);
+        genres.put("http://ref.atlasapi.org/genres/youtube/news",          AtlasGenre.NEWS);
+        genres.put("http://ref.atlasapi.org/genres/youtube/nonprofit",     AtlasGenre.FACTUAL);
+        genres.put("http://ref.atlasapi.org/genres/youtube/people",        AtlasGenre.ENTERTAINMENT);
+        genres.put("http://ref.atlasapi.org/genres/youtube/animals",       AtlasGenre.ANIMALS);
+        genres.put("http://ref.atlasapi.org/genres/youtube/tech",          AtlasGenre.FACTUAL);
+        genres.put("http://ref.atlasapi.org/genres/youtube/sports",        AtlasGenre.SPORT);
+        genres.put("http://ref.atlasapi.org/genres/youtube/travel",        AtlasGenre.FACTUAL);
      }
 }
