@@ -66,6 +66,9 @@ public class BbcBrandExtractor  {
 					log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
 					continue;
 				}
+				if (series.getContentType() == null) {
+					series.setContentType(brand.getContentType());
+				}
 				for (Item item : series.getItems()) {
 					brand.addItem(item);
 				}
