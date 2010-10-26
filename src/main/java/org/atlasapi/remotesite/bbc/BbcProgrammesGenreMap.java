@@ -16,6 +16,7 @@ package org.atlasapi.remotesite.bbc;
 
 import java.util.Set;
 
+import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.genres.GenreMap;
 
 import com.google.common.collect.Sets;
@@ -34,35 +35,35 @@ public class BbcProgrammesGenreMap extends GenreMap {
     // i.e., match on the start of the URI, not the whole URI
 
     static {
-            genres.put("http://www.bbc.co.uk/programmes/genres/childrens", "http://ref.atlasapi.org/genres/atlas/childrens");
-            genres.put("http://www.bbc.co.uk/programmes/genres/comedy", "http://ref.atlasapi.org/genres/atlas/comedy");
-            genres.put("http://www.bbc.co.uk/programmes/genres/drama", "http://ref.atlasapi.org/genres/atlas/drama");
-            genres.put("http://www.bbc.co.uk/programmes/genres/entertainment", "http://ref.atlasapi.org/genres/atlas/entertainment");
-            genres.put("http://www.bbc.co.uk/programmes/genres/entertainmentandcomedy", "http://ref.atlasapi.org/genres/atlas/entertainment");
-            genres.put("http://www.bbc.co.uk/programmes/genres/learning", "http://ref.atlasapi.org/genres/atlas/learning");
-            genres.put("http://www.bbc.co.uk/programmes/genres/music", "http://ref.atlasapi.org/genres/atlas/music");
-            genres.put("http://www.bbc.co.uk/programmes/genres/news", "http://ref.atlasapi.org/genres/atlas/news");
-            genres.put("http://www.bbc.co.uk/programmes/genres/religionandethics", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/sport", "http://ref.atlasapi.org/genres/atlas/sports");
-            genres.put("http://www.bbc.co.uk/programmes/genres/weather", "http://ref.atlasapi.org/genres/atlas/news");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/antiques", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/artscultureandthemedia", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/beautyandstyle", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/carsandmotors", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/consumer", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/crimeandjustice", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/disability", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/familiesandrelationships", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/foodanddrink", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/healthandwellbeing", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/history", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/homesandgardens", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/lifestories", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/money", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/petsandanimals", "http://ref.atlasapi.org/genres/atlas/animals");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/politics", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/scienceandnature", "http://ref.atlasapi.org/genres/atlas/factual");
-            genres.put("http://www.bbc.co.uk/programmes/genres/factual/travel", "http://ref.atlasapi.org/genres/atlas/lifestyle");
+            genres.put("http://www.bbc.co.uk/programmes/genres/childrens", AtlasGenre.CHILDRENS);
+            genres.put("http://www.bbc.co.uk/programmes/genres/comedy", AtlasGenre.COMEDY);
+            genres.put("http://www.bbc.co.uk/programmes/genres/drama", AtlasGenre.DRAMA);
+            genres.put("http://www.bbc.co.uk/programmes/genres/entertainment", AtlasGenre.ENTERTAINMENT);
+            genres.put("http://www.bbc.co.uk/programmes/genres/entertainmentandcomedy", AtlasGenre.ENTERTAINMENT);
+            genres.put("http://www.bbc.co.uk/programmes/genres/learning", AtlasGenre.LEARNING);
+            genres.put("http://www.bbc.co.uk/programmes/genres/music", AtlasGenre.MUSIC);
+            genres.put("http://www.bbc.co.uk/programmes/genres/news", AtlasGenre.NEWS);
+            genres.put("http://www.bbc.co.uk/programmes/genres/religionandethics", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/sport", AtlasGenre.SPORT);
+            genres.put("http://www.bbc.co.uk/programmes/genres/weather", AtlasGenre.NEWS);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/antiques", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/artscultureandthemedia", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/beautyandstyle", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/carsandmotors", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/consumer", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/crimeandjustice", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/disability", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/familiesandrelationships", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/foodanddrink", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/healthandwellbeing", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/history", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/homesandgardens", AtlasGenre.LIFESTYLE);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/lifestories", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/money", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/petsandanimals", AtlasGenre.ANIMALS);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/politics", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/scienceandnature", AtlasGenre.FACTUAL);
+            genres.put("http://www.bbc.co.uk/programmes/genres/factual/travel", AtlasGenre.LIFESTYLE);
     }
     
     @Override
@@ -80,9 +81,9 @@ public class BbcProgrammesGenreMap extends GenreMap {
 	}
 
 	private void convert(String sourceGenre, Set<String> mappedGenres) {
-		String mappedGenre = genres.get(sourceGenre.toLowerCase());
+		AtlasGenre mappedGenre = genres.get(sourceGenre.toLowerCase());
 		if (mappedGenre != null) { 
-			mappedGenres.add(mappedGenre); 
+			mappedGenres.add(mappedGenre.getUri()); 
 		} else {
 			if (sourceGenre.lastIndexOf('/') > -1) {
 				convert(sourceGenre.substring(0, sourceGenre.lastIndexOf('/')), mappedGenres);

@@ -1,13 +1,14 @@
 package org.atlasapi.remotesite.itv;
 
+import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.genres.GenreMap;
 
 public class ItvGenreMap extends GenreMap {
     static {
-        genres.put("entertainment", "http://ref.atlasapi.org/genres/atlas/entertainment");
-        genres.put("lifestyle", "http://ref.atlasapi.org/genres/atlas/lifestyle");
-        genres.put("drama", "http://ref.atlasapi.org/genres/atlas/drama");
-        genres.put("soaps", "http://ref.atlasapi.org/genres/atlas/drama");
-        genres.put("sport", "http://ref.atlasapi.org/genres/atlas/sport");
+        genres.put("entertainment", AtlasGenre.ENTERTAINMENT);
+        genres.put("lifestyle", AtlasGenre.LIFESTYLE);
+        genres.put("drama", AtlasGenre.DRAMA);
+        genres.put("soaps", AtlasGenre.DRAMA);
+        genres.put("sport", AtlasGenre.SPORT);
     }
 }
