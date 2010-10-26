@@ -96,4 +96,8 @@ public class HuluItemAdapterTest extends TestCase {
         assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348"));
         assertNull(new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/glee"));
     }
+    
+    public void testShouldReturnNullOn404() { 
+    	assertNull(adapter.fetch("http://www.hulu.com/watch/1782261234123421835349856794835649876439876"));
+    }
 }

@@ -31,7 +31,9 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
@@ -40,6 +42,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
     public static final String BASE_URI = "http://www.hulu.com/watch/";
     private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "\\d+)\\/?.*");
+    private static final String NOT_FOUND_MESSAGE = "The page you were looking for doesn't exist (404 error)";
 
     private final SimpleHttpClient httpClient;
     private final HuluItemContentExtractor extractor;
@@ -62,9 +65,9 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     @Override
     public Episode fetch(String uri) {
         LOG.info("Retrieving hulu episode: " + uri);
-        String content = getContent(uri);
-        if (content != null) {
-            HtmlNavigator navigator = new HtmlNavigator(content);
+        Maybe<String> content = getContent(uri);
+        if (content.hasValue()) {
+            HtmlNavigator navigator = new HtmlNavigator(content.requireValue());
 
             Episode episode = extractor.extract(navigator);
 
@@ -125,18 +128,18 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
         this.brandAdapter = brandAdapter;
     }
 
-    private String getContent(String uri) {
-        String content = null;
+    private Maybe<String> getContent(String uri) {
         for (int i = 0; i < 5; i++) {
             try {
-                content = httpClient.getContentsOf(uri);
-                if (content != null) {
-                    break;
+                HttpResponse response = httpClient.get(uri);
+                String content = response.body();
+                if (response.statusCode() == 200 || (response.wasNotFound() && !content.contains(NOT_FOUND_MESSAGE))) {
+                	return Maybe.just(content);
                 }
             } catch (HttpException e) {
                 LOG.warn("Error retrieving hulu item: " + uri + " attempt " + i + " with message: " + e.getMessage());
             }
         }
-        return content;
+        return Maybe.nothing();
     }
 }
