@@ -17,6 +17,8 @@ package org.atlasapi.remotesite.bbc;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.ContentType;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.synd.GenericPodcastGraphExtractor;
@@ -52,6 +54,14 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 	@Override
 	public Playlist extract(SyndicationSource source) {
 		Playlist playlist = super.extract(source);
+		
+		ContentType cType = contentTypeFor(source);
+		if (cType != null) {
+			playlist.setContentType(cType);
+			for (Item item : playlist.getItems()) {
+				item.setContentType(cType);
+			}
+		}
 
 //		Don't include a /programmes link this creates duplicate aliases
 //		TODO: Reinstate this code
@@ -60,6 +70,26 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 //			representation.addAliasFor(source.getUri(), slashProgrammesLink);
 //		}
 		return playlist;
+	}
+	
+	private ContentType contentTypeFor(SyndicationSource source) {
+		SyndFeed feed = source.getFeed();
+		if (feed == null) {
+			return null;
+		}
+		List<Element> foreignMarkup = (List<Element>) feed.getForeignMarkup();
+		
+		for (Element element : foreignMarkup) {
+			if (element.getName().equals("network") &&
+				element.getNamespacePrefix().equals("ppg") &&
+				element.getAttributeValue("id") != null) {
+				
+				String service = element.getAttributeValue("id");
+				
+				return BbcMasterbrandContentTypeMap.lookupService(service).valueOrNull();
+			}
+		}
+		return null;
 	}
 
 	@SuppressWarnings({ "unchecked", "unused" })

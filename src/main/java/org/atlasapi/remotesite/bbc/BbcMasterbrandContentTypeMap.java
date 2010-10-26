@@ -32,4 +32,8 @@ public class BbcMasterbrandContentTypeMap {
 		return Maybe.nothing();
 	}
 	
+	
+	public static Maybe<ContentType> lookupService(String service) {
+		return Maybe.fromPossibleNullValue(serviceContentTypeMap.get(service));
+	}
 }
