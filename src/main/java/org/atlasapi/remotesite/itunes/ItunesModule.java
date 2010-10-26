@@ -38,7 +38,6 @@ public class ItunesModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        Executors.newSingleThreadExecutor().execute(itunesRssUpdater());
         scheduler.schedule(itunesRssUpdater(), AT_NIGHT);
         log.record(new AdapterLogEntry(Severity.INFO)
             .withDescription("iTunes update scheduled task installed")
