@@ -28,8 +28,8 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.index.IndexWriter.MaxFieldLength;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -49,6 +49,7 @@ import org.atlasapi.util.stats.Score;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.metabroadcast.common.file.MoreFiles;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.units.ByteCount;
 
@@ -261,7 +262,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	}
 
 	public IndexStats stats() {
-		return new IndexStats(ByteCount.bytes(brandsDir.sizeInBytes()), ByteCount.bytes(itemsDir.fileLength(itemsDirFile.getAbsolutePath())));
+		return new IndexStats(ByteCount.bytes(brandsDir.sizeInBytes()), MoreFiles.size(itemsDirFile));
 	}
 	
 	public static class IndexStats {

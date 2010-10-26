@@ -21,7 +21,6 @@ import org.atlasapi.persistence.content.QueueingContentListener;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
@@ -38,6 +37,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.webapp.health.HealthProbe;
 
 @Configuration
@@ -53,11 +53,22 @@ public class QueryModule {
 	}
 	
 	public @Bean HealthProbe c4Probe() {
-		return new BroadcasterProbe(Publisher.C4, new AToZUriSource("http://www.channel4.com/programmes/atoz/", "", true), mongoQueryExecutor());
+		return new BroadcasterProbe(Publisher.C4, new AToZUriSource("http://www.channel4.com/programmes/atoz/", "", true), contentStore);
 	}
 	
 	public @Bean HealthProbe bbcProbe() {
-		return new BroadcasterProbe(Publisher.BBC, new AToZUriSource("http://feeds.bbc.co.uk/iplayer/atoz/", "/list", true), mongoQueryExecutor());
+		return new BroadcasterProbe(Publisher.BBC, ImmutableList.of(
+				"http://www.bbc.co.uk/programmes/b006m86d", //Eastenders
+				"http://www.bbc.co.uk/programmes/b006mf4b", //Spooks
+				"http://www.bbc.co.uk/programmes/b006t1q9", //Question Time
+				"http://www.bbc.co.uk/programmes/b006qj9z", //Today
+				"http://www.bbc.co.uk/programmes/b006md2v", //Pierre Bleu
+				"http://www.bbc.co.uk/programmes/b0071b63", //L'apprentice
+				"http://www.bbc.co.uk/programmes/b007t9yb", //Match of the Day 2
+				"http://www.bbc.co.uk/programmes/b0087g39", //Helicopter Heroes
+				"http://www.bbc.co.uk/programmes/b006mk1s", //Mastermind
+				"http://www.bbc.co.uk/programmes/b006wknd" //Rob da Bank, yeh...
+		), contentStore);
 	}
 
 	@Bean KnownTypeQueryExecutor mongoDbQueryExcutorThatFiltersUriQueries() {
