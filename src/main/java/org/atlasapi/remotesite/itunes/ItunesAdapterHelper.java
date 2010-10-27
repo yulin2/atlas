@@ -1,10 +1,41 @@
 package org.atlasapi.remotesite.itunes;
 
+import org.atlasapi.media.entity.Countries;
+import org.atlasapi.media.entity.Country;
+
 public class ItunesAdapterHelper {
-    public static final String LOOKUP_URL_BASE = "http://ax.phobos.apple.com.edgesuite.net/WebObjects/MZStoreServices.woa/wa/wsLookup?limit=200&country=gb&media=tvShow";
+    public static final String LOOKUP_URL_BASE = "http://ax.phobos.apple.com.edgesuite.net/WebObjects/MZStoreServices.woa/wa/wsLookup?limit=200&media=tvShow";
+    public static final String COUNTRY_UK = "&country=gb";
+    
+    public enum ItunesRegion {
+        UK("gb", Countries.GB),
+        USA("us", Countries.US);
+        
+        private static final String SEARCH_PARAM = "&country=";
+        
+        private final String countryCode;
+        private final Country country;
+
+        private ItunesRegion(String countryCode, Country country) {
+            this.countryCode = countryCode;
+            this.country = country;
+        }
+        
+        public String getSearchArgument() {
+            return SEARCH_PARAM + countryCode;
+        }
+        
+        public Country getCountry() {
+            return country;
+        }
+    }
     
     public String getCurie(long entityId) {
         return "itunes:" + entityId;
+    }
+    
+    public int getIdFromCurie(String curie) {
+        return Integer.valueOf(curie.substring("itunes:".length()));
     }
     
     public String getGenreUri(int genreId) {

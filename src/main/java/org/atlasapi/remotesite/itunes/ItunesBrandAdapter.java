@@ -8,17 +8,24 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.itunes.ItunesAdapterHelper.ItunesRegion;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
@@ -47,16 +54,74 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
         brandUriMatcher.matches();
         String brandId = brandUriMatcher.group(1);
         
-        Maybe<Brand> brand = findBrand(brandId);
+        Brand brand = null;
+        for (ItunesRegion region : ItunesRegion.values()) {
+            Maybe<Brand> regionBrand = getBrandAndItemsForCountry(brandId, region);
+            if (regionBrand.hasValue()) {
+                if (brand == null) {
+                    brand = regionBrand.requireValue();
+                }
+                else {
+                    mergeItems(brand, regionBrand.requireValue());
+                }
+            }
+        }
+        
+        return brand;
+    }
+    
+    private void mergeItems(Brand to, Brand from) {
+        for (Item item : from.getItems()) {
+            Maybe<Item> existingItem = findExistingItem(to, item);
+            if (existingItem.hasValue()) {
+                addLocations(existingItem.requireValue(), item);
+            }
+            else {
+                to.addItem(item);
+            }
+        }
+    }
+    
+    private void addLocations(Item to, Item from) {
+        Version version = Iterables.getOnlyElement(to.getVersions());
+        Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+        for (Location location : getAllLocations(from)) {
+            encoding.addAvailableAt(location);
+        }
+    }
+    
+    private Set<Location> getAllLocations(Item item) {
+        Set<Location> allLocations = Sets.newHashSet();
+        
+        for (Version version : item.getVersions()) {
+            for (Encoding encoding : version.getManifestedAs()) {
+                allLocations.addAll(encoding.getAvailableAt());
+            }
+        }
+        
+        return allLocations;
+    }
+    
+    
+    private Maybe<Item> findExistingItem(Brand brand, Item targetItem) {
+        for (Item item : brand.getItems()) {
+            if (targetItem.getCurie().equals(item.getCurie())) {
+                return Maybe.just(item);
+            }
+        }
+        return Maybe.nothing();
+    }
+
+    private Maybe<Brand> getBrandAndItemsForCountry(String brandId, ItunesRegion region) {
+        Maybe<Brand> brand = findBrand(brandId, region);
         if (brand.hasValue()) {
-            Map<Long, Maybe<Series>> series = seriesFinder.findSeries(brandId);
-            List<Episode> episodes = episodeFinder.findEpisodes(brandId, series);
+            Map<Long, Maybe<Series>> series = seriesFinder.findSeries(brandId, region);
+            List<Episode> episodes = episodeFinder.findEpisodes(brandId, region, series);
             
             setGenres(brand.requireValue().getGenres(), series.values(), episodes);
             brand.requireValue().setItems(episodes);
         }
-        
-        return brand.valueOrNull();
+        return brand;
     }
     
     private void setGenres(Set<String> genres, Iterable<Maybe<Series>> series, Iterable<Episode> episodes) {
@@ -70,8 +135,9 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
         }
     }
     
-    private Maybe<Brand> findBrand(String brandId) {
-        String brandSearchUri = ItunesAdapterHelper.LOOKUP_URL_BASE + "&id=" + brandId;
+    private Maybe<Brand> findBrand(String brandId, ItunesRegion region) {
+        String brandSearchUri = ItunesAdapterHelper.LOOKUP_URL_BASE + region.getSearchArgument() + "&id=" + brandId;
+        
         try {
             String contents = client.getContentsOf(brandSearchUri);
             ObjectMapper mapper = new ObjectMapper();

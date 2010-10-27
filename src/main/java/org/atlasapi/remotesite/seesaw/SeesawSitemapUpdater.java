@@ -2,11 +2,11 @@ package org.atlasapi.remotesite.seesaw;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.uri.SavingFetcher;
-import org.atlasapi.remotesite.NoMatchingAdapterException;
 
 import com.google.inject.internal.Lists;
 
@@ -15,12 +15,14 @@ public class SeesawSitemapUpdater implements Runnable {
     
     private final RemoteSiteClient<List<String>> sitemapIndexClient = new SeesawSitemapIndexClient();
     private final RemoteSiteClient<List<String>> sitemapClient = new SeesawSitemapClient();
-    private static final Log log = LogFactory.getLog(SeesawSitemapUpdater.class);
 
     private final SavingFetcher savingFetcher;
+
+    private final AdapterLog log;
     
-    public SeesawSitemapUpdater(SavingFetcher savingFetcher) {
+    public SeesawSitemapUpdater(SavingFetcher savingFetcher, AdapterLog log) {
         this.savingFetcher = savingFetcher;
+        this.log = log;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class SeesawSitemapUpdater implements Runnable {
         try {
             sitemaps = sitemapIndexClient.get(SITEMAP_INDEX);
         } catch (Exception e) {
-            log.warn("Unable to retrieve sitemaps", e);
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(SITEMAP_INDEX).withSource(SeesawSitemapUpdater.class));
         }
         
         for (String sitemap: sitemaps) {
@@ -39,14 +41,12 @@ public class SeesawSitemapUpdater implements Runnable {
                 for (String url: urls) {
                     try {
                         savingFetcher.fetch(url);
-                    } catch (NoMatchingAdapterException nmae) {
-                        if (log.isInfoEnabled()) {
-                            log.info("No matching adapter for: "+url);
-                        }
+                    } catch (Exception e) {
+                        log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(url).withSource(SeesawSitemapUpdater.class));
                     }
                 }
             } catch (Exception e) {
-                log.warn("Unable to retrieve sitemap: "+sitemap, e);
+                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(sitemap).withSource(SeesawSitemapUpdater.class));
             }
         }
     }

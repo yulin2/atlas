@@ -71,7 +71,9 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                     if (matcher.find()) {
                         episode.setSeriesNumber(Integer.valueOf(matcher.group(1)));
                     } else {
-                        LOG.warn("Unable to parse series number: "+seriesText);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Unable to parse series number: "+seriesText);
+                        }
                     }
                     
                 }
@@ -92,7 +94,9 @@ public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigato
                         episode.setEpisodeNumber(episodeNumber);
                     }
                     catch (NumberFormatException e) {
-                        LOG.warn("Unable to parse episode number: "+episodeText, e);
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Unable to parse episode number: "+episodeText, e);
+                        }
                     }
                 }
                 

@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.itunes.ItunesAdapterHelper.ItunesRegion;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -31,9 +32,9 @@ public class ItunesSeriesFinder {
         this.helper = helper;
     }
     
-    public Map<Long, Maybe<Series>> findSeries(String brandId) {
+    public Map<Long, Maybe<Series>> findSeries(String brandId, ItunesRegion region) {
         Map<Long, Maybe<Series>> seriesIdToSeries = Maps.newHashMap();
-        String seriesSearchUri = ItunesAdapterHelper.LOOKUP_URL_BASE + "&id=" + brandId + "&entity=tvSeason";
+        String seriesSearchUri = ItunesAdapterHelper.LOOKUP_URL_BASE + region.getSearchArgument() + "&id=" + brandId + "&entity=tvSeason";
         
         try {
             String contents = client.getContentsOf(seriesSearchUri);
