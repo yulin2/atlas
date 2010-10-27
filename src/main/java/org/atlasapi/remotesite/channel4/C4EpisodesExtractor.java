@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Country;
 import org.atlasapi.media.entity.Encoding;
@@ -161,7 +162,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		}
 
 		episode.setTitle(title(entry));
-
+		episode.setContentType(ContentType.VIDEO);
 		episode.setIsLongForm(true);
 		return episode;
 	}
@@ -205,6 +206,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		episode.setEpisodeNumber(episodeNumber);
 		episode.setSeriesNumber(seriesNumber);
 		episode.setIsLongForm(true);
+		episode.setContentType(ContentType.VIDEO); 
 		return episode;
 	}
 

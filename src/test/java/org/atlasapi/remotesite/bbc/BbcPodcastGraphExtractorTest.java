@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
@@ -31,6 +32,7 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.media.MimeType;
@@ -84,7 +86,10 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		Element sysRef = new Element("systemRef", "ppg", "http://www.bbc.co.uk");
 		sysRef.getAttributes().add(new Attribute("systemId", "pid.brand"));
 		sysRef.getAttributes().add(new Attribute("key", "b00xxx"));
-		feed.setForeignMarkup(Lists.newArrayList(sysRef));
+		Element svcRef = new Element("network", "ppg", "http://www.bbc.co.uk");
+		svcRef.getAttributes().add(new Attribute("id", "radio4"));
+		svcRef.getAttributes().add(new Attribute("name", "BBC Radio 4"));
+		feed.setForeignMarkup(ImmutableList.of(sysRef, svcRef));
 		return feed;
 	}
 	
@@ -146,4 +151,12 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		return new SyndicationSource(feed, PODCAST_URI);
 	}
 
+	public void testSetsContentType() {
+		Playlist playlist = extractor.extract(source);
+		Item item = Iterables.getOnlyElement(playlist.getItems());
+
+		assertThat(playlist.getContentType(), is(ContentType.AUDIO));
+		assertThat(item.getContentType(), is(ContentType.AUDIO));		
+	}
+	
 }

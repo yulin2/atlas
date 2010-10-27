@@ -146,6 +146,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   
   <bean id="seesawUpdater" class="org.atlasapi.remotesite.seesaw.SeesawSitemapUpdater">
     <constructor-arg ref="savingFetcher" />
+    <constructor-arg ref="adapterLog" />
   </bean>
   
   <bean id="bbcSchedulesUpdater" class="org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
