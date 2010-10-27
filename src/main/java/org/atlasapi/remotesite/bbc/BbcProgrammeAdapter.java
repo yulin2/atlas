@@ -40,8 +40,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
     private final Log oldLog = LogFactory.getLog(getClass());
 
     public BbcProgrammeAdapter(AdapterLog log) {
-        this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(new SeriesFetchingBbcSeriesNumberResolver(),
-                new BbcProgrammesPolicyClient()), log);
+        this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(), log);
     }
 
     public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
