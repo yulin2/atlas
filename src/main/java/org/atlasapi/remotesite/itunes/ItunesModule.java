@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.itunes;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 

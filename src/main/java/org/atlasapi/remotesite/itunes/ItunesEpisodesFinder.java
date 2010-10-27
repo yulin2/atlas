@@ -6,18 +6,19 @@ import java.util.Map;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Countries;
+import org.atlasapi.media.entity.Country;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.itunes.ItunesAdapterHelper.ItunesRegion;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.Duration;
@@ -40,11 +41,11 @@ public class ItunesEpisodesFinder {
         this.helper = helper;
     }
     
-    public List<Episode> findEpisodes(String brandId, Map<Long, Maybe<Series>> seriesIdToSeries) {
+    public List<Episode> findEpisodes(String brandId, ItunesRegion region, Map<Long, Maybe<Series>> seriesIdToSeries) {
         List<Episode> episodes = Lists.newArrayList();
         
         for(Long seriesId : seriesIdToSeries.keySet()) {
-            String episodesSearchUri = ItunesAdapterHelper.LOOKUP_URL_BASE + "&id=" + seriesId + "&entity=tvEpisode";
+            String episodesSearchUri = ItunesAdapterHelper.LOOKUP_URL_BASE + region.getSearchArgument() + "&id=" + seriesId + "&entity=tvEpisode";
             try {
                 String contents = client.getContentsOf(episodesSearchUri);
                 ObjectMapper mapper = new ObjectMapper();
@@ -53,7 +54,7 @@ public class ItunesEpisodesFinder {
                 
                 for (JsonNode episodeNode : resultsNode) {
                     if (isEpisodeNode(episodeNode)) {
-                        Episode episode = extractEpisode(episodeNode);
+                        Episode episode = extractEpisode(episodeNode, region.getCountry());
                         
                         if (episode != null) {
                             episodes.add(episode);
@@ -78,7 +79,7 @@ public class ItunesEpisodesFinder {
         return episodes;
     }
     
-    private Episode extractEpisode(JsonNode episodeNode) {
+    private Episode extractEpisode(JsonNode episodeNode, Country availableCountry) {
         try {
             String episodeUri = episodeNode.path("trackViewUrl").getTextValue();
             long episodeId = episodeNode.path("trackId").getNumberValue().longValue();
@@ -106,12 +107,12 @@ public class ItunesEpisodesFinder {
             Encoding encoding = new Encoding();
             
             Policy policy = new Policy();
-            policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
+            policy.setAvailableCountries(ImmutableSet.of(availableCountry));
             if (priceNode != null && priceNode.getNumberValue().doubleValue() > 0) {
                 double amount = priceNode.getNumberValue().doubleValue();
                 String currencyCode = episodeNode.path("currency").getTextValue();
                 policy.setPrice(new Price(Currency.getInstance(currencyCode), amount));
-                policy.setRevenueContract(RevenueContract.PAY_TO_RENT);
+                policy.setRevenueContract(RevenueContract.PAY_TO_BUY);
             }
             else {
                 policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
