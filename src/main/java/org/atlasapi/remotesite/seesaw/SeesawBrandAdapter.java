@@ -4,13 +4,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
@@ -25,7 +24,6 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
     private final Pattern seriesLinkPattern = Pattern.compile("\\?/player.episodelist:.*/([0-9]+)"); //?/player.episodelist:updateepisodesevent/28458
     private SimpleHttpClient httpClient;
     private SiteSpecificAdapter<Series> seriesAdapter;
-    private static final Log LOG = LogFactory.getLog(SeesawBrandAdapter.class);
     
     public SeesawBrandAdapter() {
         this(HttpClients.screenScrapingClient());
@@ -42,8 +40,7 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
         try {
             content = httpClient.getContentsOf(uri);
         } catch (HttpException e) {
-            LOG.warn("Error retrieving seesaw brands: " + uri + " with message: " + e.getMessage() + " with cause: " + e.getCause().getMessage());
-            return null;
+            throw new FetchException("Error retrieving seesaw brands: " + uri, e);
         }
 
         if (content != null) {
