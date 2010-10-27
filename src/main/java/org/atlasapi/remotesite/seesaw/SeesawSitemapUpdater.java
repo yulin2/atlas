@@ -43,6 +43,8 @@ public class SeesawSitemapUpdater implements Runnable {
                         if (log.isInfoEnabled()) {
                             log.info("No matching adapter for: "+url);
                         }
+                    } catch (Exception e) {
+                        log.warn("Unable to fetch "+url+" with the error: "+e.getMessage(), e);
                     }
                 }
             } catch (Exception e) {
