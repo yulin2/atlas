@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -67,35 +68,35 @@ public class ItemAvailabilityUpdaterTest extends TestCase {
 	}
 
 	public void testRun() {
-		clock.jumpTo(new DateTime(5L));
+		clock.jumpTo(new DateTime(5L, DateTimeZones.UTC));
 		updater.run();
 		
 		List<Item> items = getItems();
 		assertThat(items.size(), is(equalTo(1)));
 		assertThat(items.get(0).isAvailable(), is(false));
 		
-		clock.jumpTo(new DateTime(15L));
+		clock.jumpTo(new DateTime(15L, DateTimeZones.UTC));
 		updater.run();
 		
 		items = getItems();
 		assertThat(items.size(), is(equalTo(1)));
 		assertThat(items.get(0).isAvailable(), is(true));
 		
-		clock.jumpTo(new DateTime(25L));
+		clock.jumpTo(new DateTime(25L, DateTimeZones.UTC));
 		updater.run();
 		
 		items = getItems();
 		assertThat(items.size(), is(equalTo(1)));
 		assertThat(items.get(0).isAvailable(), is(false));
 		
-		clock.jumpTo(new DateTime(15L));
+		clock.jumpTo(new DateTime(15L, DateTimeZones.UTC));
 		updater.run();
 		
 		items = getItems();
 		assertThat(items.size(), is(equalTo(1)));
 		assertThat(items.get(0).isAvailable(), is(true));
 		
-		clock.jumpTo(new DateTime(5L));
+		clock.jumpTo(new DateTime(5L, DateTimeZones.UTC));
 		updater.run();
 		
 		items = getItems();
