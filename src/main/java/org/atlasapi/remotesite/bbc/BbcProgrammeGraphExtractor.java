@@ -33,11 +33,14 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.SystemClock;
 
 public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgrammeSource, Item> {
 
@@ -46,14 +49,17 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
     private final BbcSeriesNumberResolver seriesResolver;
     private final BbcProgrammesPolicyClient policyClient;
+    
+	private final Clock clock;
 
-    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient) {
+    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, Clock clock) {
         this.seriesResolver = seriesResolver;
         this.policyClient = policyClient;
+		this.clock = clock;
     }
 
     public BbcProgrammeGraphExtractor() {
-        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient());
+        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(), new SystemClock());
     }
 
     public Item extract(BbcProgrammeSource source) {
@@ -95,11 +101,15 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             location.setPolicy(policy.requireValue());
         }
 
-        location.setAvailable(policy.hasValue());
+        location.setAvailable(policy.hasValue() && availableNow(policy.requireValue()));
         return location;
     }
 
-    private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
+    private boolean availableNow(Policy policy) {
+		return new Interval(policy.getAvailabilityStart(), policy.getAvailabilityEnd()).contains(clock.now());
+	}
+
+	private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
         Version version = new Version();
         if (slashProgrammesVersion != null) {
             if (slashProgrammesVersion.broadcastSlots() != null) {
@@ -162,7 +172,9 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         if (slashProgrammesEpisode != null) {
             item.setDescription(slashProgrammesEpisode.description());
             item.setGenres(new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
-            item.setContentType(BbcMasterbrandContentTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull());
+            if (slashProgrammesEpisode.getMasterbrand() != null) {
+            	item.setContentType(BbcMasterbrandContentTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull());
+            }
         }
 
         if (item instanceof Episode) {
