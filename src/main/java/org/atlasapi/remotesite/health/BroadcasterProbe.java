@@ -7,7 +7,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
+import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
@@ -25,11 +25,11 @@ public class BroadcasterProbe implements HealthProbe {
 	private final Duration maxStaleness = Duration.standardHours(30);
 	
 	private final Publisher publisher;
-	private final MongoRoughSearch contentStore;
+	private final MongoDbBackedContentStore contentStore;
 	private final Iterable<String> uris;
 	
 	
-	public BroadcasterProbe(Publisher publisher, Iterable<String> uris, MongoRoughSearch contentStore) {
+	public BroadcasterProbe(Publisher publisher, Iterable<String> uris, MongoDbBackedContentStore contentStore) {
 		this.publisher = publisher;
 		this.uris = uris;
 		this.contentStore = contentStore;

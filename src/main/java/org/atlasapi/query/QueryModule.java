@@ -19,6 +19,7 @@ import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ContentListener;
 import org.atlasapi.persistence.content.QueueingContentListener;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
+import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.AToZUriSource;
@@ -44,16 +45,17 @@ import com.metabroadcast.common.webapp.health.HealthProbe;
 public class QueryModule {
 
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
-	private @Autowired MongoRoughSearch contentStore;
+	private @Autowired MongoRoughSearch roughSearch;
+	private @Autowired MongoDbBackedContentStore store;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
-		return new UniqueContentForUriQueryExecutor(new MongoDBQueryExecutor(contentStore));
+		return new UniqueContentForUriQueryExecutor(new MongoDBQueryExecutor(roughSearch));
 	}
 	
 	public @Bean HealthProbe c4Probe() {
-		return new BroadcasterProbe(Publisher.C4, new AToZUriSource("http://www.channel4.com/programmes/atoz/", "", true), contentStore);
+		return new BroadcasterProbe(Publisher.C4, new AToZUriSource("http://www.channel4.com/programmes/atoz/", "", true), store);
 	}
 	
 	public @Bean HealthProbe bbcProbe() {
@@ -68,11 +70,11 @@ public class QueryModule {
 				"http://www.bbc.co.uk/programmes/b0087g39", //Helicopter Heroes
 				"http://www.bbc.co.uk/programmes/b006mk1s", //Mastermind
 				"http://www.bbc.co.uk/programmes/b006wknd" //Rob da Bank, yeh...
-		), contentStore);
+		), store);
 	}
 
 	@Bean KnownTypeQueryExecutor mongoDbQueryExcutorThatFiltersUriQueries() {
-		MongoDBQueryExecutor executor = new MongoDBQueryExecutor(contentStore);
+		MongoDBQueryExecutor executor = new MongoDBQueryExecutor(roughSearch);
 		executor.setFilterUriQueries(true);
 		return executor;
 	}
