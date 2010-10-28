@@ -36,6 +36,7 @@ import org.atlasapi.remotesite.ictomorrow.ICTomorrowModule;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
+import org.atlasapi.remotesite.msnvideo.MsnVideoModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
@@ -54,7 +55,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HboModule.class, ItunesModule.class})
+@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
@@ -65,6 +66,7 @@ public class RemoteSiteModule {
 	private @Autowired BbcModule bbcModule; 
 	private @Autowired ItvModule itvModule;
 	private @Autowired ItunesModule itunesModule;
+	private @Autowired MsnVideoModule msnVideoModule;
 	
 	public @Bean SimpleScheduler scheduler() {
 	    return new SimpleScheduler();
@@ -92,6 +94,7 @@ public class RemoteSiteModule {
 		 adapters.addAll(archiveOrgModule.adapters());
 		 adapters.addAll(hboModule.adapters());
 		 adapters.addAll(itunesModule.adapters());
+		 adapters.addAll(msnVideoModule.adapters());
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
