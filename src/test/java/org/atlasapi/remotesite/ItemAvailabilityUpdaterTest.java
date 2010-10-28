@@ -44,8 +44,8 @@ public class ItemAvailabilityUpdaterTest extends TestCase {
 		super.setUp();
 		
 		Policy p = new Policy();
-		p.setAvailabilityStart(new DateTime(10L));
-		p.setAvailabilityEnd(new DateTime(20L));
+		p.setAvailabilityStart(new DateTime(10L, DateTimeZones.UTC));
+		p.setAvailabilityEnd(new DateTime(20L, DateTimeZones.UTC));
 		
 		Location l = new Location();
 		l.setPolicy(p);
