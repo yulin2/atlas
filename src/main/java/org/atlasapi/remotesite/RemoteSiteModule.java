@@ -16,6 +16,8 @@ package org.atlasapi.remotesite;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -44,12 +46,15 @@ import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
@@ -65,9 +70,20 @@ public class RemoteSiteModule {
 	private @Autowired BbcModule bbcModule; 
 	private @Autowired ItvModule itvModule;
 	private @Autowired ItunesModule itunesModule;
+
+	private @Autowired DatabasedMongo mongo;
 	
 	public @Bean SimpleScheduler scheduler() {
 	    return new SimpleScheduler();
+	}
+	
+	@PostConstruct 
+	public void scheduleAvailabilityUpdater() {
+		scheduler().schedule(itemAvailabilityUpdater(), RepetitionRules.atInterval(new Duration(5*60*1000L)));
+	}
+	
+	public @Bean Runnable itemAvailabilityUpdater() {
+		return new ItemAvailabilityUpdater(mongo, log);
 	}
 	
 	public @Bean ManualTaskTrigger manualTaskTrigger() {
