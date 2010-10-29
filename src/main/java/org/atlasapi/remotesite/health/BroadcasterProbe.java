@@ -1,10 +1,5 @@
 package org.atlasapi.remotesite.health;
 
-import java.util.List;
-
-import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.content.criteria.attribute.Attributes;
-import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
@@ -12,8 +7,6 @@ import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.webapp.health.HealthProbe;
@@ -50,11 +43,7 @@ public class BroadcasterProbe implements HealthProbe {
 	}
 
 	private Playlist queryForPlaylist(String letter) {
-		 List<Playlist> playlists = contentStore.dehydratedPlaylistsMatching(new ContentQuery(Attributes.PLAYLIST_URI.createQuery(Operators.EQUALS, ImmutableList.of(letter))));
-		 if (playlists.isEmpty()) {
-			 return null;
-		 }
-		 return Iterables.getOnlyElement(playlists);
+		 return (Playlist) contentStore.findByUri(letter);
 	}
 
 	@Override
