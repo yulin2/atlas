@@ -8,6 +8,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
@@ -60,8 +61,11 @@ public class ItemAvailabilityUpdaterTest extends TestCase {
 		Version v = new Version();
 		v.addManifestedAs(e);
 		
-		Item i = new Item("testUri", "testCurie", Publisher.BBC);
+		Item i = new Item("testUri", "testCurie", Publisher.C4);
 		i.addVersion(v);
+		
+		Clip c = new Clip("clipUri", "clipCurie", Publisher.C4);
+		i.addClip(c);
 		
 		itemsColl.insert(translator.toDBObject(new BasicDBObject(), i));
 	}
