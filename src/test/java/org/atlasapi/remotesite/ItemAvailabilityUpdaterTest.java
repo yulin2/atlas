@@ -16,7 +16,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.media.entity.ItemTranslator;
-import org.atlasapi.remotesite.ItemAvailabilityUpdater;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
@@ -32,16 +31,20 @@ import com.mongodb.DBObject;
 
 public class ItemAvailabilityUpdaterTest extends TestCase {
 	
-	DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
-	DBCollection itemsColl = mongo.collection("items");
-	
-	TimeMachine clock = new TimeMachine(); 
-	ItemAvailabilityUpdater updater = new ItemAvailabilityUpdater(mongo, new NullAdapterLog(), clock);
-	
-	ItemTranslator translator = new ItemTranslator();
+	private final TimeMachine clock = new TimeMachine(); 
+	private final ItemTranslator translator = new ItemTranslator();
 
+	private DBCollection itemsColl;
+	private ItemAvailabilityUpdater updater;
+
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
+		
+		itemsColl = mongo.collection("items");
+		updater = new ItemAvailabilityUpdater(mongo, new NullAdapterLog(), clock);
 		
 		Policy p = new Policy();
 		p.setAvailabilityStart(new DateTime(10L, DateTimeZones.UTC));
@@ -61,10 +64,6 @@ public class ItemAvailabilityUpdaterTest extends TestCase {
 		i.addVersion(v);
 		
 		itemsColl.insert(translator.toDBObject(new BasicDBObject(), i));
-	}
-	
-	protected void tearDown() throws Exception {
-		itemsColl.remove(new BasicDBObject());
 	}
 
 	public void testRun() {
