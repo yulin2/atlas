@@ -40,6 +40,7 @@ import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.msnvideo.MsnVideoModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
+import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
@@ -60,7 +61,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class})
+@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class, PaModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
