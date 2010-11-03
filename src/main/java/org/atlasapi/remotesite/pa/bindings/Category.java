@@ -14,6 +14,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.google.common.base.Function;
+
 
 /**
  * 
@@ -79,4 +81,11 @@ public class Category {
         this.categoryCode = value;
     }
 
+    
+    public static Function<Category, String> TO_GENRE_URIS = new Function<Category, String>() {
+        @Override
+        public String apply(Category from) {
+            return "http://pressassociation.com/genres/" + from.getCategoryCode();
+        }
+    };
 }

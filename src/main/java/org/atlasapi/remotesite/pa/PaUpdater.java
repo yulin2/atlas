@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.pa;
 
 import java.io.File;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -28,12 +27,15 @@ import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.xml.sax.XMLReader;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaUpdater implements Runnable {
     
+    private static final String PA_BASE_URL = "http://pressassociation.com";
     private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
     private final ContentWriter contentWriter;
@@ -82,15 +84,15 @@ public class PaUpdater implements Runnable {
     
     private void processProgData(ProgData progData, ChannelData channelData) {
         try {
-            Brand brand = getBrand(progData);
-            Series series = getSeries(progData);
+            Maybe<Brand> brand = getBrand(progData);
+            Maybe<Series> series = getSeries(progData);
             Episode episode = getEpisode(progData, channelData);
             
-            if (series != null) {
-                series.addItem(episode);
+            if (series.hasValue()) {
+                series.requireValue().addItem(episode);
             }
-            if (brand != null) {
-                brand.addItem(episode);
+            if (brand.hasValue()) {
+                brand.requireValue().addItem(episode);
             }
             else {
                 contentWriter.createOrUpdateItem(episode);
@@ -101,20 +103,20 @@ public class PaUpdater implements Runnable {
         }
     }
     
-    private Brand getBrand(ProgData progData) {
+    private Maybe<Brand> getBrand(ProgData progData) {
         String brandId = progData.getSeriesId();
         if (brandId == null || brandId.trim().isEmpty()) {
-            return null;
+            return Maybe.nothing();
         }
         
         if (brandMap.containsKey(brandId)) {
-            return brandMap.get(brandId);
+            return Maybe.just(brandMap.get(brandId));
         }
         
-        Brand brand = new Brand("http://pressassociation.com/brands/" + brandId, "pa:b-" + brandId, Publisher.PA);
+        Brand brand = new Brand(PA_BASE_URL + "/brands/" + brandId, "pa:b-" + brandId, Publisher.PA);
         brand.setTitle(progData.getTitle());
         
-        brand.setGenres(genreMap.map(getCategoryUris(progData.getCategory())));
+        brand.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
         
         /* Pictures currently have no path
         List<Picture> pictures = progData.getPicture();
@@ -124,24 +126,24 @@ public class PaUpdater implements Runnable {
         
         brandMap.put(brandId, brand);
         
-        return brand;
+        return Maybe.just(brand);
     }
     
-    private Series getSeries(ProgData progData) {
+    private Maybe<Series> getSeries(ProgData progData) {
         if (progData.getSeriesNumber() != null) {
-            Series series = new Series("http://pressassociation.com/series/" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber());
+            Series series = new Series(PA_BASE_URL + "/series/" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber());
             
             series.setPublisher(Publisher.PA);
             
-            series.setGenres(genreMap.map(getCategoryUris(progData.getCategory())));
+            series.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
             
-            return series;
+            return Maybe.just(series);
         }
-        return null;
+        return Maybe.nothing();
     }
     
     private Episode getEpisode(ProgData progData, ChannelData channelData) {
-        Episode episode  = new Episode("http://pressassociation.com/episodes/" + progData.getProgId(), "pa:e-" + progData.getProgId(), Publisher.PA);
+        Episode episode  = new Episode(PA_BASE_URL + "episodes/" + progData.getProgId(), "pa:e-" + progData.getProgId(), Publisher.PA);
         if (progData.getEpisodeTitle() != null) {
             episode.setTitle(progData.getEpisodeTitle());
         }
@@ -169,7 +171,7 @@ public class PaUpdater implements Runnable {
             }
         }
         
-        episode.setGenres(genreMap.map(getCategoryUris(progData.getCategory())));
+        episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
         //episode.setImage(image);
         //episode.setThumbnail(thumbnail);
         
@@ -191,15 +193,4 @@ public class PaUpdater implements Runnable {
         
         return episode;
     }
-    
-    private Set<String> getCategoryUris(Iterable<Category> categories) {
-        Set<String> uris = Sets.newHashSet();
-        
-        for (Category category : categories) {
-            uris.add("http://pressassociation.com/genres/" + category.getCategoryCode());
-        }
-        
-        return uris;
-    }
-
 }
