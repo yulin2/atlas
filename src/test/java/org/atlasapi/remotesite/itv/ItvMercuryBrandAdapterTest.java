@@ -15,12 +15,12 @@ public class ItvMercuryBrandAdapterTest extends TestCase {
     private final SiteSpecificAdapter<Brand> adapter = new ItvMercuryBrandAdapter();
     
     public void testShouldGetBrand() throws Exception {
-        String uri = "http://www.itv.com/itvplayer/video/?Filter=...Do%20the%20Funniest%20Things";
+        String uri = "http://www.itv.com/itvplayer/video/?Filter=Emmerdale";
         Brand brand = adapter.fetch(uri);
         assertNotNull(brand);
         
         assertEquals(uri, brand.getCanonicalUri());
-        assertEquals("itv:...Do%20the%20Funniest%20Things", brand.getCurie());
+        assertEquals("itv:Emmerdale", brand.getCurie());
         assertFalse(brand.getGenres().isEmpty());
         assertNotNull(brand.getTitle());
         assertNotNull(brand.getDescription());
