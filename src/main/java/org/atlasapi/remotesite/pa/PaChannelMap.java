@@ -2,8 +2,9 @@ package org.atlasapi.remotesite.pa;
 
 import java.util.Map;
 
+import org.atlasapi.media.entity.Channel;
+
 import com.google.common.collect.Maps;
-import com.metabroadcast.common.social.model.Channel;
 
 
 public class PaChannelMap {
