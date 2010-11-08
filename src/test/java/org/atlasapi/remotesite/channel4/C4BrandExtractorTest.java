@@ -100,7 +100,7 @@ public class C4BrandExtractorTest extends TestCase {
 	                    assertEquals(new DateTime("2010-08-11T14:06:33.341Z", DateTimeZones.UTC), broadcast.getLastUpdated());
 	                    found = true;
 	                } else {
-	                    assertEquals(new DateTime("2010-04-27T09:49:40.803Z", DateTimeZones.UTC), broadcast.getLastUpdated());
+	                    assertEquals(new DateTime("2010-11-03T05:57:50.175Z", DateTimeZones.UTC), broadcast.getLastUpdated());
 	                    assertTrue(broadcast.getAliases().isEmpty());
 	                }
 	            }
@@ -138,7 +138,7 @@ public class C4BrandExtractorTest extends TestCase {
                         assertFalse(broadcast.isActivelyPublished());
                         foundOld = true;
                     } else {
-                        assertEquals(new DateTime("2010-04-27T09:49:40.803Z", DateTimeZones.UTC), broadcast.getLastUpdated());
+                        assertEquals(new DateTime("2010-11-03T05:57:50.175Z", DateTimeZones.UTC), broadcast.getLastUpdated());
                         assertTrue(broadcast.getAliases().isEmpty());
                     }
                 }
