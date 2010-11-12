@@ -30,10 +30,7 @@ import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.hbo.HboModule;
-import org.atlasapi.remotesite.hulu.HuluAllBrandsAdapter;
-import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
-import org.atlasapi.remotesite.hulu.HuluItemAdapter;
-import org.atlasapi.remotesite.hulu.HuluRssAdapter;
+import org.atlasapi.remotesite.hulu.HuluModule;
 import org.atlasapi.remotesite.ictomorrow.ICTomorrowModule;
 import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itunes.ItunesModule;
@@ -61,7 +58,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class, PaModule.class})
+@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HuluModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class, PaModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
@@ -73,6 +70,7 @@ public class RemoteSiteModule {
 	private @Autowired ItvModule itvModule;
 	private @Autowired ItunesModule itunesModule;
 	private @Autowired MsnVideoModule msnVideoModule;
+	private @Autowired HuluModule huluModule;
 
 	private @Autowired DatabasedMongo mongo;
 	
@@ -112,6 +110,7 @@ public class RemoteSiteModule {
 		 adapters.addAll(hboModule.adapters());
 		 adapters.addAll(itunesModule.adapters());
 		 adapters.addAll(msnVideoModule.adapters());
+		 adapters.addAll(huluModule.adapters());
 		 
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
@@ -119,11 +118,6 @@ public class RemoteSiteModule {
 
 		 adapters.add(new BbcPodcastAdapter());
 		 
-		 adapters.add(huluItemAdapter());
-		 adapters.add(huluBrandAdapter());
-		 adapters.add(huluAllBrandsAdapter());
-		 
-		 adapters.add(new HuluRssAdapter());
 		 adapters.add(new VimeoAdapter());
 		 
 		 OembedXmlAdapter flickrAdapter = new OembedXmlAdapter();
@@ -148,24 +142,5 @@ public class RemoteSiteModule {
 	
 	public @Bean ContentWriters contentWriters() {
 		return new ContentWriters();
-	}
-	
-	public @Bean HuluItemAdapter huluItemAdapter() {
-	    HuluItemAdapter huluItemAdapter = new HuluItemAdapter();
-	    huluItemAdapter.setContentStore(contentWriters());
-        huluItemAdapter.setBrandAdapter(huluBrandAdapter());
-        return huluItemAdapter;
-	}
-	
-	public @Bean HuluBrandAdapter huluBrandAdapter() {
-	    HuluBrandAdapter huluBrandAdapter = new HuluBrandAdapter();
-        huluBrandAdapter.setEpisodeAdapter(new HuluItemAdapter());
-        return huluBrandAdapter;
-	}
-	
-	public @Bean HuluAllBrandsAdapter huluAllBrandsAdapter() {
-	    HuluAllBrandsAdapter allBrands = new HuluAllBrandsAdapter(huluBrandAdapter());
-        allBrands.setContentStore(contentWriters());
-        return allBrands;
 	}
 }

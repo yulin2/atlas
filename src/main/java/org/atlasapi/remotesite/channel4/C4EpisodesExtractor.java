@@ -42,7 +42,6 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.joda.time.LocalDate;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -63,7 +62,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	public static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
 	public static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
 
-	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(\\d{4}-\\d{2}-\\d{2}); end=(\\d{4}-\\d{2}-\\d{2}); scheme=W3C-DTF");
+	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
 	public static Map<String, String> CHANNEL_LOOKUP = channelLookup();
 	private final AdapterLog log;
@@ -270,16 +269,17 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		
 		if (availability != null) {
 			Matcher matcher = AVAILABILTY_RANGE_PATTERN.matcher(availability);
-			if (matcher.matches()) {
-				Policy policy = new Policy()
-					.withAvailabilityStart(new DateTime(matcher.group(1)))
-					.withAvailabilityEnd(new LocalDate(matcher.group(2)).plusDays(1).toDateTimeAtStartOfDay());
-					
-				if (availableCountries != null) {
-					policy.setAvailableCountries(availableCountries);
-				}
-				location.setPolicy(policy);
+			if (!matcher.matches()) {
+				throw new IllegalStateException("Availability range format not recognised, was " + availability);
 			}
+			Policy policy = new Policy()
+				.withAvailabilityStart(new DateTime(matcher.group(1)))
+				.withAvailabilityEnd(new DateTime(matcher.group(2)));
+				
+			if (availableCountries != null) {
+				policy.setAvailableCountries(availableCountries);
+			}
+			location.setPolicy(policy);
 		}
 		return location;
 	}
