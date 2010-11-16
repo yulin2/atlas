@@ -147,3 +147,42 @@ $("#app-ips li span:last-child").live('click', function(){
 		}
 	});
 });
+
+var updatePrecedence = function() {
+	var precedenceCsv = "";
+	$("#app-publishers").find("li").each(function(i) {
+		if (i > 0) {
+			 precedenceCsv = precedenceCsv + ",";
+		}
+		precedenceCsv = precedenceCsv + $(this).attr('publisher');
+	});
+	var url = "/admin/applications/" + $("#app-publishers").closest('ul').attr("data-app") + "/precedence";
+	$.ajax({
+        type: "post",
+        url: url,
+        data: ({'precedence': precedenceCsv}),
+        error:function(textStatus) {
+            console.log("failure")
+        }
+    });
+}
+
+$("#enable-precedence").live('click', function(){
+   updatePrecedence();
+   return false;
+});
+
+$("#app-publishers a.up").live('click', function() {
+    var $row = $(this).closest('li'); 
+    $row.prev().before($row); 
+    updatePrecedence();  
+    return false;
+});
+
+$("#app-publishers a.down").live('click', function() {
+    var $row = $(this).closest('li'); 
+    $row.next().after($row)
+    updatePrecedence();  
+    return false;
+});
+

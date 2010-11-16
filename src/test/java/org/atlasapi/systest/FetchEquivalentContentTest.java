@@ -26,7 +26,6 @@ import org.atlasapi.AtlasFetchModule;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.equiv.EquivModule;
-import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
@@ -169,12 +168,9 @@ public class FetchEquivalentContentTest extends TestCase {
 	public static class DummyApplicationFetcher implements ApplicationConfigurationFetcher {
 
 		@Override
-		public Maybe<ApplicationConfiguration> configurationFor(
-				HttpServletRequest request) {
-			ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration().copyWithIncludedPublishers(ImmutableSet.copyOf(Publisher.values()));
+		public Maybe<ApplicationConfiguration> configurationFor(HttpServletRequest request) {
+			ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(ImmutableSet.copyOf(Publisher.values()));
 			return Maybe.just(applicationConfiguration);
 		}
-		
-		
 	}
 }

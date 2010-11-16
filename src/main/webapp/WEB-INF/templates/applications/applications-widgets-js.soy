@@ -23,13 +23,24 @@
 </form>
 <h3>Publishers</h3>
 <ul id="app-publishers" class="mod" data-app="{$application.slug}">
+
+{if not $application.configuration.precedence}
+    <p>Publisher precedence not enabled, <a id="enable-precedence" href="#enable" onclick="$('.precedenceControl').css({lb}'visibility': 'visible'{rb}); return false;">enable</a></p>
+{/if}
+
 {foreach $publisher in $application.configuration.publishers}
-	<li>
-		<label>
+	<li publisher="{$publisher.key}">
+		<label style="width: 150px; float: left;">
 			<input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}>
 			{$publisher.title}
 		</label>
+		<p class="precedenceControl" style="{if not $application.configuration.precedence}visibility: hidden; {/if}"> 
+		  <a href="#up" class="up">up</a> <a href="#down" class="down" onclick="">down</a>
+		</p>
+		<div style="clear: both;"/>
 	</li>
 {/foreach}
 </ul>
+
+
 {/template}

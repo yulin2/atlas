@@ -45,7 +45,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      * Result: C4 item (no versions)
      */
     public void testItemWithNoVersionsIsNotFiltered() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
@@ -77,7 +77,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      * Result: C4 item with only C4 version
      */
 	public void testOnlyVersionsWithConfiguredProvidersPassFilter() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
@@ -115,7 +115,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      * Result: One item
      */
 	public void testItemPassesFilterWhereAllVersionsFailFilterWhenQueryDoesntSpecifyVersionOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
@@ -148,7 +148,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
      * Result: No items
      */
 	public void testItemFailsFilterWhereAllVersionsFailFilterWhenQuerySpecifiesVersionOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
@@ -176,7 +176,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	
     public void testBrandWithNoItemsIsNotFiltered() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Brand ubC4 = new Brand("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -197,7 +197,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     }
     
     public void testBrandWithBadPublisherIsFiltered() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC));
 		
 		Brand ubC4 = new Brand("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -221,7 +221,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     }
     
 	public void testOnlyItemsWithConfiguredPublisherPassFilter() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyC4 = new Episode("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
@@ -251,7 +251,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testBrandPassesFilterWhereAllItemsFailFilterWhenQueryDoesntSpecifyItemOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
@@ -281,7 +281,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testBrandFailsFilterWhereAllItemsFailFilterWhenQuerySpecifiesItemOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
@@ -308,7 +308,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testBrandPassesFilterWhereAllItemsFailFilterWhenQueryDoesntSpecifyVersionOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.C4);
@@ -343,7 +343,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testBrandFailsFilterWhereAllItemsFailFilterWhenQueryDoesSpecifyVersionOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.C4);
@@ -380,7 +380,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	
 	
     public void testPlaylistWithNoItemsIsNotFiltered() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -402,7 +402,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     }
     
     public void testPlaylistWithBadPublisherIsFiltered() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.BBC));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -426,7 +426,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     }
     
 	public void testOnlyBrandsWithConfiguredPublisherPassFilter() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -455,7 +455,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testOnlySubPlaylistsWithConfiguredPublisherPassFilter() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist ubC4 = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -490,7 +490,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testPlaylistPassesFilterWhereAllSubPlaylistItemsFailFilterWhenQueryDoesntSpecifyItemOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist c4playlist = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -533,7 +533,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testPlaylistFailsFilterWhereAllSubPlaylistsFailFilterWhenQueryDoesSpecifyBrandOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist c4playlist = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
@@ -573,7 +573,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testPlaylistFailsFilterWhereAllSubPlaylistItemsFailFilterWhenQueryDoesSpecifyItemOrBelow() {
-		ApplicationConfiguration config = new ApplicationConfiguration();
+		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
 		
 		Playlist c4playlist = new Playlist("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
