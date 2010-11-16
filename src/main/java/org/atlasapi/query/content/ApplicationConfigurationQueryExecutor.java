@@ -18,7 +18,6 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 public class ApplicationConfigurationQueryExecutor implements
@@ -58,26 +57,28 @@ public class ApplicationConfigurationQueryExecutor implements
 	private ContentQuery queryForBrands(ContentQuery query) {
 		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
 			mergeAttribute(Attributes.VERSION_PROVIDER, query),
-			mergeAttribute(Attributes.ITEM_PUBLISHER,query)
+			mergeAttribute(Attributes.ITEM_PUBLISHER,query),
+			mergeAttribute(Attributes.BRAND_PUBLISHER,query)
 		);
 		
+		query.setSoftConstraints(softs);
+
 		if(!QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
-			query.setSoftConstraints(softs);
 			Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
 				mergeAttribute(Attributes.BRAND_PUBLISHER, query)
 			);
 			return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
-		} else {
-			query.setSoftConstraints(Iterables.concat(softs, ImmutableSet.<AtomicQuery>of(mergeAttribute(Attributes.BRAND_PUBLISHER, query))));
-			return query;
-		}
+		} 
+		
+		return query;
 	}
 	
 	private ContentQuery queryForPlaylists(ContentQuery query) {
 		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
 			mergeAttribute(Attributes.VERSION_PROVIDER, query),
 			mergeAttribute(Attributes.ITEM_PUBLISHER,query),
-			mergeAttribute(Attributes.BRAND_PUBLISHER, query)
+			mergeAttribute(Attributes.BRAND_PUBLISHER, query),
+			mergeAttribute(Attributes.PLAYLIST_PUBLISHER, query)
 		);
 		
 		query.setSoftConstraints(softs);
