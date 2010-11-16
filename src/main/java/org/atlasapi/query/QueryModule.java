@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import org.atlasapi.equiv.query.BrandMergingQueryExecutor;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ContentListener;
@@ -51,7 +52,7 @@ public class QueryModule {
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
-		return new UniqueContentForUriQueryExecutor(new MongoDBQueryExecutor(roughSearch));
+		return new MongoDBQueryExecutor(roughSearch);
 	}
 	
 	public @Bean HealthProbe c4Probe() {
@@ -80,10 +81,13 @@ public class QueryModule {
 	}
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
+	    UriFetchingQueryExecutor uriFetching = new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()));
+		CurieResolvingQueryExecutor curieResolving = new CurieResolvingQueryExecutor(uriFetching);
+		BrandMergingQueryExecutor brandMerger = new BrandMergingQueryExecutor(curieResolving);
 	    if (Boolean.parseBoolean(applicationsEnabled)) {
-	        return new ApplicationConfigurationQueryExecutor(new CurieResolvingQueryExecutor(new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()))));
+	        return new ApplicationConfigurationQueryExecutor(brandMerger);
 	    } else {
-	        return new CurieResolvingQueryExecutor(new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher())));
+	        return brandMerger;
 	    }
 	}
 	
