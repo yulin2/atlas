@@ -1,7 +1,8 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
-import java.util.Map;
+import java.io.FilenameFilter;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -29,30 +30,46 @@ import org.xml.sax.XMLReader;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaUpdater implements Runnable {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
+    private static final FilenameFilter filenameFilter = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith("_tvdata.xml");
+        }
+    };
     private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
     private final ContentWriter contentWriter;
-    private final Map<String, Brand> brandMap = Maps.newHashMap();
+    private final Set<String> writtenBrands = Sets.newHashSet();
     private final AdapterLog log;
-    private final String filename;
+    private final String filesPath;
+    private boolean isRunning = false;
     
-    public PaUpdater(ContentWriter contentWriter, AdapterLog log, String filename) {
+    public PaUpdater(ContentWriter contentWriter, AdapterLog log, String filesPath) {
         this.contentWriter = contentWriter;
         this.log = log;
-        this.filename = filename;
+        this.filesPath = filesPath;
+    }
+    
+    public boolean isRunning() {
+        return isRunning;
     }
     
     @Override
     public void run() {
+        if (isRunning) {
+            throw new IllegalStateException("Already running");
+        }
+        
+        isRunning = true;
         try {
-            brandMap.clear();
+            writtenBrands.clear();
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
             Unmarshaller unmarshaller = context.createUnmarshaller();
             
@@ -71,14 +88,23 @@ public class PaUpdater implements Runnable {
             factory.setNamespaceAware(true);
             XMLReader reader = factory.newSAXParser().getXMLReader();
             reader.setContentHandler(unmarshaller.getUnmarshallerHandler());
-            reader.parse(new File(filename).toURI().toString());
             
-            for (Brand brand : brandMap.values()) {
-                contentWriter.createOrUpdatePlaylist(brand, true);
+            File folder = new File(filesPath);
+            if (folder.isDirectory()) {
+                for (File file : folder.listFiles(filenameFilter)) {
+                    reader.parse(file.toURI().toString());
+                }
+                writtenBrands.clear();
+            }
+            else {
+                throw new IllegalArgumentException("File specified was not a directory");
             }
         }
         catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withUri(filename));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withUri(filesPath));
+        }
+        finally {
+            isRunning = false;
         }
     }
     
@@ -92,7 +118,15 @@ public class PaUpdater implements Runnable {
                 series.requireValue().addItem(episode);
             }
             if (brand.hasValue()) {
-                brand.requireValue().addItem(episode);
+                if (writtenBrands.contains(getBrandIdFromCurie(brand.requireValue().getCurie()))) {
+                    episode.setBrand(brand.requireValue());
+                    contentWriter.createOrUpdateItem(episode);
+                }
+                else {
+                    brand.requireValue().addItem(episode);
+                    contentWriter.createOrUpdatePlaylist(brand.requireValue(), false);
+                    writtenBrands.add(getBrandIdFromCurie(brand.requireValue().getCurie()));
+                }
             }
             else {
                 contentWriter.createOrUpdateItem(episode);
@@ -103,14 +137,14 @@ public class PaUpdater implements Runnable {
         }
     }
     
+    private String getBrandIdFromCurie(String curie) {
+        return curie.substring("pa:b-".length());
+    }
+    
     private Maybe<Brand> getBrand(ProgData progData) {
         String brandId = progData.getSeriesId();
         if (brandId == null || brandId.trim().isEmpty()) {
             return Maybe.nothing();
-        }
-        
-        if (brandMap.containsKey(brandId)) {
-            return Maybe.just(brandMap.get(brandId));
         }
         
         Brand brand = new Brand(PA_BASE_URL + "/brands/" + brandId, "pa:b-" + brandId, Publisher.PA);
@@ -123,8 +157,6 @@ public class PaUpdater implements Runnable {
         for (Picture picture : pictures) {
             picture.getvalue();
         }*/
-        
-        brandMap.put(brandId, brand);
         
         return Maybe.just(brand);
     }
@@ -143,7 +175,7 @@ public class PaUpdater implements Runnable {
     }
     
     private Episode getEpisode(ProgData progData, ChannelData channelData) {
-        Episode episode  = new Episode(PA_BASE_URL + "episodes/" + progData.getProgId(), "pa:e-" + progData.getProgId(), Publisher.PA);
+        Episode episode  = new Episode(PA_BASE_URL + "/episodes/" + progData.getProgId(), "pa:e-" + progData.getProgId(), Publisher.PA);
         if (progData.getEpisodeTitle() != null) {
             episode.setTitle(progData.getEpisodeTitle());
         }

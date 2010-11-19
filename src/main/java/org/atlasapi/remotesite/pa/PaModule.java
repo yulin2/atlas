@@ -25,13 +25,13 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     
     @PostConstruct
     public void startBackgroundTasks() {
-        /*scheduler.schedule(paUpdater(), AT_NIGHT);
+        scheduler.schedule(paUpdater(), AT_NIGHT);
         log.record(new AdapterLogEntry(Severity.INFO)
             .withDescription("PA update scheduled task installed")
-            .withSource(PaUpdater.class));*/
+            .withSource(PaUpdater.class));
     } 
     
     public @Bean PaUpdater paUpdater() {
-        return new PaUpdater(contentStore, log, "/Users/ops/Downloads/PA-2910-tvdata/2910_tvdata.xml");
+        return new PaUpdater(contentStore, log, "/tmp/pa-data");
     }
 }
