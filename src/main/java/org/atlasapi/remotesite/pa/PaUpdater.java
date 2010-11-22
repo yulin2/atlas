@@ -199,6 +199,7 @@ public class PaUpdater implements Runnable {
             for (Billing billing : progData.getBillings().getBilling()) {
                 if (billing.getType().equals("synopsis")) {
                     episode.setDescription(billing.getvalue());
+                    break;
                 }
             }
         }
