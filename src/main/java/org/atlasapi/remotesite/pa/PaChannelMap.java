@@ -28,7 +28,7 @@ public class PaChannelMap {
         channelMap.put(18, Channel.BBC_ONE_WEST);
         channelMap.put(713, Channel.BBC_ONE_LONDON);
         
-        channelMap.put(51, Channel.BBC_TWO);
+        channelMap.put(52, Channel.BBC_TWO);
         channelMap.put(19, Channel.BBC_TWO_NORTHERN_IRELAND);
         channelMap.put(20, Channel.BBC_TWO_SCOTLAND);
         channelMap.put(21, Channel.BBC_TWO_WALES);

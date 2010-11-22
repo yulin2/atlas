@@ -11,11 +11,13 @@ import javax.xml.parsers.SAXParserFactory;
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -45,14 +47,16 @@ public class PaUpdater implements Runnable {
     };
     private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
-    private final ContentWriter contentWriter;
+    private final DefinitiveContentWriter contentWriter;
     private final Set<String> writtenBrands = Sets.newHashSet();
     private final AdapterLog log;
     private final String filesPath;
     private boolean isRunning = false;
+    private final ContentResolver contentResolver;
     
-    public PaUpdater(ContentWriter contentWriter, AdapterLog log, String filesPath) {
+    public PaUpdater(DefinitiveContentWriter contentWriter, ContentResolver contentResolver, AdapterLog log, String filesPath) {
         this.contentWriter = contentWriter;
+        this.contentResolver = contentResolver;
         this.log = log;
         this.filesPath = filesPath;
     }
@@ -112,24 +116,26 @@ public class PaUpdater implements Runnable {
         try {
             Maybe<Brand> brand = getBrand(progData);
             Maybe<Series> series = getSeries(progData);
-            Episode episode = getEpisode(progData, channelData);
+            Maybe<Episode> episode = getEpisode(progData, channelData);
             
-            if (series.hasValue()) {
-                series.requireValue().addItem(episode);
-            }
-            if (brand.hasValue()) {
-                if (writtenBrands.contains(getBrandIdFromCurie(brand.requireValue().getCurie()))) {
-                    episode.setBrand(brand.requireValue());
-                    contentWriter.createOrUpdateItem(episode);
+            if (episode.hasValue()) {
+                if (series.hasValue()) {
+                    series.requireValue().addItem(episode.requireValue());
+                }
+                if (brand.hasValue()) {
+                    if (writtenBrands.contains(getBrandIdFromCurie(brand.requireValue().getCurie()))) {
+                        episode.requireValue().setBrand(brand.requireValue());
+                        contentWriter.createOrUpdateDefinitiveItem(episode.requireValue());
+                    }
+                    else {
+                        brand.requireValue().addItem(episode.requireValue());
+                        contentWriter.createOrUpdateDefinitivePlaylist(brand.requireValue());
+                        writtenBrands.add(getBrandIdFromCurie(brand.requireValue().getCurie()));
+                    }
                 }
                 else {
-                    brand.requireValue().addItem(episode);
-                    contentWriter.createOrUpdatePlaylist(brand.requireValue(), false);
-                    writtenBrands.add(getBrandIdFromCurie(brand.requireValue().getCurie()));
+                    contentWriter.createOrUpdateDefinitiveItem(episode.requireValue());
                 }
-            }
-            else {
-                contentWriter.createOrUpdateItem(episode);
             }
         }
         catch (Exception e) {
@@ -174,8 +180,47 @@ public class PaUpdater implements Runnable {
         return Maybe.nothing();
     }
     
-    private Episode getEpisode(ProgData progData, ChannelData channelData) {
+    private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData) {
+        String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
+        if (channelUri == null) {
+            return Maybe.nothing();
+        }
+        
+        String episodeUri = PA_BASE_URL + "/episodes/" + progData.getProgId();
+        Content resolvedContent = contentResolver.findByUri(episodeUri);
+        Episode episode;
+        if (resolvedContent instanceof Episode) {
+            episode = (Episode) resolvedContent;
+        }
+        else {
+            episode = getBasicEpisode(progData);
+        }
+        
+        Version version = findBestVersion(episode.getVersions());
+        
+        Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
+        
+        String dateString = progData.getDate() + "-" + progData.getTime();
+        DateTime transmissionTime = DateTimeFormat.forPattern("dd/MM/yyyy-HH:mm").withZone(DateTimeZones.LONDON).parseDateTime(dateString);
+        Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration);
+        version.addBroadcast(broadcast);
+        
+        return Maybe.just(episode);
+    }
+    
+    private Version findBestVersion(Iterable<Version> versions) {
+        for (Version version: versions) {
+            if (version.getProvider() == Publisher.PA) {
+                return version;
+            }
+        }
+        
+        return versions.iterator().next();
+    }
+    
+    private Episode getBasicEpisode(ProgData progData) {
         Episode episode  = new Episode(PA_BASE_URL + "/episodes/" + progData.getProgId(), "pa:e-" + progData.getProgId(), Publisher.PA);
+        
         if (progData.getEpisodeTitle() != null) {
             episode.setTitle(progData.getEpisodeTitle());
         }
@@ -204,22 +249,16 @@ public class PaUpdater implements Runnable {
         }
         
         episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
+        
         //episode.setImage(image);
         //episode.setThumbnail(thumbnail);
         
         Version version = new Version();
         version.setProvider(Publisher.PA);
+        episode.addVersion(version);
         
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
         version.setDuration(duration);
-        
-        String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
-        if (channelUri != null) {
-            String dateString = progData.getDate() + "-" + progData.getTime();
-            DateTime transmissionTime = DateTimeFormat.forPattern("dd/MM/yyyy-HH:mm").withZone(DateTimeZones.LONDON).parseDateTime(dateString);
-            Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration);
-            version.addBroadcast(broadcast);
-        }
         
         episode.addVersion(version);
         

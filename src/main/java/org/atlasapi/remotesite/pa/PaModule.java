@@ -32,6 +32,6 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     } 
     
     public @Bean PaUpdater paUpdater() {
-        return new PaUpdater(contentStore, log, "/tmp/pa-data");
+        return new PaUpdater(contentStore, contentStore, log, "/tmp/pa-data");
     }
 }
