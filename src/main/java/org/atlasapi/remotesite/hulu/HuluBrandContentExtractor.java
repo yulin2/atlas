@@ -69,7 +69,7 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
                 String href = element.getAttributeValue("href");
 				String episodeUri = HuluFeed.canonicaliseEpisodeUri(href);
                 if (episodeUri == null) {
-                	throw new IllegalArgumentException("Cannot extract item uri from " + href);
+                	continue;
                 }
 				Episode episode = new Episode(episodeUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(episodeUri), Publisher.HULU);
                 brand.addItem(episode);
