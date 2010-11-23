@@ -92,7 +92,7 @@ public class PaUpdater implements Runnable {
             localFolder.mkdir();
         }
         if (!localFolder.isDirectory()) {
-            throw new IllegalArgumentException("Files path is not a directory");
+            throw new IllegalArgumentException("Files path is not a directory: "+localFilesPath);
         }
     }
     
