@@ -8,6 +8,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,6 +24,12 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     private @Autowired MongoDbBackedContentStore contentStore;
     private @Autowired AdapterLog log;
     
+    private @Value("${pa.ftp.username}") String ftpUsername;
+    private @Value("${pa.ftp.password}") String ftpPassword;
+    private @Value("${pa.ftp.host}") String ftpHost;
+    private @Value("${pa.ftp.path}") String ftpPath;
+    private @Value("${pa.filesPath}") String localFilesPath;
+    
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(paUpdater(), AT_NIGHT);
@@ -32,6 +39,6 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     } 
     
     public @Bean PaUpdater paUpdater() {
-        return new PaUpdater(contentStore, contentStore, log, "/tmp/pa-data");
+        return new PaUpdater(contentStore, contentStore, ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, log);
     }
 }

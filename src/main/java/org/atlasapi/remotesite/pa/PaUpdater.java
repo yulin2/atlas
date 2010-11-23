@@ -1,13 +1,19 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.Date;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPFileFilter;
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
@@ -30,6 +36,8 @@ import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.xml.sax.XMLReader;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -45,24 +53,114 @@ public class PaUpdater implements Runnable {
             return name.endsWith("_tvdata.xml");
         }
     };
+    
+    private static FTPFileFilter ftpFilenameFilter = new FTPFileFilter() {
+        @Override
+        public boolean accept(FTPFile file) {
+            return file.isFile() && !file.getName().endsWith(".md5");
+        }
+    };
+    
     private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
     private final DefinitiveContentWriter contentWriter;
     private final Set<String> writtenBrands = Sets.newHashSet();
     private final AdapterLog log;
-    private final String filesPath;
+    private final File localFolder;
     private boolean isRunning = false;
     private final ContentResolver contentResolver;
+    private final String ftpHost;
+    private final String ftpFilesPath;
+    private final String ftpUsername;
+    private final String ftpPassword;
     
-    public PaUpdater(DefinitiveContentWriter contentWriter, ContentResolver contentResolver, AdapterLog log, String filesPath) {
+    public PaUpdater(DefinitiveContentWriter contentWriter, ContentResolver contentResolver, String ftpHost, String ftpUsername, String ftpPassword, String ftpFilesPath, String localFilesPath, AdapterLog log) {
+        this.ftpUsername = ftpUsername;
+        this.ftpPassword = ftpPassword;
+        Preconditions.checkNotNull(contentWriter);
+        Preconditions.checkNotNull(contentResolver);
+        Preconditions.checkNotNull(log);
+        Preconditions.checkNotNull(localFilesPath);
+        
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
+        this.ftpHost = ftpHost;
+        this.ftpFilesPath = ftpFilesPath;
         this.log = log;
-        this.filesPath = filesPath;
+        this.localFolder = new File(localFilesPath);
+        if (!localFolder.exists()) {
+            localFolder.mkdir();
+        }
+        if (!localFolder.isDirectory()) {
+            throw new IllegalArgumentException("Files path is not a directory");
+        }
     }
     
     public boolean isRunning() {
         return isRunning;
+    }
+    
+    private void updateFilesFromFtpSite() throws IOException {
+        if (Strings.isNullOrEmpty(ftpHost) || Strings.isNullOrEmpty(ftpUsername) || Strings.isNullOrEmpty(ftpPassword) || Strings.isNullOrEmpty(ftpFilesPath)) {
+            log.record(new AdapterLogEntry(Severity.WARN).withSource(PaUpdater.class).withDescription("FTP details incomplete / missing, skipping FTP update"));
+            return;
+        }
+        
+        FTPClient client  = new FTPClient();
+        try {
+        client.connect(ftpHost);
+        client.login(ftpUsername, ftpPassword);
+        client.changeWorkingDirectory(ftpFilesPath);
+        FTPFile[] listFiles = client.listFiles(ftpFilesPath, ftpFilenameFilter);
+        
+        for (FTPFile file : listFiles) {
+            FileOutputStream fos = null;
+            try {
+                String name = file.getName();
+                
+                Maybe<File> existingFile = findExistingFile(name);
+                File fileToWrite;
+                if (existingFile.hasValue()) {
+                    Date date = new Date(existingFile.requireValue().lastModified());
+                    
+                    if (file.getSize() == existingFile.requireValue().length() && file.getTimestamp().getTime().before(date)) {
+                        continue;
+                    }
+                    
+                    fileToWrite = existingFile.requireValue();
+                }
+                else {
+                    fileToWrite = new File(localFolder, name);
+                }
+                
+                fos = new FileOutputStream(fileToWrite);
+                client.retrieveFile(name, fos);
+                fos.close();
+            }
+            catch (Exception e) {
+                if (fos != null) {
+                    fos.close();
+                }
+                log.record(new AdapterLogEntry(Severity.ERROR).withSource(PaUpdater.class).withCause(e).withDescription("Error copying file " + file.getName()));
+            }
+        }
+        }
+        catch (Exception e) {
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("Error when trying to copy files from FTP"));
+        }
+        finally {
+            client.disconnect();
+        }
+    }
+    
+    private Maybe<File> findExistingFile(String fileName) {
+        for (File file : localFolder.listFiles()) {
+            if (fileName.equals(file.getName())) {
+                return Maybe.just(file);
+            }
+        }
+        
+        return Maybe.nothing();
     }
     
     @Override
@@ -73,13 +171,19 @@ public class PaUpdater implements Runnable {
         
         isRunning = true;
         try {
+            updateFilesFromFtpSite();
+        }
+        catch (Exception e) {
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("Error when updating files from the PA FTP site").withSource(PaUpdater.class));
+        }
+        
+        try {
             writtenBrands.clear();
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
             Unmarshaller unmarshaller = context.createUnmarshaller();
             
             unmarshaller.setListener(new Unmarshaller.Listener() {
-                public void beforeUnmarshal(Object target, Object parent) {
-                }
+                public void beforeUnmarshal(Object target, Object parent) { }
     
                 public void afterUnmarshal(Object target, Object parent) {
                     if(target instanceof ProgData) {
@@ -93,19 +197,18 @@ public class PaUpdater implements Runnable {
             XMLReader reader = factory.newSAXParser().getXMLReader();
             reader.setContentHandler(unmarshaller.getUnmarshallerHandler());
             
-            File folder = new File(filesPath);
-            if (folder.isDirectory()) {
-                for (File file : folder.listFiles(filenameFilter)) {
+            for (File file : localFolder.listFiles(filenameFilter)) {
+                try {
                     reader.parse(file.toURI().toString());
                 }
-                writtenBrands.clear();
+                catch (Exception e) {
+                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("Error processing file " + file.toString()));
+                }
             }
-            else {
-                throw new IllegalArgumentException("File specified was not a directory");
-            }
+            writtenBrands.clear();
         }
         catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withUri(filesPath));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class));
         }
         finally {
             isRunning = false;

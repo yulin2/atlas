@@ -295,6 +295,11 @@
             <artifactId>freebase-java</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+        	<groupId>commons-net</groupId>
+        	<artifactId>commons-net</artifactId>
+        	<version>2.2</version>
+        </dependency>
     </dependencies>
     <properties>
         <atlas.version>${project.version}</atlas.version>
