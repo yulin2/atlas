@@ -110,6 +110,7 @@ public class PaUpdater implements Runnable {
         FTPClient client = new FTPClient();
         try {
             client.connect(ftpHost);
+            client.enterLocalPassiveMode();
             if (! client.login(ftpUsername, ftpPassword)) {
                 throw new Exception("Unable to connect to "+ftpHost+" with username: "+ftpUsername+" and password...");
             }
