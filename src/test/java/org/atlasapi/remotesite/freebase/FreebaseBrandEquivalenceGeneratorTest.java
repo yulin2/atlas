@@ -41,4 +41,18 @@ public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
         }
         System.out.println(equivs);
     }
+    
+    public void testShouldRetrieveWikipediaEquivForEastenders() {
+        Brand brand = new Brand("http://www.bbc.co.uk/programmes/b006m86d", "b006m86d", Publisher.BBC);
+        brand.setTitle("Eastenders");
+        
+        List<Equiv> equivs = generator.equivalent(brand);
+        assertNotNull(equivs);
+        assertFalse(equivs.isEmpty());
+        
+        for (Equiv equiv: equivs) {
+            assertEquals(brand.getCanonicalUri(), equiv.left());
+        }
+        System.out.println(equivs);
+    }
 }

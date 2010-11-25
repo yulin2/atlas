@@ -69,6 +69,7 @@ public class AtlasFetchModule {
 		private @Autowired RemoteSiteModule remote;
 		private @Autowired ReaderModule reader;
 	
+		@Primary
 		public @Bean ContentWriter contentWriter() {		
 			
 			ContentWriter writer = persistence.persistentWriter();

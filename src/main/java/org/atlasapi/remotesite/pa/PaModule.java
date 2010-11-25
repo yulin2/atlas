@@ -2,7 +2,8 @@ package org.atlasapi.remotesite.pa;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -13,15 +14,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 
 @Configuration
 public class PaModule {
 private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
-    private @Autowired MongoDbBackedContentStore contentStore;
+    private @Autowired DefinitiveContentWriter contentWriter;
+    private @Autowired ContentResolver contentResolver;
     private @Autowired AdapterLog log;
     
     private @Value("${pa.ftp.username}") String ftpUsername;
@@ -39,6 +41,6 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     } 
     
     public @Bean PaUpdater paUpdater() {
-        return new PaUpdater(contentStore, contentStore, ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, log);
+        return new PaUpdater(contentWriter, contentResolver, ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, log);
     }
 }
