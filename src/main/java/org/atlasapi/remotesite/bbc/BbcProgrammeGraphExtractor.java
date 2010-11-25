@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -30,6 +31,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.bbc.BbcProgrammeSource.ClipAndVersion;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
@@ -69,7 +71,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         SlashProgrammesRdf episode = source.episode();
 
 
-        Item item = item(episodeUri, episode, source.getSlashProgrammesUri());
+        Item item = item(episodeUri, episode);
 
         if (source.version() != null) {
         	Location location = htmlLinkLocation(episodeUri);
@@ -78,6 +80,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             Version version = version(source.version());
             version.addManifestedAs(encoding);
             item.addVersion(version);
+        }
+        
+        if (source.clips() != null) {
+            for (ClipAndVersion clipAndVersion: source.clips()) {
+                if (clipAndVersion.clip().clip() != null && clipAndVersion.clip().clip().uri() != null) {
+                    addClipToItem(clipAndVersion.clip(), clipAndVersion.version(), item);
+                }
+            }
         }
 
         return item;
@@ -118,7 +128,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         }
         return version;
     }
-
+	
     @VisibleForTesting
     static Set<Broadcast> broadcastsFrom(SlashProgrammesVersionRdf slashProgrammesVersion) {
 
@@ -149,8 +159,31 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         }
         return "http://www.bbc.co.uk" + broadcastOn;
     }
+    
+    private void addClipToItem(SlashProgrammesRdf clipWrapper, SlashProgrammesVersionRdf versionWrapper, Item item) {
+        String curie = BbcUriCanonicaliser.curieFor(clipWrapper.clip().uri());
+        Clip clip = new Clip(clipWrapper.clip().uri(), curie, Publisher.BBC);
+        item.addClip(clip);
+        
+        Maybe<Integer> seriesNumber = Maybe.nothing();
+        if (item instanceof Episode) {
+            seriesNumber = Maybe.fromPossibleNullValue(((Episode) item).getSeriesNumber());
+        }
+        
+        SlashProgrammesEpisode slashProgrammesClip = clipWrapper.clip();
+        populateItem(clip, slashProgrammesClip, seriesNumber);
+        
+        if (versionWrapper != null) {
+            Location location = htmlLinkLocation(clipWrapper.clip().uri());
+            Encoding encoding = new Encoding();
+            encoding.addAvailableAt(location);
+            Version version = version(versionWrapper);
+            version.addManifestedAs(encoding);
+            clip.addVersion(version);
+        }
+    }
 
-    private Item item(String episodeUri, SlashProgrammesRdf episode, String slashProgrammesUri) {
+    private Item item(String episodeUri, SlashProgrammesRdf episode) {
         String curie = BbcUriCanonicaliser.curieFor(episodeUri);
 
         SlashProgrammesContainerRef brand = episode.brand();
@@ -167,13 +200,19 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
         SlashProgrammesEpisode slashProgrammesEpisode = episode.episode();
         
+        populateItem(item, slashProgrammesEpisode, seriesNumber);
+
+        return item;
+    }
+    
+    private void populateItem(Item item, SlashProgrammesEpisode slashProgrammesEpisode, Maybe<Integer> seriesNumber) {
         item.setTitle(episodeTitle(slashProgrammesEpisode, seriesNumber));
 
         if (slashProgrammesEpisode != null) {
             item.setDescription(slashProgrammesEpisode.description());
             item.setGenres(new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
             if (slashProgrammesEpisode.getMasterbrand() != null) {
-            	item.setContentType(BbcMasterbrandContentTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull());
+                item.setContentType(BbcMasterbrandContentTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull());
             }
         }
 
@@ -187,17 +226,15 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             }
         }
 
-        Set<String> aliases = bbcAliasUrisFor(episodeUri);
+        Set<String> aliases = bbcAliasUrisFor(item.getCanonicalUri());
         if (!aliases.isEmpty()) {
             item.setAliases(aliases);
         }
 
         item.setIsLongForm(true);
 
-        item.setThumbnail(thumbnailUrlFrom(episodeUri));
-        item.setImage(imageUrlFrom(episodeUri));
-
-        return item;
+        item.setThumbnail(thumbnailUrlFrom(item.getCanonicalUri()));
+        item.setImage(imageUrlFrom(item.getCanonicalUri()));
     }
 
     private static final Pattern titleIsEpisodeAndNumber = Pattern.compile("^Episode \\d+$");

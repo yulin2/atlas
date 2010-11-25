@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,8 +25,11 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
+
+import com.google.common.collect.Sets;
 
 public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
 
@@ -39,13 +43,16 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
 
     private final Log oldLog = LogFactory.getLog(getClass());
 
+    private final BbcSlashProgrammesClipRdfClient clipClient;
+
     public BbcProgrammeAdapter(AdapterLog log) {
-        this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcProgrammeGraphExtractor(), log);
+        this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcSlashProgrammesClipRdfClient(), new BbcProgrammeGraphExtractor(), log);
     }
 
-    public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
+    public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, BbcSlashProgrammesClipRdfClient clipClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
         this.versionClient = versionClient;
         this.episodeClient = episodeClient;
+        this.clipClient = clipClient;
         this.itemExtractor = propertyExtractor;
         this.brandExtractor = new BbcBrandExtractor(this, log);
     }
@@ -66,7 +73,23 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
                 if (content.episode().versions() != null && !content.episode().versions().isEmpty()) {
                     version = readSlashProgrammesDataForVersion(content.episode().versions().get(0));
                 }
-                BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version);
+                
+                Set<SlashProgrammesClip> clipRefs = content.episode().clips();
+                Set<BbcProgrammeSource.ClipAndVersion> clips = Sets.newHashSet();
+                if (clipRefs != null && !clipRefs.isEmpty()) {
+                    for (SlashProgrammesClip clipRef: clipRefs) {
+                        SlashProgrammesRdf clip = readSlashProgrammesDataForClip(clipRef);
+                        
+                        SlashProgrammesVersionRdf clipVersion = null;
+                        if (clip.clip().versions() != null && ! clip.clip().versions().isEmpty()) {
+                            clipVersion = readSlashProgrammesDataForVersion(clip.clip().versions().get(0));
+                        }
+                        
+                        clips.add(new BbcProgrammeSource.ClipAndVersion(clip, clipVersion));
+                    }
+                }
+                
+                BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version, clips);
                 return itemExtractor.extract(source);
             }
             SlashProgrammesSeriesContainer rdfSeries = content.series();
@@ -77,6 +100,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
             if (content.brand() != null) {
                 return brandExtractor.extractBrandFrom(content.brand());
             }
+            
             return null;
 
         } catch (Exception e) {
@@ -101,8 +125,21 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
             return null;
         }
     }
+    
+    private SlashProgrammesRdf readSlashProgrammesDataForClip(SlashProgrammesClip slashProgrammesClip) {
+        try {
+            return clipClient.get(slashProgrammesUri(slashProgrammesClip));
+        } catch (Exception e) {
+            oldLog.warn(e);
+            return null;
+        }
+    }
 
     private String slashProgrammesUri(SlashProgrammesVersion slashProgrammesVersion) {
         return "http://www.bbc.co.uk" + slashProgrammesVersion.resourceUri().replace("#programme", "") + ".rdf";
+    }
+    
+    private String slashProgrammesUri(SlashProgrammesClip slashProgrammesClip) {
+        return "http://www.bbc.co.uk" + slashProgrammesClip.resourceUri().replace("#programme", "") + ".rdf";
     }
 }

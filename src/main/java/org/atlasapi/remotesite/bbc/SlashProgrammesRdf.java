@@ -43,6 +43,9 @@ class SlashProgrammesRdf {
 	@XmlElement(namespace=PO.NS, name="Episode")
 	private SlashProgrammesEpisode episode;
 	
+	@XmlElement(namespace=PO.NS, name="Clip")
+    private SlashProgrammesEpisode clip;
+	
 	@XmlElement(namespace=PO.NS, name="Brand")
 	private SlashProgrammesContainerRef brand;
 	
@@ -120,6 +123,9 @@ class SlashProgrammesRdf {
 		@XmlElement(namespace=PO.NS, name="genre")
 		protected Set<SlashProgrammesGenre> genres;
 		
+		@XmlElement(namespace=PO.NS, name="clip")
+        protected Set<SlashProgrammesClip> clips;
+		
 		public String description() {
 			if (!StringUtils.isEmpty(longSynopsis))   { return longSynopsis; }
 			if (!StringUtils.isEmpty(mediumSynopsis)) { return mediumSynopsis; }
@@ -142,6 +148,10 @@ class SlashProgrammesRdf {
 				uris.add("http://www.bbc.co.uk" + genre.resourceUri().replace("#genre", ""));
 			}
 			return uris;
+		}
+		
+		public Set<SlashProgrammesClip> clips() {
+		    return clips;
 		}
 		
 		public FoafDepiction getDepiction() {
@@ -219,6 +229,22 @@ class SlashProgrammesRdf {
 			});
 		}
 	}
+	
+	static class SlashProgrammesClip {
+
+        @XmlAttribute(name="resource", namespace=RDF.NS)
+        private String resourceUri;
+
+        public String resourceUri() {
+            return resourceUri;
+        }
+
+        public SlashProgrammesClip withResourceUri(String uri) {
+            resourceUri = uri;
+            return this;
+        }
+
+    }
 	
 	static class SlashProgrammesVersion {
 
@@ -314,6 +340,15 @@ class SlashProgrammesRdf {
 		this.episode = episode;
 		return this;
 	}
+	
+	public SlashProgrammesEpisode clip() {
+        return clip;
+    }
+    
+    public SlashProgrammesRdf withClip(SlashProgrammesEpisode clip) {
+        this.clip = clip;
+        return this;
+    }
 
 	public SlashProgrammesContainerRef brand() {
 		return brand;
