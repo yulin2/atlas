@@ -2,10 +2,10 @@ package org.atlasapi.remotesite.ictomorrow;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgItemAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.security.UsernameAndPassword;
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowApiHelper;
 
@@ -27,7 +27,7 @@ public class ICTomorrowModule {
     private @Autowired SimpleScheduler scheduler;
     private @Value("${ict.username}") String ictUsername;
     private @Value("${ict.password}") String ictPassword;
-    private @Autowired MongoDbBackedContentStore contentStore;
+    private @Autowired ContentWriters contentWriter;
     private @Autowired AdapterLog log;
     private @Autowired ArchiveOrgItemAdapter archiveOrgItemAdapter;
     
@@ -47,6 +47,6 @@ public class ICTomorrowModule {
     }
     
     public @Bean ICTomorrowPlaylistUpdater ictomorrowPlaylistUpdater() {
-        return new ICTomorrowPlaylistUpdater(new ICTomorrowApiHelper(new UsernameAndPassword(ictUsername, ictPassword)), contentStore, archiveOrgItemAdapter);
+        return new ICTomorrowPlaylistUpdater(new ICTomorrowApiHelper(new UsernameAndPassword(ictUsername, ictPassword)), contentWriter, archiveOrgItemAdapter);
     }
 }

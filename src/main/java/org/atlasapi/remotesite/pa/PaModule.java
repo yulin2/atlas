@@ -3,10 +3,10 @@ package org.atlasapi.remotesite.pa;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.ContentWriters;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ public class PaModule {
 private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
-    private @Autowired DefinitiveContentWriter contentWriter;
+    private @Autowired ContentWriters contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired AdapterLog log;
     

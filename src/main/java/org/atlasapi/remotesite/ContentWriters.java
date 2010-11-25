@@ -19,10 +19,11 @@ import java.util.Set;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.DefinitiveContentWriter;
 
 import com.google.common.collect.Sets;
 
-public class ContentWriters implements ContentWriter {
+public class ContentWriters implements DefinitiveContentWriter {
 
 	private Set<ContentWriter> writers = Sets.newHashSet();
 	
@@ -50,4 +51,22 @@ public class ContentWriters implements ContentWriter {
 			writer.createOrUpdatePlaylistSkeleton(playlist);
 		}
 	}
+
+    @Override
+    public void createOrUpdateDefinitiveItem(Item item) {
+        for (ContentWriter writer : writers) {
+            if (writer instanceof DefinitiveContentWriter) {
+                ((DefinitiveContentWriter) writer).createOrUpdateDefinitiveItem(item);
+            }
+        }
+    }
+
+    @Override
+    public void createOrUpdateDefinitivePlaylist(Playlist playlist) {
+        for (ContentWriter writer : writers) {
+            if (writer instanceof DefinitiveContentWriter) {
+                ((DefinitiveContentWriter) writer).createOrUpdateDefinitivePlaylist(playlist);
+            }
+        }
+    }
 }

@@ -5,10 +5,10 @@ import java.util.List;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jdom.Element;
@@ -23,11 +23,11 @@ public class ArchiveOrgPlaylistsUpdater implements Runnable {
     private final ArchiveOrgItemAdapter itemAdapter;
 
     private final Iterable<String> playlistUris;
-    private final ContentWriter contentWriter;
+    private final ContentWriters contentWriter;
 
     private final AdapterLog log;
 
-    public ArchiveOrgPlaylistsUpdater(SimpleHttpClient client, ArchiveOrgItemAdapter itemAdapter, Iterable<String> playlistUris, ContentWriter contentWriter, AdapterLog log) {
+    public ArchiveOrgPlaylistsUpdater(SimpleHttpClient client, ArchiveOrgItemAdapter itemAdapter, Iterable<String> playlistUris, ContentWriters contentWriter, AdapterLog log) {
         this.client = client;
         this.itemAdapter = itemAdapter;
         this.playlistUris = playlistUris;

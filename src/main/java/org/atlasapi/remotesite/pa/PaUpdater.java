@@ -23,10 +23,10 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.Category;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
@@ -63,7 +63,7 @@ public class PaUpdater implements Runnable {
 
     private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
-    private final DefinitiveContentWriter contentWriter;
+    private final ContentWriters contentWriter;
     private final Set<String> writtenBrands = Sets.newHashSet();
     private final AdapterLog log;
     private final File localFolder;
@@ -74,7 +74,7 @@ public class PaUpdater implements Runnable {
     private final String ftpUsername;
     private final String ftpPassword;
 
-    public PaUpdater(DefinitiveContentWriter contentWriter, ContentResolver contentResolver, String ftpHost, String ftpUsername, String ftpPassword, String ftpFilesPath, String localFilesPath,
+    public PaUpdater(ContentWriters contentWriter, ContentResolver contentResolver, String ftpHost, String ftpUsername, String ftpPassword, String ftpFilesPath, String localFilesPath,
             AdapterLog log) {
         this.ftpUsername = ftpUsername;
         this.ftpPassword = ftpPassword;

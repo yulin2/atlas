@@ -7,7 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowApiException;
@@ -16,12 +16,12 @@ import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowItemMetadata;
 
 public class ICTomorrowPlaylistUpdater implements Runnable {
     private final ICTomorrowApiHelper apiHelper;
-    private final ContentWriter contentWriter;
+    private final ContentWriters contentWriter;
     private final Log log = LogFactory.getLog(ICTomorrowPlaylistUpdater.class);
     private final SiteSpecificAdapter<Item> itemAdapter;
     
 
-    public ICTomorrowPlaylistUpdater(ICTomorrowApiHelper apiHelper, ContentWriter contentWriter, SiteSpecificAdapter<Item> itemAdapter) {
+    public ICTomorrowPlaylistUpdater(ICTomorrowApiHelper apiHelper, ContentWriters contentWriter, SiteSpecificAdapter<Item> itemAdapter) {
         this.apiHelper = apiHelper;
         this.contentWriter = contentWriter;
         this.itemAdapter = itemAdapter;

@@ -5,10 +5,10 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.xml.SimpleXmlNavigator;
 import org.jdom.Element;
@@ -21,9 +21,9 @@ public class MsnVideoAllShowsUpdater implements Runnable {
     private final SimpleHttpClient client;
     private final AdapterLog log;
     private final SiteSpecificAdapter<Brand> brandAdapter;
-    private final ContentWriter contentWriter;
+    private final ContentWriters contentWriter;
 
-    public MsnVideoAllShowsUpdater(SimpleHttpClient client, AdapterLog log, SiteSpecificAdapter<Brand> brandAdapter, ContentWriter contentWriter) {
+    public MsnVideoAllShowsUpdater(SimpleHttpClient client, AdapterLog log, SiteSpecificAdapter<Brand> brandAdapter, ContentWriters contentWriter) {
         this.client = client;
         this.log = log;
         this.brandAdapter = brandAdapter;

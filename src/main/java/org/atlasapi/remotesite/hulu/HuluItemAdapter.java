@@ -25,8 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
@@ -51,7 +51,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
     private SiteSpecificAdapter<Brand> brandAdapter;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    private ContentWriter contentStore;
+    private ContentWriters contentStore;
 
     public HuluItemAdapter() {
         this(HttpClients.screenScrapingClient(), new HuluItemContentExtractor());
@@ -120,7 +120,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
         }
     }
 
-    public void setContentStore(ContentWriter contentStore) {
+    public void setContentStore(ContentWriters contentStore) {
         this.contentStore = contentStore;
     }
 

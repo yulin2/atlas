@@ -3,10 +3,10 @@ package org.atlasapi.remotesite.hbo;
 import java.util.List;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jdom.Element;
@@ -18,10 +18,10 @@ public class HboSiteMapUpdater implements Runnable {
     private static final String SITEMAP_URL = "http://www.hbo.com/sitemap.xml";
     private final SimpleHttpClient client;
     private final SiteSpecificAdapter<Brand> brandAdapter;
-    private final ContentWriter contentWriter;
+    private final ContentWriters contentWriter;
     private final AdapterLog log;
     
-    public HboSiteMapUpdater(SimpleHttpClient client, SiteSpecificAdapter<Brand> brandAdapter, ContentWriter contentWriter, AdapterLog log) {
+    public HboSiteMapUpdater(SimpleHttpClient client, SiteSpecificAdapter<Brand> brandAdapter, ContentWriters contentWriter, AdapterLog log) {
         this.client = client;
         this.brandAdapter = brandAdapter;
         this.contentWriter = contentWriter;
