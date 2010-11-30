@@ -20,6 +20,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
@@ -39,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.base.Maybe;
 
 /**
  * Controller to handle the query interface to UriPlay.
@@ -53,9 +55,11 @@ public class AnyTypeFetchingController {
 	
 	private final KnownTypeQueryExecutor executor;
 	private final ApplicationConfigurationIncludingQueryBuilder builder;
+    private final ApplicationConfigurationFetcher configFetcher;
 
 	public AnyTypeFetchingController(KnownTypeQueryExecutor queryExecutor, ApplicationConfigurationFetcher configFetcher) {
 		this.executor = queryExecutor;
+        this.configFetcher = configFetcher;
 		this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter()), configFetcher) ;
 	}
 
@@ -67,7 +71,12 @@ public class AnyTypeFetchingController {
 			
 			found.addAll(executor.executeBrandQuery(builder.build(request, Brand.class)));
 			found.addAll(executor.executeItemQuery(builder.build(request, Item.class)));
-			found.addAll(executor.executePlaylistQuery(builder.build(request, Playlist.class)));
+			
+			// TODO: This is bad and there should be a better way of fixing it
+			Maybe<ApplicationConfiguration> conf = configFetcher.configurationFor(request);
+			if (conf.hasValue() && conf.requireValue().precedenceEnabled() && found.isEmpty()) {
+			    found.addAll(executor.executePlaylistQuery(builder.build(request, Playlist.class)));
+			}
 		
 			return new ModelAndView(VIEW, RequestNs.GRAPH, found);
 			
