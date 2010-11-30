@@ -6,6 +6,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -32,6 +34,7 @@ import org.atlasapi.remotesite.pa.bindings.Category;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.xml.sax.XMLReader;
@@ -47,6 +50,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class PaUpdater implements Runnable {
 
     private static final String PA_BASE_URL = "http://pressassociation.com";
+    private static final Pattern FILEDATE = Pattern.compile("^.*/(\\d+)_.*$");
     private static final FilenameFilter filenameFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
@@ -74,8 +78,7 @@ public class PaUpdater implements Runnable {
     private final String ftpUsername;
     private final String ftpPassword;
 
-    public PaUpdater(ContentWriters contentWriter, ContentResolver contentResolver, String ftpHost, String ftpUsername, String ftpPassword, String ftpFilesPath, String localFilesPath,
-            AdapterLog log) {
+    public PaUpdater(ContentWriters contentWriter, ContentResolver contentResolver, String ftpHost, String ftpUsername, String ftpPassword, String ftpFilesPath, String localFilesPath, AdapterLog log) {
         this.ftpUsername = ftpUsername;
         this.ftpPassword = ftpPassword;
         Preconditions.checkNotNull(contentWriter);
@@ -111,11 +114,11 @@ public class PaUpdater implements Runnable {
         try {
             client.connect(ftpHost);
             client.enterLocalPassiveMode();
-            if (! client.login(ftpUsername, ftpPassword)) {
-                throw new Exception("Unable to connect to "+ftpHost+" with username: "+ftpUsername+" and password...");
+            if (!client.login(ftpUsername, ftpPassword)) {
+                throw new Exception("Unable to connect to " + ftpHost + " with username: " + ftpUsername + " and password...");
             }
-            if (! client.changeWorkingDirectory(ftpFilesPath)) {
-                throw new Exception("Unable to change working directory to "+ftpFilesPath);
+            if (!client.changeWorkingDirectory(ftpFilesPath)) {
+                throw new Exception("Unable to change working directory to " + ftpFilesPath);
             }
             FTPFile[] listFiles = client.listFiles(ftpFilesPath, ftpFilenameFilter);
 
@@ -173,7 +176,7 @@ public class PaUpdater implements Runnable {
 
         isRunning = true;
         try {
-            updateFilesFromFtpSite();
+            // updateFilesFromFtpSite();
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("Error when updating files from the PA FTP site").withSource(PaUpdater.class));
         }
@@ -183,17 +186,6 @@ public class PaUpdater implements Runnable {
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
             Unmarshaller unmarshaller = context.createUnmarshaller();
 
-            unmarshaller.setListener(new Unmarshaller.Listener() {
-                public void beforeUnmarshal(Object target, Object parent) {
-                }
-
-                public void afterUnmarshal(Object target, Object parent) {
-                    if (target instanceof ProgData) {
-                        processProgData((ProgData) target, (ChannelData) parent);
-                    }
-                }
-            });
-
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setNamespaceAware(true);
             XMLReader reader = factory.newSAXParser().getXMLReader();
@@ -201,7 +193,23 @@ public class PaUpdater implements Runnable {
 
             for (File file : localFolder.listFiles(filenameFilter)) {
                 try {
-                    reader.parse(file.toURI().toString());
+                    String filename = file.toURI().toString();
+                    Matcher matcher = FILEDATE.matcher(filename);
+                    if (matcher.matches()) {
+                        final DateTimeZone zone = getTimeZone(matcher.group(1));
+                        unmarshaller.setListener(new Unmarshaller.Listener() {
+                            public void beforeUnmarshal(Object target, Object parent) {
+                            }
+
+                            public void afterUnmarshal(Object target, Object parent) {
+                                if (target instanceof ProgData) {
+                                    processProgData((ProgData) target, (ChannelData) parent, zone);
+                                }
+                            }
+                        });
+
+                        reader.parse(filename);
+                    }
                 } catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("Error processing file " + file.toString()));
                 }
@@ -214,11 +222,11 @@ public class PaUpdater implements Runnable {
         }
     }
 
-    private void processProgData(ProgData progData, ChannelData channelData) {
+    private void processProgData(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         try {
             Maybe<Brand> brand = getBrand(progData);
             Maybe<Series> series = getSeries(progData);
-            Maybe<Episode> episode = getEpisode(progData, channelData);
+            Maybe<Episode> episode = getEpisode(progData, channelData, zone);
 
             if (episode.hasValue()) {
                 if (series.hasValue()) {
@@ -279,7 +287,7 @@ public class PaUpdater implements Runnable {
         return Maybe.nothing();
     }
 
-    private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData) {
+    private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
         if (channelUri == null) {
             return Maybe.nothing();
@@ -298,8 +306,7 @@ public class PaUpdater implements Runnable {
 
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
 
-        String dateString = progData.getDate() + "-" + progData.getTime();
-        DateTime transmissionTime = DateTimeFormat.forPattern("dd/MM/yyyy-HH:mm").withZone(DateTimeZones.LONDON).parseDateTime(dateString);
+        DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
         Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration);
         version.addBroadcast(broadcast);
 
@@ -360,5 +367,17 @@ public class PaUpdater implements Runnable {
         episode.addVersion(version);
 
         return episode;
+    }
+
+    protected static DateTime getTransmissionTime(String date, String time, DateTimeZone zone) {
+        String dateString = date + "-" + time;
+        return DateTimeFormat.forPattern("dd/MM/yyyy-HH:mm").withZone(zone).parseDateTime(dateString);
+    }
+
+    protected static DateTimeZone getTimeZone(String date) {
+        String timezoneDateString = date + "-11:00";
+        DateTime timezoneDateTime = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON).parseDateTime(timezoneDateString);
+        DateTimeZone zone = timezoneDateTime.getZone();
+        return DateTimeZone.forOffsetMillis(zone.getOffset(timezoneDateTime));
     }
 }
