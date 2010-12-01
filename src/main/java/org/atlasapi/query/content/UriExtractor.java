@@ -36,7 +36,7 @@ import com.metabroadcast.common.base.Maybe;
 public class UriExtractor extends QueryVisitorAdapter<Void> {
 
 	private final Set<String> uris;
-	private Set<Attribute<String>> uriAttributes = ImmutableSet.of(Attributes.ITEM_URI, Attributes.BRAND_URI, Attributes.PLAYLIST_URI);
+	public final static Set<Attribute<String>> URI_ATTRIBUTES = ImmutableSet.of(Attributes.ITEM_URI, Attributes.BRAND_URI, Attributes.PLAYLIST_URI);
 	
 	private final CurieExpander curieExpander = new PerPublisherCurieExpander();
 
@@ -48,7 +48,7 @@ public class UriExtractor extends QueryVisitorAdapter<Void> {
 	@SuppressWarnings("unchecked")
 	public Void visit(StringAttributeQuery query) {
 
-		if (uriAttributes.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
+		if (URI_ATTRIBUTES.contains(query.getAttribute()) && query.getOperator().equals(Operators.EQUALS)) {
 			for (String value : (List<String>) query.getValue()) {
 				Maybe<String> curieExpanded = curieExpander.expand(value);
 				if (curieExpanded.hasValue()) {
