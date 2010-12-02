@@ -176,7 +176,7 @@ public class PaUpdater implements Runnable {
 
         isRunning = true;
         try {
-            // updateFilesFromFtpSite();
+            updateFilesFromFtpSite();
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("Error when updating files from the PA FTP site").withSource(PaUpdater.class));
         }
