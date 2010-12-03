@@ -248,9 +248,10 @@ public class PaUpdater implements Runnable {
         } catch (Exception e) {
             // TODO: Dirty, but need to find out why this is happening
             if (e instanceof ClassCastException) {
-                e.printStackTrace();
+                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("This is definitely where the class cast will happen" + e.getMessage()));
+            } else {
+                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription(e.getMessage()));
             }
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription(e.getMessage()));
         }
     }
 
