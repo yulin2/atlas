@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.FetchException;
+import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jaxen.JaxenException;
@@ -20,6 +21,10 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
 
     private final SimpleHttpClient httpClient;
     private final SiteSpecificAdapter<Episode> itemAdapter;
+    
+    public SeesawSeriesAdapter() {
+        this(HttpClients.screenScrapingClient());
+    }
 
     public SeesawSeriesAdapter(SimpleHttpClient httpClient) {
         this.httpClient = httpClient;

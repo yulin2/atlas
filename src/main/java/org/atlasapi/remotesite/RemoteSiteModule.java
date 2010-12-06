@@ -40,6 +40,7 @@ import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
 import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
+import org.atlasapi.remotesite.seesaw.SeesawSeriesAdapter;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
@@ -135,6 +136,7 @@ public class RemoteSiteModule {
 		 
 		 adapters.add(new SeesawBrandAdapter());
 		 adapters.add(new SeesawItemAdapter());
+		 adapters.add(new SeesawSeriesAdapter());
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;
