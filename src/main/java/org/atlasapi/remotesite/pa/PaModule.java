@@ -31,6 +31,8 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     private @Value("${pa.ftp.host}") String ftpHost;
     private @Value("${pa.ftp.path}") String ftpPath;
     private @Value("${pa.filesPath}") String localFilesPath;
+    private @Value("${s3.access}") String s3access;
+    private @Value("${s3.secret}") String s3secret;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -41,6 +43,6 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     } 
     
     public @Bean PaUpdater paUpdater() {
-        return new PaUpdater(contentWriter, contentResolver, ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, log);
+        return new PaUpdater(contentWriter, contentResolver, ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, s3access, s3secret , log);
     }
 }

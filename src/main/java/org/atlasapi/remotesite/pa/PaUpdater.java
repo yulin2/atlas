@@ -1,9 +1,11 @@
 package org.atlasapi.remotesite.pa;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -13,6 +15,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilter;
@@ -33,6 +36,13 @@ import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.Category;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
+import org.jets3t.service.S3ServiceException;
+import org.jets3t.service.acl.AccessControlList;
+import org.jets3t.service.impl.rest.httpclient.RestS3Service;
+import org.jets3t.service.model.S3Bucket;
+import org.jets3t.service.model.S3Object;
+import org.jets3t.service.model.S3Owner;
+import org.jets3t.service.security.AWSCredentials;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -45,12 +55,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.hashing.Hashers;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaUpdater implements Runnable {
 
     private static final String PA_BASE_URL = "http://pressassociation.com";
     private static final Pattern FILEDATE = Pattern.compile("^.*/(\\d+)_.*$");
+    private static final S3Bucket BUCKET = new S3Bucket("pa-data");
+    
     private static final FilenameFilter filenameFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
@@ -77,8 +90,12 @@ public class PaUpdater implements Runnable {
     private final String ftpFilesPath;
     private final String ftpUsername;
     private final String ftpPassword;
+    private final String s3access;
+    private final String s3Secret;
 
-    public PaUpdater(ContentWriters contentWriter, ContentResolver contentResolver, String ftpHost, String ftpUsername, String ftpPassword, String ftpFilesPath, String localFilesPath, AdapterLog log) {
+    public PaUpdater(ContentWriters contentWriter, ContentResolver contentResolver, String ftpHost, String ftpUsername, String ftpPassword, String ftpFilesPath, String localFilesPath, String s3access, String s3Secret, AdapterLog log) {
+        this.s3Secret = s3Secret;
+        this.s3access = s3access;
         this.ftpUsername = ftpUsername;
         this.ftpPassword = ftpPassword;
         Preconditions.checkNotNull(contentWriter);
@@ -111,6 +128,7 @@ public class PaUpdater implements Runnable {
         }
 
         FTPClient client = new FTPClient();
+        
         try {
             client.connect(ftpHost);
             client.enterLocalPassiveMode();
@@ -135,15 +153,38 @@ public class PaUpdater implements Runnable {
                         if (file.getSize() == existingFile.requireValue().length() && file.getTimestamp().getTime().before(date)) {
                             continue;
                         }
-
+                        
                         fileToWrite = existingFile.requireValue();
                     } else {
                         fileToWrite = new File(localFolder, name);
                     }
-
+                    
+                    RestS3Service s3 = new RestS3Service(new AWSCredentials(s3access, s3Secret));
+                    try {
+                        S3Object s3object = s3.getObject(BUCKET, name);
+                        if (s3object.getContentLength() == existingFile.requireValue().length() && file.getTimestamp().getTime().before(s3object.getLastModifiedDate())) {
+                            File dataInputFile = s3object.getDataInputFile();
+                            FileUtils.writeLines(fileToWrite, FileUtils.readLines(dataInputFile));
+                            continue;
+                        }
+                    } catch (S3ServiceException e){
+                        log.record(new AdapterLogEntry(Severity.WARN).withSource(PaUpdater.class).withCause(e).withDescription("Error getting file " + file.getName()));
+                    }
+                    
                     fos = new FileOutputStream(fileToWrite);
                     client.retrieveFile(name, fos);
                     fos.close();
+                    
+                    String contents = FileUtils.readFileToString(fileToWrite);
+                    S3Object put = new S3Object(name);
+                    InputStream in = new ByteArrayInputStream(contents.getBytes());
+                    put.setDataInputStream(in);
+                    put.setAcl(AccessControlList.REST_CANNED_PRIVATE);
+                    put.setContentLength(contents.length());
+                    put.setLastModifiedDate(new DateTime().toDate());
+                    put.setETag(Hashers.MD5.hashToString(contents));
+                    s3.putObject(BUCKET, put);
+                    
                 } catch (Exception e) {
                     if (fos != null) {
                         fos.close();
