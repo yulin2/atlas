@@ -7,6 +7,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
+import org.atlasapi.s3.S3Client;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,6 +44,9 @@ private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 
     } 
     
     public @Bean PaUpdater paUpdater() {
-        return new PaUpdater(contentWriter, contentResolver, ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, s3access, s3secret , log);
+        S3Client s3client = new S3Client(s3access, s3secret, "pa-data");
+        PaLocalFileManager fileManager = new PaLocalFileManager(ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, s3client, log);
+        PaProgrammeProcessor processor = new PaProgrammeProcessor(contentWriter, contentResolver, log);
+        return new PaUpdater(processor, fileManager, log);
     }
 }
