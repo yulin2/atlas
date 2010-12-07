@@ -224,8 +224,18 @@ public class PaUpdater implements Runnable {
 
     private void processProgData(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         try {
-            Maybe<Brand> brand = getBrand(progData);
-            Maybe<Series> series = getSeries(progData);
+            Maybe<Brand> brand = Maybe.nothing();
+            try {
+                brand = getBrand(progData);
+            } catch (ClassCastException e) {
+                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("This is definitely where the class cast will happen, with the brand " + e.getMessage()));
+            }
+            Maybe<Series> series = Maybe.nothing();
+            try {
+                series = getSeries(progData);
+            } catch (ClassCastException e) {
+                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("This is definitely where the class cast will happen, with the series " + e.getMessage()));
+            }
             Maybe<Episode> episode = Maybe.nothing();
             try {
                 episode = getEpisode(progData, channelData, zone);
