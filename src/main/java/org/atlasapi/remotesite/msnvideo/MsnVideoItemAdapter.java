@@ -35,6 +35,7 @@ public class MsnVideoItemAdapter implements SiteSpecificAdapter<Episode> {
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     public Episode fetch(String uri) {
         String content;
         try {

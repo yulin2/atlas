@@ -10,7 +10,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -109,21 +108,6 @@ public class HboBrandAdapter implements SiteSpecificAdapter<Brand> {
                     brand.setThumbnail(episode.getThumbnail());
                 }
             }
-        }
-    }
-    
-    private void addSeries(Brand brand, String brandKey) {
-        Map<Integer, Series> numberToSeries = Maps.newHashMap();
-        
-        for (Item item : brand.getItems()) {
-            Episode episode = (Episode) item;
-            
-            Series series = numberToSeries.get(episode.getSeriesNumber());
-            if (series == null) {
-                series = new Series(HboAdapterHelper.HBO_HOST + "/" + brandKey + "/episodes/" + episode.getSeriesNumber() , "hbo:" + brandKey + "-" + episode.getSeriesNumber());
-            }
-            
-            series.addItem(episode);
         }
     }
 

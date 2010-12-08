@@ -72,6 +72,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 		return playlist;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private ContentType contentTypeFor(SyndicationSource source) {
 		SyndFeed feed = source.getFeed();
 		if (feed == null) {
