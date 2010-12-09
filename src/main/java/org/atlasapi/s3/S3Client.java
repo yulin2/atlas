@@ -21,26 +21,21 @@ public class S3Client {
     private final String access;
     private final String secret;
     private final S3Bucket bucket;
-    private RestS3Service s3;
 
     public S3Client(String access, String secret, String bucketName) {
         this.access = access;
         this.secret = secret;
         this.bucket = new S3Bucket(bucketName);
     }
-    
-    // TODO: cludge as don't want to have to put access and secret everywhere
-    private synchronized RestS3Service client() {
-        if (s3 == null) {
-            try {
-                s3 = new RestS3Service(new AWSCredentials(access, secret));
-            } catch (S3ServiceException e) {
-                throw new RuntimeException(e);
-            }
+
+    private RestS3Service client() {
+        try {
+            return new RestS3Service(new AWSCredentials(access, secret));
+        } catch (S3ServiceException e) {
+            throw new RuntimeException(e);
         }
-        return s3;
     }
-    
+
     public void put(String name, File file) throws IOException {
         S3Object put = null;
         try {
@@ -56,21 +51,22 @@ public class S3Client {
             throw new IOException(e);
         }
     }
-    
+
     public boolean getAndSaveIfUpdated(String name, File fileToWrite, Maybe<File> existingFile) throws IOException {
         S3Object s3object = null;
         try {
             s3object = client().getObject(bucket, name);
         } catch (S3ServiceException e) {
-            if (! "NoSuchKey".equals(e.getS3ErrorCode())) {
+            if (!"NoSuchKey".equals(e.getS3ErrorCode())) {
                 throw new IOException(e);
             }
         }
         if (s3object == null) {
             return false;
         }
-        
-        if (existingFile.isNothing() || (s3object.getContentLength() == existingFile.requireValue().length() && s3object.getLastModifiedDate().before(new Date(existingFile.requireValue().lastModified())))) {
+
+        if (existingFile.isNothing()
+                || (s3object.getContentLength() == existingFile.requireValue().length() && s3object.getLastModifiedDate().before(new Date(existingFile.requireValue().lastModified())))) {
             File dataInputFile = s3object.getDataInputFile();
             FileUtils.writeLines(fileToWrite, FileUtils.readLines(dataInputFile));
         }
