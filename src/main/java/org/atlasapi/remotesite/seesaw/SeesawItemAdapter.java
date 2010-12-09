@@ -32,6 +32,10 @@ public class SeesawItemAdapter implements SiteSpecificAdapter<Episode> {
     @Override
     public Episode fetch(String uri) { 
         try {
+            if (! canFetch(uri)) {
+                return null;
+            }
+            
             String content = httpClient.getContentsOf(uri);
             
             HtmlNavigator navigator = new HtmlNavigator(content);
