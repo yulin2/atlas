@@ -2,10 +2,12 @@ package org.atlasapi.s3;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.acl.AccessControlList;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
@@ -61,15 +63,30 @@ public class S3Client {
                 throw new IOException(e);
             }
         }
+        
         if (s3object == null) {
             return false;
         }
-
-        if (existingFile.isNothing()
-                || (s3object.getContentLength() == existingFile.requireValue().length() && s3object.getLastModifiedDate().before(new Date(existingFile.requireValue().lastModified())))) {
-            File dataInputFile = s3object.getDataInputFile();
-            FileUtils.writeLines(fileToWrite, FileUtils.readLines(dataInputFile));
+        
+        try {
+            if (existingFile.isNothing()
+                    || (s3object.getContentLength() == existingFile.requireValue().length() && s3object.getLastModifiedDate().before(new Date(existingFile.requireValue().lastModified())))) {
+                if (s3object.getDataInputFile() != null) {
+                    File dataInputFile = s3object.getDataInputFile();
+                    FileUtils.writeLines(fileToWrite, FileUtils.readLines(dataInputFile));
+                } else {
+                    InputStream is = s3object.getDataInputStream();
+                    try {
+                        FileUtils.writeLines(fileToWrite, IOUtils.readLines(is));
+                    } finally {
+                        IOUtils.closeQuietly(is);
+                    }
+                }
+            }
+        } catch (S3ServiceException e) {
+            throw new IOException(e);
         }
+        
         return true;
     }
 }
