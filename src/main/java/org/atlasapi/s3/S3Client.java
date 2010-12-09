@@ -71,16 +71,11 @@ public class S3Client {
         try {
             if (existingFile.isNothing()
                     || (s3object.getContentLength() == existingFile.requireValue().length() && s3object.getLastModifiedDate().before(new Date(existingFile.requireValue().lastModified())))) {
-                if (s3object.getDataInputFile() != null) {
-                    File dataInputFile = s3object.getDataInputFile();
-                    FileUtils.writeLines(fileToWrite, FileUtils.readLines(dataInputFile));
-                } else {
-                    InputStream is = s3object.getDataInputStream();
-                    try {
-                        FileUtils.writeLines(fileToWrite, IOUtils.readLines(is));
-                    } finally {
-                        IOUtils.closeQuietly(is);
-                    }
+                InputStream is = s3object.getDataInputStream();
+                try {
+                    FileUtils.writeLines(fileToWrite, IOUtils.readLines(is));
+                } finally {
+                    IOUtils.closeQuietly(is);
                 }
             }
         } catch (S3ServiceException e) {
