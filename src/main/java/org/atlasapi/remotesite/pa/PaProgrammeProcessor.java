@@ -68,10 +68,14 @@ public class PaProgrammeProcessor {
                 if (series.hasValue()) {
                     series.requireValue().addItem(episode.requireValue());
                 }
+                try {
                 if (brand.hasValue()) {
                     contentWriter.createOrUpdateDefinitivePlaylist(brand.requireValue());
                 } else {
                     contentWriter.createOrUpdateDefinitiveItem(episode.requireValue());
+                }
+                } catch (ClassCastException e) {
+                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription("This is definitely where the class cast will happen, when it's persisted " + e.getMessage()));
                 }
             }
         } catch (Exception e) {
