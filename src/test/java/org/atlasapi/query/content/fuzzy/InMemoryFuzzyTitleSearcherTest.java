@@ -43,6 +43,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	Brand haveIGotNewsForYou = brand("/news", "Have I Got News For You");
 	Brand brasseye = brand("/eye", "Brass Eye");
 	Brand science = brand("/science", "The Story of Science: Power, Proof and Passion");
+	Brand theApprentice = brand("/apprentice", "The Apprentice");
 
 	Item englishForCats = item("/items/cats", "English for cats");
 	Item u2 = item("/items/u2", "U2 Ultraviolet");
@@ -50,7 +51,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	Item jamieOliversCookingProgramme = item("/items/oliver/1", "Jamie Oliver's cooking programme", "lots of words that are the same alpha beta");
 	Item gordonRamsaysCookingProgramme = item("/items/ramsay/2", "Gordon Ramsay's cooking show", "lots of words that are the same alpha beta");
 	
-	List<Brand> brands = Arrays.asList(dragonsDen, theCityGardener, eastenders, meetTheMagoons, theJackDeeShow, peepShow, haveIGotNewsForYou, euromillionsDraw, brasseye, science, politicsEast);
+	List<Brand> brands = Arrays.asList(dragonsDen, theCityGardener, eastenders, meetTheMagoons, theJackDeeShow, peepShow, haveIGotNewsForYou, euromillionsDraw, brasseye, science, politicsEast, theApprentice);
 	List<Item> items = Arrays.asList(englishForCats, jamieOliversCookingProgramme, gordonRamsaysCookingProgramme);
 	List<Item> itemsUpdated = Arrays.asList(u2);
 	
@@ -66,11 +67,12 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	}
 	
 	public void testFindingBrandsByTitle() throws Exception {
-		check(searcher.brandTitleSearch("den", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("Aprentice", ALL), theApprentice);
+		check(searcher.brandTitleSearch("den", ALL), dragonsDen, theJackDeeShow);
 		check(searcher.brandTitleSearch("dragon", ALL), dragonsDen);
 		check(searcher.brandTitleSearch("dragons", ALL), dragonsDen);
 		check(searcher.brandTitleSearch("drag den", ALL), dragonsDen);
-		check(searcher.brandTitleSearch("drag", ALL), dragonsDen);
+		check(searcher.brandTitleSearch("drag", ALL), dragonsDen, euromillionsDraw);
 		check(searcher.brandTitleSearch("dragon's den", ALL), dragonsDen);
 		check(searcher.brandTitleSearch("eastenders", ALL),  eastenders);
 		check(searcher.brandTitleSearch("easteners", ALL),  eastenders);
@@ -81,7 +83,7 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 		check(searcher.brandTitleSearch("end", ALL));
 		check(searcher.brandTitleSearch("peep show", ALL),  peepShow);
 		check(searcher.brandTitleSearch("peep s", ALL),  peepShow);
-		check(searcher.brandTitleSearch("dee", ALL),  theJackDeeShow);
+		check(searcher.brandTitleSearch("dee", ALL),  theJackDeeShow, dragonsDen);
 		check(searcher.brandTitleSearch("show", ALL),  peepShow, politicsEast, theJackDeeShow);
 		check(searcher.brandTitleSearch("jack show", ALL),  theJackDeeShow);
 		check(searcher.brandTitleSearch("the jack dee s", ALL),  theJackDeeShow);
