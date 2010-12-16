@@ -19,18 +19,20 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
     private final ContentWriters contentWriter;
     private final Log log = LogFactory.getLog(ICTomorrowPlaylistUpdater.class);
     private final SiteSpecificAdapter<Item> itemAdapter;
+    private final Integer csaId;
     
 
-    public ICTomorrowPlaylistUpdater(ICTomorrowApiHelper apiHelper, ContentWriters contentWriter, SiteSpecificAdapter<Item> itemAdapter) {
+    public ICTomorrowPlaylistUpdater(ICTomorrowApiHelper apiHelper, ContentWriters contentWriter, SiteSpecificAdapter<Item> itemAdapter, Integer csaId) {
         this.apiHelper = apiHelper;
         this.contentWriter = contentWriter;
         this.itemAdapter = itemAdapter;
+        this.csaId = csaId;
     }
     
     @Override
     public void run() {
         try {
-            int jobId = apiHelper.getContentMetadata(null, null, null);
+            int jobId = apiHelper.getContentMetadata(csaId, null, null);
             
             List<ICTomorrowItemMetadata> items = null;
             while (items == null) {

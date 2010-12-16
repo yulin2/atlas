@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.security.UsernameAndPassword;
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowApiHelper;
 
@@ -27,6 +27,7 @@ public class ICTomorrowModule {
     private @Autowired SimpleScheduler scheduler;
     private @Value("${ict.username}") String ictUsername;
     private @Value("${ict.password}") String ictPassword;
+    private @Value("${ict.csa_id}") Integer csaId;
     private @Autowired ContentWriters contentWriter;
     private @Autowired AdapterLog log;
     private @Autowired ArchiveOrgItemAdapter archiveOrgItemAdapter;
@@ -47,6 +48,6 @@ public class ICTomorrowModule {
     }
     
     public @Bean ICTomorrowPlaylistUpdater ictomorrowPlaylistUpdater() {
-        return new ICTomorrowPlaylistUpdater(new ICTomorrowApiHelper(new UsernameAndPassword(ictUsername, ictPassword)), contentWriter, archiveOrgItemAdapter);
+        return new ICTomorrowPlaylistUpdater(new ICTomorrowApiHelper(new UsernameAndPassword(ictUsername, ictPassword)), contentWriter, archiveOrgItemAdapter, csaId);
     }
 }
