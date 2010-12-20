@@ -8,7 +8,6 @@ import java.util.Set;
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
@@ -19,7 +18,6 @@ import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.QuerySplitter;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.content.query.QueryFragmentExtractor;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -72,13 +70,11 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 
 	private List<Brand> mergeDuplicateBrands(ContentQuery query, List<Brand> brands) {
-		Set<String> brandIds = brandIdsFrom(query);
-
 		List<Brand> merged = Lists.newArrayListWithCapacity(brands.size());
 		Set<Brand> processed = Sets.newHashSet();
 		
 		for (Brand brand : brands) {
-			if (processed.contains(brand) && !isExplicitlyMentioned(brandIds, brand)) {
+			if (processed.contains(brand)) {
 				continue;
 			}
 			List<Brand> same = findSame(brand, Sets.difference(ImmutableSet.copyOf(brands), processed));
@@ -107,21 +103,6 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 				return byPublisher.compare(o1.getPublisher(), o2.getPublisher());
 			}
 		});
-	}
-
-	private boolean isExplicitlyMentioned(Set<String> brandsIds, Brand brand) {
-		return brandsIds.contains(brand.getCanonicalUri()) || brandsIds.contains(brand.getCurie());
-	}
-	
-	// Extracts URIs and CURIEs from the query since if a Brand
-	// is requested by URI explicitly then it must be in the output set
-	@SuppressWarnings("unchecked")
-	private Set<String> brandIdsFrom(ContentQuery query) {
-		 Maybe<AttributeQuery<?>> brandIdConstraint = QueryFragmentExtractor.extract(query, ImmutableSet.<Attribute<?>>of(Attributes.BRAND_URI));
-		 if (brandIdConstraint.isNothing()) {
-			 return ImmutableSet.of();
-		 }
-		 return ImmutableSet.copyOf((Iterable<String>) brandIdConstraint.requireValue().getValue());
 	}
 
 	@Override
