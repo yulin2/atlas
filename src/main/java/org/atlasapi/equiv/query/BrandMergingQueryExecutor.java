@@ -3,6 +3,7 @@ package org.atlasapi.equiv.query;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.AtomicQuery;
@@ -11,6 +12,7 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -24,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
@@ -31,6 +34,8 @@ import com.metabroadcast.common.query.Selection;
 
 public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 
+	private static final Ordering<Episode> SERIES_ORDER = Ordering.from(new SeriesOrder());
+	
 	private final QuerySplitter splitter = new QuerySplitter();
 	
 	private final KnownTypeQueryExecutor delegate;
@@ -132,20 +137,25 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 			}
 
 			@Override
-			public Iterable<Item> merge(List<Item> items, List<Item> matches) {
-				Set<SeriesAndEpisodeNumber> seen = Sets.newHashSet();
-				List<Item> merged = Lists.newArrayList();
+			public Iterable<? extends Item> merge(List<Item> items, List<Item> matches) {
+				Map<SeriesAndEpisodeNumber, Episode> chosenItemLookup = Maps.newHashMap();
 				for (Item item : Iterables.concat(items, matches)) {
-					SeriesAndEpisodeNumber se = new SeriesAndEpisodeNumber((Episode) item);
-					if (!seen.contains(se)) {
-						seen.add(se);
-						merged.add(item);
+					Episode episode = (Episode) item;
+					SeriesAndEpisodeNumber se = new SeriesAndEpisodeNumber(episode);
+					if (!chosenItemLookup.containsKey(se)) {
+						chosenItemLookup.put(se, episode);
+					} else {
+						Item chosen = chosenItemLookup.get(se);
+						for (Clip clip : item.getClips()) {
+							chosen.addClip(clip);
+						}
 					}
 				}
-				return merged;
+				return SERIES_ORDER.immutableSortedCopy(chosenItemLookup.values());
 			}
 		};
 		
+
 		protected abstract Predicate<Item> match();
 		
 		static ItemIdStrategy findBest(Iterable<Item> items) {
@@ -155,7 +165,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 			return null;
 		}
 		
-		public abstract Iterable<Item> merge(List<Item> items, List<Item> matches);
+		public abstract Iterable<? extends Item> merge(List<Item> items, List<Item> matches);
 	}
 	
 	private void mergeIn(Brand brand, List<Brand> equivalentBrands) {
@@ -175,8 +185,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 				matches.addAll(matches);
 			}
 		}
-		List<Item> merged = Lists.newArrayList(strategy.merge(items, matches));
-		brand.setItems(merged);
+		brand.setItems(strategy.merge(items, matches));
 	}
 
 	private List<Item> findItemsSuitableForMerging(Brand brand, List<Brand> equivalentBrands) {
