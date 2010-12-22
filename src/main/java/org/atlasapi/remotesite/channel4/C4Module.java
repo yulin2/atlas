@@ -41,8 +41,8 @@ public class C4Module {
 	@PostConstruct
 	public void startBackgroundTasks(){
 		if (!"DISABLED".equals(c4ApiKey)) {
-			scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);			;
-			scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);			;
+			scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);
+			scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("C4 update scheduled tasks installed")
 				.withSource(C4AtoZAtomContentLoader.class));
