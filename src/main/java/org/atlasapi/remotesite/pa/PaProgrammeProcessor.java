@@ -67,9 +67,11 @@ public class PaProgrammeProcessor {
             if (episode.hasValue()) {
                 if (series.hasValue()) {
                     series.requireValue().addItem(episode.requireValue());
+                    contentWriter.createOrUpdateDefinitivePlaylist(series.requireValue());
                 }
                 try {
                 if (brand.hasValue()) {
+                    brand.requireValue().addItem(episode.requireValue());
                     contentWriter.createOrUpdateDefinitivePlaylist(brand.requireValue());
                 } else {
                     contentWriter.createOrUpdateDefinitiveItem(episode.requireValue());

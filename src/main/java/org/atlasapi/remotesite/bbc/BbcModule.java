@@ -11,6 +11,8 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater;
+import org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 public class BbcModule {
 
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(4, 0, 0));
+	private final static Daily SCHEDULED_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	
 	private @Autowired ContentWriters contentWriters;
@@ -39,12 +42,19 @@ public class BbcModule {
 		if (Boolean.parseBoolean(enabled)) {
 			scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
 			scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
+			scheduler.schedule(bbcSchedulesUpdater(), SCHEDULED_UPDATE_TIME);
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("BBC update scheduled tasks installed"));
 		} else {
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("Not installing BBC Scheduled tasks"));
 		}
+	}
+	
+	@Bean Runnable bbcSchedulesUpdater() {
+		BbcScheduledProgrammeUpdater updater = new BbcScheduledProgrammeUpdater();
+		updater.setUris(new DatedBbcScheduleUriSource());
+		return updater;
 	}
 
 	@Bean Runnable bbcHighlightsUpdater() {
