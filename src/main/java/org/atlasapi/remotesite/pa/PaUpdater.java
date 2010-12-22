@@ -68,6 +68,8 @@ public class PaUpdater implements Runnable {
                     Matcher matcher = FILEDATE.matcher(filename);
                     if (matcher.matches()) {
                         final DateTimeZone zone = getTimeZone(matcher.group(1));
+                        log.record(new AdapterLogEntry(Severity.INFO).withSource(PaUpdater.class).withDescription("Processing file "+filename+" with timezone "+zone.toString()));
+                        
                         unmarshaller.setListener(new Unmarshaller.Listener() {
                             public void beforeUnmarshal(Object target, Object parent) {
                             }
