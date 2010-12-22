@@ -93,7 +93,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <constructor-arg ref="seesawUpdater" />
         </bean>
     </property>
-  </bean>
+  </bean><!--
   
   <bean id="updateBbcSchedulesScheduledTask" class="org.springframework.scheduling.quartz.CronTriggerBean">
     <property name="jobDetail">
@@ -103,7 +103,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <property name="concurrent" value="false" />
         </bean>
     </property>
-    <!-- run every morning at 5 AM -->
+     run every morning at 5 AM 
     <property name="cronExpression" value="0 0 5 * * ?" />
   </bean>
   
@@ -111,7 +111,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
         <constructor-arg ref="bbcSchedulesUpdater"/>
    </bean>
   
-  <bean id="brandsUpdater" abstract="true">
+  --><bean id="brandsUpdater" abstract="true">
   	<property name="contentStore" ref="contentWriter"/>
 	<property name="fetcher" ref="remoteFetcher"/>
 	<property name="missingContentShouldBeMarkedAsUnavailable" value="true"/>
@@ -132,7 +132,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="seesawUpdater" class="org.atlasapi.remotesite.seesaw.SeesawSitemapUpdater">
     <constructor-arg ref="savingFetcher" />
     <constructor-arg ref="adapterLog" />
-  </bean>
+  </bean><!--
   
   <bean id="bbcSchedulesUpdater" class="org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater">
      <constructor-arg ref="contentResolver"/>
@@ -143,7 +143,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       </property>
   </bean> 
 
-  <bean id="perPublisherUpdater" class="org.atlasapi.remotesite.PerPublisherItemUpdater">
+  --><bean id="perPublisherUpdater" class="org.atlasapi.remotesite.PerPublisherItemUpdater">
 	 <constructor-arg ref="queryExecutor"/>
 	 <constructor-arg>
 		 <bean class="org.atlasapi.query.uri.canonical.CanonicalisingFetcher">
