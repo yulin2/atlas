@@ -13,6 +13,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -32,7 +33,7 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
-public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
+public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 
 	private static final Ordering<Episode> SERIES_ORDER = Ordering.from(new SeriesOrder());
 	
@@ -40,7 +41,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 	
 	private final KnownTypeQueryExecutor delegate;
 
-	public BrandMergingQueryExecutor(KnownTypeQueryExecutor delegate) {
+	public MergeOnOutputQueryExecutor(KnownTypeQueryExecutor delegate) {
 		this.delegate = delegate;
 	}
 	
@@ -55,7 +56,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 		
 		Iterable<AtomicQuery> nonBrandAttributes =  nonBrandAttributes(query);
 		
-		List<Brand> merged = mergeDuplicateBrands(query, brands);
+		List<Brand> merged = mergeDuplicates(query, brands);
 		
 		for (Brand brand : merged) {
 			if (brand.getEquivalentTo().isEmpty()) {
@@ -64,7 +65,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 			AttributeQuery<String> uriEquals = Attributes.BRAND_URI.createQuery(Operators.EQUALS, brand.getEquivalentTo());
 			ContentQuery findEquivalent = query.copyWithOperands(Iterables.concat(ImmutableList.of(uriEquals), nonBrandAttributes)).copyWithSelection(Selection.ALL);
 
-			List<Brand> equivalentBrands = delegate.executeBrandQuery(findEquivalent);
+			List<Brand> equivalentBrands = Lists.newArrayList(delegate.executeBrandQuery(findEquivalent));
 			equivalentBrands.remove(brand);
 			
 			sortByPrefs(query, equivalentBrands);
@@ -74,15 +75,15 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 		return merged;
 	}
 
-	private List<Brand> mergeDuplicateBrands(ContentQuery query, List<Brand> brands) {
-		List<Brand> merged = Lists.newArrayListWithCapacity(brands.size());
-		Set<Brand> processed = Sets.newHashSet();
+	private <T extends Content> List<T> mergeDuplicates(ContentQuery query, List<T> brands) {
+		List<T> merged = Lists.newArrayListWithCapacity(brands.size());
+		Set<T> processed = Sets.newHashSet();
 		
-		for (Brand brand : brands) {
+		for (T brand : brands) {
 			if (processed.contains(brand)) {
 				continue;
 			}
-			List<Brand> same = findSame(brand, Sets.difference(ImmutableSet.copyOf(brands), processed));
+			List<T> same = findSame(brand, Sets.difference(ImmutableSet.copyOf(brands), processed));
 			processed.addAll(same);
 			sortByPrefs(query, same);
 			merged.add(same.get(0));
@@ -90,9 +91,10 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 		return merged;
 	}
 
-	private List<Brand> findSame(Brand brand, Set<Brand> brands) {
-		List<Brand> same = Lists.newArrayList(brand);
-		for (Brand possiblyEquivalent : brands) {
+	@SuppressWarnings("unchecked")
+	private <T extends Content> List<T> findSame(T brand, Set<T> brands) {
+		List<T> same = Lists.newArrayList(brand);
+		for (T possiblyEquivalent : brands) {
 			if (!brand.equals(possiblyEquivalent) && possiblyEquivalent.isEquivalentTo(brand)) {
 				same.add(possiblyEquivalent);
 			}
@@ -100,11 +102,11 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 		return same;
 	}
 
-	private void sortByPrefs(ContentQuery query, List<Brand> equivalentBrands) {
+	private void sortByPrefs(ContentQuery query, List<? extends Content> equivalentBrands) {
 		final Ordering<Publisher> byPublisher = query.getConfiguration().publisherPrecedenceOrdering();
-		Collections.sort(equivalentBrands, new Comparator<Brand>() {
+		Collections.sort(equivalentBrands, new Comparator<Content>() {
 			@Override
-			public int compare(Brand o1, Brand o2) {
+			public int compare(Content o1, Content o2) {
 				return byPublisher.compare(o1.getPublisher(), o2.getPublisher());
 			}
 		});
@@ -112,7 +114,12 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 
 	@Override
 	public List<Item> executeItemQuery(ContentQuery query) {
-		return delegate.executeItemQuery(query);
+		List<Item> items = delegate.executeItemQuery(query);
+		
+		if (!query.getConfiguration().precedenceEnabled()) {
+			return items;
+		}
+		return mergeDuplicates(query, items);
 	}
 
 	@Override
