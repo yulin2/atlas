@@ -36,6 +36,6 @@ public class SeesawItemAdapterTest extends TestCase {
         Location firstLocation = firstEncoding.getAvailableAt().iterator().next();
         assertNotNull(firstLocation.getPolicy());
         assertEquals(RevenueContract.PAY_TO_RENT, firstLocation.getPolicy().getRevenueContract());
-        assertEquals(new Price(Currency.getInstance("GBP"), 119), firstLocation.getPolicy().getPrice());
+        assertEquals(new Price(Currency.getInstance("GBP"), 49), firstLocation.getPolicy().getPrice());
     }
 }
