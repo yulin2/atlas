@@ -14,7 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
-import org.atlasapi.equiv.query.BrandMergingQueryExecutor;
+import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ContentListener;
@@ -82,7 +82,7 @@ public class QueryModule {
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    UriFetchingQueryExecutor uriFetching = new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()));
 		CurieResolvingQueryExecutor curieResolving = new CurieResolvingQueryExecutor(uriFetching);
-		BrandMergingQueryExecutor brandMerger = new BrandMergingQueryExecutor(curieResolving);
+		MergeOnOutputQueryExecutor brandMerger = new MergeOnOutputQueryExecutor(curieResolving);
 	    if (Boolean.parseBoolean(applicationsEnabled)) {
 	        return new ApplicationConfigurationQueryExecutor(brandMerger);
 	    } else {
