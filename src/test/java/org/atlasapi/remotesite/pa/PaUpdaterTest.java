@@ -7,9 +7,9 @@ import org.joda.time.DateTimeZone;
 public class PaUpdaterTest extends TestCase {
 
     public void testShouldGetCorrectBizzarePaDateTimes() {
-        DateTimeZone zone26 = PaUpdater.getTimeZone("20100326");
-        DateTimeZone zone27 = PaUpdater.getTimeZone("20100327");
-        DateTimeZone zone28 = PaUpdater.getTimeZone("20100328");
+        DateTimeZone zone26 = PaCompleteUpdater.getTimeZone("20100326");
+        DateTimeZone zone27 = PaCompleteUpdater.getTimeZone("20100327");
+        DateTimeZone zone28 = PaCompleteUpdater.getTimeZone("20100328");
         
         assertEquals(DateTimeZone.forOffsetHours(0), PaProgrammeProcessor.getTransmissionTime("26/03/2010", "11:00", zone26).getZone());
         assertEquals(DateTimeZone.forOffsetHours(0), PaProgrammeProcessor.getTransmissionTime("27/03/2010", "11:00", zone27).getZone());

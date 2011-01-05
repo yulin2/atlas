@@ -20,19 +20,17 @@ import org.xml.sax.XMLReader;
 
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class PaUpdater implements Runnable {
+public abstract class PaBaseProgrammeUpdater implements Runnable {
 
     private static final Pattern FILEDATE = Pattern.compile("^.*/(\\d+)_.*$");
     
     private final AdapterLog log;
     private boolean isRunning = false;
-    private final PaLocalFileManager fileManager;
 
     private final PaProgrammeProcessor processor;
 
-    public PaUpdater(PaProgrammeProcessor processor, PaLocalFileManager fileManager, AdapterLog log) {
+    public PaBaseProgrammeUpdater(PaProgrammeProcessor processor, AdapterLog log) {
         this.processor = processor;
-        this.fileManager = fileManager;
         this.log = log;
     }
 
@@ -41,18 +39,14 @@ public class PaUpdater implements Runnable {
     }
     
     @Override
-    public void run() {
+    public abstract void run();
+    
+    protected void processFiles(Iterable<File> files) {
         if (isRunning) {
             throw new IllegalStateException("Already running");
         }
 
         isRunning = true;
-        try {
-            fileManager.updateFilesFromFtpSite();
-        } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("Error when updating files from the PA FTP site").withSource(PaUpdater.class));
-        }
-
         try {
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
             Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -62,13 +56,13 @@ public class PaUpdater implements Runnable {
             XMLReader reader = factory.newSAXParser().getXMLReader();
             reader.setContentHandler(unmarshaller.getUnmarshallerHandler());
 
-            for (File file : fileManager.localFiles()) {
+            for (File file : files) {
                 try {
                     String filename = file.toURI().toString();
                     Matcher matcher = FILEDATE.matcher(filename);
                     if (matcher.matches()) {
                         final DateTimeZone zone = getTimeZone(matcher.group(1));
-                        log.record(new AdapterLogEntry(Severity.INFO).withSource(PaUpdater.class).withDescription("Processing file "+filename+" with timezone "+zone.toString()));
+                        log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processing file "+filename+" with timezone "+zone.toString()));
                         
                         unmarshaller.setListener(new Unmarshaller.Listener() {
                             public void beforeUnmarshal(Object target, Object parent) {
@@ -84,11 +78,11 @@ public class PaUpdater implements Runnable {
                         reader.parse(filename);
                     }
                 } catch (Exception e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("Error processing file " + file.toString()));
+                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing file " + file.toString()));
                 }
             }
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
         } finally {
             isRunning = false;
         }
