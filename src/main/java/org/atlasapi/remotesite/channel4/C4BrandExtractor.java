@@ -17,6 +17,8 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -36,8 +38,6 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
     private static final String BRAND_FLATTENED_NAME = "relation.BrandFlattened";
 
-	private static final Log LOG = LogFactory.getLog(C4BrandExtractor.class);
-
     private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
 
     private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
@@ -51,9 +51,11 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
     private final RemoteSiteClient<Feed> feedClient;
 	private final C4PreviousVersionDataMerger versionMerger;
 
+    private final AdapterLog log;
 
     public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, AdapterLog log) {
         feedClient = atomClient;
+        this.log = log;
         fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands().includeBroadcasts();
         flattenedBrandExtrator = new C4EpisodesExtractor(log);
         seriesExtractor = new C4SeriesExtractor(contentResolver, log);
@@ -170,7 +172,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
             try {
                 series.add(seriesExtractor.extract(feedClient.get(uri)));
             } catch (Exception e) {
-                throw new FetchException("Could not fetch series: " + uri, e);
+                log.record(new AdapterLogEntry(Severity.ERROR).withDescription("Unable to retrieve series: "+uri).withCause(e).withUri(uri).withSource(getClass()));
             }
         }
         return series;
@@ -253,7 +255,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
             Feed epg = fetch(brand, "/epg.atom");
             broadcastEpisodes = broadcastExtractor.extract(epg);
         } catch (Exception e) {
-            LOG.warn("Unable to retrieve epg information for brand: " + brand.getCanonicalUri());
+            log.record(new AdapterLogEntry(Severity.WARN).withDescription("Unable to retrieve epg information for brand: " + brand.getCanonicalUri()).withCause(e).withUri(brand.getCanonicalUri()).withSource(getClass()));
         }
 
         for (Episode broadcastEpisode : broadcastEpisodes) {
