@@ -81,11 +81,12 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
 
                             public void afterUnmarshal(Object target, Object parent) {
                                 if (target instanceof ProgData) {
-                                    try {
-                                        boundedQueue.submitTask(new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone));
-                                    } catch (InterruptedException e) {
-                                        log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
-                                    }
+//                                    try {
+//                                        boundedQueue.submitTask(new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone));
+//                                    } catch (InterruptedException e) {
+//                                        log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
+//                                    }
+                                    new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
                                 }
                             }
                         });
