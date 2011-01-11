@@ -22,6 +22,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
@@ -87,7 +88,7 @@ public class PaProgrammeProcessor {
 
     private Maybe<Brand> getBrand(ProgData progData) {
         String brandId = progData.getSeriesId();
-        if (brandId == null || brandId.trim().isEmpty()) {
+        if (Strings.isNullOrEmpty(brandId) || Strings.isNullOrEmpty(brandId.trim())) {
             return Maybe.nothing();
         }
 
@@ -113,7 +114,7 @@ public class PaProgrammeProcessor {
     }
 
     private Maybe<Series> getSeries(ProgData progData) {
-        if (progData.getSeriesNumber() != null) {
+        if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
         
@@ -135,7 +136,7 @@ public class PaProgrammeProcessor {
 
     private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
-        if (channelUri == null) {
+        if (Strings.isNullOrEmpty(channelUri)) {
             return Maybe.nothing();
         }
 
