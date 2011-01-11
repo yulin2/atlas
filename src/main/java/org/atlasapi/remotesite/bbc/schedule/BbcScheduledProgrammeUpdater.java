@@ -4,9 +4,10 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
@@ -20,23 +21,22 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 
 	private static final String SLASH_PROGRAMMES_BASE_URI = "http://www.bbc.co.uk/programmes/";
 
-	private static Log LOG = LogFactory.getLog(BbcScheduledProgrammeUpdater.class);
-	
-	private RemoteSiteClient<ChannelSchedule> scheduleClient;
-	private Fetcher<Content> fetcher;
+	private final RemoteSiteClient<ChannelSchedule> scheduleClient;
+	private final Fetcher<Content> fetcher;
 
-	private Iterable<String> uris;
-	
-	public BbcScheduledProgrammeUpdater() {
-	}
+	private final Iterable<String> uris;
 
-	public BbcScheduledProgrammeUpdater(Fetcher<Content> fetcher) throws JAXBException {
-		this(new BbcScheduleClient(), fetcher);
+	private final AdapterLog log;
+	
+	public BbcScheduledProgrammeUpdater(Fetcher<Content> fetcher, Iterable<String> uris, AdapterLog log) throws JAXBException {
+		this(new BbcScheduleClient(), fetcher, uris, log);
 	}
 	
-	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, Fetcher<Content> fetcher) {
+	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, Fetcher<Content> fetcher, Iterable<String> uris, AdapterLog log) {
 		this.scheduleClient = scheduleClient;
 		this.fetcher = fetcher;
+		this.uris = uris;
+		this.log = log;
 	}
 
 	private void update(String uri) {
@@ -49,21 +49,19 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 				}
 			}
 		} catch (Exception e) {
-			LOG.warn((e));
+			log.record(new AdapterLogEntry(Severity.WARN).withCause(e).withDescription("Exception updating BBC URI " + uri));
 		}
 		
 	}
 
 	@Override
 	public void run() {
+		log.record(new AdapterLogEntry(Severity.INFO).withDescription("BBC Schedule Updater started"));
 		for (String uri : uris) {
-			LOG.info("Updating from schedule: " + uri);
+			log.record(new AdapterLogEntry(Severity.DEBUG).withDescription("Updating from schedule: " + uri));
 			update(uri);
 		}
-	}
-
-	public void setUris(Iterable<String> uris) {
-		this.uris = uris;
+		log.record(new AdapterLogEntry(Severity.INFO).withDescription("BBC Schedule Updater finished"));
 	}
 
 }
