@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.bbc.schedule;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
@@ -25,15 +26,13 @@ public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 	
 	public void testFetchExtractedEpisodePid() throws Exception {
 		
-		BbcScheduledProgrammeUpdater scheduleFetcher = new BbcScheduledProgrammeUpdater(scheduleClient, fetcher);
+		BbcScheduledProgrammeUpdater scheduleFetcher = new BbcScheduledProgrammeUpdater(scheduleClient, fetcher, Lists.newArrayList("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"), new NullAdapterLog());
 		
 		checking(new Expectations() {{ 
 			one(scheduleClient).get("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"); will(returnValue(schedule));
 			one(fetcher).fetch("http://www.bbc.co.uk/programmes/b00abcd");
 			one(fetcher).fetch("http://www.bbc.co.uk/programmes/b00efgh");
 		}});
-		
-		scheduleFetcher.setUris(Lists.newArrayList("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"));
 
 		scheduleFetcher.run();
 	}
