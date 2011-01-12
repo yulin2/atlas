@@ -32,10 +32,13 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
     @Override
     public void run() {
         try {
+            log.info("Requesting content metadata with csa_id " + csaId);
             int jobId = apiHelper.getContentMetadata(csaId, null, null);
+            log.info("Request successful, metadata job number " + jobId);
             
             List<ICTomorrowItemMetadata> items = null;
             while (items == null) {
+                log.info("Requesting metadata file for job id " + jobId);
                 items = apiHelper.getMetadataFile(jobId);
                 
                 if (items == null) {
@@ -46,6 +49,8 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
                     }
                 }
             }
+            
+            log.info("Metadata file recieved for job " + jobId);
             
             Playlist ictomorrowPlaylist = new Playlist("http://ictomorrow.co.uk/all-content", "ict:all", Publisher.ICTOMORROW);
             ictomorrowPlaylist.setTitle("Classic Telly");
@@ -68,8 +73,7 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
             
             contentWriter.createOrUpdatePlaylistSkeleton(ictomorrowPlaylist);
         } catch (ICTomorrowApiException e) {
-            System.err.println(e.getMessage());
-           log.debug("API Exception while updating playlist", e);
+            log.debug("API Exception while updating playlist", e);
         }
     }
     
