@@ -56,7 +56,7 @@ public class C4SeriesExtractorTest extends TestCase {
 		// since this is not a /4od feed there should be no On Demand entries
 		assertThat(firstEpisode.getVersions(), is((Set) ImmutableSet.of()));
 
-		// The outer adapter will notice that this is the same as the brand title and will replace it with the series and episode number
-		assertThat(firstEpisode.getTitle(), is("Ramsay's Kitchen Nightmares"));
+		// The outer adapter will notice that this is the same as the brand title (ignoring punctuation and spacing) and will replace it with the series and episode number
+		assertThat(firstEpisode.getTitle(), is("Ramsay's Kitchen: Nightmares"));
 	}
 }
