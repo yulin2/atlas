@@ -3,15 +3,17 @@ package org.atlasapi.equiv.query;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -19,25 +21,27 @@ import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.QuerySplitter;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.content.query.QueryFragmentExtractor;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
-public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
+public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 
+	private static final Ordering<Episode> SERIES_ORDER = Ordering.from(new SeriesOrder());
+	
 	private final QuerySplitter splitter = new QuerySplitter();
 	
 	private final KnownTypeQueryExecutor delegate;
 
-	public BrandMergingQueryExecutor(KnownTypeQueryExecutor delegate) {
+	public MergeOnOutputQueryExecutor(KnownTypeQueryExecutor delegate) {
 		this.delegate = delegate;
 	}
 	
@@ -52,7 +56,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 		
 		Iterable<AtomicQuery> nonBrandAttributes =  nonBrandAttributes(query);
 		
-		List<Brand> merged = mergeDuplicateBrands(query, brands);
+		List<Brand> merged = mergeDuplicates(query, brands, BRAND_MERGER);
 		
 		for (Brand brand : merged) {
 			if (brand.getEquivalentTo().isEmpty()) {
@@ -61,7 +65,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 			AttributeQuery<String> uriEquals = Attributes.BRAND_URI.createQuery(Operators.EQUALS, brand.getEquivalentTo());
 			ContentQuery findEquivalent = query.copyWithOperands(Iterables.concat(ImmutableList.of(uriEquals), nonBrandAttributes)).copyWithSelection(Selection.ALL);
 
-			List<Brand> equivalentBrands = delegate.executeBrandQuery(findEquivalent);
+			List<Brand> equivalentBrands = Lists.newArrayList(delegate.executeBrandQuery(findEquivalent));
 			equivalentBrands.remove(brand);
 			
 			sortByPrefs(query, equivalentBrands);
@@ -71,27 +75,34 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 		return merged;
 	}
 
-	private List<Brand> mergeDuplicateBrands(ContentQuery query, List<Brand> brands) {
-		Set<String> brandIds = brandIdsFrom(query);
-
-		List<Brand> merged = Lists.newArrayListWithCapacity(brands.size());
-		Set<Brand> processed = Sets.newHashSet();
+	private <T extends Content> List<T> mergeDuplicates(ContentQuery query, List<T> brands, Merger<T> merger) {
+		List<T> merged = Lists.newArrayListWithCapacity(brands.size());
+		Set<T> processed = Sets.newHashSet();
 		
-		for (Brand brand : brands) {
-			if (processed.contains(brand) && !isExplicitlyMentioned(brandIds, brand)) {
+		for (T brand : brands) {
+			if (processed.contains(brand)) {
 				continue;
 			}
-			List<Brand> same = findSame(brand, Sets.difference(ImmutableSet.copyOf(brands), processed));
+			List<T> same = findSame(brand, brands);
 			processed.addAll(same);
 			sortByPrefs(query, same);
-			merged.add(same.get(0));
+			T chosen = same.get(0);
+			merger.merge(chosen, same.subList(1, same.size()));
+			merged.add(chosen);
 		}
 		return merged;
 	}
-
-	private List<Brand> findSame(Brand brand, Set<Brand> brands) {
-		List<Brand> same = Lists.newArrayList(brand);
-		for (Brand possiblyEquivalent : brands) {
+	
+	private static interface Merger<T extends Content> {
+		
+		void merge(T chosen, List<T> notChosen);
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T extends Content> List<T> findSame(T brand, Iterable<T> contents) {
+		List<T> same = Lists.newArrayList(brand);
+		for (T possiblyEquivalent : contents) {
 			if (!brand.equals(possiblyEquivalent) && possiblyEquivalent.isEquivalentTo(brand)) {
 				same.add(possiblyEquivalent);
 			}
@@ -99,34 +110,43 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 		return same;
 	}
 
-	private void sortByPrefs(ContentQuery query, List<Brand> equivalentBrands) {
+	private void sortByPrefs(ContentQuery query, List<? extends Content> equivalentBrands) {
 		final Ordering<Publisher> byPublisher = query.getConfiguration().publisherPrecedenceOrdering();
-		Collections.sort(equivalentBrands, new Comparator<Brand>() {
+		Collections.sort(equivalentBrands, new Comparator<Content>() {
 			@Override
-			public int compare(Brand o1, Brand o2) {
+			public int compare(Content o1, Content o2) {
 				return byPublisher.compare(o1.getPublisher(), o2.getPublisher());
 			}
 		});
 	}
 
-	private boolean isExplicitlyMentioned(Set<String> brandsIds, Brand brand) {
-		return brandsIds.contains(brand.getCanonicalUri()) || brandsIds.contains(brand.getCurie());
-	}
+	private static final Merger<Item> ITEM_MERGER = new Merger<Item>() {
+		
+		@Override
+		public void merge(Item chosen, List<Item> notChosen) {
+			for (Item notChosenItem : notChosen) {
+				for (Clip clip : notChosenItem.getClips()) {
+					chosen.addClip(clip);
+				}
+			}
+		}
+	};
 	
-	// Extracts URIs and CURIEs from the query since if a Brand
-	// is requested by URI explicitly then it must be in the output set
-	@SuppressWarnings("unchecked")
-	private Set<String> brandIdsFrom(ContentQuery query) {
-		 Maybe<AttributeQuery<?>> brandIdConstraint = QueryFragmentExtractor.extract(query, ImmutableSet.<Attribute<?>>of(Attributes.BRAND_URI));
-		 if (brandIdConstraint.isNothing()) {
-			 return ImmutableSet.of();
-		 }
-		 return ImmutableSet.copyOf((Iterable<String>) brandIdConstraint.requireValue().getValue());
-	}
-
+	private static final Merger<Brand> BRAND_MERGER = new Merger<Brand>() {
+		
+		@Override
+		public void merge(Brand chosen, List<Brand> notChosen) {
+			// no op, we don't merge brand attributes
+		}
+	};
 	@Override
 	public List<Item> executeItemQuery(ContentQuery query) {
-		return delegate.executeItemQuery(query);
+		List<Item> items = delegate.executeItemQuery(query);
+		
+		if (!query.getConfiguration().precedenceEnabled()) {
+			return items;
+		}
+		return mergeDuplicates(query, items, ITEM_MERGER);
 	}
 
 	@Override
@@ -151,20 +171,25 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 			}
 
 			@Override
-			public Iterable<Item> merge(List<Item> items, List<Item> matches) {
-				Set<SeriesAndEpisodeNumber> seen = Sets.newHashSet();
-				List<Item> merged = Lists.newArrayList();
+			public Iterable<? extends Item> merge(List<Item> items, List<Item> matches) {
+				Map<SeriesAndEpisodeNumber, Episode> chosenItemLookup = Maps.newHashMap();
 				for (Item item : Iterables.concat(items, matches)) {
-					SeriesAndEpisodeNumber se = new SeriesAndEpisodeNumber((Episode) item);
-					if (!seen.contains(se)) {
-						seen.add(se);
-						merged.add(item);
+					Episode episode = (Episode) item;
+					SeriesAndEpisodeNumber se = new SeriesAndEpisodeNumber(episode);
+					if (!chosenItemLookup.containsKey(se)) {
+						chosenItemLookup.put(se, episode);
+					} else {
+						Item chosen = chosenItemLookup.get(se);
+						for (Clip clip : item.getClips()) {
+							chosen.addClip(clip);
+						}
 					}
 				}
-				return merged;
+				return SERIES_ORDER.immutableSortedCopy(chosenItemLookup.values());
 			}
 		};
 		
+
 		protected abstract Predicate<Item> match();
 		
 		static ItemIdStrategy findBest(Iterable<Item> items) {
@@ -174,7 +199,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 			return null;
 		}
 		
-		public abstract Iterable<Item> merge(List<Item> items, List<Item> matches);
+		public abstract Iterable<? extends Item> merge(List<Item> items, List<Item> matches);
 	}
 	
 	private void mergeIn(Brand brand, List<Brand> equivalentBrands) {
@@ -194,8 +219,7 @@ public class BrandMergingQueryExecutor implements KnownTypeQueryExecutor {
 				matches.addAll(matches);
 			}
 		}
-		List<Item> merged = Lists.newArrayList(strategy.merge(items, matches));
-		brand.setItems(merged);
+		brand.setItems(strategy.merge(items, matches));
 	}
 
 	private List<Item> findItemsSuitableForMerging(Brand brand, List<Brand> equivalentBrands) {

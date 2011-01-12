@@ -81,4 +81,12 @@ public class TVBlobService {
     public int hashCode() {
         return slug.hashCode();
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (obj instanceof TVBlobService) {
+    		return slug.equals(((TVBlobService) obj).slug);
+    	}
+    	return false;
+    }
 }

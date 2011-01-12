@@ -122,8 +122,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			
 			episode.setDescription(description(entry));
 			
-			Element mediaGroup = C4AtomApi.mediaGroup(entry);
-
+			Element mediaGroup = include4odInfo ? C4AtomApi.mediaGroup(entry) : C4AtomApi.mediaContent(entry);
 			
 			if (mediaGroup != null) {
 				Element thumbnail = mediaGroup.getChild("thumbnail", C4AtomApi.NS_MEDIA_RSS);

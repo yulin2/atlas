@@ -15,10 +15,14 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.s3.S3Client;
+import org.joda.time.DateTime;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaLocalFileManager {
     
@@ -132,6 +136,17 @@ public class PaLocalFileManager {
     
     public List<File> localFiles() {
         return ImmutableList.copyOf(localFolder.listFiles(filenameFilter));
+    }
+    
+    public List<File> recentlyUpdatedFiles() {
+        final Long since = new DateTime(DateTimeZones.UTC).minusDays(2).getMillis();
+        
+        return ImmutableList.copyOf(Iterables.filter(localFiles(), new Predicate<File>() {
+            @Override
+            public boolean apply(File input) {
+                return input.lastModified() > since;
+            }
+        }));
     }
     
     private Maybe<File> findExistingFile(String fileName) {

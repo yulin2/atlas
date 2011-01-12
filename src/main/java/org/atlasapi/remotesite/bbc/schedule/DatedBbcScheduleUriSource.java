@@ -18,8 +18,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.atlasapi.feeds.radioplayer.RadioPlayerService;
+import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
@@ -46,17 +51,23 @@ public class DatedBbcScheduleUriSource implements Iterable<String> {
 		
 		for(int i = 0; i <= daysToLookAhead; i++) {
 			DateTime scheduleDay = now.plusDays(i);
-			int year = scheduleDay.getYear();
-			int month = scheduleDay.getMonthOfYear();
-			int day = scheduleDay.getDayOfMonth();
+			final int year = scheduleDay.getYear();
+			final int month = scheduleDay.getMonthOfYear();
+			final int day = scheduleDay.getDayOfMonth();
 			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcone/programmes/schedules/london/%d/%02d/%02d.xml", year, month, day));
 			channelSchedules.add(String.format("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/%d/%02d/%02d.xml", year, month, day));
 			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcthree/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
 			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcfour/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
 			
-			channelSchedules.add(String.format("http://www.bbc.co.uk/radio2/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
-			channelSchedules.add(String.format("http://www.bbc.co.uk/radio1/programmes/schedules/england/%d/%02d/%02d.xml", year, month, day));
-			channelSchedules.add(String.format("http://www.bbc.co.uk/radio4/programmes/schedules/fm/%d/%02d/%02d.xml", year, month, day));
+//			channelSchedules.add(String.format("http://www.bbc.co.uk/radio2/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
+//			channelSchedules.add(String.format("http://www.bbc.co.uk/radio1/programmes/schedules/england/%d/%02d/%02d.xml", year, month, day));
+//			channelSchedules.add(String.format("http://www.bbc.co.uk/radio4/programmes/schedules/fm/%d/%02d/%02d.xml", year, month, day));
+			channelSchedules.addAll(ImmutableSet.copyOf(Iterables.transform(RadioPlayerServices.services, new Function<RadioPlayerService, String>() {
+				@Override
+				public String apply(RadioPlayerService input) {
+					return String.format("%s/%d/%02d/%02d.xml", input.getScheduleUri(), year, month, day);
+				}
+			})));
 		}
 		return Collections.unmodifiableList(channelSchedules );
 	}

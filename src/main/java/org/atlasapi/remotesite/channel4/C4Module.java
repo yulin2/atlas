@@ -28,7 +28,7 @@ import com.sun.syndication.feed.atom.Feed;
 @Configuration
 public class C4Module {
 
-	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
+	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	
 	private @Autowired SimpleScheduler scheduler;
@@ -41,8 +41,8 @@ public class C4Module {
 	@PostConstruct
 	public void startBackgroundTasks(){
 		if (!"DISABLED".equals(c4ApiKey)) {
-			scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);			;
-			scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);			;
+			scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);
+			scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("C4 update scheduled tasks installed")
 				.withSource(C4AtoZAtomContentLoader.class));

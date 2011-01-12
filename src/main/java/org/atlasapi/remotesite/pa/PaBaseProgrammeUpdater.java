@@ -1,9 +1,12 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PreDestroy;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.SAXParserFactory;
@@ -13,6 +16,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
+import org.atlasapi.util.concurrency.BoundedExecutor;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -20,19 +24,19 @@ import org.xml.sax.XMLReader;
 
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class PaUpdater implements Runnable {
+public abstract class PaBaseProgrammeUpdater implements Runnable {
 
     private static final Pattern FILEDATE = Pattern.compile("^.*/(\\d+)_.*$");
     
     private final AdapterLog log;
     private boolean isRunning = false;
-    private final PaLocalFileManager fileManager;
 
     private final PaProgrammeProcessor processor;
+    private final ExecutorService executor = Executors.newFixedThreadPool(5);
+    private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 10);
 
-    public PaUpdater(PaProgrammeProcessor processor, PaLocalFileManager fileManager, AdapterLog log) {
+    public PaBaseProgrammeUpdater(PaProgrammeProcessor processor, AdapterLog log) {
         this.processor = processor;
-        this.fileManager = fileManager;
         this.log = log;
     }
 
@@ -41,18 +45,19 @@ public class PaUpdater implements Runnable {
     }
     
     @Override
-    public void run() {
+    public abstract void run();
+    
+    @PreDestroy
+    public void shutdown() {
+        executor.shutdown();
+    }
+    
+    protected void processFiles(Iterable<File> files) {
         if (isRunning) {
             throw new IllegalStateException("Already running");
         }
 
         isRunning = true;
-        try {
-            fileManager.updateFilesFromFtpSite();
-        } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("Error when updating files from the PA FTP site").withSource(PaUpdater.class));
-        }
-
         try {
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
             Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -62,19 +67,26 @@ public class PaUpdater implements Runnable {
             XMLReader reader = factory.newSAXParser().getXMLReader();
             reader.setContentHandler(unmarshaller.getUnmarshallerHandler());
 
-            for (File file : fileManager.localFiles()) {
+            for (File file : files) {
                 try {
                     String filename = file.toURI().toString();
                     Matcher matcher = FILEDATE.matcher(filename);
                     if (matcher.matches()) {
                         final DateTimeZone zone = getTimeZone(matcher.group(1));
+                        log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processing file "+filename+" with timezone "+zone.toString()));
+                        
                         unmarshaller.setListener(new Unmarshaller.Listener() {
                             public void beforeUnmarshal(Object target, Object parent) {
                             }
 
                             public void afterUnmarshal(Object target, Object parent) {
                                 if (target instanceof ProgData) {
-                                    processor.process((ProgData) target, (ChannelData) parent, zone);
+//                                    try {
+//                                        boundedQueue.submitTask(new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone));
+//                                    } catch (InterruptedException e) {
+//                                        log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
+//                                    }
+                                    new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
                                 }
                             }
                         });
@@ -82,11 +94,11 @@ public class PaUpdater implements Runnable {
                         reader.parse(filename);
                     }
                 } catch (Exception e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class).withDescription("Error processing file " + file.toString()));
+                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing file " + file.toString()));
                 }
             }
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaUpdater.class));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
         } finally {
             isRunning = false;
         }
@@ -97,5 +109,29 @@ public class PaUpdater implements Runnable {
         DateTime timezoneDateTime = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON).parseDateTime(timezoneDateString);
         DateTimeZone zone = timezoneDateTime.getZone();
         return DateTimeZone.forOffsetMillis(zone.getOffset(timezoneDateTime));
+    }
+    
+    class ProcessProgrammeJob implements Runnable {
+        
+        private final ProgData progData;
+        private final ChannelData channelData;
+        private final DateTimeZone zone;
+
+        public ProcessProgrammeJob(ProgData progData, ChannelData channelData, DateTimeZone zone) {
+            this.progData = progData;
+            this.channelData = channelData;
+            this.zone = zone;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (progData != null) {
+                    processor.process(progData, channelData, zone);
+                }
+            } catch (Exception e) {
+                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing programme " + progData));
+            }
+        }
     }
 }

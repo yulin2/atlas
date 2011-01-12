@@ -68,7 +68,7 @@ public class TitleQueryBuilder {
 			PrefixQuery prefix = new PrefixQuery(term);
 			queryForThisTerm.add(prefix, Occur.SHOULD);
 			
-			queryForThisTerm.add(new FuzzyQuery(term, 0.65f, 4),Occur.SHOULD);
+			queryForThisTerm.add(new FuzzyQuery(term, 0.65f, USE_PREFIX_SEARCH_UP_TO),Occur.SHOULD);
 			queryForTerms.add(queryForThisTerm, Occur.MUST);
 		}
 	
@@ -90,7 +90,7 @@ public class TitleQueryBuilder {
 	}
 
 	private FuzzyQuery fuzzyWithoutSpaces(String flattened) {
-		return new FuzzyQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, flattened), 0.8f, 4);
+		return new FuzzyQuery(new Term(InMemoryFuzzySearcher.FIELD_TITLE_FLATTENED, flattened), 0.8f, USE_PREFIX_SEARCH_UP_TO);
 	}
 	
 	private static List<String> tokens(String queryString) {

@@ -43,6 +43,42 @@ public class PaChannelMap {
 //        channelMap.put(31, Channel.BBC_TWO_SOUTH_WEST);
 //        channelMap.put(32, Channel.BBC_TWO_WEST);
 //        channelMap.put(724, Channel.BBC_TWO_LONDON);
+        
+        channelMap.put(935, Channel.BBC_THREE);
+        channelMap.put(742, Channel.BBC_FOUR);
+        channelMap.put(1228, Channel.BBC_HD);
+        
+        channelMap.put(49, Channel.ITV1_LONDON);
+        channelMap.put(35, Channel.ITV1_GRANADA);
+        channelMap.put(37, Channel.ITV1_TYNE_TEES);
+        channelMap.put(38, Channel.ITV1_BORDER_SOUTH);
+        channelMap.put(42, Channel.ITV1_MERIDIAN);
+        channelMap.put(43, Channel.ITV1_ANGLIA);
+        channelMap.put(44, Channel.ITV1_CHANNEL);
+        channelMap.put(45, Channel.ITV1_WALES);
+        channelMap.put(46, Channel.ITV1_WEST);
+        channelMap.put(47, Channel.ITV1_CARLTON_CENTRAL);
+        channelMap.put(48, Channel.ITV1_CARLTON_WESTCOUNTRY);
+        channelMap.put(698, Channel.ITV1_BORDER_NORTH);
+        channelMap.put(1296, Channel.ITV1_THAMES_VALLEY_NORTH);
+        channelMap.put(1297, Channel.ITV1_THAMES_VALLEY_SOUTH);
+        channelMap.put(1560, Channel.ITV1_HD);
+        channelMap.put(47, Channel.ITV1_CARLTON_CENTRAL);
+        
+        channelMap.put(451, Channel.ITV2);
+        channelMap.put(1602, Channel.ITV2_HD);
+        channelMap.put(1065, Channel.ITV3);
+        channelMap.put(1612, Channel.ITV3_HD);
+        channelMap.put(1174, Channel.ITV4);
+        channelMap.put(1613, Channel.ITV4_HD);
+        
+        channelMap.put(53, Channel.CHANNEL_FOUR);
+        channelMap.put(605, Channel.E_FOUR);
+        channelMap.put(1167, Channel.MORE_FOUR);
+        
+        channelMap.put(54, Channel.FIVE);
+        channelMap.put(1289, Channel.FIVER);
+        channelMap.put(1290, Channel.FIVE_USA);
     }
     
     public String getChannelUri(int channelId) {
