@@ -5,6 +5,8 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -27,14 +29,17 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 	private final Iterable<String> uris;
 
 	private final AdapterLog log;
+
+	private final DefinitiveContentWriter writer;
 	
-	public BbcScheduledProgrammeUpdater(Fetcher<Content> fetcher, Iterable<String> uris, AdapterLog log) throws JAXBException {
-		this(new BbcScheduleClient(), fetcher, uris, log);
+	public BbcScheduledProgrammeUpdater(Fetcher<Content> fetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) throws JAXBException {
+		this(new BbcScheduleClient(), fetcher, writer, uris, log);
 	}
 	
-	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, Fetcher<Content> fetcher, Iterable<String> uris, AdapterLog log) {
+	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, Fetcher<Content> fetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) {
 		this.scheduleClient = scheduleClient;
 		this.fetcher = fetcher;
+		this.writer = writer;
 		this.uris = uris;
 		this.log = log;
 	}
@@ -45,7 +50,7 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 			List<Programme> programmes = schedule.programmes();
 			for (Programme programme : programmes) {
 				if (programme.isEpisode()) {
-					fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
+					writer.createOrUpdateDefinitiveItem((Item)fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid()));
 				}
 			}
 		} catch (Exception e) {

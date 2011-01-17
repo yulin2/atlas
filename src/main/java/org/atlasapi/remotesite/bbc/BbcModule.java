@@ -9,7 +9,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
@@ -59,8 +58,8 @@ public class BbcModule {
 	
 	@Bean Runnable bbcSchedulesUpdater() throws JAXBException {
 		DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource();
-		uriSource.setDaysToLookAhead(14);
-		return new BbcScheduledProgrammeUpdater(bbcProgrammeAdapter(), uriSource, log);
+		uriSource.setDaysToLookAhead(10);
+		return new BbcScheduledProgrammeUpdater(bbcProgrammeAdapter(), contentWriters, uriSource, log);
 	}
 
 	@Bean Runnable bbcHighlightsUpdater() {

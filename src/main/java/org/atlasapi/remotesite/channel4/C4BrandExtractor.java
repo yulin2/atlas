@@ -7,8 +7,6 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
@@ -76,7 +74,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
             if (odEpisode != null) {
                 episode.setVersions(odEpisode.getVersions());
             }
-            if (episode.getTitle().equals(brand.getTitle())) {
+            if (equivalentTitles(brand, episode)) {
                 if (episode.getSeriesNumber() != null && episode.getEpisodeNumber() != null) {
                     episode.setTitle("Series " + episode.getSeriesNumber() + " Episode " + episode.getEpisodeNumber());
                 }
@@ -106,6 +104,11 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
         
         return brand;
     }
+
+	private boolean equivalentTitles(Brand brand, Episode episode) {
+		String notAlphanumeric = "[^\\d\\w]";
+		return episode.getTitle().replaceAll(notAlphanumeric, "").equals(brand.getTitle().replaceAll(notAlphanumeric, ""));
+	}
 
 	@SuppressWarnings("unchecked")
 	private List<Episode> itemsFor(Brand brand) {
