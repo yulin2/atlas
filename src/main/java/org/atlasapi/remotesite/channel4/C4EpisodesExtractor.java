@@ -32,6 +32,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -53,6 +54,7 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>> {
     
+	public static final String DC_AGE_RATING = "dc:relation.AgeRating";
 	public static final String DC_GUIDANCE = "dc:relation.Guidance";
 	public static final String DC_TERMS_AVAILABLE = "dcterms:available";
 	public static final String DC_TX_DATE = "dc:date.TXDate";
@@ -292,13 +294,14 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			version.setDuration(duration);
 		}
 		
+		Integer ageRating = lookup.get(DC_AGE_RATING) != null ? Integer.parseInt(lookup.get(DC_AGE_RATING)) : null;
 		String guidance = lookup.get(DC_GUIDANCE);
-		if (guidance != null) {
-			version.setRating("http://ref.atlasapi.org/ratings/simple/adult");
-			version.setRatingText(guidance);
+
+		if (ageRating != null && ageRating > 0 && guidance != null) {
+			version.setRestriction(Restriction.from(ageRating, guidance));
 		} else {
-			version.setRating("http://ref.atlasapi.org/ratings/simple/nonadult");
-		} 
+			version.setRestriction(Restriction.from(guidance));
+		}
 		
 		if (inlcudeBroadcasts) {
 			String txChannel = CHANNEL_LOOKUP.get(lookup.get(DC_TX_CHANNEL));

@@ -58,8 +58,8 @@ public class BbcModule {
 	
 	@Bean Runnable bbcSchedulesUpdater() throws JAXBException {
 		DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource();
-		uriSource.setDaysToLookAhead(14);
-		return new BbcScheduledProgrammeUpdater(bbcProgrammeAdapter(), uriSource, log);
+		uriSource.setDaysToLookAhead(10);
+		return new BbcScheduledProgrammeUpdater(bbcProgrammeAdapter(), contentWriters, uriSource, log);
 	}
 
 	@Bean Runnable bbcHighlightsUpdater() {
