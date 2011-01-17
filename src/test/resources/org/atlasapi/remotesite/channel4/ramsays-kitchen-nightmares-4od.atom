@@ -28,7 +28,7 @@
     <dcterms:available>start=2009-07-01T22:00:00.000Z; end=2010-12-31T00:00:00.000Z; scheme=W3C-DTF</dcterms:available>
     <dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
     <dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
-    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.AgeRating>16</dc:relation.AgeRating>
     <dc:relation.Guidance>Strong language throughout</dc:relation.Guidance>
     <dc:relation.Subtitles>true</dc:relation.Subtitles>
     <dc:relation.AudioDescription>false</dc:relation.AudioDescription>
@@ -52,7 +52,7 @@
     <dcterms:available>start=2009-07-01T22:00:00.000Z; end=2010-12-31T00:00:00.000Z; scheme=W3C-DTF</dcterms:available>
     <dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
     <dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
-    <dc:relation.AgeRating>0</dc:relation.AgeRating>
+    <dc:relation.AgeRating>16</dc:relation.AgeRating>
     <dc:relation.Guidance>Strong language throughout</dc:relation.Guidance>
     <dc:relation.Subtitles>true</dc:relation.Subtitles>
     <dc:relation.AudioDescription>false</dc:relation.AudioDescription>
