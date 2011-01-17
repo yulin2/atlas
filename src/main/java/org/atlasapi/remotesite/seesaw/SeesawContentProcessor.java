@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -191,7 +192,9 @@ public class SeesawContentProcessor {
         
         Element ratingElement = groupElement.getFirstChildElement("rating", MEDIA);
         if (ratingElement != null) {
-            version.setRating(ratingElement.getValue());
+            version.setRestriction(
+            		ratingElement.getValue().matches("\\d+")? Restriction.from(Integer.parseInt(ratingElement.getValue()))
+            												: Restriction.from(ratingElement.getValue()));
         }
         
         return version;
