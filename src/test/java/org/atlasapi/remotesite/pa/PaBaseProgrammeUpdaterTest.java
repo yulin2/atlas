@@ -4,6 +4,11 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
@@ -35,7 +40,37 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         TestFileUpdater updater = new TestFileUpdater(programmeProcessor, log);
         updater.run();
         
-        assertNotNull(store.findByUri("http://pressassociation.com/brands/122139"));
+        Content content = store.findByUri("http://pressassociation.com/brands/122139");
+        assertNotNull(content);
+        assertTrue(content instanceof Brand);
+        Brand brand = (Brand) content;
+        assertFalse(brand.getItems().isEmpty());
+        
+        Item item = brand.getItems().get(0);
+        assertFalse(item.getVersions().isEmpty());
+        
+        Version version = item.getVersions().iterator().next();
+        assertFalse(version.getBroadcasts().isEmpty());
+        
+        Broadcast broadcast = version.getBroadcasts().iterator().next();
+        assertEquals("pa:71118471", broadcast.getId());
+        
+        updater.run();
+        
+        content = store.findByUri("http://pressassociation.com/brands/122139");
+        assertNotNull(content);
+        assertTrue(content instanceof Brand);
+        brand = (Brand) content;
+        assertFalse(brand.getItems().isEmpty());
+        
+        item = brand.getItems().get(0);
+        assertFalse(item.getVersions().isEmpty());
+        
+        version = item.getVersions().iterator().next();
+        assertFalse(version.getBroadcasts().isEmpty());
+        
+        broadcast = version.getBroadcasts().iterator().next();
+        assertEquals("pa:71118471", broadcast.getId());
     }
     
     static class TestFileUpdater extends PaBaseProgrammeUpdater {

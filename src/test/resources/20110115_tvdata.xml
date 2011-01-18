@@ -108,23 +108,6 @@
           <pictureUsage type="season" pictureUsage_id="75456-71118471" copyright="©BBC" start_date="18/12/2010" expiry_date="05/02/2011">webcomeflywithme2.jpg</pictureUsage>
         </pictures>
       </prog_data>
-      <prog_data>
-        <showing_id>71118511</showing_id>
-        <prog_id>131818258</prog_id>
-        <series_id>84155</series_id>
-          <date>15/01/2011</date>
-        <time>22:10</time>
-        <duration>20</duration>
-        <title>BBC News; Weather</title>
-        <category><category_name>News</category_name><category_code>2F02</category_code></category>
-        <category><category_name>Weather</category_name><category_code>2F03</category_code></category>
-        <rt_category><maincat>News and current affairs</maincat></rt_category>
-<videoplus>712467</videoplus><attr stereo="no" subtitles="yes" repeat="no" bw="no" premiere="no" new_series="no" last_in_series="no" surround="no" widescreen="yes" film="no" sign_lang="no" in_vision="no" audio_des="no" interactive="yes" hd="no" live="no" as_live="no" follow_on="no" choice="no" familychoice="no" tv_movie="no" web_choice="no"/>
-        <pictures>
-          <pictureUsage type="series" pictureUsage_id="59260-71118511" copyright="BBC" start_date="18/12/2010" expiry_date="05/02/2011">webBBCNewsWeatherGen.jpg</pictureUsage>
-          <pictureUsage type="series" pictureUsage_id="70951-71118511" copyright="PA Wire/Press Association Images" start_date="18/12/2010" expiry_date="05/02/2011">webweathergen13.jpg</pictureUsage>
-        </pictures>
-      </prog_data>
     </channel_data>
   </listings_date>
 </tv_data>
