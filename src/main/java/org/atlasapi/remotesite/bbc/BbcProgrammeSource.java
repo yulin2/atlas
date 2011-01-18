@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc;
 
+import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.remotesite.BaseSource;
@@ -7,15 +8,15 @@ import org.atlasapi.remotesite.BaseSource;
 public class BbcProgrammeSource extends BaseSource {
 
 	private final SlashProgrammesRdf episode;
-	private final SlashProgrammesVersionRdf version;
+	private final List<SlashProgrammesVersionRdf> versions;
 	private final String slashProgrammesUri;
     private final Set<ClipAndVersion> clips;
 
-	public BbcProgrammeSource(String uri, String slashProgrammesUri, SlashProgrammesRdf episode, SlashProgrammesVersionRdf version, Set<ClipAndVersion> clips) {
+	public BbcProgrammeSource(String uri, String slashProgrammesUri, SlashProgrammesRdf episode, List<SlashProgrammesVersionRdf> versions, Set<ClipAndVersion> clips) {
 		super(uri);
 		this.slashProgrammesUri = slashProgrammesUri;
 		this.episode = episode;
-		this.version = version;
+		this.versions = versions;
         this.clips = clips;
 	}
 	
@@ -23,8 +24,8 @@ public class BbcProgrammeSource extends BaseSource {
 		return episode;
 	}
 	
-	public SlashProgrammesVersionRdf version() {
-		return version;
+	public List<SlashProgrammesVersionRdf> versions() {
+		return versions;
 	}
 	
 	public String getSlashProgrammesUri() {
