@@ -70,7 +70,7 @@ public class BbcBrandExtractor  {
 					series.setContentType(brand.getContentType());
 				}
 				for (Item item : series.getItems()) {
-					if(brand.getContentType() != null && !item.getContentType().equals(brand.getContentType())) {
+					if(brand.getContentType() != null && !brand.getContentType().equals(item.getContentType())) {
 						item.setContentType(brand.getContentType());
 					}
 					brand.addItem(item);
