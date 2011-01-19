@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.bbc.atoz;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
@@ -59,6 +60,11 @@ public class BbcSlashProgrammesAtoZUpdater implements Runnable {
             }
         }
         executor.shutdown();
+        try {
+            executor.awaitTermination(10, TimeUnit.DAYS);
+        }catch (InterruptedException e) {
+            log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withCause(e).withDescription("Interrupted waiting for executor to terminate"));
+        }
     }
 
 	private void loadAndSave(String pid) {
