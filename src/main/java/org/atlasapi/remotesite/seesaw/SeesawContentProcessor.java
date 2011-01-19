@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.Policy.RevenueContract;
@@ -41,7 +42,6 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.hp.hpl.jena.ontology.Restriction;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.media.MimeType;
@@ -85,14 +85,14 @@ public class SeesawContentProcessor {
             if (description != null) {
                 if (description instanceof Series) {
                     Series series = (Series) description;
-                    series.addItem(episode);
+                    series.addContents(episode);
                     episode.setSeriesNumber(series.getSeriesNumber());
                     episode.setSeries(series);
                 }
                 else if (description instanceof Brand) {
                     Brand brand = (Brand) description;
-                    brand.addItem(episode);
-                    episode.setBrand(brand);
+                    brand.addContents(episode);
+                    episode.setContainer(brand);
                 }
                 else {
                     log.record(new AdapterLogEntry(Severity.DEBUG).withSource(SeesawContentProcessor.class).withDescription("Tried to join episode (uri: " + episode.getCanonicalUri() + ") to parent, but parent ID " + parentId + " was not a series or brand"));
