@@ -14,7 +14,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="updateMentionsScheduledTask" />
             <ref bean="updateTVBlobScheduledTask" />
             <ref bean="updateTVBlobTomorrowScheduledTask" />
-            <ref bean="updateSeesawAtoZScheduledTask" />
         </list>
     </property>
     <property name="daemon" value="true" />
