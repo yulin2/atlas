@@ -5,12 +5,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
@@ -24,9 +24,9 @@ import com.google.common.collect.Lists;
 public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 
 	RemoteSiteClient<ChannelSchedule> scheduleClient = mock(RemoteSiteClient.class);
-	Fetcher<Content> fetcher = mock(Fetcher.class);
+	Fetcher<Identified> fetcher = mock(Fetcher.class);
 	ContentResolver localFetcher = mock(ContentResolver.class);
-	DefinitiveContentWriter writer = mock(DefinitiveContentWriter.class);
+	ContentWriter writer = mock(ContentWriter.class);
 	
 	ChannelSchedule schedule = new ChannelSchedule();
 	
@@ -41,10 +41,10 @@ public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 	    final Episode containedInBrand = new Episode("containedInBrandUri", "containedInBrandCurie", Publisher.BBC);
         
 	    final Brand brand = new Brand("brandUri", "brandCurie", Publisher.BBC);
-        brand.addItem(containedInBrand);
+        brand.setContents(containedInBrand);
         
         final Episode replacingEpisode = new Episode("containedInBrandUri", "replacingCurie", Publisher.BBC);
-        replacingEpisode.setBrand(brand);
+        replacingEpisode.setContainer(brand);
         
         final Episode withoutBrand = new Episode("episodeWithoutBrandUri", "episodeWithoutBrandCurie", Publisher.BBC);
 		
@@ -54,14 +54,14 @@ public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 			one(scheduleClient).get("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"); will(returnValue(schedule));
 			one(fetcher).fetch("http://www.bbc.co.uk/programmes/b00abcd"); will(returnValue(replacingEpisode));
 			one(fetcher).fetch("http://www.bbc.co.uk/programmes/b00efgh"); will(returnValue(withoutBrand));
-			one(localFetcher).findByUri("brandUri"); will(returnValue(brand));
-			one(writer).createOrUpdateDefinitivePlaylist(with(any(Brand.class)));
-			one(writer).createOrUpdateDefinitiveItem(with(any(Item.class)));
+			one(localFetcher).findByCanonicalUri("brandUri"); will(returnValue(brand));
+			one(writer).createOrUpdate(with(any(Brand.class)), with(true));
+			one(writer).createOrUpdate(with(any(Item.class)));
 		}});
 
 		scheduleFetcher.run();
 		
-		assertThat(brand.getItems().size(), is(equalTo(1)));
-		assertThat(brand.getItems().get(0).getCurie(), is(equalTo("replacingCurie")));
+		assertThat(brand.getContents().size(), is(equalTo(1)));
+		assertThat(brand.getContents().get(0).getCurie(), is(equalTo("replacingCurie")));
 	}
 }

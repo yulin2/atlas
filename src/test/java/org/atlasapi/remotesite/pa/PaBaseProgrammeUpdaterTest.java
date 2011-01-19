@@ -6,7 +6,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
@@ -40,13 +40,13 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         TestFileUpdater updater = new TestFileUpdater(programmeProcessor, log);
         updater.run();
         
-        Content content = store.findByUri("http://pressassociation.com/brands/122139");
+        Identified content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
         assertNotNull(content);
         assertTrue(content instanceof Brand);
         Brand brand = (Brand) content;
-        assertFalse(brand.getItems().isEmpty());
+        assertFalse(brand.getContents().isEmpty());
         
-        Item item = brand.getItems().get(0);
+        Item item = brand.getContents().get(0);
         assertFalse(item.getVersions().isEmpty());
         
         Version version = item.getVersions().iterator().next();
@@ -57,13 +57,13 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         
         updater.run();
         
-        content = store.findByUri("http://pressassociation.com/brands/122139");
+        content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
         assertNotNull(content);
         assertTrue(content instanceof Brand);
         brand = (Brand) content;
-        assertFalse(brand.getItems().isEmpty());
+        assertFalse(brand.getContents().isEmpty());
         
-        item = brand.getItems().get(0);
+        item = brand.getContents().get(0);
         assertFalse(item.getVersions().isEmpty());
         
         version = item.getVersions().iterator().next();
