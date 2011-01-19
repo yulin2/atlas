@@ -96,13 +96,14 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 	@Override
 	public void run() {
 		log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Schedule Updater started"));
-		ExecutorService executor = Executors.newFixedThreadPool(10);
+		ExecutorService executor = Executors.newFixedThreadPool(5);
 		for (final String uri : uris) {
 		    executor.submit(new Runnable() {
                 @Override
                 public void run() {
                     log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Updating from schedule: " + uri));
                     update(uri);
+                    log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Finished updating from schedule: " + uri));
                 }
 		    });
 
