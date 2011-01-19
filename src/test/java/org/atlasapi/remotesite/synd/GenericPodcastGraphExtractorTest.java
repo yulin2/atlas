@@ -21,10 +21,10 @@ import static org.hamcrest.Matchers.not;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.jmock.integration.junit3.MockObjectTestCase;
@@ -92,11 +92,11 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testCanExtractTitleAndDescription() throws Exception {
 		
-		Playlist playlist = extractor.extract(source);
+		Container<?> playlist = extractor.extract(source);
 		assertThat(playlist.getCanonicalUri(), is(PODCAST_URI));
 		assertThat(playlist.getPublisher(), is(aPublisher));
 		
-		Item item = Iterables.getOnlyElement(playlist.getItems());
+		Item item = Iterables.getOnlyElement(playlist.getContents());
 		
 		assertThat(item.getCanonicalUri(), is(ENTRY_URI));
 		
@@ -130,8 +130,8 @@ public class GenericPodcastGraphExtractorTest extends MockObjectTestCase {
 	}
 
 	private Encoding extractEncodingFrom(SyndicationSource source) {
-		Playlist playlist = extractor.extract(source);
-		Item item = Iterables.getOnlyElement(playlist.getItems());
+		Container<?> playlist = extractor.extract(source);
+		Item item = Iterables.getOnlyElement(playlist.getContents());
 		Version version = Iterables.getOnlyElement(item.getVersions());
 		return Iterables.getOnlyElement(version.getManifestedAs());
 	}

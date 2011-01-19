@@ -24,7 +24,7 @@ class C4PreviousVersionDataMerger {
 	
 	void merge(Item item) {
 		
-		Item oldItem = (Item) contentResolver.findByUri(item.getCanonicalUri());
+		Item oldItem = (Item) contentResolver.findByCanonicalUri(item.getCanonicalUri());
 		
 		if (oldItem == null || oldItem.nativeVersions().isEmpty()) {
 			// can't merge if this is the first time we've seen

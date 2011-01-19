@@ -21,7 +21,7 @@ public class HuluItemAdapterTest extends TestCase {
         Episode item = (Episode) adapter.fetch(vanityUrl);
         assertNotNull(item);
 
-        Brand brand = item.getBrand();
+        Brand brand = item.getContainer();
         assertNotNull(brand);
         assertEquals("Glee", brand.getTitle());
         assertEquals("http://www.hulu.com/glee", brand.getCanonicalUri());

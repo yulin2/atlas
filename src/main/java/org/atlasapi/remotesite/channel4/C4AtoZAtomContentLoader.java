@@ -5,8 +5,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -19,6 +19,7 @@ import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
@@ -46,14 +47,14 @@ public class C4AtoZAtomContentLoader implements Runnable {
     void loadAndSaveByLetter(String letter) throws Exception {
         	String playlistUri = String.format(C4_ATOZ_URI_FORMAT, letter);
         	
-            Playlist playlist = new Playlist(playlistUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(playlistUri), Publisher.C4);
+            ContentGroup playlist = new ContentGroup(playlistUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(playlistUri), Publisher.C4);
             
             boolean hasNext = false;
             String currentPage = C4AtomApi.createAtoZRequest(letter, ".atom");
+            List<Brand> brands = Lists.newArrayList();
             do {
                 Feed feed = feedClient.get(currentPage);
-                loadFromFeed(playlist, feed);
-                
+                brands.addAll(loadAndSaveFromFeed(feed));
                 String nextUrl = extractNextLinkFromLinks(feed);
                 if (nextUrl != null) {
                     hasNext = true;
@@ -62,22 +63,24 @@ public class C4AtoZAtomContentLoader implements Runnable {
                     hasNext = false;
                 }
             } while (hasNext);
-            
-        	writer.createOrUpdatePlaylistSkeleton(playlist);
+            playlist.setContents(brands);
+        	writer.createOrUpdateSkeleton(playlist);
     }
 
 	@SuppressWarnings("unchecked")
-	private void loadFromFeed(Playlist playlist, Feed feed) {
+	private List<Brand> loadAndSaveFromFeed(Feed feed) {
+		List<Brand> brands = Lists.newArrayList();
 		for (Entry entry: (List<Entry>) feed.getEntries()) {
 		    String brandUri = extarctUriFromLinks(entry);
 		    if (brandUri != null && brandAdapter.canFetch(brandUri)) {
 		        Brand brand = fetchBrand(brandUri);
 		        if (brand != null) {
-		        	playlist.addPlaylist(brand);
-		        	writer.createOrUpdatePlaylist(brand, true);
+		        	brands.add(brand);
+		        	writer.createOrUpdate(brand, true);
 		        }
 		    }
 		}
+		return brands;
 	}
 
 	private Brand fetchBrand(String brandUri) {
@@ -85,8 +88,8 @@ public class C4AtoZAtomContentLoader implements Runnable {
 			return brandAdapter.fetch(brandUri);
 		} catch (Exception e) {
 			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(brandUri).withSource(brandAdapter.getClass()));
-			Content found = resolver.findByUri(brandUri);
-			if (found != null && Publisher.C4.equals(found.getPublisher())) {
+			Identified found = resolver.findByCanonicalUri(brandUri);
+			if (found != null && found instanceof Brand && Publisher.C4.equals(((Brand) found).getPublisher())) {
 				return (Brand) found;
 			}
 			return null;

@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.channel4;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.NullAdapterLog;
@@ -63,9 +63,9 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 			one(itemClient).get("http://api.channel4.com/programmes/atoz/a.atom"); will(returnValue(atoza.build()));
 			one(itemClient).get("http://api.channel4.com/programmes/atoz/a/page-2.atom"); will(returnValue(atoza2.build()));
 			
-			one(writer).createOrUpdatePlaylist(brand101, true);
-			one(writer).createOrUpdatePlaylist(brand202, true);
-			one(writer).createOrUpdatePlaylistSkeleton(new Playlist(uri, null));
+			one(writer).createOrUpdate(brand101, true);
+			one(writer).createOrUpdate(brand202, true);
+			one(writer).createOrUpdateSkeleton(new ContentGroup(uri, null));
 
 			allowing(brandAdapter).fetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(brand101));
 			allowing(brandAdapter).fetch("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(brand202));

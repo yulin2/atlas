@@ -6,8 +6,11 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.MutableContentList;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -38,11 +41,12 @@ public class BbcBrandExtractor  {
 		this.log = log;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Series extractSeriesFrom(SlashProgrammesSeriesContainer rdfSeries) {
 		Series series = new Series();
 		populatePlaylistAttributes(series, rdfSeries);
 		List<String> episodeUris = episodesFrom(rdfSeries.episodeResourceUris());
-		addDirectlyIncludedEpisodesTo(series, episodeUris);
+		addDirectlyIncludedEpisodesTo((MutableContentList) series, episodeUris);
     	return series;
 	}
 
@@ -69,25 +73,25 @@ public class BbcBrandExtractor  {
 				if (!series.getContentType().equals(brand.getContentType())) {
 					series.setContentType(brand.getContentType());
 				}
-				for (Item item : series.getItems()) {
-					if(!item.getContentType().equals(brand.getContentType())) {
-						item.setContentType(brand.getContentType());
+				for (Content episode : series.getContents()) {
+					if(!episode.getContentType().equals(brand.getContentType())) {
+						episode.setContentType(brand.getContentType());
 					}
-					brand.addItem(item);
+					brand.addContents((Episode) episode);
 				}
 			}
 		}
 		return brand;
 	}
 
-	private void addDirectlyIncludedEpisodesTo(Playlist playlist, List<String> episodes) {
+	private void addDirectlyIncludedEpisodesTo(MutableContentList<Episode> playlist, List<String> episodes) {
 		for (String episodeUri : mostRecent(episodes)) {
-			Content found = subContentExtractor.fetch(episodeUri);
+			Identified found = subContentExtractor.fetch(episodeUri);
 			if (!(found instanceof Item)) {
 				log.record(new AdapterLogEntry(Severity.WARN).withUri(episodeUri).withSource(getClass()).withDescription("Expected Item for PID: " + episodeUri));
 				continue;
 			} 
-			playlist.addItem((Item) found); 
+			playlist.addContents(ImmutableList.of((Episode) found)); 
 		}
 	}
 
@@ -111,7 +115,7 @@ public class BbcBrandExtractor  {
 		return episodes.subList(episodes.size() - MAX_EPISODES, episodes.size());
 	}
 
-	private void populatePlaylistAttributes(Playlist container, SlashProgrammesBase brandRef) {
+	private void populatePlaylistAttributes(Described container, SlashProgrammesBase brandRef) {
 		String brandUri = brandRef.uri();
 		container.setCanonicalUri(brandUri);
 		container.setCurie(BbcUriCanonicaliser.curieFor(brandUri));

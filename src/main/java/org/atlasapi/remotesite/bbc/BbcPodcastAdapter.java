@@ -15,7 +15,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
@@ -30,13 +31,13 @@ import com.sun.syndication.feed.synd.SyndFeed;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BbcPodcastAdapter extends SyndicationAdapter<Playlist> implements SiteSpecificAdapter<Playlist> {
+public class BbcPodcastAdapter extends SyndicationAdapter<Container<Item>> implements SiteSpecificAdapter<Container<Item>> {
 
 	public BbcPodcastAdapter() {
 		this(new SyndicationFeedClient(), new BbcPodcastGraphExtractor());
 	}
 	
-	protected BbcPodcastAdapter(RemoteSiteClient<SyndFeed> feedClient, ContentExtractor<SyndicationSource, Playlist> propertyExtractor) {
+	protected BbcPodcastAdapter(RemoteSiteClient<SyndFeed> feedClient, ContentExtractor<SyndicationSource, Container<Item>> propertyExtractor) {
 		super(feedClient, propertyExtractor);
 	}
 	

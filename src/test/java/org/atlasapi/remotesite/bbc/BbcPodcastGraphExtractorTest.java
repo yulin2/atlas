@@ -20,11 +20,11 @@ import static org.hamcrest.Matchers.is;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.synd.SyndicationSource;
@@ -95,14 +95,10 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testCanExtractTitleDescriptionAndPid() throws Exception {
 		
-		Playlist playlist = extractor.extract(source);
+		Container<Item> playlist = extractor.extract(source);
 		
-		// Check that it's just playlist and not a brand
-		assertEquals(Playlist.class, playlist.getClass());
+		Item item = Iterables.getOnlyElement(playlist.getContents());
 		
-		Item item = Iterables.getOnlyElement(playlist.getItems());
-		
-		//assertThat(representation, hasPropertyValue(PODCAST_URI, "aliases", Sets.newHashSet(SLASH_PROGRAMMES_URI)));
 		assertThat(item.getTitle(), is("BH"));
 		assertThat(item.getPublisher(), is(Publisher.BBC));
 		assertThat(item.getDescription(), is("Broadcasting House"));
@@ -110,9 +106,9 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	
 	public void testGeneratesVersionEncodingAndLocationData() throws Exception {
 		
-		Playlist playlist = extractor.extract(source);
+		Container<Item> playlist = extractor.extract(source);
 		
-		Item item = Iterables.getOnlyElement(playlist.getItems());
+		Item item = Iterables.getOnlyElement(playlist.getContents());
 		Version version = Iterables.getOnlyElement(item.getVersions());
 		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
 		Location location  = Iterables.getOnlyElement(encoding.getAvailableAt());
@@ -127,8 +123,8 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	}
 	
 	public void testDealsWithChrisMoylesEnhancedPodcastAsMp4() throws Exception {
-		Playlist playlist = extractor.extract(moylesSource());
-		Item item = Iterables.getOnlyElement(playlist.getItems());
+		Container<Item> playlist = extractor.extract(moylesSource());
+		Item item = Iterables.getOnlyElement(playlist.getContents());
 		Version version = Iterables.getOnlyElement(item.getVersions());
 		Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
 		assertThat(encoding.getDataContainerFormat(), is(MimeType.AUDIO_MP4));
@@ -152,11 +148,10 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 	}
 
 	public void testSetsContentType() {
-		Playlist playlist = extractor.extract(source);
-		Item item = Iterables.getOnlyElement(playlist.getItems());
+		Container<Item> playlist = extractor.extract(source);
+		Item item = Iterables.getOnlyElement(playlist.getContents());
 
 		assertThat(playlist.getContentType(), is(ContentType.AUDIO));
 		assertThat(item.getContentType(), is(ContentType.AUDIO));		
 	}
-	
 }

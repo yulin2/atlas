@@ -19,8 +19,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -84,9 +85,9 @@ public class BbcIplayerHightlightsAdapter implements Runnable {
 
 	private void loadAndSave(String uri) throws Exception {
 		List<String> urisFrom = readUrisFrom(uri);
-		Playlist playlist = new Playlist(uri, compact(uri).requireValue(), Publisher.BBC);
-		playlist.setItemUris(urisFrom);
-		writer.createOrUpdatePlaylistSkeleton(playlist);
+		ContentGroup playlist = new ContentGroup(uri, compact(uri).requireValue(), Publisher.BBC);
+		playlist.setContentUris(urisFrom);
+		writer.createOrUpdateSkeleton(playlist);
 	}
 
 	@SuppressWarnings("unchecked")

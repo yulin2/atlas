@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -64,12 +64,12 @@ public class BbcSlashProgrammesAtoZUpdater implements Runnable {
 	private void loadAndSave(String pid) {
 		String uri = SLASH_PROGRAMMES_BASE_URI + pid;
 		try {
-			Content content = fetcher.fetch(uri);
+			Identified content = fetcher.fetch(uri);
 		    if (content != null) {
 		    	if (content instanceof Item) {
-		    		writer.createOrUpdateItem((Item) content);
-		    	} else if (content instanceof Playlist) {
-		        	writer.createOrUpdatePlaylist((Playlist) content, true);
+		    		writer.createOrUpdate((Item) content);
+		    	} else if (content instanceof Container<?>) {
+		        	writer.createOrUpdate((Container<?>) content, true);
 		    	} else {
 		            throw new IllegalArgumentException("Could not persist content (unknown type): " + content);
 		    	}

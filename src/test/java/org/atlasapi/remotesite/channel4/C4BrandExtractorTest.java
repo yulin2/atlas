@@ -66,7 +66,7 @@ public class C4BrandExtractorTest extends TestCase {
 		
 		assertThat(brand.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares"));
 
-		Item firstItem = brand.getItems().get(0);
+		Item firstItem = brand.getContents().get(0);
 		
 		assertThat(firstItem.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1"));
 
@@ -80,7 +80,7 @@ public class C4BrandExtractorTest extends TestCase {
 		Location firstItemLocation = Iterables.getOnlyElement(firstItemEncoding.getAvailableAt());
 		assertThat(firstItemLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921983"));
 		
-		Episode episodeNotOn4od = (Episode) find("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-5", brand.getItems());
+		Episode episodeNotOn4od = (Episode) find("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-5", brand.getContents());
 		assertThat(episodeNotOn4od.getVersions().size(), is(0));
 	}
 	
@@ -88,7 +88,7 @@ public class C4BrandExtractorTest extends TestCase {
 	    Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 	    
 	    boolean found = false;
-	    for (Item item: brand.getItems()) {
+	    for (Item item : brand.getContents()) {
 	        if (item.getCanonicalUri().equals("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4/episode-5")) {
 	            assertFalse(item.getVersions().isEmpty());
 	            Version version = item.getVersions().iterator().next();
@@ -123,7 +123,7 @@ public class C4BrandExtractorTest extends TestCase {
         
         boolean found = false;
         boolean foundOld = false;
-        for (Item item: brand.getItems()) {
+        for (Item item: brand.getContents()) {
             if (item.getCanonicalUri().equals("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4/episode-5")) {
                 assertFalse(item.getVersions().isEmpty());
                 version = item.getVersions().iterator().next();
@@ -158,7 +158,7 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
 		Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
-		assertThat(brand.getItems().size(), is(greaterThan(1)));
+		assertThat(brand.getContents().size(), is(greaterThan(1)));
 	}
 	
 	public void testThatWhenTheEpisodeGuide404sSeries1IsAssumed() throws Exception {
@@ -170,7 +170,7 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
 		Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
-		assertThat(brand.getItems().size(), is(greaterThan(1)));
+		assertThat(brand.getContents().size(), is(greaterThan(1)));
 	}
 	
 	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries3IsReturned() throws Exception {
@@ -181,7 +181,7 @@ public class C4BrandExtractorTest extends TestCase {
             .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries4Feed.build());
 
         Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
-        assertThat(brand.getItems().size(), is(greaterThan(1)));
+        assertThat(brand.getContents().size(), is(greaterThan(1)));
     }
 	
 	
@@ -191,9 +191,9 @@ public class C4BrandExtractorTest extends TestCase {
          .respondTo("http://api.channel4.com/programmes/dispatches/episode-guide.atom", dispatchesEpisodeGuideFeed.build());
 		 
 	     Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/dispatches");
-	     assertThat(brand.getItems().size(), is(greaterThan(1)));
+	     assertThat(brand.getContents().size(), is(greaterThan(1)));
 	     
-	     for (Item item : brand.getItems()) {
+	     for (Item item : brand.getContents()) {
 			assertThat(item.getVersions().size(), is(0));
 		}
 	}
@@ -209,7 +209,7 @@ public class C4BrandExtractorTest extends TestCase {
            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries3Feed.build());
 
        Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
-       assertThat(brand.getItems().size(), is(greaterThan(1)));
+       assertThat(brand.getContents().size(), is(greaterThan(1)));
 	}
 	
 	public void testThatWhenTheEpisodeGuideRedirectsToSeries1TheSeriesIsRead() throws Exception {
@@ -218,7 +218,7 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", rknSeries3Feed.build());
 
 		Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
-		assertThat(brand.getItems().size(), is(greaterThan(1)));
+		assertThat(brand.getContents().size(), is(greaterThan(1)));
 	}
 
 	public void testThatClipsAreAddedToBrands() throws Exception {
@@ -255,7 +255,7 @@ public class C4BrandExtractorTest extends TestCase {
 		
 		Brand brand = new C4AtomBackedBrandAdapter(feedClient, contentResolver, nullLog).fetch("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 	
-		Item series3Ep1Parsed = Iterables.get(brand.getItems(), 0);
+		Item series3Ep1Parsed = Iterables.get(brand.getContents(), 0);
 		
 		assertTrue(Iterables.getOnlyElement(series3Ep1Parsed.getVersions()) == c4Version);
 	}

@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
 /**
@@ -37,49 +37,29 @@ import com.google.common.collect.Sets;
  */
 public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 
-	private final Fetcher<Content> fetcher;
+	private final Fetcher<Identified> fetcher;
 	private final KnownTypeQueryExecutor delegate;
 	
-	public UriFetchingQueryExecutor(Fetcher<Content> fetcher, KnownTypeQueryExecutor delegate) {
+	public UriFetchingQueryExecutor(Fetcher<Identified> fetcher, KnownTypeQueryExecutor delegate) {
 		this.fetcher = fetcher;
 		this.delegate = delegate;
 	}
 	
-	public List<Item> executeItemQuery(ContentQuery query) {
-		return executeContentQuery(query, new DelegateQueryExecutor<Item>() {
-
-			@Override
-			public List<Item> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
-				return executor.executeItemQuery(query);
-			}
-		});
+	@Override
+	public List<Content> discover(ContentQuery query) {
+		return delegate.discover(query);
 	}
 	
-	public List<Brand> executeBrandQuery(ContentQuery query) {
-		return executeContentQuery(query, new DelegateQueryExecutor<Brand>() {
-
-			@Override
-			public List<Brand> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
-				return executor.executeBrandQuery(query);
-			}
-		});
+	@Override
+	public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+		return executeContentQuery(uris, query);
 	}
 	
-	public List<Playlist> executePlaylistQuery(ContentQuery query) {
-		return executeContentQuery(query, new DelegateQueryExecutor<Playlist>() {
+	public List<Identified> executeContentQuery(Iterable<String> uris, ContentQuery query) {
 
-			@Override
-			public List<Playlist> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
-				return executor.executePlaylistQuery(query);
-			}
-		});
-	}
-	
-	public <T extends Content> List<T> executeContentQuery(ContentQuery query, DelegateQueryExecutor<T> executor) {
-
-		List<T> found =  executor.executeQuery(delegate, query);
+		List<Identified> found = delegate.executeUriQuery(uris, query);
 		
-		Set<String> missingUris = missingUris(found, query);
+		Set<String> missingUris = missingUris(found, uris);
 		
 		if (missingUris.isEmpty()) {
 			return found;
@@ -88,33 +68,36 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		boolean foundAtLeastOneUri = false;
 		
 		for (String missingUri : missingUris) {
-			Content remoteContent = fetcher.fetch(missingUri);
+			Identified remoteContent = fetcher.fetch(missingUri);
 			if (remoteContent != null) {
 				foundAtLeastOneUri = true;
 			}
 		}
 		
+		// If we couldn't resolve any of the missing uris then we should just return the 
+		// results of the original query
 		if (!foundAtLeastOneUri) {
 			return found;
 		}
 
-		return executor.executeQuery(delegate, query);
+		// re-attempt the query now the missing uris have been fetched
+		return delegate.executeUriQuery(uris, query);
 	}
 	
-	private static Set<String> missingUris(Iterable<? extends Content> content, ContentQuery query) {
-		return Sets.difference(UriExtractor.extractFrom(query), urisFrom(content));
+	private static Set<String> missingUris(Iterable<? extends Identified> content, Iterable<String> uris) {
+		return Sets.difference(ImmutableSet.copyOf(uris), urisFrom(content));
 	}
 
-	private static Set<String> urisFrom(Iterable<? extends Content> contents) {
+	private static Set<String> urisFrom(Iterable<? extends Identified> contents) {
 		Set<String> uris = Sets.newHashSet();
-		for (Content content : contents) {
+		for (Identified content : contents) {
 			uris.addAll(content.getAllUris());
-			if (content instanceof Playlist) {
-				for (Item item : ((Playlist) content).getItems()) {
-					uris.addAll(item.getAllUris());
-				}
-			}
 		}
 		return uris;
+	}
+
+	@Override
+	public Schedule schedule(ContentQuery query) {
+		return delegate.schedule(query);
 	}
 }

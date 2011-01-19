@@ -8,13 +8,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.FetchException;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
@@ -34,11 +34,11 @@ public class TVBlobDayPopulator {
     private final JsonFactory jsonF = new JsonFactory();
 
     static final Log LOG = LogFactory.getLog(TVBlobDayPopulator.class);
-    private final DefinitiveContentWriter contentStore;
+    private final ContentWriter contentStore;
     private final ContentResolver contentResolver;
     private Integer expireAfterDays;
 
-    public TVBlobDayPopulator(DefinitiveContentWriter contentStore, ContentResolver contentResolver, String channelSlug) {
+    public TVBlobDayPopulator(ContentWriter contentStore, ContentResolver contentResolver, String channelSlug) {
         this.contentStore = contentStore;
         this.contentResolver = contentResolver;
         this.channel = BASE_CHANNEL_URL + channelSlug;
@@ -84,7 +84,7 @@ public class TVBlobDayPopulator {
                             Broadcast broadcast = new Broadcast(channel, start.toDateTime(DateTimeZones.UTC), end.toDateTime(DateTimeZones.UTC));
                             broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
 
-                            Content currentContent = contentResolver.findByUri(episode.getCanonicalUri());
+                            Identified currentContent = contentResolver.findByCanonicalUri(episode.getCanonicalUri());
                             if (currentContent != null && currentContent instanceof Episode) {
                                 episode.setVersions(((Episode) currentContent).getVersions());
                             }
@@ -95,19 +95,18 @@ public class TVBlobDayPopulator {
                             version.setBroadcasts(expireBroadcasts(broadcasts));
 
                             if (brand != null) {
-                                brand.addItem(episode);
-                                Content currentBrand = contentResolver.findByUri(brand.getCanonicalUri());
+                                brand.addContents(episode);
+                                Identified currentBrand = contentResolver.findByCanonicalUri(brand.getCanonicalUri());
                                 if (currentBrand != null && currentBrand instanceof Brand) {
-                                    for (Item item : ((Brand) currentBrand).getItems()) {
-                                        if (!brand.getItems().contains(item)) {
-                                            brand.addItem(item);
+                                    for (Item item : ((Brand) currentBrand).getContents()) {
+                                        if (!brand.getContents().contains(item)) {
+                                            brand.addContents((Episode) item);
                                         }
                                     }
                                 }
-
-                                contentStore.createOrUpdateDefinitivePlaylist(brand);
+                                contentStore.createOrUpdate(brand, true);
                             } else {
-                                contentStore.createOrUpdateDefinitiveItem(episode);
+                                contentStore.createOrUpdate(episode);
                             }
 
                             numBroadcasts++;

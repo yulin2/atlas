@@ -16,7 +16,8 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.synd;
 
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -31,22 +32,22 @@ import com.sun.syndication.feed.opml.Opml;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OpmlAdapter implements SiteSpecificAdapter<Content> {
+public class OpmlAdapter implements SiteSpecificAdapter<ContentGroup> {
 
 	private final RemoteSiteClient<Opml> opmlClient;
-	private final ContentExtractor<OpmlSource, Playlist> graphExtractor;
+	private final ContentExtractor<OpmlSource, ContentGroup> graphExtractor;
 	
-	public OpmlAdapter(Fetcher<Content> delegateFetcher) {
+	public OpmlAdapter(Fetcher<Identified> delegateFetcher) {
 		this(new OpmlFeedClient(), new OpmlGraphExtractor(delegateFetcher));
 	}
 
-	OpmlAdapter(RemoteSiteClient<Opml> opmlFeedClient, ContentExtractor<OpmlSource, Playlist> graphExtractor) {
+	OpmlAdapter(RemoteSiteClient<Opml> opmlFeedClient, ContentExtractor<OpmlSource, ContentGroup> graphExtractor) {
 		this.opmlClient = opmlFeedClient;
 		this.graphExtractor = graphExtractor;
 	}
 
 	@Override
-	public Playlist fetch(String uri) {
+	public ContentGroup fetch(String uri) {
 		try {
 			Opml feed = opmlClient.get(uri);
 			return graphExtractor.extract(new OpmlSource(feed, uri));
@@ -58,5 +59,4 @@ public class OpmlAdapter implements SiteSpecificAdapter<Content> {
 	public boolean canFetch(String uri) {
 		return uri.endsWith("opml.xml") || uri.endsWith(".opml");
 	}
-
 }

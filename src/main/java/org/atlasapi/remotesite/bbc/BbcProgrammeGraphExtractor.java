@@ -194,7 +194,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
 		if (brand != null) {
 			String brandUri = brand.uri();
-			((Episode) item).setBrand(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(brandUri), Publisher.BBC));
+			((Episode) item).setContainer(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(brandUri), Publisher.BBC));
 		}
 		
 

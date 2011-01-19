@@ -22,7 +22,6 @@ import org.atlasapi.logging.HealthModule;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
-import org.atlasapi.tracking.TrackingModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +33,7 @@ import com.mongodb.Mongo;
 
 @Configuration
 @ImportResource({"classpath:atlas.xml", "beans-scheduling.xml"})
-@Import({AtlasLoggingModule.class, EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, TrackingModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class})
+@Import({AtlasLoggingModule.class, EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class})
 public class AtlasModule {
 	
 	private @Value("${mongo.host}") String mongoHost;

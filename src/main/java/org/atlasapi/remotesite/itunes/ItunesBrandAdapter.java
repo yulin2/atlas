@@ -71,13 +71,13 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
     }
     
     private void mergeItems(Brand to, Brand from) {
-        for (Item item : from.getItems()) {
+        for (Episode item : from.getContents()) {
             Maybe<Item> existingItem = findExistingItem(to, item);
             if (existingItem.hasValue()) {
                 addLocations(existingItem.requireValue(), item);
             }
             else {
-                to.addItem(item);
+                to.addContents(item);
             }
         }
     }
@@ -104,7 +104,7 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
     
     
     private Maybe<Item> findExistingItem(Brand brand, Item targetItem) {
-        for (Item item : brand.getItems()) {
+        for (Item item : brand.getContents()) {
             if (targetItem.getCurie().equals(item.getCurie())) {
                 return Maybe.just(item);
             }
@@ -119,7 +119,7 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
             List<Episode> episodes = episodeFinder.findEpisodes(brandId, region, series);
             
             setGenres(brand.requireValue().getGenres(), series.values(), episodes);
-            brand.requireValue().setItems(episodes);
+            brand.requireValue().setContents(episodes);
         }
         return brand;
     }

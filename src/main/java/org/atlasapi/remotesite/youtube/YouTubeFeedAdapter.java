@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.youtube;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -8,16 +8,16 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.gdata.data.youtube.VideoFeed;
 
-public class YouTubeFeedAdapter implements SiteSpecificAdapter<Playlist> {
+public class YouTubeFeedAdapter implements SiteSpecificAdapter<ContentGroup> {
     
     private final RemoteSiteClient<VideoFeed> gdataClient;
-    private final ContentExtractor<YouTubeFeedSource, Playlist> feedExtractor;
+    private final ContentExtractor<YouTubeFeedSource, ContentGroup> feedExtractor;
     
     public YouTubeFeedAdapter() {
         this(new YouTubeFeedClient(), new YouTubeFeedExtractor());
     }
     
-    public YouTubeFeedAdapter(RemoteSiteClient<VideoFeed> gdataClient, ContentExtractor<YouTubeFeedSource, Playlist> feedExtractor) {
+    public YouTubeFeedAdapter(RemoteSiteClient<VideoFeed> gdataClient, ContentExtractor<YouTubeFeedSource, ContentGroup> feedExtractor) {
         this.gdataClient = gdataClient;
         this.feedExtractor = feedExtractor;
     }
@@ -28,7 +28,7 @@ public class YouTubeFeedAdapter implements SiteSpecificAdapter<Playlist> {
     }
 
     @Override
-    public Playlist fetch(String uri) {
+    public ContentGroup fetch(String uri) {
         try {
             VideoFeed feed = gdataClient.get(uri);
             

@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.url.UrlEncoding;
 
 public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Object>, Brand> {
@@ -24,6 +25,7 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
     @Override
     public Brand extract(Map<String, Object> values) {
         Brand brand = null;
+        List<Episode> parsedEpisodes = Lists.newArrayList();
 
         if (values.containsKey("Result")) {
             List<Map<String, Object>> results = (List<Map<String, Object>>) values.get("Result");
@@ -65,14 +67,14 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
                         for (Map<String, Object> episodeInfo : episodes) {
                             Episode episode = episodeExtractor.extract(episodeInfo);
                             if (episode != null) {
-                                brand.addItem(episode);
+                                parsedEpisodes.add(episode);
                             }
                         }
                     }
                 }
             }
         }
-
+        brand.setContents(parsedEpisodes);
         return brand;
     }
 

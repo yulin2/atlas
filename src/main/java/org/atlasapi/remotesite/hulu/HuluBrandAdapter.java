@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -65,22 +64,21 @@ public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
                 HtmlNavigator navigator = new HtmlNavigator(content);
 
                 Brand brand = extractor.extract(navigator);
-                List<Item> episodes = Lists.newArrayList();
+                List<Episode> episodes = Lists.newArrayList();
 
                 if (episodeAdapter != null) {
-                    for (Item item : brand.getItems()) {
+                    for (Episode item : brand.getContents()) {
                         try {
                             Episode episode = episodeAdapter.fetch(item.getCanonicalUri());
-                            episode.setBrand(brand);
                             episodes.add(episode);
                         } catch (FetchException fe) {
                             LOG.warn("Failed to retrieve episode: " + item.getCanonicalUri() + " with message: " + fe.getMessage());
                         }
                     }
-                    brand.setItems(episodes);
+                    brand.setContents(episodes);
                 }
 
-                LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getItems().size() + " episodes");
+                LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getContents().size() + " episodes");
                 return brand;
             } else {
             	return null;

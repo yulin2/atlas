@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Described;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.joda.time.Duration;
@@ -49,7 +49,7 @@ public class C4AtomApi {
 	private static final String THUMBNAIL_SIZE = "200x113";
 	
 	
-	public static void addImages(Content content, String anImage) {
+	public static void addImages(Described content, String anImage) {
 		if (anImage != null) {
 			Matcher matcher = IMAGE_PATTERN.matcher(anImage);
 			if (matcher.matches()) {

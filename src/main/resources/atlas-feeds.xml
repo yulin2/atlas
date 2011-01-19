@@ -79,26 +79,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 						</bean>
 					</constructor-arg>
 				</bean>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
-					<constructor-arg>
-						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
-							<constructor-arg value="APPLICATION_ATOM_XML" />
-							<constructor-arg>
-								<bean class="org.atlasapi.beans.AtomFeedTranslator" />
-							</constructor-arg>
-						</bean>
-					</constructor-arg>
-				</bean>
-				<bean class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
-					<constructor-arg>
-						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">
-							<constructor-arg value="APPLICATION_RSS_XML" />
-							<constructor-arg>
-								<bean class="org.atlasapi.beans.RssFeedTranslator" />
-							</constructor-arg>
-						</bean>
-					</constructor-arg>
-				</bean>
 				<bean id="oembedJsonViewResolver" class="org.atlasapi.views.SingleViewViewResolver" p:mappedView="contentModel">
 					<constructor-arg>
 						<bean class="org.atlasapi.beans.view.BeanGraphWriterView">

@@ -15,6 +15,7 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.xml.SimpleXmlNavigator;
 import org.jdom.Element;
 
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.url.UrlEncoding;
@@ -42,6 +43,7 @@ public class MsnVideoBrandAdapter implements SiteSpecificAdapter<Brand> {
             String encodedTag = brandUriMatcher.group(1);
             
             Brand brand = new Brand(uri, "msn:" + encodedTag, Publisher.MSN_VIDEO);
+            List<Episode> episodes = Lists.newArrayList();
             
             for (int page = 1; page < 1000; page++) {
                 SimpleXmlNavigator navigator = getNavigatorForShow(encodedTag, page++);
@@ -67,7 +69,7 @@ public class MsnVideoBrandAdapter implements SiteSpecificAdapter<Brand> {
                             }
                             episode.setImage(episodeImage);
                             episode.setThumbnail(episodeImage);
-                            brand.addItem(episode);
+                            episodes.add(episode);
                         }
                     }
                     else {
@@ -76,7 +78,7 @@ public class MsnVideoBrandAdapter implements SiteSpecificAdapter<Brand> {
                     
                 }
             }
-            
+            brand.setContents(episodes);
             return brand;
         }
         catch (Exception e) {

@@ -25,13 +25,16 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Country;
 import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.youtube.YouTubeGraphExtractor;
@@ -53,20 +56,20 @@ import com.sun.syndication.feed.opml.Outline;
 @SuppressWarnings("unchecked")
 public class OpmlGraphExtractorTest extends MockObjectTestCase {
 
-	static final String OPML_URI = "http://downloads.bbc.co.uk/podcasts/all.opml";
-	static final String FEED1_URI = "http://downloads.bbc.co.uk/someshow/rss.xml";
-	static final String FEED2_URI = "http://feed1.com/rss.xml";
-	static final String LOCATION1_URI = "http://downloads.bbc.co.uk/a.mp3";
-	static final String LOCATION2_URI = "http://feed1.com/a.mp3";
+	private static final String OPML_URI = "http://downloads.bbc.co.uk/podcasts/all.opml";
+	private static final String FEED1_URI = "http://downloads.bbc.co.uk/someshow/rss.xml";
+	private static final String FEED2_URI = "http://feed1.com/rss.xml";
+	private static final String LOCATION1_URI = "http://downloads.bbc.co.uk/a.mp3";
+	private static final String LOCATION2_URI = "http://feed1.com/a.mp3";
 	
-	Fetcher<Content> fetcher = mock(Fetcher.class);
+	Fetcher<Identified> fetcher = mock(Fetcher.class);
 	
 	OpmlGraphExtractor extractor = new OpmlGraphExtractor(fetcher);
 	Opml feed;
 	OpmlSource source;
 
-	private Playlist fetchedFeed1;
-	private Playlist fetchedFeed2;
+	private Container<Item> fetchedFeed1;
+	private Container<Item> fetchedFeed2;
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -74,11 +77,11 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 		feed = createFeed();
 		source = new OpmlSource(feed, OPML_URI);
 		
-		fetchedFeed1 = new Playlist(FEED1_URI, FEED1_URI);
-		fetchedFeed1.addItem(itemWithLocation(LOCATION1_URI));
+		fetchedFeed1 = new Container<Item>(FEED1_URI, FEED1_URI, Publisher.BBC);
+		fetchedFeed1.setContents(itemWithLocation(LOCATION1_URI));
 		
-		fetchedFeed2 = new Playlist(FEED2_URI, FEED2_URI);
-		fetchedFeed2.addItem(itemWithLocation(LOCATION2_URI));
+		fetchedFeed2 = new Container<Item>(FEED2_URI, FEED2_URI, Publisher.BBC);
+		fetchedFeed2.setContents(itemWithLocation(LOCATION2_URI));
 	}
 
 	private Item itemWithLocation(String locationUri) {
@@ -123,19 +126,19 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 			one(fetcher).fetch(FEED2_URI); will(returnValue(fetchedFeed2));
 		}});
 		
-		Playlist playlist = extractor.extract(source);
+		ContentGroup playlist = extractor.extract(source);
 		assertThat(playlist.getCanonicalUri(), is(OPML_URI));
 		
 		assertThat(playlist.getTitle(), is("All BBC Podcasts"));
 		assertThat(playlist.getDescription(), is("All BBC Podcasts"));
 
-		List<Playlist> feeds = playlist.getPlaylists();
+		List<Content> feeds = playlist.getContents();
 		
-		Playlist feed1 = Iterables.get(feeds, 0);
+		Container<Item> feed1 = (Container<Item>) Iterables.get(feeds, 0);
 		assertThat(feed1.getCanonicalUri(), is(FEED1_URI));
 		assertThat(feed1.getGenres(), is((Set<String>) Sets.newHashSet("http://www.bbc.co.uk/programmes/genres/entertainmentandcomedy")));
 		
-		Playlist feed2 = Iterables.get(feeds, 1);
+		Container<Item> feed2 = (Container<Item>) Iterables.get(feeds, 1);
 		assertThat(feed2.getCanonicalUri(), is(FEED2_URI));
 	}
 	
@@ -146,10 +149,10 @@ public class OpmlGraphExtractorTest extends MockObjectTestCase {
 			one(fetcher).fetch(FEED2_URI); will(returnValue(fetchedFeed2));
 		}});
 		
-		Playlist playlist = extractor.extract(source);
+		ContentGroup playlist = extractor.extract(source);
 
-		assertThat(locationByUri(LOCATION1_URI, playlist.getPlaylists().get(0).getItems()).getPolicy().getAvailableCountries(), is((Set<Country>) Sets.newHashSet(Countries.GB)));
-		assertThat(locationByUri(LOCATION2_URI, playlist.getPlaylists().get(1).getItems()).getPolicy(), is(nullValue()));
+		assertThat(locationByUri(LOCATION1_URI, ((Container<Item>) playlist.getContents().get(0)).getContents()).getPolicy().getAvailableCountries(), is((Set<Country>) Sets.newHashSet(Countries.GB)));
+		assertThat(locationByUri(LOCATION2_URI, ((Container<Item>) playlist.getContents().get(1)).getContents()).getPolicy(), is(nullValue()));
 	}
 	
 

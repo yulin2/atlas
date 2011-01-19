@@ -1,15 +1,17 @@
 package org.atlasapi.remotesite.youtube;
 
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.data.youtube.VideoFeed;
 
-public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource, Playlist> {
+public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource, ContentGroup> {
     
     private final ContentExtractor<YouTubeSource, Item> itemExtractor;
     
@@ -22,17 +24,21 @@ public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource,
     }
 
     @Override
-    public Playlist extract(YouTubeFeedSource source) {
+    public ContentGroup extract(YouTubeFeedSource source) {
         VideoFeed feed = source.getVideoFeed();
         
-        Playlist playlist = new Playlist(source.getUri(), YouTubeFeedCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
+        ContentGroup playlist = new ContentGroup(source.getUri(), YouTubeFeedCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
         playlist.setContentType(ContentType.VIDEO);
         
-        for (VideoEntry video: feed.getEntries()) {
-            Item item = itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalise(video.getId())));
-            playlist.addItem(item);
-        }
+        Iterable<Item> items = Iterables.transform(feed.getEntries(), new Function<VideoEntry, Item>() {
+
+			@Override
+			public Item apply(VideoEntry video) {
+				return itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalise(video.getId())));
+			}
+        });
         
+        playlist.setContents(items);
         return playlist;
     }
 }

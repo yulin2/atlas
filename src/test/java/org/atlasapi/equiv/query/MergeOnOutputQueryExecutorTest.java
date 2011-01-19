@@ -10,9 +10,11 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
@@ -29,47 +31,47 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 
 	private final Clip clip1 = new Clip("c1", "c:c1", Publisher.YOUTUBE);
 	
-	private MergeOnOutputQueryExecutor merger;
-
 	@Override
 	protected void setUp() throws Exception {
 		brand3.addEquivalentTo(brand1);
 		item1.addEquivalentTo(item2);
 		item2.addClip(clip1);
-		this.merger = new MergeOnOutputQueryExecutor(delegate());
 	}
 	
 	public void testMergingBrands() throws Exception {
-		ContentQuery query = new ContentQuery(Attributes.BRAND_TITLE.createQuery(Operators.EQUALS, ImmutableList.of("test")));
+		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(brand1, brand2, brand3));
+		ContentQuery query = new ContentQuery(Attributes.DESCRIPTION_TITLE.createQuery(Operators.EQUALS, ImmutableList.of("test")));
 		query = query.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.YOUTUBE, Publisher.BBC)));
-		List<Brand> merged = merger.executeBrandQuery(query);
-		assertEquals(ImmutableList.of(brand3, brand2), merged);
+		assertEquals(ImmutableList.of(brand3, brand2), merger.discover(query));
+		assertEquals(ImmutableList.of(brand3, brand2), merger.executeUriQuery(ImmutableList.of("1", "2", "3"), query));
 	}
 	
 	public void testMergingItems() throws Exception {
-		ContentQuery query = new ContentQuery(Attributes.ITEM_TITLE.createQuery(Operators.EQUALS, ImmutableList.of("test")));
+		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
+
+		ContentQuery query = new ContentQuery(Attributes.DESCRIPTION_TITLE.createQuery(Operators.EQUALS, ImmutableList.of("test")));
 		query = query.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
-		List<Item> merged = merger.executeItemQuery(query);
+		List<Content> merged = merger.discover(query);
 		assertEquals(ImmutableList.of(item1), merged);
 		assertEquals(ImmutableList.of(clip1), Iterables.getOnlyElement(merged).getClips());
 	}
 
-	private KnownTypeQueryExecutor delegate() {
+	private KnownTypeQueryExecutor delegate(final Content... respondWith) {
 		return new KnownTypeQueryExecutor() {
-			
+
 			@Override
-			public List<Playlist> executePlaylistQuery(ContentQuery query) {
+			public List<Content> discover(ContentQuery query) {
+				return ImmutableList.copyOf(respondWith);
+			}
+
+			@Override
+			public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+				return ImmutableList.<Identified>copyOf(respondWith);
+			}
+
+			@Override
+			public Schedule schedule(ContentQuery query) {
 				throw new UnsupportedOperationException();
-			}
-			
-			@Override
-			public List<Item> executeItemQuery(ContentQuery query) {
-				return ImmutableList.of(item1, item2);
-			}
-			
-			@Override
-			public List<Brand> executeBrandQuery(ContentQuery query) {
-				return ImmutableList.of(brand1, brand2, brand3);
 			}
 		};
 	}

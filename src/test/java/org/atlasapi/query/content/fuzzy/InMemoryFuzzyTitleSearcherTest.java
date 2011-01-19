@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Description;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentListener;
@@ -61,8 +61,8 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		searcher = new InMemoryFuzzySearcher();
-		searcher.brandChanged(brands, ContentListener.changeType.BOOTSTRAP);
-		searcher.itemChanged(items, ContentListener.changeType.BOOTSTRAP);
+		searcher.brandChanged(brands, ContentListener.ChangeType.BOOTSTRAP);
+		searcher.itemChanged(items, ContentListener.ChangeType.BOOTSTRAP);
 		searcher.itemChanged(itemsUpdated, null);
 	}
 	
@@ -116,17 +116,17 @@ public class InMemoryFuzzyTitleSearcherTest extends MockObjectTestCase {
 		Brand dragonsDenV2 = brand("/den", "Dragon's den Version 2");
 		
 		check(searcher.brandTitleSearch("dragon", ALL),  dragonsDen);
-		searcher.brandChanged(Lists.newArrayList(dragonsDenV2), ContentListener.changeType.CONTENT_UPDATE);
+		searcher.brandChanged(Lists.newArrayList(dragonsDenV2), ContentListener.ChangeType.CONTENT_UPDATE);
 		check(searcher.brandTitleSearch("dragon", ALL),  dragonsDen);
 	}
 
-	private void check(List<String> found, Description... content) {
+	private void check(List<String> found, Identified... content) {
 		assertThat(found, is(toUris(Arrays.asList(content))));
 	}
 
-	private List<String> toUris(List<? extends Description> content) {
+	private List<String> toUris(List<? extends Identified> content) {
 		List<String> uris = Lists.newArrayList();
-		for (Description description : content) {
+		for (Identified description : content) {
 			uris.add(description.getCanonicalUri());
 		}
 		return uris;

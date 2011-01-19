@@ -22,9 +22,9 @@ public class SeesawBrandAdapterTest extends TestCase {
     public void testShouldGetBrand() {
         Brand galactica = adapter.fetch("http://www.seesaw.com/TV/Drama/b-28373-Battlestar-Galactica");
         assertEquals("Battlestar Galactica", galactica.getTitle());
-        assertTrue(galactica.getItems().size() > 0);
+        assertTrue(galactica.getContents().size() > 0);
         assertTrue(galactica.getGenres().contains("http://www.seesaw.com/TV/Drama"));
-        Item firstItem = galactica.getItems().get(0);
+        Item firstItem = galactica.getContents().get(0);
         assertTrue(firstItem instanceof Episode);
         Episode firstEpisode = (Episode) firstItem;
         assertEquals("33", firstEpisode.getTitle());

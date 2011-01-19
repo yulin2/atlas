@@ -17,7 +17,7 @@ public class StubContentResolver implements ContentResolver {
 	}
 
 	@Override
-	public Content findByUri(String uri) {
+	public Content findByCanonicalUri(String uri) {
 		return data.get(uri);
 	}
 }

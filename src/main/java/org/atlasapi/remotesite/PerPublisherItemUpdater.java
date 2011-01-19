@@ -35,19 +35,21 @@ public class PerPublisherItemUpdater implements Runnable {
 	}
 
 	private void update(String publisher) {
-		ContentQueryBuilder publisherEqualsQuery = query().equalTo(Attributes.ITEM_PUBLISHER, Publisher.fromKey(publisher).requireValue());
 		
-		List<Item> items = contentStore.executeItemQuery(publisherEqualsQuery.build());
-		
-		for (Item item : items) {
-			try {
-				fetcher.fetch(item.getCanonicalUri());
-				LOG.info("Updating info from:" + item.getCanonicalUri());
-			} catch (Exception e) {
-				LOG.warn((e));
-				continue; // try the next uri
-			}
-		}
+		throw new UnsupportedOperationException("Do we need this?");
+//		ContentQueryBuilder publisherEqualsQuery = query().equalTo(Attributes.DESCRIPTION_PUBLISHER, Publisher.fromKey(publisher).requireValue());
+//		
+//		List<Item> items = contentStore.executeItemQuery(publisherEqualsQuery.build());
+//		
+//		for (Item item : items) {
+//			try {
+//				fetcher.fetch(item.getCanonicalUri());
+//				LOG.info("Updating info from:" + item.getCanonicalUri());
+//			} catch (Exception e) {
+//				LOG.warn((e));
+//				continue; // try the next uri
+//			}
+//		}
 	}
 
 	@Override
@@ -61,5 +63,4 @@ public class PerPublisherItemUpdater implements Runnable {
 	public void setUris(Iterable<String> publishers) {
 		this.publishers = publishers;
 	}
-
 }

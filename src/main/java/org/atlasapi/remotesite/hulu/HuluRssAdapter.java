@@ -5,20 +5,21 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.sun.syndication.feed.rss.Channel;
 import com.sun.syndication.feed.rss.Guid;
 import com.sun.syndication.feed.rss.Item;
 import com.sun.syndication.io.WireFeedInput;
 
-public class HuluRssAdapter implements SiteSpecificAdapter<Playlist> {
+public class HuluRssAdapter implements SiteSpecificAdapter<ContentGroup> {
 
     public static final String BASE_URI = "http://www.hulu.com/feed/";
     public static final Pattern URI_PATTERN = Pattern.compile("^(.*watch\\/\\d+)\\/.*$");
@@ -41,9 +42,9 @@ public class HuluRssAdapter implements SiteSpecificAdapter<Playlist> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Playlist fetch(String uri) {
+    public ContentGroup fetch(String uri) {
         try {
-            Playlist playlist = new Playlist();
+            ContentGroup playlist = new ContentGroup();
 
             Channel channel = feedClient.get(uri);
             playlist.setTitle(channel.getTitle());
@@ -52,19 +53,20 @@ public class HuluRssAdapter implements SiteSpecificAdapter<Playlist> {
             playlist.setCurie("hulu:" + uri.replace(BASE_URI, "").replace("/", "_"));
 
             List<Item> items = channel.getItems();
+            
+            List<Episode> episodes = Lists.newArrayList();
+            
             for (Item rssItem : items) {
                 Guid guid = rssItem.getGuid();
                 if (guid != null) {
                     
                     Matcher matcher = URI_PATTERN.matcher(guid.getValue());
                     if (matcher.matches()) {
-                        
-                        Episode item = huluItemAdapter.fetch(matcher.group(1));
-                        playlist.addItem(item);
+                        episodes.add(huluItemAdapter.fetch(matcher.group(1)));
                     }
                 }
             }
-
+            playlist.setContents(episodes);
             return playlist;
         } catch (Exception e) {
             throw new FetchException("Unable to retrieve Hulu feed from: " + uri, e);

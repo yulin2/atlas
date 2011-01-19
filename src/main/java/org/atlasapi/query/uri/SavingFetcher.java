@@ -14,9 +14,9 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.uri;
 
-  import org.atlasapi.media.entity.Content;
+  import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.Fetcher;
 
@@ -26,12 +26,12 @@ import org.atlasapi.persistence.system.Fetcher;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class SavingFetcher implements Fetcher<Content> {
+public class SavingFetcher implements Fetcher<Identified> {
 
-	private final Fetcher<Content> delegateFetcher;
+	private final Fetcher<Identified> delegateFetcher;
 	private ContentWriter store;
 
-	public SavingFetcher(Fetcher<Content> delegateFetcher, ContentWriter store) {
+	public SavingFetcher(Fetcher<Identified> delegateFetcher, ContentWriter store) {
 		this.delegateFetcher = delegateFetcher;
 		this.store = store;
 	}
@@ -40,13 +40,13 @@ public class SavingFetcher implements Fetcher<Content> {
 		this.store = store;
 	}
 
-	public Content fetch(String uri) {
+	public Identified fetch(String uri) {
 		
 		if (store == null) {
 			throw new IllegalStateException();
 		}
 		
-		Content bean = delegateFetcher.fetch(uri);
+		Identified bean = delegateFetcher.fetch(uri);
 		
 		if (bean == null) { return null; }
 		
@@ -55,12 +55,12 @@ public class SavingFetcher implements Fetcher<Content> {
 		return bean;
 	}
 	
-    private void createOrUpdateContent(Content root, boolean markMissingItemsAsUnavailable) {
-        if (root instanceof Playlist) {
-            store.createOrUpdatePlaylist((Playlist) root, markMissingItemsAsUnavailable);
+    private void createOrUpdateContent(Identified root, boolean markMissingItemsAsUnavailable) {
+        if (root instanceof Container<?>) {
+            store.createOrUpdate((Container<?>) root, markMissingItemsAsUnavailable);
         }
         if (root instanceof Item) {
-           store.createOrUpdateItem((Item) root);
+           store.createOrUpdate((Item) root);
         }
     }
 }

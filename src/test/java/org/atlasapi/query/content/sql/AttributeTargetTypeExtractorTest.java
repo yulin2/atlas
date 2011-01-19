@@ -16,7 +16,7 @@ package org.atlasapi.query.content.sql;
 
 import static org.atlasapi.content.criteria.ContentQueryBuilder.query;
 import static org.atlasapi.content.criteria.attribute.Attributes.BROADCAST_TRANSMISSION_TIME;
-import static org.atlasapi.content.criteria.attribute.Attributes.ITEM_TITLE;
+import static org.atlasapi.content.criteria.attribute.Attributes.DESCRIPTION_TITLE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -37,12 +37,12 @@ public class AttributeTargetTypeExtractorTest extends TestCase {
 	AttributeTargetTypeExtractor extractor = new AttributeTargetTypeExtractor();
 
 	public void testExtractingItemAttribute() throws Exception {
-		ContentQuery query = query().beginning(ITEM_TITLE, "bob").build();
+		ContentQuery query = query().beginning(DESCRIPTION_TITLE, "bob").build();
 		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Item.class)));
 	}
 	
 	public void testCompositeQuery() {
-		ContentQuery query = query().beginning(ITEM_TITLE, "bob").after(BROADCAST_TRANSMISSION_TIME, new DateTime()).build();
+		ContentQuery query = query().beginning(DESCRIPTION_TITLE, "bob").after(BROADCAST_TRANSMISSION_TIME, new DateTime()).build();
 		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Item.class, Broadcast.class)));
 	}
 }

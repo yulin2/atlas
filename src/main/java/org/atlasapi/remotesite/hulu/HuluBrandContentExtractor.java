@@ -16,6 +16,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jaxen.JaxenException;
 import org.jdom.Element;
 
+import com.google.common.collect.Lists;
+
 public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator, Brand> {
     private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.subscribe = ";
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -64,7 +66,9 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
             }
 
             brand.setTags(HuluItemContentExtractor.getTags(source));
+
             
+            List<Episode> episodes = Lists.newArrayList();
             for (Element element : source.allElementsMatching("//div[@id='episode-container']/div/ul/li/a']")) {
                 String href = element.getAttributeValue("href");
 				String episodeUri = HuluFeed.canonicaliseEpisodeUri(href);
@@ -72,9 +76,9 @@ public class HuluBrandContentExtractor implements ContentExtractor<HtmlNavigator
                 	continue;
                 }
 				Episode episode = new Episode(episodeUri, PerPublisherCurieExpander.CurieAlgorithm.HULU.compact(episodeUri), Publisher.HULU);
-                brand.addItem(episode);
+                episodes.add(episode);
             }
-
+            brand.setContents(episodes);
             return brand;
         } catch (JaxenException e) {
             throw new FetchException("Unable to navigate HTML document", e);

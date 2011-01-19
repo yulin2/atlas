@@ -11,7 +11,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
     private BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(new SystemOutAdapterLog());
     
     public void testClientGetsEpisode() throws Exception {
-        Content programme = adapter.fetch("http://www.bbc.co.uk/programmes/b00w4hjy");
+        Content programme = (Content) adapter.fetch("http://www.bbc.co.uk/programmes/b00w4hjy");
         assertNotNull(programme);
         
         assertNotNull(programme.getClips());

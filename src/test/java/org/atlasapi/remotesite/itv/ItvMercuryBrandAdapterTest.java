@@ -24,9 +24,9 @@ public class ItvMercuryBrandAdapterTest extends TestCase {
 //        assertFalse(brand.getGenres().isEmpty());
         assertNotNull(brand.getTitle());
         assertNotNull(brand.getDescription());
-        assertFalse(brand.getItems().isEmpty());
+        assertFalse(brand.getContents().isEmpty());
         
-        for (Item item: brand.getItems()) {
+        for (Item item: brand.getContents()) {
             assertNotNull(item.getTitle());
             assertNotNull(item.getDescription());
             //assertFalse(item.getGenres().isEmpty());

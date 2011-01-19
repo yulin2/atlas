@@ -16,7 +16,7 @@ permissions and limitations under the License. */
 package org.atlasapi.query.uri;
 
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.system.Fetcher;
 
@@ -26,19 +26,19 @@ import org.atlasapi.persistence.system.Fetcher;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class LocalOrRemoteFetcher implements Fetcher<Content>, ContentResolver {
+public class LocalOrRemoteFetcher implements Fetcher<Identified>, ContentResolver {
 
 	private final ContentResolver localStore;
-	private final Fetcher<Content> remoteFetcher;
+	private final Fetcher<Identified> remoteFetcher;
 	
-	public LocalOrRemoteFetcher(ContentResolver localStore, Fetcher<Content> remoteFetcher) {
+	public LocalOrRemoteFetcher(ContentResolver localStore, Fetcher<Identified> remoteFetcher) {
 		this.localStore = localStore;
 		this.remoteFetcher = remoteFetcher;
 	}
 
-	public Content fetch(String uri) {
+	public Identified fetch(String uri) {
 		
-		Content local = localStore.findByUri(uri);
+		Identified local = localStore.findByCanonicalUri(uri);
 		
 		if (local == null) {
 			return remoteFetcher.fetch(uri); 
@@ -48,7 +48,7 @@ public class LocalOrRemoteFetcher implements Fetcher<Content>, ContentResolver {
 	}
 
 	@Override
-	public Content findByUri(String uri) {
+	public Identified findByCanonicalUri(String uri) {
 		return fetch(uri);
 	}
 }

@@ -65,11 +65,11 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
     public Brand extract(Feed source) {
         Brand brand = basicDetailsExtractor.extract(source);
         
-        List<Episode> items = itemsFor(brand);
+        List<Episode> episodes = itemsFor(brand);
 
         Map<String, Episode> onDemandEpisodes = onDemandEpisodes(brand);
 
-        for (Episode episode : items) {
+        for (Episode episode : episodes) {
             Episode odEpisode = onDemandEpisodes.get(episode.getCanonicalUri());
             if (odEpisode != null) {
                 episode.setVersions(odEpisode.getVersions());
@@ -92,13 +92,13 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
             }
         }
 
-        populateBroadcasts(items, brand);
+        populateBroadcasts(episodes, brand);
 
-        for (Episode episode : items) {
+        for (Episode episode : episodes) {
 			versionMerger.merge(episode);
 		}
         
-        brand.setItems(items);
+        brand.setContents(episodes);
         
         clipExtractor.fetchAndAddClipsTo(brand);
         
@@ -115,7 +115,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
         }
         	
 		for (Series sery : fetchSeries(brand, possibleEpisodeGuide)) {
-            items.addAll((List) sery.getItems());
+            items.addAll((List) sery.getContents());
         }
 		return items;
 	}

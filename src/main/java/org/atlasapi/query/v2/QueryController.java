@@ -21,13 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasErrorSummary;
-import org.atlasapi.beans.SingleItemProjector;
-import org.atlasapi.beans.SinglePlaylistProjector;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -41,17 +35,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.time.DateTimeZones;
 
 @Controller
 public class QueryController {
+	
+	private static final Splitter URI_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
+	
 	private static final String VIEW = "contentModel";
 
 	private final KnownTypeQueryExecutor executor;
 	private final ApplicationConfigurationIncludingQueryBuilder builder;
 	
-	private final SingleItemProjector itemProjector = new SingleItemProjector();
-	private final SinglePlaylistProjector playlistProjector = new SinglePlaylistProjector();
 	private final AdapterLog log;
 	
 	public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log) {
@@ -60,92 +59,38 @@ public class QueryController {
 		this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter()), configFetcher) ;
 	}
 	
-	@RequestMapping("/2.0/item.*")
-	public ModelAndView item(HttpServletRequest request) {
+	@RequestMapping("/3.0/discover.*")
+	public ModelAndView discover(HttpServletRequest request) {
 		try {
-			return modelAndViewFor(itemProjector.applyTo(executeItemQuery(request)));
+			ContentQuery filter = builder.build(request);
+			if (!Selection.ALL.equals(filter.getSelection())) {
+				throw new IllegalArgumentException("Cannot specifiy a limit or offset here");
+			}
+			return modelAndViewFor(executor.discover(filter));
 		} catch (Exception e) {
 			return errorViewFor(AtlasErrorSummary.forException(e));
 		}
 	}
 	
-	@RequestMapping("/2.0/items.*")
-	public ModelAndView items(HttpServletRequest request) {
+	@RequestMapping("/3.0/content.*")
+	public ModelAndView content(HttpServletRequest request) {
 		try {
-			return modelAndViewFor(executeItemQuery(request));
-		} catch (Exception e) {
-			return errorViewFor(AtlasErrorSummary.forException(e));
-		}
-	}
-
-	@RequestMapping("/2.0/brand.*")
-	public ModelAndView brand(HttpServletRequest request) {
-		try {
-			return modelAndViewFor(playlistProjector.applyTo(executeBrandQuery(request)));
-		} catch (Exception e) {
-			return errorViewFor(AtlasErrorSummary.forException(e));
-		}
-	}
-	
-	@RequestMapping("/2.0/brands.*")
-	public ModelAndView brands(HttpServletRequest request) {
-		try {
-			return modelAndViewFor(executeBrandQuery(request));
-		} catch (Exception e) {
-			return errorViewFor(AtlasErrorSummary.forException(e));
-		}
-	}
-
-	@RequestMapping("/2.0/playlist.*")
-	public ModelAndView playlist(HttpServletRequest request) {
-		try {
-			return modelAndViewFor(playlistProjector.applyTo(executePlaylistQuery(request)));
+			String commaSeperatedUris = request.getParameter("uri");
+			if (commaSeperatedUris == null) {
+				throw new IllegalArgumentException("No uris specified");
+			}
+			List<String> uris = ImmutableList.copyOf(URI_SPLITTER.split(commaSeperatedUris));
+			if (Iterables.isEmpty(uris)) {
+				throw new IllegalArgumentException("No uris specified");
+			}
+//			ContentQuery build = builder.build(request);
+			return modelAndViewFor(executor.executeUriQuery(uris, ContentQuery.MATCHES_EVERYTHING));
 		} catch (Exception e) {
 			return errorViewFor(AtlasErrorSummary.forException(e));
 		}
 	}
 	
-	@RequestMapping("/2.0/playlists.*")
-	public ModelAndView playlists(HttpServletRequest request) {
-		try {
-			return modelAndViewFor(executePlaylistQuery(request));
-		} catch (Exception e) {
-			return errorViewFor(AtlasErrorSummary.forException(e));
-		}
-	}
-	
-	@RequestMapping("/api/2.0/item.*")
-    public ModelAndView apiItem(HttpServletRequest request) {
-        return item(request);
-    }
-    
-    @RequestMapping("/api/2.0/items.*")
-    public ModelAndView apiItems(HttpServletRequest request) {
-        return items(request);
-    }
-    
-
-    @RequestMapping("/api/2.0/brand.*")
-    public ModelAndView apiBrand(HttpServletRequest request) {
-        return brand(request);
-    }
-    
-    @RequestMapping("/api/2.0/brands.*")
-    public ModelAndView apiBrands(HttpServletRequest request) {
-        return brands(request);
-    }
-    
-    @RequestMapping("/api/2.0/playlist.*")
-    public ModelAndView apiPlaylist(HttpServletRequest request) {
-        return playlist(request);
-    }
-    
-    @RequestMapping("/api/2.0/playlists.*")
-    public ModelAndView apiPlaylists(HttpServletRequest request) {
-        return playlists(request);
-    }
-    
-    private ModelAndView errorViewFor(AtlasErrorSummary ae) {
+     private ModelAndView errorViewFor(AtlasErrorSummary ae) {
     	log.record(new AdapterLogEntry(ae.id(), Severity.ERROR, new DateTime(DateTimeZones.UTC)).withCause(ae.exception()).withSource(this.getClass()));
     	return new ModelAndView(VIEW, RequestNs.ERROR, ae);
     }
@@ -156,20 +101,4 @@ public class QueryController {
     	}
     	return new ModelAndView(VIEW, RequestNs.GRAPH, queryResults);
     }
-	
-	private List<Item> executeItemQuery(HttpServletRequest request) {
-		return executor.executeItemQuery(build(request, Item.class));
-	}
-
-	private List<Playlist> executePlaylistQuery(HttpServletRequest request) {
-		return executor.executePlaylistQuery(build(request, Playlist.class));
-	}
-	
-	private List<Brand> executeBrandQuery(HttpServletRequest request) {
-		return executor.executeBrandQuery(build(request, Brand.class));
-	}
-
-	private ContentQuery build(HttpServletRequest request, Class<? extends Content> type) {
-		return builder.build(request, type);
-	}
 }

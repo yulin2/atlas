@@ -18,7 +18,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
@@ -32,7 +32,6 @@ import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.hbo.HboModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
 import org.atlasapi.remotesite.ictomorrow.ICTomorrowModule;
-import org.atlasapi.remotesite.imdb.ImdbAdapter;
 import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.msnvideo.MsnVideoModule;
@@ -92,11 +91,11 @@ public class RemoteSiteModule {
 	    return new ManualTaskTrigger(scheduler());
 	}
 	
-	public @Bean Fetcher<Content> remoteFetcher() {
+	public @Bean Fetcher<Identified> remoteFetcher() {
 		
 		 PerSiteAdapterDispatcher dispatcher = new PerSiteAdapterDispatcher(log);
 		 
-		 List<SiteSpecificAdapter<? extends Content>> adapters = Lists.newArrayList();
+		 List<SiteSpecificAdapter<? extends Identified>> adapters = Lists.newArrayList();
 		 
 		 adapters.add(new YouTubeAdapter());
 		 adapters.add(new YouTubeFeedAdapter());
@@ -128,11 +127,6 @@ public class RemoteSiteModule {
 		 
 		 adapters.add(flickrAdapter);
 		 adapters.add(new OpmlAdapter(dispatcher));
-		 
-		 // avoid overloading with equiv requests
-		 // adapters.add(new WikipediaSparqlAdapter());
-		 
-		 adapters.add(new ImdbAdapter(dispatcher));
 		 
 		 adapters.add(new SeesawBrandAdapter());
 		 adapters.add(new SeesawItemAdapter());

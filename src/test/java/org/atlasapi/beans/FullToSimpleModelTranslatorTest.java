@@ -57,7 +57,7 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 				Object bean = Iterables.getOnlyElement(beans);
 				if (!(bean instanceof ContentQueryResult)) { return false; }
 				ContentQueryResult output = (ContentQueryResult) bean;
-				if (output.getItems().size() != 1) { return false; }
+				if (output.getContents().size() != 1) { return false; }
 				return true;
 			}
 

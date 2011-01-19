@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jaxen.JaxenException;
 import org.jdom.Element;
 
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
@@ -71,7 +72,7 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
             if (episode.getSeriesNumber() != null) {
                 series.withSeriesNumber(episode.getSeriesNumber());
                 if (series.getTitle() == null) {
-                    String title = episode.getBrand() != null ? episode.getBrand() + " - " : "";
+                    String title = episode.getContainer() != null ? episode.getContainer() + " - " : "";
                     title += "Series " + series.getSeriesNumber();
                     series.setTitle(title);
                 }
@@ -81,7 +82,7 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
                 series.setImage(episode.getImage());
             }
 
-            series.addItem(episode);
+            series.addContents(ImmutableList.of(episode));
         }
     }
 

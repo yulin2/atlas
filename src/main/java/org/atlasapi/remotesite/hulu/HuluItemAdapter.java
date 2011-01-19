@@ -38,7 +38,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
-    static final Log LOG = LogFactory.getLog(HuluItemAdapter.class);
+    private static final Log LOG = LogFactory.getLog(HuluItemAdapter.class);
 
     public static final String BASE_URI = "http://www.hulu.com/watch/";
     private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "\\d+)\\/?.*");
@@ -46,9 +46,11 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
     private final SimpleHttpClient httpClient;
     private final HuluItemContentExtractor extractor;
+    
     // If you don't set the brand adapter, it won't try to hydrate them, which
     // is important for stopping everything from spiraling out of control
     private SiteSpecificAdapter<Brand> brandAdapter;
+    
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     private ContentWriters contentStore;
@@ -71,8 +73,8 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
             Episode episode = extractor.extract(navigator);
 
-            if (episode.getBrand() != null && episode.getBrand().getCanonicalUri() != null && contentStore != null && brandAdapter != null) {
-                executor.execute(new BrandHydratingJob(episode.getBrand().getCanonicalUri()));
+            if (episode.getContainer() != null && episode.getContainer().getCanonicalUri() != null && contentStore != null && brandAdapter != null) {
+                executor.execute(new BrandHydratingJob(episode.getContainer().getCanonicalUri()));
             }
 
             return episode;
@@ -102,7 +104,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
         public void run() {
             try {
                 Brand brand = brandAdapter.fetch(uri);
-                contentStore.createOrUpdatePlaylist(brand, true);
+                contentStore.createOrUpdate(brand, true);
             } catch (Exception e) {
                 LOG.warn("Unable to retrieve hulu brand :" + uri + " while hydrating item", e);
             }

@@ -14,9 +14,9 @@ public class SeesawSeriesAdapterTest extends TestCase {
     public void testShouldGetSeries() {
         Series thirtyRock = adapter.fetch("http://www.seesaw.com/TV/Comedy/s-29158-30-Rock");
         assertEquals("Series 2", thirtyRock.getTitle());
-        assertTrue(thirtyRock.getItems().size() > 0);
+        assertTrue(thirtyRock.getContents().size() > 0);
         assertTrue(thirtyRock.getGenres().contains("http://www.seesaw.com/TV/Comedy"));
-        Item firstItem = thirtyRock.getItems().get(0);
+        Item firstItem = (Item) thirtyRock.getContents().get(0);
         assertTrue(firstItem instanceof Episode);
         Episode firstEpisode = (Episode) firstItem;
         assertEquals("SeinfeldVision", firstEpisode.getTitle());

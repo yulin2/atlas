@@ -9,10 +9,10 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.mongo.QueryConcernsTypeDecider;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
@@ -20,8 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-public class ApplicationConfigurationQueryExecutor implements
-		KnownTypeQueryExecutor {
+public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExecutor {
 	
 	private final KnownTypeQueryExecutor delegate;
 
@@ -30,61 +29,31 @@ public class ApplicationConfigurationQueryExecutor implements
 	}		
 		
 	@Override
-	public List<Item> executeItemQuery(ContentQuery query) {
-		return delegate.executeItemQuery(queryForItems(query));
+	public List<Content> discover(ContentQuery query) {
+		return delegate.discover(queryForContent(query));
 	}
 
 	@Override
-	public List<Playlist> executePlaylistQuery(ContentQuery query) {
-		return delegate.executePlaylistQuery(queryForPlaylists(query));
-	}
-
-	@Override
-	public List<Brand> executeBrandQuery(ContentQuery query) {
-		return delegate.executeBrandQuery(queryForBrands(query));
-	}
-
-	private ContentQuery queryForItems(ContentQuery query) {
-		AtomicQuery atom = mergeAttribute(Attributes.VERSION_PROVIDER, query);
-
-		query.setSoftConstraints(ImmutableSet.of(atom));
-		
-		Iterable<AtomicQuery> queryAtoms = ImmutableSet.<AtomicQuery>of(mergeAttribute(Attributes.ITEM_PUBLISHER,query));
-		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
+	public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+		return delegate.executeUriQuery(uris, queryForContent(query));
 	}
 	
-	
-	private ContentQuery queryForBrands(ContentQuery query) {
+	private ContentQuery queryForContent(ContentQuery query) {
 		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
 			mergeAttribute(Attributes.VERSION_PROVIDER, query),
-			mergeAttribute(Attributes.ITEM_PUBLISHER,query),
-			mergeAttribute(Attributes.BRAND_PUBLISHER,query)
+			mergeAttribute(Attributes.DESCRIPTION_PUBLISHER,query)
 		);
 		
 		query.setSoftConstraints(softs);
 
 		if(!QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
 			Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-				mergeAttribute(Attributes.BRAND_PUBLISHER, query)
+				mergeAttribute(Attributes.DESCRIPTION_PUBLISHER, query)
 			);
 			return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 		} 
 		
 		return query;
-	}
-	
-	private ContentQuery queryForPlaylists(ContentQuery query) {
-		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
-			mergeAttribute(Attributes.VERSION_PROVIDER, query),
-			mergeAttribute(Attributes.ITEM_PUBLISHER,query),
-			mergeAttribute(Attributes.BRAND_PUBLISHER, query),
-			mergeAttribute(Attributes.PLAYLIST_PUBLISHER, query)
-		);
-		
-		query.setSoftConstraints(softs);
-		
-		Iterable<AtomicQuery> queryAtoms = ImmutableSet.<AtomicQuery>of(mergeAttribute(Attributes.PLAYLIST_PUBLISHER, query));
-		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 
 	private AtomicQuery mergeAttribute(Attribute<?> attr, ContentQuery query){
@@ -101,5 +70,10 @@ public class ApplicationConfigurationQueryExecutor implements
 		}
 		
 		return attr.createQuery(Operators.EQUALS, values);
+	}
+
+	@Override
+	public Schedule schedule(ContentQuery query) {
+		throw new UnsupportedOperationException("TODO");
 	}
 }

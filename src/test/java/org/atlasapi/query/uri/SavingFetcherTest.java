@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.query.uri;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.Fetcher;
@@ -28,7 +28,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 @SuppressWarnings("unchecked")
 public class SavingFetcherTest extends MockObjectTestCase {
 
-	Fetcher<Content> delegateFetcher = mock(Fetcher.class);
+	Fetcher<Identified> delegateFetcher = mock(Fetcher.class);
 	ContentWriter store = mock(ContentWriter.class);
 	
 	String URI = "http://example.com";
@@ -39,7 +39,7 @@ public class SavingFetcherTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{ 
 			one(delegateFetcher).fetch(URI); will(returnValue(item1));
-			one(store).createOrUpdateItem(item1);
+			one(store).createOrUpdate(item1);
 		}});
 		
 		new SavingFetcher(delegateFetcher, store).fetch(URI);

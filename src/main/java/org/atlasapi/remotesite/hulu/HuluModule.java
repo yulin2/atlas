@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.LocalTime;
@@ -29,8 +29,8 @@ public class HuluModule {
 		scheduler.schedule(huluAllBrandsUpdater(), RepetitionRules.daily(when));
 	}
 	
-	public List<SiteSpecificAdapter<? extends Content>> adapters() {
-		return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(huluItemAdapter(), huluBrandAdapter(), new HuluRssAdapter());
+	public List<SiteSpecificAdapter<? extends Identified>> adapters() {
+		return ImmutableList.<SiteSpecificAdapter<? extends Identified>>of(huluItemAdapter(), huluBrandAdapter(), new HuluRssAdapter());
 	}
 	
 	public @Bean HuluItemAdapter huluItemAdapter() {

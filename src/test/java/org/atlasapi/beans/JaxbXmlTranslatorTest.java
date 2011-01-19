@@ -53,7 +53,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		DateTime transmitted = new DateTime(1990, 1, 1, 1, 1, 1, 1);
 		item.addBroadcast(new Broadcast("channel", transmitted, transmitted.plusHours(1)));
 		ContentQueryResult result = new ContentQueryResult();
-		result.addItem(item);
+		result.add(item);
 		graph.add(result);
 		
 		new JaxbXmlTranslator().writeTo(graph, stream);

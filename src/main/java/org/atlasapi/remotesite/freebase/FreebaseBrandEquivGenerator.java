@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Equiv;
 import org.atlasapi.remotesite.EquivGenerator;
 
@@ -16,7 +16,7 @@ import com.freebase.api.Freebase;
 import com.freebase.json.JSON;
 import com.google.inject.internal.Lists;
 
-public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
+public class FreebaseBrandEquivGenerator implements EquivGenerator<Container<?>> {
 
     private static final Pattern HEX = Pattern.compile("(\\$[0-9A-F]{4})");
     protected static final String WIKIPEDIA = "http://en.wikipedia.org/wiki/";
@@ -33,7 +33,7 @@ public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
     }
 
     @Override
-    public List<Equiv> equivalent(Brand brand) {
+    public List<Equiv> equivalent(Container<?> brand) {
         List<Equiv> equivs = Lists.newArrayList();
 
         JSON query = o("type", "/tv/tv_program", "name", brand.getTitle(), "*", a(o()));
@@ -56,7 +56,7 @@ public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
         return equivs;
     }
     
-    private void addId(List<Equiv> equivs, Brand brand, String id, String prefix) {
+    private void addId(List<Equiv> equivs, Container<?> brand, String id, String prefix) {
         if (id != null && !brand.getCanonicalUri().equals(prefix+id)) {
             equivs.add(new Equiv(brand.getCanonicalUri(), prefix+id));
         }
@@ -108,7 +108,7 @@ public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
         return null;
     }
 
-    private List<Equiv> equivalents(Brand brand, List<String> ids) {
+    private List<Equiv> equivalents(Container<?> brand, List<String> ids) {
         List<Equiv> equivs = Lists.newArrayList();
 
         for (String id : ids) {

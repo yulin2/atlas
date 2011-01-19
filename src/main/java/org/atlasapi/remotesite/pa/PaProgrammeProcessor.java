@@ -5,6 +5,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
@@ -66,15 +67,14 @@ public class PaProgrammeProcessor {
 
             if (episode.hasValue()) {
                 if (series.hasValue()) {
-                    series.requireValue().addItem(episode.requireValue());
-                    contentWriter.createOrUpdateDefinitivePlaylist(series.requireValue());
+                    series.requireValue().addContents(episode.requireValue());
                 }
                 try {
                 if (brand.hasValue()) {
-                    brand.requireValue().addItem(episode.requireValue());
-                    contentWriter.createOrUpdateDefinitivePlaylist(brand.requireValue());
+                    brand.requireValue().addContents(episode.requireValue());
+                    contentWriter.createOrUpdate(brand.requireValue(), true);
                 } else {
-                    contentWriter.createOrUpdateDefinitiveItem(episode.requireValue());
+                    contentWriter.createOrUpdate(episode.requireValue());
                 }
                 } catch (ClassCastException e) {
                     log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription("This is definitely where the class cast will happen, when it's persisted " + e.getMessage()));
@@ -92,7 +92,7 @@ public class PaProgrammeProcessor {
         }
 
         String brandUri = PA_BASE_URL + "/brands/" + brandId;
-        Content resolvedContent = contentResolver.findByUri(brandUri);
+        Identified resolvedContent = contentResolver.findByCanonicalUri(brandUri);
         Brand brand;
         if (resolvedContent instanceof Brand) {
             brand = (Brand) resolvedContent;
@@ -119,7 +119,7 @@ public class PaProgrammeProcessor {
         
         String seriesUri = PA_BASE_URL + "/series/" + progData.getSeriesId() + "-" + progData.getSeriesNumber();
         
-        Content resolvedContent = contentResolver.findByUri(seriesUri);
+        Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
         Series series;
         if (resolvedContent instanceof Series) {
             series = (Series) resolvedContent;
@@ -140,7 +140,7 @@ public class PaProgrammeProcessor {
         }
 
         String episodeUri = PA_BASE_URL + "/episodes/" + progData.getProgId();
-        Content resolvedContent = contentResolver.findByUri(episodeUri);
+        Identified resolvedContent = contentResolver.findByCanonicalUri(episodeUri);
         Episode episode;
         if (resolvedContent instanceof Episode) {
             episode = (Episode) resolvedContent;

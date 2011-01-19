@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -69,7 +69,7 @@ public class BbcModule {
 		return new BbcProgrammeAdapter(log);
 	}
 
-	public Collection<SiteSpecificAdapter<? extends Content>> adapters() {
-		return ImmutableList.<SiteSpecificAdapter<? extends Content>>of(bbcProgrammeAdapter());
+	public Collection<SiteSpecificAdapter<? extends Identified>> adapters() {
+		return ImmutableList.<SiteSpecificAdapter<? extends Identified>>of(bbcProgrammeAdapter());
 	}
 }

@@ -16,28 +16,21 @@ package org.atlasapi.remotesite;
 
 import java.util.Set;
 
+import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
 
 import com.google.common.collect.Sets;
 
-public class ContentWriters implements DefinitiveContentWriter {
+public class ContentWriters implements ContentWriter {
 
 	private Set<ContentWriter> writers = Sets.newHashSet();
 	
 	@Override
-	public void createOrUpdateItem(Item item) {
+	public void createOrUpdate(Item item) {
 		for (ContentWriter writer : writers) {
-			writer.createOrUpdateItem(item);
-		}
-	}
-
-	@Override
-	public void createOrUpdatePlaylist(Playlist enclosingList, boolean markMissingItemsAsUnavailable) {
-		for (ContentWriter writer : writers) {
-			writer.createOrUpdatePlaylist(enclosingList, markMissingItemsAsUnavailable);
+			writer.createOrUpdate(item);
 		}
 	}
 	
@@ -46,27 +39,16 @@ public class ContentWriters implements DefinitiveContentWriter {
 	}
 
 	@Override
-	public void createOrUpdatePlaylistSkeleton(Playlist playlist) {
+	public void createOrUpdateSkeleton(ContentGroup playlist) {
 		for (ContentWriter writer : writers) {
-			writer.createOrUpdatePlaylistSkeleton(playlist);
+			writer.createOrUpdateSkeleton(playlist);
 		}
 	}
 
-    @Override
-    public void createOrUpdateDefinitiveItem(Item item) {
-        for (ContentWriter writer : writers) {
-            if (writer instanceof DefinitiveContentWriter) {
-                ((DefinitiveContentWriter) writer).createOrUpdateDefinitiveItem(item);
-            }
-        }
-    }
-
-    @Override
-    public void createOrUpdateDefinitivePlaylist(Playlist playlist) {
-        for (ContentWriter writer : writers) {
-            if (writer instanceof DefinitiveContentWriter) {
-                ((DefinitiveContentWriter) writer).createOrUpdateDefinitivePlaylist(playlist);
-            }
-        }
-    }
+	@Override
+	public void createOrUpdate(Container<?> container, boolean markMissingItemsAsUnavailable) {
+		for (ContentWriter writer : writers) {
+			writer.createOrUpdate(container, markMissingItemsAsUnavailable);
+		}
+	}
 }

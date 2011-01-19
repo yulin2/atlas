@@ -5,10 +5,10 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.joda.time.Duration;
@@ -82,14 +82,13 @@ public class HtmlTranslatorTest extends TestCase {
 		item2.setDescription("Wino chef");
 		item2.setCanonicalUri("http://www.bbc.co.uk/floyd");
 		
-		Playlist playlist = new Playlist();
+		Container<Item> playlist = new Container<Item>();
 		playlist.setCanonicalUri("http://www.bbc.co.uk/somebrand");
-		
-		playlist.addItems(item1, item2);
+		playlist.setContents(item1, item2);
 		
 		Set<Object> graph = Sets.newHashSet();
 		graph.add(playlist);
 		
-		new HtmlTranslator().writeTo(graph, baos );
+		new HtmlTranslator().writeTo(graph, baos);
 	}
 }

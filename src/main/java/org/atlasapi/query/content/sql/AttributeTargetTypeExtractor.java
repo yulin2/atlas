@@ -26,53 +26,53 @@ import org.atlasapi.content.criteria.IntegerAttributeQuery;
 import org.atlasapi.content.criteria.MatchesNothing;
 import org.atlasapi.content.criteria.QueryVisitor;
 import org.atlasapi.content.criteria.StringAttributeQuery;
-import org.atlasapi.media.entity.Description;
+import org.atlasapi.media.entity.Identified;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
 public class AttributeTargetTypeExtractor {
 
-	public Set<Class<? extends Description>> extract(ContentQuery query) {
+	public Set<Class<? extends Identified>> extract(ContentQuery query) {
 		 return ImmutableSet.copyOf(Maybe.filterValues(typesFrom(query)));
 	}
 
-	private List<Maybe<Class<? extends Description>>> typesFrom(ContentQuery query) {
+	private List<Maybe<Class<? extends Identified>>> typesFrom(ContentQuery query) {
 		
-		return query.accept(new QueryVisitor<Maybe<Class<? extends Description>>>() {
+		return query.accept(new QueryVisitor<Maybe<Class<? extends Identified>>>() {
 
 			@Override
-			public Maybe<Class<? extends Description>> visit(IntegerAttributeQuery query) {
+			public Maybe<Class<? extends Identified>> visit(IntegerAttributeQuery query) {
 				return type(query);
 			}
 
 			@Override
-			public Maybe<Class<? extends Description>> visit(StringAttributeQuery query) {
+			public Maybe<Class<? extends Identified>> visit(StringAttributeQuery query) {
 				return type(query);
 			}
 
 			@Override
-			public Maybe<Class<? extends Description>> visit(EnumAttributeQuery<?> query) {
+			public Maybe<Class<? extends Identified>> visit(EnumAttributeQuery<?> query) {
 				return type(query);
 			}
 
 			@Override
-			public Maybe<Class<? extends Description>> visit(DateTimeAttributeQuery query) {
+			public Maybe<Class<? extends Identified>> visit(DateTimeAttributeQuery query) {
 				return type(query);
 			}
 
 			@Override
-			public Maybe<Class<? extends Description>> visit(BooleanAttributeQuery query) {
+			public Maybe<Class<? extends Identified>> visit(BooleanAttributeQuery query) {
 				return type(query);
 			}
 			
 			@Override
-			public Maybe<Class<? extends Description>> visit(MatchesNothing noOp) {
+			public Maybe<Class<? extends Identified>> visit(MatchesNothing noOp) {
 				return Maybe.nothing();
 			}
 
-			private Maybe<Class<? extends Description>> type(AttributeQuery<?> query) {
-				return Maybe.<Class<? extends Description>>just(query.getAttribute().target());
+			private Maybe<Class<? extends Identified>> type(AttributeQuery<?> query) {
+				return Maybe.<Class<? extends Identified>>just(query.getAttribute().target());
 			}
 		});
 	}

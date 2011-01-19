@@ -11,7 +11,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <property name="scheduledTimerTasks">
         <list>
             <ref bean="updatePlaylistsScheduledTask" />
-            <ref bean="updateMentionsScheduledTask" />
             <ref bean="updateTVBlobScheduledTask" />
             <ref bean="updateTVBlobTomorrowScheduledTask" />
             <ref bean="updateSeesawAtoZScheduledTask" />
@@ -45,23 +44,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 					</bean>
  			</constructor-arg>
  		</bean>
-    </property>
-  </bean>
-  
-  <bean id="updateMentionsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-    <property name="delay"  value="10000" />
-    <property name="period" value="60000" />
-    <property name="runnable">
-        <bean parent="conditionalRunner">
-            <constructor-arg>
-                <bean class="org.atlasapi.tracking.PlaylistFromMentionsGenerator">
-                   <constructor-arg ref="contentResolver"/>
-                   <constructor-arg ref="contentWriter"/>
-                   <constructor-arg ref="contentMentionStore"/>
-                   <constructor-arg value="TWITTER"/>
-               </bean>
-            </constructor-arg>
-        </bean>
     </property>
   </bean>
   

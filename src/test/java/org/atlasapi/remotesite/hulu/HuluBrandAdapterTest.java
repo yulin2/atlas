@@ -31,7 +31,7 @@ public class HuluBrandAdapterTest extends MockObjectTestCase {
         assertNotNull(brand.getImage());
         assertNotNull(brand.getThumbnail());
         assertFalse(brand.getTags().isEmpty());
-        assertFalse(brand.getItems().isEmpty());
+        assertFalse(brand.getContents().isEmpty());
     }
     
     public void testShouldBeAbleToFetchBrands() throws Exception {

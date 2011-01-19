@@ -103,7 +103,7 @@ public class HuluAllBrandsUpdater implements Runnable {
         public void run() {
             try {
                 Brand brand = brandAdapter.fetch(uri);
-                contentStore.createOrUpdatePlaylist(brand, true);
+                contentStore.createOrUpdate(brand, true);
             } catch (Exception e) {
                 LOG.warn("Error retrieving Hulu brand: " + uri + " while retrieving all brands with message: " + e.getMessage());
             }

@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -31,7 +31,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
 import com.google.common.collect.Sets;
 
-public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
+public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
 
     static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile("^http://www\\.bbc\\.co\\.uk/programmes/([pb]00[^/\\.]+)$");
 
@@ -62,7 +62,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Content> {
         return matcher.matches();
     }
 
-    public Content fetch(String uri) {
+    public Identified fetch(String uri) {
         try {
             SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
             if (content == null) {

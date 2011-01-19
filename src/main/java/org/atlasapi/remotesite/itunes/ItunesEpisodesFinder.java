@@ -23,6 +23,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.Duration;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
@@ -65,7 +66,7 @@ public class ItunesEpisodesFinder {
                                 if (series.getSeriesNumber() != null) {
                                     episode.setSeriesNumber(series.getSeriesNumber());
                                 }
-                                series.addItem(episode);
+                                series.addContents(ImmutableList.of(episode));
                             }
                         }
                     }

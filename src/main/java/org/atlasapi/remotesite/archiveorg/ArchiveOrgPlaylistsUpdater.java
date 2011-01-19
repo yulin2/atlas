@@ -2,8 +2,8 @@ package org.atlasapi.remotesite.archiveorg;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jdom.Element;
 
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class ArchiveOrgPlaylistsUpdater implements Runnable {
@@ -42,9 +43,11 @@ public class ArchiveOrgPlaylistsUpdater implements Runnable {
                 boolean noItemsLeft = false;
                 int page = 1;
                 
-                Playlist playlist = new Playlist();
+                ContentGroup playlist = new ContentGroup();
                 playlist.setCanonicalUri(playlistUri);
                 playlist.setPublisher(Publisher.ARCHIVE_ORG);
+                
+                List<Item> items = Lists.newArrayList();
                 
                 while (!noItemsLeft) {
                     String content = null;
@@ -77,8 +80,8 @@ public class ArchiveOrgPlaylistsUpdater implements Runnable {
                                     if (itemAdapter.canFetch(itemUri)) {
                                         Item item = itemAdapter.fetch(itemUri);
                                         if (item != null) {
-                                            contentWriter.createOrUpdateItem(item);
-                                            playlist.addItem(item);
+                                            contentWriter.createOrUpdate(item);
+                                            items.add(item);
                                         }
                                     }
                                 }
@@ -94,8 +97,8 @@ public class ArchiveOrgPlaylistsUpdater implements Runnable {
                         throw new FetchException("Playlist page returned with no content: " + currentPageUri);
                     }
                 }
-                
-                contentWriter.createOrUpdatePlaylistSkeleton(playlist);
+                playlist.setContents(items);
+                contentWriter.createOrUpdateSkeleton(playlist);
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(playlistUri).withSource(ArchiveOrgPlaylistsUpdater.class));
             }

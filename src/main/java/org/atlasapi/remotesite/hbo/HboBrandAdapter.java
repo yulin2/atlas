@@ -8,16 +8,17 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.xml.SimpleXmlNavigator;
+import org.jaxen.JaxenException;
 import org.jdom.Element;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
@@ -66,14 +67,9 @@ public class HboBrandAdapter implements SiteSpecificAdapter<Brand> {
             String formattedDescription = aboutNavigator.firstElementOrNull("//content/Article/article/body").getValue();
             brand.setDescription(helper.removeFormatting(formattedDescription));
             
-            List<Element> episodeElements = episodesNavigator.allElementsMatching("//group[@id='sequentialNav']/group"); 
-            
-            for (Element episodeElement : episodeElements) {
-                extractEpisode(episodesNavigator, brand, episodeElement);
-            }
+            attachEpisodes(episodesNavigator, brand);
             
             correctEpisodeNumbers(brand);
-            
             return brand;
         }
         catch (Exception e) {
@@ -82,7 +78,19 @@ public class HboBrandAdapter implements SiteSpecificAdapter<Brand> {
         return null;
     }
 
-    private void extractEpisode(SimpleXmlNavigator episodesNavigator, Brand brand, Element episodeElement) {
+	private void attachEpisodes(SimpleXmlNavigator episodesNavigator, Brand brand) throws JaxenException {
+		List<Element> episodeElements = episodesNavigator.allElementsMatching("//group[@id='sequentialNav']/group"); 
+		List<Episode> episodes = Lists.newArrayList();
+		for (Element episodeElement : episodeElements) {
+		    Episode possibleEpisode = extractEpisode(episodesNavigator, brand, episodeElement);
+		    if (possibleEpisode != null) {
+		    	episodes.add(possibleEpisode);
+		    }
+		}
+		brand.setContents(episodes);
+	}
+
+    private Episode extractEpisode(SimpleXmlNavigator episodesNavigator, Brand brand, Element episodeElement) {
         Element titleElement = episodesNavigator.firstElementOrNull("item[@id='title']/data", episodeElement);
         Pattern titlePattern = Pattern.compile("([0-9]+): (.*)");
         
@@ -97,8 +105,6 @@ public class HboBrandAdapter implements SiteSpecificAdapter<Brand> {
                 String thumbnailUrl = imageElement.getValue().trim();
                 episode.setThumbnail(thumbnailUrl);
                 
-                brand.addItem(episode);
-                
                 Matcher titleMatcher = titlePattern.matcher(titleElement.getValue().trim());
                 titleMatcher.matches();
                 Integer episodeNumber = Integer.valueOf(titleMatcher.group(1));
@@ -107,14 +113,16 @@ public class HboBrandAdapter implements SiteSpecificAdapter<Brand> {
                     brand.setImage(episode.getImage());
                     brand.setThumbnail(episode.getThumbnail());
                 }
+                
+                return episode;
             }
         }
+        return null;
     }
 
     private void correctEpisodeNumbers(Brand brand) {
         Map<Integer, Integer> seriesToHighestEpisode = Maps.newHashMap();
-        for (Item item : brand.getItems()) {
-            Episode episode = (Episode) item;
+        for (Episode episode : brand.getContents()) {
             
             Integer currentHighest = seriesToHighestEpisode.get(episode.getSeriesNumber());
             
@@ -123,9 +131,7 @@ public class HboBrandAdapter implements SiteSpecificAdapter<Brand> {
             }
         }
         
-        for (Item item : brand.getItems()) {
-            Episode episode = (Episode) item;
-            
+        for (Episode episode : brand.getContents()) {
             if (episode.getSeriesNumber() > 1) {
                 Integer episodesToSubtract = seriesToHighestEpisode.get(episode.getSeriesNumber() - 1);
                 episode.setEpisodeNumber(episode.getEpisodeNumber() - episodesToSubtract);

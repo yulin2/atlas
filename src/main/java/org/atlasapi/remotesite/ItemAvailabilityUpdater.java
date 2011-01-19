@@ -37,7 +37,7 @@ public class ItemAvailabilityUpdater implements Runnable {
 	private final Clock clock;
 	
 	private DBCollection items;
-	private ItemTranslator translator = new ItemTranslator();
+	private ItemTranslator translator = new ItemTranslator(true);
 	private final AdapterLog log;
 
 	public ItemAvailabilityUpdater(DatabasedMongo db, AdapterLog log, Clock clock) {

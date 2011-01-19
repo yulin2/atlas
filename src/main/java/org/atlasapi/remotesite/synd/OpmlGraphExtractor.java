@@ -20,12 +20,14 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.StringUtils;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.Fetcher;
@@ -34,6 +36,7 @@ import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.bbc.BbcPodcastGenreMap;
 import org.joda.time.Duration;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sun.syndication.feed.opml.Outline;
@@ -41,35 +44,35 @@ import com.sun.syndication.feed.opml.Outline;
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist> {
+public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, ContentGroup> {
 
-	private final Fetcher<Content> delegateFetcher;
+	private final Fetcher<Identified> delegateFetcher;
 	private final BbcPodcastGenreMap genreMap = new BbcPodcastGenreMap();
 
-	public OpmlGraphExtractor(Fetcher<Content> delegateFetcher) {
+	public OpmlGraphExtractor(Fetcher<Identified> delegateFetcher) {
 		this.delegateFetcher = delegateFetcher;
 	}
 
-	public Playlist extract(OpmlSource source) {
-		Playlist playlist = outerPlaylist(source);
+	public ContentGroup extract(OpmlSource source) {
+		ContentGroup playlist = outerPlaylist(source);
 
 		List<Outline> outlines = typedList(source.getFeed().getOutlines());
 	
-		playlist.setPlaylists(fetchFeedsFor(outlines));
+		playlist.setContents(fetchFeedsFor(outlines));
 		
 		return playlist;
 	}
 
-	private Playlist outerPlaylist(OpmlSource source) {
-		Playlist playlist = new Playlist();
+	private ContentGroup outerPlaylist(OpmlSource source) {
+		ContentGroup playlist = new ContentGroup();
 		playlist.setCanonicalUri(source.getUri());
 		playlist.setTitle(source.getTitle());
 		playlist.setDescription(source.getTitle());
 		return playlist;
 	}
 	
-	private List<Playlist> fetchFeedsFor(List<Outline> outlines) {
-		List<Playlist> playlists = Lists.newArrayList();
+	private List<Content> fetchFeedsFor(List<Outline> outlines) {
+		List<Content> playlists = Lists.newArrayList();
 		if (outlines != null) {
 			for (Outline outline : outlines) {
 				playlists.addAll(fetchFeedsFor(outline));
@@ -78,8 +81,8 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 		return playlists;
 	}
 
-	private List<Playlist> fetchFeedsFor(Outline outline) {
-		List<Playlist> playlists = Lists.newArrayList();
+	private List<Content> fetchFeedsFor(Outline outline) {
+		List<Content> playlists = Lists.newArrayList();
 
 		List<Outline> children = typedList(outline.getChildren());
 		playlists.addAll(fetchFeedsFor(children));
@@ -94,17 +97,18 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 		return playlists;
 	}
 
-	private List<Playlist> fetchFeed(String feedUrl, Outline outline) {
+	@SuppressWarnings("unchecked")
+	private List<Container<Item>> fetchFeed(String feedUrl, Outline outline) {
 		
 		String genres = outline.getAttributeValue("bbcgenres");
 		
-		Playlist feed;
+		Container<Item> feed;
 		
 		try {
-			 feed = (Playlist) delegateFetcher.fetch(feedUrl);
+			 feed = (Container<Item>) delegateFetcher.fetch(feedUrl);
 		} catch (FetchException fe) {
 			// carry on and try the next feed
-			return Lists.newArrayList();
+			return ImmutableList.of();
 		} 
 		
 		if (!StringUtils.isEmpty(genres)) {
@@ -117,14 +121,14 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 		
 		addRestrictionsFor(outline, feed);
 		
-		return Lists.newArrayList(feed);
+		return ImmutableList.of(feed);
 	}
 
-	private void addRestrictionsFor(Outline outline, Playlist feed) {
+	private void addRestrictionsFor(Outline outline, Container<Item> feed) {
 		
 		String allow = outline.getAttributeValue("allow");
 		
-		for (Location location : locationsFrom(feed.getItems())) {
+		for (Location location : locationsFrom(feed.getContents())) {
 			if (location.getUri() != null && location.getUri().contains("bbc.co.uk")) {
 				Policy policy = location.getPolicy();
 				if (policy == null) {
@@ -153,7 +157,7 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 		return locations;
 	}
 
-	private void addPublishedDurationFor(Outline outline, Playlist feed) {
+	private void addPublishedDurationFor(Outline outline, Container<Item> feed) {
 
 		// foreach version 'publishedDuration' = typicalDurationMins x 60 for secs
 
@@ -161,7 +165,7 @@ public class OpmlGraphExtractor implements ContentExtractor<OpmlSource, Playlist
 	
 		if (typicalDurationAttr != null) {
 			Integer typicalDuration = Integer.parseInt(typicalDurationAttr);
-			for (Item item : feed.getItems()) {
+			for (Item item : feed.getContents()) {
 				for (Version version : item.getVersions()) {
 					version.setDuration(Duration.standardMinutes(typicalDuration));
 				}

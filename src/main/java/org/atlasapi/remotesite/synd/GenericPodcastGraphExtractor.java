@@ -17,13 +17,14 @@ package org.atlasapi.remotesite.synd;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 
+import com.google.common.collect.Lists;
 import com.sun.syndication.feed.synd.SyndEnclosure;
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -35,18 +36,19 @@ import com.sun.syndication.feed.synd.SyndFeed;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public abstract class GenericPodcastGraphExtractor extends PodcastGraphExtractor implements ContentExtractor<SyndicationSource, Playlist> {
+public abstract class GenericPodcastGraphExtractor extends PodcastGraphExtractor implements ContentExtractor<SyndicationSource, Container<Item>> {
 
-	public Playlist extract(SyndicationSource source) {
+	public Container<Item> extract(SyndicationSource source) {
 	
 		SyndFeed feed = source.getFeed();
 		
 		List<SyndEntry> entries = entriesFrom(feed);
 		
-		Playlist playlist =  collectionType();
+		Container<Item> playlist =  collectionType();
 		playlist.setCanonicalUri(source.getUri());
 		setCollectionPropertyValuesFrom(playlist, feed, source.getUri());
 		
+		List<Item> items = Lists.newArrayList();
 		for (SyndEntry entry : entries) {
 			Location location =  locationFrom(locationUriFrom(entry));
 			
@@ -58,17 +60,19 @@ public abstract class GenericPodcastGraphExtractor extends PodcastGraphExtractor
 			
 			Item item = itemFrom(entry, source.getUri());
 			item.addVersion(version);
+			items.add(item);
 
-			playlist.addItem(item);
 		}
+		
+		playlist.setContents(items);
 		
 		playlist.setPublisher(publisher());
 		
 		return playlist;
 	}
 
-	protected Playlist collectionType() {
-		return new Playlist();
+	protected Container<Item> collectionType() {
+		return new Container<Item>();
 	}
 
 	private String locationUriFrom(SyndEntry entry) {
@@ -84,7 +88,7 @@ public abstract class GenericPodcastGraphExtractor extends PodcastGraphExtractor
 		return locationUri;
 	}
 
-	protected void setCollectionPropertyValuesFrom(Playlist playlist, SyndFeed feed, String feedUri) {
+	protected void setCollectionPropertyValuesFrom(Container<?> playlist, SyndFeed feed, String feedUri) {
 		playlist.setTitle(feed.getTitle());
 		playlist.setDescription(feed.getDescription());
 		playlist.setCanonicalUri(feedUri);

@@ -20,7 +20,8 @@ import static org.hamcrest.Matchers.instanceOf;
 
 import java.io.IOException;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -39,7 +40,7 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 	static final String DOCUMENT = "doc";
 	
 	RemoteSiteClient<SyndFeed> feedClient;
-	ContentExtractor<SyndicationSource, Playlist> propertyExtractor;
+	ContentExtractor<SyndicationSource, Container<Item>> propertyExtractor;
 	BbcPodcastAdapter adapter;
 	SyndFeed feed = null;
 	SyndicationSource podcastSource;
@@ -80,7 +81,6 @@ public class BbcPodcastAdapterTest extends MockObjectTestCase {
 	}
 	
 	public void testCanFetchResourcesForRssUris() throws Exception {
-		
 		assertTrue(adapter.canFetch("http://downloads.bbc.co.uk/podcasts/radio4/bh/rss.xml"));
 		assertFalse(adapter.canFetch("http://www.bbc.co.uk"));
 	}

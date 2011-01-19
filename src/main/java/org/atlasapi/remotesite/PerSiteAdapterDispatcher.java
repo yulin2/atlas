@@ -17,7 +17,7 @@ package org.atlasapi.remotesite;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -31,17 +31,17 @@ import org.atlasapi.persistence.system.Fetcher;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class PerSiteAdapterDispatcher implements Fetcher<Content> {
+public class PerSiteAdapterDispatcher implements Fetcher<Identified> {
 
-	private List<SiteSpecificAdapter<? extends Content>> adapters;
+	private List<SiteSpecificAdapter<? extends Identified>> adapters;
 	private final AdapterLog log;
 
 	public PerSiteAdapterDispatcher(AdapterLog log) {
 		this.log = log;
 	}
 
-	public Content fetch(String uri) {
-		SiteSpecificAdapter<? extends Content> adapter = findMatchingAdapterFor(uri);
+	public Identified fetch(String uri) {
+		SiteSpecificAdapter<? extends Identified> adapter = findMatchingAdapterFor(uri);
 		if (adapter != null) {
 			try {
 				return adapter.fetch(uri);
@@ -54,8 +54,8 @@ public class PerSiteAdapterDispatcher implements Fetcher<Content> {
 		}
 	}
 
-	private SiteSpecificAdapter<? extends Content> findMatchingAdapterFor(String uri) {
-		for (SiteSpecificAdapter<? extends Content> adapter : adapters) {
+	private SiteSpecificAdapter<? extends Identified> findMatchingAdapterFor(String uri) {
+		for (SiteSpecificAdapter<? extends Identified> adapter : adapters) {
 			if (adapter.canFetch(uri)) {
 				return adapter;
 			}
@@ -63,7 +63,7 @@ public class PerSiteAdapterDispatcher implements Fetcher<Content> {
 		throw new NoMatchingAdapterException("No configured adapter matched URI " + uri);
 	}
 
-	public void setAdapters(List<SiteSpecificAdapter<? extends Content>> adapters) {
+	public void setAdapters(List<SiteSpecificAdapter<? extends Identified>> adapters) {
 		this.adapters = adapters;
 	}
 }

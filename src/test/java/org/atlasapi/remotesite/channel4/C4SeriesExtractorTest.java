@@ -37,7 +37,7 @@ public class C4SeriesExtractorTest extends TestCase {
 		assertThat(series.getTitle(), is("Series 3 - Ramsay's Kitchen Nightmares"));
 		assertThat(series.getDescription(), startsWith("Multi Michelin-starred chef Gordon Ramsay"));
 		
-		List<Episode> episodes = (List) series.getItems();
+		List<Episode> episodes = (List) series.getContents();
 		
 		Episode firstEpisode = episodes.get(0);
 		

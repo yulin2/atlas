@@ -1,8 +1,6 @@
 package org.atlasapi.equiv;
 
-import java.util.Collection;
-
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentListener;
 
@@ -17,17 +15,17 @@ public class EquivContentListener implements ContentListener {
     }
 
     @Override
-    public void brandChanged(Collection<Brand> brands, changeType type) {
-        if (changeType.CONTENT_UPDATE.equals(type)) {
-            for (Brand brand: brands) {
+	public void brandChanged(Iterable<? extends Container<?>> containers, ChangeType changeType) {
+        if (ChangeType.CONTENT_UPDATE.equals(changeType)) {
+            for (Container<?> brand: containers) {
                 brandUpdater.update(brand);
             }
         }
     }
 
     @Override
-    public void itemChanged(Collection<Item> items, changeType type) {
-        if (changeType.CONTENT_UPDATE.equals(type)) {
+	public void itemChanged(Iterable<? extends Item> items, ChangeType changeType) {
+        if (ChangeType.CONTENT_UPDATE.equals(changeType)) {
             for (Item item: items) {
                 itemEquivUpdater.update(item);
             }

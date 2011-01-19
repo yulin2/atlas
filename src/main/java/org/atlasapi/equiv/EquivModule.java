@@ -17,7 +17,7 @@ package org.atlasapi.equiv;
 import java.util.List;
 
 import org.atlasapi.equiv.www.EquivController;
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.equiv.EquivalentUrlStore;
@@ -46,7 +46,7 @@ public class EquivModule {
 	}
 	
 	@Bean EquivContentListener equivContentListener() {
-	    List<EquivGenerator<Brand>> brandEquivGenerators = ImmutableList.<EquivGenerator<Brand>>of(new FreebaseBrandEquivGenerator());
+	    List<EquivGenerator<Container<?>>> brandEquivGenerators = ImmutableList.<EquivGenerator<Container<?>>>of(new FreebaseBrandEquivGenerator());
 	    
 	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators, store());
 	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());

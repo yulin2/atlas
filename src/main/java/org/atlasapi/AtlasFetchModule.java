@@ -19,10 +19,9 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.EquivModule;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.ContentPersistenceModule;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.content.mongo.AliasWriter;
 import org.atlasapi.persistence.equiv.EquivalentContentFinder;
 import org.atlasapi.persistence.equiv.EquivalentContentMerger;
@@ -73,11 +72,10 @@ public class AtlasFetchModule {
 		public @Bean ContentWriter contentWriter() {		
 			
 			ContentWriter writer = persistence.persistentWriter();
-			DefinitiveContentWriter definitiveWriter = persistence.definitiveWriter();
 			
 			if (enableEquivalence) {
 				EquivalentContentMerger merger = new EquivalentContentMerger(new EquivalentContentFinder(finder, reader.contentResolverThatDoesntSave()));
-				writer = new EquivalentContentMergingContentWriter(writer, definitiveWriter, merger);
+				writer = new EquivalentContentMergingContentWriter(writer, merger);
 			}
 			
 			remote.contentWriters().add(writer);
@@ -102,13 +100,12 @@ public class AtlasFetchModule {
 	
 		@Primary
 		public @Bean CanonicalisingFetcher contentResolver() {
-			Fetcher<Content> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), savingFetcher());
-			
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), savingFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers(), aliasWriter);
 		}
 		
 		public @Bean CanonicalisingFetcher contentResolverThatDoesntSave() {
-			Fetcher<Content> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), remote.remoteFetcher());
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), remote.remoteFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers(), aliasWriter);
 		}
 		

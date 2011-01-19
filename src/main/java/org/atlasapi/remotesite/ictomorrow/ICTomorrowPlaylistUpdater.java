@@ -4,12 +4,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowApiException;
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowApiHelper;
 import com.metabroadcast.common.social.auth.ictomorrow.ICTomorrowItemMetadata;
@@ -47,9 +48,11 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
                 }
             }
             
-            Playlist ictomorrowPlaylist = new Playlist("http://ictomorrow.co.uk/all-content", "ict:all", Publisher.ICTOMORROW);
+            ContentGroup ictomorrowPlaylist = new ContentGroup("http://ictomorrow.co.uk/all-content", "ict:all", Publisher.ICTOMORROW);
             ictomorrowPlaylist.setTitle("Classic Telly");
             ictomorrowPlaylist.setDescription("Classic TV provided by ICTomorrow");
+            
+            List<Item> parsedItems = Lists.newArrayList();
             
             for (ICTomorrowItemMetadata itemMetadata : items) {
                 Item item = null;
@@ -60,13 +63,12 @@ public class ICTomorrowPlaylistUpdater implements Runnable {
                 }
                 
                 if (item != null) {
-                    contentWriter.createOrUpdateItem(item);
-                    
-                    ictomorrowPlaylist.addItem(item);
+                    contentWriter.createOrUpdate(item);
+                    parsedItems.add(item);
                 }
             }
-            
-            contentWriter.createOrUpdatePlaylistSkeleton(ictomorrowPlaylist);
+            ictomorrowPlaylist.setContents(parsedItems);
+            contentWriter.createOrUpdateSkeleton(ictomorrowPlaylist);
         } catch (ICTomorrowApiException e) {
             System.err.println(e.getMessage());
            log.debug("API Exception while updating playlist", e);

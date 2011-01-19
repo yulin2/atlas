@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -15,6 +16,7 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jdom.Element;
 
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
@@ -69,7 +71,6 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
                     Series series = seriesAdapter.fetch(uri);
                     addSeriesToBrand(series, brand);
                 }
-                
                 return brand;
             }
         }
@@ -94,13 +95,15 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
                 brand.setImage(series.getImage());
             }
             
-            for (Item item : series.getItems()) {
+            List<Episode> episodes = Lists.newArrayListWithCapacity(series.getContents().size());
+            for (Content item : series.getContents()) {
                 Episode episode = (Episode) item;
                 if (series.getCanonicalUri().equals(brand.getCanonicalUri())) {
                     episode.setSeries(null);
                 }
-                brand.addItem(item);
+                episodes.add(episode);
             }
+            brand.addContents(episodes);
         }
     }
 

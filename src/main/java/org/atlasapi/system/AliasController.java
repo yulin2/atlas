@@ -17,7 +17,7 @@ package org.atlasapi.system;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.media.entity.Description;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.mongo.AliasWriter;
 import org.springframework.stereotype.Controller;
@@ -56,14 +56,14 @@ public class AliasController {
 		ImmutableList<AliasAndTarget> aliases = aliasesFrom(csvAliases);
 		for (AliasAndTarget aliasAndTarget : aliases) {
 			
-			Description content = finder.findByUri(aliasAndTarget.alias);
+			Identified content = finder.findByCanonicalUri(aliasAndTarget.alias);
 			if (content != null) {
 				info.add("Not adding alias " + aliasAndTarget.alias + "  because it already exists");
 				continue;
 			}
 			
 			try { 
-				Description canonicalContent = finder.findByUri(aliasAndTarget.canonicalUri);
+				Identified canonicalContent = finder.findByCanonicalUri(aliasAndTarget.canonicalUri);
 				if (canonicalContent == null) {
 					errors.add("Not adding alias " + aliasAndTarget.alias + "  because the canonicalUri (" + aliasAndTarget.canonicalUri + ") can't be found");
 					continue;

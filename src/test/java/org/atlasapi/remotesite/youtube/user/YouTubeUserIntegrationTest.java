@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.youtube.user;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
 
 public class YouTubeUserIntegrationTest extends TestCase {
@@ -13,12 +13,12 @@ public class YouTubeUserIntegrationTest extends TestCase {
         String uri = "http://www.youtube.com/user/YTdebates";
         assertTrue(adapter.canFetch(uri));
         
-        Playlist userPlaylist = adapter.fetch(uri);
+        ContentGroup userPlaylist = adapter.fetch(uri);
         assertNotNull(userPlaylist);
         assertEquals(new YouTubeUserCanonicaliser().canonicalise(uri), userPlaylist.getCanonicalUri());
         assertEquals(YouTubeUserCanonicaliser.curieFor(uri), userPlaylist.getCurie());
         assertEquals(Publisher.YOUTUBE, userPlaylist.getPublisher());
         
-        assertFalse(userPlaylist.getItems().isEmpty());
+        assertFalse(userPlaylist.getContents().isEmpty());
     }
 }

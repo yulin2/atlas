@@ -17,10 +17,10 @@ package org.atlasapi.query.content;
 import java.util.List;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
-public interface DelegateQueryExecutor<T extends Content> {
+public interface DelegateQueryExecutor<T extends Identified> {
 	
 	List<T> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query);
 	

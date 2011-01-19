@@ -20,7 +20,8 @@ import static org.hamcrest.Matchers.instanceOf;
 
 import java.io.IOException;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -40,7 +41,7 @@ public class OpmlAdapterTest extends MockObjectTestCase {
 	static final String DOCUMENT = "doc";
 	
 	RemoteSiteClient<Opml> feedClient;
-	ContentExtractor<OpmlSource, Playlist> propertyExtractor;
+	ContentExtractor<OpmlSource, ContentGroup> propertyExtractor;
 	OpmlAdapter adapter;
 	Opml opml = null;
 	OpmlSource opmlSource = new OpmlSource(opml, OPML_LINK);

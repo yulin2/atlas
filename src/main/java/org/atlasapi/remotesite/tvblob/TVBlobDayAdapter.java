@@ -9,18 +9,18 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
+import org.atlasapi.persistence.content.ContentWriter;
 
 public class TVBlobDayAdapter {
 
     private static final Pattern URL_PATTERN = Pattern
                     .compile("http://epgadmin.tvblob.com/api/(\\w+)/programmes/schedules/(.+)(\\.\\w*)?");
-    private final DefinitiveContentWriter contentStore;
+    private final ContentWriter contentStore;
     private final ContentResolver contentResolver;
     
     static final Log LOG = LogFactory.getLog(TVBlobDayAdapter.class);
     
-    public TVBlobDayAdapter(DefinitiveContentWriter contentStore, ContentResolver contentResolver) {
+    public TVBlobDayAdapter(ContentWriter contentStore, ContentResolver contentResolver) {
         this.contentStore = contentStore;
         this.contentResolver = contentResolver;
     }

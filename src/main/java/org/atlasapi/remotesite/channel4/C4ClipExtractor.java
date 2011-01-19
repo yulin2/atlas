@@ -41,7 +41,7 @@ class C4ClipExtractor {
 	
 	public void fetchAndAddClipsTo(Brand brand) {
 		List<Clip> clips = clipsFrom(brand);
-		Map<String, org.atlasapi.media.entity.Item> lookup = toEpisodeLookup(brand.getItems());
+		Map<String, org.atlasapi.media.entity.Item> lookup = toEpisodeLookup(brand.getContents());
 		for (Clip clip : clips) {
 			Item episode = findEpisode(lookup, clip);
 			
@@ -66,7 +66,7 @@ class C4ClipExtractor {
 		return null;
 	}
 	
-    private static Map<String, Item> toEpisodeLookup(Iterable<Item> contents) {
+    private static Map<String, Item> toEpisodeLookup(Iterable<? extends Item> contents) {
         Map<String, Item> lookup = Maps.newHashMap();
         for (Item item : contents) {
         	if (item instanceof Episode) {

@@ -17,9 +17,9 @@ package org.atlasapi.remotesite.bbc;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.synd.GenericPodcastGraphExtractor;
 import org.atlasapi.remotesite.synd.SyndicationSource;
@@ -52,13 +52,13 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 	}
 	
 	@Override
-	public Playlist extract(SyndicationSource source) {
-		Playlist playlist = super.extract(source);
+	public Container<Item> extract(SyndicationSource source) {
+		Container<Item> playlist = super.extract(source);
 		
 		ContentType cType = contentTypeFor(source);
 		if (cType != null) {
 			playlist.setContentType(cType);
-			for (Item item : playlist.getItems()) {
+			for (Item item : playlist.getContents()) {
 				item.setContentType(cType);
 			}
 		}

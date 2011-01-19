@@ -15,21 +15,21 @@ permissions and limitations under the License. */
 package org.atlasapi.query.content.fuzzy;
 
 import java.util.List;
+import java.util.concurrent.Delayed;
 
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.content.criteria.MatchesNothing;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.content.criteria.StringAttributeQuery;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.query.content.DelegateQueryExecutor;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.query.Selection;
 
@@ -46,69 +46,51 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 		this.fuzzyQueryDelegate = fuzzyQueryDelegate;
 		this.fuzzySearcher = fuzzySearcher;
 	}
-	
-	public List<Brand> executeBrandQuery(ContentQuery query) {
-		return executeContentQuery(query, new DelegateQueryExecutor<Brand>() {
 
-			@Override
-			public List<Brand> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
-				return executor.executeBrandQuery(query);
-			}
-		});
-	}
-	
-	public List<Item> executeItemQuery(ContentQuery query) {
-		return executeContentQuery(query, new DelegateQueryExecutor<Item>() {
-
-			@Override
-			public List<Item> executeQuery(KnownTypeQueryExecutor executor, ContentQuery query) {
-				return executor.executeItemQuery(query);
-			}
-		});
-	}
-
-	public <T extends Content> List<T> executeContentQuery(ContentQuery query, DelegateQueryExecutor<T> exec) {
+	@Override
+	public List<Content> discover(ContentQuery query) {
 		if (!isFuzzy(query)) {
-			return exec.executeQuery(nonFuzzyQueryDelegate, query);
+			return nonFuzzyQueryDelegate.discover(query);
 		}
-		return query.getSelection().applyTo(loadAll(query, exec));
+		return query.getSelection().applyTo(loadAll(query));
 	}
+		
 
-	private <T extends Content> List<T> loadAll(ContentQuery query, DelegateQueryExecutor<T> exec) {
+	@SuppressWarnings("unchecked")
+	private List<Content> loadAll(ContentQuery query) {
 		Selection originalSelection = query.getSelection();
 		int numberToLoad = originalSelection.getOffset() + originalSelection.limitOrDefaultValue(BATCH_SIZE);
 		
-		List<T> all = Lists.newArrayList();
+		List<Content> all = Lists.newArrayList();
 		
 		for (int offset = 0; all.size() < numberToLoad; offset+= BATCH_SIZE) {
 			
-			ContentQuery queryForThisBatch = defuzz(query.copyWithSelection(new Selection(offset, BATCH_SIZE)));
+			Iterable<String> urisForThisBatch = defuzz(query.copyWithSelection(new Selection(offset, BATCH_SIZE)));
 			
-			if (MatchesNothing.isEquivalentTo(queryForThisBatch)) {
+			if (Iterables.isEmpty(urisForThisBatch)) {
 				break;
 			}
-		
-			all.addAll(exec.executeQuery(fuzzyQueryDelegate, queryForThisBatch));
+			
+			all.addAll((List) fuzzyQueryDelegate.executeUriQuery(urisForThisBatch, query));
 		}
-		
 		return all;
 	}
 
-	public List<Playlist> executePlaylistQuery(ContentQuery query) {
+	public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		if (isFuzzy(query)) {
-			// Fuzzy playlist queries not supported
-			return Lists.newArrayList();
+			// Fuzzy uri queries not supported
+			return ImmutableList.of();
 		}
-		return nonFuzzyQueryDelegate.executePlaylistQuery(query);
+		return nonFuzzyQueryDelegate.executeUriQuery(uris, query);
 	}
 	
-	private ContentQuery defuzz(ContentQuery query) {
-		return query.copyWithOperands(query.accept(new TitleDefuzzingQueryVisitor(query.getSelection())));
+	private Iterable<String> defuzz(ContentQuery query) {
+		return Iterables.concat(query.accept(new TitleDefuzzingQueryVisitor(query.getSelection())));
 	}
 	
-	private class TitleDefuzzingQueryVisitor extends QueryVisitorAdapter<AtomicQuery> {
-		
-		private final Selection selection;
+	private class TitleDefuzzingQueryVisitor extends QueryVisitorAdapter<List<String>> {
+
+		private Selection selection;
 
 		public TitleDefuzzingQueryVisitor(Selection selection) {
 			this.selection = selection;
@@ -116,43 +98,27 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public AtomicQuery visit(StringAttributeQuery query) {
+		public List<String> visit(StringAttributeQuery query) {
 			if(!Operators.SEARCH.equals(query.getOperator())) {
-				return query;
+				return defaultValue(query);
 			}
 			
 			List<String> titleSearches = (List<String>) query.getValue();
 
-			if (Attributes.BRAND_TITLE.equals(query.getAttribute())) {
-				
+			if (Attributes.DESCRIPTION_TITLE.equals(query.getAttribute())) {
 				List<String> uris = Lists.newArrayList();
 				
 				for (String title : titleSearches) {
 					uris.addAll(fuzzySearcher.brandTitleSearch(title, selection));
 				}
-				if (uris.isEmpty()) {
-					return MatchesNothing.get();
-				}
-				return Attributes.BRAND_URI.createQuery(Operators.EQUALS, uris);
+				return uris;
 			}
-			if (Attributes.ITEM_TITLE.equals(query.getAttribute())) {
-
-				List<String> uris = Lists.newArrayList();
-				
-				for (String title : titleSearches) {
-					uris.addAll(fuzzySearcher.itemTitleSearch(title, selection));
-				}
-				if (uris.isEmpty()) {
-					return MatchesNothing.get();
-				}
-				return Attributes.ITEM_URI.createQuery(Operators.EQUALS, uris);
-			}
-			return query;
+			return defaultValue(query);
 		}
 		
 		@Override
-		protected AtomicQuery defaultValue(AtomicQuery query) {
-			return query;
+		protected ImmutableList<String> defaultValue(AtomicQuery query) {
+			return ImmutableList.of();
 		}
 	}
 	
@@ -165,12 +131,16 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 		@Override
 		public Boolean visit(StringAttributeQuery query) {
 			return Operators.SEARCH.equals(query.getOperator());
-			
 		}
 		
 		@Override
 		protected Boolean defaultValue(AtomicQuery query) {
 			return false;
 		}
+	}
+
+	@Override
+	public Schedule schedule(ContentQuery query) {
+		return nonFuzzyQueryDelegate.schedule(query);
 	}
 }

@@ -11,10 +11,12 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import com.google.inject.internal.Lists;
 import com.metabroadcast.common.persistence.MongoTestHelper;
@@ -37,7 +39,7 @@ public class TVBlobDayPopulatorTest extends TestCase {
         extractor.populate(is);
         
         ContentQuery query = ContentQueryBuilder.query().equalTo(Attributes.BROADCAST_ON, "http://tvblob.com/channel/raiuno").build();
-        List<Item> items = store.itemsMatching(query);
+        List<Item> items = null;//store.itemsMatching(query);
         
         boolean foundMoreThanOneBroadcast = false;
         boolean foundBrandWithMoreThanOneEpisode = false;
@@ -45,12 +47,12 @@ public class TVBlobDayPopulatorTest extends TestCase {
         
         for (Item item: items) {
             Episode episode = (Episode) item;
-            if (episode.getBrand() != null) {
-                assertNotNull(episode.getBrand().getCanonicalUri());
-                if (brandUris.contains(episode.getBrand().getCanonicalUri())) {
+            if (episode.getContainer() != null) {
+                assertNotNull(episode.getContainer().getCanonicalUri());
+                if (brandUris.contains(episode.getContainer().getCanonicalUri())) {
                     foundBrandWithMoreThanOneEpisode = true;
                 } else {
-                    brandUris.add(episode.getBrand().getCanonicalUri());
+                    brandUris.add(episode.getContainer().getCanonicalUri());
                 }
             }
             assertNotNull(episode.getCanonicalUri());
@@ -70,13 +72,11 @@ public class TVBlobDayPopulatorTest extends TestCase {
         assertTrue(foundMoreThanOneBroadcast);
         assertTrue(foundBrandWithMoreThanOneEpisode);
         
-        query = ContentQueryBuilder.query().equalTo(Attributes.BRAND_URI, "http://tvblob.com/brand/269").build();
-        List<Brand> brands = store.dehydratedBrandsMatching(query);
+        List<Identified> brands = store.findByCanonicalUri(ImmutableList.of("http://tvblob.com/brand/269"));
         
         assertFalse(brands.isEmpty());
         assertEquals(1, brands.size());
-        Brand brand = brands.get(0);
-        
-        assertEquals(2, brand.getItemUris().size());
+        Brand brand = (Brand) brands.get(0);
+        assertEquals(2, brand.getContents().size());
     }
 }

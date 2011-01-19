@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.DefinitiveContentWriter;
+import org.atlasapi.persistence.content.ContentWriter;
 
 import com.google.inject.internal.Lists;
 
@@ -20,7 +20,7 @@ public class TVBlobServicesUpdater implements Runnable {
     static final Log LOG = LogFactory.getLog(TVBlobServicesUpdater.class);
     private final String day;
 
-    public TVBlobServicesUpdater(DefinitiveContentWriter contentStore, ContentResolver contentResolver, String day) {
+    public TVBlobServicesUpdater(ContentWriter contentStore, ContentResolver contentResolver, String day) {
         this(new TVBlobServicesClient(), new TVBlobDayAdapter(contentStore, contentResolver), day);
     }
 

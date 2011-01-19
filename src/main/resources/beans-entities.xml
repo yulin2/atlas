@@ -11,10 +11,10 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   -->
 
   <util:list id="resourceTypes">
-    <value>org.atlasapi.media.entity.Playlist</value>
-    <value>org.atlasapi.media.entity.Description</value>
+    <value>org.atlasapi.media.entity.Identified</value>
     <value>org.atlasapi.media.entity.Item</value>
     <value>org.atlasapi.media.entity.Brand</value>
+    <value>org.atlasapi.media.entity.Container</value>
     <value>org.atlasapi.media.entity.Episode</value>
     <value>org.atlasapi.media.entity.Version</value>
     <value>org.atlasapi.media.entity.Broadcast</value>

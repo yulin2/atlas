@@ -53,6 +53,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -110,14 +111,13 @@ public class FetchEquivalentContentTest extends TestCase {
 		Version version = new Version();
 		version.addManifestedAs(encoding);
 		item.addVersion(version);
-		brand.addItem(item);
-		
+		brand.setContents(ImmutableList.of(item));
 		return brand;
 	}
 
 	private static Set<String> locationUrisFrom(Brand huluBrand) {
 		Set<String> uris = Sets.newHashSet();
-		for (Item item : huluBrand.getItems()) {
+		for (Item item : huluBrand.getContents()) {
 			for (Version version : item.getVersions()) {
 				for (Encoding encoding : version.getManifestedAs()) {
 					for (Location location : encoding.getAvailableAt()) {
@@ -132,7 +132,7 @@ public class FetchEquivalentContentTest extends TestCase {
 	@SuppressWarnings("unchecked")
 	private Brand queryForBrand(String uri) {
 		QueryController queryController = applicationContext.getBean(QueryController.class);
-		ModelAndView modelAndView = queryController.brand(new StubHttpServletRequest().withParam("uri", uri));
+		ModelAndView modelAndView = queryController.discover(new StubHttpServletRequest().withParam("uri", uri));
 		Collection<Brand> brands = (Collection<Brand>) modelAndView.getModel().get("graph");
 		return Iterables.getOnlyElement(brands);
 	}

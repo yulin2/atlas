@@ -18,10 +18,7 @@ permissions and limitations under the License. */
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.beans.NullProjector;
-import org.atlasapi.beans.ProjectionException;
-import org.atlasapi.beans.Projector;
-import org.atlasapi.media.entity.Description;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.servlet.ContentNotFoundException;
 import org.atlasapi.persistence.servlet.RequestNs;
 import org.atlasapi.persistence.system.Fetcher;
@@ -46,16 +43,10 @@ public class UriFetchingController {
 
 	private static final String VIEW = "contentModel";
 	
-	private final Projector projector;
-	private final Fetcher<Description> localOrRemoteFetcher;
-
-	public UriFetchingController(Fetcher<Description> fetcher) {
-		this(fetcher, new NullProjector());
-	}
+	private final Fetcher<Identified> localOrRemoteFetcher;
 	
-	public UriFetchingController(Fetcher<Description> fetcher, Projector projector) {
+	public UriFetchingController(Fetcher<Identified> fetcher) {
 		this.localOrRemoteFetcher = fetcher;
-		this.projector = projector;
 	}
 
 	@RequestMapping(method=RequestMethod.GET)
@@ -65,22 +56,19 @@ public class UriFetchingController {
 		
 		Query query = new Query(uri, outputTimingInfo);
 		
-		
 		try {
-			Description bean = localOrRemoteFetcher.fetch(query.getUri());
+			Identified bean = localOrRemoteFetcher.fetch(query.getUri());
 			
 			if (bean == null) {
 				throw new ContentNotFoundException(uri);
 			}
-			return new ModelAndView(VIEW, RequestNs.GRAPH, projector.applyTo(Lists.newArrayList(bean)));
+			return new ModelAndView(VIEW, RequestNs.GRAPH, Lists.newArrayList(bean));
 
 		} catch (NoMatchingAdapterException nmae) {
 			throw new ContentNotFoundException(nmae);
 		} catch (FetchException fe) {
 			throw new ContentNotFoundException(fe);
-		} catch (ProjectionException pe) {
-			throw new ContentNotFoundException(pe);
-		} 
+		}
 	}
 	
 	static class Query {

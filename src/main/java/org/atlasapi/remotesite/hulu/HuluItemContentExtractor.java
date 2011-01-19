@@ -28,7 +28,8 @@ import org.joda.time.Duration;
 import com.google.common.collect.Sets;
 
 public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
-    private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.watch = ";
+    
+	private static final String SOCIAL_FEED = "SocialFeed.facebook_template_data.watch = ";
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final Pattern INFO_PATTERN = Pattern.compile("^.*Season\\s*(\\d+).*Ep\\.\\s*(\\d+)\\|(\\d+):(\\d+):?(\\d*)\\|.*$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.UNIX_LINES);
 
@@ -132,8 +133,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
                     item.setDescription((String) attributes.get("video_description"));
                     item.setIsLongForm(true);
                     
-                    item.setBrand(brandFrom(attributes));
-
+                    item.setContainer(brandFrom(attributes));
                     break;
                 }
             }

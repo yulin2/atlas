@@ -55,7 +55,7 @@ public class ItunesRssUpdater implements Runnable {
                     if (!alreadyProcessed.contains(brandUri) && brandAdapter.canFetch(brandUri)) {
                         Brand brand = brandAdapter.fetch(brandUri);
                         if (brand != null) {
-                            contentWriter.createOrUpdatePlaylist(brand, true);
+                            contentWriter.createOrUpdate(brand, true);
                         }
                         alreadyProcessed.add(brandUri);
                     }

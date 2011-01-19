@@ -16,7 +16,7 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -26,7 +26,9 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 
@@ -82,7 +84,7 @@ public class C4HighlightsAdapter implements Runnable {
 	}
 	
 	
-	public final Playlist load(String uri) throws Exception {
+	public final ContentGroup load(String uri) throws Exception {
 		List<HtmlBrandSummary> brandList = Lists.newArrayList();
 		
 		BrandListingPage brandListingPage = brandListClient.get(uri);
@@ -93,11 +95,15 @@ public class C4HighlightsAdapter implements Runnable {
 			brandList.addAll(brandListingPage.getBrandList());
 		}
 		
-		Playlist playlist = new Playlist(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), Publisher.C4);
+		ContentGroup playlist = new ContentGroup(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), Publisher.C4);
 		
-		for (HtmlBrandSummary brandRef : brandList) {
-			playlist.addPlaylistUri(brandRef.getBrandPage());
-		}
+		playlist.setContentUris(Iterables.transform(brandList, new Function<HtmlBrandSummary, String>() {
+			@Override
+			public String apply(HtmlBrandSummary summary) {
+				return summary.getBrandPage();
+			}
+		}));
+		
 		return playlist;
 	}
 
@@ -110,8 +116,8 @@ public class C4HighlightsAdapter implements Runnable {
 
 	private void loadAndSavePlaylist(String uri) {
 		try {
-			Playlist playlist = load(uri);
-			writer.createOrUpdatePlaylistSkeleton(playlist);
+			ContentGroup group = load(uri);
+			writer.createOrUpdateSkeleton(group);
 		} catch (Exception e) {
 			log.record(new AdapterLogEntry(Severity.WARN).withUri(uri).withCause(e).withSource(getClass()).withDescription("Failed to load highlights feed"));
 		}

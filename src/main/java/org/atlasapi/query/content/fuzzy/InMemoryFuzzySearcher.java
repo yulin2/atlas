@@ -16,7 +16,6 @@ package org.atlasapi.query.content.fuzzy;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,8 +27,8 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.IndexWriter.MaxFieldLength;
 import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -41,7 +40,7 @@ import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.store.SimpleFSDirectory;
 import org.apache.lucene.store.SingleInstanceLockFactory;
 import org.apache.lucene.util.Version;
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentListener;
 import org.atlasapi.util.stats.Score;
@@ -111,7 +110,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 		return new IndexWriter(dir, new StandardAnalyzer(Version.LUCENE_30), MaxFieldLength.UNLIMITED);
 	}
 
-	private Document brandToDoc(Brand brand) {
+	private Document brandToDoc(Container<?> brand) {
 		return asDocument(brand.getCanonicalUri(), brand.getTitle());
 	}
 	
@@ -201,15 +200,15 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	}
 
 	@Override
-	public void brandChanged(Collection<Brand> brands, changeType changeType) {
+	public void brandChanged(Iterable<? extends Container<?>> brands, ChangeType changeType) {
 		IndexWriter writer = null;
 		try {
 			writer = writerFor(brandsDir);
 			writer.setWriteLockTimeout(5000);
-			for (Brand brand : brands) {
+			for (Container<?> brand : brands) {
 				Document doc = brandToDoc(brand);
 				if (doc != null) {
-					if (changeType == ContentListener.changeType.BOOTSTRAP) {
+					if (changeType == ContentListener.ChangeType.BOOTSTRAP) {
 						writer.addDocument(doc);
 					}
 					else {
@@ -231,7 +230,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 	}
 
 	@Override
-	public void itemChanged(Collection<Item> items, changeType changeType) {
+	public void itemChanged(Iterable<? extends Item> items, ChangeType changeType) {
 		IndexWriter writer = null;
 		try {
 			writer = writerFor(itemsDir);
@@ -240,7 +239,7 @@ public class InMemoryFuzzySearcher implements ContentListener, FuzzySearcher {
 				
 				Document doc = itemToDoc(item);
 				if (doc != null) {
-					if (changeType == ContentListener.changeType.BOOTSTRAP) {
+					if (changeType == ContentListener.ChangeType.BOOTSTRAP) {
 						writer.addDocument(doc);
 					}
 					else {

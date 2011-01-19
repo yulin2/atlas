@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.health;
 
-import org.atlasapi.media.entity.Playlist;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.joda.time.Duration;
@@ -32,7 +32,7 @@ public class BroadcasterProbe implements HealthProbe {
 	public ProbeResult probe() {
 		ProbeResult result = new ProbeResult(title());
 		for (String uri : uris) {
-			Playlist playlist = queryForPlaylist(uri);
+			Described playlist = queryForPlaylist(uri);
 			if (playlist != null) {
 				result.add(Strings.isNullOrEmpty(playlist.getTitle())?uri:playlist.getTitle(), playlist.getLastFetched().toString(DateTimeFormat.mediumDateTime()), playlist.getLastFetched().isAfter(clock.now().minus(maxStaleness)));
 			} else {
@@ -42,8 +42,8 @@ public class BroadcasterProbe implements HealthProbe {
 		return result;
 	}
 
-	private Playlist queryForPlaylist(String letter) {
-		 return (Playlist) contentStore.findByUri(letter);
+	private Described queryForPlaylist(String letter) {
+		 return (Described) contentStore.findByCanonicalUri(letter);
 	}
 
 	@Override

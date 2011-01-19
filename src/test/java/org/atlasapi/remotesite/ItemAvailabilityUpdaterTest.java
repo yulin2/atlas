@@ -33,7 +33,7 @@ import com.mongodb.DBObject;
 public class ItemAvailabilityUpdaterTest extends TestCase {
 	
 	private final TimeMachine clock = new TimeMachine(); 
-	private final ItemTranslator translator = new ItemTranslator();
+	private final ItemTranslator translator = new ItemTranslator(true);
 
 	private DBCollection itemsColl;
 	private ItemAvailabilityUpdater updater;

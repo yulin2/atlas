@@ -31,7 +31,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 				<prop key="/api/1.0/list*">listControllerV1</prop>
 				<prop key="/api/1.0/lists*">listsControllerV1</prop>
 				<prop key="/api/1.0/doc*">uriFetchingControllerV1</prop>
-				<prop key="/2.0/any*">anyTypeController</prop>
                 <prop key="/">rootRedirectController</prop>
 			</props>
 		</property>
@@ -58,19 +57,13 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	</bean>
 	
 	<bean id="itemControllerV1" parent="uriFetchingControllerV1">
-		<constructor-arg><bean class="org.atlasapi.beans.SingleItemProjector" /></constructor-arg> 
 	</bean>
 	
 	<bean id="listControllerV1"  parent="uriFetchingControllerV1">
-		<constructor-arg><bean class="org.atlasapi.beans.FlatteningProjector" /></constructor-arg> 
 	</bean>
 	
 	<bean id="listsControllerV1" parent="uriFetchingControllerV1">
-		<constructor-arg><bean class="org.atlasapi.beans.OuterCollectionRemovingProjector" /></constructor-arg> 
 	</bean>
 	
-	<bean id="anyTypeController" class="org.atlasapi.query.v2.AnyTypeFetchingController">
-		<constructor-arg ref="queryExecutor" />
-		<constructor-arg ref="configFetcher"/>
-	</bean>
+	
 </beans>
