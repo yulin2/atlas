@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.bbc.schedule;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.xml.bind.JAXBException;
 
@@ -94,9 +96,16 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 	@Override
 	public void run() {
 		log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Schedule Updater started"));
-		for (String uri : uris) {
-			log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Updating from schedule: " + uri));
-			update(uri);
+		ExecutorService executor = Executors.newFixedThreadPool(10);
+		for (final String uri : uris) {
+		    executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Updating from schedule: " + uri));
+                    update(uri);
+                }
+		    });
+
 		}
 		log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Schedule Updater finished"));
 	}
