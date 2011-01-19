@@ -5,7 +5,6 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -13,9 +12,8 @@ import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.query.uri.LocalOrRemoteFetcher;
+import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
 
 import com.google.common.base.Strings;
@@ -31,7 +29,7 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 	private static final String SLASH_PROGRAMMES_BASE_URI = "http://www.bbc.co.uk/programmes/";
 
 	private final RemoteSiteClient<ChannelSchedule> scheduleClient;
-	private final Fetcher<Content> fetcher;
+	private final BbcProgrammeAdapter fetcher;
 
 	private final Iterable<String> uris;
 
@@ -41,11 +39,11 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 
     private final ContentResolver localFetcher;
 	
-	public BbcScheduledProgrammeUpdater(ContentResolver localFetcher, Fetcher<Content> remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) throws JAXBException {
+	public BbcScheduledProgrammeUpdater(ContentResolver localFetcher, BbcProgrammeAdapter remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) throws JAXBException {
 		this(new BbcScheduleClient(), localFetcher, remoteFetcher, writer, uris, log);
 	}
 	
-	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, ContentResolver localFetcher, Fetcher<Content> remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) {
+	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, ContentResolver localFetcher, BbcProgrammeAdapter remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) {
 		this.scheduleClient = scheduleClient;
         this.localFetcher = localFetcher;
 		this.fetcher = remoteFetcher;
@@ -56,7 +54,6 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 
 	private void update(String uri) {
 		try {
-		    Fetcher<Content> brandFetcher = new LocalOrRemoteFetcher(localFetcher, fetcher);
 			ChannelSchedule schedule = scheduleClient.get(uri);
 			List<Programme> programmes = schedule.programmes();
 			for (Programme programme : programmes) {
@@ -70,7 +67,10 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
                         if (brand == null || Strings.isNullOrEmpty(brand.getCanonicalUri())) {
                             writer.createOrUpdateDefinitiveItem(fetchedEpisode);
                         } else {
-                            Brand fetchedBrand = (Brand) brandFetcher.fetch(brand.getCanonicalUri());
+                            Brand fetchedBrand = (Brand) localFetcher.findByUri(brand.getCanonicalUri());
+                            if(fetchedBrand == null) {
+                                fetchedBrand = (Brand) fetcher.fetch(brand.getCanonicalUri(), false);
+                            }
                             if (fetchedBrand != null) {
                                 if (!fetchedBrand.getItems().contains(fetchedEpisode)) {
                                     fetchedBrand.addItem(fetchedEpisode);
