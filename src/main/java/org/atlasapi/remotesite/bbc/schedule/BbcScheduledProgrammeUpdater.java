@@ -61,22 +61,27 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 			List<Programme> programmes = schedule.programmes();
 			for (Programme programme : programmes) {
 				if (programme.isEpisode()) {
-					Episode fetchedEpisode = (Episode) fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
-					Brand brand = fetchedEpisode.getBrand();
-					if(brand == null || Strings.isNullOrEmpty(brand.getCanonicalUri())) {
-                        writer.createOrUpdateDefinitiveItem(fetchedEpisode);
+					Item fetchedItem = (Item) fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
+					if(!(fetchedItem instanceof Episode)) {
+                        writer.createOrUpdateDefinitiveItem(fetchedItem);
 					} else {
-					    Brand fetchedBrand = (Brand) brandFetcher.fetch(brand.getCanonicalUri());
-					    if(fetchedBrand != null) {
-					        if(!fetchedBrand.getItems().contains(fetchedEpisode)) {
-					            fetchedBrand.addItem(fetchedEpisode);
-					        } else {
-					            List<Item> currentItems = Lists.newArrayList(fetchedBrand.getItems());
-					            currentItems.set(currentItems.indexOf(fetchedEpisode), fetchedEpisode);
-					            fetchedBrand.setItems(currentItems);
-					        }
-					        writer.createOrUpdateDefinitivePlaylist(fetchedBrand);
-					    }
+                        Episode fetchedEpisode = (Episode) fetchedItem;
+                        Brand brand = fetchedEpisode.getBrand();
+                        if (brand == null || Strings.isNullOrEmpty(brand.getCanonicalUri())) {
+                            writer.createOrUpdateDefinitiveItem(fetchedEpisode);
+                        } else {
+                            Brand fetchedBrand = (Brand) brandFetcher.fetch(brand.getCanonicalUri());
+                            if (fetchedBrand != null) {
+                                if (!fetchedBrand.getItems().contains(fetchedEpisode)) {
+                                    fetchedBrand.addItem(fetchedEpisode);
+                                } else {
+                                    List<Item> currentItems = Lists.newArrayList(fetchedBrand.getItems());
+                                    currentItems.set(currentItems.indexOf(fetchedEpisode), fetchedEpisode);
+                                    fetchedBrand.setItems(currentItems);
+                                }
+                                writer.createOrUpdateDefinitivePlaylist(fetchedBrand);
+                            }
+                        }
 					}
 				}
 			}
