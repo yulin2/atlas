@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +30,9 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
@@ -69,9 +73,13 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
                 return null;
             }
             if (content.episode() != null) {
-                SlashProgrammesVersionRdf version = null;
+                List<SlashProgrammesVersionRdf> versions = null;
                 if (content.episode().versions() != null && !content.episode().versions().isEmpty()) {
-                    version = readSlashProgrammesDataForVersion(content.episode().versions().get(0));
+                    versions = ImmutableList.copyOf(Iterables.transform(content.episode().versions(), new Function<SlashProgrammesVersion,SlashProgrammesVersionRdf>(){
+						@Override
+						public SlashProgrammesVersionRdf apply(SlashProgrammesVersion input) {
+							return readSlashProgrammesDataForVersion(input);
+						}}));
                 }
                 
                 Set<SlashProgrammesClip> clipRefs = content.episode().clips();
@@ -89,7 +97,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
                     }
                 }
                 
-                BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, version, clips);
+                BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, versions, clips);
                 return itemExtractor.extract(source);
             }
             SlashProgrammesSeriesContainer rdfSeries = content.series();

@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
@@ -70,7 +71,12 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		
 		org.atlasapi.media.entity.Item fullItem = new org.atlasapi.media.entity.Item();
 		Version version = new Version();
-		version.setRatingText("adults only");
+		
+		Restriction restriction = new Restriction();
+		restriction.setRestricted(true);
+		restriction.setMessage("adults only");
+		version.setRestriction(restriction);
+		
 		Encoding encoding = new Encoding();
 		encoding.setDataContainerFormat(MimeType.VIDEO_3GPP);
 		version.addManifestedAs(encoding);
@@ -89,7 +95,7 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		
 		assertThat(simpleLocation.getUri(), is("http://example.com"));
 		assertThat(simpleLocation.getDataContainerFormat(), is(MimeType.VIDEO_3GPP.toString()));
-		assertThat(simpleLocation.getRatingText(), is("adults only"));
+		assertThat(simpleLocation.getRestriction().getMessage(), is("adults only"));
 		assertThat(simpleLocation.getRevenueContract(), is("pay_to_buy"));
 		assertThat(simpleLocation.getCurrency(), is("GBP"));
 		assertThat(simpleLocation.getPrice(), is(99));

@@ -37,9 +37,7 @@ import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.msnvideo.MsnVideoModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.pa.PaModule;
-import org.atlasapi.remotesite.seesaw.SeesawBrandAdapter;
-import org.atlasapi.remotesite.seesaw.SeesawItemAdapter;
-import org.atlasapi.remotesite.seesaw.SeesawSeriesAdapter;
+import org.atlasapi.remotesite.seesaw.SeesawModule;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
@@ -58,7 +56,8 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HuluModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class, PaModule.class})
+@Import({ C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HuluModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class,
+        PaModule.class, SeesawModule.class })
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
@@ -127,10 +126,6 @@ public class RemoteSiteModule {
 		 
 		 adapters.add(flickrAdapter);
 		 adapters.add(new OpmlAdapter(dispatcher));
-		 
-		 adapters.add(new SeesawBrandAdapter());
-		 adapters.add(new SeesawItemAdapter());
-		 adapters.add(new SeesawSeriesAdapter());
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;

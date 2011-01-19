@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
+import java.util.Set;
+
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
@@ -23,13 +25,16 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 public class PaProgrammeProcessor {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
+    private static final String BROADCAST_ID_PREFIX = "pa:";
     
     private final ContentWriters contentWriter;
     private final ContentResolver contentResolver;
@@ -87,7 +92,7 @@ public class PaProgrammeProcessor {
 
     private Maybe<Brand> getBrand(ProgData progData) {
         String brandId = progData.getSeriesId();
-        if (brandId == null || brandId.trim().isEmpty()) {
+        if (Strings.isNullOrEmpty(brandId) || Strings.isNullOrEmpty(brandId.trim())) {
             return Maybe.nothing();
         }
 
@@ -113,7 +118,7 @@ public class PaProgrammeProcessor {
     }
 
     private Maybe<Series> getSeries(ProgData progData) {
-        if (progData.getSeriesNumber() != null) {
+        if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
         
@@ -135,7 +140,7 @@ public class PaProgrammeProcessor {
 
     private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
-        if (channelUri == null) {
+        if (Strings.isNullOrEmpty(channelUri)) {
             return Maybe.nothing();
         }
 
@@ -153,10 +158,26 @@ public class PaProgrammeProcessor {
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
 
         DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
-        Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration);
-        version.addBroadcast(broadcast);
+        Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
+        addBroadcast(version, broadcast);
 
         return Maybe.just(episode);
+    }
+    
+    private void addBroadcast(Version version, Broadcast broadcast) {
+        if (! Strings.isNullOrEmpty(broadcast.getId())) {
+            Set<Broadcast> broadcasts = Sets.newHashSet();
+            
+            for (Broadcast currentBroadcast: version.getBroadcasts()) {
+                if ((! Strings.isNullOrEmpty(currentBroadcast.getId()) && ! broadcast.getId().equals(currentBroadcast.getId())) ||
+                     ! (currentBroadcast.getBroadcastOn().equals(broadcast.getBroadcastOn()) && currentBroadcast.getTransmissionTime().equals(broadcast.getTransmissionTime()) && currentBroadcast.getTransmissionEndTime().equals(broadcast.getTransmissionEndTime()))) {
+                    broadcasts.add(currentBroadcast);
+                }
+            }
+            broadcasts.add(broadcast);
+            
+            version.setBroadcasts(broadcasts);
+        }
     }
 
     private Version findBestVersion(Iterable<Version> versions) {

@@ -43,6 +43,8 @@ public class C4SeriesExtractorTest extends TestCase {
 		
 		assertThat(firstEpisode.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1"));
 		assertThat(firstEpisode.getCurie(), is("c4:ramsays-kitchen-nightmares-series-3-episode-1"));
+		assertThat(firstEpisode.getThumbnail(), is("http://www.channel4.com/assets/programmes/images/shameless/series-7/episode-8/c842994a-5c06-493e-9d1f-5b6a03188848_200x113.jpg"));
+		assertThat(firstEpisode.getImage(), is("http://www.channel4.com/assets/programmes/images/shameless/series-7/episode-8/c842994a-5c06-493e-9d1f-5b6a03188848_625x352.jpg"));
 
 		assertThat(series.getSeriesNumber(), is(3));
 
@@ -54,7 +56,7 @@ public class C4SeriesExtractorTest extends TestCase {
 		// since this is not a /4od feed there should be no On Demand entries
 		assertThat(firstEpisode.getVersions(), is((Set) ImmutableSet.of()));
 
-		// The outer adapter will notice that this is the same as the brand title and will replace it with the series and episode number
-		assertThat(firstEpisode.getTitle(), is("Ramsay's Kitchen Nightmares"));
+		// The outer adapter will notice that this is the same as the brand title (ignoring punctuation and spacing) and will replace it with the series and episode number
+		assertThat(firstEpisode.getTitle(), is("Ramsay's Kitchen: Nightmares"));
 	}
 }

@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.jmock.integration.junit3.MockObjectTestCase;
@@ -53,8 +54,12 @@ public class C4FourOdEpisodesExtractorTest extends MockObjectTestCase {
 		
 		Version firstEpisodeVersion = Iterables.get(firstEpisode.getVersions(), 0);
 		assertThat(firstEpisodeVersion.getDuration(), is((48 * 60) + 55));
-		assertThat(firstEpisodeVersion.getRating(), is("http://ref.atlasapi.org/ratings/simple/adult"));
-		assertThat(firstEpisodeVersion.getRatingText(), is("Strong language throughout"));
+		
+		Restriction r = firstEpisodeVersion.getRestriction();
+		assertThat(r.isRestricted(), is(true));
+		assertThat(r.getMessage(), is("Strong language throughout"));
+		assertThat(r.getMinimumAge(), is(16));
+		
 		assertThat(firstEpisodeVersion.getBroadcasts(), is(Collections.<Broadcast>emptySet()));
 		
 		Encoding firstEpsiodeEncoding = Iterables.get(firstEpisodeVersion.getManifestedAs(), 0); 

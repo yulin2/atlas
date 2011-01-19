@@ -71,4 +71,8 @@ public class PaModule {
     @Bean PaFileUpdater paFileUpdater() {
         return new PaFileUpdater(localFileManager(), log);
     }
+    
+    public @Bean PaSingleDateUpdatingController paUpdateController() {
+        return new PaSingleDateUpdatingController(paProgrammeProcessor(), log, localFileManager());
+    }
 }

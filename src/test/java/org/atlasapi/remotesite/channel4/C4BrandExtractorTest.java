@@ -72,6 +72,8 @@ public class C4BrandExtractorTest extends TestCase {
 
 		assertThat(firstItem.getAliases(), is((Set<String>) ImmutableSet.of("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921983", "tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1")));
 		
+		assertThat(firstItem.getTitle(), is(("Series 3 Episode 1")));
+		
 		Version firstItemVersion = Iterables.getOnlyElement(firstItem.getVersions());
 		
 		assertThat(firstItemVersion.getDuration(), is(2949));

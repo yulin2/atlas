@@ -73,11 +73,12 @@ public class BbcBrandExtractor  {
 				if (!series.getContentType().equals(brand.getContentType())) {
 					series.setContentType(brand.getContentType());
 				}
-				for (Content episode : series.getContents()) {
-					if(!episode.getContentType().equals(brand.getContentType())) {
-						episode.setContentType(brand.getContentType());
+
+				for (Content item : series.getContents()) {
+					if(brand.getContentType() != null && !brand.getContentType().equals(item.getContentType())) {
+						item.setContentType(brand.getContentType());
 					}
-					brand.addContents((Episode) episode);
+					brand.addContents((Episode) item);
 				}
 			}
 		}

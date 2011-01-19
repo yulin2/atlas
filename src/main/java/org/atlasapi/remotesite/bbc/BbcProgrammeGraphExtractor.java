@@ -39,6 +39,10 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
@@ -73,13 +77,33 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
         Item item = item(episodeUri, episode);
 
-        if (source.version() != null) {
+        if (source.versions() != null && !source.versions().isEmpty()) {
+        	
         	Location location = htmlLinkLocation(episodeUri);
         	Encoding encoding = new Encoding();
         	encoding.addAvailableAt(location);
-            Version version = version(source.version());
-            version.addManifestedAs(encoding);
-            item.addVersion(version);
+        	
+			ImmutableList<Version> versions = ImmutableList.copyOf(Iterables.transform(source.versions(), new Function<SlashProgrammesVersionRdf, Version>() {
+				@Override
+				public Version apply(SlashProgrammesVersionRdf input) {
+					return version(input);
+				}
+			}));
+
+            //extract broadcasts from all versions.
+			Set<Broadcast> broadcasts = ImmutableSet.copyOf(Iterables.concat(Iterables.transform(versions, new Function<Version, Iterable<Broadcast>>() {
+				@Override
+				public Iterable<Broadcast> apply(Version input) {
+					return input.getBroadcasts();
+				}
+			})));
+			
+			Version firstVersion = versions.get(0);
+			
+            firstVersion.setBroadcasts(broadcasts);
+            
+            firstVersion.addManifestedAs(encoding);
+            item.addVersion(firstVersion);
         }
         
         if (source.clips() != null) {
@@ -251,9 +275,9 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         String pid = BbcUriCanonicaliser.bbcProgrammeIdFrom(episodeUri);
         HashSet<String> aliases = Sets.newHashSet();
         if (pid != null) {
-            aliases.add(String.format("http://www.bbc.co.uk/iplayer/episode/b00%s", pid));
-            aliases.add(String.format("http://www.bbc.co.uk/programmes/b00%s", pid));
-            aliases.add(String.format("http://bbc.co.uk/i/%s/", pid));
+            aliases.add(String.format("http://www.bbc.co.uk/iplayer/episode/%s", pid));
+            aliases.add(String.format("http://www.bbc.co.uk/programmes/%s", pid));
+            aliases.add(String.format("http://bbc.co.uk/i/%s/", pid.replaceFirst("b00", "")));
             aliases.remove(episodeUri);
         }
         return aliases;

@@ -204,4 +204,13 @@ public class C4AtomApi {
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
+	public static Element mediaContent(Entry syndEntry) {
+		for (Element element : (List<Element>) syndEntry.getForeignMarkup()) {
+			if (NS_MEDIA_RSS.equals(element.getNamespace()) && "content".equals(element.getName())) {
+				return element;
+			}
+		}
+		return null;
+	}
 }

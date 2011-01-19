@@ -3,8 +3,10 @@ package org.atlasapi.remotesite.bbc;
 import java.util.Collection;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBException;
 
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -30,7 +32,8 @@ public class BbcModule {
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(4, 0, 0));
 	private final static Daily SCHEDULED_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	
+
+    private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired ContentWriters contentWriters;
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
@@ -42,7 +45,11 @@ public class BbcModule {
 		if (Boolean.parseBoolean(enabled)) {
 			scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
 			scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
-			scheduler.schedule(bbcSchedulesUpdater(), SCHEDULED_UPDATE_TIME);
+			try {
+				scheduler.schedule(bbcSchedulesUpdater(), SCHEDULED_UPDATE_TIME);
+			} catch (JAXBException e) {
+				log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withDescription("Couldn't create BBC Schedule Updater task"));
+			}
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("BBC update scheduled tasks installed"));
 		} else {
@@ -51,10 +58,10 @@ public class BbcModule {
 		}
 	}
 	
-	@Bean Runnable bbcSchedulesUpdater() {
-		BbcScheduledProgrammeUpdater updater = new BbcScheduledProgrammeUpdater();
-		updater.setUris(new DatedBbcScheduleUriSource());
-		return updater;
+	@Bean Runnable bbcSchedulesUpdater() throws JAXBException {
+	    DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource();
+		uriSource.setDaysToLookAhead(10);
+		return new BbcScheduledProgrammeUpdater(contentStore, bbcProgrammeAdapter(), contentWriters, uriSource, log);
 	}
 
 	@Bean Runnable bbcHighlightsUpdater() {
