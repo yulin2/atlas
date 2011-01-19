@@ -4,15 +4,22 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.DefinitiveContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 
 /**
  * Updater to download advance BBC schedules and get URIplay to load data for the programmes that they include
@@ -31,14 +38,17 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 	private final AdapterLog log;
 
 	private final DefinitiveContentWriter writer;
+
+    private final ContentResolver localFetcher;
 	
-	public BbcScheduledProgrammeUpdater(Fetcher<Content> fetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) throws JAXBException {
-		this(new BbcScheduleClient(), fetcher, writer, uris, log);
+	public BbcScheduledProgrammeUpdater(ContentResolver localFetcher, Fetcher<Content> remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) throws JAXBException {
+		this(new BbcScheduleClient(), localFetcher, remoteFetcher, writer, uris, log);
 	}
 	
-	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, Fetcher<Content> fetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) {
+	BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, ContentResolver localFetcher, Fetcher<Content> remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) {
 		this.scheduleClient = scheduleClient;
-		this.fetcher = fetcher;
+        this.localFetcher = localFetcher;
+		this.fetcher = remoteFetcher;
 		this.writer = writer;
 		this.uris = uris;
 		this.log = log;
@@ -46,27 +56,44 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 
 	private void update(String uri) {
 		try {
+		    Fetcher<Content> brandFetcher = new LocalOrRemoteFetcher(localFetcher, fetcher);
 			ChannelSchedule schedule = scheduleClient.get(uri);
 			List<Programme> programmes = schedule.programmes();
 			for (Programme programme : programmes) {
 				if (programme.isEpisode()) {
-					writer.createOrUpdateDefinitiveItem((Item)fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid()));
+					Episode fetchedEpisode = (Episode) fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
+					Brand brand = fetchedEpisode.getBrand();
+					if(brand == null || Strings.isNullOrEmpty(brand.getCanonicalUri())) {
+                        writer.createOrUpdateDefinitiveItem(fetchedEpisode);
+					} else {
+					    Brand fetchedBrand = (Brand) brandFetcher.fetch(brand.getCanonicalUri());
+					    if(fetchedBrand != null) {
+					        if(!fetchedBrand.getItems().contains(fetchedEpisode)) {
+					            fetchedBrand.addItem(fetchedEpisode);
+					        } else {
+					            List<Item> currentItems = Lists.newArrayList(fetchedBrand.getItems());
+					            currentItems.set(currentItems.indexOf(fetchedEpisode), fetchedEpisode);
+					            fetchedBrand.setItems(currentItems);
+					        }
+					        writer.createOrUpdateDefinitivePlaylist(fetchedBrand);
+					    }
+					}
 				}
 			}
 		} catch (Exception e) {
-			log.record(new AdapterLogEntry(Severity.WARN).withCause(e).withDescription("Exception updating BBC URI " + uri));
+			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception updating BBC URI " + uri));
 		}
 		
 	}
 
 	@Override
 	public void run() {
-		log.record(new AdapterLogEntry(Severity.INFO).withDescription("BBC Schedule Updater started"));
+		log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Schedule Updater started"));
 		for (String uri : uris) {
-			log.record(new AdapterLogEntry(Severity.DEBUG).withDescription("Updating from schedule: " + uri));
+			log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Updating from schedule: " + uri));
 			update(uri);
 		}
-		log.record(new AdapterLogEntry(Severity.INFO).withDescription("BBC Schedule Updater finished"));
+		log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Schedule Updater finished"));
 	}
 
 }

@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -31,7 +32,8 @@ public class BbcModule {
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(4, 0, 0));
 	private final static Daily SCHEDULED_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	
+
+    private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired ContentWriters contentWriters;
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
@@ -57,9 +59,9 @@ public class BbcModule {
 	}
 	
 	@Bean Runnable bbcSchedulesUpdater() throws JAXBException {
-		DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource();
+	    DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource();
 		uriSource.setDaysToLookAhead(10);
-		return new BbcScheduledProgrammeUpdater(bbcProgrammeAdapter(), contentWriters, uriSource, log);
+		return new BbcScheduledProgrammeUpdater(contentStore, bbcProgrammeAdapter(), contentWriters, uriSource, log);
 	}
 
 	@Bean Runnable bbcHighlightsUpdater() {
