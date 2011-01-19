@@ -80,7 +80,7 @@ public class RemoteSiteModule {
 
     @PostConstruct
     public void scheduleAvailabilityUpdater() {
-        scheduler().schedule(itemAvailabilityUpdater(), RepetitionRules.atInterval(new Duration(5 * 60 * 1000L)));
+        scheduler().schedule(itemAvailabilityUpdater(), RepetitionRules.atInterval(new Duration(30 * 60 * 1000L)));
     }
 
     public @Bean Runnable itemAvailabilityUpdater() {
