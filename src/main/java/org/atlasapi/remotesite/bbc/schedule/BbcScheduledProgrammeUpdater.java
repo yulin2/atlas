@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.bbc.schedule;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -18,7 +19,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
 
-import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -42,14 +43,12 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 
     private final ContentResolver localFetcher;
 
-    public BbcScheduledProgrammeUpdater(ContentResolver localFetcher, BbcProgrammeAdapter remoteFetcher,
-                    DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) throws JAXBException {
+    public BbcScheduledProgrammeUpdater(ContentResolver localFetcher, BbcProgrammeAdapter remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris, AdapterLog log) throws JAXBException {
         this(new BbcScheduleClient(), localFetcher, remoteFetcher, writer, uris, log);
     }
 
-    BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, ContentResolver localFetcher,
-                    BbcProgrammeAdapter remoteFetcher, DefinitiveContentWriter writer, Iterable<String> uris,
-                    AdapterLog log) {
+    BbcScheduledProgrammeUpdater(RemoteSiteClient<ChannelSchedule> scheduleClient, ContentResolver localFetcher, BbcProgrammeAdapter remoteFetcher, DefinitiveContentWriter writer,
+            Iterable<String> uris, AdapterLog log) {
         this.scheduleClient = scheduleClient;
         this.localFetcher = localFetcher;
         this.fetcher = remoteFetcher;
@@ -66,61 +65,74 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
                 try {
                     if (programme.isEpisode()) {
                         Item fetchedItem = (Item) fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
-                        if (!(fetchedItem instanceof Episode)) {
-                            writer.createOrUpdateDefinitiveItem(fetchedItem);
-                        } else {
-                            Episode fetchedEpisode = (Episode) fetchedItem;
-                            Brand brand = fetchedEpisode.getBrand();
-                            if (brand == null || Strings.isNullOrEmpty(brand.getCanonicalUri())) {
-                                writer.createOrUpdateDefinitiveItem(fetchedEpisode);
-                            } else {
-                                Brand fetchedBrand = (Brand) localFetcher.findByUri(brand.getCanonicalUri());
-                                if (fetchedBrand == null) {
-                                    fetchedBrand = (Brand) fetcher.fetch(brand.getCanonicalUri(), false);
-                                }
-                                if (fetchedBrand != null) {
-                                    if (!fetchedBrand.getItems().contains(fetchedEpisode)) {
-                                        fetchedBrand.addItem(fetchedEpisode);
-                                    } else {
-                                        List<Item> currentItems = Lists.newArrayList(fetchedBrand.getItems());
-                                        currentItems.set(currentItems.indexOf(fetchedEpisode), fetchedEpisode);
-                                        fetchedBrand.setItems(currentItems);
-                                    }
-                                    writer.createOrUpdateDefinitivePlaylist(fetchedBrand);
-                                }
-                            }
+                        if (fetchedItem != null) {
+                            writeFetchedItem(fetchedItem);
                         }
                     }
                 } catch (Exception e) {
-                    log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription(
-                                    "Exception updating programme with pid " + programme.pid()));
+                    log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception updating programme with pid " + programme.pid()));
                 }
             }
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription(
-                            "Exception updating BBC URI " + uri));
+            log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception updating BBC URI " + uri));
         }
+    }
 
+    private void writeFetchedItem(Item fetchedItem) {
+        if (fetchedItem instanceof Episode) {
+            Episode fetchedEpisode = (Episode) fetchedItem;
+            Brand fetchedBrand = fetchBrandFor(fetchedEpisode.getBrand().getCanonicalUri());
+            if (fetchedBrand != null) {
+                addOrReplaceEpisode(fetchedEpisode, fetchedBrand);
+                writer.createOrUpdateDefinitivePlaylist(fetchedBrand);
+            }
+        } else {
+            writer.createOrUpdateDefinitiveItem(fetchedItem);
+        }
+    }
+
+    private void addOrReplaceEpisode(Episode fetchedEpisode, Brand fetchedBrand) {
+        if (!fetchedBrand.getItems().contains(fetchedEpisode)) {
+            fetchedBrand.addItem(fetchedEpisode);
+        } else { // replace
+            List<Item> currentItems = Lists.newArrayList(fetchedBrand.getItems());
+            currentItems.set(currentItems.indexOf(fetchedEpisode), fetchedEpisode);
+            fetchedBrand.setItems(currentItems);
+        }
+    }
+
+    private Brand fetchBrandFor(String brandUri) {
+        Brand fetchedBrand = (Brand) localFetcher.findByUri(brandUri);
+        if (fetchedBrand == null) {
+            fetchedBrand = (Brand) fetcher.fetch(brandUri, false);
+        }
+        return fetchedBrand;
     }
 
     @Override
     public void run() {
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription(
-                        "BBC Schedule Updater started"));
+        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Schedule Updater started"));
+
+        final CountDownLatch done = new CountDownLatch(Iterables.size(uris));
+
         ExecutorService executor = Executors.newFixedThreadPool(5);
         for (final String uri : uris) {
             executor.submit(new Runnable() {
                 @Override
                 public void run() {
-                    log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription(
-                                    "Updating from schedule: " + uri));
+                    log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Updating from schedule: " + uri));
                     update(uri);
+                    done.countDown();
                 }
             });
-
         }
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription(
-                        "BBC Schedule Updater finished"));
-    }
+        executor.shutdown();
 
+        try {
+            done.await();
+            log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Schedule Updater finished"));
+        } catch (InterruptedException e) {
+            log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withCause(e).withDescription("BBC Schedule Updater interrupted waiting to finish"));
+        }
+    }
 }
