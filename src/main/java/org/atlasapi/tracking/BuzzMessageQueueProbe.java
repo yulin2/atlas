@@ -2,8 +2,8 @@ package org.atlasapi.tracking;
 
 import org.atlasapi.tracking.twitter.QueueingTweetProcessor;
 
-import com.metabroadcast.common.webapp.health.HealthProbe;
-import com.metabroadcast.common.webapp.health.ProbeResult;
+import com.metabroadcast.common.health.HealthProbe;
+import com.metabroadcast.common.health.ProbeResult;
 
 public class BuzzMessageQueueProbe implements HealthProbe  {
 

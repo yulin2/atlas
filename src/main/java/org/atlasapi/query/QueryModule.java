@@ -39,7 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
-import com.metabroadcast.common.webapp.health.HealthProbe;
+import com.metabroadcast.common.health.HealthProbe;
 
 @Configuration
 public class QueryModule {

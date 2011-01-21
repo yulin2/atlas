@@ -2,9 +2,9 @@ package org.atlasapi.query.content.fuzzy;
 
 import org.atlasapi.query.content.fuzzy.InMemoryFuzzySearcher.IndexStats;
 
+import com.metabroadcast.common.health.HealthProbe;
+import com.metabroadcast.common.health.ProbeResult;
 import com.metabroadcast.common.units.ByteCount;
-import com.metabroadcast.common.webapp.health.HealthProbe;
-import com.metabroadcast.common.webapp.health.ProbeResult;
 
 public class InMemoryIndexProbe implements HealthProbe {
 
