@@ -15,9 +15,9 @@ public class BbcMasterbrandContentTypeMapTest extends TestCase {
 	}
 
 	public void testLookup() {
-		assertThat(BbcMasterbrandContentTypeMap.lookup("/bbcone#service").valueOrNull(), is(equalTo(MediaType.VIDEO)));
-		assertThat(BbcMasterbrandContentTypeMap.lookup("/radio4#service").valueOrNull(), is(equalTo(MediaType.AUDIO)));
-		assertThat(BbcMasterbrandContentTypeMap.lookup("/notareal#service").valueOrNull(), is(nullValue()));
+		assertThat(BbcMasterbrandMediaTypeMap.lookup("/bbcone#service").valueOrNull(), is(equalTo(MediaType.VIDEO)));
+		assertThat(BbcMasterbrandMediaTypeMap.lookup("/radio4#service").valueOrNull(), is(equalTo(MediaType.AUDIO)));
+		assertThat(BbcMasterbrandMediaTypeMap.lookup("/notareal#service").valueOrNull(), is(nullValue()));
 	}
 
 }
