@@ -71,16 +71,16 @@ public class BbcBrandExtractor  {
         		}
         		String uri = "http://www.bbc.co.uk/programmes/" + seriesPid;
         		Series series = (Series) subContentExtractor.fetch(uri);
-        		if (series == null || series.getContentType() == null || brand == null || brand.getContentType() == null) {
+        		if (series == null || series.getMediaType() == null || brand == null || brand.getMediaType() == null) {
         			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
         			continue;
         		}
-        		if (!series.getContentType().equals(brand.getContentType())) {
-        			series.setContentType(brand.getContentType());
+        		if (!series.getMediaType().equals(brand.getMediaType())) {
+        			series.setMediaType(brand.getMediaType());
         		}
         		for (Item item : series.getItems()) {
-        			if(brand.getContentType() != null && !brand.getContentType().equals(item.getContentType())) {
-        				item.setContentType(brand.getContentType());
+        			if(brand.getMediaType() != null && !brand.getMediaType().equals(item.getMediaType())) {
+        				item.setMediaType(brand.getMediaType());
         			}
         			brand.addItem(item);
         		}
@@ -126,7 +126,7 @@ public class BbcBrandExtractor  {
 		container.setPublisher(Publisher.BBC);
 		container.setTitle(brandRef.title());
 		if (brandRef.getMasterbrand() != null) {
-			container.setContentType(BbcMasterbrandContentTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull());
+			container.setMediaType(BbcMasterbrandContentTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull());
 		}
 		if (brandRef.getDepiction() != null) {
 			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());

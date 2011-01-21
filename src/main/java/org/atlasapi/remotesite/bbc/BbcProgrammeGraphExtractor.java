@@ -236,7 +236,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             item.setDescription(slashProgrammesEpisode.description());
             item.setGenres(new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
             if (slashProgrammesEpisode.getMasterbrand() != null) {
-                item.setContentType(BbcMasterbrandContentTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull());
+                item.setMediaType(BbcMasterbrandContentTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull());
             }
         }
 

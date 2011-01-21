@@ -20,10 +20,10 @@ import static org.hamcrest.Matchers.is;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
@@ -155,8 +155,8 @@ public class BbcPodcastGraphExtractorTest extends MockObjectTestCase {
 		Playlist playlist = extractor.extract(source);
 		Item item = Iterables.getOnlyElement(playlist.getItems());
 
-		assertThat(playlist.getContentType(), is(ContentType.AUDIO));
-		assertThat(item.getContentType(), is(ContentType.AUDIO));		
+		assertThat(playlist.getMediaType(), is(MediaType.AUDIO));
+		assertThat(item.getMediaType(), is(MediaType.AUDIO));		
 	}
 	
 }

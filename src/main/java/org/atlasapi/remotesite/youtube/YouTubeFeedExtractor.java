@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.youtube;
 
-import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -26,7 +26,7 @@ public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource,
         VideoFeed feed = source.getVideoFeed();
         
         Playlist playlist = new Playlist(source.getUri(), YouTubeFeedCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
-        playlist.setContentType(ContentType.VIDEO);
+        playlist.setMediaType(MediaType.VIDEO);
         
         for (VideoEntry video: feed.getEntries()) {
             Item item = itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalise(video.getId())));

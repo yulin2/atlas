@@ -1,10 +1,12 @@
 package org.atlasapi.remotesite.bbc;
 
-import junit.framework.TestCase;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.ContentType;
+import org.atlasapi.media.entity.MediaType;
 
 public class BbcMasterbrandContentTypeMapTest extends TestCase {
 
@@ -13,8 +15,8 @@ public class BbcMasterbrandContentTypeMapTest extends TestCase {
 	}
 
 	public void testLookup() {
-		assertThat(BbcMasterbrandContentTypeMap.lookup("/bbcone#service").valueOrNull(), is(equalTo(ContentType.VIDEO)));
-		assertThat(BbcMasterbrandContentTypeMap.lookup("/radio4#service").valueOrNull(), is(equalTo(ContentType.AUDIO)));
+		assertThat(BbcMasterbrandContentTypeMap.lookup("/bbcone#service").valueOrNull(), is(equalTo(MediaType.VIDEO)));
+		assertThat(BbcMasterbrandContentTypeMap.lookup("/radio4#service").valueOrNull(), is(equalTo(MediaType.AUDIO)));
 		assertThat(BbcMasterbrandContentTypeMap.lookup("/notareal#service").valueOrNull(), is(nullValue()));
 	}
 

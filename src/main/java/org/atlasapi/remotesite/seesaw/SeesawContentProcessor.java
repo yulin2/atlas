@@ -16,19 +16,19 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Description;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -321,7 +321,7 @@ public class SeesawContentProcessor {
             brand.setImage(image.requireValue());
         }
         
-        brand.setContentType(ContentType.VIDEO);
+        brand.setMediaType(MediaType.VIDEO);
         
         allBrands.add(brand);
         idToDescription.put(getId(groupElement), brand);
