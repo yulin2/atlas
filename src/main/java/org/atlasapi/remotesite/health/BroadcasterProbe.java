@@ -7,10 +7,10 @@ import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
 import com.google.common.base.Strings;
+import com.metabroadcast.common.health.HealthProbe;
+import com.metabroadcast.common.health.ProbeResult;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
-import com.metabroadcast.common.webapp.health.HealthProbe;
-import com.metabroadcast.common.webapp.health.ProbeResult;
 
 public class BroadcasterProbe implements HealthProbe {
 
