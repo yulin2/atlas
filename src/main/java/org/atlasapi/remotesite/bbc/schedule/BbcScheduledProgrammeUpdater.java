@@ -81,10 +81,12 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
     private void writeFetchedItem(Item fetchedItem) {
         if (fetchedItem instanceof Episode) {
             Episode fetchedEpisode = (Episode) fetchedItem;
-            Brand fetchedBrand = fetchBrandFor(fetchedEpisode.getBrand().getCanonicalUri());
-            if (fetchedBrand != null) {
-                addOrReplaceEpisode(fetchedEpisode, fetchedBrand);
-                writer.createOrUpdateDefinitivePlaylist(fetchedBrand);
+            if (fetchedEpisode.getBrand() != null) {
+                Brand fetchedBrand = fetchBrandFor(fetchedEpisode.getBrand().getCanonicalUri());
+                if (fetchedBrand != null) {
+                    addOrReplaceEpisode(fetchedEpisode, fetchedBrand);
+                    writer.createOrUpdateDefinitivePlaylist(fetchedBrand);
+                }
             }
         } else {
             writer.createOrUpdateDefinitiveItem(fetchedItem);

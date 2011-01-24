@@ -7,9 +7,11 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Playlist;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -75,13 +77,19 @@ public class BbcBrandExtractor  {
         			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
         			continue;
         		}
-        		if (!series.getMediaType().equals(brand.getMediaType())) {
+        		if (brand.getMediaType() != null && ! brand.getMediaType().equals(series.getMediaType())) {
         			series.setMediaType(brand.getMediaType());
         		}
+        		if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(series.getSpecialization())) {
+                    series.setSpecialization(brand.getSpecialization());
+                }
         		for (Item item : series.getItems()) {
         			if(brand.getMediaType() != null && !brand.getMediaType().equals(item.getMediaType())) {
         				item.setMediaType(brand.getMediaType());
         			}
+        			if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(item.getSpecialization())) {
+        			    item.setSpecialization(brand.getSpecialization());
+                    }
         			brand.addItem(item);
         		}
         	}
@@ -126,7 +134,13 @@ public class BbcBrandExtractor  {
 		container.setPublisher(Publisher.BBC);
 		container.setTitle(brandRef.title());
 		if (brandRef.getMasterbrand() != null) {
-			container.setMediaType(BbcMasterbrandContentTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull());
+		    MediaType mediaType = BbcMasterbrandMediaTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull();
+		    container.setMediaType(mediaType);
+            if (brandRef.isFilmFormat()) {
+                container.setSpecialization(Specialization.FILM);
+            } else if (mediaType != null) {
+                container.setSpecialization(MediaType.VIDEO == mediaType ? Specialization.TV : Specialization.RADIO);
+            }
 		}
 		if (brandRef.getDepiction() != null) {
 			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());
