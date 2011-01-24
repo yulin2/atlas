@@ -44,7 +44,7 @@ public class AliasController {
 	
 	@RequestMapping("/system/aliases")
 	public String showAliasForm() {
-		return "system/aliases";
+		return "system/aliases/aliases";
 	}
 	
 	@RequestMapping(value="/system/aliases", method=RequestMethod.POST)
@@ -78,7 +78,7 @@ public class AliasController {
 		
 		model.put("info", info);
 		model.put("errors", errors);
-		return "/system/aliases";
+		return "system/aliases/aliases";
 	}
 	
 	private static ImmutableList<AliasAndTarget> aliasesFrom(String csv) {

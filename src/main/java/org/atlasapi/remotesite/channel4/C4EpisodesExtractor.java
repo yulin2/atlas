@@ -33,6 +33,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -207,6 +208,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		episode.setSeriesNumber(seriesNumber);
 		episode.setIsLongForm(true);
 		episode.setMediaType(MediaType.VIDEO);
+		episode.setSpecialization(Specialization.TV);
 		return episode;
 	}
 

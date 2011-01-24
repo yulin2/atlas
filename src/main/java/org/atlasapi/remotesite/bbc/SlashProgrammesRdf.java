@@ -123,6 +123,9 @@ class SlashProgrammesRdf {
 		@XmlElement(namespace=PO.NS, name="genre")
 		protected Set<SlashProgrammesGenre> genres;
 		
+		@XmlElement(namespace=PO.NS, name="format")
+		protected SlashProgrammesFormat format;
+		
 		@XmlElement(namespace=PO.NS, name="clip")
         protected Set<SlashProgrammesClip> clips;
 		
@@ -139,6 +142,14 @@ class SlashProgrammesRdf {
 
 		public Set<SlashProgrammesGenre> genres() {
 			return genres;
+		}
+		
+		public SlashProgrammesFormat format() {
+		    return format;
+		}
+		
+		public boolean isFilmFormat() {
+		    return format != null && "/programmes/formats/films#format".equals(format.getResourceUri());
 		}
 
 		public Set<String> genreUris() {
@@ -292,6 +303,22 @@ class SlashProgrammesRdf {
 		}
 		
 	}
+	
+	static class SlashProgrammesFormat {
+        
+        @XmlAttribute(name="resource", namespace=RDF.NS)
+        private String resourceUri;
+
+        public SlashProgrammesFormat withResourceUri(String uri) {
+            this.resourceUri = uri;
+            return this;
+        }
+
+        public String getResourceUri() {
+            return resourceUri;
+        }
+        
+    }
 	
 	static class SlashProgrammesEpisodeRef {
 

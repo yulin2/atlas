@@ -87,7 +87,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 				
 				String service = element.getAttributeValue("id");
 				
-				return BbcMasterbrandContentTypeMap.lookupService(service).valueOrNull();
+				return BbcMasterbrandMediaTypeMap.lookupService(service).valueOrNull();
 			}
 		}
 		return null;
