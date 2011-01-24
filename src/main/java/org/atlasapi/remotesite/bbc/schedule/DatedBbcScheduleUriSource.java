@@ -34,6 +34,7 @@ public class DatedBbcScheduleUriSource implements Iterable<String> {
 	private final Clock clock;
 	private List<String> uris;
 	private int daysToLookAhead = 0;
+    private Iterable<String> baseScheduleUris;
 	
 	public DatedBbcScheduleUriSource() {
 		this(new SystemClock());
@@ -44,32 +45,33 @@ public class DatedBbcScheduleUriSource implements Iterable<String> {
 	}
 
 	private List<String> build() {
+	    if(baseScheduleUris == null) {
+	        baseScheduleUris = ImmutableSet.<String>builder()
+	        .add("http://www.bbc.co.uk/bbcone/programmes/schedules/london")
+	        .add("http://www.bbc.co.uk/bbctwo/programmes/schedules/england")
+	        .add("http://www.bbc.co.uk/bbcthree/programmes/schedules")
+	        .add("http://www.bbc.co.uk/bbcfour/programmes/schedules")
+	        .addAll(Iterables.transform(RadioPlayerServices.services, new Function<RadioPlayerService, String>() {
+	                @Override
+	                public String apply(RadioPlayerService input) {
+	                    return input.getScheduleUri();
+	                }
+	            }))
+	        .build();
+	    }
 		
 		DateTime now = clock.now();
 		
-		List<String> channelSchedules = Lists.newArrayList();
+		List<String> channelSchedules = Lists.newArrayListWithCapacity((daysToLookAhead+1)*Iterables.size(baseScheduleUris));
 		
 		for(int i = 0; i <= daysToLookAhead; i++) {
 			DateTime scheduleDay = now.plusDays(i);
-			final int year = scheduleDay.getYear();
-			final int month = scheduleDay.getMonthOfYear();
-			final int day = scheduleDay.getDayOfMonth();
-			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcone/programmes/schedules/london/%d/%02d/%02d.xml", year, month, day));
-			channelSchedules.add(String.format("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/%d/%02d/%02d.xml", year, month, day));
-			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcthree/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
-			channelSchedules.add(String.format("http://www.bbc.co.uk/bbcfour/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
-			
-//			channelSchedules.add(String.format("http://www.bbc.co.uk/radio2/programmes/schedules/%d/%02d/%02d.xml", year, month, day));
-//			channelSchedules.add(String.format("http://www.bbc.co.uk/radio1/programmes/schedules/england/%d/%02d/%02d.xml", year, month, day));
-//			channelSchedules.add(String.format("http://www.bbc.co.uk/radio4/programmes/schedules/fm/%d/%02d/%02d.xml", year, month, day));
-			channelSchedules.addAll(ImmutableSet.copyOf(Iterables.transform(RadioPlayerServices.services, new Function<RadioPlayerService, String>() {
-				@Override
-				public String apply(RadioPlayerService input) {
-					return String.format("%s/%d/%02d/%02d.xml", input.getScheduleUri(), year, month, day);
-				}
-			})));
+			String dayPart = scheduleDay.toString("yyyy/MM/dd");
+			for (String baseUri : baseScheduleUris) {
+			    channelSchedules.add(String.format("%s/%s.xml", baseUri, dayPart));
+            }
 		}
-		return Collections.unmodifiableList(channelSchedules );
+		return Collections.unmodifiableList(channelSchedules);
 	}
 	
 	public Iterator<String> iterator() {
@@ -77,8 +79,14 @@ public class DatedBbcScheduleUriSource implements Iterable<String> {
 		return Collections.unmodifiableList(uris).iterator();
 	}
 
-	public void setDaysToLookAhead(int days) {
+	public DatedBbcScheduleUriSource withLookAhead(int days) {
 		this.daysToLookAhead = days;
+		return this;
+	}
+	
+	public DatedBbcScheduleUriSource withBaseScheduleUris(Iterable<String> baseScheduleUris) {
+	    this.baseScheduleUris = baseScheduleUris;
+        return this;
 	}
 
 }

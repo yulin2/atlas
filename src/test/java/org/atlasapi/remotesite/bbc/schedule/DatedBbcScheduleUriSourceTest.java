@@ -51,9 +51,7 @@ public class DatedBbcScheduleUriSourceTest extends MockObjectTestCase {
 	
 	public void testGeneratesUrisForDaysInTheFuture() throws Exception {
 		
-		DatedBbcScheduleUriSource uriBuilder = new DatedBbcScheduleUriSource(clock);
-		
-		uriBuilder.setDaysToLookAhead(2);
+		DatedBbcScheduleUriSource uriBuilder = new DatedBbcScheduleUriSource(clock).withLookAhead(2);
 		
 		Iterator<String> source = uriBuilder.iterator();
 		
