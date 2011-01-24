@@ -2,6 +2,8 @@ package org.atlasapi.remotesite;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 
+import java.util.List;
+
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
@@ -56,7 +58,7 @@ public class ItemAvailabilityUpdater implements Runnable {
 		try {
 			DateTime now = clock.now();
 			
-			Iterable<DBObject> toUpdate = Iterables.concat(items.find(availableQuery(now)),items.find(notAvailableQuery(now)));
+			List<DBObject> toUpdate = ImmutableList.copyOf(Iterables.concat(items.find(availableQuery(now)),items.find(notAvailableQuery(now))));
 			for (DBObject dbo : toUpdate) {
 				items.update(new BasicDBObject(MongoConstants.ID, dbo.get(MongoConstants.ID)) , updateAvailabilityOf(dbo, now));
 			}

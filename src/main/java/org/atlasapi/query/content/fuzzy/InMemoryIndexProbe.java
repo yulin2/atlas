@@ -30,4 +30,11 @@ public class InMemoryIndexProbe implements HealthProbe {
 	public String title() {
 		return "Lucene index";
 	}
+
+    @Override
+    public String slug() {
+        return "lucene";
+    }
+	
+	
 }
