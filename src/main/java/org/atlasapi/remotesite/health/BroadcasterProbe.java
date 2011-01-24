@@ -50,4 +50,9 @@ public class BroadcasterProbe implements HealthProbe {
 	public String title() {
 		return publisher.title();
 	}
+
+    @Override
+    public String slug() {
+        return publisher.title().replaceAll(" ", "").toLowerCase();
+    }
 }

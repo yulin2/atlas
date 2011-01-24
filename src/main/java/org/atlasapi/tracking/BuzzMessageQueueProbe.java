@@ -25,4 +25,9 @@ public class BuzzMessageQueueProbe implements HealthProbe  {
 	public String title() {
 		return "Tweet queue";
 	}
+
+    @Override
+    public String slug() {
+        return "tweetqueue";
+    }
 }
