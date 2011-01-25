@@ -13,7 +13,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
             <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateTVBlobScheduledTask" />
             <ref bean="updateTVBlobTomorrowScheduledTask" />
-            <ref bean="updateSeesawAtoZScheduledTask" />
         </list>
     </property>
     <property name="daemon" value="true" />
@@ -67,16 +66,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     </property>
   </bean>
   
-  <bean id="updateSeesawAtoZScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-    <property name="delay"  value="3440000" />
-    <property name="period" value="1800000" />
-    <property name="runnable">
-        <bean parent="conditionalRunner">
-            <constructor-arg ref="seesawUpdater" />
-        </bean>
-    </property>
-  </bean>
-  
   <bean id="brandsUpdater" abstract="true">
   	<property name="contentStore" ref="contentWriter"/>
 	<property name="fetcher" ref="remoteFetcher"/>
@@ -93,11 +82,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     <constructor-arg ref="contentWriter"/>
     <constructor-arg ref="contentResolver" />
     <constructor-arg value="tomorrow" />
-  </bean>
-  
-  <bean id="seesawUpdater" class="org.atlasapi.remotesite.seesaw.SeesawSitemapUpdater">
-    <constructor-arg ref="savingFetcher" />
-    <constructor-arg ref="adapterLog" />
   </bean>
   
   <bean id="perPublisherUpdater" class="org.atlasapi.remotesite.PerPublisherItemUpdater">
@@ -129,7 +113,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
                 <prop key="/system/orphans/update">orphanUpdateController</prop>
                 <prop key="/system/tvblob/update">tvblobUpdateController</prop>
                 <prop key="/system/tvblob-tomorrow/update">tvblobTomorrowUpdateController</prop>
-                <prop key="/system/seesaw/update">seesawUpdateController</prop>
             </props>
         </property>
     </bean>
@@ -144,10 +127,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
     
     <bean id="orphanUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
         <constructor-arg ref="perPublisherUpdater"/>
-    </bean>
-    
-     <bean id="seesawUpdateController" class="org.atlasapi.persistence.system.ContentUpdateController">
-        <constructor-arg ref="seesawUpdater"/>
     </bean>
      
    <bean id="conditionalRunner" abstract="true" class="com.metabroadcast.common.webapp.runnables.IpAddressBasedConditionalRunner">

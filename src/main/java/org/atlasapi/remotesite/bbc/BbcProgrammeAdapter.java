@@ -66,7 +66,12 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
         return matcher.matches();
     }
 
+    @Override
     public Identified fetch(String uri) {
+        return fetch(uri, true);
+    }
+    
+    public Identified fetch(String uri, boolean hydrate) {
         try {
             SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
             if (content == null) {
@@ -106,7 +111,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
             }
             
             if (content.brand() != null) {
-                return brandExtractor.extractBrandFrom(content.brand());
+                return brandExtractor.extractBrandFrom(content.brand(), hydrate);
             }
             
             return null;

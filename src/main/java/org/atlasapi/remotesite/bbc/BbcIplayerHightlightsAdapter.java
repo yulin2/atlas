@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;

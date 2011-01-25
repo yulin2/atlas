@@ -5,11 +5,12 @@ import java.util.Set;
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -35,6 +36,7 @@ public class PaProgrammeProcessor {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
     private static final String BROADCAST_ID_PREFIX = "pa:";
+    private static final String YES = "yes";
     
     private final ContentWriters contentWriter;
     private final ContentResolver contentResolver;
@@ -106,6 +108,7 @@ public class PaProgrammeProcessor {
         }
         
         brand.setTitle(progData.getTitle());
+        brand.setSpecialization(specialization(progData));
         brand.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
 
         /*
@@ -133,6 +136,7 @@ public class PaProgrammeProcessor {
         }
         
         series.setPublisher(Publisher.PA);
+        series.setSpecialization(specialization(progData));
         series.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
 
         return Maybe.just(series);
@@ -152,6 +156,39 @@ public class PaProgrammeProcessor {
         } else {
             episode = getBasicEpisode(progData);
         }
+        
+        if (progData.getEpisodeTitle() != null) {
+            episode.setTitle(progData.getEpisodeTitle());
+        } else {
+            episode.setTitle(progData.getTitle());
+        }
+
+        try {
+            if (progData.getEpisodeNumber() != null) {
+                episode.setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
+            }
+            if (progData.getSeriesNumber() != null) {
+                episode.setSeriesNumber(Integer.valueOf(progData.getSeriesNumber()));
+            }
+        } catch (NumberFormatException e) {
+            // sometimes we don't get valid numbers
+        }
+
+        if (progData.getBillings() != null) {
+            for (Billing billing : progData.getBillings().getBilling()) {
+                if (billing.getType().equals("synopsis")) {
+                    episode.setDescription(billing.getvalue());
+                    break;
+                }
+            }
+        }
+        
+        episode.setMediaType(MediaType.VIDEO);
+        episode.setSpecialization(specialization(progData));
+        episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
+
+        // episode.setImage(image);
+        // episode.setThumbnail(thumbnail);
 
         Version version = findBestVersion(episode.getVersions());
 
@@ -193,37 +230,6 @@ public class PaProgrammeProcessor {
     private Episode getBasicEpisode(ProgData progData) {
         Episode episode = new Episode(PA_BASE_URL + "/episodes/" + progData.getProgId(), "pa:e-" + progData.getProgId(), Publisher.PA);
 
-        if (progData.getEpisodeTitle() != null) {
-            episode.setTitle(progData.getEpisodeTitle());
-        } else {
-            episode.setTitle(progData.getTitle());
-        }
-
-        try {
-            if (progData.getEpisodeNumber() != null) {
-                episode.setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
-            }
-            if (progData.getSeriesNumber() != null) {
-                episode.setSeriesNumber(Integer.valueOf(progData.getSeriesNumber()));
-            }
-        } catch (NumberFormatException e) {
-            // sometimes we don't get valid numbers
-        }
-
-        if (progData.getBillings() != null) {
-            for (Billing billing : progData.getBillings().getBilling()) {
-                if (billing.getType().equals("synopsis")) {
-                    episode.setDescription(billing.getvalue());
-                    break;
-                }
-            }
-        }
-
-        episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
-
-        // episode.setImage(image);
-        // episode.setThumbnail(thumbnail);
-
         Version version = new Version();
         version.setProvider(Publisher.PA);
         episode.addVersion(version);
@@ -234,6 +240,10 @@ public class PaProgrammeProcessor {
         episode.addVersion(version);
 
         return episode;
+    }
+    
+    protected static Specialization specialization(ProgData progData) {
+        return YES.equals(progData.getAttr().getFilm()) ? Specialization.FILM : Specialization.TV;
     }
 
     protected static DateTime getTransmissionTime(String date, String time, DateTimeZone zone) {

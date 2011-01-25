@@ -1,8 +1,9 @@
 package org.atlasapi.remotesite.channel4;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ContentType;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
@@ -32,7 +33,8 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		brand.setDescription(source.getSubtitle().getValue());
 		
 		brand.setLastUpdated(new DateTime(source.getUpdated(), DateTimeZones.UTC));
-		brand.setContentType(ContentType.VIDEO);
+		brand.setMediaType(MediaType.VIDEO);
+		brand.setSpecialization(Specialization.TV);
 		
 		C4AtomApi.addImages(brand, source.getLogo());
 		

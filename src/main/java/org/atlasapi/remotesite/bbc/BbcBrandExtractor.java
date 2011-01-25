@@ -10,9 +10,11 @@ import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.MutableContentList;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -50,40 +52,51 @@ public class BbcBrandExtractor  {
     	return series;
 	}
 
-	public Brand extractBrandFrom(SlashProgrammesContainerRef brandRef) {
+	public Brand extractBrandFrom(SlashProgrammesContainerRef brandRef, boolean hydrate) {
 		Brand brand = new Brand();
 		populatePlaylistAttributes(brand, brandRef);
-
-		List<String> episodes = brandRef.episodes == null ? ImmutableList.<String>of() : episodesFrom(brandRef.episodeResourceUris());
-		addDirectlyIncludedEpisodesTo(brand, episodes);
-		
-		if (brandRef.series != null) {
-			for (SlashProgrammesSeriesRef seriesRef : brandRef.series) {
-				String seriesPid = BbcFeeds.pidFrom(seriesRef.resourceUri());
-				if (seriesPid == null) {
-					log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(seriesRef.resourceUri()).withDescription("Could not extract PID from series ref " + seriesRef.resourceUri() + " for brand with uri " + brand.getCanonicalUri()));
-					continue;
-				}
-				String uri = "http://www.bbc.co.uk/programmes/" + seriesPid;
-				Series series = (Series) subContentExtractor.fetch(uri);
-				if (series == null || series.getContentType() == null || brand == null || brand.getContentType() == null) {
-					log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
-					continue;
-				}
-				if (!series.getContentType().equals(brand.getContentType())) {
-					series.setContentType(brand.getContentType());
-				}
-
-				for (Content item : series.getContents()) {
-					if(brand.getContentType() != null && !brand.getContentType().equals(item.getContentType())) {
-						item.setContentType(brand.getContentType());
-					}
-					brand.addContents((Episode) item);
-				}
-			}
+		if(hydrate) {
+		    hydrateBrand(brandRef, brand);
 		}
 		return brand;
 	}
+
+    private void hydrateBrand(SlashProgrammesContainerRef brandRef, Brand brand) {
+        List<String> episodes = brandRef.episodes == null ? ImmutableList.<String>of() : episodesFrom(brandRef.episodeResourceUris());
+        addDirectlyIncludedEpisodesTo(brand, episodes);
+
+
+        if (brandRef.series != null) {
+        	for (SlashProgrammesSeriesRef seriesRef : brandRef.series) {
+        		String seriesPid = BbcFeeds.pidFrom(seriesRef.resourceUri());
+        		if (seriesPid == null) {
+        			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(seriesRef.resourceUri()).withDescription("Could not extract PID from series ref " + seriesRef.resourceUri() + " for brand with uri " + brand.getCanonicalUri()));
+        			continue;
+        		}
+        		String uri = "http://www.bbc.co.uk/programmes/" + seriesPid;
+        		Series series = (Series) subContentExtractor.fetch(uri);
+        		if (series == null || series.getMediaType() == null || brand == null || brand.getMediaType() == null) {
+        			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
+        			continue;
+        		}
+        		if (brand.getMediaType() != null && ! brand.getMediaType().equals(series.getMediaType())) {
+        			series.setMediaType(brand.getMediaType());
+        		}
+        		if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(series.getSpecialization())) {
+                    series.setSpecialization(brand.getSpecialization());
+                }
+        		for (Content item : series.getContents()) {
+        			if(brand.getMediaType() != null && !brand.getMediaType().equals(item.getMediaType())) {
+        				item.setMediaType(brand.getMediaType());
+        			}
+        			if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(item.getSpecialization())) {
+        			    item.setSpecialization(brand.getSpecialization());
+                    }
+        			brand.addContents((Episode) item);
+        		}
+        	}
+        }
+    }
 
 	private void addDirectlyIncludedEpisodesTo(MutableContentList<Episode> playlist, List<String> episodes) {
 		for (String episodeUri : mostRecent(episodes)) {
@@ -123,7 +136,13 @@ public class BbcBrandExtractor  {
 		container.setPublisher(Publisher.BBC);
 		container.setTitle(brandRef.title());
 		if (brandRef.getMasterbrand() != null) {
-			container.setContentType(BbcMasterbrandContentTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull());
+		    MediaType mediaType = BbcMasterbrandMediaTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull();
+		    container.setMediaType(mediaType);
+            if (brandRef.isFilmFormat()) {
+                container.setSpecialization(Specialization.FILM);
+            } else if (mediaType != null) {
+                container.setSpecialization(MediaType.VIDEO == mediaType ? Specialization.TV : Specialization.RADIO);
+            }
 		}
 		if (brandRef.getDepiction() != null) {
 			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());

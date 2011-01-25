@@ -8,14 +8,15 @@ import org.springframework.context.annotation.Bean;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.health.HealthProbe;
+import com.metabroadcast.common.health.probes.DiskSpaceProbe;
+import com.metabroadcast.common.health.probes.MemoryInfoProbe;
+import com.metabroadcast.common.persistence.mongo.health.MongoConnectionPoolProbe;
 import com.metabroadcast.common.webapp.health.HealthController;
-import com.metabroadcast.common.webapp.health.HealthProbe;
-import com.metabroadcast.common.webapp.health.probes.DiskSpaceProbe;
-import com.metabroadcast.common.webapp.health.probes.MemoryInfoProbe;
 
 public class HealthModule {
 	
-	private final ImmutableList<HealthProbe> systemProbes = ImmutableList.<HealthProbe>of(new MemoryInfoProbe(), new DiskSpaceProbe());
+	private final ImmutableList<HealthProbe> systemProbes = ImmutableList.<HealthProbe>of(new MemoryInfoProbe(), new DiskSpaceProbe(), new MongoConnectionPoolProbe());
 	
 	private @Autowired Collection<HealthProbe> probes;
 

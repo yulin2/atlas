@@ -26,8 +26,10 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -236,7 +238,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             item.setDescription(slashProgrammesEpisode.description());
             item.setGenres(new BbcProgrammesGenreMap().map(slashProgrammesEpisode.genreUris()));
             if (slashProgrammesEpisode.getMasterbrand() != null) {
-                item.setContentType(BbcMasterbrandContentTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull());
+                MediaType mediaType = BbcMasterbrandMediaTypeMap.lookup(slashProgrammesEpisode.getMasterbrand().getResourceUri()).valueOrNull();
+                item.setMediaType(mediaType);
+                if (slashProgrammesEpisode.isFilmFormat()) {
+                    item.setSpecialization(Specialization.FILM);
+                } else if (mediaType != null) {
+                    item.setSpecialization(MediaType.VIDEO == mediaType ? Specialization.TV : Specialization.RADIO);
+                }
             }
         }
 

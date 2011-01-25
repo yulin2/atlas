@@ -19,10 +19,10 @@ import java.util.Set;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.reference.entity.ContainerFormat;
@@ -97,7 +97,7 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 		if (source.getVideos().size() > 0) {
 			item.setIsLongForm((source.getVideos().get(0).getDuration()).isLongerThan(Duration.standardMinutes(15)));
 		}
-		item.setContentType(ContentType.VIDEO);
+		item.setMediaType(MediaType.VIDEO);
 		return item;
 	}
 

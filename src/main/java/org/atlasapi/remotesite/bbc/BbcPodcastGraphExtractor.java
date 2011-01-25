@@ -18,8 +18,8 @@ package org.atlasapi.remotesite.bbc;
 import java.util.List;
 
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.ContentType;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.synd.GenericPodcastGraphExtractor;
 import org.atlasapi.remotesite.synd.SyndicationSource;
@@ -55,11 +55,12 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 	public Container<Item> extract(SyndicationSource source) {
 		Container<Item> playlist = super.extract(source);
 		
-		ContentType cType = contentTypeFor(source);
+		MediaType cType = mediaTypeFor(source);
 		if (cType != null) {
-			playlist.setContentType(cType);
+
+			playlist.setMediaType(cType);
 			for (Item item : playlist.getContents()) {
-				item.setContentType(cType);
+				item.setMediaType(cType);
 			}
 		}
 
@@ -73,7 +74,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private ContentType contentTypeFor(SyndicationSource source) {
+	private MediaType mediaTypeFor(SyndicationSource source) {
 		SyndFeed feed = source.getFeed();
 		if (feed == null) {
 			return null;
@@ -87,7 +88,7 @@ public class BbcPodcastGraphExtractor extends GenericPodcastGraphExtractor {
 				
 				String service = element.getAttributeValue("id");
 				
-				return BbcMasterbrandContentTypeMap.lookupService(service).valueOrNull();
+				return BbcMasterbrandMediaTypeMap.lookupService(service).valueOrNull();
 			}
 		}
 		return null;

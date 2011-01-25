@@ -3,7 +3,9 @@ package org.atlasapi.remotesite.channel4;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
@@ -44,7 +46,9 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 		C4AtomApi.addImages(series, source.getLogo());
 		
 		series.setDescription(series.getDescription());
-
+		
+		series.setMediaType(MediaType.VIDEO);
+		series.setSpecialization(Specialization.TV);
 		series.setContents(episodesExtractor.extract(source));
 		return series;
 	}
