@@ -4,6 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.DefinitiveContentWriter;
@@ -23,7 +25,6 @@ public class BbcIonScheduleUpdater implements Runnable {
     private final ContentResolver localFetcher;
     private final AdapterLog log;
     
-    private final ExecutorService executor;
     private final SimpleHttpClient httpClient;
     private final DefinitiveContentWriter writer;
 
@@ -33,12 +34,13 @@ public class BbcIonScheduleUpdater implements Runnable {
         this.writer = writer;
         this.log = log;
         httpClient = HttpClients.webserviceClient();
-        executor = Executors.newFixedThreadPool(3);
     }
     
     @Override
     public void run() {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update initiated"));
+
+        ExecutorService executor = Executors.newFixedThreadPool(3);
         for (String uri : uriSource) {
             executor.submit(new BbcIonScheduleUpdateTask(uri));
         }
@@ -49,6 +51,7 @@ public class BbcIonScheduleUpdater implements Runnable {
         } catch (InterruptedException e) {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("BBC Ion Schedule Update interrupted waiting for completion").withCause(e));
         }
+        
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update finished (" + (completion ? "normally)" : "timed-out)")));
     }
 
@@ -65,12 +68,26 @@ public class BbcIonScheduleUpdater implements Runnable {
             try {
                 IonSchedule schedule = BbcIonScheduleDeserialiser.deserialise(httpClient.getContentsOf(uri));
                 for (IonBroadcast broadcast : schedule.getBlocklist()) {
-                    Item stored = (Item) localFetcher.findByUri("http://www.bbc.co.uk/programmes/" + broadcast.getEpisodeId());
-                    if(stored != null) {
-                        
+                    Item item = (Item) localFetcher.findByUri("http://www.bbc.co.uk/programmes/" + broadcast.getEpisodeId());
+                    if(item != null) {
+                        //updateItemDetails(item, broadcast.getEpisode());
+                        if(!(item instanceof Episode)) {
+                            //save and return
+                        } else {
+                            //update episode-only details
+                        }
                     } else {
-                        //createItem
+                        //item = createEpisodeFrom(broadcast);
                     }
+                    //here item is and episode and not null;
+                    Brand brand = (Brand) localFetcher.findByUri("http://www.bbc.co.uk/programmes/" + broadcast.getBrandId());
+                    if(brand != null) {
+                        //update brand details
+                    } else {
+                        //brand = createBrandFrom(brodcast);
+                    }
+                    //ensure item in brand,
+                    //write brand
                 }
             } catch(Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri).withSource(getClass()));

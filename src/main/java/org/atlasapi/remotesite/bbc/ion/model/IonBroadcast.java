@@ -51,7 +51,7 @@ public class IonBroadcast {
         return startTimeIso;
     }
 
-    public Boolean getHasGuidance() {
+    public Boolean isHasGuidance() {
         return hasGuidance;
     }
 

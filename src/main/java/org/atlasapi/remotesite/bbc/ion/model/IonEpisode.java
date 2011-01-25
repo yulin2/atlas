@@ -26,7 +26,7 @@ public class IonEpisode {
     private String partner;
     private Boolean isDelayed;
     private Integer availableSiblingCount;
-    private URL myShortUrl;
+    private String myShortUrl;
     private Boolean isFilm;
     private String contextualFamilyTree;
     private Boolean isAvailableMediasetPcSd;
@@ -151,7 +151,7 @@ public class IonEpisode {
         return availableSiblingCount;
     }
 
-    public URL getMyShortUrl() {
+    public String getMyShortUrl() {
         return myShortUrl;
     }
 

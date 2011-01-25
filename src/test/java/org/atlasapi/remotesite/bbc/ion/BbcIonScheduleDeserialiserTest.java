@@ -18,15 +18,19 @@ public class BbcIonScheduleDeserialiserTest extends TestCase {
         
         BbcIonScheduleDeserialiser deserialiser = new BbcIonScheduleDeserialiser();
         
-        IonSchedule schedule = deserialiser.scheduleFrom(json);
+        assertThat(deserialiser.deserialise("0", Boolean.class), is(false));
+        
+        IonSchedule schedule = deserialiser.deserialise(json, IonSchedule.class);
         
         assertThat(schedule.getCount(), is(38));
         
         assertThat(schedule.getLink().getRel(), is("self"));
         
+        assertThat(schedule.getContext().isInHd(), is(false));
+        
         assertThat(schedule.getBlocklist().size(), is(38));
         
-        assertThat(schedule.getBlocklist().get(0).getHasGuidance(), is(false));
+        assertThat(schedule.getBlocklist().get(0).isHasGuidance(), is(false));
     }
 
 }
