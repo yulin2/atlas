@@ -5,7 +5,6 @@ import java.util.Collection;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 
-import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -14,6 +13,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater;
 import org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource;
 import org.joda.time.LocalTime;
@@ -23,10 +23,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 
 @Configuration
 public class BbcModule {
@@ -63,6 +62,10 @@ public class BbcModule {
 	@Bean Runnable bbcSchedulesUpdater() throws JAXBException {
 	    DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource().withLookAhead(10);
 		return new BbcScheduledProgrammeUpdater(contentStore, bbcProgrammeAdapter(), contentWriters, uriSource, log);
+	}
+	
+	@Bean BbcScheduleController bbcScheduleController() {
+	    return new BbcScheduleController(contentStore, bbcProgrammeAdapter(), contentWriters, log);
 	}
 
 	@Bean Runnable bbcHighlightsUpdater() {
