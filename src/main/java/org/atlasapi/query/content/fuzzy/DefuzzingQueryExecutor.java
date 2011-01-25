@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 package org.atlasapi.query.content.fuzzy;
 
 import java.util.List;
-import java.util.concurrent.Delayed;
 
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.ContentQuery;

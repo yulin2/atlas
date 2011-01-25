@@ -14,6 +14,7 @@ import org.jaxen.JaxenException;
 import org.jdom.Element;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
@@ -67,7 +68,7 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
     private void addEpisode(String uri, Series series) {
         Episode episode = itemAdapter.fetch(uri);
         if (episode != null) {
-            series.getGenres().addAll(episode.getGenres());
+            series.setGenres(Iterables.concat(series.getGenres(), episode.getGenres()));
 
             if (episode.getSeriesNumber() != null) {
                 series.withSeriesNumber(episode.getSeriesNumber());

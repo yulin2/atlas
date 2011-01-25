@@ -19,7 +19,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
-import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.joda.time.Duration;
 
 import com.google.common.collect.ImmutableList;
@@ -39,7 +38,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
     	super.setUp();
     	
     	store = new MongoDbBackedContentStore(MongoTestHelper.anEmptyTestDatabase());
-    	mongoQueryExecutor = new MongoDBQueryExecutor(new MongoRoughSearch(store));
+    	mongoQueryExecutor = new MongoDBQueryExecutor(store);
     	
     	queryExecutor = new ApplicationConfigurationQueryExecutor(mongoQueryExecutor);
     }
@@ -66,13 +65,13 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		List<Content> results = queryExecutor.discover(query);
 		
-		assertEquals( 1, results.size());
-		for (Content item : results) {
-			assertEquals(Publisher.C4, item.getPublisher());
-			assertEquals(0, ((Item) item).getVersions().size());
-		}
+		assertEquals(1, results.size());
+		
+		Brand foundBrand = (Brand) Iterables.getOnlyElement(results);
+		
+		assertEquals(Publisher.C4, foundBrand.getPublisher());
+		assertEquals(0, Iterables.getOnlyElement(foundBrand.getContents()).getVersions().size());
     }
-    
     
     /* Config: C4
      * Item: C4
@@ -102,9 +101,12 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		List<Content> results = queryExecutor.discover(query);
 		
-		assertEquals( 1, results.size());
-		for (Content item : results) {
-			assertEquals(Publisher.C4, item.getPublisher());
+		assertEquals(1, results.size());
+		
+		Brand foundBrand = (Brand) Iterables.getOnlyElement(results);
+		
+		assertEquals(Publisher.C4, foundBrand.getPublisher());
+		for (Item item : foundBrand.getContents()) {
 			for (Version version : ((Item) item).getVersions()) {
 				assertEquals(Publisher.C4, version.getProvider());
 			}
@@ -279,29 +281,24 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testBrandFailsFilterWhereAllItemsFailFilterWhenQuerySpecifiesItemOrBelow() {
-		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
-		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		ApplicationConfiguration config = includingPublishers(Publisher.C4);
 		
-		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
-		uglyBettyHulu.setTitle("Ugly Betty Episode One");
-		uglyBettyHulu.setGenres(ImmutableSet.of("Yawn"));
+		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.C4);
+		uglyBettyHulu.setIsLongForm(true);
 		
 		Brand ubC4 = new Brand("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
-		ubC4.setDescription("blah blah blah");
-		ubC4.setTitle("Ugly Betty");
+		ubC4.setGenres(ImmutableSet.of("Yawn"));
 		ubC4.setContents(uglyBettyHulu);
 		
 		store.createOrUpdate(ubC4, true);
 		
-		ContentQuery query = new ContentQuery(Attributes.DESCRIPTION_GENRE.createQuery(Operators.EQUALS, ImmutableList.of("Yawn"))).copyWithApplicationConfiguration(config);
+		ContentQuery query = new ContentQuery(Attributes.ITEM_IS_LONG_FORM.createQuery(Operators.EQUALS, ImmutableList.of(false))).copyWithApplicationConfiguration(config);
 		
 		List<Content> results = queryExecutor.discover(query);
-		
+
 		assertEquals( 0, results.size() );
 		
-		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
-		query = query.copyWithApplicationConfiguration(config);
-		
+		query =  new ContentQuery(Attributes.ITEM_IS_LONG_FORM.createQuery(Operators.EQUALS, ImmutableList.of(true))).copyWithApplicationConfiguration(config);
 		assertEquals( 1, queryExecutor.discover(query).size() );
 	}
 	
@@ -395,7 +392,7 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		List<Identified> results = queryExecutor.executeUriQuery(ImmutableList.of("group"), ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(config));
 		
-		assertEquals( 0, results.size());
+		assertEquals(0, results.size());
 		
 		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.BBC));
 		query = query.copyWithApplicationConfiguration(config);
@@ -409,13 +406,13 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		ApplicationConfiguration config = includingPublishers(Publisher.C4);
 		
 		ContentGroup group = new ContentGroup("group", "group", Publisher.C4);
-		group.setGenres(ImmutableSet.of("Fun"));
-		
 		Brand c4playlist = new Brand("http://www.channel4.com/uglybetty/one", "c4:ugly-betty-one", Publisher.C4);
 		Brand huluPlaylist = new Brand("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
 		
 		group.setContents(c4playlist, huluPlaylist);
 		
+		store.createOrUpdate(huluPlaylist, true);
+		store.createOrUpdate(c4playlist, true);
 		store.createOrUpdateSkeleton(group);
 		
 		ContentQuery query = new ContentQuery(Attributes.DESCRIPTION_GENRE.createQuery(Operators.EQUALS, ImmutableSet.of("Fun"))).copyWithApplicationConfiguration(config);
@@ -432,18 +429,16 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 
 	public void testPlaylistFailsFilterWhereAllSubPlaylistsFailFilterWhenQueryDoesSpecifyBrandOrBelow() {
-		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
-		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		ApplicationConfiguration config = includingPublishers(Publisher.C4);
 		
 		ContentGroup group = new ContentGroup("group", "group", Publisher.C4);
-		group.setGenres(ImmutableSet.of("Fun"));
 		
 		Brand hulubrand = new Brand("http://www.hulu.com/uglybetty/one", "c4:ugly-betty-one", Publisher.HULU);
 		hulubrand.setGenres(ImmutableSet.of("Joy"));
 		
 		Episode huluEpisode = new Episode("http://www.hulu.com/uglybetty/one/one", "hulu:ugly-betty-one", Publisher.HULU);
-		huluEpisode.setTitle("Ugly Betty Episode One");
-		
+		huluEpisode.setGenres(ImmutableSet.of("Joy"));
+
 		Version huluVersion = new Version();
 		huluVersion.setDuration(Duration.standardHours(1000));
 		huluVersion.setProvider(Publisher.HULU);
@@ -453,21 +448,22 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 		
 		group.setContents(hulubrand);
 		
+		store.createOrUpdate(hulubrand, true);
 		store.createOrUpdateSkeleton(group);
 		
 		ContentQuery query = new ContentQuery(Attributes.DESCRIPTION_GENRE.createQuery(Operators.EQUALS, ImmutableSet.of("Joy"))).copyWithApplicationConfiguration(config);
 		
 		List<Identified> results = queryExecutor.executeUriQuery(ImmutableList.of("group"), query);
 		
-		assertEquals( 0, results.size() );
+		assertEquals(1, results.size());
+		assertEquals(0, ((ContentGroup) Iterables.getOnlyElement(results)).getContents().size());
 		
-		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU));
-		query = query.copyWithApplicationConfiguration(config);
+		query = query.copyWithApplicationConfiguration(config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4, Publisher.HULU)));
 		
 		results = queryExecutor.executeUriQuery(ImmutableList.of("group"), query);
 		
-		assertEquals(2, results.size() );
-		ContentGroup foundGroup = (ContentGroup) results.get(1);
-		assertEquals(1, ((Container<?>) foundGroup.getContents().get(0)).getContents().size() );
+		assertEquals(1, results.size());
+		ContentGroup foundGroup = (ContentGroup) results.get(0);
+		assertEquals(1, ((Container<?>) Iterables.getOnlyElement(foundGroup.getContents())).getContents().size());
 	}
 }

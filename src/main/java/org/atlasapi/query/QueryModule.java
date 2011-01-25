@@ -21,7 +21,6 @@ import org.atlasapi.persistence.content.ContentListener;
 import org.atlasapi.persistence.content.QueueingContentListener;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
-import org.atlasapi.persistence.content.mongo.MongoRoughSearch;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
@@ -45,13 +44,12 @@ import com.metabroadcast.common.webapp.health.HealthProbe;
 public class QueryModule {
 
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
-	private @Autowired MongoRoughSearch roughSearch;
 	private @Autowired MongoDbBackedContentStore store;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
-		return new MongoDBQueryExecutor(roughSearch);
+		return new MongoDBQueryExecutor(store);
 	}
 	
 	public @Bean HealthProbe c4Probe() {
@@ -74,7 +72,7 @@ public class QueryModule {
 	}
 
 	@Bean KnownTypeQueryExecutor mongoDbQueryExcutorThatFiltersUriQueries() {
-		MongoDBQueryExecutor executor = new MongoDBQueryExecutor(roughSearch);
+		MongoDBQueryExecutor executor = new MongoDBQueryExecutor(store);
 		executor.setFilterUriQueries(true);
 		return executor;
 	}

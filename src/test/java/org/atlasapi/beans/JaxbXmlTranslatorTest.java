@@ -25,11 +25,13 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.simple.Broadcast;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 
 /**
@@ -65,7 +67,6 @@ public class JaxbXmlTranslatorTest extends TestCase {
 				                              "<alias>http://www.bbc.co.uk/p/bluepeter</alias>" +
 				                            "</aliases>" +
 				                            "<clips/>" +
-				                            "<play:containedIn/>" +
 				                            "<play:genres/>" +
 				                            "<play:tags/>" +
                                				"<title>Blue Peter</title>" +
@@ -96,15 +97,17 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		Location location = new Location();
 		location.setUri("http://www.bbc.co.uk/bluepeter");
 		item.addLocation(location);
-		list.addItem(item);
-		graph.add(list);
+		list.add(item);
+		
+		ContentQueryResult result = new ContentQueryResult();
+		result.setContents(ImmutableList.<Description>of(list));
+		graph.add(result);
 		
 		new JaxbXmlTranslator().writeTo(graph, stream);
 		
 		assertThat(stream.toString(), containsString("<play:item>" +
 														"<aliases/>" +
 														"<clips/>" +
-														"<play:containedIn/>" +
 														"<play:genres/>" +
 														"<play:tags/>" +
 	                                         			"<title>Blue Peter</title>" +

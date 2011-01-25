@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.FetchException;
@@ -16,6 +15,7 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jdom.Element;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
@@ -86,7 +86,7 @@ public class SeesawBrandAdapter implements SiteSpecificAdapter<Brand> {
     
     private void addSeriesToBrand(Series series, Brand brand) {
         if (series != null) {
-            brand.getGenres().addAll(series.getGenres());
+            brand.setGenres(Iterables.concat(brand.getGenres(), series.getGenres()));
             
             if (brand.getDescription() == null) {
                 brand.setDescription(series.getDescription());

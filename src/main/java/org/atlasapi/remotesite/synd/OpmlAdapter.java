@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.synd;
 
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.system.Fetcher;

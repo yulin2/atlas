@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Content;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Sets;
@@ -38,11 +38,11 @@ public class AttributeTargetTypeExtractorTest extends TestCase {
 
 	public void testExtractingItemAttribute() throws Exception {
 		ContentQuery query = query().beginning(DESCRIPTION_TITLE, "bob").build();
-		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Item.class)));
+		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Content.class)));
 	}
 	
 	public void testCompositeQuery() {
 		ContentQuery query = query().beginning(DESCRIPTION_TITLE, "bob").after(BROADCAST_TRANSMISSION_TIME, new DateTime()).build();
-		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Item.class, Broadcast.class)));
+		assertThat(extractor.extract(query), is((Set) Sets.newHashSet(Content.class, Broadcast.class)));
 	}
 }

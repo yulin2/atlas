@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 
 import com.google.common.collect.ImmutableList;
@@ -39,7 +40,7 @@ public class TVBlobDayPopulatorTest extends TestCase {
         extractor.populate(is);
         
         ContentQuery query = ContentQueryBuilder.query().equalTo(Attributes.BROADCAST_ON, "http://tvblob.com/channel/raiuno").build();
-        List<Item> items = null;//store.itemsMatching(query);
+        List<Item> items = new MongoDBQueryExecutor(store).schedule(query).getItemsFromOnlyChannel();
         
         boolean foundMoreThanOneBroadcast = false;
         boolean foundBrandWithMoreThanOneEpisode = false;

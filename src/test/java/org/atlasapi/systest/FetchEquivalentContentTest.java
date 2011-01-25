@@ -132,7 +132,7 @@ public class FetchEquivalentContentTest extends TestCase {
 	@SuppressWarnings("unchecked")
 	private Brand queryForBrand(String uri) {
 		QueryController queryController = applicationContext.getBean(QueryController.class);
-		ModelAndView modelAndView = queryController.discover(new StubHttpServletRequest().withParam("uri", uri));
+		ModelAndView modelAndView = queryController.content(new StubHttpServletRequest().withParam("uri", uri));
 		Collection<Brand> brands = (Collection<Brand>) modelAndView.getModel().get("graph");
 		return Iterables.getOnlyElement(brands);
 	}
