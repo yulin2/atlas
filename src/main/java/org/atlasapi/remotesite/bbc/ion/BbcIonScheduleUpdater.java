@@ -52,7 +52,7 @@ public class BbcIonScheduleUpdater implements Runnable {
     public void run() {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update initiated"));
 
-        ExecutorService executor = Executors.newFixedThreadPool(3);
+        ExecutorService executor = Executors.newFixedThreadPool(5);
         for (String uri : uriSource) {
             executor.submit(new BbcIonScheduleUpdateTask(uri,HttpClients.webserviceClient(), localFetcher, writer,deserialiser,log));
         }
