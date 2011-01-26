@@ -30,6 +30,8 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     
     private Mockery context = new Mockery();
     
+    private final BbcIonScheduleDeserialiser deserialiser = new BbcIonScheduleDeserialiser();
+    
     private final SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final DefinitiveContentWriter writer = context.mock(DefinitiveContentWriter.class);
@@ -47,7 +49,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, log).run();
+        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, deserialiser, log).run();
         
     }
     
@@ -68,7 +70,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
         }});
 
-        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, log).run();
+        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, deserialiser, log).run();
     }
 
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
@@ -92,7 +94,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
         }});
 
-        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, log).run();
+        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, deserialiser, log).run();
     }
 
         

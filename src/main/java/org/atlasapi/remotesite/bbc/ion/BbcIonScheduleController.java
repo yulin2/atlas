@@ -25,11 +25,13 @@ public class BbcIonScheduleController {
     private final DefinitiveContentWriter writer;
     private final AdapterLog log;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("singleBBCIonScheduleUpdater"));
+    private BbcIonScheduleDeserialiser deserialiser;
 
     public BbcIonScheduleController(ContentResolver localFetcher, DefinitiveContentWriter writer, AdapterLog log) {
         this.localFetcher = localFetcher;
         this.writer = writer;
         this.log = log;
+        this.deserialiser = new BbcIonScheduleDeserialiser();
     }
 
     @RequestMapping("/system/bbc/ion/update/{service}/{date}")
@@ -37,7 +39,7 @@ public class BbcIonScheduleController {
         Preconditions.checkArgument(date.length() == 8, "the date must be 8 digits");
         
         String scheduleUri = String.format(BbcIonScheduleUriSource.SCHEDULE_PATTERN, service, date);
-        BbcIonScheduleUpdateTask updater = new BbcIonScheduleUpdateTask(scheduleUri, HttpClients.webserviceClient(), localFetcher, writer, log);
+        BbcIonScheduleUpdateTask updater = new BbcIonScheduleUpdateTask(scheduleUri, HttpClients.webserviceClient(), localFetcher, writer, deserialiser, log);
         executor.execute(updater);
         
         response.setStatus(HttpServletResponse.SC_OK);

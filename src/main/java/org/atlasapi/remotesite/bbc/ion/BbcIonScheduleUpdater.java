@@ -38,11 +38,13 @@ public class BbcIonScheduleUpdater implements Runnable {
     private final AdapterLog log;
 
     private final DefinitiveContentWriter writer;
+    private final BbcIonScheduleDeserialiser deserialiser;
 
-    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, DefinitiveContentWriter writer, AdapterLog log) {
+    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonScheduleDeserialiser deserialiser, AdapterLog log) {
         this.uriSource = uriSource;
         this.localFetcher = localFetcher;
         this.writer = writer;
+        this.deserialiser = deserialiser;
         this.log = log;
     }
 
@@ -52,7 +54,7 @@ public class BbcIonScheduleUpdater implements Runnable {
 
         ExecutorService executor = Executors.newFixedThreadPool(3);
         for (String uri : uriSource) {
-            executor.submit(new BbcIonScheduleUpdateTask(uri,HttpClients.webserviceClient(), localFetcher, writer,log));
+            executor.submit(new BbcIonScheduleUpdateTask(uri,HttpClients.webserviceClient(), localFetcher, writer,deserialiser,log));
         }
         executor.shutdown();
         boolean completion = false;
@@ -74,19 +76,21 @@ public class BbcIonScheduleUpdater implements Runnable {
         private final ContentResolver localFetcher;
         private DefinitiveContentWriter writer;
         private final AdapterLog log;
+        private final BbcIonScheduleDeserialiser deserialiser;
 
-        public BbcIonScheduleUpdateTask(String uri, SimpleHttpClient httpClient, ContentResolver localFetcher, DefinitiveContentWriter writer, AdapterLog log) {
+        public BbcIonScheduleUpdateTask(String uri, SimpleHttpClient httpClient, ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonScheduleDeserialiser deserialiser, AdapterLog log){
             this.uri = uri;
             this.httpClient = httpClient;
             this.localFetcher = localFetcher;
             this.writer = writer;
+            this.deserialiser = deserialiser;
             this.log = log;
         }
 
         @Override
         public void run() {
             try {
-                IonSchedule schedule = BbcIonScheduleDeserialiser.deserialise(httpClient.getContentsOf(uri));
+                IonSchedule schedule = deserialiser.deserialise(httpClient.getContentsOf(uri));
                 for (IonBroadcast broadcast : schedule.getBlocklist()) {
                     //find and (create and) update item
                     Item item = (Item) localFetcher.findByUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
