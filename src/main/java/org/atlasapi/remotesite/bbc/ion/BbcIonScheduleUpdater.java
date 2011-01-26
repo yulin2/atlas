@@ -164,7 +164,7 @@ public class BbcIonScheduleUpdater implements Runnable {
         private Item createItemFrom(IonBroadcast broadcast) {
             IonEpisode ionEpisode = broadcast.getEpisode();
             Item item;
-            if (!Strings.isNullOrEmpty(broadcast.getBrandId())) {
+            if (!Strings.isNullOrEmpty(broadcast.getBrandId()) || !Strings.isNullOrEmpty(broadcast.getSeriesId())) {
                 item = new Episode(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
             } else {
                 item = new Item(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
