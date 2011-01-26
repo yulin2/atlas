@@ -13,6 +13,9 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
+import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUriSource;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater;
 import org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource;
@@ -24,8 +27,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class BbcModule {
@@ -46,6 +49,7 @@ public class BbcModule {
 		if (Boolean.parseBoolean(enabled)) {
 			scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
 			scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
+			scheduler.schedule(bbcIonUpdater(), SCHEDULED_UPDATE_TIME);
 			try {
 				scheduler.schedule(bbcSchedulesUpdater(), SCHEDULED_UPDATE_TIME);
 			} catch (JAXBException e) {
@@ -59,13 +63,21 @@ public class BbcModule {
 		}
 	}
 	
-	@Bean Runnable bbcSchedulesUpdater() throws JAXBException {
+	private Runnable bbcIonUpdater() {
+        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource(), contentStore, contentWriters, log);
+    }
+
+    @Bean Runnable bbcSchedulesUpdater() throws JAXBException {
 	    DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource().withLookAhead(10);
 		return new BbcScheduledProgrammeUpdater(contentStore, bbcProgrammeAdapter(), contentWriters, uriSource, log);
 	}
 	
 	@Bean BbcScheduleController bbcScheduleController() {
 	    return new BbcScheduleController(contentStore, bbcProgrammeAdapter(), contentWriters, log);
+	}
+	
+	@Bean BbcIonScheduleController bbcIonScheduleController() {
+	    return new BbcIonScheduleController(contentStore, contentWriters, log);
 	}
 
 	@Bean Runnable bbcHighlightsUpdater() {

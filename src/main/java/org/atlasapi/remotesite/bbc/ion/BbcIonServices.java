@@ -3,10 +3,10 @@ package org.atlasapi.remotesite.bbc.ion;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 
-public class BbcIonServiceMap {
+public class BbcIonServices {
 
-    private static BiMap<String, String> services = ImmutableBiMap.<String, String>builder()
-        .put("bbc_radio_one", "http://www.bbc.co.uk/services/radio1/england")
+    public static BiMap<String, String> services = ImmutableBiMap.<String, String>builder()
+        .put("bbc_one_london", "http://www.bbc.co.uk/services/bbcone/london")
         .build();
     
     public static String get(String ionService) {

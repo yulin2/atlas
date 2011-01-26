@@ -15,40 +15,42 @@ import com.metabroadcast.common.time.SystemClock;
 
 public class BbcIonScheduleUriSource implements Iterable<String> {
 
-    private static final String SCHEDULE_PATTERN = "http://www.bbc.co.uk/iplayer/ion/schedule/service/%s/date/%s/timeslot/day/format/json";
-    
+    public static final String SCHEDULE_PATTERN = "http://www.bbc.co.uk/iplayer/ion/schedule/service/%s/date/%s/timeslot/day/format/json";
+
     private final Clock clock;
+    private final Iterable<String> serviceIds;
     private List<String> uris;
-    private Iterable<String> serviceIds;
-    private int lookAhead;
-    
+    private int lookAhead = 8;
+
     public BbcIonScheduleUriSource() {
-        this(new SystemClock());
-    }
-    
-    public BbcIonScheduleUriSource(Clock clock) {
-        this.clock = clock;
+        this(BbcIonServices.services.keySet());
     }
 
-    public BbcIonScheduleUriSource withServiceIds(Iterable<String> serviceIds) {
-        this.serviceIds = serviceIds;
-        return this;
+    public BbcIonScheduleUriSource(Iterable<String> serviceIds) {
+        this(new SystemClock(), serviceIds);
     }
-    
+
+    public BbcIonScheduleUriSource(Clock clock, Iterable<String> serviceIds) {
+        this.clock = clock;
+        this.serviceIds = serviceIds;
+    }
+
     public BbcIonScheduleUriSource withLookAhead(int lookAhead) {
         this.lookAhead = lookAhead;
         return this;
     }
-    
+
     @Override
     public Iterator<String> iterator() {
-        if (uris == null) { uris = build(); }
+        if (uris == null) {
+            uris = build();
+        }
         return Collections.unmodifiableList(uris).iterator();
     }
 
     private List<String> build() {
         final DateTime now = clock.now();
-        return ImmutableList.copyOf(Iterables.concat(Iterables.transform(serviceIds, new Function<String,Iterable<String>>(){
+        return ImmutableList.copyOf(Iterables.concat(Iterables.transform(serviceIds, new Function<String, Iterable<String>>() {
             @Override
             public Iterable<String> apply(String serviceId) {
                 List<String> uris = Lists.newArrayListWithCapacity(lookAhead + 1);
