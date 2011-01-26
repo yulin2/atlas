@@ -62,10 +62,9 @@ public class ItunesSeriesFinder {
                                 Price price = new Price(Currency.getInstance(currency), seriesPrice.doubleValue());
                             }*/
                             
-                            series = new Series(seriesUrl, helper.getCurie(seriesId));
+                            series = new Series(seriesUrl, helper.getCurie(seriesId), Publisher.ITUNES);
                             series.setTitle(seriesTitle);
                             series.withSeriesNumber(seriesNumber);
-                            series.setPublisher(Publisher.ITUNES);
                             series.setThumbnail(seriesThumbnail);
                             series.setImage(seriesThumbnail);
                         }

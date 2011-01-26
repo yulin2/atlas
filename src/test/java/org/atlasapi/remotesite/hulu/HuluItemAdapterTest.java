@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.hulu;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -21,7 +21,7 @@ public class HuluItemAdapterTest extends TestCase {
         Episode item = (Episode) adapter.fetch(vanityUrl);
         assertNotNull(item);
 
-        Brand brand = item.getContainer();
+        Container<?> brand = item.getContainer();
         assertNotNull(brand);
         assertEquals("Glee", brand.getTitle());
         assertEquals("http://www.hulu.com/glee", brand.getCanonicalUri());

@@ -63,9 +63,6 @@ public class QueryController {
 	public ModelAndView discover(HttpServletRequest request) {
 		try {
 			ContentQuery filter = builder.build(request);
-			if (!Selection.ALL.equals(filter.getSelection())) {
-				throw new IllegalArgumentException("Cannot specifiy a limit or offset here");
-			}
 			return modelAndViewFor(executor.discover(filter));
 		} catch (Exception e) {
 			return errorViewFor(AtlasErrorSummary.forException(e));
@@ -75,6 +72,11 @@ public class QueryController {
 	@RequestMapping("/3.0/content.*")
 	public ModelAndView content(HttpServletRequest request) {
 		try {
+			ContentQuery filter = builder.build(request);
+
+			if (!Selection.ALL.equals(filter.getSelection())) {
+				throw new IllegalArgumentException("Cannot specifiy a limit or offset here");
+			}
 			String commaSeperatedUris = request.getParameter("uri");
 			if (commaSeperatedUris == null) {
 				throw new IllegalArgumentException("No uris specified");
@@ -83,8 +85,7 @@ public class QueryController {
 			if (Iterables.isEmpty(uris)) {
 				throw new IllegalArgumentException("No uris specified");
 			}
-//			ContentQuery build = builder.build(request);
-			return modelAndViewFor(executor.executeUriQuery(uris, ContentQuery.MATCHES_EVERYTHING));
+			return modelAndViewFor(executor.executeUriQuery(uris, filter));
 		} catch (Exception e) {
 			return errorViewFor(AtlasErrorSummary.forException(e));
 		}

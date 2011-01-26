@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.HttpClients;
@@ -39,7 +40,7 @@ public class SeesawSeriesAdapter implements SiteSpecificAdapter<Series> {
             String content = httpClient.getContentsOf(uri);
 
             HtmlNavigator navigator = new HtmlNavigator(content);
-            Series series = new Series(uri, SeesawHelper.getCurieFromLink(uri));
+            Series series = new Series(uri, SeesawHelper.getCurieFromLink(uri), Publisher.SEESAW);
 
             Element seriesInfoElem = navigator.firstElementOrNull("//div[@class='information']//*[text()='About this series:']/parent::div/div");
             if (seriesInfoElem != null) {

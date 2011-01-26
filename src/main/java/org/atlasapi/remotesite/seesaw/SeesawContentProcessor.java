@@ -87,7 +87,6 @@ public class SeesawContentProcessor {
                     Series series = (Series) description;
                     series.addContents(episode);
                     episode.setSeriesNumber(series.getSeriesNumber());
-                    episode.setSeries(series);
                 }
                 else if (description instanceof Brand) {
                     Brand brand = (Brand) description;
@@ -270,8 +269,7 @@ public class SeesawContentProcessor {
 
     private void processAsSeries(Element seriesElement) {
         String uri = getUri(seriesElement);
-        Series series = new Series(uri, getCurie(uri));
-        series.setPublisher(Publisher.SEESAW);
+        Series series = new Series(uri, getCurie(uri), Publisher.SEESAW);
         
         Element seesawMetadata = getSeesawMetadata(seriesElement);
         Element groupElement = getGroupElement(seriesElement);

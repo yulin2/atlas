@@ -132,7 +132,7 @@ public class PaProgrammeProcessor {
         if (resolvedContent instanceof Series) {
             series = (Series) resolvedContent;
         } else {
-            series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber());
+            series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         }
         
         series.setPublisher(Publisher.PA);

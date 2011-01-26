@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -33,7 +34,7 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 		
 		String uri = seriesUriFrom(source);
 		
-		Series series = new Series(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri));
+		Series series = new Series(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), Publisher.C4);
 		
 		series.withSeriesNumber(seriesNumberFrom(source));
 		
