@@ -18,7 +18,7 @@ public class IonEpisode {
     private String subseriesTitle;
     private Boolean isDownloadableSd;
     private Boolean isRepeat;
-    private String actual_start;
+    private String actualStart;
     private String masterbrandTitle;
     private String title;
     private Boolean isDownloadableHd;
@@ -43,7 +43,7 @@ public class IonEpisode {
     private String playVersionId;
     private String tagSchemes;
     private Boolean isStacked;
-    private String parent_id;
+    private String parentId;
     private String myPlaylistUrl;
     private String toplevelContainerTitle;
     private String synopsis;
@@ -119,8 +119,8 @@ public class IonEpisode {
         return isRepeat;
     }
 
-    public String getActual_start() {
-        return actual_start;
+    public String getActualStart() {
+        return actualStart;
     }
 
     public String getMasterbrandTitle() {
@@ -220,7 +220,7 @@ public class IonEpisode {
     }
 
     public String getParent_id() {
-        return parent_id;
+        return parentId;
     }
 
     public String getMyPlaylistUrl() {
@@ -325,6 +325,10 @@ public class IonEpisode {
 
     public URL getMyMediaselectorXmlUrl() {
         return myMediaselectorXmlUrl;
+    }
+
+    public String getParentId() {
+        return parentId;
     }
 
     public static class IonCategory {
