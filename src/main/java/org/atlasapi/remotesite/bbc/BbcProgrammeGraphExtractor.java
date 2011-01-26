@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -147,6 +146,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
 	private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
         Version version = new Version();
+        version.setCanonicalUri("http://www.bbc.co.uk/programmes/"+slashProgrammesVersion.pid());
         if (slashProgrammesVersion != null) {
             if (slashProgrammesVersion.broadcastSlots() != null) {
                 version.setBroadcasts(broadcastsFrom(slashProgrammesVersion));
@@ -258,7 +258,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             }
         }
 
-        Set<String> aliases = bbcAliasUrisFor(item.getCanonicalUri());
+        Set<String> aliases = BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri());
         if (!aliases.isEmpty()) {
             item.setAliases(aliases);
         }
@@ -279,18 +279,6 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         return "Series " + seriesNumber.requireValue() + " " + title;
     }
 
-    static Set<String> bbcAliasUrisFor(String episodeUri) {
-        String pid = BbcUriCanonicaliser.bbcProgrammeIdFrom(episodeUri);
-        HashSet<String> aliases = Sets.newHashSet();
-        if (pid != null) {
-            aliases.add(String.format("http://www.bbc.co.uk/iplayer/episode/%s", pid));
-            aliases.add(String.format("http://www.bbc.co.uk/programmes/%s", pid));
-            aliases.add(String.format("http://bbc.co.uk/i/%s/", pid.replaceFirst("b00", "")));
-            aliases.remove(episodeUri);
-        }
-        return aliases;
-    }
-
     private String imageUrlFrom(String episodeUri) {
         return extractImageUrl(episodeUri, FULL_IMAGE_EXTENSION);
     }
@@ -305,7 +293,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         return "http://www.bbc.co.uk/iplayer/images/episode/" + BbcFeeds.pidFrom(episodeUri) + suffix;
     }
 
-    private String iplayerPageFrom(String episodeUri) {
+    public static String iplayerPageFrom(String episodeUri) {
         return "http://www.bbc.co.uk/iplayer/episode/" + BbcFeeds.pidFrom(episodeUri);
     }
 
