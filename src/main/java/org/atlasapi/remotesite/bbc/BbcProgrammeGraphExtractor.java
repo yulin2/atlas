@@ -147,6 +147,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
 	private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
         Version version = new Version();
+        version.setCanonicalUri("http://www.bbc.co.uk/programmes/"+slashProgrammesVersion.pid());
         if (slashProgrammesVersion != null) {
             if (slashProgrammesVersion.broadcastSlots() != null) {
                 version.setBroadcasts(broadcastsFrom(slashProgrammesVersion));
@@ -305,7 +306,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         return "http://www.bbc.co.uk/iplayer/images/episode/" + BbcFeeds.pidFrom(episodeUri) + suffix;
     }
 
-    private String iplayerPageFrom(String episodeUri) {
+    public static String iplayerPageFrom(String episodeUri) {
         return "http://www.bbc.co.uk/iplayer/episode/" + BbcFeeds.pidFrom(episodeUri);
     }
 

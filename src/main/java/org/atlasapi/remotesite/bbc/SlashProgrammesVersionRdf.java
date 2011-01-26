@@ -46,6 +46,25 @@ class SlashProgrammesVersionRdf {
 		return broadcasts;
 	}
 	
+	@XmlElement(namespace=PO.NS, name="Version")
+	BbcVersion version;
+	
+	String pid() {
+	    if (version != null) {
+	        return version.pid();
+	    }
+	    return null;
+	}
+	
+	static class BbcVersion {
+	    @XmlElement(namespace=PO.NS, name="pid")
+	    String pid;
+	    
+	    String pid() {
+	        return pid;
+	    }
+	}
+	
 	static class BbcBroadcast {
 		
 		@XmlElement(namespace="http://purl.org/NET/c4dm/event.owl#", name="time")

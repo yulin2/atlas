@@ -18,9 +18,7 @@ public class BbcIonScheduleDeserialiserTest extends TestCase {
         
         BbcIonScheduleDeserialiser deserialiser = new BbcIonScheduleDeserialiser();
         
-        assertThat(deserialiser.deserialise("0", Boolean.class), is(false));
-        
-        IonSchedule schedule = deserialiser.deserialise(json, IonSchedule.class);
+        IonSchedule schedule = deserialiser.deserialise(json);
         
         assertThat(schedule.getCount(), is(38));
         

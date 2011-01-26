@@ -6,18 +6,18 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BooleanDeserializer;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.DateTimeDeserializer;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.IntegerDeserializer;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.URLDeserializer;
-import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
+import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.joda.time.DateTime;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class BbcIonScheduleDeserialiser {
+public class BbcIonOndemanChangeDeserialiser {
 
     private final Gson gson;
 
-    public BbcIonScheduleDeserialiser() {
+    public BbcIonOndemanChangeDeserialiser() {
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
             .registerTypeAdapter(Integer.class, new IntegerDeserializer())
@@ -26,7 +26,7 @@ public class BbcIonScheduleDeserialiser {
             .create();
     }
 
-    public IonSchedule deserialise(String ionScheduleString) {
-        return gson.fromJson(ionScheduleString, IonSchedule.class);
+    public IonOndemandChanges deserialise(String ionString) {
+        return gson.fromJson(ionString, IonOndemandChanges.class);
     }
 }
