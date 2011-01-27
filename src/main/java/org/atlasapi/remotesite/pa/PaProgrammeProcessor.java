@@ -149,7 +149,7 @@ public class PaProgrammeProcessor {
             return Maybe.nothing();
         }
 
-        String episodeUri = PA_BASE_URL + "/episodes/" + progData.getProgId();
+        String episodeUri = PA_BASE_URL + "/episodes/" + programmeId(progData);
         Content resolvedContent = contentResolver.findByUri(episodeUri);
         Episode episode;
         if (resolvedContent instanceof Episode) {
@@ -229,7 +229,7 @@ public class PaProgrammeProcessor {
     }
 
     private Episode getBasicEpisode(ProgData progData) {
-        Episode episode = new Episode(PA_BASE_URL + "/episodes/" + progData.getProgId(), "pa:e-" + progData.getProgId(), Publisher.PA);
+        Episode episode = new Episode(PA_BASE_URL + "/episodes/" + programmeId(progData), "pa:e-" + programmeId(progData), Publisher.PA);
 
         Version version = new Version();
         version.setProvider(Publisher.PA);
@@ -250,5 +250,9 @@ public class PaProgrammeProcessor {
     protected static DateTime getTransmissionTime(String date, String time, DateTimeZone zone) {
         String dateString = date + "-" + time;
         return DateTimeFormat.forPattern("dd/MM/yyyy-HH:mm").withZone(zone).parseDateTime(dateString);
+    }
+    
+    protected static String programmeId(ProgData progData) {
+        return ! Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? progData.getRtFilmnumber() : progData.getProgId();
     }
 }
