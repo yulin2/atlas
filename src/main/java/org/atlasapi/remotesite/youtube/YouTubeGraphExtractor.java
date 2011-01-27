@@ -17,6 +17,7 @@ package org.atlasapi.remotesite.youtube;
 
 import java.util.Set;
 
+import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
@@ -40,6 +41,8 @@ import com.metabroadcast.common.media.MimeType;
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, Item> {
+    
+    private GenreMap genreMap = new YouTubeGenreMap();
 	
 	@Override
 	public Item extract(YouTubeSource source) {
@@ -89,7 +92,6 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 		item.setTitle(source.getVideoTitle());
 		item.setDescription(source.getDescription());
 		
-		item.setGenres(new YouTubeGenreMap().map(source.getCategories()));
 		item.setTags(source.getTags());
 		
 		item.setThumbnail(source.getThumbnailImageUri());
@@ -98,6 +100,8 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 			item.setIsLongForm((source.getVideos().get(0).getDuration()).isLongerThan(Duration.standardMinutes(15)));
 		}
 		item.setMediaType(MediaType.VIDEO);
+		
+		item.setGenres(genreMap.map(source.getCategories()));
 		return item;
 	}
 

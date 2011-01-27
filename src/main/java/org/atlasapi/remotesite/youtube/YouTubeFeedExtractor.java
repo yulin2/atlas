@@ -5,14 +5,13 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.gdata.data.youtube.VideoEntry;
-import com.google.gdata.data.youtube.VideoFeed;
 
 public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource, ContentGroup> {
-    
+
     private final ContentExtractor<YouTubeSource, Item> itemExtractor;
     
     public YouTubeFeedExtractor() {
@@ -25,17 +24,16 @@ public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource,
 
     @Override
     public ContentGroup extract(YouTubeFeedSource source) {
-        VideoFeed feed = source.getVideoFeed();
-        
+        YouTubeFeedClient.VideoFeed feed = source.getVideoFeed();
 
         ContentGroup playlist = new ContentGroup(source.getUri(), YouTubeFeedCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
         playlist.setMediaType(MediaType.VIDEO);
         
-        Iterable<Item> items = Iterables.transform(feed.getEntries(), new Function<VideoEntry, Item>() {
+        Iterable<Item> items = Iterables.transform(feed.videos, new Function<VideoEntry, Item>() {
 
 			@Override
 			public Item apply(VideoEntry video) {
-				return itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalise(video.getId())));
+				return  itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalUriFor(video.id)));
 			}
         });
         

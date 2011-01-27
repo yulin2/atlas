@@ -17,20 +17,10 @@ package org.atlasapi.remotesite.youtube;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-
-import java.util.List;
-
 import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.FetchException;
-
-import com.google.gdata.data.Link;
-import com.google.gdata.data.MediaContent;
-import com.google.gdata.data.media.mediarss.MediaThumbnail;
-import com.google.gdata.data.youtube.VideoEntry;
-import com.google.gdata.data.youtube.YouTubeMediaGroup;
+import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
 
 /**
  * Test of the behaviour of the third-party YouTube GData client from Google.
@@ -43,26 +33,13 @@ public class YouTubeGdataClientTest extends TestCase {
 	YouTubeGDataClient gdataClient = new YouTubeGDataClient();
 
 	public void testCanRetrieveDataRelatingToGivenYouTubePage() throws Exception {
-
 		VideoEntry entry = gdataClient.get("http://www.youtube.com/watch?v=pdyYe7sDlhA");
-		
-		assertThat(entry.getTitle().getPlainText(), containsString("BBC News 24"));
-		assertThat(entry.getHtmlLink().getHref(), startsWith("http://www.youtube.com/watch?v=pdyYe7sDlhA&feature=youtube_gdata")); // should remove youtube_gdata flag
-		MediaContent content = (MediaContent) entry.getContent();
-		assertThat(content.getUri(), startsWith("http://www.youtube.com/v/pdyYe7sDlhA")); // but has more params 
-
-		YouTubeMediaGroup mediaGroup = entry.getMediaGroup();
-		assertThat(mediaGroup.getDescription().getPlainTextContent(), startsWith("On May 8th 2006"));
-		List<MediaThumbnail> thumbnails = mediaGroup.getThumbnails();
-		assertThat(thumbnails.get(0).getUrl(), is("http://i.ytimg.com/vi/pdyYe7sDlhA/default.jpg"));
-		assertThat(thumbnails.get(thumbnails.size() - 1).getUrl(), is("http://i.ytimg.com/vi/pdyYe7sDlhA/hqdefault.jpg"));
-		List<com.google.gdata.data.media.mediarss.MediaContent> contents = mediaGroup.getContents();
-		
-		for (com.google.gdata.data.media.mediarss.MediaContent mediaContent : contents) {
-			mediaContent.getType();
-			mediaContent.getDuration();
-			mediaContent.getUrl();
-		}
+		assertThat(entry.title, containsString("BBC News 24"));
+		assertNotNull(entry.thumbnail);
+		assertNotNull(entry.thumbnail.hqDefault);
+		assertFalse(entry.tags.isEmpty());
+		assertNotNull(entry.category);
+		assertNotNull(entry.player.defaultUrl);
 	}
 	
 	public void testhrowsExceptionIfSubmittedUriDoesNotContainVideoId() throws Exception {
@@ -71,25 +48,6 @@ public class YouTubeGdataClientTest extends TestCase {
 			gdataClient.get("http://uk.youtube.com/watch/blah");
 		} catch (FetchException fe) {
 			assertThat(fe.getMessage(), containsString("URI did not contain a recognised video id"));
-		}
-	}
-	
-	public void testTellsUsAboutDifferentVideoQualitysAvailalbe() throws Exception {
-		
-		VideoEntry entry = gdataClient.get("http://www.youtube.com/watch?v=ilHDZBb-hI0");
-		
-		YouTubeMediaGroup mediaGroup = entry.getMediaGroup();
-		List<com.google.gdata.data.media.mediarss.MediaContent> contents = mediaGroup.getContents();
-		
-		for (com.google.gdata.data.media.mediarss.MediaContent mediaContent : contents) {
-			mediaContent.getType();
-			mediaContent.getDuration();
-			System.out.println(mediaContent.getUrl());
-		}
-		
-		List<Link> links = entry.getLinks();
-		for (Link link : links) {
-			System.out.println(link.getType() + " : " + link.getRel() + " : " +  link.getHref());
 		}
 	}
 }

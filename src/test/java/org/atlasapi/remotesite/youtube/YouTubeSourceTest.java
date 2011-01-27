@@ -19,50 +19,27 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-
-import java.util.List;
-import java.util.Set;
-
 import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.youtube.YouTubeSource.Video;
 import org.joda.time.Duration;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.gdata.data.Category;
-import com.google.gdata.data.media.mediarss.MediaCategory;
-import com.google.gdata.data.youtube.VideoEntry;
-import com.google.gdata.data.youtube.YouTubeMediaGroup;
 
 public class YouTubeSourceTest extends TestCase {
 
 	public void testReturnsNullForUninitalisedContent() throws Exception {
 		
-		YouTubeSource source = new YouTubeSource(new VideoEntry(), "uri");
+		YouTubeSource source = new YouTubeSource(new YouTubeFeedClient.VideoEntry(), "uri");
 		assertNull(source.getVideoTitle());
 		assertNull(source.getDescription());
 	}
 	
 	public void testGeneratesGenresAndTagsUrisForCategories() throws Exception {
 		
-		VideoEntry entry = new VideoEntry() { 
-			@Override
-			public YouTubeMediaGroup getMediaGroup() {
-				return new YouTubeMediaGroup() {
-					@Override
-					public List<MediaCategory> getCategories() {
-						return Lists.newArrayList(new MediaCategory("youtube.com", "News"));
-					}
-				};
-			}
-			
-			@Override
-			public Set<Category> getCategories() {
-				return Sets.newHashSet(new Category("http://gdata.youtube.com/schemas/2007/categories.cat", "News"), 
-						               new Category("http://gdata.youtube.com/schemas/2007/keywords.cat", "funny"));
-			}
-		};
+	    YouTubeFeedClient.VideoEntry entry = new YouTubeFeedClient.VideoEntry();
+	    entry.category = "News";
+	    entry.tags = Lists.newArrayList("Funny");
 				
 		YouTubeSource source = new YouTubeSource(entry, "uri");
 		assertThat(source.getCategories(), hasItem("http://ref.atlasapi.org/genres/youtube/News"));
