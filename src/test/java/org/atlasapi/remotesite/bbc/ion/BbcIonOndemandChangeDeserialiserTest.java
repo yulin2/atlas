@@ -8,6 +8,7 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.springframework.core.io.ClassPathResource;
 
@@ -15,8 +16,8 @@ public class BbcIonOndemandChangeDeserialiserTest extends TestCase {
 
     public void testScheduleFrom() throws IOException {
         String json = IOUtils.toString(new ClassPathResource("ion-ondemand-changes.json").getInputStream());
-        
-        BbcIonOndemanChangeDeserialiser deserialiser = new BbcIonOndemanChangeDeserialiser();
+
+        BbcIonDeserializer<IonOndemandChanges> deserialiser = BbcIonDeserializers.deserializerForClass(IonOndemandChanges.class);
         
         IonOndemandChanges schedule = deserialiser.deserialise(json);
         

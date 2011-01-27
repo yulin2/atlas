@@ -22,6 +22,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcAliasCompiler;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
@@ -38,9 +39,9 @@ public class BbcIonScheduleUpdater implements Runnable {
     private final AdapterLog log;
 
     private final DefinitiveContentWriter writer;
-    private final BbcIonScheduleDeserialiser deserialiser;
+    private final BbcIonDeserializer<IonSchedule> deserialiser;
 
-    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonScheduleDeserialiser deserialiser, AdapterLog log) {
+    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
         this.uriSource = uriSource;
         this.localFetcher = localFetcher;
         this.writer = writer;
@@ -76,9 +77,9 @@ public class BbcIonScheduleUpdater implements Runnable {
         private final ContentResolver localFetcher;
         private DefinitiveContentWriter writer;
         private final AdapterLog log;
-        private final BbcIonScheduleDeserialiser deserialiser;
+        private final BbcIonDeserializer<IonSchedule> deserialiser;
 
-        public BbcIonScheduleUpdateTask(String uri, SimpleHttpClient httpClient, ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonScheduleDeserialiser deserialiser, AdapterLog log){
+        public BbcIonScheduleUpdateTask(String uri, SimpleHttpClient httpClient, ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log){
             this.uri = uri;
             this.httpClient = httpClient;
             this.localFetcher = localFetcher;

@@ -6,6 +6,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 
 public class IonEpisode {
+
     private String mySeriesUrl;
     private Boolean isEmbargoed;
     private URL myMediaselectorJsonUrl;
@@ -41,7 +42,7 @@ public class IonEpisode {
     private Boolean isAvailableMediasetStbSd;
     private String masterbrand;
     private String playVersionId;
-    private String tagSchemes;
+    private List<IonTagScheme> tagSchemes;
     private Boolean isStacked;
     private String parentId;
     private String myPlaylistUrl;
@@ -211,7 +212,7 @@ public class IonEpisode {
         return playVersionId;
     }
 
-    public String getTagSchemes() {
+    public List<IonTagScheme> getTagSchemes() {
         return tagSchemes;
     }
 
@@ -329,6 +330,10 @@ public class IonEpisode {
 
     public String getParentId() {
         return parentId;
+    }
+    
+    public static class IonTagScheme {
+        //not used
     }
 
     public static class IonCategory {

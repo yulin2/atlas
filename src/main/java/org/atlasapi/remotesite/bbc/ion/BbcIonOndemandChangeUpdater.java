@@ -7,6 +7,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.joda.time.DateTime;
@@ -25,10 +26,10 @@ public class BbcIonOndemandChangeUpdater implements Runnable {
     private final AdapterLog log;
     private DateTime lastRun = new DateTime(DateTimeZones.UTC).minusHours(2);
     private boolean isRunning = false;
-    private final BbcIonOndemanChangeDeserialiser deserialiser;
+    private final BbcIonDeserializer<IonOndemandChanges> deserialiser;
     private final BbcIonOndemandItemUpdater itemUpdater = new BbcIonOndemandItemUpdater();
 
-    public BbcIonOndemandChangeUpdater(ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonOndemanChangeDeserialiser deserialiser, AdapterLog log) {
+    public BbcIonOndemandChangeUpdater(ContentResolver localFetcher, DefinitiveContentWriter writer, BbcIonDeserializer<IonOndemandChanges> deserialiser, AdapterLog log) {
         this.localFetcher = localFetcher;
         this.writer = writer;
         this.deserialiser = deserialiser;

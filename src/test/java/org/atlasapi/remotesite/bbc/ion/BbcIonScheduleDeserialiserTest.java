@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 
 import com.google.common.base.Charsets;
@@ -17,7 +18,7 @@ public class BbcIonScheduleDeserialiserTest extends TestCase {
     public void testScheduleFrom() throws IOException {
         String json =  Resources.toString(Resources.getResource("ion-schedule.json"), Charsets.UTF_8);
         
-        BbcIonScheduleDeserialiser deserialiser = new BbcIonScheduleDeserialiser();
+        BbcIonDeserializer<IonSchedule> deserialiser = BbcIonDeserializers.deserializerForClass(IonSchedule.class);
         
         IonSchedule schedule = deserialiser.deserialise(json);
         

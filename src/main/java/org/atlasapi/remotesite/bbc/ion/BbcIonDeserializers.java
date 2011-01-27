@@ -9,10 +9,14 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 public class BbcIonDeserializers {
     public static class DateTimeDeserializer implements JsonDeserializer<DateTime> {
@@ -63,5 +67,38 @@ public class BbcIonDeserializers {
                 throw new JsonParseException(e);
             }
         }
+    }
+    
+    public static class BbcIonDeserializer<T> {
+
+        private final Type type;
+        private final Gson gson;
+
+        public BbcIonDeserializer(Class<T> cls) {
+            this(TypeToken.get(cls).getType());
+
+        }
+
+        public BbcIonDeserializer(Type type) {
+            this.type = type;
+            this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
+            .registerTypeAdapter(Integer.class, new IntegerDeserializer())
+            .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
+            .registerTypeAdapter(URL.class, new URLDeserializer())
+            .create();
+        }
+        
+        public T deserialise(String jsonString) {
+            return gson.fromJson(jsonString, type);
+        }
+    }
+    
+    public static <T>  BbcIonDeserializer<T> deserializerForClass(Class<T> cls) {
+        return new BbcIonDeserializer<T>(cls);
+    }
+    
+    public static <T> BbcIonDeserializer<T> deserializerForType(TypeToken<T> token) {
+        return new BbcIonDeserializer<T>(token.getType());
     }
 }
