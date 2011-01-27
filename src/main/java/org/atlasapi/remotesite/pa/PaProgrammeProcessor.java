@@ -253,6 +253,6 @@ public class PaProgrammeProcessor {
     }
     
     protected static String programmeId(ProgData progData) {
-        return progData.getRtFilmnumber() != null ? progData.getRtFilmnumber() : progData.getProgId();
+        return ! Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? progData.getRtFilmnumber() : progData.getProgId();
     }
 }
