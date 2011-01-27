@@ -27,13 +27,6 @@ import org.joda.time.Duration;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gdata.data.Category;
-import com.google.gdata.data.media.mediarss.MediaCategory;
-import com.google.gdata.data.media.mediarss.MediaContent;
-import com.google.gdata.data.media.mediarss.MediaThumbnail;
-import com.google.gdata.data.youtube.VideoEntry;
-import com.google.gdata.data.youtube.YouTubeMediaContent;
-import com.google.gdata.util.common.base.Charsets;
 
 /**
  * Object that wraps data fetched from YouTube
@@ -44,26 +37,25 @@ public class YouTubeSource extends BaseSource {
 	
 	private static final String ATLAS_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
 	private static final String ATLAS_TAGS_SCHEME = "http://ref.atlasapi.org/tags/";
-	private static final String GDATA_KEYWORDS_CAT_SCHEME = "http://gdata.youtube.com/schemas/2007/keywords.cat";
 	
-	private final VideoEntry videoEntry;
+	private final YouTubeFeedClient.VideoEntry videoEntry;
 	
-	public YouTubeSource(VideoEntry entry, String uri) {
+	public YouTubeSource(YouTubeFeedClient.VideoEntry entry, String uri) {
 		super(uri);
 		videoEntry = entry;
 	}
 		
 	String getVideoTitle() {
-		if (videoEntry.getTitle() != null) {
-			return videoEntry.getTitle().getPlainText();
+		if (videoEntry.title != null) {
+			return videoEntry.title;
 		} else {
 			return null;
 		}
 	}
 	
 	String getDescription() {
-		if (videoEntry.getMediaGroup() != null && videoEntry.getMediaGroup().getDescription() != null) {
-			return videoEntry.getMediaGroup().getDescription().getPlainTextContent();
+		if (videoEntry.description != null) {
+			return videoEntry.description;
 		} else {
 			return null;
 		}
@@ -71,10 +63,8 @@ public class YouTubeSource extends BaseSource {
 	
 	List<Video> getVideos() {
 		List<Video> result = Lists.newArrayList();
-		List<MediaContent> contents = videoEntry.getMediaGroup().getContents();
-		for (MediaContent mediaContent : contents) {
-			result.add(new Video(mediaContent, videoEntry.isEmbeddable()));
-		}
+		Video video = new Video("", Duration.standardSeconds(videoEntry.duration), videoEntry.player.defaultUrl, 5, true);
+		result.add(video);
 		return result;
 	}
 	
@@ -85,10 +75,6 @@ public class YouTubeSource extends BaseSource {
 		private final String type;
 		private final int youtubeFormat;
 		private final boolean embeddable;
-
-		public Video(MediaContent mediaContent, boolean embeddable) {
-			this(mediaContent.getType(), Duration.standardSeconds(mediaContent.getDuration()), mediaContent.getUrl(), ((YouTubeMediaContent)mediaContent).getYouTubeFormat(), embeddable);
-		}
 
 		public Video(String type, Duration duration, String locationUri, int youtubeFormat, boolean embeddable) {
 			this.type = type;
@@ -123,41 +109,44 @@ public class YouTubeSource extends BaseSource {
 		}
 		
 	}
-
+	
 	Set<String> getCategories() {
-		Set<String> result = Sets.newHashSet();
-		List<MediaCategory> categories = videoEntry.getMediaGroup().getCategories();
-		for (MediaCategory category : categories) {
-			result.add(ATLAS_GENRES_SCHEME + category.getContent());
-		}
-		return result;
-	}
+        Set<String> result = Sets.newHashSet();
+        try {
+            result.add(ATLAS_GENRES_SCHEME + URLEncoder.encode(videoEntry.category, com.google.common.base.Charsets.UTF_8.name()));
+        } catch (UnsupportedEncodingException e) {
+            throw new Defect("UTF-8 not found");
+        }
+        return result;
+    }
 
 	Set<String> getTags() {
 		Set<String> result = Sets.newHashSet();
-		Set<Category> categories = videoEntry.getCategories();
-		for (Category category : categories) {
-			if (category.getScheme().equals(GDATA_KEYWORDS_CAT_SCHEME)) {
-				try {
-					result.add(ATLAS_TAGS_SCHEME + URLEncoder.encode(category.getTerm().toLowerCase(), Charsets.UTF_8.name()));
-				} catch (UnsupportedEncodingException e) {
-					throw new Defect("UTF-8 not found");
-				}
+		for (String category : videoEntry.tags) {
+			try {
+				result.add(ATLAS_TAGS_SCHEME + URLEncoder.encode(category.toLowerCase(), com.google.common.base.Charsets.UTF_8.name()));
+			} catch (UnsupportedEncodingException e) {
+				throw new Defect("UTF-8 not found");
 			}
 		}
 		return result;
 	}
 
 	public String getThumbnailImageUri() {
-		if (videoEntry.getMediaGroup().getThumbnails().isEmpty()) {
-			return null;
-		}
-		return videoEntry.getMediaGroup().getThumbnails().get(0).getUrl();
+	    if (videoEntry.thumbnail != null) {
+	        if (videoEntry.thumbnail.defaultUrl != null) {
+	            return videoEntry.thumbnail.defaultUrl;
+	        } else if (videoEntry.thumbnail.sqDefault != null) {
+	            return videoEntry.thumbnail.sqDefault;
+	        }
+	    }
+	    return null;
 	}
 	
 	public String getImageUri() {
-		List<MediaThumbnail> thumbnails = videoEntry.getMediaGroup().getThumbnails();
-		if (thumbnails == null || thumbnails.isEmpty()) { return null; }
-		return thumbnails.get(thumbnails.size() - 1).getUrl();
+	    if (videoEntry.thumbnail != null && videoEntry.thumbnail.hqDefault != null) {
+            return videoEntry.thumbnail.hqDefault;
+        }
+	    return null;
 	}
 }
