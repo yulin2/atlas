@@ -1,7 +1,7 @@
 {
    "link" : {
       "rel" : "self",
-      "href" : "http://dynamite.iplayer.bbc.co.uk/iplayer/ion/episodedetail/episode/b00xmljr/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json",
+      "href" : "http://dynamite.iplayer.bbc.co.uk/iplayer/ion/episodedetail/episode/p00d5210/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json",
       "type" : "application/json",
       "locale_str" : "en"
    },
@@ -13,156 +13,148 @@
    },
    "blocklist" : [
       {
-         "my_series_url" : "",
+         "my_series_url" : "/iplayer/series/p001d7kl/Danny_Baker/",
          "is_embargoed" : "0",
          "next_broadcasts" : [],
-         "my_mediaselector_json_url" : "http://www.bbc.co.uk/mediaselector/4/mtis/all/b00xmkl9",
+         "my_mediaselector_json_url" : "http://www.bbc.co.uk/mediaselector/4/mtis/all/p00d521h",
          "play_version_has_competition_warning" : "",
          "is_embeddable" : "0",
-         "original_title" : "A Dewey Decimal",
-         "original_broadcast_service_title" : "BBC Radio 7",
+         "original_title" : "",
+         "original_broadcast_service_title" : "BBC London",
          "series_medium_synopsis" : "",
          "is_available_elektra_sd" : "0",
          "series_long_synopsis" : "",
          "available_toplevel_episode_count" : "0",
          "long_synopsis" : "",
          "stacked_container_id" : "",
-         "complete_title" : "A Dewey Decimal",
+         "complete_title" : "Danny Baker: 27/01/2011",
          "subseries_title" : "",
-         "previous_episode_id" : "",
+         "previous_episode_id" : "p00d4bfb",
          "is_downloadable_sd" : "0",
-         "next_episode_id" : "",
+         "next_episode_id" : "p00d5psc",
          "is_repeat" : "0",
-         "actual_start" : "2011-01-25T15:36:16+0000",
-         "version_id" : "b00xmkl9",
-         "masterbrand_title" : "BBC Radio 7",
-         "title" : "A Dewey Decimal",
+         "actual_start" : "2011-01-27T17:33:40+0000",
+         "version_id" : "p00d521h",
+         "masterbrand_title" : "BBC London",
+         "title" : "27/01/2011",
          "is_downloadable_hd" : "0",
          "is_available_mediaset_pc_hd" : "0",
          "partner" : "s0000001",
-         "shortened_path" : "/i/xmljr/",
+         "shortened_path" : "/i/p00d5210/",
          "is_delayed" : "0",
          "available_sibling_count" : "0",
-         "my_short_url" : "bbc.co.uk/i/xmljr/",
+         "my_short_url" : "bbc.co.uk/i/p00d5210/",
          "is_film" : "0",
-         "contextual_family_tree" : "e",
+         "contextual_family_tree" : "b-e",
          "is_available_mediaset_pc_sd" : "0",
-         "passionsite_link" : "http://www.bbc.co.uk/programmes/b00xmljr",
+         "passionsite_link" : "http://www.bbc.co.uk/programmes/p001d7kl/microsite",
          "media_type" : "audio",
          "next_available_episode" : "",
-         "passionsite_title" : "A Dewey Decimal",
+         "passionsite_title" : "Danny Baker",
          "categories" : [
             {
-               "short_name" : "Factual",
-               "path" : "factual",
+               "short_name" : "Entertainment",
+               "path" : "entertainment",
                "parent_id" : "",
                "level" : "1",
-               "text" : "Factual",
+               "text" : "Entertainment",
                "updated" : "",
                "type" : "category",
-               "id" : "9100005",
-               "title" : "Factual",
+               "id" : "9100099",
+               "title" : "Entertainment",
+               "child_categories" : []
+            },
+            {
+               "short_name" : "Review Shows",
+               "path" : "entertainment/review_shows",
+               "parent_id" : "9100099",
+               "level" : "2",
+               "text" : "Entertainment - Review Shows",
+               "updated" : "",
+               "type" : "category",
+               "id" : "9200995",
+               "title" : "Review Shows",
+               "child_categories" : []
+            },
+            {
+               "short_name" : "Music",
+               "path" : "music",
+               "parent_id" : "",
+               "level" : "1",
+               "text" : "Music",
+               "updated" : "",
+               "type" : "category",
+               "id" : "9100006",
+               "title" : "Music",
                "child_categories" : []
             }
          ],
          "series_id" : "",
          "is_feedback_disabled" : "0",
-         "toplevel_container_id" : "",
-         "available_until" : "2011-02-01T15:02:00+0000",
+         "toplevel_container_id" : "p001d7kl",
+         "available_until" : "2011-02-03T17:02:00+0000",
          "my_image_base_url" : "http://node1.bbcimg.co.uk/iplayer/images/episode/",
-         "brand_short_synopsis" : "",
+         "brand_short_synopsis" : "The radio genius with great guests, calls and music from the \"Radio DJ of the Year\".",
          "is_available_mediaset_stb_sd" : "0",
-         "play_version_id" : "b00xmkl9",
-         "masterbrand" : "bbc_7",
+         "play_version_id" : "p00d521h",
+         "masterbrand" : "bbc_london",
          "tag_schemes" : [],
          "is_stacked" : "0",
-         "original_broadcast_service" : "bbc_7",
-         "parent_id" : "",
-         "toplevel_container_title" : "",
-         "brand_medium_synopsis" : "",
-         "my_playlist_url" : "/iplayer/playlist/b00xmljr/",
+         "original_broadcast_service" : "bbc_london",
+         "parent_id" : "p001d7kl",
+         "toplevel_container_title" : "Danny Baker",
+         "brand_medium_synopsis" : "The radio genius with great guests, calls and music from the \"Radio DJ of the Year\".",
+         "my_playlist_url" : "/iplayer/playlist/p00d5210/",
          "contributors" : [],
-         "synopsis" : "Shaun Wallace investigates Melvil Dewey's book organisation system at his local library - and the likely impact of the internet.",
+         "synopsis" : "With Gary Crowley sitting in for the Candyman.",
          "has_guidance" : "0",
-         "ondemand_scheduled_start" : "2011-01-25T15:02:00+0000",
-         "ondemand_start" : "2011-01-25T15:36:19+0000",
+         "ondemand_scheduled_start" : "2011-01-27T17:02:00+0000",
+         "ondemand_start" : "2011-01-27T17:34:54+0000",
          "my_alternate_url" : "",
-         "updated" : "2011-01-18T00:13:59+0000",
-         "id" : "b00xmljr",
+         "updated" : "2011-01-07T10:18:05+0000",
+         "id" : "p00d5210",
          "related_links" : [],
          "is_free" : "1",
          "is_clip" : "0",
          "series_short_synopsis" : "",
-         "brand_title" : "",
-         "duration" : "1800",
+         "brand_title" : "Danny Baker",
+         "duration" : "7200",
          "subseries_id" : "",
-         "hierarchical_title" : "A Dewey Decimal",
+         "hierarchical_title" : "Thu 27 Jan",
          "type" : "episode_detail",
          "has_bsl" : "0",
          "is_available_elektra_hd" : "0",
-         "brand_id" : "",
-         "my_url" : "/iplayer/episode/b00xmljr/A_Dewey_Decimal/",
-         "original_broadcast_datetime" : "2011-01-25T14:30:00+0000",
+         "brand_id" : "p001d7kl",
+         "my_url" : "/iplayer/episode/p00d5210/Danny_Baker_27_01_2011/",
+         "original_broadcast_datetime" : "2011-01-27T15:00:00+0000",
          "series_title" : "",
-         "position" : "",
+         "position" : "584",
          "is_available_mediaset_stb_hd" : "0",
          "clips" : [],
          "versions" : [
             {
-               "most_recent_broadcast_service" : "bbc_7",
+               "most_recent_broadcast_service" : "bbc_london",
                "aspect_ratio" : "",
                "download_size_elektra_hd" : "0",
                "is_available_mediaset_stb_sd" : "0",
                "is_original" : "1",
-               "first_broadcast_service_title" : "BBC Radio 7",
-               "original_broadcast_service_title" : "BBC Radio 7",
-               "original_broadcast_service" : "bbc_7",
-               "most_recent_broadcast_datetime" : "2011-01-25T14:30:00+0000",
+               "first_broadcast_service_title" : "BBC London",
+               "original_broadcast_service_title" : "BBC London",
+               "original_broadcast_service" : "bbc_london",
+               "most_recent_broadcast_datetime" : "2011-01-27T15:00:00+0000",
                "is_available_elektra_sd" : "0",
-               "ondemand_start" : "2011-01-25T15:36:19+0000",
-               "ondemand_scheduled_start" : "2011-01-25T15:02:00+0000",
+               "ondemand_start" : "2011-01-27T17:34:54+0000",
+               "ondemand_scheduled_start" : "2011-01-27T17:02:00+0000",
                "is_available_vp6_stream" : "0",
                "download_size_http_wmv" : "0",
-               "updated" : "2011-01-18T00:13:37+0000",
-               "id" : "b00xmkl9",
+               "updated" : "2011-01-07T10:18:03+0000",
+               "id" : "p00d521h",
                "is_available_streaming_hd" : "0",
                "ondemands" : [
                   {
                      "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:38:05+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_4f2db88b0eaaf9e528f2b76e5fde8607_900084",
-                     "service" : "iplayer_uk_stream_aac_rtmp_lo_concrete",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "emp"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "pc"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "pc-bigscreen"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "ps3"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:43:10+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkq8",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_a65c5bac3ba78994197b47d6e2117bed",
+                     "actual_start" : "2011-01-27T17:33:40+0000",
+                     "oid" : "p00d521h.imi:bbc.co.uk/AMI_59f98c435c35dc3750b94d36d3f8f222",
                      "service" : "iplayer_intl_stream_wma",
                      "media_sets" : [
                         {
@@ -174,99 +166,19 @@
                            "id" : "wmp"
                         }
                      ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
+                     "end" : "2011-02-03T17:02:00+0000",
+                     "discoverable_end" : "2011-02-03T17:02:00+0000",
                      "revocation_status" : "active",
-                     "updated" : "2011-01-18T02:31:05+0000",
+                     "updated" : "2011-01-27T17:36:49+0000",
                      "type" : "ondemand",
-                     "id" : "p00dbfhz",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
+                     "id" : "p00d5249",
+                     "scheduled_start" : "2011-01-27T17:02:00+0000",
                      "is_free" : "1"
                   },
                   {
                      "file_size" : "0",
                      "actual_start" : "",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_10a5d88912795af8da9a3fd1a0443e9a",
-                     "service" : "iplayer_intl_stream_aac_abstract",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "emp"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "pc"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "pc-bigscreen"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "ps3"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-18T02:31:02+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dbfhx",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T18:48:14+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_4f2db88b0eaaf9e528f2b76e5fde8607_900051",
-                     "service" : "iplayer_uk_stream_aac_3gp_concrete",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "3gp-mobile-3g"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "3gp-mobile-generic"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "3gp-mobile-wifi"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T18:51:28+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkry",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_4f2db88b0eaaf9e528f2b76e5fde8607",
-                     "service" : "iplayer_uk_stream_aac_abstract",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "mobile-emp"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-18T02:31:06+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dbfj1",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_71d0389115bb5826086f1fef31ecdb9a",
+                     "oid" : "p00d521h.imi:bbc.co.uk/AMI_878bcbd60af6ad5ad1980eec782b6eb7",
                      "service" : "iplayer_intl_stream_real",
                      "media_sets" : [
                         {
@@ -274,95 +186,20 @@
                            "id" : "emp"
                         }
                      ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
+                     "end" : "2011-02-03T17:02:00+0000",
+                     "discoverable_end" : "2011-02-03T17:02:00+0000",
                      "revocation_status" : "active",
-                     "updated" : "2011-01-18T02:31:04+0000",
+                     "updated" : "2011-01-07T10:18:24+0000",
                      "type" : "ondemand",
-                     "id" : "p00dbfhy",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
+                     "id" : "p00d5248",
+                     "scheduled_start" : "2011-01-27T17:02:00+0000",
                      "is_free" : "1"
                   },
                   {
                      "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:35:26+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_a65c5bac3ba78994197b47d6e2117bed_900082",
-                     "service" : "iplayer_intl_stream_wma_lo_concrete",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "wmp"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:39:34+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkp5",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:36:24+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_6b547f1b56678cd70288ed072676bcf7_900038",
-                     "service" : "iplayer_uk_stream_mp3_http",
-                     "media_sets" : [],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:39:30+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkpx",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:36:36+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_4f2db88b0eaaf9e528f2b76e5fde8607_900079",
-                     "service" : "iplayer_uk_stream_aac_wii_concrete",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "iplayer-wii"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:39:21+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkq0",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:35:12+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_a65c5bac3ba78994197b47d6e2117bed_900083",
-                     "service" : "iplayer_intl_stream_wma_uk_concrete",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "wmp"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:37:17+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkp3",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:36:16+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_6b547f1b56678cd70288ed072676bcf7",
-                     "service" : "iplayer_uk_stream_mp3",
+                     "actual_start" : "2011-01-27T17:34:54+0000",
+                     "oid" : "p00d521h.imi:bbc.co.uk/AMI_5dead35dd6d289419612c27c7fb761b3",
+                     "service" : "iplayer_intl_stream_mp3",
                      "media_sets" : [
                         {
                            "type" : "media_set",
@@ -385,182 +222,65 @@
                            "id" : "wii"
                         }
                      ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
+                     "end" : "2011-02-03T17:02:00+0000",
+                     "discoverable_end" : "2011-02-03T17:02:00+0000",
                      "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:39:48+0000",
+                     "updated" : "2011-01-27T17:36:50+0000",
                      "type" : "ondemand",
-                     "id" : "p00dbfj2",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:36:19+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_4f2db88b0eaaf9e528f2b76e5fde8607_900050",
-                     "service" : "iplayer_uk_stream_aac_rtmp_concrete",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "emp"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "mobile-emp"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "pc"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "pc-bigscreen"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "ps3"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:39:39+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkp2",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:36:15+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_10a5d88912795af8da9a3fd1a0443e9a_900066",
-                     "service" : "iplayer_intl_stream_aac_rtmp_concrete",
-                     "media_sets" : [],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:39:45+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkp1",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_fa51837ef051e61753a3bb1337e877a0",
-                     "service" : "iplayer_uk_stream_mp3_http",
-                     "media_sets" : [],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-18T02:31:09+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dbfj3",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:39:25+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_4f2db88b0eaaf9e528f2b76e5fde8607_900052",
-                     "service" : "iplayer_uk_stream_aac_http_lo_concrete",
-                     "media_sets" : [],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:43:06+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkrs",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
-                     "is_free" : "1"
-                  },
-                  {
-                     "file_size" : "0",
-                     "actual_start" : "2011-01-25T15:36:47+0000",
-                     "oid" : "b00xmkl9.imi:bbc.co.uk/AMI_4f2db88b0eaaf9e528f2b76e5fde8607_900094",
-                     "service" : "iplayer_stb_uk_stream_aac_concrete",
-                     "media_sets" : [
-                        {
-                           "type" : "media_set",
-                           "id" : "apple-i-family"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "apple-ipad"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "flash-iplayer-all"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "flash-iplayer-sd"
-                        },
-                        {
-                           "type" : "media_set",
-                           "id" : "stb-aac"
-                        }
-                     ],
-                     "end" : "2011-02-01T15:02:00+0000",
-                     "discoverable_end" : "2011-02-01T15:02:00+0000",
-                     "revocation_status" : "active",
-                     "updated" : "2011-01-25T15:39:11+0000",
-                     "type" : "ondemand",
-                     "id" : "p00dgkq2",
-                     "scheduled_start" : "2011-01-25T15:02:00+0000",
+                     "id" : "p00d5247",
+                     "scheduled_start" : "2011-01-27T17:02:00+0000",
                      "is_free" : "1"
                   }
                ],
-               "sound_format" : "Stereo",
+               "sound_format" : "",
                "download_size_kontiki_wmv" : "0",
-               "first_broadcast_service" : "bbc_7",
+               "first_broadcast_service" : "bbc_london",
                "broadcasts" : [
                   {
                      "medium_synopsis" : "",
                      "aspect_ratio" : "",
-                     "brand_id" : "",
-                     "date" : "2011-01-25T00:00:00+0000",
-                     "start_time_iso" : "2011-01-25T14:30:00+00:00",
+                     "brand_id" : "p001d7kl",
+                     "date" : "2011-01-27T00:00:00+0000",
+                     "start_time_iso" : "2011-01-27T15:00:00+00:00",
                      "has_guidance" : "0",
-                     "passionsite_link" : "http://www.bbc.co.uk/programmes/b00xmljr",
+                     "passionsite_link" : "http://www.bbc.co.uk/programmes/p001d7kl/microsite",
                      "media_type" : "audio",
-                     "complete_title" : "A Dewey Decimal",
-                     "updated" : "2011-01-18T00:13:59+0000",
-                     "id" : "p00db9rl",
-                     "myurl" : "/iplayer/episode/b00xmljr/b00xmkl9/A_Dewey_Decimal/",
-                     "end_time_iso" : "2011-01-25T15:00:00+00:00",
+                     "complete_title" : "Danny Baker: 27/01/2011",
+                     "updated" : "2011-01-07T10:18:05+0000",
+                     "id" : "p00d521t",
+                     "myurl" : "/iplayer/episode/p00d5210/p00d521h/Danny_Baker_27_01_2011/",
+                     "end_time_iso" : "2011-01-27T17:00:00+00:00",
                      "is_repeat" : "0",
                      "short_synopsis" : "",
-                     "parent_title" : "",
-                     "passionsite_title" : "A Dewey Decimal",
-                     "duration" : "1800",
+                     "parent_title" : "Danny Baker",
+                     "passionsite_title" : "Danny Baker",
+                     "duration" : "7200",
                      "is_audiodescribed" : "0",
-                     "version_id" : "b00xmkl9",
-                     "service" : "bbc_7",
+                     "version_id" : "p00d521h",
+                     "service" : "bbc_london",
                      "series_id" : "",
-                     "end" : "2011-01-25T15:00:00+0000",
+                     "end" : "2011-01-27T17:00:00+0000",
                      "on_now" : "0",
                      "is_blanked" : "0",
-                     "service_title" : "BBC Radio 7",
-                     "episode_id" : "b00xmljr",
+                     "service_title" : "BBC London",
+                     "episode_id" : "p00d5210",
                      "is_signed" : "0",
                      "type" : "broadcast",
-                     "title" : "A Dewey Decimal",
-                     "start" : "2011-01-25T14:30:00+0000"
+                     "title" : "27/01/2011",
+                     "start" : "2011-01-27T15:00:00+0000"
                   }
                ],
-               "duration" : "1800",
+               "duration" : "7200",
                "is_audiodescribed" : "0",
                "is_available_kontiki_wmv" : "0",
                "download_size_elektra_sd" : "0",
-               "content_expiry" : "2011-02-01T15:02:00+0000",
+               "content_expiry" : "2011-02-03T17:02:00+0000",
                "guidance_code" : "",
                "type" : "version",
                "is_available_mediaset_pc_hd" : "0",
                "has_bsl" : "0",
                "is_available_h264_high_stream" : "0",
-               "original_broadcast_datetime" : "2011-01-25T14:30:00+0000",
+               "original_broadcast_datetime" : "2011-01-27T15:00:00+0000",
                "is_available_elektra_hd" : "0",
                "is_delayed" : "0",
                "version_type_string" : "Original version",
@@ -570,19 +290,19 @@
                "availability" : "CURRENT",
                "is_available_mediaset_pc_sd" : "0",
                "is_available_h264_stream" : "0",
-               "most_recent_broadcast_service_title" : "BBC Radio 7",
+               "most_recent_broadcast_service_title" : "BBC London",
                "guidance_text" : "",
                "is_available_iplayer_mobile_wmv" : "0",
                "is_coming_very_soon" : "0"
             }
          ],
          "availability" : "CURRENT",
-         "brand_long_synopsis" : "",
+         "brand_long_synopsis" : "Join the Sony Award-winning DJ every weekday afternoon between 3pm and 5pm with great music and guests. You're sure to have a smile on your face.\n\nDanny is not only joined by the best guests but also his trusty consorts; Baylen Leonard and Amy Lamé. \n\nDanny was born in Deptford, south-east London, and has already had a varied career including working in a record shop, establishing music magazines, journalism and a a varied career in radio. \n\nHe began his radio career at GLR in 1989 and since then has worked on Radio 1 and BBC Radio 5Live. \n\nDanny has been at BBC London 94.9 since 2001.",
          "is_downloadable" : "0",
-         "short_synopsis" : "Shaun Wallace visits his local library to see how the Dewey Decimal System works.",
+         "short_synopsis" : "With Gary Crowley sitting in for the Candyman.",
          "has_segment" : "0",
          "is_hd_only" : "0",
-         "my_mediaselector_xml_url" : "http://www.bbc.co.uk/mediaselector/4/mtis/all/b00xmkl9",
+         "my_mediaselector_xml_url" : "http://www.bbc.co.uk/mediaselector/4/mtis/all/p00d521h",
          "play_version_guidance_text" : ""
       }
    ],
@@ -618,8 +338,8 @@
       ],
       "recipe" : ""
    },
-   "updated" : "2011-01-27T11:02:43+0000",
+   "updated" : "2011-01-27T18:15:54+0000",
    "type" : "ion",
-   "id" : "tag:bbc.co.uk,2008:ps:fetcher:episodedetail:allow_unavailable:1:category_type:iplayer:clips:include:episode_id:b00xmljr:expose_search_categories:0:include_broadcasts:1:include_clip_counts:0:next_broadcasts:1:request_context:discoverable_only=0,media_set=emp",
+   "id" : "tag:bbc.co.uk,2008:ps:fetcher:episodedetail:allow_unavailable:1:category_type:iplayer:clips:include:episode_id:p00d5210:expose_search_categories:0:include_broadcasts:1:include_clip_counts:0:next_broadcasts:1:request_context:discoverable_only=0,media_set=emp",
    "locale_str" : "en"
 }
