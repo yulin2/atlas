@@ -42,7 +42,7 @@ public class IonEpisode {
     private Boolean isAvailableMediasetStbSd;
     private String masterbrand;
     private String playVersionId;
-    private List<IonTagScheme> tagSchemes;
+    //private List<IonTagScheme> tagSchemes;
     private Boolean isStacked;
     private String parentId;
     private String myPlaylistUrl;
@@ -212,9 +212,9 @@ public class IonEpisode {
         return playVersionId;
     }
 
-    public List<IonTagScheme> getTagSchemes() {
-        return tagSchemes;
-    }
+//    public List<IonTagScheme> getTagSchemes() {
+//        return tagSchemes;
+//    }
 
     public Boolean getIsStacked() {
         return isStacked;
