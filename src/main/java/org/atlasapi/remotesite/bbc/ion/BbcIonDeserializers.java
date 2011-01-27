@@ -89,6 +89,7 @@ public class BbcIonDeserializers {
                 .create();
         }
         
+        @SuppressWarnings("unchecked")
         public T deserialise(String jsonString) {
             return (T) gson.fromJson(jsonString, type);
         }
