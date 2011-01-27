@@ -82,19 +82,19 @@ public class BbcIonDeserializers {
         public BbcIonDeserializer(Type type) {
             this.type = type;
             this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-            .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
-            .registerTypeAdapter(Integer.class, new IntegerDeserializer())
-            .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
-            .registerTypeAdapter(URL.class, new URLDeserializer())
-            .create();
+                .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
+                .registerTypeAdapter(Integer.class, new IntegerDeserializer())
+                .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
+                .registerTypeAdapter(URL.class, new URLDeserializer())
+                .create();
         }
         
         public T deserialise(String jsonString) {
-            return gson.fromJson(jsonString, type);
+            return (T) gson.fromJson(jsonString, type);
         }
     }
     
-    public static <T>  BbcIonDeserializer<T> deserializerForClass(Class<T> cls) {
+    public static <T> BbcIonDeserializer<T> deserializerForClass(Class<T> cls) {
         return new BbcIonDeserializer<T>(cls);
     }
     
