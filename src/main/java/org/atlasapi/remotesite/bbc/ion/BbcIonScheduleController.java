@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,7 +13,9 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater.BbcIonScheduleUpdateTask;
+import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,13 +29,13 @@ public class BbcIonScheduleController {
     private final ContentWriter writer;
     private final AdapterLog log;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("singleBBCIonScheduleUpdater"));
-    private BbcIonScheduleDeserialiser deserialiser;
+    private final BbcIonDeserializer<IonSchedule> deserialiser;
 
     public BbcIonScheduleController(ContentResolver localFetcher, ContentWriter writer, AdapterLog log) {
         this.localFetcher = localFetcher;
         this.writer = writer;
         this.log = log;
-        this.deserialiser = new BbcIonScheduleDeserialiser();
+        this.deserialiser = deserializerForClass(IonSchedule.class);
     }
 
     @RequestMapping("/system/bbc/ion/update/{service}/{date}")

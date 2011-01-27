@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
 import static org.hamcrest.core.AllOf.allOf;
 import junit.framework.TestCase;
 
@@ -11,7 +12,9 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater.BbcIonScheduleUpdateTask;
+import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
@@ -30,7 +33,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     
     private Mockery context = new Mockery();
     
-    private final BbcIonScheduleDeserialiser deserialiser = new BbcIonScheduleDeserialiser();
+    private final BbcIonDeserializer<IonSchedule> deserialiser = deserializerForClass(IonSchedule.class);
     
     private final SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
     private final ContentResolver resolver = context.mock(ContentResolver.class);

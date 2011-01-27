@@ -50,7 +50,7 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
     private final BbcSlashProgrammesClipRdfClient clipClient;
 
     public BbcProgrammeAdapter(AdapterLog log) {
-        this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcSlashProgrammesClipRdfClient(), new BbcProgrammeGraphExtractor(), log);
+        this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcSlashProgrammesClipRdfClient(), new BbcProgrammeGraphExtractor(log), log);
     }
 
     public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, BbcSlashProgrammesClipRdfClient clipClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {

@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc;
 
+import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
+
 import java.util.Collection;
 
 import javax.annotation.PostConstruct;
@@ -13,12 +15,12 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
-import org.atlasapi.remotesite.bbc.ion.BbcIonOndemanChangeDeserialiser;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
-import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleDeserialiser;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUriSource;
+import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
+import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater;
 import org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource;
@@ -71,7 +73,7 @@ public class BbcModule {
 	}
 	
 	private Runnable bbcIonUpdater() {
-        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource(), contentStore, contentWriters, new BbcIonScheduleDeserialiser(), log);
+        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource(), contentStore, contentWriters, deserializerForClass(IonSchedule.class), log);
     }
 
     @Bean Runnable bbcSchedulesUpdater() throws JAXBException {
@@ -100,7 +102,7 @@ public class BbcModule {
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
-	    return new BbcIonOndemandChangeUpdater(contentStore, contentWriters, new BbcIonOndemanChangeDeserialiser(), log);
+	    return new BbcIonOndemandChangeUpdater(contentStore, contentWriters, deserializerForClass(IonOndemandChanges.class), log);
 	}
 
 	public Collection<SiteSpecificAdapter<? extends Identified>> adapters() {
