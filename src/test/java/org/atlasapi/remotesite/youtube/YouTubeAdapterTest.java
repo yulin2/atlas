@@ -24,11 +24,9 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
+import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
-
-import com.google.gdata.data.youtube.VideoEntry;
-import com.google.gdata.util.ResourceNotFoundException;
 
 /**
  * Unit test for {@link YouTubeAdapter}.
@@ -82,7 +80,7 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			allowing(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); 
-				will(throwException(new ResourceNotFoundException("Video not found")));
+				will(throwException(new Exception()));
 		}});
 		
 		assertNull(adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8"));

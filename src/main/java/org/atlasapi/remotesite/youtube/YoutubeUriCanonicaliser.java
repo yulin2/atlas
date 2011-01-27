@@ -29,7 +29,7 @@ public class YoutubeUriCanonicaliser implements Canonicaliser {
 		Pattern.compile("tag:youtube.com,\\d+:\\w+:([^\\./&=]+)")
 	);
 
-	private String canonicalUriFor(String videoId) {
+	public String canonicalUriFor(String videoId) {
 		return "http://www.youtube.com/watch?v=" + videoId;
 	}
 

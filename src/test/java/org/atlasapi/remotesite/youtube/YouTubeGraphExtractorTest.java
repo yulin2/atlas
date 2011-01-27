@@ -32,6 +32,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
 import org.hamcrest.Matcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.Duration;
@@ -39,8 +40,6 @@ import org.joda.time.Duration;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.gdata.data.TextConstruct;
-import com.google.gdata.data.youtube.VideoEntry;
 import com.metabroadcast.common.media.MimeType;
 
 /**
@@ -66,7 +65,7 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		entry.setTitle(text("Video Title"));
+		entry.title = "Video Title";
 		source = new TestYouTubeSource(entry, ITEM_URI);
 	}
 	
@@ -182,11 +181,6 @@ public class YouTubeGraphExtractorTest extends MockObjectTestCase {
 							.withTransportType(is(TransportType.LINK))));
 		
 		assertThat(encodings, hasItems(encoding1, encoding2, encoding3, encoding4));
-	}
-
-	private TextConstruct text(String text) {
-		
-		return TextConstruct.create(TextConstruct.Type.TEXT, text, null);
 	}
 	
 	class NoVideosYouTubeSource extends YouTubeSource {

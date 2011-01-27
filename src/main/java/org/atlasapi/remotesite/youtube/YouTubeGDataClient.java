@@ -15,31 +15,35 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.FetchException;
+import org.atlasapi.remotesite.youtube.YouTubeFeedClient.YouTubeUrl;
 
-import com.google.gdata.client.youtube.YouTubeService;
-import com.google.gdata.data.youtube.VideoEntry;
+import com.google.api.client.googleapis.GoogleHeaders;
+import com.google.api.client.googleapis.GoogleTransport;
+import com.google.api.client.googleapis.json.JsonCParser;
+import com.google.api.client.http.HttpTransport;
 
 /**
  * Simple wrapper for Google's Java client for YouTube GData API
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YouTubeGDataClient implements RemoteSiteClient<VideoEntry> {
+public class YouTubeGDataClient implements RemoteSiteClient<YouTubeFeedClient.VideoEntry> {
 
-	public VideoEntry get(String uri) throws Exception {
-		
-		YouTubeService service = new YouTubeService("atlasapi.org");
-		
-		URL entryUrl = new URL("http://gdata.youtube.com/feeds/api/videos/" + videoIdFrom(uri));
-
-		return service.getEntry(entryUrl, VideoEntry.class);
-	}
+    public YouTubeFeedClient.VideoEntry get(String uri) throws Exception {
+        HttpTransport transport = GoogleTransport.create();
+        GoogleHeaders headers = (GoogleHeaders) transport.defaultHeaders;
+        headers.setApplicationName("atlasapi.org");
+        headers.gdataVersion = "2";
+        transport.addParser(new JsonCParser());
+        
+        YouTubeUrl url = new YouTubeUrl("http://gdata.youtube.com/feeds/api/videos/" + videoIdFrom(uri));
+        return YouTubeFeedClient.VideoEntry.executeGet(transport, url);
+    }
 	
 	private String videoIdFrom(String uri) {
 		Pattern regex = Pattern.compile("v=([^&]*)");
