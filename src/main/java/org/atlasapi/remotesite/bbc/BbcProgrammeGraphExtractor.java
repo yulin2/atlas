@@ -49,7 +49,6 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
-import org.atlasapi.remotesite.bbc.ion.IonService;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
@@ -81,6 +80,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	private final Clock clock;
 	private final AdapterLog log;
     private final BbcIonDeserializer<IonFeed<IonEpisodeDetail>> ionDeserialiser;
+    private final BbcProgrammeEncodingAndLocationCreator encodingCreator;
 
     public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, Clock clock, AdapterLog log) {
         this.seriesResolver = seriesResolver;
@@ -88,6 +88,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 		this.clock = clock;
         this.log = log;
 		this.ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonFeed<IonEpisodeDetail>>(){});
+		this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
     }
 
     public BbcProgrammeGraphExtractor(AdapterLog log) {
@@ -149,38 +150,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         List<IonOndemandChange> ondemands = ionVersion.getOndemand();
         Set<Encoding> encodings = Sets.newHashSetWithExpectedSize(ondemands.size());
         for (IonOndemandChange ondemand : ondemands) {
-            Maybe<IonService> ionService = IonService.fromString(ondemand.getService());
-            if(ionService.hasValue()) {
-                Encoding encoding = new Encoding();
-                encoding.setCanonicalUri(SLASH_PROGRAMMES_ROOT+ondemand.getId());
-                encoding.addAvailableAt(location(ondemand, pid));
             
-                ionService.requireValue().applyToEncoding(encoding);
+            Encoding encoding = encodingCreator.createEncoding(ondemand);
+            if(encoding != null) {
                 encodings.add(encoding);
             }
         }
         return encodings;
-    }
-
-    private Location location(IonOndemandChange ondemand, String pid) {
-        Location location = new Location();
-
-        Policy policy = policyFrom(ondemand);
-        location.setPolicy(policy);
-        
-        location.setAvailable(availableNow(policy));
-        location.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ondemand.getId());
-        location.setTransportType(TransportType.LINK);
-        location.setUri("http://www.bbc.co.uk/iplayer/episode/"+pid);
-
-        return location;
-    }
-
-    private Policy policyFrom(IonOndemandChange ondemand) {
-        Policy policy = new Policy();
-        policy.setAvailabilityStart(ondemand.getActualStart() == null ? ondemand.getScheduledStart() : ondemand.getActualStart());
-        policy.setAvailabilityEnd(ondemand.getEnd());
-        return policy;
     }
 
     private IonEpisodeDetail getEpisodeDetail(String episodeUri) {
@@ -261,6 +237,8 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     }
     
     private void addClipToItem(SlashProgrammesRdf clipWrapper, SlashProgrammesVersionRdf versionWrapper, Item item) {
+//        IonEpisodeDetail clipDetail = getEpisodeDetail(clipWrapper.clip().uri); TODO: use this instead of the policy client.
+        
         String curie = BbcUriCanonicaliser.curieFor(clipWrapper.clip().uri());
         Clip clip = new Clip(clipWrapper.clip().uri(), curie, Publisher.BBC);
         item.addClip(clip);
