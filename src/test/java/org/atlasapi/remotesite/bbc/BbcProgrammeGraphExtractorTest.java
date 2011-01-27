@@ -25,21 +25,21 @@ import com.google.common.collect.Lists;
 public class BbcProgrammeGraphExtractorTest extends MockObjectTestCase {
 
 	public void testGeneratesSetOfBbcAliasUrisForIplayerEpisode() {
-		Set<String> aliases = BbcProgrammeGraphExtractor.bbcAliasUrisFor("http://www.bbc.co.uk/iplayer/episode/b00nxb4q/Later_Live..._with_Jools_Holland_Series_35_Episode_9/");
+		Set<String> aliases = BbcAliasCompiler.bbcAliasUrisFor("http://www.bbc.co.uk/iplayer/episode/b00nxb4q/Later_Live..._with_Jools_Holland_Series_35_Episode_9/");
 		assertThat(aliases, hasItem("http://www.bbc.co.uk/programmes/b00nxb4q"));
 		assertThat(aliases, hasItem("http://bbc.co.uk/i/nxb4q/"));
 		assertThat(aliases, not(hasItem("http://www.bbc.co.uk/iplayer/episode/b00nxb4q/Later_Live..._with_Jools_Holland_Series_35_Episode_9/")));
 	}
 	
 	public void testGeneratesSetOfBbcAliasUrisForSlashProgrammesEpisode() {
-		Set<String> aliases = BbcProgrammeGraphExtractor.bbcAliasUrisFor("http://www.bbc.co.uk/programmes/b00nxb4q");
+		Set<String> aliases = BbcAliasCompiler.bbcAliasUrisFor("http://www.bbc.co.uk/programmes/b00nxb4q");
 		assertThat(aliases, hasItem("http://bbc.co.uk/i/nxb4q/"));
 		assertThat(aliases, hasItem("http://www.bbc.co.uk/iplayer/episode/b00nxb4q"));
 		assertThat(aliases, not(hasItem("http://www.bbc.co.uk/programmes/b00nxb4q")));
 	}
 	
 	public void testReturnsEmptySetForUriThatDoesNotContainPid() {
-		Set<String> aliases = BbcProgrammeGraphExtractor.bbcAliasUrisFor("http://www.bbc.co.uk/programmes/today");
+		Set<String> aliases = BbcAliasCompiler.bbcAliasUrisFor("http://www.bbc.co.uk/programmes/today");
 		assertTrue(aliases.isEmpty());
 	}
 	

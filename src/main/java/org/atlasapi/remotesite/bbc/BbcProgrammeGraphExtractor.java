@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -259,7 +258,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             }
         }
 
-        Set<String> aliases = bbcAliasUrisFor(item.getCanonicalUri());
+        Set<String> aliases = BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri());
         if (!aliases.isEmpty()) {
             item.setAliases(aliases);
         }
@@ -278,18 +277,6 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             return title;
         }
         return "Series " + seriesNumber.requireValue() + " " + title;
-    }
-
-    static Set<String> bbcAliasUrisFor(String episodeUri) {
-        String pid = BbcUriCanonicaliser.bbcProgrammeIdFrom(episodeUri);
-        HashSet<String> aliases = Sets.newHashSet();
-        if (pid != null) {
-            aliases.add(String.format("http://www.bbc.co.uk/iplayer/episode/%s", pid));
-            aliases.add(String.format("http://www.bbc.co.uk/programmes/%s", pid));
-            aliases.add(String.format("http://bbc.co.uk/i/%s/", pid.replaceFirst("b00", "")));
-            aliases.remove(episodeUri);
-        }
-        return aliases;
     }
 
     private String imageUrlFrom(String episodeUri) {
