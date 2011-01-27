@@ -37,6 +37,7 @@ import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
+import org.atlasapi.remotesite.facebook.FacebookCanonicaliser;
 import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
@@ -117,6 +118,7 @@ public class AtlasFetchModule {
 			canonicalisers.add(new BbcUriCanonicaliser());
 			canonicalisers.add(new YoutubeUriCanonicaliser());
 			canonicalisers.add(new YouTubeFeedCanonicaliser());
+			canonicalisers.add(new FacebookCanonicaliser());
 			canonicalisers.add(new TedTalkAdapter.TedTalkCanonicaliser());
 			canonicalisers.add(new DailyMotionItemAdapter.DailyMotionItemCanonicaliser());
 			canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());
