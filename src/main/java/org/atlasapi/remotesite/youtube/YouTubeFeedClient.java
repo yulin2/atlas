@@ -51,13 +51,19 @@ public class YouTubeFeedClient implements RemoteSiteClient<YouTubeFeedClient.Vid
         @Key List<String> tags = Lists.newArrayList();
         @Key Thumbnail thumbnail;
         @Key int duration;
-        
+        @Key Content content;
         
         static VideoEntry executeGet(HttpTransport transport, YouTubeUrl url) throws IOException {
             HttpRequest request = transport.buildGetRequest();
             request.url = url;
             return request.execute().parseAs(VideoEntry.class);
         }
+    }
+    
+    public static class Content {
+        @Key("1") String one;
+        @Key("5") String five;
+        @Key("6") String six;
     }
     
     public static class Player {
