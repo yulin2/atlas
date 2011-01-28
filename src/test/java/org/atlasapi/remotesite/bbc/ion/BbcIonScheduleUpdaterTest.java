@@ -2,6 +2,9 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
 import static org.hamcrest.core.AllOf.allOf;
+
+import java.util.concurrent.Executors;
+
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
@@ -13,7 +16,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
-import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater.BbcIonScheduleUpdateTask;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -23,6 +25,7 @@ import org.jmock.Mockery;
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.http.SimpleHttpClient;
@@ -52,7 +55,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, deserialiser, log).run();
+        new BbcIonScheduleUpdater(Executors.newSingleThreadExecutor(), ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
         
     }
     
@@ -73,7 +76,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, deserialiser, log).run();
+        new BbcIonScheduleUpdater(Executors.newSingleThreadExecutor(), ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
     }
 
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
@@ -97,7 +100,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdateTask("uri", httpClient, resolver, writer, deserialiser, log).run();
+        new BbcIonScheduleUpdater(Executors.newSingleThreadExecutor(), ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {

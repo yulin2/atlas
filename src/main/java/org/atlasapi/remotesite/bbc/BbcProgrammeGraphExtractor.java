@@ -150,13 +150,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     }
 
     private Set<Encoding> encodingsFrom(IonVersion ionVersion, String pid) {
-        List<IonOndemandChange> ondemands = ionVersion.getOndemand();
+        List<IonOndemandChange> ondemands = ionVersion.getOndemands();
         Set<Encoding> encodings = Sets.newHashSetWithExpectedSize(ondemands.size());
         for (IonOndemandChange ondemand : ondemands) {
             
-            Encoding encoding = encodingCreator.createEncoding(ondemand);
-            if(encoding != null) {
-                encodings.add(encoding);
+            Maybe<Encoding> encoding = encodingCreator.createEncoding(ondemand);
+            if(encoding.hasValue()) {
+                encodings.add(encoding.requireValue());
             }
         }
         return encodings;

@@ -21,6 +21,7 @@ public class BbcIonScheduleUriSource implements Iterable<String> {
     private final Iterable<String> serviceIds;
     private List<String> uris;
     private int lookAhead = 8;
+    private int lookBack = 5;
 
     public BbcIonScheduleUriSource() {
         this(BbcIonServices.services.keySet());
@@ -40,6 +41,11 @@ public class BbcIonScheduleUriSource implements Iterable<String> {
         return this;
     }
 
+    public BbcIonScheduleUriSource withLookBack(int lookBack) {
+        this.lookBack = lookBack;
+        return this;
+    }
+    
     @Override
     public Iterator<String> iterator() {
         if (uris == null) {
@@ -54,8 +60,9 @@ public class BbcIonScheduleUriSource implements Iterable<String> {
             @Override
             public Iterable<String> apply(String serviceId) {
                 List<String> uris = Lists.newArrayListWithCapacity(lookAhead + 1);
-                for (int i = 0; i <= lookAhead; i++) {
-                    DateTime scheduleDay = now.plusDays(i);
+                DateTime scheduleDay = now.minusDays(lookBack);
+                for (int i = 0; i < (lookBack + 1 + lookAhead); i++) {
+                    scheduleDay = scheduleDay.plusDays(i);
                     uris.add(String.format(SCHEDULE_PATTERN, serviceId, scheduleDay.toString("yyyy-MM-dd")));
                 }
                 return uris;

@@ -228,7 +228,7 @@ public class IonVersion {
         return broadcasts;
     }
 
-    public List<IonOndemandChange> getOndemand() {
+    public List<IonOndemandChange> getOndemands() {
         return ondemands;
     }
 }

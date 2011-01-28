@@ -56,9 +56,9 @@ public class BbcIonOndemandItemUpdater {
                 encoding.requireValue().addAvailableAt(newLocation);
             }
         } else if (!revoked) {
-            Encoding newEncoding = encodingCreator.createEncoding(change);
-            if (newEncoding != null) {
-                version.addManifestedAs(newEncoding);
+            Maybe<Encoding> newEncoding = encodingCreator.createEncoding(change);
+            if(newEncoding.hasValue()) {
+                version.addManifestedAs(newEncoding.requireValue());
             }
         }
     }
