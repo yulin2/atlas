@@ -63,7 +63,7 @@ public class BbcModule {
 			} catch (JAXBException e) {
 				log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withDescription("Couldn't create BBC Schedule Updater task"));
 			}
-			scheduler.schedule(bbcIonUpdater(0,0), TEN_MINUTES);
+			scheduler.schedule(bbcIonUpdater(3,2), TEN_MINUTES);
 			scheduler.schedule(bbcIonUpdater(7,7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), SCHEDULED_UPDATE_TIME);
 			scheduler.schedule(bbcIonOndemandChangeUpdater(), TEN_MINUTES);
 			log.record(new AdapterLogEntry(Severity.INFO)

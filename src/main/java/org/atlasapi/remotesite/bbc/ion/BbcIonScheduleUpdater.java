@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.DEBUG;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import java.util.List;
