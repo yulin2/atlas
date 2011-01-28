@@ -63,9 +63,22 @@ public class YouTubeSource extends BaseSource {
 	
 	List<Video> getVideos() {
 		List<Video> result = Lists.newArrayList();
-		Video video = new Video("", Duration.standardSeconds(videoEntry.duration), videoEntry.player.defaultUrl, 5, true);
+		Video video = new Video("application/x-shockwave-flash", Duration.standardSeconds(videoEntry.duration), videoEntry.player.defaultUrl, topContent(), true);
 		result.add(video);
 		return result;
+	}
+	
+	int topContent() {
+	    if (videoEntry.content != null) {
+	        if (videoEntry.content.six != null) {
+	            return 6;
+	        } else if (videoEntry.content.one != null) {
+	            return 1;
+	        } else if (videoEntry.content.five != null) {
+	            return 5;
+	        }
+	    }
+	    return 0;
 	}
 	
 	static class Video {

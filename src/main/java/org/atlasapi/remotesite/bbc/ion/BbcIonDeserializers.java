@@ -3,11 +3,14 @@ package org.atlasapi.remotesite.bbc.ion;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.remotesite.bbc.ion.model.IonEpisode.IonTagScheme;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -69,6 +72,18 @@ public class BbcIonDeserializers {
         }
     }
     
+    public static class IonTagSchemeListDeserialiser implements JsonDeserializer<List<IonTagScheme>> {
+        @Override
+        public List<IonTagScheme> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            String jsonString = json.getAsJsonPrimitive().getAsString();
+            if(Strings.isNullOrEmpty(jsonString)) {
+                return null;
+            }
+            return context.deserialize(json, typeOfT);
+        }
+    }
+    
+    
     public static class BbcIonDeserializer<T> {
 
         private final Type type;
@@ -82,19 +97,21 @@ public class BbcIonDeserializers {
         public BbcIonDeserializer(Type type) {
             this.type = type;
             this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-            .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
-            .registerTypeAdapter(Integer.class, new IntegerDeserializer())
-            .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
-            .registerTypeAdapter(URL.class, new URLDeserializer())
-            .create();
+                .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
+                .registerTypeAdapter(Integer.class, new IntegerDeserializer())
+                .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
+                .registerTypeAdapter(URL.class, new URLDeserializer())
+                .registerTypeAdapter(new TypeToken<List<IonTagScheme>>(){}.getType(), new IonTagSchemeListDeserialiser())
+                .create();
         }
         
+        @SuppressWarnings("unchecked")
         public T deserialise(String jsonString) {
-            return gson.fromJson(jsonString, type);
+            return (T) gson.fromJson(jsonString, type);
         }
     }
     
-    public static <T>  BbcIonDeserializer<T> deserializerForClass(Class<T> cls) {
+    public static <T> BbcIonDeserializer<T> deserializerForClass(Class<T> cls) {
         return new BbcIonDeserializer<T>(cls);
     }
     
