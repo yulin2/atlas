@@ -27,10 +27,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 	<bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
 		<property name="mappings">
 			<props>
-				<prop key="/api/1.0/*">itemControllerV1</prop>
-				<prop key="/api/1.0/list*">listControllerV1</prop>
-				<prop key="/api/1.0/lists*">listsControllerV1</prop>
-				<prop key="/api/1.0/doc*">uriFetchingControllerV1</prop>
                 <prop key="/">rootRedirectController</prop>
 			</props>
 		</property>
@@ -51,19 +47,5 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<constructor-arg ref="configFetcher"/>
 		<constructor-arg ref="adapterLog"/>
 	</bean>
-	
-	<bean id="uriFetchingControllerV1" class="org.atlasapi.query.v1.UriFetchingController">
-		<constructor-arg ref="remoteFetcher" />
-	</bean>
-	
-	<bean id="itemControllerV1" parent="uriFetchingControllerV1">
-	</bean>
-	
-	<bean id="listControllerV1"  parent="uriFetchingControllerV1">
-	</bean>
-	
-	<bean id="listsControllerV1" parent="uriFetchingControllerV1">
-	</bean>
-	
 	
 </beans>
