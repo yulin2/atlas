@@ -214,7 +214,7 @@ public class BbcIonScheduleUpdater implements Runnable {
             version.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ionBroadcast.getVersionId());
             version.setDuration(Duration.standardSeconds(ionBroadcast.getDuration()));
             version.setProvider(Publisher.BBC);
-
+            
             return version;
         }
 
@@ -228,7 +228,11 @@ public class BbcIonScheduleUpdater implements Runnable {
         }
 
         private Broadcast atlasBroadcastFrom(IonBroadcast ionBroadcast) {
-            Broadcast broadcast = new Broadcast(BbcIonServices.get(ionBroadcast.getService()), ionBroadcast.getStart(), ionBroadcast.getEnd());
+            String serviceUri = BbcIonServices.get(ionBroadcast.getService());
+            if(serviceUri == null) {
+                throw new IllegalStateException("Couldn't find service URI for Ion Service " + ionBroadcast.getService());
+            }
+            Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
             broadcast.withId(BBC_CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
             broadcast.setLastUpdated(ionBroadcast.getUpdated());
             return broadcast;
