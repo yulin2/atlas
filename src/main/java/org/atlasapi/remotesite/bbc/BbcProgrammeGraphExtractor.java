@@ -117,19 +117,22 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         	
 			for (SlashProgrammesVersionRdf versionRdf : source.versions()) {
                 Version version = version(versionRdf);
+                version.setProvider(BBC);
+                
                 
                 IonVersion ionVersion = ionVersions.get(version.getCanonicalUri());
-                version.setProvider(BBC);
-                if(ionVersion.getDuration() != null) {
-                    version.setDuration(standardSeconds(ionVersion.getDuration()));
+                if(ionVersion != null) {
+                    if(ionVersion.getDuration() != null) {
+                        version.setDuration(standardSeconds(ionVersion.getDuration()));
+                    }
+                    version.setLastUpdated(ionVersion.getUpdated());
+                    
+                    if(!Strings.isNullOrEmpty(ionVersion.getGuidanceText())){ 
+                        version.setRestriction(Restriction.from(ionVersion.getGuidanceText()));
+                    }
+                    
+                    version.setManifestedAs(encodingsFrom(ionVersion, bbcProgrammeIdFrom(episodeUri)));
                 }
-                version.setLastUpdated(ionVersion.getUpdated());
-                
-                if(!Strings.isNullOrEmpty(ionVersion.getGuidanceText())){ 
-                    version.setRestriction(Restriction.from(ionVersion.getGuidanceText()));
-                }
-                
-                version.setManifestedAs(encodingsFrom(ionVersion, bbcProgrammeIdFrom(episodeUri)));
                 item.addVersion(version);
             }
 
