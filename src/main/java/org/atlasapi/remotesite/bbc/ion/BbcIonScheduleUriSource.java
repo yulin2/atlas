@@ -59,11 +59,10 @@ public class BbcIonScheduleUriSource implements Iterable<String> {
         return ImmutableList.copyOf(Iterables.concat(Iterables.transform(serviceIds, new Function<String, Iterable<String>>() {
             @Override
             public Iterable<String> apply(String serviceId) {
-                List<String> uris = Lists.newArrayListWithCapacity(lookAhead + 1);
+                List<String> uris = Lists.newArrayListWithCapacity(lookBack + 1 + lookAhead);
                 DateTime scheduleDay = now.minusDays(lookBack);
                 for (int i = 0; i < (lookBack + 1 + lookAhead); i++) {
-                    scheduleDay = scheduleDay.plusDays(i);
-                    uris.add(String.format(SCHEDULE_PATTERN, serviceId, scheduleDay.toString("yyyy-MM-dd")));
+                    uris.add(String.format(SCHEDULE_PATTERN, serviceId, scheduleDay.plusDays(i).toString("yyyy-MM-dd")));
                 }
                 return uris;
             }
