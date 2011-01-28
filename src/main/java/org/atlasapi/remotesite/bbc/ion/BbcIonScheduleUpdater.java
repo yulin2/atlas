@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.DEBUG;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,22 +42,39 @@ public class BbcIonScheduleUpdater implements Runnable {
 
     private final ContentWriter writer;
     private final BbcIonDeserializer<IonSchedule> deserialiser;
+    private final ExecutorService executor;
+    private BbcItemFetcherClient fetcherClient;
+    private SimpleHttpClient httpClient;
 
-    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
+    public BbcIonScheduleUpdater(ExecutorService executor, Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
+        this.executor = executor;
         this.uriSource = uriSource;
         this.localFetcher = localFetcher;
         this.writer = writer;
         this.deserialiser = deserialiser;
         this.log = log;
     }
+    
+    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
+        this(Executors.newFixedThreadPool(5), uriSource,localFetcher, writer,deserialiser, log);
+    }
 
+    public BbcIonScheduleUpdater withItemFetchClient(BbcItemFetcherClient fetcherClient) {
+        this.fetcherClient = fetcherClient;
+        return this;
+    }
+    
+    public BbcIonScheduleUpdater withHttpClient(SimpleHttpClient httpClient) {
+        this.httpClient = httpClient;
+        return this;
+    }
+    
     @Override
     public void run() {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update initiated"));
 
-        ExecutorService executor = Executors.newFixedThreadPool(5);
         for (String uri : uriSource) {
-            executor.submit(new BbcIonScheduleUpdateTask(uri,HttpClients.webserviceClient(), localFetcher, writer,deserialiser,log));
+            executor.submit(new BbcIonScheduleUpdateTask(uri,this.httpClient != null ? this.httpClient : HttpClients.webserviceClient()));
         }
         executor.shutdown();
         boolean completion = false;
@@ -68,35 +87,33 @@ public class BbcIonScheduleUpdater implements Runnable {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update finished" + (completion ? "" : " (timed-out)")));
     }
 
-    public static class BbcIonScheduleUpdateTask implements Runnable {
+    private class BbcIonScheduleUpdateTask implements Runnable {
 
         private static final String BBC_CURIE_BASE = "bbc:";
         private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
         private final String uri;
         private final SimpleHttpClient httpClient;
-        private final ContentResolver localFetcher;
-        private ContentWriter writer;
-        private final AdapterLog log;
-        private final BbcIonDeserializer<IonSchedule> deserialiser;
 
-        public BbcIonScheduleUpdateTask(String uri, SimpleHttpClient httpClient, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log){
+        public BbcIonScheduleUpdateTask(String uri, SimpleHttpClient httpClient){
             this.uri = uri;
             this.httpClient = httpClient;
-            this.localFetcher = localFetcher;
-            this.writer = writer;
-            this.deserialiser = deserialiser;
-            this.log = log;
         }
 
         @Override
         public void run() {
+            log.record(new AdapterLogEntry(DEBUG).withSource(getClass()).withDescription("BBC Ion Schedule update for " + uri));
             try {
                 IonSchedule schedule = deserialiser.deserialise(httpClient.getContentsOf(uri));
                 for (IonBroadcast broadcast : schedule.getBlocklist()) {
                     //find and (create and) update item
                     Item item = (Item) localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
                     if (item == null) {
-                        item = createItemFrom(broadcast);
+                        if(fetcherClient != null) {
+                            item = fetcherClient.createItem(broadcast.getEpisodeId());
+                        } 
+                        if(item == null) {
+                            item = createItemFrom(broadcast);
+                        }
                     }
                     updateItemDetails(item, broadcast);
                     if (item instanceof Episode) {

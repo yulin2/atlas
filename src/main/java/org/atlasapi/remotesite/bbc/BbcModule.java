@@ -15,6 +15,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
@@ -62,7 +63,8 @@ public class BbcModule {
 			} catch (JAXBException e) {
 				log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withDescription("Couldn't create BBC Schedule Updater task"));
 			}
-			scheduler.schedule(bbcIonUpdater(), TEN_MINUTES);
+			scheduler.schedule(bbcIonUpdater(0,0), TEN_MINUTES);
+			scheduler.schedule(bbcIonUpdater(7,7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), SCHEDULED_UPDATE_TIME);
 			scheduler.schedule(bbcIonOndemandChangeUpdater(), TEN_MINUTES);
 			log.record(new AdapterLogEntry(Severity.INFO)
 				.withDescription("BBC update scheduled tasks installed"));
@@ -72,8 +74,8 @@ public class BbcModule {
 		}
 	}
 	
-	private Runnable bbcIonUpdater() {
-        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource(), contentStore, contentWriters, deserializerForClass(IonSchedule.class), log);
+	private BbcIonScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
+        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack), contentStore, contentWriters, deserializerForClass(IonSchedule.class), log);
     }
 
     @Bean Runnable bbcSchedulesUpdater() throws JAXBException {

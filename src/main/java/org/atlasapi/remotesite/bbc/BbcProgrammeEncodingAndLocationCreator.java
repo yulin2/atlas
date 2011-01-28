@@ -20,7 +20,7 @@ public class BbcProgrammeEncodingAndLocationCreator {
         this.clock = clock;
     }
 
-    public Encoding createEncoding(IonOndemandChange ondemand) {
+    public Maybe<Encoding> createEncoding(IonOndemandChange ondemand) {
         Maybe<IonService> ionService = IonService.fromString(ondemand.getService());
         if(ionService.hasValue()) {
             Encoding encoding = new Encoding();
@@ -29,9 +29,9 @@ public class BbcProgrammeEncodingAndLocationCreator {
             
             IonService requiredIonService = ionService.requireValue();
             requiredIonService.applyToEncoding(encoding);
-            return encoding;
+            return Maybe.just(encoding);
         }
-        return null;
+        return Maybe.nothing();
     }
 
     public Location location(IonOndemandChange ondemand) {
