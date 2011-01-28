@@ -14,6 +14,12 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
+import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.remotesite.bbc.BbcUriCanonicaliser.bbcProgrammeIdFrom;
+import static org.joda.time.Duration.standardSeconds;
+
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -28,29 +34,43 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcProgrammeSource.ClipAndVersion;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
+import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
+import org.atlasapi.remotesite.bbc.ion.model.IonFeed;
+import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
+import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
 
 public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgrammeSource, Item> {
 
+    private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
+    private static final String EPISODE_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/episodedetail/episode/%s/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json";
     static final String FULL_IMAGE_EXTENSION = "_640_360.jpg";
     static final String THUMBNAIL_EXTENSION = "_150_84.jpg";
 
@@ -58,15 +78,21 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     private final BbcProgrammesPolicyClient policyClient;
     
 	private final Clock clock;
+	private final AdapterLog log;
+    private final BbcIonDeserializer<IonFeed<IonEpisodeDetail>> ionDeserialiser;
+    private final BbcProgrammeEncodingAndLocationCreator encodingCreator;
 
-    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, Clock clock) {
+    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, Clock clock, AdapterLog log) {
         this.seriesResolver = seriesResolver;
         this.policyClient = policyClient;
 		this.clock = clock;
+        this.log = log;
+		this.ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonFeed<IonEpisodeDetail>>(){});
+		this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
     }
 
-    public BbcProgrammeGraphExtractor() {
-        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(), new SystemClock());
+    public BbcProgrammeGraphExtractor(AdapterLog log) {
+        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(), new SystemClock(), log);
     }
 
     public Item extract(BbcProgrammeSource source) {
@@ -77,34 +103,39 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
 
         Item item = item(episodeUri, episode);
+        
+        IonEpisodeDetail episodeDetail = getEpisodeDetail(episodeUri);
+        
+        Map<String, IonVersion> ionVersions = Maps.uniqueIndex(episodeDetail.getVersions(), new Function<IonVersion, String>() {
+            @Override
+            public String apply(IonVersion input) {
+                return SLASH_PROGRAMMES_ROOT+input.getId();
+            }
+        });
 
         if (source.versions() != null && !source.versions().isEmpty()) {
         	
-        	Location location = htmlLinkLocation(episodeUri);
-        	Encoding encoding = new Encoding();
-        	encoding.addAvailableAt(location);
-        	
-			ImmutableList<Version> versions = ImmutableList.copyOf(Iterables.transform(source.versions(), new Function<SlashProgrammesVersionRdf, Version>() {
-				@Override
-				public Version apply(SlashProgrammesVersionRdf input) {
-					return version(input);
-				}
-			}));
+			for (SlashProgrammesVersionRdf versionRdf : source.versions()) {
+                Version version = version(versionRdf);
+                version.setProvider(BBC);
+                
+                
+                IonVersion ionVersion = ionVersions.get(version.getCanonicalUri());
+                if(ionVersion != null) {
+                    if(ionVersion.getDuration() != null) {
+                        version.setDuration(standardSeconds(ionVersion.getDuration()));
+                    }
+                    version.setLastUpdated(ionVersion.getUpdated());
+                    
+                    if(!Strings.isNullOrEmpty(ionVersion.getGuidanceText())){ 
+                        version.setRestriction(Restriction.from(ionVersion.getGuidanceText()));
+                    }
+                    
+                    version.setManifestedAs(encodingsFrom(ionVersion, bbcProgrammeIdFrom(episodeUri)));
+                }
+                item.addVersion(version);
+            }
 
-            //extract broadcasts from all versions.
-			Set<Broadcast> broadcasts = ImmutableSet.copyOf(Iterables.concat(Iterables.transform(versions, new Function<Version, Iterable<Broadcast>>() {
-				@Override
-				public Iterable<Broadcast> apply(Version input) {
-					return input.getBroadcasts();
-				}
-			})));
-			
-			Version firstVersion = versions.get(0);
-			
-            firstVersion.setBroadcasts(broadcasts);
-            
-            firstVersion.addManifestedAs(encoding);
-            item.addVersion(firstVersion);
         }
         
         if (source.clips() != null) {
@@ -116,6 +147,28 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         }
 
         return item;
+    }
+
+    private Set<Encoding> encodingsFrom(IonVersion ionVersion, String pid) {
+        List<IonOndemandChange> ondemands = ionVersion.getOndemand();
+        Set<Encoding> encodings = Sets.newHashSetWithExpectedSize(ondemands.size());
+        for (IonOndemandChange ondemand : ondemands) {
+            
+            Encoding encoding = encodingCreator.createEncoding(ondemand);
+            if(encoding != null) {
+                encodings.add(encoding);
+            }
+        }
+        return encodings;
+    }
+
+    private IonEpisodeDetail getEpisodeDetail(String episodeUri) {
+        try {
+            return ionDeserialiser.deserialise(HttpClients.webserviceClient().getContentsOf(String.format(EPISODE_DETAIL_PATTERN, bbcProgrammeIdFrom(episodeUri)))).getBlocklist().get(0);
+        } catch (HttpException e) {
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Could get episode detail for " + episodeUri));
+            return null;
+        }
     }
 
     private Maybe<Integer> seriesNumber(SlashProgrammesRdf episode) {
@@ -146,7 +199,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
 	private Version version(SlashProgrammesVersionRdf slashProgrammesVersion) {
         Version version = new Version();
-        version.setCanonicalUri("http://www.bbc.co.uk/programmes/"+slashProgrammesVersion.pid());
+        version.setCanonicalUri(SLASH_PROGRAMMES_ROOT+slashProgrammesVersion.pid());
         if (slashProgrammesVersion != null) {
             if (slashProgrammesVersion.broadcastSlots() != null) {
                 version.setBroadcasts(broadcastsFrom(slashProgrammesVersion));
@@ -187,6 +240,8 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     }
     
     private void addClipToItem(SlashProgrammesRdf clipWrapper, SlashProgrammesVersionRdf versionWrapper, Item item) {
+//        IonEpisodeDetail clipDetail = getEpisodeDetail(clipWrapper.clip().uri); TODO: use this instead of the policy client.
+        
         String curie = BbcUriCanonicaliser.curieFor(clipWrapper.clip().uri());
         Clip clip = new Clip(clipWrapper.clip().uri(), curie, Publisher.BBC);
         item.addClip(clip);

@@ -14,7 +14,7 @@
    "blocklist" : [
       {
          "aspect_ratio" : "16:9",
-         "date" : "2011-01-28T00:00:00+0000",
+         "date" : "2011-01-28T00:00:00",
          "start_time_iso" : "2011-01-28T21:00:00+00:00",
          "has_guidance" : "0",
          "complete_title" : "Hustle: Series 7: Episode 4",
@@ -157,7 +157,7 @@
       ],
       "recipe" : ""
    },
-   "updated" : "2011-01-26T14:25:46+0000",
+   "updated" : "2011-01-27T17:13:18+0000",
    "type" : "ion",
    "id" : "tag:bbc.co.uk,2008:ps:fetcher:schedule:allow_duplicates:1:allow_unavailable:1:date:20110128:order_by:broadcast:request_context:discoverable_only=0:service:bbc_one_london",
    "locale_str" : "en"

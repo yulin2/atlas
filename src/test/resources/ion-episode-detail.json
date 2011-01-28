@@ -1,0 +1,345 @@
+{
+   "link" : {
+      "rel" : "self",
+      "href" : "http://dynamite.iplayer.bbc.co.uk/iplayer/ion/episodedetail/episode/p00d5210/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json",
+      "type" : "application/json",
+      "locale_str" : "en"
+   },
+   "count" : "1",
+   "pagination" : {
+      "page" : "1",
+      "per_page" : "3000",
+      "total_count" : "1"
+   },
+   "blocklist" : [
+      {
+         "my_series_url" : "/iplayer/series/p001d7kl/Danny_Baker/",
+         "is_embargoed" : "0",
+         "next_broadcasts" : [],
+         "my_mediaselector_json_url" : "http://www.bbc.co.uk/mediaselector/4/mtis/all/p00d521h",
+         "play_version_has_competition_warning" : "",
+         "is_embeddable" : "0",
+         "original_title" : "",
+         "original_broadcast_service_title" : "BBC London",
+         "series_medium_synopsis" : "",
+         "is_available_elektra_sd" : "0",
+         "series_long_synopsis" : "",
+         "available_toplevel_episode_count" : "0",
+         "long_synopsis" : "",
+         "stacked_container_id" : "",
+         "complete_title" : "Danny Baker: 27/01/2011",
+         "subseries_title" : "",
+         "previous_episode_id" : "p00d4bfb",
+         "is_downloadable_sd" : "0",
+         "next_episode_id" : "p00d5psc",
+         "is_repeat" : "0",
+         "actual_start" : "2011-01-27T17:33:40+0000",
+         "version_id" : "p00d521h",
+         "masterbrand_title" : "BBC London",
+         "title" : "27/01/2011",
+         "is_downloadable_hd" : "0",
+         "is_available_mediaset_pc_hd" : "0",
+         "partner" : "s0000001",
+         "shortened_path" : "/i/p00d5210/",
+         "is_delayed" : "0",
+         "available_sibling_count" : "0",
+         "my_short_url" : "bbc.co.uk/i/p00d5210/",
+         "is_film" : "0",
+         "contextual_family_tree" : "b-e",
+         "is_available_mediaset_pc_sd" : "0",
+         "passionsite_link" : "http://www.bbc.co.uk/programmes/p001d7kl/microsite",
+         "media_type" : "audio",
+         "next_available_episode" : "",
+         "passionsite_title" : "Danny Baker",
+         "categories" : [
+            {
+               "short_name" : "Entertainment",
+               "path" : "entertainment",
+               "parent_id" : "",
+               "level" : "1",
+               "text" : "Entertainment",
+               "updated" : "",
+               "type" : "category",
+               "id" : "9100099",
+               "title" : "Entertainment",
+               "child_categories" : []
+            },
+            {
+               "short_name" : "Review Shows",
+               "path" : "entertainment/review_shows",
+               "parent_id" : "9100099",
+               "level" : "2",
+               "text" : "Entertainment - Review Shows",
+               "updated" : "",
+               "type" : "category",
+               "id" : "9200995",
+               "title" : "Review Shows",
+               "child_categories" : []
+            },
+            {
+               "short_name" : "Music",
+               "path" : "music",
+               "parent_id" : "",
+               "level" : "1",
+               "text" : "Music",
+               "updated" : "",
+               "type" : "category",
+               "id" : "9100006",
+               "title" : "Music",
+               "child_categories" : []
+            }
+         ],
+         "series_id" : "",
+         "is_feedback_disabled" : "0",
+         "toplevel_container_id" : "p001d7kl",
+         "available_until" : "2011-02-03T17:02:00+0000",
+         "my_image_base_url" : "http://node1.bbcimg.co.uk/iplayer/images/episode/",
+         "brand_short_synopsis" : "The radio genius with great guests, calls and music from the \"Radio DJ of the Year\".",
+         "is_available_mediaset_stb_sd" : "0",
+         "play_version_id" : "p00d521h",
+         "masterbrand" : "bbc_london",
+         "tag_schemes" : [],
+         "is_stacked" : "0",
+         "original_broadcast_service" : "bbc_london",
+         "parent_id" : "p001d7kl",
+         "toplevel_container_title" : "Danny Baker",
+         "brand_medium_synopsis" : "The radio genius with great guests, calls and music from the \"Radio DJ of the Year\".",
+         "my_playlist_url" : "/iplayer/playlist/p00d5210/",
+         "contributors" : [],
+         "synopsis" : "With Gary Crowley sitting in for the Candyman.",
+         "has_guidance" : "0",
+         "ondemand_scheduled_start" : "2011-01-27T17:02:00+0000",
+         "ondemand_start" : "2011-01-27T17:34:54+0000",
+         "my_alternate_url" : "",
+         "updated" : "2011-01-07T10:18:05+0000",
+         "id" : "p00d5210",
+         "related_links" : [],
+         "is_free" : "1",
+         "is_clip" : "0",
+         "series_short_synopsis" : "",
+         "brand_title" : "Danny Baker",
+         "duration" : "7200",
+         "subseries_id" : "",
+         "hierarchical_title" : "Thu 27 Jan",
+         "type" : "episode_detail",
+         "has_bsl" : "0",
+         "is_available_elektra_hd" : "0",
+         "brand_id" : "p001d7kl",
+         "my_url" : "/iplayer/episode/p00d5210/Danny_Baker_27_01_2011/",
+         "original_broadcast_datetime" : "2011-01-27T15:00:00+0000",
+         "series_title" : "",
+         "position" : "584",
+         "is_available_mediaset_stb_hd" : "0",
+         "clips" : [],
+         "versions" : [
+            {
+               "most_recent_broadcast_service" : "bbc_london",
+               "aspect_ratio" : "",
+               "download_size_elektra_hd" : "0",
+               "is_available_mediaset_stb_sd" : "0",
+               "is_original" : "1",
+               "first_broadcast_service_title" : "BBC London",
+               "original_broadcast_service_title" : "BBC London",
+               "original_broadcast_service" : "bbc_london",
+               "most_recent_broadcast_datetime" : "2011-01-27T15:00:00+0000",
+               "is_available_elektra_sd" : "0",
+               "ondemand_start" : "2011-01-27T17:34:54+0000",
+               "ondemand_scheduled_start" : "2011-01-27T17:02:00+0000",
+               "is_available_vp6_stream" : "0",
+               "download_size_http_wmv" : "0",
+               "updated" : "2011-01-07T10:18:03+0000",
+               "id" : "p00d521h",
+               "is_available_streaming_hd" : "0",
+               "ondemands" : [
+                  {
+                     "file_size" : "0",
+                     "actual_start" : "2011-01-27T17:33:40+0000",
+                     "oid" : "p00d521h.imi:bbc.co.uk/AMI_59f98c435c35dc3750b94d36d3f8f222",
+                     "service" : "iplayer_intl_stream_wma",
+                     "media_sets" : [
+                        {
+                           "type" : "media_set",
+                           "id" : "emp"
+                        },
+                        {
+                           "type" : "media_set",
+                           "id" : "wmp"
+                        }
+                     ],
+                     "end" : "2011-02-03T17:02:00+0000",
+                     "discoverable_end" : "2011-02-03T17:02:00+0000",
+                     "revocation_status" : "active",
+                     "updated" : "2011-01-27T17:36:49+0000",
+                     "type" : "ondemand",
+                     "id" : "p00d5249",
+                     "scheduled_start" : "2011-01-27T17:02:00+0000",
+                     "is_free" : "1"
+                  },
+                  {
+                     "file_size" : "0",
+                     "actual_start" : "",
+                     "oid" : "p00d521h.imi:bbc.co.uk/AMI_878bcbd60af6ad5ad1980eec782b6eb7",
+                     "service" : "iplayer_intl_stream_real",
+                     "media_sets" : [
+                        {
+                           "type" : "media_set",
+                           "id" : "emp"
+                        }
+                     ],
+                     "end" : "2011-02-03T17:02:00+0000",
+                     "discoverable_end" : "2011-02-03T17:02:00+0000",
+                     "revocation_status" : "active",
+                     "updated" : "2011-01-07T10:18:24+0000",
+                     "type" : "ondemand",
+                     "id" : "p00d5248",
+                     "scheduled_start" : "2011-01-27T17:02:00+0000",
+                     "is_free" : "1"
+                  },
+                  {
+                     "file_size" : "0",
+                     "actual_start" : "2011-01-27T17:34:54+0000",
+                     "oid" : "p00d521h.imi:bbc.co.uk/AMI_5dead35dd6d289419612c27c7fb761b3",
+                     "service" : "iplayer_intl_stream_mp3",
+                     "media_sets" : [
+                        {
+                           "type" : "media_set",
+                           "id" : "emp"
+                        },
+                        {
+                           "type" : "media_set",
+                           "id" : "pc"
+                        },
+                        {
+                           "type" : "media_set",
+                           "id" : "pc-bigscreen"
+                        },
+                        {
+                           "type" : "media_set",
+                           "id" : "ps3"
+                        },
+                        {
+                           "type" : "media_set",
+                           "id" : "wii"
+                        }
+                     ],
+                     "end" : "2011-02-03T17:02:00+0000",
+                     "discoverable_end" : "2011-02-03T17:02:00+0000",
+                     "revocation_status" : "active",
+                     "updated" : "2011-01-27T17:36:50+0000",
+                     "type" : "ondemand",
+                     "id" : "p00d5247",
+                     "scheduled_start" : "2011-01-27T17:02:00+0000",
+                     "is_free" : "1"
+                  }
+               ],
+               "sound_format" : "",
+               "download_size_kontiki_wmv" : "0",
+               "first_broadcast_service" : "bbc_london",
+               "broadcasts" : [
+                  {
+                     "medium_synopsis" : "",
+                     "aspect_ratio" : "",
+                     "brand_id" : "p001d7kl",
+                     "date" : "2011-01-27T00:00:00+0000",
+                     "start_time_iso" : "2011-01-27T15:00:00+00:00",
+                     "has_guidance" : "0",
+                     "passionsite_link" : "http://www.bbc.co.uk/programmes/p001d7kl/microsite",
+                     "media_type" : "audio",
+                     "complete_title" : "Danny Baker: 27/01/2011",
+                     "updated" : "2011-01-07T10:18:05+0000",
+                     "id" : "p00d521t",
+                     "myurl" : "/iplayer/episode/p00d5210/p00d521h/Danny_Baker_27_01_2011/",
+                     "end_time_iso" : "2011-01-27T17:00:00+00:00",
+                     "is_repeat" : "0",
+                     "short_synopsis" : "",
+                     "parent_title" : "Danny Baker",
+                     "passionsite_title" : "Danny Baker",
+                     "duration" : "7200",
+                     "is_audiodescribed" : "0",
+                     "version_id" : "p00d521h",
+                     "service" : "bbc_london",
+                     "series_id" : "",
+                     "end" : "2011-01-27T17:00:00+0000",
+                     "on_now" : "0",
+                     "is_blanked" : "0",
+                     "service_title" : "BBC London",
+                     "episode_id" : "p00d5210",
+                     "is_signed" : "0",
+                     "type" : "broadcast",
+                     "title" : "27/01/2011",
+                     "start" : "2011-01-27T15:00:00+0000"
+                  }
+               ],
+               "duration" : "7200",
+               "is_audiodescribed" : "0",
+               "is_available_kontiki_wmv" : "0",
+               "download_size_elektra_sd" : "0",
+               "content_expiry" : "2011-02-03T17:02:00+0000",
+               "guidance_code" : "",
+               "type" : "version",
+               "is_available_mediaset_pc_hd" : "0",
+               "has_bsl" : "0",
+               "is_available_h264_high_stream" : "0",
+               "original_broadcast_datetime" : "2011-01-27T15:00:00+0000",
+               "is_available_elektra_hd" : "0",
+               "is_delayed" : "0",
+               "version_type_string" : "Original version",
+               "is_available_mediaset_stb_hd" : "0",
+               "is_available_http_wmv" : "0",
+               "download_size_iplayer_mobile_wmv" : "0",
+               "availability" : "CURRENT",
+               "is_available_mediaset_pc_sd" : "0",
+               "is_available_h264_stream" : "0",
+               "most_recent_broadcast_service_title" : "BBC London",
+               "guidance_text" : "",
+               "is_available_iplayer_mobile_wmv" : "0",
+               "is_coming_very_soon" : "0"
+            }
+         ],
+         "availability" : "CURRENT",
+         "brand_long_synopsis" : "Join the Sony Award-winning DJ every weekday afternoon between 3pm and 5pm with great music and guests. You're sure to have a smile on your face.\n\nDanny is not only joined by the best guests but also his trusty consorts; Baylen Leonard and Amy Lamé. \n\nDanny was born in Deptford, south-east London, and has already had a varied career including working in a record shop, establishing music magazines, journalism and a a varied career in radio. \n\nHe began his radio career at GLR in 1989 and since then has worked on Radio 1 and BBC Radio 5Live. \n\nDanny has been at BBC London 94.9 since 2001.",
+         "is_downloadable" : "0",
+         "short_synopsis" : "With Gary Crowley sitting in for the Candyman.",
+         "has_segment" : "0",
+         "is_hd_only" : "0",
+         "my_mediaselector_xml_url" : "http://www.bbc.co.uk/mediaselector/4/mtis/all/p00d521h",
+         "play_version_guidance_text" : ""
+      }
+   ],
+   "generator" : {
+      "version" : "0.1",
+      "type" : "generator",
+      "title" : "OMG Publishing Services",
+      "uri" : "http://publishing.omg.bbc.co.uk/"
+   },
+   "context" : {
+      "in_hd" : "0",
+      "domain" : "",
+      "is_signed" : "0",
+      "locale" : "en",
+      "is_dubbed_audio" : "0",
+      "bikini_states" : [
+         {
+            "area" : "global",
+            "state" : "0"
+         },
+         {
+            "area" : "db.activity",
+            "state" : "0"
+         },
+         {
+            "area" : "db.publishing",
+            "state" : "0"
+         },
+         {
+            "area" : "net.recommendations_supplier",
+            "state" : "0"
+         }
+      ],
+      "recipe" : ""
+   },
+   "updated" : "2011-01-27T18:15:54+0000",
+   "type" : "ion",
+   "id" : "tag:bbc.co.uk,2008:ps:fetcher:episodedetail:allow_unavailable:1:category_type:iplayer:clips:include:episode_id:p00d5210:expose_search_categories:0:include_broadcasts:1:include_clip_counts:0:next_broadcasts:1:request_context:discoverable_only=0,media_set=emp",
+   "locale_str" : "en"
+}
