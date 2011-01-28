@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.DEBUG;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -209,14 +211,17 @@ public class BbcIonScheduleUpdater implements Runnable {
 
         private void updateItemDetails(Item item, IonBroadcast ionBroadcast) {
 
-            Broadcast broadcast = atlasBroadcastFrom(ionBroadcast);
 
             Version broadcastVersion = getBroadcastVersion(item, ionBroadcast);
             if (broadcastVersion == null) {
                 broadcastVersion = versionFrom(ionBroadcast);
                 item.addVersion(broadcastVersion);
             }
-            broadcastVersion.addBroadcast(broadcast);
+            
+            Broadcast broadcast = atlasBroadcastFrom(ionBroadcast);
+            if(broadcast!= null) {
+                broadcastVersion.addBroadcast(broadcast);
+            }
 
             IonEpisode episode = ionBroadcast.getEpisode();
             item.setTitle(episode.getTitle());
@@ -248,12 +253,14 @@ public class BbcIonScheduleUpdater implements Runnable {
         private Broadcast atlasBroadcastFrom(IonBroadcast ionBroadcast) {
             String serviceUri = BbcIonServices.get(ionBroadcast.getService());
             if(serviceUri == null) {
-                throw new IllegalStateException("Couldn't find service URI for Ion Service " + ionBroadcast.getService());
+                log.record(new AdapterLogEntry(WARN).withDescription("Couldn't find service URI for Ion Service " + ionBroadcast.getService()).withSource(getClass()));
+                return null;
+            } else {
+                Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
+                broadcast.withId(BBC_CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
+                broadcast.setLastUpdated(ionBroadcast.getUpdated());
+                return broadcast;
             }
-            Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
-            broadcast.withId(BBC_CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
-            broadcast.setLastUpdated(ionBroadcast.getUpdated());
-            return broadcast;
         }
 
     }

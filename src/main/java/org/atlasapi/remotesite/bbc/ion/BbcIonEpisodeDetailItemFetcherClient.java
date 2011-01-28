@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -96,12 +97,14 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private Broadcast broadcastFrom(IonBroadcast ionBroadcast) {
         String serviceUri = BbcIonServices.get(ionBroadcast.getService());
         if(serviceUri == null) {
-            throw new IllegalStateException("Couldn't find service URI for Ion Service " + ionBroadcast.getService());
+            log.record(new AdapterLogEntry(WARN).withDescription("Couldn't find service URI for Ion Service " + ionBroadcast.getService()).withSource(getClass()));
+            return null;
+        } else {
+            Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
+            broadcast.withId(CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
+            broadcast.setLastUpdated(ionBroadcast.getUpdated());
+            return broadcast;
         }
-        Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
-        broadcast.withId(CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
-        broadcast.setLastUpdated(ionBroadcast.getUpdated());
-        return broadcast;
     }
     
     private Version versionFrom(IonVersion ionVersion) {
