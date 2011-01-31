@@ -10,40 +10,11 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   <bean id="contentUpdateTimerFactory" class="org.springframework.scheduling.timer.TimerFactoryBean">
     <property name="scheduledTimerTasks">
         <list>
-            <ref bean="updatePlaylistsScheduledTask" />
             <ref bean="updateTVBlobScheduledTask" />
             <ref bean="updateTVBlobTomorrowScheduledTask" />
         </list>
     </property>
     <property name="daemon" value="true" />
-  </bean>
-  
-   <bean id="updatePlaylistsScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">
-    <property name="delay"  value="300000" />
-    <property name="period" value="1800000" />
-    <property name="runnable">
-   		<bean parent="conditionalRunner">
-    		<constructor-arg>
- 					 <bean class="org.atlasapi.persistence.system.UriRefresher">
- 					 	<property name="contentStore" ref="contentWriter"/>
-                        <property name="fetcher" ref="remoteFetcher"/>
- 					 	<property name="missingContentShouldBeMarkedAsUnavailable" value="false"/>
- 					 	<property name="uris">
-						  <list>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_viewed</value>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/top_rated</value>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/recently_featured</value>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/watch_on_mobile</value>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_discussed</value>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/top_favorites</value>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_responded</value>
-                              <value>http://gdata.youtube.com/feeds/api/standardfeeds/most_recent</value>
-						  </list>
-					</property>
-					</bean>
- 			</constructor-arg>
- 		</bean>
-    </property>
   </bean>
   
   <bean id="updateTVBlobScheduledTask" class="org.springframework.scheduling.timer.ScheduledTimerTask">

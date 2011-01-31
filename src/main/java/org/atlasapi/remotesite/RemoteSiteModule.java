@@ -41,6 +41,7 @@ import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
+import org.atlasapi.remotesite.youtube.YouTubeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +53,7 @@ import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
 @Import({ C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HuluModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class,
-        PaModule.class, SeesawModule.class })
+        PaModule.class, SeesawModule.class, YouTubeModule.class })
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
@@ -65,6 +66,7 @@ public class RemoteSiteModule {
 	private @Autowired ItunesModule itunesModule;
 	private @Autowired MsnVideoModule msnVideoModule;
 	private @Autowired HuluModule huluModule;
+	private @Autowired YouTubeModule youTubeModule;
 	
 	public @Bean SimpleScheduler scheduler() {
 	    return new SimpleScheduler();
@@ -80,12 +82,7 @@ public class RemoteSiteModule {
 		 
 		 List<SiteSpecificAdapter<? extends Identified>> adapters = Lists.newArrayList();
 		 
-		 adapters.add(new YouTubeAdapter());
-		 adapters.add(new YouTubeFeedAdapter());
-		 // Commented out for now, as it generates too much gdata traffic
-		 //adapters.add(new YouTubeUserAdapter());
-		 adapters.add(new TedTalkAdapter());
-		 
+		 adapters.addAll(youTubeModule.adapters());
 		 adapters.addAll(c4Module.adapters());
 		 adapters.addAll(bbcModule.adapters());
 		 adapters.addAll(itvModule.adapters());
@@ -95,9 +92,9 @@ public class RemoteSiteModule {
 		 adapters.addAll(msnVideoModule.adapters());
 		 adapters.addAll(huluModule.adapters());
 		 
+		 adapters.add(new TedTalkAdapter());
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
-		 adapters.add(new BbcProgrammeAdapter(log));
 
 		 adapters.add(new BbcPodcastAdapter());
 		 
