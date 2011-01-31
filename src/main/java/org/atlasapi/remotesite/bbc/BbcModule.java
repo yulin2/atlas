@@ -66,10 +66,10 @@ public class BbcModule {
 			scheduler.schedule(bbcIonUpdater(3,2), TEN_MINUTES);
 			scheduler.schedule(bbcIonUpdater(7,7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), SCHEDULED_UPDATE_TIME);
 			scheduler.schedule(bbcIonOndemandChangeUpdater(), TEN_MINUTES);
-			log.record(new AdapterLogEntry(Severity.INFO)
+			log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass())
 				.withDescription("BBC update scheduled tasks installed"));
 		} else {
-			log.record(new AdapterLogEntry(Severity.INFO)
+			log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass())
 				.withDescription("Not installing BBC Scheduled tasks"));
 		}
 	}
