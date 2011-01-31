@@ -22,6 +22,7 @@ public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
     protected static final String WIKIPEDIA = "http://en.wikipedia.org/wiki/";
     protected static final String THETVDB = "http://thetvdb.com/?tab=series&id=";
     protected static final String HULU = "http://www.hulu.com/";
+    protected static final String IMDB = "http://www.imdb.com/title/";
     private final Freebase freebase;
 
     public FreebaseBrandEquivGenerator() {
@@ -83,6 +84,11 @@ public class FreebaseBrandEquivGenerator implements EquivGenerator<Brand> {
                         }
 
                         ids.add(WIKIPEDIA+id);
+                    }
+                    
+                    if (key.has("namespace") && key.get("namespace").string().contains("imdb") && key.get("namespace").string().endsWith("title") && key.has("value")) {
+                        String id = key.get("value").string();
+                        ids.add(IMDB+id);
                     }
                 }
             }
