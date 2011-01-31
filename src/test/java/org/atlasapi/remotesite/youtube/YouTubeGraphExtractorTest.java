@@ -32,7 +32,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.hamcrest.Matcher;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.Duration;

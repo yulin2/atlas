@@ -1,87 +1,46 @@
 package org.atlasapi.remotesite.youtube;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.youtube.YouTubeModel.Content;
+import org.atlasapi.remotesite.youtube.YouTubeModel.FeedWrapper;
+import org.atlasapi.remotesite.youtube.YouTubeModel.Player;
+import org.atlasapi.remotesite.youtube.YouTubeModel.Thumbnail;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoFeed;
 
-import com.google.api.client.googleapis.GoogleHeaders;
-import com.google.api.client.googleapis.GoogleTransport;
-import com.google.api.client.googleapis.json.JsonCParser;
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.util.Key;
-import com.google.common.collect.Lists;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.metabroadcast.common.http.HttpResponse;
+import com.metabroadcast.common.http.HttpStatusCodeException;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class YouTubeFeedClient implements RemoteSiteClient<YouTubeFeedClient.VideoFeed> {
+public class YouTubeFeedClient implements RemoteSiteClient<VideoFeed> {
 
-    @Override
-    public YouTubeFeedClient.VideoFeed get(String uri) throws Exception {
-        HttpTransport transport = GoogleTransport.create();
-        GoogleHeaders headers = (GoogleHeaders) transport.defaultHeaders;
-        headers.setApplicationName("atlasapi.org");
-        headers.gdataVersion = "2";
-        transport.addParser(new JsonCParser());
-        
-        YouTubeUrl url = new YouTubeUrl(uri);
-        return VideoFeed.executeGet(transport, url);
-    }
+    private final SimpleHttpClient client;
+    private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapter(Content.class, new YouTubeModel.ContentDeserializer())
+            .registerTypeAdapter(Thumbnail.class, new YouTubeModel.ThumbnailDeserializer())
+            .registerTypeAdapter(Player.class, new YouTubeModel.PlayerDeserializer())
+            .create();
     
-    public static class VideoFeed {
-        @Key("items") public List<VideoEntry> videos;
-        
-        @Key public int itemsPerPage;
-        @Key public int startIndex;
-        @Key public int totalItems;
+    public YouTubeFeedClient() {
+        this(HttpClients.webserviceClient());
+    }
 
-        static VideoFeed executeGet(HttpTransport transport, YouTubeUrl url) throws IOException {
-            HttpRequest request = transport.buildGetRequest();
-            request.url = url;
-            return request.execute().parseAs(VideoFeed.class);
+    public YouTubeFeedClient(SimpleHttpClient client) {
+        this.client = client;
+    }
+
+    public VideoFeed get(String uri) throws Exception {
+        HttpResponse httpResponse = client.get(uri+"?v=2&alt=jsonc");
+        if (httpResponse.statusCode() >= 300) {
+            throw new HttpStatusCodeException(httpResponse); 
         }
-    }
-
-    public static class VideoEntry {
-        @Key String id;
-        @Key String title;
-        @Key String description;
-        @Key String category;
-        @Key Player player;
-        @Key List<String> tags = Lists.newArrayList();
-        @Key Thumbnail thumbnail;
-        @Key int duration;
-        @Key Content content;
-        
-        static VideoEntry executeGet(HttpTransport transport, YouTubeUrl url) throws IOException {
-            HttpRequest request = transport.buildGetRequest();
-            request.url = url;
-            return request.execute().parseAs(VideoEntry.class);
+        FeedWrapper wrapper = gson.fromJson(httpResponse.body(), FeedWrapper.class);
+        if (wrapper != null && wrapper.getData() != null) {
+            return wrapper.getData();
         }
-    }
-    
-    public static class Content {
-        @Key("1") String one;
-        @Key("5") String five;
-        @Key("6") String six;
-    }
-    
-    public static class Player {
-        @Key("default") String defaultUrl;
-    }
-    
-    public static class Thumbnail {
-        @Key("default") String defaultUrl;
-        @Key String sqDefault;
-        @Key String hqDefault;
-    }
-
-    public static class YouTubeUrl extends GenericUrl {
-        @Key final String alt = "jsonc";
-        @Key final String v = "2";
-        @Key String author;
-        @Key("max-results") Integer maxResults;
-        
-        YouTubeUrl(String url) { super(url); }
+        return null;
     }
 }
