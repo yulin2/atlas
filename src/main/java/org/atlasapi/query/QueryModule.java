@@ -16,9 +16,6 @@ package org.atlasapi.query;
 
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.AggregateContentListener;
-import org.atlasapi.persistence.content.ContentListener;
-import org.atlasapi.persistence.content.QueueingContentListener;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -27,8 +24,8 @@ import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.DefuzzingQueryExecutor;
-import org.atlasapi.query.content.fuzzy.InMemoryFuzzySearcher;
-import org.atlasapi.query.content.fuzzy.InMemoryIndexProbe;
+import org.atlasapi.query.content.fuzzy.FuzzySearcher;
+import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
 import org.atlasapi.remotesite.health.BroadcasterProbe;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.health.HealthProbe;
 
@@ -45,8 +43,9 @@ public class QueryModule {
 
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	private @Autowired MongoDbBackedContentStore store;
-	private @Autowired AggregateContentListener aggregateContentListener;
 	private @Value("${applications.enabled}") String applicationsEnabled;
+	
+	private @Value("${atlas.search.host}") String searchHost;
 	
 	@Bean KnownTypeQueryExecutor mongoQueryExecutor() {
 		return new MongoDBQueryExecutor(store);
@@ -78,8 +77,17 @@ public class QueryModule {
 	}
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
-	    UriFetchingQueryExecutor uriFetching = new UriFetchingQueryExecutor(localOrRemoteFetcher, new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher()));
-		CurieResolvingQueryExecutor curieResolving = new CurieResolvingQueryExecutor(uriFetching);
+		KnownTypeQueryExecutor defuzzingExecutor = mongoQueryExecutor();
+		
+		if (!Strings.isNullOrEmpty(searchHost)) {
+			FuzzySearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
+		    defuzzingExecutor = new DefuzzingQueryExecutor(mongoQueryExecutor(), mongoDbQueryExcutorThatFiltersUriQueries(), titleSearcher);
+		}
+		
+		UriFetchingQueryExecutor uriFetching = new UriFetchingQueryExecutor(localOrRemoteFetcher, defuzzingExecutor);
+		
+	    CurieResolvingQueryExecutor curieResolving = new CurieResolvingQueryExecutor(uriFetching);
+		
 		MergeOnOutputQueryExecutor brandMerger = new MergeOnOutputQueryExecutor(curieResolving);
 	    if (Boolean.parseBoolean(applicationsEnabled)) {
 	        return new ApplicationConfigurationQueryExecutor(brandMerger);
@@ -88,23 +96,4 @@ public class QueryModule {
 	    }
 	}
 	
-	@Bean InMemoryFuzzySearcher titleSearcher() {
-		return new InMemoryFuzzySearcher();
-	}
-	
-	@Bean InMemoryIndexProbe inMemoryIndexProbe() {
-		return new InMemoryIndexProbe(titleSearcher());
-	}
-    
-    @Bean ContentListener queueingContentListener() {
-        QueueingContentListener queueingContentListener = queue();
-        aggregateContentListener.addListener(queueingContentListener);
-        return queueingContentListener;
-    }
-
-	@Bean QueueingContentListener queue() {
-		QueueingContentListener listener = new QueueingContentListener(titleSearcher());
-		listener.start();
-		return listener;
-	}
 }

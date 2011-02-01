@@ -53,7 +53,6 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 		}
 		return query.getSelection().applyTo(loadAll(query));
 	}
-		
 
 	@SuppressWarnings("unchecked")
 	private List<Content> loadAll(ContentQuery query) {
@@ -71,6 +70,7 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 			}
 			
 			all.addAll((List) fuzzyQueryDelegate.executeUriQuery(urisForThisBatch, query));
+		
 		}
 		return all;
 	}
@@ -108,7 +108,7 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 				List<String> uris = Lists.newArrayList();
 				
 				for (String title : titleSearches) {
-					uris.addAll(fuzzySearcher.brandTitleSearch(title, selection));
+					uris.addAll(fuzzySearcher.contentSearch(title, selection).toUris());
 				}
 				return uris;
 			}
