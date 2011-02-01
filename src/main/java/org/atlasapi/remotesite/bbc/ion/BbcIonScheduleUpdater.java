@@ -29,11 +29,15 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormat;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class BbcIonScheduleUpdater implements Runnable {
 
@@ -72,6 +76,7 @@ public class BbcIonScheduleUpdater implements Runnable {
     
     @Override
     public void run() {
+        DateTime start = new DateTime(DateTimeZones.UTC);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update initiated"));
 
         for (String uri : uriSource) {
@@ -84,8 +89,9 @@ public class BbcIonScheduleUpdater implements Runnable {
         } catch (InterruptedException e) {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("BBC Ion Schedule Update interrupted waiting for completion").withCause(e));
         }
-
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update finished" + (completion ? "" : " (timed-out)")));
+        
+        String runTime = new Period(start, new DateTime(DateTimeZones.UTC)).toString(PeriodFormat.getDefault());
+        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update finished in " + runTime + (completion ? "" : " (timed-out)")));
     }
 
     private class BbcIonScheduleUpdateTask implements Runnable {
