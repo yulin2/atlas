@@ -23,13 +23,18 @@ public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource,
     @Override
     public Playlist extract(YouTubeFeedSource source) {
         VideoFeed feed = source.getVideoFeed();
+        if (feed == null) {
+            return null;
+        }
         
         Playlist playlist = new Playlist(source.getUri(), YouTubeFeedCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
         playlist.setMediaType(MediaType.VIDEO);
         
-        for (VideoEntry video: feed.items) {
-            Item item = itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalUriFor(video.id)));
-            playlist.addItem(item);
+        if (feed.getVideos() != null && !feed.getVideos().isEmpty()) {
+            for (VideoEntry video: feed.items) {
+                Item item = itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalUriFor(video.id)));
+                playlist.addItem(item);
+            }
         }
         
         return playlist;
