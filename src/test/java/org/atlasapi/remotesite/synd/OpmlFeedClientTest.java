@@ -34,6 +34,6 @@ public class OpmlFeedClientTest extends TestCase {
 
 		Opml feed = new OpmlFeedClient().get(feedUrl);
 
-		assertThat(feed.getTitle(), is("BBC Radio Podcasts"));
+		assertThat(feed.getTitle(), is("BBC Podcast OPML"));
 	}
 }
