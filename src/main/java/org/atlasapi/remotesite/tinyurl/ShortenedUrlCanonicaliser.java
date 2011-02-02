@@ -35,6 +35,10 @@ public class ShortenedUrlCanonicaliser implements Canonicaliser {
 		this.shortUrlServices = shortUrlServices;
 		this.shortUrlResolver = new RedirectShortUrlResolver();
 	}
+	
+	public ShortenedUrlCanonicaliser() {
+		this(ShortUrlServices.ALL);
+	}
 
 	@Override
 	public String canonicalise(String uri) {

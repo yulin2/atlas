@@ -23,7 +23,6 @@ import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
-import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
@@ -38,9 +37,8 @@ import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.seesaw.SeesawModule;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
+import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
-import org.atlasapi.remotesite.youtube.YouTubeAdapter;
-import org.atlasapi.remotesite.youtube.YouTubeFeedAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,7 +51,7 @@ import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
 @Import({ C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HuluModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class,
-        PaModule.class, SeesawModule.class, YouTubeModule.class })
+        PaModule.class, SeesawModule.class, YouTubeModule.class, TVBlobModule.class })
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;

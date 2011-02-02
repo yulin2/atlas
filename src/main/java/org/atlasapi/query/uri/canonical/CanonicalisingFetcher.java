@@ -8,7 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.mongo.AliasWriter;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.NoMatchingAdapterException;
 
@@ -21,17 +20,27 @@ public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolv
 	
 	private final List<Canonicaliser> chain;
 	private final Fetcher<Identified> delegate;
-	private final AliasWriter store;
 
-	public CanonicalisingFetcher(Fetcher<Identified> delegate, List<Canonicaliser> chain, AliasWriter store) {
+	public CanonicalisingFetcher(Fetcher<Identified> delegate, List<Canonicaliser> chain) {
 		this.delegate = delegate;
 		this.chain = chain;
-		this.store = store;
+	}
+	
+	private static class Canonicalisation {
+		
+		private final InterestedInTheEventualContentCanonicaliser canonicaliser;
+		private final String url;
+
+		public Canonicalisation(InterestedInTheEventualContentCanonicaliser canonicaliser, String url) {
+			this.canonicaliser = canonicaliser;
+			this.url = url;
+		}
 	}
 
 	@Override
 	public Identified fetch(String uri) {
 		Set<String> aliases = Sets.newHashSet();
+		Set<Canonicalisation> resultAwareCanonicalisers = Sets.newHashSet();
 		String currentUri = uri;
 		for (int i = 0; i < MAX_CANONICALISATIONS; i++) {
 			try {
@@ -39,10 +48,10 @@ public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolv
 				if (bean == null) {
 					return null;
 				} else {
-					return saveAliases(bean, currentUri, aliases);
+					return saveAliases(bean, resultAwareCanonicalisers);
 				}
 			} catch (NoMatchingAdapterException e) {
-				String nextUri = nextUri(currentUri, aliases);
+				String nextUri = nextUri(currentUri, aliases, resultAwareCanonicalisers);
 				if (nextUri == null || nextUri.equals(currentUri)) {
 					return null;
 				}
@@ -53,10 +62,13 @@ public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolv
 		return null;
 	}
 
-	private String nextUri(String currentUri, Set<String> aliases) {
+	private String nextUri(String currentUri, Set<String> aliases, Set<Canonicalisation> resultAwareCanonicalisers) {
 		for (Canonicaliser canonicaliser : chain) {
 			String next = canonicaliseOrNull(currentUri, canonicaliser);
 			if (next != null) {
+				if (canonicaliser instanceof InterestedInTheEventualContentCanonicaliser) {
+					resultAwareCanonicalisers.add(new Canonicalisation((InterestedInTheEventualContentCanonicaliser) canonicaliser, currentUri));
+				}
 				return next;
 			}
 		}
@@ -72,9 +84,11 @@ public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolv
 		}
 	}
 
-	private Identified saveAliases(Identified bean, String canonicalUri, Set<String> aliases) {
-		if (!aliases.isEmpty()) {
-			store.addAliases(canonicalUri, aliases);
+	private Identified saveAliases(Identified bean, Set<Canonicalisation> resultAwareCanonicalisers) {
+		if (!resultAwareCanonicalisers.isEmpty()) {
+			for (Canonicalisation canonicalisation : resultAwareCanonicalisers) {
+				canonicalisation.canonicaliser.resolvedTo(canonicalisation.url, bean);
+			}
 		}
 		return bean;
 	}
