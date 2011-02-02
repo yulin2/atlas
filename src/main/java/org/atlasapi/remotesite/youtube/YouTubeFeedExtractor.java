@@ -5,7 +5,8 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoFeed;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -24,12 +25,13 @@ public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource,
 
     @Override
     public ContentGroup extract(YouTubeFeedSource source) {
-        YouTubeFeedClient.VideoFeed feed = source.getVideoFeed();
+        
+    	VideoFeed feed = source.getVideoFeed();
 
         ContentGroup playlist = new ContentGroup(source.getUri(), YouTubeFeedCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
         playlist.setMediaType(MediaType.VIDEO);
         
-        Iterable<Item> items = Iterables.transform(feed.videos, new Function<VideoEntry, Item>() {
+        Iterable<Item> items = Iterables.transform(feed.getVideos(), new Function<VideoEntry, Item>() {
 
 			@Override
 			public Item apply(VideoEntry video) {

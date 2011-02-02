@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import junit.framework.TestCase;
 
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.atlasapi.remotesite.youtube.YouTubeSource.Video;
 import org.joda.time.Duration;
 
@@ -30,14 +31,14 @@ public class YouTubeSourceTest extends TestCase {
 
 	public void testReturnsNullForUninitalisedContent() throws Exception {
 		
-		YouTubeSource source = new YouTubeSource(new YouTubeFeedClient.VideoEntry(), "uri");
+		YouTubeSource source = new YouTubeSource(new VideoEntry(), "uri");
 		assertNull(source.getVideoTitle());
 		assertNull(source.getDescription());
 	}
 	
 	public void testGeneratesGenresAndTagsUrisForCategories() throws Exception {
 		
-	    YouTubeFeedClient.VideoEntry entry = new YouTubeFeedClient.VideoEntry();
+	    VideoEntry entry = new VideoEntry();
 	    entry.category = "News";
 	    entry.tags = Lists.newArrayList("Funny");
 				

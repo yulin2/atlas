@@ -20,29 +20,53 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.youtube.YouTubeFeedClient.YouTubeUrl;
+import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.youtube.YouTubeModel.Content;
+import org.atlasapi.remotesite.youtube.YouTubeModel.Player;
+import org.atlasapi.remotesite.youtube.YouTubeModel.Thumbnail;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoWrapper;
 
-import com.google.api.client.googleapis.GoogleHeaders;
-import com.google.api.client.googleapis.GoogleTransport;
-import com.google.api.client.googleapis.json.JsonCParser;
-import com.google.api.client.http.HttpTransport;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.metabroadcast.common.http.HttpResponse;
+import com.metabroadcast.common.http.HttpStatusCodeException;
+import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
  * Simple wrapper for Google's Java client for YouTube GData API
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YouTubeGDataClient implements RemoteSiteClient<YouTubeFeedClient.VideoEntry> {
+public class YouTubeGDataClient implements RemoteSiteClient<VideoEntry> {
+    
+    private final SimpleHttpClient client;
+    private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .registerTypeAdapter(Content.class, new YouTubeModel.ContentDeserializer())
+            .registerTypeAdapter(Thumbnail.class, new YouTubeModel.ThumbnailDeserializer())
+            .registerTypeAdapter(Player.class, new YouTubeModel.PlayerDeserializer())
+            .create();
+    
+    public YouTubeGDataClient() {
+        this(HttpClients.webserviceClient());
+    }
 
-    public YouTubeFeedClient.VideoEntry get(String uri) throws Exception {
-        HttpTransport transport = GoogleTransport.create();
-        GoogleHeaders headers = (GoogleHeaders) transport.defaultHeaders;
-        headers.setApplicationName("atlasapi.org");
-        headers.gdataVersion = "2";
-        transport.addParser(new JsonCParser());
-        
-        YouTubeUrl url = new YouTubeUrl("http://gdata.youtube.com/feeds/api/videos/" + videoIdFrom(uri));
-        return YouTubeFeedClient.VideoEntry.executeGet(transport, url);
+    public YouTubeGDataClient(SimpleHttpClient client) {
+        this.client = client;
+    }
+
+    public VideoEntry get(String uri) throws Exception {
+        String url = "http://gdata.youtube.com/feeds/api/videos/" + videoIdFrom(uri) + "?v=2&alt=jsonc";
+        HttpResponse httpResponse = client.get(url);
+        if (httpResponse.statusCode() >= 300) {
+            throw new HttpStatusCodeException(httpResponse); 
+        }
+        VideoWrapper wrapper = gson.fromJson(httpResponse.body(), VideoWrapper.class);
+        if (wrapper != null && wrapper.getData() != null) {
+            return wrapper.getData();
+        }
+        return null;
     }
 	
 	private String videoIdFrom(String uri) {

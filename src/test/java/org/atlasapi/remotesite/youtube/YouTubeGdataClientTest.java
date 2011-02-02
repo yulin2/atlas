@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.containsString;
 import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 
 /**
  * Test of the behaviour of the third-party YouTube GData client from Google.

@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.atlasapi.feeds.Defect;
 import org.atlasapi.remotesite.BaseSource;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.joda.time.Duration;
 
 import com.google.common.collect.Lists;
@@ -38,9 +39,9 @@ public class YouTubeSource extends BaseSource {
 	private static final String ATLAS_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
 	private static final String ATLAS_TAGS_SCHEME = "http://ref.atlasapi.org/tags/";
 	
-	private final YouTubeFeedClient.VideoEntry videoEntry;
+	private final VideoEntry videoEntry;
 	
-	public YouTubeSource(YouTubeFeedClient.VideoEntry entry, String uri) {
+	public YouTubeSource(VideoEntry entry, String uri) {
 		super(uri);
 		videoEntry = entry;
 	}

@@ -24,7 +24,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
-import org.atlasapi.remotesite.youtube.YouTubeFeedClient.VideoEntry;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
