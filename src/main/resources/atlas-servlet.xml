@@ -35,12 +35,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <bean id="rootRedirectController" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
         <property name="viewName" value="redirect:http://docs.atlasapi.org"/>
     </bean>
-	<bean id="stackTraceController" class="org.atlasapi.system.HealthController"/>
-	
-	<bean id="aliasController" class="org.atlasapi.system.AliasController">
-	   <constructor-arg ref="aliasWriter"/>
-	   <constructor-arg ref="contentResolver"/>
-	</bean>
 
 	<bean id="newQueryApiController" class="org.atlasapi.query.v2.QueryController">
 		<constructor-arg ref="queryExecutor"/>
