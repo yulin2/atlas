@@ -32,7 +32,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.mongodb.Mongo;
 
 @Configuration
-@ImportResource({"classpath:atlas.xml", "beans-scheduling.xml"})
+@ImportResource({"classpath:atlas.xml"})
 @Import({AtlasLoggingModule.class, EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class})
 public class AtlasModule {
 	
