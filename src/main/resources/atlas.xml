@@ -8,7 +8,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
   - Application context definition for Atlas. See atlas-servlet.xml for webapp config.
   -->
 
-    <import resource="classpath:beans-short-url-services.xml" />
     <import resource="classpath:atlas-servlet.xml" />
     <import resource="classpath:atlas-feeds.xml" />
 

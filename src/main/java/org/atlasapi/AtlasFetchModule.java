@@ -22,11 +22,11 @@ import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.ContentPersistenceModule;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.mongo.AliasWriter;
 import org.atlasapi.persistence.equiv.EquivalentContentFinder;
 import org.atlasapi.persistence.equiv.EquivalentContentMerger;
 import org.atlasapi.persistence.equiv.EquivalentContentMergingContentWriter;
 import org.atlasapi.persistence.equiv.EquivalentUrlFinder;
+import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.query.uri.SavingFetcher;
@@ -40,6 +40,7 @@ import org.atlasapi.remotesite.facebook.FacebookCanonicaliser;
 import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
+import org.atlasapi.remotesite.tinyurl.SavingShortUrlCanonicaliser;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
 import org.atlasapi.remotesite.youtube.YouTubeFeedCanonicaliser;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
@@ -92,25 +93,20 @@ public class AtlasFetchModule {
 	
 		private @Autowired ContentPersistenceModule persistence;
 		
-		private @Autowired AliasWriter aliasWriter;
-		
-		private @Autowired ShortenedUrlCanonicaliser shortUrlCanonicaliser;
-		
 		private @Autowired RemoteSiteModule remote;
-	
+		
 		@Primary
 		public @Bean CanonicalisingFetcher contentResolver() {
 			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), savingFetcher());
-			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers(), aliasWriter);
+			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		
 		public @Bean CanonicalisingFetcher contentResolverThatDoesntSave() {
 			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), remote.remoteFetcher());
-			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers(), aliasWriter);
+			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		
-
-		private List<Canonicaliser> canonicalisers() {
+		public @Bean List<Canonicaliser> canonicalisers() {
 			List<Canonicaliser> canonicalisers = Lists.newArrayList();
 			canonicalisers.add(new BbcUriCanonicaliser());
 			canonicalisers.add(new YoutubeUriCanonicaliser());
@@ -121,10 +117,10 @@ public class AtlasFetchModule {
 			canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());
 			canonicalisers.add(new HuluItemAdapter.HuluItemCanonicaliser());
 			canonicalisers.add(new HuluBrandAdapter.HuluBrandCanonicaliser());
-			canonicalisers.add(shortUrlCanonicaliser);
+			canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), persistence.shortUrlSaver()));
 			return canonicalisers;
 		}
-		
+
 		public @Bean SavingFetcher savingFetcher() {
 			return new SavingFetcher(remote.remoteFetcher(), null);
 		}
