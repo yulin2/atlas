@@ -1,7 +1,6 @@
 package org.atlasapi.query.content;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.AtomicQuery;
@@ -13,7 +12,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.persistence.content.mongo.QueryConcernsTypeDecider;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
@@ -40,32 +38,26 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 	
 	private ContentQuery queryForContent(ContentQuery query) {
 		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
-			mergeAttribute(Attributes.VERSION_PROVIDER, query),
-			mergeAttribute(Attributes.DESCRIPTION_PUBLISHER,query)
+			mergeAttribute(Attributes.VERSION_PROVIDER, query)
 		);
 		
 		query.setSoftConstraints(softs);
 
-		if(!QueryConcernsTypeDecider.concernsItemOrBelow(query)) {
-			Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
-				mergeAttribute(Attributes.DESCRIPTION_PUBLISHER, query)
-			);
-			return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
-		} 
-		
-		return query;
+		Iterable<AtomicQuery> queryAtoms = ImmutableSet.of((AtomicQuery)
+			mergeAttribute(Attributes.DESCRIPTION_PUBLISHER, query)
+		);
+		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 
 	private AtomicQuery mergeAttribute(Attribute<?> attr, ContentQuery query){
 		Set<Publisher> configPublishers = query.getConfiguration().getIncludedPublishers();
-		Map<Attribute<?>, List<?>> operandMap = query.operandMap();
+		ImmutableSet<Publisher> requestedPublishers = query.includedPublishers();
 		
 		Set<?> values;
-		List<?> queryValues = operandMap.get(attr);
-		if (queryValues == null) {
+		if (requestedPublishers.isEmpty()) {
 			values = configPublishers;
 		} else {
-			Set<Publisher> pubIntersection = Sets.intersection(configPublishers, ImmutableSet.copyOf(queryValues));
+			Set<Publisher> pubIntersection = Sets.intersection(configPublishers, requestedPublishers);
 			values = pubIntersection.isEmpty() ? configPublishers : pubIntersection;
 		}
 		
@@ -74,6 +66,6 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 
 	@Override
 	public Schedule schedule(ContentQuery query) {
-		throw new UnsupportedOperationException("TODO");
+		return delegate.schedule(queryForContent(query));
 	}
 }

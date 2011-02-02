@@ -6,7 +6,6 @@ import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
-import org.apache.lucene.util.NamedThreadFactory;
 import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 @Controller
 public class BbcScheduleController {
@@ -26,7 +26,7 @@ public class BbcScheduleController {
     private final BbcProgrammeAdapter remoteFetcher;
     private final ContentWriter writer;
     private final AdapterLog log;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("singleBBCScheduleUpdater"));
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCScheduleUpdater").build());
 
     public BbcScheduleController(ContentResolver localFetcher, BbcProgrammeAdapter remoteFetcher, ContentWriter writer, AdapterLog log) {
         this.localFetcher = localFetcher;

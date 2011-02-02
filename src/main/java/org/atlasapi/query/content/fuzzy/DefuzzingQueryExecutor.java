@@ -24,6 +24,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
@@ -53,7 +54,6 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 		}
 		return query.getSelection().applyTo(loadAll(query));
 	}
-		
 
 	@SuppressWarnings("unchecked")
 	private List<Content> loadAll(ContentQuery query) {
@@ -84,15 +84,17 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 	
 	private Iterable<String> defuzz(ContentQuery query) {
-		return Iterables.concat(query.accept(new TitleDefuzzingQueryVisitor(query.getSelection())));
+		return Iterables.concat(query.accept(new TitleDefuzzingQueryVisitor(query.getSelection(), query.includedPublishers())));
 	}
 	
 	private class TitleDefuzzingQueryVisitor extends QueryVisitorAdapter<List<String>> {
 
-		private Selection selection;
+		private final Selection selection;
+		private final Iterable<Publisher> publishers;
 
-		public TitleDefuzzingQueryVisitor(Selection selection) {
+		public TitleDefuzzingQueryVisitor(Selection selection, Iterable<Publisher> publishers) {
 			this.selection = selection;
+			this.publishers = publishers;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -108,7 +110,7 @@ public class DefuzzingQueryExecutor implements KnownTypeQueryExecutor {
 				List<String> uris = Lists.newArrayList();
 				
 				for (String title : titleSearches) {
-					uris.addAll(fuzzySearcher.brandTitleSearch(title, selection));
+					uris.addAll(fuzzySearcher.contentSearch(title, selection, publishers).toUris());
 				}
 				return uris;
 			}

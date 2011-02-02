@@ -7,7 +7,6 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.lucene.util.NamedThreadFactory;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 @Controller
 public class BbcIonScheduleController {
@@ -28,7 +28,7 @@ public class BbcIonScheduleController {
     private final ContentResolver localFetcher;
     private final ContentWriter writer;
     private final AdapterLog log;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("singleBBCIonScheduleUpdater"));
+    private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCIonScheduleUpdater").build());
     private final BbcItemFetcherClient fetcherClient;
     private final BbcIonDeserializer<IonSchedule> deserialiser;
 

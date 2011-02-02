@@ -57,7 +57,7 @@ public class BbcIonOndemandItemUpdater {
             }
         } else if (!revoked) {
             Maybe<Encoding> newEncoding = encodingCreator.createEncoding(change);
-            if(newEncoding.hasValue()) {
+            if (newEncoding.hasValue()) {
                 version.addManifestedAs(newEncoding.requireValue());
             }
         }

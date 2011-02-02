@@ -22,6 +22,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 
 /**
  * {@link SiteSpecificAdapter} for querying data about video clips from YouTube.
@@ -32,14 +33,14 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 
 	private static final Pattern YOUTUBE_CANONICAL_URI_PATTERN = Pattern.compile("http://www\\.youtube\\.com/watch\\?v=[^\\./&=]+");
 	
-	private final RemoteSiteClient<YouTubeFeedClient.VideoEntry> gdataClient;
+	private final RemoteSiteClient<VideoEntry> gdataClient;
 	private final ContentExtractor<YouTubeSource, Item> contentExtractor;
 	
 	public YouTubeAdapter() {
 		this(new YouTubeGDataClient(), new YouTubeGraphExtractor()); 
 	}
 	
-	YouTubeAdapter(RemoteSiteClient<YouTubeFeedClient.VideoEntry> gdataClient, ContentExtractor<YouTubeSource, Item> youTubeGraphExtractor) {
+	YouTubeAdapter(RemoteSiteClient<VideoEntry> gdataClient, ContentExtractor<YouTubeSource, Item> youTubeGraphExtractor) {
 		this.gdataClient = gdataClient;
 		this.contentExtractor = youTubeGraphExtractor;
 	}
@@ -47,7 +48,7 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 	@Override
 	public Item fetch(String uri) {
 		try {
-		    YouTubeFeedClient.VideoEntry videoEntry = gdataClient.get(uri);
+		    VideoEntry videoEntry = gdataClient.get(uri);
 			return contentExtractor.extract(new YouTubeSource(videoEntry, uri));
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);

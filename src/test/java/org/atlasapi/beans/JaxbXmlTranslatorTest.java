@@ -68,6 +68,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 				                            "</aliases>" +
 				                            "<clips/>" +
 				                            "<play:genres/>" +
+				                            "<play:sameAs/>" +
 				                            "<play:tags/>" +
                                				"<title>Blue Peter</title>" +
                                				"<play:broadcasts>" +
@@ -80,6 +81,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +
+												"<play:availableCountries/>" +
 												"<embedCode><![CDATA[object><embed></embed></object>]]></embedCode>" +
 												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 												"</play:location>" +
@@ -109,12 +111,14 @@ public class JaxbXmlTranslatorTest extends TestCase {
 														"<aliases/>" +
 														"<clips/>" +
 														"<play:genres/>" +
+														"<play:sameAs/>" +
 														"<play:tags/>" +
 	                                         			"<title>Blue Peter</title>" +
 	                                         			"<play:broadcasts/>" +
 														"<play:locations>" +
 															"<play:location>" +
 															"<available>true</available>" +
+															"<play:availableCountries/>" +
 															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 															"</play:location>" +
 														  "</play:locations>" +
