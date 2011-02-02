@@ -25,4 +25,8 @@ public class HealthModule {
 		allProbes.addAll(probes);
 		return new HealthController(allProbes);
 	}
+	
+	public @Bean org.atlasapi.system.HealthController threadController() {
+		return new org.atlasapi.system.HealthController();
+	}
 }

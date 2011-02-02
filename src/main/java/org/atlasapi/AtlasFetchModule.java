@@ -26,7 +26,6 @@ import org.atlasapi.persistence.equiv.EquivalentContentFinder;
 import org.atlasapi.persistence.equiv.EquivalentContentMerger;
 import org.atlasapi.persistence.equiv.EquivalentContentMergingContentWriter;
 import org.atlasapi.persistence.equiv.EquivalentUrlFinder;
-import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.query.uri.SavingFetcher;
@@ -44,6 +43,7 @@ import org.atlasapi.remotesite.tinyurl.SavingShortUrlCanonicaliser;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
 import org.atlasapi.remotesite.youtube.YouTubeFeedCanonicaliser;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
+import org.atlasapi.system.AliasController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -85,6 +85,10 @@ public class AtlasFetchModule {
 		
 		public @PostConstruct void passWriterToReader() {
 			reader.savingFetcher().setStore(contentWriter());
+		}
+		
+		public @Bean AliasController aliasController() {
+			return new AliasController(persistence.contentStore(), reader.contentResolverThatDoesntSave());
 		}
 	}
 	
