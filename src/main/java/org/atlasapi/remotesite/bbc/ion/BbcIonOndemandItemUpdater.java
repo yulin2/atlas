@@ -2,8 +2,6 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import java.util.Set;
 
-import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
@@ -14,7 +12,6 @@ import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.joda.time.Interval;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
@@ -60,7 +57,7 @@ public class BbcIonOndemandItemUpdater {
             }
         } else if (!revoked) {
             Encoding newEncoding = encodingCreator.createEncoding(change);
-            if(encoding != null) {
+            if (newEncoding != null) {
                 version.addManifestedAs(newEncoding);
             }
         }
