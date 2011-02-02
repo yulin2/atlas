@@ -24,6 +24,8 @@ import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 
+import com.metabroadcast.common.http.HttpStatusCodeException;
+
 /**
  * {@link SiteSpecificAdapter} for querying data about video clips from YouTube.
  *
@@ -50,6 +52,8 @@ public class YouTubeAdapter implements SiteSpecificAdapter<Item> {
 		try {
 		    VideoEntry videoEntry = gdataClient.get(uri);
 			return contentExtractor.extract(new YouTubeSource(videoEntry, uri));
+		} catch (HttpStatusCodeException e) {
+		    return null;
 		} catch (Exception e) {
 			throw new FetchException("Failed to fetch: " + uri, e);
 		}
