@@ -276,7 +276,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 				throw new IllegalStateException("Availability range format not recognised, was " + availability);
 			}
 			Policy policy = new Policy()
-				.withAvailabilityStart(new DateTime(matcher.group(1)))
+				.withAvailabilityStart(new DateTime(lookup.get(DC_TX_DATE)))
 				.withAvailabilityEnd(new DateTime(matcher.group(2)));
 				
 			if (availableCountries != null) {

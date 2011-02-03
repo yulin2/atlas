@@ -10,7 +10,6 @@ import org.atlasapi.remotesite.bbc.ion.model.IonEpisode.IonTagScheme;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
