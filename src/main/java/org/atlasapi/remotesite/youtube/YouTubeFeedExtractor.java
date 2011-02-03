@@ -25,21 +25,24 @@ public class YouTubeFeedExtractor implements ContentExtractor<YouTubeFeedSource,
 
     @Override
     public ContentGroup extract(YouTubeFeedSource source) {
-        
-    	VideoFeed feed = source.getVideoFeed();
+        VideoFeed feed = source.getVideoFeed();
+        if (feed == null) {
+            return null;
+        }
 
         ContentGroup playlist = new ContentGroup(source.getUri(), YouTubeFeedCanonicaliser.curieFor(source.getUri()), Publisher.YOUTUBE);
         playlist.setMediaType(MediaType.VIDEO);
-        
-        Iterable<Item> items = Iterables.transform(feed.getVideos(), new Function<VideoEntry, Item>() {
 
-			@Override
-			public Item apply(VideoEntry video) {
-				return  itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalUriFor(video.id)));
-			}
-        });
-        
-        playlist.setContents(items);
+        if (feed.getVideos() != null) {
+	        Iterable<Item> items = Iterables.transform(feed.getVideos(), new Function<VideoEntry, Item>() {
+	
+				@Override
+				public Item apply(VideoEntry video) {
+					return  itemExtractor.extract(new YouTubeSource(video, new YoutubeUriCanonicaliser().canonicalUriFor(video.id)));
+				}
+	        });
+	        playlist.setContents(items);
+        }
         return playlist;
     }
 }

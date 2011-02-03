@@ -7,6 +7,8 @@ import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoFeed;
 
+import com.metabroadcast.common.http.HttpStatusCodeException;
+
 public class YouTubeFeedAdapter implements SiteSpecificAdapter<ContentGroup> {
     
     private final RemoteSiteClient<VideoFeed> gdataClient;
@@ -32,6 +34,8 @@ public class YouTubeFeedAdapter implements SiteSpecificAdapter<ContentGroup> {
             VideoFeed feed = gdataClient.get(uri);
             
             return feedExtractor.extract(new YouTubeFeedSource(feed, uri));
+        } catch (HttpStatusCodeException e) {
+            return null;
         } catch (Exception e) {
             throw new FetchException("Failed to fetch: " + uri, e);
         }
