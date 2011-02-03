@@ -14,7 +14,9 @@ permissions and limitations under the License. */
 
 package org.atlasapi.systest;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -25,6 +27,7 @@ import junit.framework.TestCase;
 import org.atlasapi.AtlasFetchModule;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.beans.JaxbXmlTranslator;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
@@ -35,6 +38,9 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.Description;
+import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.persistence.equiv.EquivalentUrlStore;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -61,6 +67,7 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
+import com.metabroadcast.common.servlet.StubHttpServletResponse;
 import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 
 public class FetchEquivalentContentTest extends TestCase {
@@ -81,7 +88,7 @@ public class FetchEquivalentContentTest extends TestCase {
 
 		equivStore.store(new Equiv(C4_GLEE.getCanonicalUri(), WIKIPEDIA_URL));
 
-		Brand c4Brand = queryForBrand(C4_GLEE.getCanonicalUri());
+		Playlist c4Brand = queryForBrand(C4_GLEE.getCanonicalUri());
 		
 		assertEquals(Sets.newHashSet(WIKIPEDIA_URL), c4Brand.getAliases());
 
@@ -89,7 +96,7 @@ public class FetchEquivalentContentTest extends TestCase {
 		
 		equivStore.store(new Equiv(HULU_GLEE.getCanonicalUri(), WIKIPEDIA_URL));
 
-		Brand huluBrand = queryForBrand(HULU_GLEE.getCanonicalUri());
+		Playlist huluBrand = queryForBrand(HULU_GLEE.getCanonicalUri());
 
 		assertEquals(Sets.newHashSet(WIKIPEDIA_URL, C4_GLEE.getCanonicalUri()), huluBrand.getAliases());
 		
@@ -115,30 +122,26 @@ public class FetchEquivalentContentTest extends TestCase {
 		return brand;
 	}
 
-	private static Set<String> locationUrisFrom(Brand huluBrand) {
+	private static Set<String> locationUrisFrom(Playlist huluBrand) {
 		Set<String> uris = Sets.newHashSet();
-		for (Item item : huluBrand.getContents()) {
-			for (Version version : item.getVersions()) {
-				for (Encoding encoding : version.getManifestedAs()) {
-					for (Location location : encoding.getAvailableAt()) {
-						uris.add(location.getUri());
-					}
-				}
+		for (Description description : huluBrand.getContent()) {
+			org.atlasapi.media.entity.simple.Item item = (org.atlasapi.media.entity.simple.Item) description;
+			for (org.atlasapi.media.entity.simple.Location location : item.getLocations()) {
+				uris.add(location.getUri());
 			}
 		}
 		return uris;
 	}
 
-	@SuppressWarnings("unchecked")
-	private Brand queryForBrand(String uri) {
+	private Playlist queryForBrand(String uri) throws IOException {
 		QueryController queryController = applicationContext.getBean(QueryController.class);
-		ModelAndView modelAndView = queryController.content(new StubHttpServletRequest().withParam("uri", uri));
-		Collection<Brand> brands = (Collection<Brand>) modelAndView.getModel().get("graph");
-		return Iterables.getOnlyElement(brands);
+		StubHttpServletResponse response = new StubHttpServletResponse();
+		queryController.content(new StubHttpServletRequest().withRequestUri("/content.xml").withParam("uri", uri), response);
+		ContentQueryResult result = new JaxbXmlTranslator().readFrom(response.getResponseAsString());
+		return (Playlist) Iterables.getOnlyElement(result.getContents());
 	}
 
 	@Configuration
-	@ImportResource({"classpath:beans-short-url-services.xml","classpath:atlas-servlet.xml"})
 	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
 	public static class AtlasModuleWithLocalMongoAndFakeFetchers {
 		

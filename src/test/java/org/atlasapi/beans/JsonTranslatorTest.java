@@ -17,8 +17,6 @@ package org.atlasapi.beans;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -27,15 +25,24 @@ import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.servlet.StubHttpServletRequest;
+import com.metabroadcast.common.servlet.StubHttpServletResponse;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class JsonTranslatorTest extends TestCase {
 
-	OutputStream stream = new ByteArrayOutputStream();
-	Set<Object> graph = Sets.newHashSet();
+	private StubHttpServletRequest request;
+	private StubHttpServletResponse response;
+	private final Set<Object> graph = Sets.newHashSet();
 
+	@Override
+	public void setUp() throws Exception {
+		this.request = new StubHttpServletRequest();
+		this.response = new StubHttpServletResponse();
+	}
+	
 	public void testCanOutputSimpleItemObjectModelAsXml() throws Exception {
 
 		Item item = new Item();
@@ -45,9 +52,9 @@ public class JsonTranslatorTest extends TestCase {
 		item.addLocation(location);
 		graph.add(item);
 		
-		new JsonTranslator().writeTo(graph, stream);
+		new JsonTranslator().writeTo(request, response, graph);
 		
-		String output = stream.toString();
+		String output = response.getResponseAsString();
 		assertThat(output, containsString("\"uri\":\"http://www.bbc.co.uk/bluepeter\""));
 		assertThat(output, containsString("\"title\":\"Blue Peter\""));
 	}

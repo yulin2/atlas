@@ -3,8 +3,6 @@ package org.atlasapi.beans;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.Currency;
 import java.util.Set;
 
@@ -13,9 +11,9 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.hamcrest.Description;
@@ -28,25 +26,35 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.media.MimeType;
+import com.metabroadcast.common.servlet.StubHttpServletRequest;
+import com.metabroadcast.common.servlet.StubHttpServletResponse;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 
+	private StubHttpServletRequest request;
+	private StubHttpServletResponse response;
+
+	@Override
+	public void setUp() throws Exception {
+		this.request = new StubHttpServletRequest();
+		this.response = new StubHttpServletResponse();
+	}
+	
 	public void testTranslatesItemsInFullModel() throws Exception {
 		
-		final BeanGraphWriter xmlOutputter = mock(BeanGraphWriter.class);
-		final OutputStream stream = new ByteArrayOutputStream();
+		final AtlasModelWriter xmlOutputter = mock(AtlasModelWriter.class);
 		
 		Set<Object> graph = Sets.newHashSet();
 		graph.add(new Episode());
 		
 		checking(new Expectations() {{ 
-			one(xmlOutputter).writeTo(with(simpleGraph()), with(same(stream)));
+			one(xmlOutputter).writeTo(with(request), with(response), with(simpleGraph()));
 		}});
 		
-		new FullToSimpleModelTranslator(xmlOutputter).writeTo(graph, stream);
+		new FullToSimpleModelTranslator(xmlOutputter).writeTo(request, response, graph);
 	}
 
 	protected Matcher<Set<Object>> simpleGraph() {

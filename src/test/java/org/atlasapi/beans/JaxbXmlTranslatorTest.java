@@ -17,8 +17,6 @@ package org.atlasapi.beans;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -33,14 +31,23 @@ import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.servlet.StubHttpServletRequest;
+import com.metabroadcast.common.servlet.StubHttpServletResponse;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class JaxbXmlTranslatorTest extends TestCase {
 
-	OutputStream stream = new ByteArrayOutputStream();
+	private StubHttpServletRequest request;
+	private StubHttpServletResponse response;
 
+	@Override
+	public void setUp() throws Exception {
+		this.request = new StubHttpServletRequest();
+		this.response = new StubHttpServletResponse();
+	}
+	
 	public void testCanOutputSimpleItemObjectModelAsXml() throws Exception {
 		Set<Object> graph = Sets.newHashSet();
 
@@ -58,9 +65,9 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		result.add(item);
 		graph.add(result);
 		
-		new JaxbXmlTranslator().writeTo(graph, stream);
+		new JaxbXmlTranslator().writeTo(request, response, graph);
 		
-		String output = stream.toString();
+		String output = response.getResponseAsString();
 		assertThat(output, containsString("<play:item>" +
 											"<uri>http://www.bbc.co.uk/programmes/bluepeter</uri>" +
 				                            "<aliases>" +
@@ -105,9 +112,9 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		result.setContents(ImmutableList.<Description>of(list));
 		graph.add(result);
 		
-		new JaxbXmlTranslator().writeTo(graph, stream);
+		new JaxbXmlTranslator().writeTo(request, response, graph);
 		
-		assertThat(stream.toString(), containsString("<play:item>" +
+		assertThat(response.getResponseAsString(), containsString("<play:item>" +
 														"<aliases/>" +
 														"<clips/>" +
 														"<play:genres/>" +

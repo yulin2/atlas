@@ -14,11 +14,15 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
@@ -27,6 +31,7 @@ import org.atlasapi.query.content.fuzzy.DefuzzingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
+import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.remotesite.health.BroadcasterProbe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,6 +49,9 @@ public class QueryModule {
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	private @Autowired MongoDbBackedContentStore store;
 	private @Value("${applications.enabled}") String applicationsEnabled;
+	
+	private @Autowired ApplicationConfigurationFetcher configFetcher;
+	private @Autowired AdapterLog log;
 	
 	private @Value("${atlas.search.host}") String searchHost;
 	
@@ -94,6 +102,14 @@ public class QueryModule {
 	    } else {
 	        return brandMerger;
 	    }
+	}
+	
+	@Bean QueryController queryController() {
+		return new QueryController(queryExecutor(), configFetcher, log, atlasModelOutputter());
+	}
+
+	@Bean AtlasModelWriter atlasModelOutputter() {
+		return new DispatchingAtlasModelWriter();
 	}
 	
 }

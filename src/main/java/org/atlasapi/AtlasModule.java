@@ -22,22 +22,21 @@ import org.atlasapi.logging.HealthModule;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.properties.Configurer;
+import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
 
 @Configuration
-@ImportResource({"classpath:atlas.xml"})
-@Import({AtlasLoggingModule.class, EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class})
+@Import({AtlasLoggingModule.class, AtlasWebModule.class, EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class})
 public class AtlasModule {
 	
-	private @Value("${mongo.host}") String mongoHost;
-	private @Value("${mongo.dbName}") String dbName;
+	private final String mongoHost = Configurer.get("mongo.host").get();
+	private final String dbName = Configurer.get("mongo.dbName").get();
 
 	public @Bean DatabasedMongo mongo() {
 		try {
@@ -45,5 +44,11 @@ public class AtlasModule {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+	 
+    public @Bean ContextConfigurer config() {
+		ContextConfigurer c = new ContextConfigurer();
+		c.init();
+		return c;
 	}
 }
