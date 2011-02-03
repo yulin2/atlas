@@ -45,6 +45,7 @@ public class BbcIonServices {
         .put("bbc_parliament",  "http://www.bbc.co.uk/services/parliament")
         .put("bbc_news24",  "http://www.bbc.co.uk/services/bbcnews")
         .put("bbc_hd",          "http://www.bbc.co.uk/services/bbchd")
+        .put("cbbc",          "http://www.bbc.co.uk/services/cbbc")
         .put("cbeebies",          "http://www.bbc.co.uk/services/cbeebies")
         
         .putAll(
