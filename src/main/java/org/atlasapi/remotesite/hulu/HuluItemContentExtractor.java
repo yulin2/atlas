@@ -162,7 +162,7 @@ public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator,
 	    List<Element> elements = source.allElementsMatching("//*[@class='tags-content-cell']/a");
         Set<String> tags = Sets.newHashSet();
         for (Element element : elements) {
-            tags.add("http://ref.atlasapi.org/tags/" + element.getAttributeValue("href").replace("/search/search_tag?query=", ""));
+            tags.add(element.getAttributeValue("href").replace("/search/search_tag?query=", ""));
         }
         return tags;
 	}
