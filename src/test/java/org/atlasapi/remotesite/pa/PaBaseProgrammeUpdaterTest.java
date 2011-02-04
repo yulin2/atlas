@@ -45,8 +45,10 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertTrue(content instanceof Brand);
         Brand brand = (Brand) content;
         assertFalse(brand.getContents().isEmpty());
+        assertNotNull(brand.getImage());
         
         Item item = brand.getContents().get(0);
+        assertNotNull(item.getImage());
         assertFalse(item.getVersions().isEmpty());
         
         Version version = item.getVersions().iterator().next();

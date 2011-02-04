@@ -26,6 +26,7 @@ import org.atlasapi.remotesite.BaseSource;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.joda.time.Duration;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -37,7 +38,6 @@ import com.google.common.collect.Sets;
 public class YouTubeSource extends BaseSource {
 	
 	private static final String ATLAS_GENRES_SCHEME = "http://ref.atlasapi.org/genres/youtube/";
-	private static final String ATLAS_TAGS_SCHEME = "http://ref.atlasapi.org/tags/";
 	
 	private final VideoEntry videoEntry;
 	
@@ -135,15 +135,7 @@ public class YouTubeSource extends BaseSource {
     }
 
 	Set<String> getTags() {
-		Set<String> result = Sets.newHashSet();
-		for (String category : videoEntry.tags) {
-			try {
-				result.add(ATLAS_TAGS_SCHEME + URLEncoder.encode(category.toLowerCase(), com.google.common.base.Charsets.UTF_8.name()));
-			} catch (UnsupportedEncodingException e) {
-				throw new Defect("UTF-8 not found");
-			}
-		}
-		return result;
+		return ImmutableSet.copyOf(videoEntry.tags);
 	}
 
 	public String getThumbnailImageUri() {
