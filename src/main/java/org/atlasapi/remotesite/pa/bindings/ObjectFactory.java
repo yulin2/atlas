@@ -37,11 +37,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Picture }
+     * Create an instance of {@link PictureUsage }
      * 
      */
-    public Picture createPicture() {
-        return new Picture();
+    public PictureUsage createPicture() {
+        return new PictureUsage();
     }
 
     /**
