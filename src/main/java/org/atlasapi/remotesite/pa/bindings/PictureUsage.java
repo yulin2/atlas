@@ -10,6 +10,7 @@ package org.atlasapi.remotesite.pa.bindings;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
@@ -23,10 +24,21 @@ import javax.xml.bind.annotation.XmlValue;
     "value"
 })
 @XmlRootElement(name = "picture")
-public class Picture {
+public class PictureUsage {
 
     @XmlValue
     protected String value;
+    
+    @XmlAttribute(name="type", required=true)
+    protected String type;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     /**
      * Gets the value of the value property.
