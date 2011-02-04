@@ -114,7 +114,10 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         version.setProvider(BBC);
         if(ionVersion.getBroadcasts() != null) {
             for (IonBroadcast ionBroadcast : ionVersion.getBroadcasts()) {
-                version.addBroadcast(broadcastFrom(ionBroadcast));
+                Broadcast broadcast = broadcastFrom(ionBroadcast);
+                if(broadcast != null) {
+                    version.addBroadcast(broadcast);
+                }
             }
         }
         if(ionVersion.getOndemands() != null) {
