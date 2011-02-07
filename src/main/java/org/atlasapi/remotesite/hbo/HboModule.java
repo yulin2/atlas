@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,13 +30,16 @@ public class HboModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriters contentWriter;
     private @Autowired AdapterLog log;
+    private @Value("${hbo.enabled}") String enabled;
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(siteMapUpdater(), AT_NIGHT);
-        log.record(new AdapterLogEntry(Severity.INFO)
-            .withDescription("HBO update scheduled task installed")
-            .withSource(HboSiteMapUpdater.class));
+        if (Boolean.parseBoolean(enabled)) {
+            scheduler.schedule(siteMapUpdater(), AT_NIGHT);
+            log.record(new AdapterLogEntry(Severity.INFO)
+                .withDescription("HBO update scheduled task installed")
+                .withSource(HboSiteMapUpdater.class));
+        }
     } 
     
     public @Bean HboSiteMapUpdater siteMapUpdater() {

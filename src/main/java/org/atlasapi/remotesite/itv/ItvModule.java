@@ -10,6 +10,7 @@ import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,10 +23,13 @@ public class ItvModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriters contentWriters;
     private @Autowired AdapterLog log;
+    private @Value("${itv.enabled}") String itvEnabled;
     
     @PostConstruct 
     public void scheduleTasks() {
-        scheduler.schedule(updater(), RepetitionRules.daily(new LocalTime(4, 0, 0)));
+        if (Boolean.parseBoolean(itvEnabled)) {
+            scheduler.schedule(updater(), RepetitionRules.daily(new LocalTime(4, 0, 0)));
+        }
     }
     
     @Bean ItvUpdater updater() {

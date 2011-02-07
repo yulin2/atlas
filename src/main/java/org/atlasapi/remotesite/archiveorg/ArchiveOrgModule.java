@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,16 +29,19 @@ public class ArchiveOrgModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriters contentWriter;
     private @Autowired AdapterLog log;
+    private @Value("${archiveorg.enabled}") String enabled;
     
     private Iterable<String> playlists = ImmutableList.of("http://www.archive.org/search.php?query=collection:classic_tv", 
                                                           "http://www.archive.org/search.php?query=collection:feature_films");
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(archiveOrgPlaylistUpdater(), AT_NIGHT);
-        log.record(new AdapterLogEntry(Severity.INFO)
-            .withDescription("Archive.org update scheduled task installed")
-            .withSource(ArchiveOrgPlaylistsUpdater.class));
+        if (Boolean.parseBoolean(enabled)) {
+            scheduler.schedule(archiveOrgPlaylistUpdater(), AT_NIGHT);
+            log.record(new AdapterLogEntry(Severity.INFO)
+                .withDescription("Archive.org update scheduled task installed")
+                .withSource(ArchiveOrgPlaylistsUpdater.class));
+        }
     } 
     
     public @Bean ArchiveOrgItemAdapter archiveOrgItemAdapter() {
