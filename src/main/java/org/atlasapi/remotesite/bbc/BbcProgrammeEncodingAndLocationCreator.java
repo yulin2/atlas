@@ -40,6 +40,10 @@ public class BbcProgrammeEncodingAndLocationCreator {
         }
         return Maybe.nothing();
     }
+    
+    public Location location(IonOndemandChange ondemand) {
+        return location(ondemand, ondemand.getEpisodeId());
+    }
 
     public Location location(IonOndemandChange ondemand, String episodeId) {
         Location location = new Location();
