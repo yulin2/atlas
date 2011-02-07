@@ -2,9 +2,6 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
 import static org.hamcrest.core.AllOf.allOf;
-
-import java.util.concurrent.Executors;
-
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
@@ -43,6 +40,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private final ContentWriter writer = context.mock(ContentWriter.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
     
+    @SuppressWarnings("unchecked")
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
         final String newItemNoBrandNoSeriesJson = Resources.toString(Resources.getResource("ion-item-no-brand-no-series.json"), Charsets.UTF_8);
 
@@ -55,10 +53,11 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonScheduleUpdater(Executors.newSingleThreadExecutor(), ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
         
     }
     
+    @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandNoSeries() throws Exception {
         final String newItemNoBrandNoSeriesJson = Resources.toString(Resources.getResource("ion-item-brand-no-series.json"), Charsets.UTF_8);
 
@@ -76,9 +75,10 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdater(Executors.newSingleThreadExecutor(), ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
     }
 
+    @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
         final String newItemNoBrandNoSeriesJson = Resources.toString(Resources.getResource("ion-item-brand-series.json"), Charsets.UTF_8);
 
@@ -100,7 +100,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdater(Executors.newSingleThreadExecutor(), ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {
