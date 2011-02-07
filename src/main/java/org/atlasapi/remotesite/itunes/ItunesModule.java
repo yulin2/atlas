@@ -14,6 +14,7 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,16 +32,19 @@ public class ItunesModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriters contentWriter;
     private @Autowired AdapterLog log;
+    private @Value("${itunes.enabled") String enabled;
     
     private Set<String> feeds = ImmutableSet.of("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toptvseasons/sf=143444/limit=300/xml",
                                                 "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toptvepisodes/sf=143444/limit=300/xml");
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(itunesRssUpdater(), AT_NIGHT);
-        log.record(new AdapterLogEntry(Severity.INFO)
-            .withDescription("iTunes update scheduled task installed")
-            .withSource(ItunesRssUpdater.class));
+        if (Boolean.parseBoolean(enabled)) {
+            scheduler.schedule(itunesRssUpdater(), AT_NIGHT);
+            log.record(new AdapterLogEntry(Severity.INFO)
+                .withDescription("iTunes update scheduled task installed")
+                .withSource(ItunesRssUpdater.class));
+        }
     } 
     
     public @Bean ItunesRssUpdater itunesRssUpdater() {
