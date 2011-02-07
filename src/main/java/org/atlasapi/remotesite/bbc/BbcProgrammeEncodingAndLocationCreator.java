@@ -8,6 +8,7 @@ import org.atlasapi.remotesite.bbc.ion.IonService;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.joda.time.Interval;
 
+import com.google.common.base.Preconditions;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
 
@@ -19,13 +20,19 @@ public class BbcProgrammeEncodingAndLocationCreator {
     public BbcProgrammeEncodingAndLocationCreator(Clock clock) {
         this.clock = clock;
     }
-
+    
     public Encoding createEncoding(IonOndemandChange ondemand) {
+        return createEncoding(ondemand, ondemand.getEpisodeId());
+    }
+
+    public Encoding createEncoding(IonOndemandChange ondemand, String episodeId) {
+        Preconditions.checkNotNull(episodeId);
+        
         Maybe<IonService> ionService = IonService.fromString(ondemand.getService());
         if(ionService.hasValue()) {
             Encoding encoding = new Encoding();
             encoding.setCanonicalUri(SLASH_PROGRAMMES_ROOT+ondemand.getId());
-            encoding.addAvailableAt(location(ondemand));
+            encoding.addAvailableAt(location(ondemand, episodeId));
             
             IonService requiredIonService = ionService.requireValue();
             requiredIonService.applyToEncoding(encoding);
@@ -34,7 +41,7 @@ public class BbcProgrammeEncodingAndLocationCreator {
         return null;
     }
 
-    public Location location(IonOndemandChange ondemand) {
+    public Location location(IonOndemandChange ondemand, String episodeId) {
         Location location = new Location();
 
         Policy policy = policyFrom(ondemand);
@@ -43,7 +50,7 @@ public class BbcProgrammeEncodingAndLocationCreator {
         location.setAvailable(availableNow(policy));
         location.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ondemand.getId());
         location.setTransportType(TransportType.LINK);
-        location.setUri("http://www.bbc.co.uk/iplayer/episode/"+ondemand.getEpisodeId());
+        location.setUri("http://www.bbc.co.uk/iplayer/episode/"+episodeId);
 
         return location;
     }
