@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.bbc;
 
 import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.remotesite.HttpClients.webserviceClient;
 import static org.atlasapi.remotesite.bbc.BbcUriCanonicaliser.bbcProgrammeIdFrom;
 import static org.joda.time.Duration.standardSeconds;
 
@@ -42,7 +43,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcProgrammeSource.ClipAndVersion;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
@@ -59,6 +59,7 @@ import org.joda.time.LocalDate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.reflect.TypeToken;
@@ -101,17 +102,19 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
         SlashProgrammesRdf episode = source.episode();
 
-
         Item item = item(episodeUri, episode);
         
         IonEpisodeDetail episodeDetail = getEpisodeDetail(episodeUri);
         
-        Map<String, IonVersion> ionVersions = Maps.uniqueIndex(episodeDetail.getVersions(), new Function<IonVersion, String>() {
-            @Override
-            public String apply(IonVersion input) {
-                return SLASH_PROGRAMMES_ROOT+input.getId();
-            }
-        });
+        Map<String, IonVersion> ionVersions = ImmutableMap.of();
+        if(episodeDetail != null) {
+            ionVersions = Maps.uniqueIndex(episodeDetail.getVersions(), new Function<IonVersion, String>() {
+                @Override
+                public String apply(IonVersion input) {
+                    return SLASH_PROGRAMMES_ROOT+input.getId();
+                }
+            });
+        }
 
         if (source.versions() != null && !source.versions().isEmpty()) {
         	
@@ -164,7 +167,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
     private IonEpisodeDetail getEpisodeDetail(String episodeUri) {
         try {
-            return ionDeserialiser.deserialise(HttpClients.webserviceClient().getContentsOf(String.format(EPISODE_DETAIL_PATTERN, bbcProgrammeIdFrom(episodeUri)))).getBlocklist().get(0);
+            List<IonEpisodeDetail> episodeDetailList = ionDeserialiser.deserialise(webserviceClient().getContentsOf(String.format(EPISODE_DETAIL_PATTERN, bbcProgrammeIdFrom(episodeUri)))).getBlocklist();
+            if (episodeDetailList == null || episodeDetailList.isEmpty()) {
+                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Could get episode detail for " + episodeUri));
+                return null;
+            } else {
+                return episodeDetailList.get(0);
+            }
         } catch (HttpException e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Could get episode detail for " + episodeUri));
             return null;
