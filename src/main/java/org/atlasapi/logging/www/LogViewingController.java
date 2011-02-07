@@ -7,11 +7,15 @@ import java.util.Map;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.LogReader;
 import org.atlasapi.persistence.logging.AdapterLogEntry.ExceptionSummary;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
@@ -28,9 +32,45 @@ public class LogViewingController {
 	}
 	
 	@RequestMapping("/system/log")
-	public String showLog(Map<String, Object> model) throws IOException {
-		model.put("logEntries", toModel(Iterables.limit(log.read(), MAX_LOG_ENTRIES_TO_SHOW)));
+	public String showLog(Map<String, Object> model, @RequestParam(required=false) String source, @RequestParam(required=false, value="level") String severityString) throws IOException {
+		model.put("logEntries", toModel(Iterables.limit(filter(source, toSeverity(severityString)), MAX_LOG_ENTRIES_TO_SHOW)));
 		return "system/log/show";
+	}
+
+	private static Severity toSeverity(String severityString) {
+		if (severityString == null) {
+			return null;
+		}
+		return Severity.valueOf(severityString.toUpperCase());
+	}
+
+	private Iterable<AdapterLogEntry> filter(final String source, final Severity severity) {
+		
+		Predicate<AdapterLogEntry> filter = Predicates.alwaysTrue();
+		
+		Predicate<AdapterLogEntry> sourceFilter = new Predicate<AdapterLogEntry>() {
+
+			@Override
+			public boolean apply(AdapterLogEntry entry) {
+				return entry.classNameOfSource() != null && entry.classNameOfSource().startsWith(source);
+			}
+		};
+		
+		Predicate<AdapterLogEntry> severityFilter = new Predicate<AdapterLogEntry>() {
+			
+			@Override
+			public boolean apply(AdapterLogEntry entry) {
+				return entry.severity().isMoreSevereOrSameAs(severity);
+			}
+		};
+		
+		if (source != null) {
+			filter = Predicates.and(filter, sourceFilter);
+		}
+		if (severity != null) {
+			filter = Predicates.and(filter, severityFilter);
+		}
+		return Iterables.filter(log.read(), filter);
 	}
 	
 	@RequestMapping("/system/log/{id}/trace")
