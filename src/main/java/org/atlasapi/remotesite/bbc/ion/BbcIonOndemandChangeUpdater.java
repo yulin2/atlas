@@ -15,17 +15,23 @@ import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Ordering;
+import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class BbcIonOndemandChangeUpdater implements Runnable {
 
-    private final static String CHANGES_URL = "http://www.bbc.co.uk/iplayer/ion/ondemand/change/from_datetime/%S/format/json";
+    private static final int MAX_RETRIES = 3;
+    
+	private final static String CHANGES_URL = "http://www.bbc.co.uk/iplayer/ion/ondemand/change/from_datetime/%S/format/json";
     public final static String SLASH_PROGRAMMES_BASE = "http://www.bbc.co.uk/programmes/";
 
-    private final SimpleHttpClient httpClient = new SimpleHttpClientBuilder().withUserAgent(ATLAS_USER_AGENT)
-        .withConnectionTimeout(60, SECONDS).withSocketTimeout(60, SECONDS).withRetries(3).build();
+    private final SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
+    	.withUserAgent(ATLAS_USER_AGENT)
+        .withConnectionTimeout(60, SECONDS)
+        .withSocketTimeout(60, SECONDS).build();
+    
     private final ContentResolver localFetcher;
     private final ContentWriter writer;
     private final AdapterLog log;
@@ -47,7 +53,7 @@ public class BbcIonOndemandChangeUpdater implements Runnable {
             isRunning = true;
             try {
                 DateTime limitedLastRun = Ordering.natural().max(new DateTime(DateTimeZones.UTC).minusHours(2), lastRun);
-                String json = httpClient.getContentsOf(String.format(CHANGES_URL, limitedLastRun.toString()));
+                String json = fetch(limitedLastRun);
                 IonOndemandChanges changes = deserialiser.deserialise(json);
 
                 for (IonOndemandChange change : changes.getBlocklist()) {
@@ -73,4 +79,25 @@ public class BbcIonOndemandChangeUpdater implements Runnable {
         }
     }
 
+	private String fetch(DateTime limitedLastRun) throws HttpException {
+		for (int i = 0; i < MAX_RETRIES; i++) {
+			try {
+				return httpClient.getContentsOf(String.format(CHANGES_URL, limitedLastRun.toString()));
+			} catch (HttpException e) {
+				if (e.wasNotFound()) {
+					throw e;
+				}
+				// throw if no more retries
+				if (i == (MAX_RETRIES - 1)) {
+					throw e;
+				}
+				// ignore and try again
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException ex) {}
+			}
+		}
+		// should never reach here
+		throw new IllegalStateException();
+	}
 }
