@@ -41,7 +41,7 @@ public class AtlasMain {
 		final SelectChannelConnector connector = new SelectChannelConnector();
 		connector.setPort(port);
 		
-		connector.setAcceptQueueSize(2048);
+		connector.setAcceptQueueSize(200);
 		
 		connector.setThreadPool(new QueuedThreadPool(500));
 		
@@ -54,5 +54,4 @@ public class AtlasMain {
 		server.setConnectors(new Connector[] { connector });
 		return server;
 	}
-
 }
