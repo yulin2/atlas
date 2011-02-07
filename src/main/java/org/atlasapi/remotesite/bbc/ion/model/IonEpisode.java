@@ -26,7 +26,7 @@ public class IonEpisode {
     private Boolean isAvailableMediasetPcHd;
     private String partner;
     private Boolean isDelayed;
-    private Integer availableSiblingCount;
+    private Long availableSiblingCount;
     private String myShortUrl;
     private Boolean isFilm;
     private String contextualFamilyTree;
@@ -56,14 +56,14 @@ public class IonEpisode {
     private Boolean isFree;
     private Boolean isClip;
     private String brandTitle;
-    private Integer duration;
+    private Long duration;
     private String subseriesId;
     private String hierarchicalTitle;
     private String type;
     private String brandId;
     private String myUrl;
     private DateTime originalBroadcastDatetime;
-    private Integer position;
+    private Long position;
     private String seriesTitle;
     private Boolean isAvailableMediasetStbHd;
     private String availability;
@@ -148,7 +148,7 @@ public class IonEpisode {
         return isDelayed;
     }
 
-    public Integer getAvailableSiblingCount() {
+    public Long getAvailableSiblingCount() {
         return availableSiblingCount;
     }
 
@@ -268,7 +268,7 @@ public class IonEpisode {
         return brandTitle;
     }
 
-    public Integer getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
@@ -296,7 +296,7 @@ public class IonEpisode {
         return originalBroadcastDatetime;
     }
 
-    public Integer getPosition() {
+    public Long getPosition() {
         return position;
     }
 
@@ -339,9 +339,9 @@ public class IonEpisode {
     public static class IonCategory {
         private String shortName;
         private String path;
-        private Integer episodeCount;
+        private Long episodeCount;
         private String parentId;
-        private Integer level;
+        private Long level;
         private String text;
         private DateTime updated;
         private String type;
@@ -356,7 +356,7 @@ public class IonEpisode {
             return path;
         }
 
-        public Integer getEpisodeCount() {
+        public Long getEpisodeCount() {
             return episodeCount;
         }
 
@@ -364,7 +364,7 @@ public class IonEpisode {
             return parentId;
         }
 
-        public Integer getLevel() {
+        public Long getLevel() {
             return level;
         }
 

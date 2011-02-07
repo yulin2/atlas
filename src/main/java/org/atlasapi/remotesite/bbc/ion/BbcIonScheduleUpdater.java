@@ -36,6 +36,7 @@ import org.joda.time.format.PeriodFormat;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.time.DateTimeZones;
 
@@ -209,8 +210,8 @@ public class BbcIonScheduleUpdater implements Runnable {
         private void updateEpisodeDetails(Episode item, IonBroadcast broadcast) {
             // not sure how useful this is. there isn't mush else we can do.
             IonEpisode episode = broadcast.getEpisode();
-            if (Strings.isNullOrEmpty(episode.getSubseriesId())) {
-                item.setEpisodeNumber(episode.getPosition());
+            if (Strings.isNullOrEmpty(episode.getSubseriesId()) && episode.getPosition() != null) {
+                item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
             }
         }
 

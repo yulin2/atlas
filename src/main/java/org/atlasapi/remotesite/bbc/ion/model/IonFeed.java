@@ -6,7 +6,7 @@ import org.joda.time.DateTime;
 
 public class IonFeed<T> {
 
-    private Integer count;
+    private Long count;
     private DateTime updated;
     private String type;
     private String id;
@@ -18,7 +18,7 @@ public class IonFeed<T> {
 
     private List<T> blocklist;
     
-    public Integer getCount() {
+    public Long getCount() {
         return count;
     }
 

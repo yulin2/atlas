@@ -7,7 +7,7 @@ import org.joda.time.DateTime;
 public class IonVersion {
     private String mostRecentBroadcastService;
     private String aspectRatio;
-    private Integer downloadSizeElektraHd;
+    private Long downloadSizeElektraHd;
     private Boolean isAvailableMediasetStbSd;
     private Boolean isOriginal;
     private String firstBroadcastServiceTitle;
@@ -18,17 +18,17 @@ public class IonVersion {
     private DateTime ondemandStart;
     private DateTime ondemandScheduledStart;
     private Boolean isAvailableVp6Stream;
-    private Integer downloadSizeHttpWmv;
+    private Long downloadSizeHttpWmv;
     private DateTime updated;
     private String id;
     private Boolean isAvailableStreamingHd;
     private String soundFormat;
-    private Integer downloadSizeKontikiWmv;
+    private Long downloadSizeKontikiWmv;
     private String firstBroadcastService;
-    private Integer duration;
+    private Long duration;
     private Boolean isAudiodescribed;
     private Boolean isAvailableKontikiWmv;
-    private Integer downloadSizeElektraSd;
+    private Long downloadSizeElektraSd;
     private String guidanceCode;
     private String type;
     private Boolean isAvailableMediasetPcHd;
@@ -40,7 +40,7 @@ public class IonVersion {
     private String versionTypeString;
     private Boolean isAvailableMediasetStbHd;
     private Boolean isAvailableHttpWmv;
-    private Integer downloadSizeIplayerMobileWmv;
+    private Long downloadSizeIplayerMobileWmv;
     private String availability;
     private Boolean isAvailableMediasetPcSd;
     private Boolean isAvailableH264Stream;
@@ -60,7 +60,7 @@ public class IonVersion {
         return aspectRatio;
     }
 
-    public Integer getDownloadSizeElektraHd() {
+    public Long getDownloadSizeElektraHd() {
         return downloadSizeElektraHd;
     }
 
@@ -104,7 +104,7 @@ public class IonVersion {
         return isAvailableVp6Stream;
     }
 
-    public Integer getDownloadSizeHttpWmv() {
+    public Long getDownloadSizeHttpWmv() {
         return downloadSizeHttpWmv;
     }
 
@@ -124,7 +124,7 @@ public class IonVersion {
         return soundFormat;
     }
 
-    public Integer getDownloadSizeKontikiWmv() {
+    public Long getDownloadSizeKontikiWmv() {
         return downloadSizeKontikiWmv;
     }
 
@@ -132,7 +132,7 @@ public class IonVersion {
         return firstBroadcastService;
     }
 
-    public Integer getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
@@ -144,7 +144,7 @@ public class IonVersion {
         return isAvailableKontikiWmv;
     }
 
-    public Integer getDownloadSizeElektraSd() {
+    public Long getDownloadSizeElektraSd() {
         return downloadSizeElektraSd;
     }
 
@@ -192,7 +192,7 @@ public class IonVersion {
         return isAvailableHttpWmv;
     }
 
-    public Integer getDownloadSizeIplayerMobileWmv() {
+    public Long getDownloadSizeIplayerMobileWmv() {
         return downloadSizeIplayerMobileWmv;
     }
 

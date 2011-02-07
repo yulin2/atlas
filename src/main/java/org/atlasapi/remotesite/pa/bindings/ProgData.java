@@ -26,7 +26,6 @@ import javax.xml.bind.annotation.XmlType;
     "progId",
     "seriesId",
     "rtFilmnumber",
-    "picture",
     "date",
     "time",
     "duration",
@@ -53,7 +52,8 @@ import javax.xml.bind.annotation.XmlType;
     "videoplus",
     "attr",
     "roviGenre",
-    "roviDescription"
+    "roviDescription",
+    "pictures"
 })
 @XmlRootElement(name = "prog_data")
 public class ProgData {
@@ -66,7 +66,8 @@ public class ProgData {
     protected String seriesId;
     @XmlElement(name = "rt_filmnumber")
     protected String rtFilmnumber;
-    protected List<Picture> picture;
+    @XmlElement(name = "pictures")
+    protected Pictures pictures;
     @XmlElement(required = true)
     protected String date;
     @XmlElement(required = true)
@@ -226,15 +227,12 @@ public class ProgData {
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Picture }
+     * {@link PictureUsage }
      * 
      * 
      */
-    public List<Picture> getPicture() {
-        if (picture == null) {
-            picture = new ArrayList<Picture>();
-        }
-        return this.picture;
+    public Pictures getPictures() {
+        return pictures;
     }
 
     /**

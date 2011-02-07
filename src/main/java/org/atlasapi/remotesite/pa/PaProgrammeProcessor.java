@@ -20,6 +20,7 @@ import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.Category;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
+import org.atlasapi.remotesite.pa.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -35,6 +36,7 @@ import com.metabroadcast.common.base.Maybe;
 public class PaProgrammeProcessor {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
+    private static final String PA_BASE_IMAGE_URL = "http://ref.atlasapi.org/images/";
     private static final String BROADCAST_ID_PREFIX = "pa:";
     private static final String YES = "yes";
     
@@ -111,11 +113,17 @@ public class PaProgrammeProcessor {
         brand.setSpecialization(specialization(progData));
         brand.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
 
-        /*
-         * Pictures currently have no path List<Picture> pictures =
-         * progData.getPicture(); for (Picture picture : pictures) {
-         * picture.getvalue(); }
-         */
+        if (progData.getPictures() != null) {
+            for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
+                if (picture.getType().equals("season") && brand.getImage() == null){
+                    brand.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                }
+                if (picture.getType().equals("series")){
+                    brand.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                    break;
+                }
+            }
+        }
 
         return Maybe.just(brand);
     }
@@ -138,6 +146,18 @@ public class PaProgrammeProcessor {
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData));
         series.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
+        
+        if (progData.getPictures() != null) {
+            for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
+                if (picture.getType().equals("series") && series.getImage() == null){
+                    series.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                }
+                if (picture.getType().equals("season")){
+                    series.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                    break;
+                }
+            }
+        }
 
         return Maybe.just(series);
     }
@@ -188,8 +208,21 @@ public class PaProgrammeProcessor {
         episode.setSpecialization(specialization(progData));
         episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
 
-        // episode.setImage(image);
-        // episode.setThumbnail(thumbnail);
+        if (progData.getPictures() != null) {
+            for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
+                if (picture.getType().equals("series") && episode.getImage() == null){
+                    episode.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                }
+                if (picture.getType().equals("season") && episode.getImage() == null){
+                    episode.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                }
+                if (picture.getType().equals("episode")){
+                    episode.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                    break;
+                }
+            }
+        }
+
 
         Version version = findBestVersion(episode.getVersions());
 

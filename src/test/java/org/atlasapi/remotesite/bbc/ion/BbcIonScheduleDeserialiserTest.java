@@ -25,7 +25,7 @@ public class BbcIonScheduleDeserialiserTest extends TestCase {
         
         IonSchedule schedule = deserialiser.deserialise(json);
         
-        assertThat(schedule.getCount(), is(38));
+        assertThat(schedule.getCount(), is(38L));
         
         assertThat(schedule.getLink().getRel(), is("self"));
         
@@ -43,7 +43,7 @@ public class BbcIonScheduleDeserialiserTest extends TestCase {
        
         IonFeed<IonEpisodeDetail> schedule = deserialiser.deserialise(json);
         
-        assertThat(schedule.getCount(), is(1));
+        assertThat(schedule.getCount(), is(1L));
         
         assertThat(schedule.getLink().getRel(), is("self"));
         
