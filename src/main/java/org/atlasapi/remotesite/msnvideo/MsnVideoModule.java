@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -28,13 +29,16 @@ public class MsnVideoModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriters contentWriters;
     private @Autowired AdapterLog log;
+    private @Value("${msn.enabled}") String enabled;
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(msnVideoAllShowsUpdater(), AT_NIGHT);
-        log.record(new AdapterLogEntry(Severity.INFO)
-            .withDescription("MSN Video update scheduled task installed")
-            .withSource(MsnVideoAllShowsUpdater.class));
+        if (Boolean.parseBoolean(enabled)) {
+            scheduler.schedule(msnVideoAllShowsUpdater(), AT_NIGHT);
+            log.record(new AdapterLogEntry(Severity.INFO)
+                .withDescription("MSN Video update scheduled task installed")
+                .withSource(MsnVideoAllShowsUpdater.class));
+        }
     }   
     
     public @Bean MsnVideoAllShowsUpdater msnVideoAllShowsUpdater() {

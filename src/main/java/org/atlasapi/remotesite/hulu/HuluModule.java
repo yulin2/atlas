@@ -9,6 +9,7 @@ import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,12 +22,15 @@ public class HuluModule {
 
 	private @Autowired ContentWriters writers;
 	private @Autowired SimpleScheduler scheduler;
+	private @Value("${hulu.enabled}") String enabled;
 	
 	private LocalTime when = new LocalTime(2, 0, 0);
 	
 	@PostConstruct
 	public void startTasks() {
-		scheduler.schedule(huluAllBrandsUpdater(), RepetitionRules.daily(when));
+	    if (Boolean.parseBoolean(enabled)) {
+	        scheduler.schedule(huluAllBrandsUpdater(), RepetitionRules.daily(when));
+	    }
 	}
 	
 	public List<SiteSpecificAdapter<? extends Identified>> adapters() {

@@ -42,27 +42,22 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class BbcIonScheduleUpdater implements Runnable {
 
+    private static final int THREADS = 5;
     private final Iterable<String> uriSource;
     private final ContentResolver localFetcher;
     private final AdapterLog log;
 
     private final ContentWriter writer;
     private final BbcIonDeserializer<IonSchedule> deserialiser;
-    private final ExecutorService executor;
     private BbcItemFetcherClient fetcherClient;
     private SimpleHttpClient httpClient;
 
-    public BbcIonScheduleUpdater(ExecutorService executor, Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
-        this.executor = executor;
+    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
         this.uriSource = uriSource;
         this.localFetcher = localFetcher;
         this.writer = writer;
         this.deserialiser = deserialiser;
         this.log = log;
-    }
-    
-    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
-        this(Executors.newFixedThreadPool(5), uriSource,localFetcher, writer,deserialiser, log);
     }
 
     public BbcIonScheduleUpdater withItemFetchClient(BbcItemFetcherClient fetcherClient) {
@@ -80,9 +75,12 @@ public class BbcIonScheduleUpdater implements Runnable {
         DateTime start = new DateTime(DateTimeZones.UTC);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update initiated"));
 
+        ExecutorService executor = Executors.newFixedThreadPool(THREADS);
+        
         for (String uri : uriSource) {
             executor.submit(new BbcIonScheduleUpdateTask(uri,this.httpClient != null ? this.httpClient : HttpClients.webserviceClient()));
         }
+        
         executor.shutdown();
         boolean completion = false;
         try {
