@@ -246,7 +246,7 @@ public class BbcIonScheduleUpdater implements Runnable {
         }
 
         private Version getBroadcastVersion(Item item, IonBroadcast ionBroadcast) {
-            for (Version version : item.getVersions()) {
+            for (Version version : item.nativeVersions()) {
                 if (version.getCanonicalUri().equals(SLASH_PROGRAMMES_ROOT + ionBroadcast.getVersionId())) {
                     return version;
                 }
