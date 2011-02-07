@@ -29,7 +29,7 @@ public class BbcIonServices {
         .put("bbc_one_cambridge",  "http://www.bbc.co.uk/services/bbcone/cambridge")
         .put("bbc_one_channel_islands",  "http://www.bbc.co.uk/services/bbcone/channel_islands")
         .put("bbc_one_east_yorkshire",  "http://www.bbc.co.uk/services/bbcone/east_yorkshire")
-        .put("bbc_one_northern_island",  "http://www.bbc.co.uk/services/bbcone/ni")
+        .put("bbc_one_northern_ireland",  "http://www.bbc.co.uk/services/bbcone/ni")
         .put("bbc_one_wales",  "http://www.bbc.co.uk/services/bbcone/wales")
         
         .put("bbc_two", "http://www.bbc.co.uk/services/bbctwo")

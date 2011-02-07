@@ -6,7 +6,7 @@ import org.joda.time.DateTime;
 
 public class IonSchedule {
 
-    private Integer count;
+    private Long count;
     private DateTime updated;
     private String type;
     private String id;
@@ -22,7 +22,7 @@ public class IonSchedule {
     public IonSchedule() {
     }
 
-    public Integer getCount() {
+    public Long getCount() {
         return count;
     }
 

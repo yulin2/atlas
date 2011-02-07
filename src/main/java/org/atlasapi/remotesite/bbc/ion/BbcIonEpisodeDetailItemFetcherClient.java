@@ -21,6 +21,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
 
 import com.google.common.base.Strings;
+import com.google.common.primitives.Ints;
 import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
@@ -74,7 +75,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
             item.setSeriesUri(SLASH_PROGRAMMES_ROOT + episodeDetail.getSeriesId());
         }
         if(Strings.isNullOrEmpty(episodeDetail.getSubseriesId()) && episodeDetail.getPosition() != null) {
-            item.setSeriesNumber(episodeDetail.getPosition());
+            item.setSeriesNumber(Ints.saturatedCast(episodeDetail.getPosition()));
         }
     }
 
@@ -110,7 +111,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private Version versionFrom(IonVersion ionVersion) {
         Version version = new Version();
         version.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ionVersion.getId());
-        version.setPublishedDuration(ionVersion.getDuration());
+        version.setPublishedDuration(ionVersion.getDuration() != null ? Ints.saturatedCast(ionVersion.getDuration()) : null);
         version.setProvider(BBC);
         if(ionVersion.getBroadcasts() != null) {
             for (IonBroadcast ionBroadcast : ionVersion.getBroadcasts()) {

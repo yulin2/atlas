@@ -6,7 +6,7 @@ import org.joda.time.DateTime;
 
 public class IonOndemandChanges {
 
-    private Integer count;
+    private Long count;
     private DateTime updated;
     private String type;
     private String id;
@@ -23,7 +23,7 @@ public class IonOndemandChanges {
     public IonOndemandChanges() {
     }
 
-    public Integer getCount() {
+    public Long getCount() {
         return count;
     }
 

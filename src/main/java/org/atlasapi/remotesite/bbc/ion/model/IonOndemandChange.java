@@ -6,7 +6,7 @@ import org.joda.time.DateTime;
 
 public class IonOndemandChange {
     private String versionCrid;
-    private Integer fileSize;
+    private Long fileSize;
     private String oid;
     private Set<IonMediaSet> mediaSets;
     private DateTime discoverableEnd;
@@ -21,7 +21,7 @@ public class IonOndemandChange {
     private DateTime actualStart;
     private String lastChange;
     private String publicationEventId;
-    private Integer duration;
+    private Long duration;
     private String versionId;
     private String service;
     private DateTime end;
@@ -36,7 +36,7 @@ public class IonOndemandChange {
     public String getVersionCrid() {
         return versionCrid;
     }
-    public Integer getFileSize() {
+    public Long getFileSize() {
         return fileSize;
     }
     public String getOid() {
@@ -81,7 +81,7 @@ public class IonOndemandChange {
     public String getPublicationEventId() {
         return publicationEventId;
     }
-    public Integer getDuration() {
+    public Long getDuration() {
         return duration;
     }
     public String getVersionId() {

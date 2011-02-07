@@ -16,7 +16,7 @@ public class IonBroadcast {
     private IonEpisode episode;
     private String myurl;
     private Boolean isRepeat;
-    private Integer duration;
+    private Long duration;
     private Boolean isAudiodescribed;
     private String versionId;
     private String service;
@@ -79,7 +79,7 @@ public class IonBroadcast {
         return isRepeat;
     }
 
-    public Integer getDuration() {
+    public Long getDuration() {
         return duration;
     }
 

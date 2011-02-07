@@ -21,7 +21,7 @@ public class BbcIonOndemandChangeDeserialiserTest extends TestCase {
         
         IonOndemandChanges schedule = deserialiser.deserialise(json);
         
-        assertThat(schedule.getCount(), is(500));
+        assertThat(schedule.getCount(), is(500L));
         
         assertThat(schedule.getLink().getRel(), is("self"));
         
