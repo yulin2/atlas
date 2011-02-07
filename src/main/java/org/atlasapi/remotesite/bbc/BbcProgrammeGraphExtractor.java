@@ -157,7 +157,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         Set<Encoding> encodings = Sets.newHashSetWithExpectedSize(ondemands.size());
         for (IonOndemandChange ondemand : ondemands) {
             
-            Maybe<Encoding> encoding = encodingCreator.createEncoding(ondemand);
+            Maybe<Encoding> encoding = encodingCreator.createEncoding(ondemand, pid);
             if(encoding.hasValue()) {
                 encodings.add(encoding.requireValue());
             }
