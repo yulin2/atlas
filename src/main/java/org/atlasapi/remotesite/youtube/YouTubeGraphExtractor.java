@@ -46,6 +46,9 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 	
 	@Override
 	public Item extract(YouTubeSource source) {
+	    if (source == null) {
+	        return null;
+	    }
 		
 		Set<Encoding> encodings = Sets.newHashSet();
 		for (Video video : source.getVideos()) {
