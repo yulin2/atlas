@@ -79,7 +79,10 @@ public class C4FourOdEpisodesExtractorTest extends MockObjectTestCase {
 		Episode episodeWithABroadcast = (Episode) Iterables.get(episodes, 4);
 		Version episodeWithABroadcastVersion = Iterables.get(episodeWithABroadcast.getVersions(), 0);
 		Broadcast episodeWithABroadcastBroadcast = Iterables.get(episodeWithABroadcastVersion.getBroadcasts(), 0);
+		Location locationWithBroadcast = Iterables.get(Iterables.get(episodeWithABroadcastVersion.getManifestedAs(), 0).getAvailableAt(), 0);
+		
 		assertThat(episodeWithABroadcastBroadcast.getTransmissionTime(), is(new DateTime("2009-06-10T23:05:00.000Z")));
+		assertThat(locationWithBroadcast.getPolicy().getAvailabilityStart(), is(new DateTime("2009-06-10T23:05:00.000Z")));
 		assertThat(episodeWithABroadcastBroadcast.getBroadcastOn(), is("http://www.channel4.com/more4"));
 	}
 }
