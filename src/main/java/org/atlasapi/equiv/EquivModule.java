@@ -25,6 +25,7 @@ import org.atlasapi.persistence.equiv.MongoEquivStore;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,6 +37,7 @@ public class EquivModule {
 
 	private @Autowired DatabasedMongo db;
 	private @Autowired AggregateContentListener aggregateContentListener;
+	private @Value("${freebase.enabled}") String freebaseEnabled;
 	
 	@Bean EquivController manualEquivAssignmentController() {
 		return new EquivController(store());
@@ -46,7 +48,9 @@ public class EquivModule {
 	}
 	
 	@Bean EquivContentListener equivContentListener() {
-	    List<EquivGenerator<Container<?>>> brandEquivGenerators = ImmutableList.<EquivGenerator<Container<?>>>of(new FreebaseBrandEquivGenerator());
+	    List<EquivGenerator<Container<?>>> brandEquivGenerators = Boolean.parseBoolean(freebaseEnabled) 
+	            ? ImmutableList.<EquivGenerator<Container<?>>>of(new FreebaseBrandEquivGenerator())
+	            : ImmutableList.<EquivGenerator<Container<?>>>of();
 	    
 	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators, store());
 	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());
