@@ -30,13 +30,9 @@
         <init-param>
             <param-name>contextClass</param-name>
             <param-value>
-                org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+               org.atlasapi.ConfigurableAnnotationWebApplicationContext
             </param-value>
         </init-param>
-        <init-param>
-            <param-name>contextConfigLocation</param-name>
-            <param-value>org.atlasapi.AtlasModule</param-value>
-        </init-param> 
     </servlet>
 
     <servlet-mapping>
