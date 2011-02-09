@@ -36,7 +36,7 @@ import com.metabroadcast.common.base.Maybe;
 public class PaProgrammeProcessor {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
-    private static final String PA_BASE_IMAGE_URL = "http://ref.atlasapi.org/images/";
+    private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
     private static final String BROADCAST_ID_PREFIX = "pa:";
     private static final String YES = "yes";
     
