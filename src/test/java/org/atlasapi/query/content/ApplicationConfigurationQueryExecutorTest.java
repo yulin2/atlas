@@ -251,15 +251,11 @@ public class ApplicationConfigurationQueryExecutorTest extends TestCase {
 	}
 	
 	public void testBrandPassesFilterWhereAllItemsFailFilterWhenQueryDoesntSpecifyItemOrBelow() {
-		ApplicationConfiguration config = ApplicationConfiguration.DEFAULT_CONFIGURATION;
-		config = config.copyWithIncludedPublishers(ImmutableSet.of(Publisher.C4));
+		ApplicationConfiguration config = includingPublishers(Publisher.C4);
 		
 		Episode uglyBettyHulu = new Episode("http://www.hulu.com/uglybetty/one", "hulu:ugly-betty-one", Publisher.HULU);
-		uglyBettyHulu.setTitle("Ugly Betty Episode One");
 		
 		Brand ubC4 = new Brand("http://www.channel4.com/uglybetty", "c4:ugly-betty", Publisher.C4);
-		ubC4.setDescription("blah blah blah");
-		ubC4.setTitle("Ugly Betty");
 		ubC4.setContents(uglyBettyHulu);
 		
 		store.createOrUpdate(ubC4, true);
