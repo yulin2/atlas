@@ -17,6 +17,7 @@ package org.atlasapi;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.query.v2.QueryController;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -28,6 +29,6 @@ public class SpringTest extends TestCase {
 
 	public void testCanCreateQueryController() throws Exception {
 		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AtlasModule.class);
-		applicationContext.getBean("newQueryApiController");
+		applicationContext.getBean(QueryController.class);
 	}
 }

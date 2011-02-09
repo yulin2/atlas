@@ -25,6 +25,7 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -68,7 +69,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 
 		boolean foundAtLeastOneUri = false;
 		
-		List<String> resolvedUris = Lists.newArrayList();
+		List<String> resolvedUris = found.isEmpty() ? Lists.<String>newArrayList() : Lists.newArrayList(Iterables.transform(found, Identified.TO_URI));
 		
 		for (String missingUri : missingUris) {
 			Identified remoteContent = fetcher.fetch(missingUri);
@@ -80,8 +81,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 			}
 		}
 		
-		// If we couldn't resolve any of the missing uris then we should just return the 
-		// results of the original query
+		// If we couldn't resolve any of the missing uris then we should just return the results of the original query
 		if (!foundAtLeastOneUri) {
 			return found;
 		}

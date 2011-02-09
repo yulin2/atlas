@@ -44,8 +44,8 @@ public class YouTubeSourceTest extends TestCase {
 				
 		YouTubeSource source = new YouTubeSource(entry, "uri");
 		assertThat(source.getCategories(), hasItem("http://ref.atlasapi.org/genres/youtube/News"));
-		assertThat(source.getTags(), hasItem("http://ref.atlasapi.org/tags/funny"));
-		assertThat(source.getTags(), not(hasItem("http://ref.atlasapi.org/tags/news")));
+		assertThat(source.getTags(), hasItem("Funny"));
+		assertThat(source.getTags(), not(hasItem("News")));
 	}
 	
 	public void testStripsParametersFromLocationUris() throws Exception {
