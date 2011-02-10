@@ -125,8 +125,8 @@ public class BbcIonScheduleUpdater implements Runnable {
                     updateItemDetails(item, broadcast);
                     if (item instanceof Episode) {
                         updateEpisodeDetails((Episode) item, broadcast);
-                    } else {
-                        log.record(new AdapterLogEntry(Severity.INFO).withDescription("Trying to update item: " + item.getCanonicalUri() + " that turned out to be a "+item.getClass().getSimpleName()).withSource(getClass()));
+                    } else if (hasEpisodeDetails(broadcast.getEpisode())){
+                        log.record(new AdapterLogEntry(Severity.INFO).withDescription("Trying to update episode: " + item.getCanonicalUri() + " that turned out to be a "+item.getClass().getSimpleName()).withSource(getClass()));
                     }
                     
                     //if no series and no brand just store item
@@ -252,9 +252,13 @@ public class BbcIonScheduleUpdater implements Runnable {
         private void updateEpisodeDetails(Episode item, IonBroadcast broadcast) {
             // not sure how useful this is. there isn't mush else we can do.
             IonEpisode episode = broadcast.getEpisode();
-            if (Strings.isNullOrEmpty(episode.getSubseriesId()) && episode.getPosition() != null) {
+            if (hasEpisodeDetails(episode)) {
                 item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
             }
+        }
+        
+        private boolean hasEpisodeDetails(IonEpisode episode) {
+            return episode != null && Strings.isNullOrEmpty(episode.getSubseriesId()) && episode.getPosition() != null;
         }
 
         private void updateItemDetails(Item item, IonBroadcast ionBroadcast) {
