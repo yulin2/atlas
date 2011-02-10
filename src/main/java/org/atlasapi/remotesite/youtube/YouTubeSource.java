@@ -128,10 +128,12 @@ public class YouTubeSource extends BaseSource {
 	
 	Set<String> getCategories() {
         Set<String> result = Sets.newHashSet();
-        try {
-            result.add(ATLAS_GENRES_SCHEME + URLEncoder.encode(videoEntry.category, com.google.common.base.Charsets.UTF_8.name()));
-        } catch (UnsupportedEncodingException e) {
-            throw new Defect("UTF-8 not found");
+        if (videoEntry != null && videoEntry.category != null) {
+            try {
+                result.add(ATLAS_GENRES_SCHEME + URLEncoder.encode(videoEntry.category, com.google.common.base.Charsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException e) {
+                throw new Defect("UTF-8 not found");
+            }
         }
         return result;
     }
