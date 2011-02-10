@@ -77,9 +77,8 @@ public class C4EpgEntryProcessor {
             }
             updateEpisodeDetails(episode, entry, channel);
             
-            Series series = null;
             if(episode.getSeriesNumber() != null) {
-                series = updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, episode.getSeriesNumber()), episode);
+                updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, episode.getSeriesNumber()), episode);
             }
             Brand brand = updateBrand(C4_PROGRAMMES_BASE + webSafeBrandName, episode, entry);
 
