@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
 import static org.atlasapi.media.entity.Channel.E_FOUR;
+import static org.atlasapi.media.entity.Channel.FILM_4;
 import static org.atlasapi.media.entity.Channel.FOUR_MUSIC;
 import static org.atlasapi.media.entity.Channel.MORE_FOUR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
@@ -34,7 +35,7 @@ public class C4EpgUpdater implements Runnable {
     private final static Map<String, Channel> CHANNEL_MAP = ImmutableMap.of(
             "C4", CHANNEL_FOUR,
             "M4", MORE_FOUR,
-            //"F4", FILM_4,
+            "F4", FILM_4,
             "E4", E_FOUR,
             "4M", FOUR_MUSIC
     );
