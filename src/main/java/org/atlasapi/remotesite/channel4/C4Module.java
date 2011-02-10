@@ -1,8 +1,12 @@
 package org.atlasapi.remotesite.channel4;
 
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+
+import nu.xom.Builder;
+import nu.xom.Document;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
@@ -11,8 +15,12 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentWriters;
+import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.channel4.epg.C4EpgElementFactory;
+import org.atlasapi.remotesite.channel4.epg.C4EpgUpdater;
 import org.atlasapi.remotesite.support.atom.AtomClient;
+import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,9 +28,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
+import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.sun.syndication.feed.atom.Feed;
 
 @Configuration
@@ -30,9 +41,12 @@ public class C4Module {
 
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
+	private final static RepetitionRule SIXTY_MINUTES = RepetitionRules.atInterval(Duration.standardMinutes(60));
 	
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
+	
+	private @Value("${c4.epg.enabled}") String c4EpgEnabled;
 
 	private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired ContentWriters contentWriter;
@@ -40,6 +54,9 @@ public class C4Module {
 	
 	@PostConstruct
 	public void startBackgroundTasks(){
+	    if(Boolean.parseBoolean(c4EpgEnabled)) {
+	        scheduler.schedule(c4EpgUpdater(), SIXTY_MINUTES);
+	    }
 		if (!"DISABLED".equals(c4ApiKey)) {
 			scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);
 			scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
@@ -53,7 +70,20 @@ public class C4Module {
 		}
 	}
 
-	@Bean C4AtoZAtomContentLoader c4AtozUpdater() {
+	@Bean public C4EpgUpdater c4EpgUpdater() {
+        return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentStore, log);
+    }
+	
+	@Bean public RemoteSiteClient<Document> c4EpgAtomClient() {
+	    SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
+            .withUserAgent(HttpClients.ATLAS_USER_AGENT)
+            .withSocketTimeout(30, TimeUnit.SECONDS)
+            .withRetries(3)
+        .build();
+        return new RequestLimitingRemoteSiteClient<Document>(new ApiKeyAwareClient<Document>(c4ApiKey, new XmlClient(httpClient, new Builder(new C4EpgElementFactory()))), 2);
+	}
+
+    @Bean C4AtoZAtomContentLoader c4AtozUpdater() {
 		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentWriter, contentStore, log);
 	}
 	
