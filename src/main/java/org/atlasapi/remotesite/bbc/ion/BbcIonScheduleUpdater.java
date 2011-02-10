@@ -139,12 +139,12 @@ public class BbcIonScheduleUpdater implements Runnable {
                             
                             if (obj == null) {
                                 series = createSeries(broadcast);
-                            }
-                            
-                            if (obj instanceof Series) {
-                                series = (Series) obj;
                             } else {
-                                log.record(new AdapterLogEntry(Severity.WARN).withDescription("Trying to update item: " + item.getCanonicalUri() + " but got back series "+obj.getCanonicalUri()+" that turned out to be a "+obj.getClass().getSimpleName()).withSource(getClass()));
+                                if (obj instanceof Series) {
+                                    series = (Series) obj;
+                                } else {
+                                    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Trying to update item: " + item.getCanonicalUri() + " but got back series "+obj.getCanonicalUri()+" that turned out to be a "+obj.getClass().getSimpleName()).withSource(getClass()));
+                                }
                             }
                                 
                             if (series != null) {
@@ -164,13 +164,13 @@ public class BbcIonScheduleUpdater implements Runnable {
                             
                             if (obj == null) {
                                 brand = createBrandFrom(broadcast);
-                            }
-                            
-                            if (obj instanceof Brand) {
-                                brand = (Brand) obj;
-                            } else if (obj instanceof Series) {
-                                brand = brandFromSeries((Series) obj);
-                                log.record(new AdapterLogEntry(Severity.INFO).withDescription("Update item: " + item.getCanonicalUri() + " but upsold series "+obj.getCanonicalUri()+" turned out to be a brand").withSource(getClass()));
+                            } else {
+                                if (obj instanceof Brand) {
+                                    brand = (Brand) obj;
+                                } else if (obj instanceof Series) {
+                                    brand = brandFromSeries((Series) obj);
+                                    log.record(new AdapterLogEntry(Severity.INFO).withDescription("Update item: " + item.getCanonicalUri() + " but upsold series "+obj.getCanonicalUri()+" turned out to be a brand").withSource(getClass()));
+                                }
                             }
                             
                             if (brand != null) {
