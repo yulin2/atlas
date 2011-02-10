@@ -88,7 +88,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
 
         if(episode.getVersions() != null) {
             for (IonVersion ionVersion : episode.getVersions()) {
-                item.addVersion(versionFrom(ionVersion));
+                item.addVersion(versionFrom(ionVersion, episode.getId()));
             }
         }
 
@@ -108,7 +108,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         }
     }
     
-    private Version versionFrom(IonVersion ionVersion) {
+    private Version versionFrom(IonVersion ionVersion, String pid) {
         Version version = new Version();
         version.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ionVersion.getId());
         version.setPublishedDuration(ionVersion.getDuration() != null ? Ints.saturatedCast(ionVersion.getDuration()) : null);
@@ -123,7 +123,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         }
         if(ionVersion.getOndemands() != null) {
             for (IonOndemandChange ondemand : ionVersion.getOndemands()) {
-                Maybe<Encoding> possibleEncoding = enodingCreator.createEncoding(ondemand);
+                Maybe<Encoding> possibleEncoding = enodingCreator.createEncoding(ondemand, pid);
                 if(possibleEncoding.hasValue()) {
                     version.addManifestedAs(possibleEncoding.requireValue());
                 }
