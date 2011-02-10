@@ -45,6 +45,7 @@ public class BbcModule {
 	private final static Daily SCHEDULED_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	private final static RepetitionInterval TEN_MINUTES = RepetitionRules.atInterval(Duration.standardMinutes(10));
+	private final static RepetitionInterval SEVEN_MINUTES = RepetitionRules.atInterval(Duration.standardMinutes(10));
 	private final static RepetitionInterval ONE_HOUR = RepetitionRules.atInterval(Duration.standardHours(1));
 
     private @Autowired MongoDbBackedContentStore contentStore;
@@ -66,7 +67,7 @@ public class BbcModule {
 			}
 			scheduler.schedule(bbcIonUpdater(0,0).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), TEN_MINUTES);
 			scheduler.schedule(bbcIonUpdater(7,7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), ONE_HOUR);
-			scheduler.schedule(bbcIonOndemandChangeUpdater(), TEN_MINUTES);
+			scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
 			log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass())
 				.withDescription("BBC update scheduled tasks installed"));
 		} else {
