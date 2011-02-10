@@ -1,0 +1,882 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms"
+	xml:base="http://int.channel4.com">
+	<id>tag:int.channel4.com,2009:/tv-listings/daily/2011/01/07/c4</id>
+	<title type="text">Channel 4 EPG for Friday 7 January 2011</title>
+	<link href="http://int.channel4.com/tv-listings/daily/2011/01/07/c4.atom"
+		rel="self" type="application/atom+xml" />
+	<link href="http://int.channel4.com/tv-listings/daily/2011/01/06/c4.atom"
+		rel="previous" type="application/atom+xml" />
+	<link href="http://int.channel4.com/tv-listings/daily/2011/01/08/c4.atom"
+		rel="next" type="application/atom+xml" />
+	<author>
+		<name>Channel 4 Television</name>
+	</author>
+	<updated>2011-02-03T15:43:00.843Z</updated>
+	<logo imageSource="default">http://int.channel4.com/static/programmes/images/c4-atom-logo.gif
+	</logo>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/336</id>
+		<title type="text">Up and Down</title>
+		<updated>2010-11-03T05:57:50.175Z</updated>
+		<summary type="html">Lots of things go up and lots of things go down.
+			But is there anything that goes up and down at the same time?
+		</summary>
+		<link href="http://int.channel4.com/programmes/the-hoobs/4od#2930250"
+			rel="alternate" type="text/html" />
+		<link
+			href="http://int.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-58.atom"
+			rel="related" type="application/atom+xml" />
+		<media:group>
+			<media:player
+				url="http://int.channel4.com/programmes/the-hoobs/4od#2930250" />
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/the-hoobs/series-1/the-hoobs-s1-20090623112301_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+			<media:rating>nonadult</media:rating>
+			<media:copyright url="http://int.channel4.com/terms_and_conditions.html">Terms and Conditions
+			</media:copyright>
+			<media:restriction relationship="allow" type="country">gb,im,je,gg,ie
+			</media:restriction>
+			<media:rights status="official" />
+		</media:group>
+		<dc:relation.BrandTitle>The Hoobs</dc:relation.BrandTitle>
+		<dcterms:available>start=2009-06-07T22:00:00.000Z;
+			end=2018-12-07T00:00:00.000Z; scheme=W3C-DTF</dcterms:available>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>58</dc:relation.EpisodeNumber>
+		<dc:relation.AgeRating>0</dc:relation.AgeRating>
+		<dc:date.TXDate>2011-01-07T06:10:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>24:13</dc:relation.Duration>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/337</id>
+		<title type="text">Dancing</title>
+		<updated>2010-11-03T05:57:50.175Z</updated>
+		<summary type="html">Hoobs have been dancing the Hoobyjiggle since
+			Hooby time began. But is there a Peep dance that fits to the
+			Hoobyjiggle music?</summary>
+		<link href="http://int.channel4.com/programmes/the-hoobs/4od#2930251"
+			rel="alternate" type="text/html" />
+		<link
+			href="http://int.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-59.atom"
+			rel="related" type="application/atom+xml" />
+		<media:group>
+			<media:player
+				url="http://int.channel4.com/programmes/the-hoobs/4od#2930251" />
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/the-hoobs/series-1/the-hoobs-s1-20090623112301_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+			<media:rating>nonadult</media:rating>
+			<media:copyright url="http://int.channel4.com/terms_and_conditions.html">Terms and Conditions
+			</media:copyright>
+			<media:restriction relationship="allow" type="country">gb,im,je,gg,ie
+			</media:restriction>
+			<media:rights status="official" />
+		</media:group>
+		<dc:relation.BrandTitle>The Hoobs</dc:relation.BrandTitle>
+		<dcterms:available>start=2009-06-07T22:00:00.000Z;
+			end=2018-12-07T00:00:00.000Z; scheme=W3C-DTF</dcterms:available>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>59</dc:relation.EpisodeNumber>
+		<dc:relation.AgeRating>0</dc:relation.AgeRating>
+		<dc:date.TXDate>2011-01-07T06:35:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>24:12</dc:relation.Duration>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/291</id>
+		<title type="text">Freshly Squeezed</title>
+		<updated>2011-02-03T15:43:00.845Z</updated>
+		<summary type="html">Celebrity interviews, behind the scenes
+			exclusives and music videos.</summary>
+		<dc:relation.BrandTitle>Freshly Squeezed</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>5</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T07:00:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>30:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/freshly-squeezed.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/freshly-squeezed/series-3/50b93c80-6626-4657-9677-53517df87610_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/292</id>
+		<title type="text">Everybody Loves Raymond</title>
+		<updated>2011-02-03T15:43:00.845Z</updated>
+		<summary type="html">Turkey or Fish: Debra takes it upon herself to
+			prepare the Thanksgiving dinner.</summary>
+		<dc:relation.BrandTitle>Everybody Loves Raymond
+		</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:date.TXDate>2011-01-07T07:30:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>25:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link
+			href="http://int.channel4.com/programmes/everybody-loves-raymond.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/everybody-loves-raymond/everybody-loves-raymond_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/293</id>
+		<title type="text">Frasier</title>
+		<updated>2011-02-03T15:43:00.846Z</updated>
+		<summary type="html">You Can Go Home Again: Frasier struggles to come
+			up with a clever catchphrase for the show, while Daphne tries to
+			avoid returning to England to visit her family.</summary>
+		<dc:relation.BrandTitle>Frasier</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>3</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>24</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T07:55:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>25:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/frasier.atom" rel="related"
+			type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/frasier/series-3/frasier-s3_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/294</id>
+		<title type="text">Friends</title>
+		<updated>2011-02-03T15:43:00.846Z</updated>
+		<summary type="html">The One Where Rachel Has a Baby (Part 2/2):
+			Chandler and Monica search for a room in the hospital to make their
+			own baby, while Phoebe is attracted to a handsome patient.</summary>
+		<dc:relation.BrandTitle>Friends</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>8</dc:relation.SeriesNumber>
+		<dc:date.TXDate>2011-01-07T08:20:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>30:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/friends.atom" rel="related"
+			type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/friends/friends_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/295</id>
+		<title type="text">Friends</title>
+		<updated>2011-02-03T15:43:00.847Z</updated>
+		<summary type="html">The One Where No One Proposes: Due to a
+			misunderstanding, Rachel finds herself engaged to marry Joey instead
+			of Ross, who intended to propose after she had given birth.</summary>
+		<dc:relation.BrandTitle>Friends</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>9</dc:relation.SeriesNumber>
+		<dc:date.TXDate>2011-01-07T08:50:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>35:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/friends.atom" rel="related"
+			type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/friends/friends_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/296</id>
+		<title type="text">Famous and Fearless</title>
+		<updated>2011-02-03T15:43:00.847Z</updated>
+		<summary type="html">Chris Evans and Clare Balding present the
+			penultimate event show where eight celebrities compete in
+			adrenaline-fuelled action sport challenges in order to win loads of
+			money for charity.</summary>
+		<dc:relation.BrandTitle>Famous and Fearless</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>5</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T09:25:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>95:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/famous-and-fearless.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/famous-and-fearless/series-1/episode-5/6b849828-85b8-4ea0-bae5-3150c62680fd_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/297</id>
+		<title type="text">Glee</title>
+		<updated>2011-02-03T15:43:00.847Z</updated>
+		<summary type="html">Season Finale: Journey: Quinn awaits the birth
+			of her baby, Emma tells Will she's seeing someone else and the clubs
+			battle it out at the Regionals.</summary>
+		<dc:relation.BrandTitle>Glee</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>22</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T11:00:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>true</dc:relation.AudioDescription>
+		<dc:relation.Duration>55:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/glee.atom" rel="related"
+			type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/glee/series-1/episode-22/73cabe49-fe28-4686-912c-fee2a3f1631b_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/298</id>
+		<title type="text">Wedding House</title>
+		<updated>2011-02-03T15:43:00.848Z</updated>
+		<summary type="html">Shirene and Richard are transformed for a King
+			and I-style ceremony, Sharon and Peter have a Cinderella dream day,
+			and everything goes pink for Kim and Dave.</summary>
+		<dc:relation.BrandTitle>Wedding House</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>8</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T11:55:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>65:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/wedding-house.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/wedding-house/series-1/38cde5a4-8bf4-4dcf-98c1-8a203ca268e7_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/338</id>
+		<title type="text">3 Minute Wonder: Frieze</title>
+		<updated>2011-02-03T15:43:00.848Z</updated>
+		<summary type="html">Four new films by British artists. Jess
+			Flood-Paddock's film is shot in Malta, the non-linear narrative tone
+			throughout aims to create a mood associated with travelling and
+			observing.</summary>
+		<dc:relation.BrandTitle>3 Minute Wonder</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>11</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T13:00:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>05:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/3-minute-wonder.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/3-minute-wonder/series-11/5fccc9ab-aa87-4466-b284-a1d0e693e5bc_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/299</id>
+		<title type="text">Lassie</title>
+		<updated>2011-02-03T15:43:00.849Z</updated>
+		<summary type="html">(2005) Joe's (Jonathan Mason) beloved dog Lassie
+			is sold by his destitute parents to the Duke of Rudling (Peter
+			O'Toole), but the collie escapes and embarks on an adventurous
+			journey home.</summary>
+		<dc:date.TXDate>2011-01-07T13:05:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>110:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/300</id>
+		<title type="text">Birmingham - Claudine</title>
+		<updated>2010-12-30T15:37:35.036Z</updated>
+		<summary type="html">Claudine is first up in Birmingham. But while
+			the 31-year-old events organiser is completely convinced she'll win,
+			she is less sure about one of her guest's outfit for the evening.
+		</summary>
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/4od#3149084"
+			rel="alternate" type="text/html" />
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/episode-guide/series-12/episode-17.atom"
+			rel="related" type="application/atom+xml" />
+		<media:group>
+			<media:player
+				url="http://int.channel4.com/programmes/come-dine-with-me/4od#3149084" />
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/come-dine-with-me-extra-portions/series-2/5e2ea061-38dd-49bc-9919-d8aea04c9552_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+			<media:rating>nonadult</media:rating>
+			<media:copyright url="http://int.channel4.com/terms_and_conditions.html">Terms and Conditions
+			</media:copyright>
+			<media:restriction relationship="allow" type="country">GB,GG,IE,IM,JE
+			</media:restriction>
+			<media:rights status="official" />
+		</media:group>
+		<dc:relation.BrandTitle>Come Dine with Me</dc:relation.BrandTitle>
+		<dcterms:available>start=2011-01-07T15:25:00.000Z;
+			end=2011-02-06T15:25:00.000Z; scheme=W3C-DTF</dcterms:available>
+		<dc:relation.SeriesNumber>12</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>17</dc:relation.EpisodeNumber>
+		<dc:relation.AgeRating>0</dc:relation.AgeRating>
+		<dc:date.TXDate>2011-01-07T14:55:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>false</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>23:31</dc:relation.Duration>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/301</id>
+		<title type="text">Birmingham - Katie</title>
+		<updated>2010-12-30T15:29:01.388Z</updated>
+		<summary type="html">In Birmingham, hairdresser Katie's showstopper
+			dessert doesn't quite go according to plan. Meanwhile Mike and
+			Claudine indulge in some flirtatious if slightly peculiar behaviour.
+		</summary>
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/4od#3149079"
+			rel="alternate" type="text/html" />
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/episode-guide/series-12/episode-18.atom"
+			rel="related" type="application/atom+xml" />
+		<media:group>
+			<media:player
+				url="http://int.channel4.com/programmes/come-dine-with-me/4od#3149079" />
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/come-dine-with-me-extra-portions/series-2/5e2ea061-38dd-49bc-9919-d8aea04c9552_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+			<media:rating>nonadult</media:rating>
+			<media:copyright url="http://int.channel4.com/terms_and_conditions.html">Terms and Conditions
+			</media:copyright>
+			<media:restriction relationship="allow" type="country">GB,GG,IE,IM,JE
+			</media:restriction>
+			<media:rights status="official" />
+		</media:group>
+		<dc:relation.BrandTitle>Come Dine with Me</dc:relation.BrandTitle>
+		<dcterms:available>start=2011-01-07T15:55:00.000Z;
+			end=2011-02-06T15:55:00.000Z; scheme=W3C-DTF</dcterms:available>
+		<dc:relation.SeriesNumber>12</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>18</dc:relation.EpisodeNumber>
+		<dc:relation.AgeRating>0</dc:relation.AgeRating>
+		<dc:date.TXDate>2011-01-07T15:25:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>23:52</dc:relation.Duration>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/302</id>
+		<title type="text">Deal or No Deal</title>
+		<updated>2011-02-03T15:43:00.850Z</updated>
+		<summary type="html">Noel Edmonds asks the all-important question as
+			contestants do battle with the Banker in their quest to leave the
+			Dream Factory with £250,000.</summary>
+		<dc:relation.BrandTitle>Deal or No Deal</dc:relation.BrandTitle>
+		<dc:relation.EpisodeNumber>6</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T15:55:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>true</dc:relation.AudioDescription>
+		<dc:relation.Duration>60:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/deal-or-no-deal.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/deal-or-no-deal/f9e73d1c-3d7a-4803-a868-22c8ef6b7c68_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/303</id>
+		<title type="text">Birmingham - Kish</title>
+		<updated>2010-12-30T11:34:39.002Z</updated>
+		<summary type="html">Third to host in Birmingham is Kish who treats
+			his guests to a real Brummy curry. But mild-mannered Kish is
+			beginning to lose his patience with Claudine, and struggles to hide
+			his feelings.</summary>
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/4od#3149069"
+			rel="alternate" type="text/html" />
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/episode-guide/series-12/episode-19.atom"
+			rel="related" type="application/atom+xml" />
+		<media:group>
+			<media:player
+				url="http://int.channel4.com/programmes/come-dine-with-me/4od#3149069" />
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/come-dine-with-me-extra-portions/series-2/5e2ea061-38dd-49bc-9919-d8aea04c9552_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+			<media:rating>nonadult</media:rating>
+			<media:copyright url="http://int.channel4.com/terms_and_conditions.html">Terms and Conditions
+			</media:copyright>
+			<media:restriction relationship="allow" type="country">GB,GG,IE,IM,JE
+			</media:restriction>
+			<media:rights status="official" />
+		</media:group>
+		<dc:relation.BrandTitle>Come Dine with Me</dc:relation.BrandTitle>
+		<dcterms:available>start=2011-01-07T17:30:00.000Z;
+			end=2011-02-06T17:30:00.000Z; scheme=W3C-DTF</dcterms:available>
+		<dc:relation.SeriesNumber>12</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>19</dc:relation.EpisodeNumber>
+		<dc:relation.AgeRating>0</dc:relation.AgeRating>
+		<dc:date.TXDate>2011-01-07T16:55:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>false</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>23:39</dc:relation.Duration>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/304</id>
+		<title type="text">Birmingham - Mike</title>
+		<updated>2010-12-30T11:38:40.829Z</updated>
+		<summary type="html">Last to host in Birmingham is Mike, whose
+			eccentric approach to cooking is overshadowed when Kish and Katie
+			finally lose patience with Claudine and tell her exactly what they
+			think, as an explosion of honesty erupts across the dinner table.
+		</summary>
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/4od#3149072"
+			rel="alternate" type="text/html" />
+		<link
+			href="http://int.channel4.com/programmes/come-dine-with-me/episode-guide/series-12/episode-20.atom"
+			rel="related" type="application/atom+xml" />
+		<media:group>
+			<media:player
+				url="http://int.channel4.com/programmes/come-dine-with-me/4od#3149072" />
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/come-dine-with-me-extra-portions/series-2/5e2ea061-38dd-49bc-9919-d8aea04c9552_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+			<media:rating>nonadult</media:rating>
+			<media:copyright url="http://int.channel4.com/terms_and_conditions.html">Terms and Conditions
+			</media:copyright>
+			<media:restriction relationship="allow" type="country">GB,GG,IE,IM,JE
+			</media:restriction>
+			<media:rights status="official" />
+		</media:group>
+		<dc:relation.BrandTitle>Come Dine with Me</dc:relation.BrandTitle>
+		<dcterms:available>start=2011-01-07T18:00:00.000Z;
+			end=2011-02-06T18:00:00.000Z; scheme=W3C-DTF</dcterms:available>
+		<dc:relation.SeriesNumber>12</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>20</dc:relation.EpisodeNumber>
+		<dc:relation.AgeRating>0</dc:relation.AgeRating>
+		<dc:date.TXDate>2011-01-07T17:30:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>false</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>23:28</dc:relation.Duration>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/305</id>
+		<title type="text">The Simpsons</title>
+		<updated>2011-02-03T15:43:00.852Z</updated>
+		<summary type="html">Pokey Mom: When Homer ends up in the prison
+			infirmary after visiting the prison rodeo, Marge notices the artistic
+			talent of inmate Jack Crowley, and vouches for him at his parole
+			hearing.</summary>
+		<dc:relation.BrandTitle>The Simpsons</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>12</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>10</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T18:00:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>true</dc:relation.AudioDescription>
+		<dc:relation.Duration>30:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/the-simpsons.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/the-simpsons/series-12/episode-10/the-simpsons-s12e10-20090326170307_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/306</id>
+		<title type="text">Hollyoaks</title>
+		<updated>2011-02-03T15:43:00.852Z</updated>
+		<summary type="html">Eva is causing big trouble with Amber's diary
+			and when she catches Rob and Anita at her house she calls the police.
+			Theresa panics that PC Ethan is getting too close to the truth.
+		</summary>
+		<dc:relation.BrandTitle>Hollyoaks</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>20</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>5</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T18:30:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>true</dc:relation.AudioDescription>
+		<dc:relation.Duration>30:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/hollyoaks.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/hollyoaks/series-20/2b2ea400-a8b1-41e5-8298-25c6ae8cf06c_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/307</id>
+		<title type="text">Channel 4 News</title>
+		<updated>2011-02-03T15:43:00.853Z</updated>
+		<summary type="html">Includes sport and weather.</summary>
+		<dc:relation.BrandTitle>Channel 4 News</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>28</dc:relation.SeriesNumber>
+		<dc:date.TXDate>2011-01-07T19:00:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>25:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/channel-4-news.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/channel-4-news/9d5a479d-8d1e-4544-8772-1ff232082a68_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/725</id>
+		<title type="text">4thought.tv</title>
+		<updated>2011-02-03T15:43:00.853Z</updated>
+		<summary type="html">Chris Atkins was born in Hong Kong and adopted
+			by British parents as a baby. She believes ethnicity should always be
+			taken into account when considering adoption.</summary>
+		<dc:relation.BrandTitle>4thought.tv</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>188</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T19:25:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>05:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/4thoughttv.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/4thoughttv/series-1/episode-188/5fbd1847-47c3-4f87-a45c-af756abba68a_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/308</id>
+		<title type="text">Love, Virtually</title>
+		<updated>2010-11-16T15:12:08.130Z</updated>
+		<summary type="html">
+			Virtual love has never been bigger. In 2010, seven million of us will sign
+			up for internet dating, a fifth of whom will find love online, and 12
+			million dates will be organised online.
+			Dating websites are no longer stigmatised as a weird pastime for young
+			people, and nearly two thirds of over-55s who are single are now
+			using them. The internet has completely changed how people conduct
+			their love lives, from long-distance relationships and keeping tabs
+			on a crush, to obsessing about exes... and partners' exes.
+			Lucy Robinson is a growing sensation in the blogging world. Her online
+			diary, The Final Countdown, entertains thousands of marieclaire.co.uk
+			readers with its frank and humorous tales from the frontline of
+			internet dating. Lucy spares no detail of her cyber-love adventures,
+			confessing freely to rampant internet stalking and imaginary love
+			affairs with men she's never even met.
+			In Love Virtually, actress Claire Wood portrays Lucy in a fictional
+			documentary, at critical moments in her cyber love life: her first
+			internet dates, her secret stalking of her new boyfriend and her
+			heartbroken weeks with only the internet for company when it all goes
+			wrong.
+			As well as following Lucy's experiences, the documentary interviews
+			several other internet-dating-savvy women, and provides an absorbing
+			and comical glimpse of love in the 21st century: a time where new
+			relationships are very often three-way affairs between man, woman...
+			and the internet.
+			After all, why sit around in a hedge with a long-lens camera when you can
+			find out all you need to know at the click of a mouse?
+</summary>
+		<link href="http://int.channel4.com/programmes/love-virtually/4od#3134156"
+			rel="alternate" type="text/html" />
+		<link
+			href="http://int.channel4.com/programmes/love-virtually/episode-guide/series-1/episode-1.atom"
+			rel="related" type="application/atom+xml" />
+		<media:group>
+			<media:player
+				url="http://int.channel4.com/programmes/love-virtually/4od#3134156" />
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/love-virtually/series-1/episode-1/c493a246-be8d-49a5-8b92-5678786f63f4_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+			<media:rating>nonadult</media:rating>
+			<media:copyright url="http://int.channel4.com/terms_and_conditions.html">Terms and Conditions
+			</media:copyright>
+			<media:restriction relationship="allow" type="country">GB,GG,IE,IM,JE
+			</media:restriction>
+			<media:rights status="official" />
+		</media:group>
+		<dc:relation.BrandTitle>Love, Virtually</dc:relation.BrandTitle>
+		<dcterms:available>start=2010-11-19T00:00:00.000Z;
+			end=2013-07-04T22:00:00.000Z; scheme=W3C-DTF</dcterms:available>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+		<dc:relation.AgeRating>0</dc:relation.AgeRating>
+		<dc:date.TXDate>2011-01-07T19:30:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>false</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>23:35</dc:relation.Duration>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/309</id>
+		<title type="text">T4: Famous and Fearless</title>
+		<updated>2011-02-03T15:43:00.854Z</updated>
+		<summary type="html">Chris Evans and Clare Balding present the grand
+			final live show where eight celebrities compete in adrenaline-fuelled
+			action sport challenges in order to win loads of money for charity.
+		</summary>
+		<dc:relation.BrandTitle>Famous and Fearless</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>6</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T20:00:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>120:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/famous-and-fearless.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/famous-and-fearless/series-1/episode-6/8ac4af0d-b788-40d3-83ae-ceb062367818_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/310</id>
+		<title type="text">Rude Tube 2011</title>
+		<updated>2011-02-03T15:43:00.855Z</updated>
+		<summary type="html">Alex Zane kicks off the New Year with a top 100
+			countdown, combining the very best clips from Rude Tube 2010 with a
+			special gift of 50 brand new, never-before-seen clips.</summary>
+		<dc:relation.BrandTitle>Rude Tube</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>7</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>1</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-07T22:00:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>125:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>false</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/rude-tube.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/rude-tube/series-7/episode-1/88f9200c-15dc-4155-8ed3-bb52d2266084_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/606</id>
+		<title type="text">Robin Williams: Weapons of Self...</title>
+		<updated>2011-02-03T15:43:00.855Z</updated>
+		<summary type="html">...Destruction: Academy Award-winning actor,
+			writer and comedian Robin Williams performs stand-up material at his
+			sold-out US tour.</summary>
+		<dc:date.TXDate>2011-01-08T00:05:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>110:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/607</id>
+		<title type="text">My Name is Earl</title>
+		<updated>2011-02-03T15:43:00.855Z</updated>
+		<summary type="html">Quit Smoking: Earl tackles two items on his
+			karma list: making up for all the second-hand smoke he's inflicted on
+			the world, and confessing to a crime he committed.</summary>
+		<dc:relation.BrandTitle>My Name Is Earl</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-08T01:55:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>25:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/my-name-is-earl.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/my-name-is-earl/series-1/my-name-is-earl-s1-20090622171029_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/608</id>
+		<title type="text">My Name is Earl</title>
+		<updated>2011-02-03T15:43:00.856Z</updated>
+		<summary type="html">Randy's Touchdown: During their high school
+			days, Earl ruined Randy's chance to score a touchdown during a key
+			football game, so Earl tries to figure out a way to make things
+			right.</summary>
+		<dc:relation.BrandTitle>My Name Is Earl</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>1</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>3</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-08T02:20:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>20:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/my-name-is-earl.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/my-name-is-earl/series-1/my-name-is-earl-s1-20090622171029_200x113.jpg"
+				height="113" width="200" imageSource="fallback" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/610</id>
+		<title type="text">Castle of Cagliostro</title>
+		<updated>2011-02-03T15:43:00.856Z</updated>
+		<summary type="html">(1979) From Studio Ghibli, Japan's Hayao
+			Miyazaki's animation in which master-thief Lupin and his gang track
+			down a forger who threatens to overthrow the world's economy.
+		</summary>
+		<dc:date.TXDate>2011-01-08T02:40:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>false</dc:relation.AudioDescription>
+		<dc:relation.Duration>105:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/726</id>
+		<title type="text">Brothers &amp; Sisters</title>
+		<updated>2011-02-03T15:43:00.856Z</updated>
+		<summary type="html">The Missionary Imposition: Nora and Isaac get
+			closer to each other, while Jason makes Kevin think about his future.
+		</summary>
+		<dc:relation.BrandTitle>Brothers and Sisters</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>2</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>11</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-08T04:25:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>true</dc:relation.AudioDescription>
+		<dc:relation.Duration>45:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/brothers-and-sisters.atom"
+			rel="related" type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/brothers-sisters/series-2/episode-11/brothers-sisters-s2e11_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+	<entry>
+		<id>tag:int.channel4.com,2009:slot/611</id>
+		<title type="text">ER</title>
+		<updated>2011-02-03T15:43:00.857Z</updated>
+		<summary type="html">Another Thursday at County: Staff in the ER come
+			to terms with the loss of their colleague. Gates and the new interns
+			treat a bio terrorist, who has a lethal secret that endangers them
+			all.</summary>
+		<dc:relation.BrandTitle>ER</dc:relation.BrandTitle>
+		<dc:relation.SeriesNumber>15</dc:relation.SeriesNumber>
+		<dc:relation.EpisodeNumber>2</dc:relation.EpisodeNumber>
+		<dc:date.TXDate>2011-01-08T05:10:00.000Z</dc:date.TXDate>
+		<dc:relation.TXChannel>C4</dc:relation.TXChannel>
+		<dc:relation.Subtitles>true</dc:relation.Subtitles>
+		<dc:relation.AudioDescription>true</dc:relation.AudioDescription>
+		<dc:relation.Duration>50:00</dc:relation.Duration>
+		<dc:relation.WideScreen>false</dc:relation.WideScreen>
+		<dc:relation.Signing>false</dc:relation.Signing>
+		<dc:relation.Repeat>true</dc:relation.Repeat>
+		<link href="http://int.channel4.com/programmes/er.atom" rel="related"
+			type="application/atom+xml" />
+		<media:content>
+			<media:thumbnail
+				url="http://int.channel4.com/assets/programmes/images/er/series-15/episode-2/er-s15e2_200x113.jpg"
+				height="113" width="200" imageSource="own" />
+		</media:content>
+	</entry>
+</feed>
