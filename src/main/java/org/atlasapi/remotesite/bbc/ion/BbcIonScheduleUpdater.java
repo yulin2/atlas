@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -124,38 +125,81 @@ public class BbcIonScheduleUpdater implements Runnable {
                     updateItemDetails(item, broadcast);
                     if (item instanceof Episode) {
                         updateEpisodeDetails((Episode) item, broadcast);
+                    } else {
+                        log.record(new AdapterLogEntry(Severity.INFO).withDescription("Trying to update item: " + item.getCanonicalUri() + " that turned out to be a "+item.getClass().getSimpleName()).withSource(getClass()));
                     }
+                    
                     //if no series and no brand just store item
                     if(Strings.isNullOrEmpty(broadcast.getSeriesId()) && Strings.isNullOrEmpty(broadcast.getBrandId())) {
                         writer.createOrUpdate(item);
                     } else {
                         Series series = null;
                         if (!Strings.isNullOrEmpty(broadcast.getSeriesId())) {
-                            series = (Series) localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getSeriesId());
-                            if (series == null) {
+                            Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getSeriesId());
+                            
+                            if (obj == null) {
                                 series = createSeries(broadcast);
                             }
-                            updateSeries(series, broadcast);
-                            addOrReplaceItemInPlaylist(item, series);
+                            
+                            if (obj instanceof Series) {
+                                series = (Series) obj;
+                            } else {
+                                log.record(new AdapterLogEntry(Severity.WARN).withDescription("Trying to update item: " + item.getCanonicalUri() + " but got back series "+obj.getCanonicalUri()+" that turned out to be a "+obj.getClass().getSimpleName()).withSource(getClass()));
+                            }
+                                
+                            if (series != null) {
+                                updateSeries(series, broadcast);
+                                addOrReplaceItemInPlaylist(item, series);
+                            }
                         }
+                    
                         if (Strings.isNullOrEmpty(broadcast.getBrandId())) {
                             if(series != null) { //no brand so just save series if it exists
                                 writer.createOrUpdate(series, true);
                             }
+                            
                         } else {
-                            Brand brand = (Brand) localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getBrandId());
-                            if (brand == null) {
+                            Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getBrandId());
+                            Brand brand = null;
+                            
+                            if (obj == null) {
                                 brand = createBrandFrom(broadcast);
                             }
-                            updateBrand(brand, broadcast);
-                            addOrReplaceItemInPlaylist(item, brand);
-                            writer.createOrUpdate(brand, true);
+                            
+                            if (obj instanceof Brand) {
+                                brand = (Brand) obj;
+                            } else if (obj instanceof Series) {
+                                brand = brandFromSeries((Series) obj);
+                                log.record(new AdapterLogEntry(Severity.INFO).withDescription("Update item: " + item.getCanonicalUri() + " but upsold series "+obj.getCanonicalUri()+" turned out to be a brand").withSource(getClass()));
+                            }
+                            
+                            if (brand != null) {
+                                updateBrand(brand, broadcast);
+                                addOrReplaceItemInPlaylist(item, brand);
+                                writer.createOrUpdate(brand, true);
+                            }
                         }
                     }
                 }
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri).withSource(getClass()));
             }
+        }
+        
+        private Brand brandFromSeries(Series series) {
+            Brand brand = new Brand(series.getCanonicalUri(), series.getCurie(), series.getPublisher());
+            brand.setEquivalentTo(series.getEquivalentTo());
+            brand.setContents(series.getContents());
+            brand.setTitle(series.getTitle());
+            brand.setDescription(series.getDescription());
+            brand.setImage(series.getImage());
+            brand.setThumbnail(series.getThumbnail());
+            brand.setFirstSeen(series.getFirstSeen());
+            brand.setGenres(series.getGenres());
+            brand.setMediaType(series.getMediaType());
+            brand.setSpecialization(series.getSpecialization());
+            
+            return brand;
         }
 
         @SuppressWarnings("unchecked")
