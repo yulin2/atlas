@@ -48,6 +48,8 @@ public class C4AtomApi {
 	private static final String IMAGE_SIZE = "625x352";
 	private static final String THUMBNAIL_SIZE = "200x113";
 	
+    public static final Pattern SLOT_PATTERN = Pattern.compile("tag:.*,\\d{4}:slot/(\\d+)");
+	
 	
 	public static void addImages(Described content, String anImage) {
 		if (anImage != null) {

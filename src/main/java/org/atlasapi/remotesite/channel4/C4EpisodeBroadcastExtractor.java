@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
@@ -52,6 +53,7 @@ public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<
                 DateTime txStart = fmt.parseDateTime(startTime);
                 Broadcast broadcast = new Broadcast(txChannel, txStart, duration);
                 broadcast.addAlias(entry.getId());
+                broadcast.withId(idFrom(entry.getId()));
                 broadcast.setLastUpdated(new DateTime(entry.getUpdated(), DateTimeZones.UTC));
                 version.addBroadcast(broadcast);
                 episodes.add(episode);
@@ -59,6 +61,14 @@ public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<
         }
 
         return episodes;
+    }
+
+    private String idFrom(String id) {
+        Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(id);
+        if(matcher.matches()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 
 }
