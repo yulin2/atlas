@@ -15,7 +15,6 @@ permissions and limitations under the License. */
 package org.atlasapi.query.v2;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,37 +26,18 @@ import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.query.content.parser.ApplicationConfigurationIncludingQueryBuilder;
-import org.atlasapi.query.content.parser.QueryStringBackedQueryBuilder;
-import org.atlasapi.query.content.parser.WebProfileDefaultQueryAttributesSetter;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
-import com.metabroadcast.common.time.DateTimeZones;
 
 @Controller
-public class QueryController {
-	
-	private static final Splitter URI_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
-	
-	private final KnownTypeQueryExecutor executor;
-	private final ApplicationConfigurationIncludingQueryBuilder builder;
-	
-	private final AdapterLog log;
-	private final AtlasModelWriter outputter;
+public class QueryController extends BaseController {
 	
 	public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
-		this.executor = executor;
-		this.log = log;
-		this.outputter = outputter;
-		this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter()), configFetcher) ;
+	    super(executor, configFetcher, log, outputter);
 	}
 	
 	@RequestMapping("/3.0/discover.*")
@@ -91,18 +71,4 @@ public class QueryController {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}
 	}
-	
-     private void errorViewFor(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary ae) throws IOException {
-    	log.record(new AdapterLogEntry(ae.id(), Severity.ERROR, new DateTime(DateTimeZones.UTC)).withCause(ae.exception()).withSource(this.getClass()));
-    	outputter.writeError(request, response, ae);
-
-    }
-    
-    @SuppressWarnings("unchecked")
-	private void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, Collection<?> queryResults) throws IOException {
-    	if (queryResults == null) {
-    		errorViewFor(request, response, AtlasErrorSummary.forException(new Exception("Query result was null")));
-    	}
-    	outputter.writeTo(request, response, (Collection<Object>) queryResults);
-    }
 }

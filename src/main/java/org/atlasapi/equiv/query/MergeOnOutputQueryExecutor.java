@@ -39,7 +39,8 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 
 	@Override
 	public Schedule schedule(ContentQuery query) {
-		throw new UnsupportedOperationException("TODO");
+	    // TODO: filter out duplicate items, try to have a single contiguous schedule
+	    return delegate.schedule(query);
 	}
 	
 	@Override

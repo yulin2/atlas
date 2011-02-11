@@ -32,6 +32,7 @@ import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
 import org.atlasapi.query.v2.QueryController;
+import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.remotesite.health.BroadcasterProbe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -106,6 +107,10 @@ public class QueryModule {
 	
 	@Bean QueryController queryController() {
 		return new QueryController(queryExecutor(), configFetcher, log, atlasModelOutputter());
+	}
+	
+	@Bean ScheduleController schedulerController() {
+	    return new ScheduleController(queryExecutor(), configFetcher, log, atlasModelOutputter());
 	}
 
 	@Bean AtlasModelWriter atlasModelOutputter() {
