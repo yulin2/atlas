@@ -14,6 +14,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.channel4.C4AtomApi;
 
 import com.google.common.collect.Iterables;
 
@@ -55,6 +56,7 @@ public class C4EpgBrandlessEntryProcessor {
     private Brand brandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
         Brand brand = new Brand(SYNTH_PROGRAMME_BASE + synthBrandName, "c4:"+synthBrandName, C4);
         brand.setTitle(entry.title());
+        brand.setLastUpdated(entry.updated());
         
         brand.addContents(episodeFrom(entry, synthBrandName, channel));
         
@@ -99,10 +101,12 @@ public class C4EpgBrandlessEntryProcessor {
         }
         //otherwise create a new one.
         brand.addContents(episodeFrom(entry, synthbrandName, channel));
+
+        brand.setLastUpdated(entry.updated());
     }
 
     private String slotIdFrom(C4EpgEntry entry) {
-        Matcher slotMatcher = C4EpgEntryProcessor.SLOT_PATTERN.matcher(entry.id());
+        Matcher slotMatcher = C4AtomApi.SLOT_PATTERN.matcher(entry.id());
         if(!slotMatcher.matches()) {
             throw new RuntimeException("No slot ID found for " + entry.id());
         }

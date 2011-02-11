@@ -47,8 +47,6 @@ public class C4EpgEntryProcessor {
 
     private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
-    public static final Pattern SLOT_PATTERN = Pattern.compile("tag:.*,\\d{4}:slot/(\\d+)");
-
     private final ContentWriter contentWriter;
     private final ContentResolver contentStore;
 
@@ -215,7 +213,7 @@ public class C4EpgEntryProcessor {
 
     private Broadcast broadcastFrom(C4EpgEntry entry, Channel channel) {
         Broadcast broadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration());
-
+        broadcast.setLastUpdated(entry.updated());
         String id = idFrom(entry.id());
         if (id != null) {
             broadcast.withId("c4:" + id);
@@ -225,7 +223,7 @@ public class C4EpgEntryProcessor {
     }
 
     private String idFrom(String id) {
-        Matcher matcher = SLOT_PATTERN.matcher(id);
+        Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(id);
         if (matcher.matches()) {
             return matcher.group(1);
         }
