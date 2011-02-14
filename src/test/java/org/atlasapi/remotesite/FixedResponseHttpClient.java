@@ -24,7 +24,7 @@ import com.google.common.io.Resources;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpStatusCodeException;
-import com.metabroadcast.common.http.PostData;
+import com.metabroadcast.common.http.Payload;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class FixedResponseHttpClient implements SimpleHttpClient {
@@ -59,7 +59,7 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
 	}
 
 	@Override
-	public HttpResponse post(String url, PostData data) throws HttpException {
+	public HttpResponse post(String url, Payload data) throws HttpException {
 		throw new UnsupportedOperationException();
 	}
 	
@@ -84,7 +84,7 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
 	}
 
     @Override
-    public HttpResponse put(String arg0, PostData arg1) throws HttpException {
+    public HttpResponse put(String arg0, Payload arg1) throws HttpException {
         throw new UnsupportedOperationException();
     }
 }
