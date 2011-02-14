@@ -41,7 +41,7 @@ public class C4Module {
 
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	private final static RepetitionRule TEN_MINUTES = RepetitionRules.atInterval(Duration.standardMinutes(10));
+	private final static RepetitionRule TEN_MINUTES = RepetitionRules.every(Duration.standardHours(10));
 	
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;

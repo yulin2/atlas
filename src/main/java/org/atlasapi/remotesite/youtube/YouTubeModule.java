@@ -34,7 +34,7 @@ public class YouTubeModule {
 	
 	@PostConstruct
 	public void startFeedUpdater() {
-		scheduler.schedule(new YouTubeFeedUpdater(FEED_URLS, log, writers), RepetitionRules.atInterval(Duration.standardMinutes(30)));
+		scheduler.schedule(new YouTubeFeedUpdater(FEED_URLS, log, writers), RepetitionRules.every(Duration.standardMinutes(30)));
 	}
 	
 	public List<SiteSpecificAdapter<? extends Identified>> adapters() {

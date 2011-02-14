@@ -36,7 +36,7 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
-import com.metabroadcast.common.scheduling.RepetitionRules.RepetitionInterval;
+import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 
 @Configuration
 public class BbcModule {
@@ -44,9 +44,9 @@ public class BbcModule {
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(4, 0, 0));
 	private final static Daily SCHEDULED_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	private final static RepetitionInterval TEN_MINUTES = RepetitionRules.atInterval(Duration.standardMinutes(10));
-	private final static RepetitionInterval SEVEN_MINUTES = RepetitionRules.atInterval(Duration.standardMinutes(10));
-	private final static RepetitionInterval ONE_HOUR = RepetitionRules.atInterval(Duration.standardHours(1));
+	private final static Every TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
+	private final static Every SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
+	private final static Every ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
 
     private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired ContentWriters contentWriters;
