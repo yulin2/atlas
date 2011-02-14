@@ -32,7 +32,7 @@ public class LogViewingController {
 	}
 	
 	@RequestMapping("/system/log")
-	public String showLog(Map<String, Object> model, @RequestParam(required=false) String source, @RequestParam(required=false, value="level") String severityString) throws IOException {
+	public String showLog(Map<String, Object> model, @RequestParam(required=false) String source, @RequestParam(required=false, value="level", defaultValue="info") String severityString) throws IOException {
 		model.put("logEntries", toModel(Iterables.limit(filter(source, toSeverity(severityString)), MAX_LOG_ENTRIES_TO_SHOW)));
 		return "system/log/show";
 	}
