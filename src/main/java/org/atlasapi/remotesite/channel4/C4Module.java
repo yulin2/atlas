@@ -41,7 +41,7 @@ public class C4Module {
 
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	private final static RepetitionRule TEN_MINUTES = RepetitionRules.every(Duration.standardHours(10));
+	private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
 	
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
@@ -55,7 +55,7 @@ public class C4Module {
 	@PostConstruct
 	public void startBackgroundTasks(){
 	    if(Boolean.parseBoolean(c4EpgEnabled)) {
-	        scheduler.schedule(c4EpgUpdater(), TEN_MINUTES);
+	        scheduler.schedule(c4EpgUpdater(), TWO_HOURS);
 	    }
 		if (!"DISABLED".equals(c4ApiKey)) {
 			scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);

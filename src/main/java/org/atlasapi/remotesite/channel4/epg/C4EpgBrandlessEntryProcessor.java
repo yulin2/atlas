@@ -20,7 +20,9 @@ import com.google.common.collect.Iterables;
 
 public class C4EpgBrandlessEntryProcessor {
     
+    private static final String REAL_PROGRAMME_BASE = "http://www.channel4.com/programmes/";
     private static final String SYNTH_PROGRAMME_BASE = "http://www.channel4.com/programmes/synthesized/";
+    private static final String SYNTH_TAG_BASE = "tag:www.channel4.com,2009:/programmes/synthesized/";
 
     private final ContentWriter contentWriter;
     private final ContentResolver contentStore;
@@ -35,15 +37,17 @@ public class C4EpgBrandlessEntryProcessor {
     public void process(C4EpgEntry entry, Channel channel) {
         try{
             
-            String synthbrandName = brandName(entry.title());
+            String realBrandName = C4EpgEntryProcessor.webSafeBrandName(entry);
+            
+            String brandName = realBrandName != null ? realBrandName : brandName(entry.title());
             
             //try to get container for the item.
-            Brand brand = (Brand) contentStore.findByCanonicalUri(SYNTH_PROGRAMME_BASE + synthbrandName);
+            Brand brand = (Brand) contentStore.findByCanonicalUri((realBrandName != null ? REAL_PROGRAMME_BASE : SYNTH_PROGRAMME_BASE) + brandName);
             
             if(brand == null) {
-                brand = brandFromEntry(entry, synthbrandName, channel);
+                brand = brandFromEntry(entry, brandName, channel);
             } else {
-                updateBrand(entry, brand, synthbrandName, channel);
+                updateBrand(entry, brand, brandName, channel);
             }
             
             contentWriter.createOrUpdate(brand, true);
@@ -55,6 +59,7 @@ public class C4EpgBrandlessEntryProcessor {
 
     private Brand brandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
         Brand brand = new Brand(SYNTH_PROGRAMME_BASE + synthBrandName, "c4:"+synthBrandName, C4);
+        brand.addAlias(SYNTH_TAG_BASE+synthBrandName);
         brand.setTitle(entry.title());
         brand.setLastUpdated(entry.updated());
         
@@ -66,6 +71,7 @@ public class C4EpgBrandlessEntryProcessor {
     private Episode episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel) {
         String slotId = slotIdFrom(entry);
         Episode episode = new Episode(SYNTH_PROGRAMME_BASE + synthBrandName + "/" + slotId, "c4:"+synthBrandName +"-"+slotId, C4);
+        episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
         episode.setTitle(entry.title());
         episode.setDescription(entry.summary());
         episode.setLastUpdated(entry.updated());
@@ -82,6 +88,7 @@ public class C4EpgBrandlessEntryProcessor {
         
         
         Broadcast broadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId("c4:"+slotId);
+        broadcast.addAlias(entry.id());
         
         version.addBroadcast(broadcast);
         

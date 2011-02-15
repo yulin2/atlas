@@ -104,7 +104,7 @@ public class C4EpgUpdater implements Runnable {
         Nodes entryNodes = scheduleDocument.query("//atom:feed/atom:entry", new XPathContext("atom", "http://www.w3.org/2005/Atom"));
         for (int i = 0; i < entryNodes.size(); i++) {
             C4EpgEntry entry = C4EpgEntry.from((C4EpgEntryElement) entryNodes.get(i));
-            if (entry.brandTitle() != null && entry.episodeNumber() != null) {
+            if (entry.brandTitle() != null && entry.episodeNumber() != null && entry.seriesNumber() != null) {
                 entryProcessor.process(entry, channel);
             } else {
                 brandlessEntryProcessor.process(entry, channel);

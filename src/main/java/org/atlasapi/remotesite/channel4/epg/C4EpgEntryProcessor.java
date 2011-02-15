@@ -1,9 +1,11 @@
 package org.atlasapi.remotesite.channel4.epg;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +38,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class C4EpgEntryProcessor {
+
+    private static final String TAG_ALIAS_BASE = "tag:www.channel4.com,2009:/programmes/";
 
     private static final String C4_PROGRAMMES_BASE = "http://www.channel4.com/programmes/";
 
@@ -72,13 +76,14 @@ public class C4EpgEntryProcessor {
             Episode episode = (Episode) contentStore.findByCanonicalUri(itemUri);
             if (episode == null) {
                 episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
+                episode.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s/episode-%s", webSafeBrandName, entry.seriesNumber(), entry.episodeNumber()));
             }
             updateEpisodeDetails(episode, entry, channel);
             
             if(episode.getSeriesNumber() != null) {
-                updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, episode.getSeriesNumber()), episode);
+                updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode);
             }
-            Brand brand = updateBrand(C4_PROGRAMMES_BASE + webSafeBrandName, episode, entry);
+            Brand brand = updateBrand(webSafeBrandName, episode, entry);
 
             contentWriter.createOrUpdate(brand, true);
 
@@ -88,7 +93,8 @@ public class C4EpgEntryProcessor {
 
     }
 
-    private Brand updateBrand(String brandUri, Episode episode, C4EpgEntry entry) {
+    private Brand updateBrand(String brandName, Episode episode, C4EpgEntry entry) {
+        String brandUri = C4_PROGRAMMES_BASE + brandName;
         Brand brand = (Brand) contentStore.findByCanonicalUri(brandUri);
         if (brand != null) {
             addOrReplaceItemInPlaylist(episode, brand);
@@ -96,17 +102,19 @@ public class C4EpgEntryProcessor {
             brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4);
             brand.addContents(episode);
             brand.setTitle(entry.brandTitle());
+            brand.addAlias(TAG_ALIAS_BASE+brandName);
         }
         return brand;
     }
 
-    private Series updateSeries(String seriesUri, Episode episode) {
+    private Series updateSeries(String seriesUri, String brandName, Episode episode) {
         Series series = (Series) contentStore.findByCanonicalUri(seriesUri);
         if (series != null) {
             addOrReplaceItemInPlaylist(episode, series);
         } else {
             series = new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri), C4);
             series.addContents(episode);
+            series.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s", brandName, episode.getSeriesNumber()));
         }
         return series;
     }
@@ -154,7 +162,7 @@ public class C4EpgEntryProcessor {
         Version version = Iterables.getFirst(episode.nativeVersions(), new Version());
         version.setDuration(entry.duration());
         
-        version.addBroadcast(broadcastFrom(entry, channel));
+        updateBroadcasts(version.getBroadcasts(), entry, channel);
 
         Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
 
@@ -167,6 +175,16 @@ public class C4EpgEntryProcessor {
         if (!episode.getVersions().contains(version)) {
             episode.addVersion(version);
         }
+    }
+
+    private void updateBroadcasts(Set<Broadcast> broadcasts, C4EpgEntry entry, Channel channel) {
+        for (Broadcast broadcast : broadcasts) {
+            if (idFrom(entry.id()).equals(broadcast.getId())){
+                broadcasts.remove(broadcast);
+                break;
+            }
+        }
+        broadcasts.add(broadcastFrom(entry, channel));
     }
 
     private void updateEncoding(Version version, Encoding encoding, C4EpgEntry entry) {
@@ -218,6 +236,7 @@ public class C4EpgEntryProcessor {
         if (id != null) {
             broadcast.withId("c4:" + id);
         }
+        broadcast.addAlias(entry.id());
 
         return broadcast;
     }
@@ -231,10 +250,13 @@ public class C4EpgEntryProcessor {
     }
 
     private String uriFrom(C4EpgEntry entry, String brandName) {
+        checkNotNull(brandName);
+        checkNotNull(entry.seriesNumber());
+        checkNotNull(entry.episodeNumber());
         return String.format("%s%s/episode-guide/series-%s/episode-%s", C4_PROGRAMMES_BASE, brandName, entry.seriesNumber(), entry.episodeNumber());
     }
 
-    private String webSafeBrandName(C4EpgEntry entry) {
+    public static String webSafeBrandName(C4EpgEntry entry) {
         for (String link : entry.links()) {
             for (Pattern pattern : WEB_SAFE_BRAND_PATTERNS) {
                 Matcher matcher = pattern.matcher(link);
