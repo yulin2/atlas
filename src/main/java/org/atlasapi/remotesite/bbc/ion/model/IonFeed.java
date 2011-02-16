@@ -1,10 +1,8 @@
 package org.atlasapi.remotesite.bbc.ion.model;
 
-import java.util.List;
-
 import org.joda.time.DateTime;
 
-public class IonFeed<T> {
+public abstract class IonFeed {
 
     private Long count;
     private DateTime updated;
@@ -15,8 +13,6 @@ public class IonFeed<T> {
     private IonPagination pagination;
     private IonGenerator generator;
     private IonContext context;
-
-    private List<T> blocklist;
     
     public Long getCount() {
         return count;
@@ -52,10 +48,6 @@ public class IonFeed<T> {
 
     public IonContext getContext() {
         return context;
-    }
-
-    public List<T> getBlocklist() {
-        return blocklist;
     }
 
 }
