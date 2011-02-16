@@ -1,7 +1,9 @@
 package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.List;
+import java.util.regex.Matcher;
 
+import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
@@ -125,6 +127,14 @@ public class C4EpgEntry {
 
     public String id() {
         return id;
+    }
+    
+    public String slotId() {
+        Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(id);
+        if (matcher.matches()) {
+            return "c4:"+matcher.group(1);
+        }
+        return null;
     }
 
     public String title() {

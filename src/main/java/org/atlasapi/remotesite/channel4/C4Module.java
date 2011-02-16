@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.channel4;
 
+import static org.atlasapi.media.entity.Publisher.C4;
+
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 
@@ -9,14 +11,17 @@ import nu.xom.Builder;
 import nu.xom.Document;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.C4EpgElementFactory;
 import org.atlasapi.remotesite.channel4.epg.C4EpgUpdater;
 import org.atlasapi.remotesite.support.atom.AtomClient;
@@ -42,7 +47,7 @@ public class C4Module {
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
-	
+
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
 	
@@ -71,7 +76,8 @@ public class C4Module {
 	}
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-        return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentStore, log);
+	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, new ApplicationConfigurationQueryExecutor(new MongoDBQueryExecutor(contentStore)), contentWriter, log);
+        return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentStore, trimmer, log);
     }
 	
 	@Bean public RemoteSiteClient<Document> c4EpgAtomClient() {
