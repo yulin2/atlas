@@ -169,13 +169,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         try {
             List<IonEpisodeDetail> episodeDetailList = ionDeserialiser.deserialise(webserviceClient().getContentsOf(String.format(EPISODE_DETAIL_PATTERN, bbcProgrammeIdFrom(episodeUri)))).getBlocklist();
             if (episodeDetailList == null || episodeDetailList.isEmpty()) {
-                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Could get episode detail for " + episodeUri));
+                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Empty episode detail for " + episodeUri));
                 return null;
             } else {
                 return episodeDetailList.get(0);
             }
         } catch (HttpException e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Could get episode detail for " + episodeUri));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception getting episode detail for " + episodeUri));
             return null;
         }
     }
