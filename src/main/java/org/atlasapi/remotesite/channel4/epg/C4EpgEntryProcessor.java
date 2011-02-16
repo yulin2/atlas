@@ -237,7 +237,7 @@ public class C4EpgEntryProcessor {
         
         String id = entry.slotId();
         if (id != null) {
-            broadcast.withId("c4:" + id);
+            broadcast.withId(id);
         }
 
         return broadcast;

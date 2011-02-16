@@ -63,7 +63,7 @@ public class C4EpgUpdaterTest extends TestCase {
             allowing(contentStore).findByCanonicalUri(with(any(String.class)));
                 will(returnValue(null));
             allowing(contentWriter).createOrUpdate(with(any(Container.class)), with(true));
-            one(queryExecutor).schedule(with(any(ContentQuery.class))); will(returnValue(Schedule.fromItems(new Interval(new DateTime(),new DateTime()), ImmutableList.<Item>of())));
+            allowing(queryExecutor).schedule(with(any(ContentQuery.class))); will(returnValue(Schedule.fromItems(new Interval(new DateTime(),new DateTime()), ImmutableList.<Item>of())));
         }});
         
         updater.run();
