@@ -26,7 +26,6 @@ import org.joda.time.Interval;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 public class BroadcastTrimmer {
@@ -52,16 +51,16 @@ public class BroadcastTrimmer {
             for (Item item : items) {
                 boolean changed = false;
                 for (Version version : item.nativeVersions()) {
-                    List<Broadcast> broadcasts = Lists.newLinkedList(version.getBroadcasts());
-                    for (Broadcast broadcast : broadcasts) {
-                        if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) { // double-check
-                            if (broadcast.getId() != null && !acceptableIds.contains(broadcast.getId())) {
-                                broadcasts.remove(broadcast);
-                                changed = true;
-                            }
+                    Set<Broadcast> toRetain = Sets.newHashSet();
+                    for (Broadcast broadcast : version.getBroadcasts()) {
+                        if (!contained(broadcast, scheduleInterval) || !broadcast.getBroadcastOn().equals(channel.uri()) || broadcast.getId() == null || acceptableIds.contains(broadcast.getId())) {
+                            toRetain.add(broadcast);
                         }
                     }
-                    version.setBroadcasts(Sets.newHashSet(broadcasts));
+                    if(!toRetain.equals(version.getBroadcasts())) {
+                        version.setBroadcasts(toRetain);
+                        changed = true;
+                    }
                 }
                 if(changed) {
                     writer.createOrUpdate(item);
