@@ -85,6 +85,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 												"</play:location>" +
 											"</play:locations>" +
+											"<play:people/>" +
 										  "</play:item>"));
 	}
 
@@ -119,6 +120,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 															"</play:location>" +
 														  "</play:locations>" +
+				                                          "<play:people/>" +
 													  "</play:item>"));
 	}
 }
