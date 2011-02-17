@@ -15,8 +15,6 @@ permissions and limitations under the License. */
 package org.atlasapi.systest;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -34,7 +32,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Equiv;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
@@ -55,8 +52,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.web.servlet.ModelAndView;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;

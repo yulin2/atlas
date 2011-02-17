@@ -2,12 +2,12 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.Countries;
-import org.atlasapi.media.entity.Country;
-
 import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.Node;
+
+import org.atlasapi.media.entity.Countries;
+import org.atlasapi.media.entity.Country;
 
 public class C4MediaGroupElement extends Element {
 
