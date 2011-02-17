@@ -179,7 +179,7 @@ public class C4EpgEntryProcessor {
 
     private void updateBroadcasts(Set<Broadcast> broadcasts, C4EpgEntry entry, Channel channel) {
         for (Broadcast broadcast : broadcasts) {
-            if (idFrom(entry.id()).equals(broadcast.getId())){
+            if (broadcast.getId() != null && broadcast.getId().equals(entry.slotId())){
                 broadcasts.remove(broadcast);
                 break;
             }
@@ -231,22 +231,16 @@ public class C4EpgEntryProcessor {
 
     private Broadcast broadcastFrom(C4EpgEntry entry, Channel channel) {
         Broadcast broadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration());
-        broadcast.setLastUpdated(entry.updated());
-        String id = idFrom(entry.id());
-        if (id != null) {
-            broadcast.withId("c4:" + id);
-        }
         broadcast.addAlias(entry.id());
 
-        return broadcast;
-    }
-
-    private String idFrom(String id) {
-        Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(id);
-        if (matcher.matches()) {
-            return matcher.group(1);
+        broadcast.setLastUpdated(entry.updated());
+        
+        String id = entry.slotId();
+        if (id != null) {
+            broadcast.withId(id);
         }
-        return null;
+
+        return broadcast;
     }
 
     private String uriFrom(C4EpgEntry entry, String brandName) {

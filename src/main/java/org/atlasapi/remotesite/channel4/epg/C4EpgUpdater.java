@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.channel4.epg;
 
+import static com.google.common.base.Predicates.notNull;
 import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
 import static org.atlasapi.media.entity.Channel.E_FOUR;
 import static org.atlasapi.media.entity.Channel.FILM_4;
@@ -8,6 +9,8 @@ import static org.atlasapi.media.entity.Channel.MORE_FOUR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import nu.xom.Document;
@@ -22,11 +25,17 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.DayRangeGenerator;
 
@@ -46,13 +55,15 @@ public class C4EpgUpdater implements Runnable {
     private final DayRangeGenerator rangeGenerator;
     private final C4EpgEntryProcessor entryProcessor;
     private final C4EpgBrandlessEntryProcessor brandlessEntryProcessor;
+    private final BroadcastTrimmer trimmer;
 
-    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, ContentWriter writer, ContentResolver store, AdapterLog log) {
-        this(fetcher, new C4EpgEntryProcessor(writer, store, log), new C4EpgBrandlessEntryProcessor(writer, store, log), log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
+    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, ContentWriter writer, ContentResolver store, BroadcastTrimmer trimmer, AdapterLog log) {
+        this(fetcher, new C4EpgEntryProcessor(writer, store, log), new C4EpgBrandlessEntryProcessor(writer, store, log), trimmer, log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }
 
-    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, C4EpgEntryProcessor entryProcessor, C4EpgBrandlessEntryProcessor brandlessEntryProcessor, AdapterLog log, DayRangeGenerator generator) {
+    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, C4EpgEntryProcessor entryProcessor, C4EpgBrandlessEntryProcessor brandlessEntryProcessor, BroadcastTrimmer trimmer, AdapterLog log, DayRangeGenerator generator) {
         this.c4AtomFetcher = fetcher;
+        this.trimmer = trimmer;
         this.log = log;
         this.rangeGenerator = generator;
         this.entryProcessor = entryProcessor;
@@ -80,11 +91,29 @@ public class C4EpgUpdater implements Runnable {
         Document scheduleDocument = getSchedule(uri);
         if(scheduleDocument != null) {
             try {
-                process(scheduleDocument, channelEntry.getValue());
+                List<C4EpgEntry> entries = getEntries(scheduleDocument);
+                trim(scheduleDay, channelEntry.getValue(), entries);
+                process(entries, channelEntry.getValue());
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(ERROR).withCause(e).withSource(getClass()).withDescription("Exception updating from " + uri));
             }
         }
+    }
+
+    private void trim(LocalDate scheduleDay, Channel channel, Iterable<C4EpgEntry> entries) {
+        DateTime scheduleStart = scheduleDay.toDateTime(new LocalTime(6,0,0), DateTimeZones.LONDON);
+        Interval scheduleInterval = new Interval(scheduleStart, scheduleStart.plusDays(1));
+        trimmer.trimBroadcasts(scheduleInterval, channel, broacastIdsFrom(entries));
+    }
+
+    private Collection<String> broacastIdsFrom(Iterable<C4EpgEntry> entries) {
+        return ImmutableSet.copyOf(Iterables.filter(Iterables.transform(entries, new Function<C4EpgEntry, String>() {
+            @Override
+            public String apply(C4EpgEntry entry) {
+                String slotId = entry.slotId();
+                return slotId == null ? null : "c4:"+slotId;
+            }
+        }), notNull()));
     }
 
     private Document getSchedule(String uri) {
@@ -100,10 +129,8 @@ public class C4EpgUpdater implements Runnable {
         return String.format(epgUriPattern, scheduleDay.toString("yyyy/MM/dd"), channelKey);
     }
 
-    private void process(Document scheduleDocument, Channel channel) {
-        Nodes entryNodes = scheduleDocument.query("//atom:feed/atom:entry", new XPathContext("atom", "http://www.w3.org/2005/Atom"));
-        for (int i = 0; i < entryNodes.size(); i++) {
-            C4EpgEntry entry = C4EpgEntry.from((C4EpgEntryElement) entryNodes.get(i));
+    private void process(Iterable<C4EpgEntry> entries, Channel channel) {
+        for (C4EpgEntry entry : entries) {
             if (entry.brandTitle() != null && entry.episodeNumber() != null && entry.seriesNumber() != null) {
                 entryProcessor.process(entry, channel);
             } else {
@@ -112,4 +139,16 @@ public class C4EpgUpdater implements Runnable {
         }
     }
 
+    private List<C4EpgEntry> getEntries(Document scheduleDocument) {
+        Nodes entryNodes = scheduleDocument.query("//atom:feed/atom:entry", new XPathContext("atom", "http://www.w3.org/2005/Atom"));
+        
+        List<C4EpgEntry> entries = Lists.newArrayListWithCapacity(entryNodes.size());
+        
+        for (int i = 0; i < entryNodes.size(); i++) {
+            C4EpgEntry entry = C4EpgEntry.from((C4EpgEntryElement) entryNodes.get(i));
+            entries.add(entry);
+        }
+        
+        return entries;
+    }
 }

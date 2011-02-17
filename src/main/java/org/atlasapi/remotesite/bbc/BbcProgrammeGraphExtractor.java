@@ -50,6 +50,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
+import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
@@ -80,7 +81,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     
 	private final Clock clock;
 	private final AdapterLog log;
-    private final BbcIonDeserializer<IonFeed<IonEpisodeDetail>> ionDeserialiser;
+    private final BbcIonDeserializer<IonEpisodeDetailFeed> ionDeserialiser;
     private final BbcProgrammeEncodingAndLocationCreator encodingCreator;
 
     public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, Clock clock, AdapterLog log) {
@@ -88,7 +89,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         this.policyClient = policyClient;
 		this.clock = clock;
         this.log = log;
-		this.ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonFeed<IonEpisodeDetail>>(){});
+		this.ionDeserialiser = BbcIonDeserializers.deserializerForClass(IonEpisodeDetailFeed.class);
 		this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
     }
 
@@ -169,13 +170,13 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         try {
             List<IonEpisodeDetail> episodeDetailList = ionDeserialiser.deserialise(webserviceClient().getContentsOf(String.format(EPISODE_DETAIL_PATTERN, bbcProgrammeIdFrom(episodeUri)))).getBlocklist();
             if (episodeDetailList == null || episodeDetailList.isEmpty()) {
-                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Could get episode detail for " + episodeUri));
+                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Empty episode detail for " + episodeUri));
                 return null;
             } else {
                 return episodeDetailList.get(0);
             }
         } catch (HttpException e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Could get episode detail for " + episodeUri));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception getting episode detail for " + episodeUri));
             return null;
         }
     }

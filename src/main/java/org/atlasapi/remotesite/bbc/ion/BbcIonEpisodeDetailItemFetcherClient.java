@@ -16,7 +16,7 @@ import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
-import org.atlasapi.remotesite.bbc.ion.model.IonFeed;
+import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
 
@@ -33,7 +33,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
     private static final String EPISODE_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/episodedetail/episode/%s/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json";
 
-    private final BbcIonDeserializer<IonFeed<IonEpisodeDetail>> ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonFeed<IonEpisodeDetail>>(){});
+    private final BbcIonDeserializer<IonEpisodeDetailFeed> ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonEpisodeDetailFeed>(){});
     private final BbcProgrammeEncodingAndLocationCreator enodingCreator = new BbcProgrammeEncodingAndLocationCreator(new SystemClock());
     private final AdapterLog log;
     

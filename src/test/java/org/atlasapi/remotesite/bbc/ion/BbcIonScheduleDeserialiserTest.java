@@ -8,8 +8,7 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
-import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
-import org.atlasapi.remotesite.bbc.ion.model.IonFeed;
+import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 
 import com.google.common.base.Charsets;
@@ -39,9 +38,9 @@ public class BbcIonScheduleDeserialiserTest extends TestCase {
     public void testEpisodeDetailFrom() throws IOException {
         String json =  Resources.toString(Resources.getResource("ion-episode-detail.json"), Charsets.UTF_8);
         
-        BbcIonDeserializer<IonFeed<IonEpisodeDetail>> deserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonFeed<IonEpisodeDetail>>(){});
+        BbcIonDeserializer<IonEpisodeDetailFeed> deserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonEpisodeDetailFeed>(){});
        
-        IonFeed<IonEpisodeDetail> schedule = deserialiser.deserialise(json);
+        IonEpisodeDetailFeed schedule = deserialiser.deserialise(json);
         
         assertThat(schedule.getCount(), is(1L));
         
