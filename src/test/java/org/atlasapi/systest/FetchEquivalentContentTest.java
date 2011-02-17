@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.systest;
 
 import java.util.Collection;
+import java.io.IOException;
 import java.util.Set;
 import java.util.regex.Pattern;
 

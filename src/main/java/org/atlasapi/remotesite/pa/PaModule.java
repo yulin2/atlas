@@ -18,14 +18,14 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
-import com.metabroadcast.common.scheduling.RepetitionRules.RepetitionInterval;
+import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 import com.metabroadcast.common.scheduling.RepetitionRules.Weekly;
 import com.metabroadcast.common.time.DayOfWeek;
 
 @Configuration
 public class PaModule {
     private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
-    private final static RepetitionInterval REPEATED = RepetitionRules.atInterval(Duration.standardHours(5));
+    private final static Every REPEATED = RepetitionRules.every(Duration.standardHours(5));
     private final static Weekly WEEKLY = RepetitionRules.weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;

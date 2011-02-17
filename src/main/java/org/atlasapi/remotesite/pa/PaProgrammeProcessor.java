@@ -3,11 +3,14 @@ package org.atlasapi.remotesite.pa;
 import java.util.Set;
 
 import org.atlasapi.genres.GenreMap;
+import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -18,15 +21,18 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
+import org.atlasapi.remotesite.pa.bindings.CastMember;
 import org.atlasapi.remotesite.pa.bindings.Category;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
+import org.atlasapi.remotesite.pa.bindings.StaffMember;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -46,6 +52,8 @@ public class PaProgrammeProcessor {
     
     private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
+    
+    private final Splitter personSplitter = Splitter.on(", ");
 
     public PaProgrammeProcessor(ContentWriters contentWriter, ContentResolver contentResolver, AdapterLog log) {
         this.contentWriter = contentWriter;
@@ -55,24 +63,9 @@ public class PaProgrammeProcessor {
 
     public void process(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         try {
-            Maybe<Brand> brand = Maybe.nothing();
-            try {
-                brand = getBrand(progData);
-            } catch (ClassCastException e) {
-                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription("This is definitely where the class cast will happen, with the brand " + e.getMessage()));
-            }
-            Maybe<Series> series = Maybe.nothing();
-            try {
-                series = getSeries(progData);
-            } catch (ClassCastException e) {
-                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription("This is definitely where the class cast will happen, with the series " + e.getMessage()));
-            }
-            Maybe<Episode> episode = Maybe.nothing();
-            try {
-                episode = getEpisode(progData, channelData, zone);
-            } catch (ClassCastException e) {
-                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription("This is definitely where the class cast will happen, with the episode " + e.getMessage()));
-            }
+            Maybe<Brand> brand = getBrand(progData);
+            Maybe<Series> series = getSeries(progData);
+            Maybe<Episode> episode = getEpisode(progData, channelData, zone);
 
             if (episode.hasValue()) {
                 if (series.hasValue()) {
@@ -223,6 +216,7 @@ public class PaProgrammeProcessor {
             }
         }
 
+        episode.setPeople(people(progData));
 
         Version version = findBestVersion(episode.getVersions());
 
@@ -249,6 +243,23 @@ public class PaProgrammeProcessor {
             
             version.setBroadcasts(broadcasts);
         }
+    }
+    
+    private Set<Person> people(ProgData progData) {
+        Set<Person> people = Sets.newHashSet();
+        
+        for (StaffMember staff: progData.getStaffMember()) {
+            String roleKey = staff.getRole().toLowerCase().replace(' ', '_');
+            for (String name: personSplitter.split(staff.getPerson())) {
+                people.add(CrewMember.crewMember(name, roleKey, Publisher.PA));
+            }
+        }
+        
+        for (CastMember cast: progData.getCastMember()) {
+            people.add(Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA));
+        }
+        
+        return people;
     }
 
     private Version findBestVersion(Iterable<Version> versions) {

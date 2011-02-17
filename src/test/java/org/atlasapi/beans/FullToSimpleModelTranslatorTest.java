@@ -8,14 +8,17 @@ import java.io.OutputStream;
 import java.util.Currency;
 import java.util.Set;
 
+import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Policy.RevenueContract;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.hamcrest.Description;
@@ -87,7 +90,14 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		fullItem.addVersion(version);
 		fullItem.setTitle("Collings and Herrin");
 		
+		Person person = Actor.actor("Andrew Collings", "Dirt-bag Humperdink", Publisher.BBC);
+		fullItem.addPerson(person);
+		
 		Item simpleItem = FullToSimpleModelTranslator.simpleItemFrom(fullItem);
+		Set<org.atlasapi.media.entity.simple.Person> people = simpleItem.getPeople();
+		org.atlasapi.media.entity.simple.Actor simpleActor = (org.atlasapi.media.entity.simple.Actor) Iterables.getOnlyElement(people);
+		assertThat(simpleActor.character(), is("Dirt-bag Humperdink"));
+		assertThat(simpleActor.getName(), is("Andrew Collings"));
 		
 		Set<org.atlasapi.media.entity.simple.Location> simpleLocations = simpleItem.getLocations();
 		assertThat(simpleLocations.size(), is(1));
