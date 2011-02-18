@@ -98,6 +98,7 @@ public class PaProgrammeProcessor {
             }
             person.addContents(episode);
             person.setLastUpdated(new DateTime(DateTimeZones.UTC));
+            person.setMediaType(null);
             
             contentWriter.createOrUpdateSkeleton(person);
         }
