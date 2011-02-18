@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -37,6 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaProgrammeProcessor {
     
@@ -67,23 +69,38 @@ public class PaProgrammeProcessor {
             Maybe<Episode> episode = getEpisode(progData, channelData, zone);
 
             if (episode.hasValue()) {
+                createOrUpdatePeople(episode.requireValue());
+                
                 if (series.hasValue()) {
                     series.requireValue().addItem(episode.requireValue());
                     contentWriter.createOrUpdateDefinitivePlaylist(series.requireValue());
                 }
-                try {
                 if (brand.hasValue()) {
                     brand.requireValue().addItem(episode.requireValue());
                     contentWriter.createOrUpdateDefinitivePlaylist(brand.requireValue());
                 } else {
                     contentWriter.createOrUpdateDefinitiveItem(episode.requireValue());
                 }
-                } catch (ClassCastException e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription("This is definitely where the class cast will happen, when it's persisted " + e.getMessage()));
-                }
             }
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
+        }
+    }
+    
+    private void createOrUpdatePeople(Episode episode) {
+        for (CrewMember crewMember: episode.people()) {
+            Content resolvedContent = contentResolver.findByUri(crewMember.getCanonicalUri());
+            
+            Person person = null;
+            if (resolvedContent instanceof Person) {
+                person = (Person) resolvedContent;
+            } else {
+                person = crewMember.toPerson();
+            }
+            person.addItem(episode);
+            person.setLastUpdated(new DateTime(DateTimeZones.UTC));
+            
+            contentWriter.createOrUpdateDefinitivePlaylist(person);
         }
     }
 

@@ -7,7 +7,9 @@ import junit.framework.TestCase;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -76,6 +78,13 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         
         broadcast = version.getBroadcasts().iterator().next();
         assertEquals("pa:71118471", broadcast.getId());
+        
+        
+        for (CrewMember crewMember: item.people()) {
+            content = store.findByUri(crewMember.getCanonicalUri());
+            assertTrue(content instanceof Person);
+            assertEquals(crewMember.name(), content.getTitle());
+        }
     }
     
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
