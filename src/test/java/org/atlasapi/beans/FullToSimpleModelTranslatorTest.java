@@ -10,10 +10,10 @@ import java.util.Set;
 
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Countries;
+import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
@@ -90,7 +90,7 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		fullItem.addVersion(version);
 		fullItem.setTitle("Collings and Herrin");
 		
-		Person person = Actor.actor("Andrew Collings", "Dirt-bag Humperdink", Publisher.BBC);
+		CrewMember person = Actor.actor("Andrew Collings", "Dirt-bag Humperdink", Publisher.BBC);
 		fullItem.addPerson(person);
 		
 		Item simpleItem = FullToSimpleModelTranslator.simpleItemFrom(fullItem);
