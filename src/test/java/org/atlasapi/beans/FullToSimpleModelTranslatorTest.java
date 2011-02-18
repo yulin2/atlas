@@ -103,7 +103,7 @@ public class FullToSimpleModelTranslatorTest extends MockObjectTestCase {
 		
 		Item simpleItem = FullToSimpleModelTranslator.simpleItemFrom(fullItem);
 		Set<org.atlasapi.media.entity.simple.Person> people = simpleItem.getPeople();
-		org.atlasapi.media.entity.simple.Actor simpleActor = (org.atlasapi.media.entity.simple.Actor) Iterables.getOnlyElement(people);
+		org.atlasapi.media.entity.simple.Person simpleActor = Iterables.getOnlyElement(people);
 		assertThat(simpleActor.character(), is("Dirt-bag Humperdink"));
 		assertThat(simpleActor.getName(), is("Andrew Collings"));
 		
