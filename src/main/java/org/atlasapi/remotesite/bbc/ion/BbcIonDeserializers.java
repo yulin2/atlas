@@ -3,10 +3,8 @@ package org.atlasapi.remotesite.bbc.ion;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.remotesite.bbc.ion.model.IonEpisode.IonTagScheme;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
@@ -71,16 +69,38 @@ public class BbcIonDeserializers {
         }
     }
     
-    public static class IonTagSchemeListDeserialiser implements JsonDeserializer<List<IonTagScheme>> {
-        @Override
-        public List<IonTagScheme> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            String jsonString = json.getAsJsonPrimitive().getAsString();
-            if(Strings.isNullOrEmpty(jsonString)) {
-                return null;
-            }
-            return context.deserialize(json, typeOfT);
-        }
-    }
+//    public static class IonTagSchemeListDeserialiser implements JsonDeserializer<List<IonTagScheme>> {
+//        @Override
+//        public List<IonTagScheme> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+//            String jsonString = json.getAsJsonPrimitive().getAsString();
+//            if(Strings.isNullOrEmpty(jsonString)) {
+//                return null;
+//            }
+//            return context.deserialize(json, typeOfT);
+//        }
+//    }
+//    
+//    public static class IonCategoryListDeserialiser implements JsonDeserializer<List<IonCategory>> {
+//        @Override
+//        public List<IonCategory> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+//            String jsonString = json.getAsJsonPrimitive().getAsString();
+//            if(Strings.isNullOrEmpty(jsonString)) {
+//                return null;
+//            }
+//            return context.deserialize(json, typeOfT);
+//        }
+//    }
+//    
+//    public static class IonMediaSetDeserialiser implements JsonDeserializer<Set<IonMediaSet>> {
+//        @Override
+//        public Set<IonMediaSet> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+//            String jsonString = json.getAsJsonPrimitive().getAsString();
+//            if(Strings.isNullOrEmpty(jsonString)) {
+//                return null;
+//            }
+//            return context.deserialize(json, typeOfT);
+//        }
+//    }
     
     
     public static class BbcIonDeserializer<T> {
@@ -100,7 +120,9 @@ public class BbcIonDeserializers {
                 .registerTypeAdapter(Long.class, new LongDeserializer())
                 .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
                 .registerTypeAdapter(URL.class, new URLDeserializer())
-                .registerTypeAdapter(new TypeToken<List<IonTagScheme>>(){}.getType(), new IonTagSchemeListDeserialiser())
+//                .registerTypeAdapter(new TypeToken<List<IonTagScheme>>(){}.getType(), new IonTagSchemeListDeserialiser())
+//                .registerTypeAdapter(new TypeToken<List<IonCategory>>(){}.getType(), new IonCategoryListDeserialiser())
+//                .registerTypeAdapter(new TypeToken<Set<IonMediaSet>>(){}.getType(), new IonMediaSetDeserialiser())
                 .create();
         }
         
