@@ -6,9 +6,9 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Iterator;
 
-import org.joda.time.DateTime;
-
 import junit.framework.TestCase;
+
+import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.time.DateTimeZones;

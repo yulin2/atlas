@@ -1,16 +1,8 @@
 package org.atlasapi.remotesite;
 
-import static org.atlasapi.content.criteria.ContentQueryBuilder.query;
-
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.atlasapi.content.criteria.ContentQueryBuilder;
-import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
