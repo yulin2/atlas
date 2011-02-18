@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgEntryProcessor {
 
@@ -82,10 +83,10 @@ public class C4EpgEntryProcessor {
                 episode.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s/episode-%s", webSafeBrandName, entry.seriesNumber(), entry.episodeNumber()));
                 
             }
+            //look for a synthesized equivalent of this item and copy any broadcast/locations and remove its versions.
             updateFromPossibleSynthesized(webSafeBrandName, entry, episode);
 
             updateEpisodeDetails(episode, entry, channel);
-            
             
             if(episode.getSeriesNumber() != null) {
                 updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode);
@@ -246,7 +247,7 @@ public class C4EpgEntryProcessor {
         Broadcast broadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration());
         broadcast.addAlias(entry.id());
 
-        broadcast.setLastUpdated(entry.updated());
+        broadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime(DateTimeZones.UTC));
         broadcast.setIsActivelyPublished(true);
         
         String id = entry.slotId();

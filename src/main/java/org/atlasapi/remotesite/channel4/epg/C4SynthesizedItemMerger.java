@@ -30,6 +30,9 @@ public class C4SynthesizedItemMerger {
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
         Encoding synthEncoding = Iterables.getOnlyElement(synthVersion.getManifestedAs());
 
+        /* create a set of the uris of the current locations in the canon episode.
+         * copy in locations from synth episode if they're not in the uri set.
+         */
         ImmutableSet<String> locationUris = currentLocationUris(encoding.getAvailableAt());
         for (Location location : synthEncoding.getAvailableAt()) {
             if (!locationUris.contains(location.getUri())) {
@@ -48,6 +51,9 @@ public class C4SynthesizedItemMerger {
     }
 
     private void mergeBroadcasts(Version version, Version synthVersion) {
+        /* Create a set of current broadcast ids in .
+         * Copy in broadcasts from synth if not in canon.
+         */
         Set<String> currentBroadcastIds = currentBroadcastIds(version.getBroadcasts());
         for (Broadcast synthBroadcast : synthVersion.getBroadcasts()) {
             if (!currentBroadcastIds.contains(synthBroadcast.getId())) {

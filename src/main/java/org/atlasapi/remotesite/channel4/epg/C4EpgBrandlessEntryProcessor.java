@@ -185,7 +185,7 @@ public class C4EpgBrandlessEntryProcessor {
         Broadcast entryBroadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId("c4:"+entry.slotId());
         entryBroadcast.addAlias(entry.id());
         entryBroadcast.setIsActivelyPublished(true);
-        entryBroadcast.setLastUpdated(entry.updated());
+        entryBroadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime());
         return entryBroadcast;
     }
 

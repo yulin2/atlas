@@ -26,7 +26,6 @@ import org.joda.time.Interval;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 public class BroadcastTrimmer {
 
@@ -44,22 +43,22 @@ public class BroadcastTrimmer {
 
     public void trimBroadcasts(Interval scheduleInterval, Channel channel, Collection<String> acceptableIds) {
         try {
-
+            //Get items currently broadcast in the interval
             Schedule schedule = queryExecutor.schedule(queryFor(scheduleInterval, channel));
             Set<Item> items = itemsFrom(schedule.getEntriesForOnlyChannel());
 
+            //For each item, check that it's broadcasts are in correct in the acceptable set, set actively published false if not.
             for (Item item : items) {
                 boolean changed = false;
                 for (Version version : item.nativeVersions()) {
-                    Set<Broadcast> toRetain = Sets.newHashSet();
                     for (Broadcast broadcast : version.getBroadcasts()) {
-                        if (!contained(broadcast, scheduleInterval) || !broadcast.getBroadcastOn().equals(channel.uri()) || broadcast.getId() == null || acceptableIds.contains(broadcast.getId())) {
-                            toRetain.add(broadcast);
+                        //double-check the broadcast is in the valid interval/channel
+                        if(contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
+                            if (broadcast.getId() != null && !acceptableIds.contains(broadcast.getId())) {
+                                broadcast.setIsActivelyPublished(false);
+                                changed = true;
+                            }
                         }
-                    }
-                    if(!toRetain.equals(version.getBroadcasts())) {
-                        version.setBroadcasts(toRetain);
-                        changed = true;
                     }
                 }
                 if(changed) {

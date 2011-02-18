@@ -24,8 +24,8 @@ public class C4SynthesizedItemUpdater {
             return;
         }
         
+        //try to find a synthesized item contained in the brand.
         String synthItemUri = synthItemUri(broadcastId, brandUri);
-        
         Episode synthEpisode = (Episode) contentResolver.findByCanonicalUri(synthItemUri);
         
         if(synthEpisode != null) {
