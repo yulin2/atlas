@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -37,6 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaProgrammeProcessor {
     
@@ -70,19 +72,34 @@ public class PaProgrammeProcessor {
                 if (series.hasValue()) {
                     series.requireValue().addContents(episode.requireValue());
                 }
-                try {
                 if (brand.hasValue()) {
                     brand.requireValue().addContents(episode.requireValue());
                     contentWriter.createOrUpdate(brand.requireValue(), true);
                 } else {
                     contentWriter.createOrUpdate(episode.requireValue());
                 }
-                } catch (ClassCastException e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription("This is definitely where the class cast will happen, when it's persisted " + e.getMessage()));
-                }
+                
+                createOrUpdatePeople(episode.requireValue());
             }
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
+        }
+    }
+    
+    private void createOrUpdatePeople(Episode episode) {
+        for (CrewMember crewMember: episode.people()) {
+            Identified resolvedContent = contentResolver.findByCanonicalUri(crewMember.getCanonicalUri());
+            
+            Person person = null;
+            if (resolvedContent instanceof Person) {
+                person = (Person) resolvedContent;
+            } else {
+                person = crewMember.toPerson();
+            }
+            person.addContents(episode);
+            person.setLastUpdated(new DateTime(DateTimeZones.UTC));
+            
+            contentWriter.createOrUpdateSkeleton(person);
         }
     }
 
