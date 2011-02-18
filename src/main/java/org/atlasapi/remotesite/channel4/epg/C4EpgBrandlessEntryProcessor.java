@@ -2,21 +2,29 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import static org.atlasapi.media.entity.Publisher.C4;
 
+import java.util.Set;
 import java.util.regex.Matcher;
 
+import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.channel4.C4AtomApi;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgBrandlessEntryProcessor {
     
@@ -42,7 +50,7 @@ public class C4EpgBrandlessEntryProcessor {
             String brandName = realBrandName != null ? realBrandName : brandName(entry.title());
             
             //try to get container for the item.
-            Brand brand = (Brand) contentStore.findByCanonicalUri((realBrandName != null ? REAL_PROGRAMME_BASE : SYNTH_PROGRAMME_BASE) + brandName);
+            Brand brand = (Brand) contentStore.findByCanonicalUri((realBrandName == null ? SYNTH_PROGRAMME_BASE : REAL_PROGRAMME_BASE) + brandName);
             
             if(brand == null) {
                 brand = brandFromEntry(entry, brandName, channel);
@@ -69,79 +77,119 @@ public class C4EpgBrandlessEntryProcessor {
     }
 
     private Episode episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel) {
-        String slotId = slotIdFrom(entry);
+        String slotId = entry.slotId();
         Episode episode = new Episode(SYNTH_PROGRAMME_BASE + synthBrandName + "/" + slotId, "c4:"+synthBrandName +"-"+slotId, C4);
         episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
         episode.setTitle(entry.title());
         episode.setDescription(entry.summary());
         episode.setLastUpdated(entry.updated());
         
-        addBroadcastTo(episode, entry, channel, slotId);
+        updateVersion(entry, episode, channel);
         
         return episode;
     }
 
-    private void addBroadcastTo(Episode episode, C4EpgEntry entry, Channel channel, String slotId) {
-        
+    private void updateVersion(C4EpgEntry entry, Episode episode, Channel channel) {
         Version version = Iterables.getFirst(episode.getVersions(), new Version());
         version.setDuration(entry.duration());
         
+        Broadcast entryBroadcast = createBroadcast(entry, channel);
+        Set<Broadcast> broadcasts = Sets.newHashSet(entryBroadcast);
+        //copy in broadcasts.
+        for (Broadcast broadcast : version.getBroadcasts()) {
+            if (!entryBroadcast.getId().equals(broadcast.getId())) {
+                broadcasts.add(broadcast);
+            }
+        }
+        version.setBroadcasts(broadcasts);
         
-        Broadcast broadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId("c4:"+slotId);
-        broadcast.addAlias(entry.id());
-        
-        version.addBroadcast(broadcast);
+        addLocationTo(version, entry);
         
         if(!episode.getVersions().contains(version)) {
             episode.addVersion(version);
         }
+    }
+
+    private void addLocationTo(Version version, C4EpgEntry entry) {
+        if (entry.media() != null && entry.media().player() != null) {
+            Location location = new Location();
+            location.setUri(entry.media().player());
+            location.setTransportType(TransportType.LINK);
+            
+            Policy policy = policyFrom(entry);
+            location.setPolicy(policy);
+            if(policy.getAvailabilityEnd() != null) {
+                location.setAvailable(new Interval(policy.getAvailabilityStart(), policy.getAvailabilityStart()).contains(new DateTime(DateTimeZones.UTC)));
+            }
+            
+            Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
+            Set<Location> locations = Sets.newHashSet(location);
+            for (Location existing : encoding.getAvailableAt()) {
+                if(!existing.getUri().equals(location.getUri())) {
+                    locations.add(existing);
+                }
+            }
+            encoding.setAvailableAt(locations);
+        }
+    }
+    
+    private Policy policyFrom(C4EpgEntry entry) {
+        Policy policy = new Policy();
+        policy.setLastUpdated(entry.updated());
         
+        policy.setAvailableCountries(entry.media().availableCountries());
+        policy.setAvailabilityStart(entry.txDate());
+
+        Matcher matcher = C4EpgEntryProcessor.AVAILABILTY_RANGE_PATTERN.matcher(entry.available());
+        if (matcher.matches()) {
+            policy.setAvailabilityEnd(new DateTime(matcher.group(2)));
+        }
+
+        return policy;
     }
 
     private void updateBrand(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
+        boolean found = false;
+        //look for an episode with a broadcast with this entry's id, replace if found.
+        for (Episode episode : brand.getContents()) {
+            for (Version version : episode.getVersions()) {
+                Set<Broadcast> broadcasts = Sets.newHashSet();
+                for (Broadcast broadcast : version.getBroadcasts()) {
+                    if(broadcast.getId() != null && broadcast.getId().equals("c4:"+entry.slotId())) {
+                        broadcasts.add(createBroadcast(entry, channel));
+                        found = true;
+                    } else {
+                        broadcasts.add(broadcast);
+                    }
+                }
+                if(found) {
+                    version.setBroadcasts(broadcasts);
+                    return;
+                }
+            }
+        }
+        
         //Try to locate an item with the same description.
         for (Episode episode : brand.getContents()) {
             if(episode.getDescription().equals(entry.summary())) {
-                addBroadcastTo(episode, entry, channel, slotIdFrom(entry));
+                //Known from above that this is a new broadcast so just add.
+                updateVersion(entry, episode, channel);
                 return;
             }
         }
         //otherwise create a new one.
         brand.addContents(episodeFrom(entry, synthbrandName, channel));
-
-        brand.setLastUpdated(entry.updated());
     }
 
-    private String slotIdFrom(C4EpgEntry entry) {
-        Matcher slotMatcher = C4AtomApi.SLOT_PATTERN.matcher(entry.id());
-        if(!slotMatcher.matches()) {
-            throw new RuntimeException("No slot ID found for " + entry.id());
-        }
-        
-        String slotId = slotMatcher.group(1);
-        return slotId;
+    private Broadcast createBroadcast(C4EpgEntry entry, Channel channel) {
+        Broadcast entryBroadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId("c4:"+entry.slotId());
+        entryBroadcast.addAlias(entry.id());
+        entryBroadcast.setIsActivelyPublished(true);
+        entryBroadcast.setLastUpdated(entry.updated());
+        return entryBroadcast;
     }
 
     private String brandName(String title) {
         return title.replaceAll("[^ a-zA-Z0-9]", "").replaceAll("\\s+", "-").toLowerCase();
     }
-/*
- *  <entry>
-        <id>tag:int.channel4.com,2009:slot/299</id>
-        <title type="text">Lassie</title>
-        <updated>2011-02-03T15:43:00.849Z</updated>
-        <summary type="html">(2005) Joe's (Jonathan Mason) beloved dog Lassie
-            is sold by his destitute parents to the Duke of Rudling (Peter
-            O'Toole), but the collie escapes and embarks on an adventurous
-            journey home.</summary>
-        <dc:date.TXDate>2011-01-07T13:05:00.000Z</dc:date.TXDate>
-        <dc:relation.TXChannel>C4</dc:relation.TXChannel>
-        <dc:relation.Subtitles>true</dc:relation.Subtitles>
-        <dc:relation.AudioDescription>false</dc:relation.AudioDescription>
-        <dc:relation.Duration>110:00</dc:relation.Duration>
-        <dc:relation.WideScreen>false</dc:relation.WideScreen>
-        <dc:relation.Signing>false</dc:relation.Signing>
-        <dc:relation.Repeat>true</dc:relation.Repeat>
-    </entry>
- */
 }

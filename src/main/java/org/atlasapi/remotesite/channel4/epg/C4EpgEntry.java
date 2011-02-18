@@ -132,7 +132,7 @@ public class C4EpgEntry {
     public String slotId() {
         Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(id);
         if (matcher.matches()) {
-            return "c4:"+matcher.group(1);
+            return matcher.group(1);
         }
         return null;
     }

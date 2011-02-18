@@ -5,6 +5,8 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
@@ -24,6 +26,9 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.joda.time.DateTime;
@@ -106,28 +111,37 @@ public class C4EpgEntryProcessorTest extends TestCase {
     public void testProcessExistingItemSeriesBrand() { 
         
         final Episode episode = existingEpisode();
-        final Series series = existingSeries();
-        final Brand brand = existingBrand();
+        final Series series = new Series("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1", "c4:the-hoobs-series-1", C4);
+        final Brand brand = new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:the-hoobs", C4);
         series.addContents(episode);
         brand.addContents(episode);
         
+        final ContentWriter writer = context.mock(ContentWriter.class);
+        
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(episode)); //item
-            one(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(series)); //series
-            one(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(brand)); //brand
+            one(resolver).findByCanonicalUri(with(endsWith("episode-59"))); will(returnValue(episode)); //item
+            one(resolver).findByCanonicalUri(with(containsString("synthesized"))); will(returnValue(null)); //no synth item
+            one(resolver).findByCanonicalUri(with(endsWith("series-1"))); will(returnValue(series)); //series
+            one(resolver).findByCanonicalUri(with(endsWith("the-hoobs"))); will(returnValue(brand)); //brand
+            one(writer).createOrUpdate(with(updatedBrandWithExistingItem()), with(true));
         }});
         
-        ContentWriter writer = new ContentWriter() {
+        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
+        
+        processor.process(buildEntry(), CHANNEL_FOUR);
+        
+        context.assertIsSatisfied();
+    }
+    
+    public Matcher<Brand> updatedBrandWithExistingItem() {
+        return new TypeSafeMatcher<Brand>() {
             @Override
-            public void createOrUpdate(Item item) {
-                throw new RuntimeException();
+            public void describeTo(Description desc) {
+                desc.appendText("");
             }
 
             @Override
-            public void createOrUpdate(Container<?> container, boolean markMissingItemsAsUnavailable) {
-                assertTrue(container instanceof Brand);
-                Brand brand = (Brand) container;
-                
+            public boolean matchesSafely(Brand brand) {
                 assertThat(brand.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs")));
                 
                 assertThat(brand.getSeries().size(), is(equalTo(1)));
@@ -157,17 +171,9 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 assertThat(location.getUri(), is(equalTo("http://int.channel4.com/programmes/the-hoobs/4od#2930251")));
                 assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
                 assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
-            }
-
-            @Override
-            public void createOrUpdateSkeleton(ContentGroup playlist) {
-                throw new RuntimeException();
+                return true;
             }
         };
-        
-        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
-        
-        processor.process(buildEntry(), CHANNEL_FOUR);
     }
 
     private Episode existingEpisode() {
@@ -189,40 +195,42 @@ public class C4EpgEntryProcessorTest extends TestCase {
         
         return episode;
     }
-
-    private Series existingSeries() {
-        return new Series("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1", "c4:the-hoobs-series-1", C4);
-    }
-
-    private Brand existingBrand() {
-        return new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:the-hoobs", C4);
-    }
     
     public void testProcessNewItemSeriesExistingBrand() {
         
-        final Brand brand = existingBrand();
-        Series series = existingSeries();
+        final Brand brand = new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:the-hoobs", C4);
+        Series series = new Series("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1", "c4:the-hoobs-series-1", C4);
         Episode episode = new Episode("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-58", "c4:the-hoobs-series-1-episode-58", C4);
         brand.addContents(episode);
         series.addContents(episode);
+
+        final ContentWriter writer = context.mock(ContentWriter.class);
         
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(null)); //item
-            one(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(null)); //series
-            one(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(brand)); //brand
+            one(resolver).findByCanonicalUri(with(endsWith("episode-59"))); will(returnValue(null)); //item
+            one(resolver).findByCanonicalUri(with(containsString("synthesized"))); will(returnValue(null)); //no synth item
+            one(resolver).findByCanonicalUri(with(endsWith("series-1"))); will(returnValue(null)); //series
+            one(resolver).findByCanonicalUri(with(endsWith("the-hoobs"))); will(returnValue(brand)); //brand
+            one(writer).createOrUpdate(with(updatedBrandWithNewItem()), with(true));
         }});
         
-        ContentWriter writer = new ContentWriter() {
+        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
+        
+        processor.process(buildEntry(), CHANNEL_FOUR);
+        
+        context.assertIsSatisfied();
+        
+    }
+    
+    private Matcher<Brand> updatedBrandWithNewItem() {
+        return new TypeSafeMatcher<Brand>() {
             @Override
-            public void createOrUpdate(Item item) {
-                throw new RuntimeException();
+            public void describeTo(Description desc) {
+                desc.appendText("updated brand");
             }
 
             @Override
-            public void createOrUpdate(Container<?> container, boolean markMissingItemsAsUnavailable) {
-                assertTrue(container instanceof Brand);
-                Brand brand = (Brand) container;
-                
+            public boolean matchesSafely(Brand brand) {
                 assertThat(brand.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs")));
                 
                 assertThat(brand.getSeries().size(), is(equalTo(1)));
@@ -251,20 +259,10 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 assertThat(location.getUri(), is(equalTo("http://int.channel4.com/programmes/the-hoobs/4od#2930251")));
                 assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
                 assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
-            }
-
-            @Override
-            public void createOrUpdateSkeleton(ContentGroup playlist) {
-                throw new RuntimeException();
+                return true;
             }
         };
-        
-        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
-        
-        processor.process(buildEntry(), CHANNEL_FOUR);
-        
     }
-    
 
     private C4EpgEntry buildEntry() {
         return new C4EpgEntry("tag:int.channel4.com,2009:slot/337")

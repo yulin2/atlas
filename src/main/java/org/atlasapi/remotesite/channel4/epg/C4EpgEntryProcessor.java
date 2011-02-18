@@ -22,7 +22,6 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -36,6 +35,7 @@ import org.joda.time.DateTime;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class C4EpgEntryProcessor {
 
@@ -49,17 +49,20 @@ public class C4EpgEntryProcessor {
 
     private static final List<Pattern> WEB_SAFE_BRAND_PATTERNS = ImmutableList.of(BRAND_ATOM_PATTERN, C40D_PATTERN, EPISODE_ATOM_PATTERN);
 
-    private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
+    public static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
     private final ContentWriter contentWriter;
     private final ContentResolver contentStore;
 
     private final AdapterLog log;
+    
+    private final C4SynthesizedItemUpdater c4SynthesizedItemUpdater;
 
     public C4EpgEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentStore = contentStore;
         this.log = log;
+        this.c4SynthesizedItemUpdater = new C4SynthesizedItemUpdater(contentStore, contentWriter);
     }
 
     public void process(C4EpgEntry entry, Channel channel) {
@@ -77,8 +80,12 @@ public class C4EpgEntryProcessor {
             if (episode == null) {
                 episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
                 episode.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s/episode-%s", webSafeBrandName, entry.seriesNumber(), entry.episodeNumber()));
+                
             }
+            updateFromPossibleSynthesized(webSafeBrandName, entry, episode);
+
             updateEpisodeDetails(episode, entry, channel);
+            
             
             if(episode.getSeriesNumber() != null) {
                 updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode);
@@ -91,6 +98,10 @@ public class C4EpgEntryProcessor {
             log.record(new AdapterLogEntry(WARN).withCause(e).withSource(getClass()).withDescription("Exception processing entry: " + entry.id()));
         }
 
+    }
+
+    private void updateFromPossibleSynthesized(String webSafeBrandName, C4EpgEntry entry, Episode episode) {
+        c4SynthesizedItemUpdater.findAndUpdatePossibleSynthesized("c4:"+entry.slotId(), episode, C4_PROGRAMMES_BASE+webSafeBrandName);
     }
 
     private Brand updateBrand(String brandName, Episode episode, C4EpgEntry entry) {
@@ -152,7 +163,6 @@ public class C4EpgEntryProcessor {
 
         episode.setIsLongForm(true);
         episode.setMediaType(MediaType.VIDEO);
-        episode.setSpecialization(Specialization.TV);
         episode.setLastUpdated(entry.updated());
 
         return episode;
@@ -162,7 +172,7 @@ public class C4EpgEntryProcessor {
         Version version = Iterables.getFirst(episode.nativeVersions(), new Version());
         version.setDuration(entry.duration());
         
-        updateBroadcasts(version.getBroadcasts(), entry, channel);
+        version.setBroadcasts(updateBroadcasts(version.getBroadcasts(), entry, channel));
 
         Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
 
@@ -177,14 +187,17 @@ public class C4EpgEntryProcessor {
         }
     }
 
-    private void updateBroadcasts(Set<Broadcast> broadcasts, C4EpgEntry entry, Channel channel) {
-        for (Broadcast broadcast : broadcasts) {
-            if (broadcast.getId() != null && broadcast.getId().equals(entry.slotId())){
-                broadcasts.remove(broadcast);
-                break;
+    private Set<Broadcast> updateBroadcasts(Set<Broadcast> currentBroadcasts, C4EpgEntry entry, Channel channel) {
+        Broadcast entryBroadcast = broadcastFrom(entry, channel);
+        
+        Set<Broadcast> broadcasts = Sets.newHashSet(entryBroadcast);
+        for (Broadcast broadcast : currentBroadcasts) {
+            if (!entryBroadcast.getId().equals(broadcast.getId())){
+                broadcasts.add(broadcast);
             }
         }
-        broadcasts.add(broadcastFrom(entry, channel));
+        
+        return broadcasts;
     }
 
     private void updateEncoding(Version version, Encoding encoding, C4EpgEntry entry) {
@@ -234,10 +247,11 @@ public class C4EpgEntryProcessor {
         broadcast.addAlias(entry.id());
 
         broadcast.setLastUpdated(entry.updated());
+        broadcast.setIsActivelyPublished(true);
         
         String id = entry.slotId();
         if (id != null) {
-            broadcast.withId(id);
+            broadcast.withId("c4:"+id);
         }
 
         return broadcast;

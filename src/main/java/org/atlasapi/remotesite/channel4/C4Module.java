@@ -102,7 +102,7 @@ public class C4Module {
 	}
 
 	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {
-		return new C4AtomBackedBrandAdapter(c4AtomFetcher(), contentStore, log);
+		return new C4AtomBackedBrandAdapter(c4AtomFetcher(), contentStore, contentStore, log);
 	}
 
 	public Collection<SiteSpecificAdapter<? extends Content>> adapters() {

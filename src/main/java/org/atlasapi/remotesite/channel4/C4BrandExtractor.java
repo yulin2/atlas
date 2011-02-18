@@ -14,12 +14,14 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
+import org.atlasapi.remotesite.channel4.epg.C4SynthesizedItemUpdater;
 import org.jdom.Element;
 
 import com.google.common.collect.ImmutableList;
@@ -51,7 +53,9 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
     private final AdapterLog log;
 
-    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, AdapterLog log) {
+    private C4SynthesizedItemUpdater synthesizedItemUpdater;
+
+    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentWriter, AdapterLog log) {
         feedClient = atomClient;
         this.log = log;
         fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands().includeBroadcasts();
@@ -59,6 +63,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
         seriesExtractor = new C4SeriesExtractor(contentResolver, log);
         clipExtractor = new C4ClipExtractor(atomClient, new C4EpisodesExtractor(log).includeOnDemands());
         versionMerger = new C4PreviousVersionDataMerger(contentResolver);
+        synthesizedItemUpdater = new C4SynthesizedItemUpdater(contentResolver, contentWriter);
     }
 
     @Override
@@ -272,17 +277,19 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
                     } else {
                         version = episode.getVersions().iterator().next();
                     }
+                    synthesizedItemUpdater.findAndUpdatePossibleSynthesized(broadcast.getId(), episode, brand.getCanonicalUri());
 
+                    boolean found = false;
                     for (Broadcast currentBroadcast : version.getBroadcasts()) {
-                        if (currentBroadcast.equals(broadcast)) {
+                        if (currentBroadcast.equals(broadcast) || (currentBroadcast.getId() != null && currentBroadcast.getId().equals(broadcast.getId()))) {
                             currentBroadcast.setAliases(broadcast.getAliases());
                             currentBroadcast.setLastUpdated(broadcast.getLastUpdated());
-                            return;
+                            found = true;
                         }
                     }
-
-                    version.addBroadcast(broadcast);
-                    return;
+                    if (!found) {
+                        version.addBroadcast(broadcast);
+                    }
                 }
             }
         }

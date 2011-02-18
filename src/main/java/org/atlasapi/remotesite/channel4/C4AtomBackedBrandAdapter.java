@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -41,8 +42,8 @@ public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
 	private final RemoteSiteClient<Feed> feedClient;
 	private final ContentExtractor<Feed, Brand> extractor;
 	
-	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, AdapterLog log) {
-		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, log));
+	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, AdapterLog log) {
+		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, contentStore, log));
 	}
 	
 	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> feedClient, ContentExtractor<Feed, Brand> extractor) {
