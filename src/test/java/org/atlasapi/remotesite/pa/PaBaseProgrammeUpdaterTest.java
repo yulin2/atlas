@@ -52,7 +52,6 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertFalse(item.getVersions().isEmpty());
         
         assertEquals(18, item.people().size());
-        assertEquals(4, item.crewMembers().size());
         assertEquals(14, item.actors().size());
         
         Version version = item.getVersions().iterator().next();

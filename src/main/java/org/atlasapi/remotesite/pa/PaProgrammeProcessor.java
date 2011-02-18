@@ -10,7 +10,6 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -245,8 +244,8 @@ public class PaProgrammeProcessor {
         }
     }
     
-    private Set<Person> people(ProgData progData) {
-        Set<Person> people = Sets.newHashSet();
+    private Set<CrewMember> people(ProgData progData) {
+        Set<CrewMember> people = Sets.newHashSet();
         
         for (StaffMember staff: progData.getStaffMember()) {
             String roleKey = staff.getRole().toLowerCase().replace(' ', '_');
