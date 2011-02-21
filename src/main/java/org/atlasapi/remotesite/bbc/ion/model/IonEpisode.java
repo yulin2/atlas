@@ -71,6 +71,15 @@ public class IonEpisode {
     private String shortSynopsis;
     private Boolean isHdOnly;
     private URL myMediaselectorXmlUrl;
+    private List<IonContributor> contributors;
+
+    public List<IonContributor> getContributors() {
+        return contributors;
+    }
+
+    public void setContributors(List<IonContributor> contributors) {
+        this.contributors = contributors;
+    }
 
     public String getMySeriesUrl() {
         return mySeriesUrl;

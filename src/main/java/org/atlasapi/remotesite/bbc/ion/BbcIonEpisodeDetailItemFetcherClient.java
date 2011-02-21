@@ -3,11 +3,15 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
+import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -15,6 +19,7 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
+import org.atlasapi.remotesite.bbc.ion.model.IonContributor;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
@@ -32,6 +37,9 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private static final String CURIE_BASE = "bbc:";
     private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
     private static final String EPISODE_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/episodedetail/episode/%s/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json";
+    private static final String ACTOR_ROLE_NAME = "ACTOR";
+    private static final String PERSON_BASE_URL = "http://www.bbc.co.uk/people/";
+    private static final String PERSON_BASE_CURIE = "bbc:person_";
 
     private final BbcIonDeserializer<IonEpisodeDetailFeed> ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonEpisodeDetailFeed>(){});
     private final BbcProgrammeEncodingAndLocationCreator enodingCreator = new BbcProgrammeEncodingAndLocationCreator(new SystemClock());
@@ -91,8 +99,31 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
                 item.addVersion(versionFrom(ionVersion, episode.getId()));
             }
         }
+        
+        if (episode.getContributors() != null) {
+            for (IonContributor contributor: episode.getContributors()) {
+                item.addPerson(personFrom(contributor));
+            }
+        }
 
         return item;
+    }
+    
+    private CrewMember personFrom(IonContributor contributor) {
+        CrewMember person = null;
+        String uri = PERSON_BASE_URL+contributor.getId();
+        String curie = PERSON_BASE_CURIE+contributor.getId();
+        
+        if (ACTOR_ROLE_NAME.equals(contributor.getRoleName())) {
+            person = new Actor(uri, curie, Publisher.BBC).withCharacter(contributor.getCharacterName()).withRole(Role.ACTOR);
+        } else {
+            Role role = Role.fromKey(contributor.getRole().toLowerCase().replace(' ', '_'));
+            person = new CrewMember(uri, curie, Publisher.BBC).withRole(role);
+        }
+        person.withName(contributor.getGivenName()+" "+contributor.getFamilyName()).withProfileLink("http://www.bbc.co.uk"+contributor.getSearchUrl());
+        person.setLastUpdated(contributor.getUpdated());
+        
+        return person;
     }
 
     private Broadcast broadcastFrom(IonBroadcast ionBroadcast) {
