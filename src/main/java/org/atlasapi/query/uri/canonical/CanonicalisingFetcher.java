@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.system.Fetcher;
@@ -94,7 +93,7 @@ public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolv
 	}
 
 	@Override
-	public Content findByCanonicalUri(String uri) {
-		return (Content) fetch(uri);
+	public Identified findByCanonicalUri(String uri) {
+		return fetch(uri);
 	}
 }
