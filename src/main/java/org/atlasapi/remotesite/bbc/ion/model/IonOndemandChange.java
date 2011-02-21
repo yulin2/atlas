@@ -1,14 +1,12 @@
 package org.atlasapi.remotesite.bbc.ion.model;
 
-import java.util.Set;
-
 import org.joda.time.DateTime;
 
 public class IonOndemandChange {
     private String versionCrid;
     private Integer fileSize;
     private String oid;
-    private Set<IonMediaSet> mediaSets;
+//    private Set<IonMediaSet> mediaSets;
     private DateTime discoverableEnd;
     private String linearServiceId;
     private String masterbrandId;
@@ -42,9 +40,9 @@ public class IonOndemandChange {
     public String getOid() {
         return oid;
     }
-    public Set<IonMediaSet> getMediaSets() {
-        return mediaSets;
-    }
+//    public Set<IonMediaSet> getMediaSets() {
+//        return mediaSets;
+//    }
     public DateTime getDiscoverableEnd() {
         return discoverableEnd;
     }
