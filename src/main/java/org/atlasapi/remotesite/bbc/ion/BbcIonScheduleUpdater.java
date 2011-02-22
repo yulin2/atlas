@@ -11,10 +11,12 @@ import java.util.concurrent.TimeUnit;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -180,9 +182,31 @@ public class BbcIonScheduleUpdater implements Runnable {
                             }
                         }
                     }
+                    
+                    if (item instanceof Item) {
+                        createOrUpdatePeople((Item) item);
+                    }
                 }
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri).withSource(getClass()));
+            }
+        }
+        
+        private void createOrUpdatePeople(Item item) {
+            for (CrewMember crewMember: item.people()) {
+                Identified resolvedContent = localFetcher.findByCanonicalUri(crewMember.getCanonicalUri());
+                
+                Person person = null;
+                if (resolvedContent instanceof Person) {
+                    person = (Person) resolvedContent;
+                } else {
+                    person = crewMember.toPerson();
+                }
+                person.addContents(item);
+                person.setLastUpdated(new DateTime(DateTimeZones.UTC));
+                person.setMediaType(null);
+                
+                writer.createOrUpdateSkeleton(person);
             }
         }
         
