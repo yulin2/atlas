@@ -62,11 +62,14 @@ public class BbcProgrammeEncodingAndLocationCreator {
     private Policy policyFrom(IonOndemandChange ondemand) {
         Policy policy = new Policy();
         policy.setAvailabilityStart(ondemand.getActualStart() == null ? ondemand.getScheduledStart() : ondemand.getActualStart());
-        policy.setAvailabilityEnd(ondemand.getEnd());
+        policy.setAvailabilityEnd(ondemand.getEnd() == null ? policy.getAvailabilityStart().plus(ondemand.getDuration()) : ondemand.getEnd());
         return policy;
     }
 
     private boolean availableNow(Policy policy) {
+        if (policy.getAvailabilityStart() == null || policy.getAvailabilityEnd() == null || policy.getAvailabilityStart().isAfter(policy.getAvailabilityEnd())) {
+            return false;
+        }
         return new Interval(policy.getAvailabilityStart(), policy.getAvailabilityEnd()).contains(clock.now());
     }
 }
