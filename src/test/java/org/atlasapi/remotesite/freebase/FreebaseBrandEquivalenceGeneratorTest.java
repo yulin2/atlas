@@ -37,7 +37,7 @@ public class FreebaseBrandEquivalenceGeneratorTest extends TestCase {
         
         for (Equiv equiv: equivs) {
             assertEquals(brand.getCanonicalUri(), equiv.left());
-            assertTrue(equiv.right().startsWith(FreebaseBrandEquivGenerator.WIKIPEDIA));
+            assertTrue(equiv.right().startsWith(FreebaseBrandEquivGenerator.WIKIPEDIA) || equiv.right().startsWith(FreebaseBrandEquivGenerator.HULU) || equiv.right().startsWith(FreebaseBrandEquivGenerator.IMDB));
         }
         System.out.println(equivs);
     }

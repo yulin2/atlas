@@ -63,7 +63,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
 
             @Override
             public boolean matchesSafely(Brand brand) {
-                assertThat(brand.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/synthesized/robin-williams-weapons-of-self")));
+                assertThat(brand.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/robin-williams-weapons-of-self")));
                 assertThat(brand.getCurie(), is(equalTo("c4:robin-williams-weapons-of-self")));
                 
                 assertThat(brand.getSeries().size(), is(equalTo(0)));
