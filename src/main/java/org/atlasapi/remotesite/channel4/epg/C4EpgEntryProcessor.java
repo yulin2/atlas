@@ -128,6 +128,7 @@ public class C4EpgEntryProcessor {
             series = new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri), C4);
             series.addContents(episode);
             series.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s", brandName, episode.getSeriesNumber()));
+            series.withSeriesNumber(episode.getSeriesNumber());
         }
         return series;
     }
