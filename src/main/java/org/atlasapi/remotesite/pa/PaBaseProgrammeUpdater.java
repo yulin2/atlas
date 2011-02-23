@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.pa;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,11 +70,13 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
 
             for (File file : files) {
                 try {
-                    String filename = file.toURI().toString();
+                    final String filename = file.toURI().toString();
                     Matcher matcher = FILEDATE.matcher(filename);
+                    
                     if (matcher.matches()) {
                         final DateTimeZone zone = getTimeZone(matcher.group(1));
                         log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processing file "+filename+" with timezone "+zone.toString()));
+                        final AtomicInteger recordsProcessed = new AtomicInteger();
                         
                         unmarshaller.setListener(new Unmarshaller.Listener() {
                             public void beforeUnmarshal(Object target, Object parent) {
@@ -86,7 +89,12 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                                     } catch (InterruptedException e) {
                                         log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
                                     }
-                                    new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
+                                    //new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
+                                    int processed = recordsProcessed.incrementAndGet();
+                                    
+                                    if (processed % 100 == 0) {
+                                        log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processed "+processed+" programmes from "+filename));
+                                    }
                                 }
                             }
                         });
