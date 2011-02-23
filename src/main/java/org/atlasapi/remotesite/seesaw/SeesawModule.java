@@ -30,7 +30,7 @@ public class SeesawModule {
     @PostConstruct
     public void startBackgroundTasks() {
         
-        if (!feedUri.equals("DISABLED")) {
+        if (!feedUri.equalsIgnoreCase("DISABLED")) {
             scheduler.schedule(rssUpdater(), DAILY);
             log.record(new AdapterLogEntry(Severity.INFO)
                 .withDescription("Seesaw update scheduled task installed")
