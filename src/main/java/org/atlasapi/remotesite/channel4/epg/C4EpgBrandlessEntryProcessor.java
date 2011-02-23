@@ -29,6 +29,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class C4EpgBrandlessEntryProcessor {
     
     private static final String REAL_PROGRAMME_BASE = "http://www.channel4.com/programmes/";
+    private static final String REAL_TAG_BASE = "tag:www.channel4.com,2009:/programmes/";
+  
     private static final String SYNTH_PROGRAMME_BASE = "http://www.channel4.com/programmes/synthesized/";
     private static final String SYNTH_TAG_BASE = "tag:www.channel4.com,2009:/programmes/synthesized/";
 
@@ -50,7 +52,7 @@ public class C4EpgBrandlessEntryProcessor {
             String brandName = realBrandName != null ? realBrandName : brandName(entry.title());
             
             //try to get container for the item.
-            Brand brand = (Brand) contentStore.findByCanonicalUri((realBrandName == null ? SYNTH_PROGRAMME_BASE : REAL_PROGRAMME_BASE) + brandName);
+            Brand brand = (Brand) contentStore.findByCanonicalUri(REAL_PROGRAMME_BASE + brandName);
             
             if(brand == null) {
                 brand = brandFromEntry(entry, brandName, channel);
@@ -65,9 +67,13 @@ public class C4EpgBrandlessEntryProcessor {
         }
     }
 
+    /**
+     * Give synthesized brands 'real' uris so that when/if they appear in the /programmes feed they are
+     * matched up 
+     */
     private Brand brandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
-        Brand brand = new Brand(SYNTH_PROGRAMME_BASE + synthBrandName, "c4:"+synthBrandName, C4);
-        brand.addAlias(SYNTH_TAG_BASE+synthBrandName);
+        Brand brand = new Brand(REAL_PROGRAMME_BASE + synthBrandName, "c4:"+synthBrandName, C4);
+        brand.addAlias(REAL_TAG_BASE + synthBrandName);
         brand.setTitle(entry.title());
         brand.setLastUpdated(entry.updated());
         
