@@ -22,14 +22,14 @@ import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.time.TimeMachine;
 
 public class PaBaseProgrammeUpdaterTest extends TestCase {
-    
+
     private PaProgrammeProcessor programmeProcessor;
 
     private TimeMachine clock = new TimeMachine();
     private AdapterLog log = new SystemOutAdapterLog();
     private MongoDbBackedContentStore store;
     private ContentWriters contentWriters = new ContentWriters();
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -37,56 +37,63 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         contentWriters.add(store);
         programmeProcessor = new PaProgrammeProcessor(contentWriters, store, log);
     }
-    
+
     public void testShouldCreateCorrectPaData() throws Exception {
         TestFileUpdater updater = new TestFileUpdater(programmeProcessor, log);
         updater.run();
-        
-        Identified content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
+        Identified content = null;
+
+        // lazy
+        for (int i = 0; i < 5; i++) {
+            Thread.sleep(500);
+            content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
+            if (content != null)
+                continue;
+        }
+
         assertNotNull(content);
         assertTrue(content instanceof Brand);
         Brand brand = (Brand) content;
         assertFalse(brand.getContents().isEmpty());
         assertNotNull(brand.getImage());
-        
+
         Item item = brand.getContents().get(0);
         assertNotNull(item.getImage());
         assertFalse(item.getVersions().isEmpty());
-        
+
         assertEquals(18, item.people().size());
         assertEquals(14, item.actors().size());
-        
+
         Version version = item.getVersions().iterator().next();
         assertFalse(version.getBroadcasts().isEmpty());
-        
+
         Broadcast broadcast = version.getBroadcasts().iterator().next();
         assertEquals("pa:71118471", broadcast.getId());
-        
+
         updater.run();
-        
+
         content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
         assertNotNull(content);
         assertTrue(content instanceof Brand);
         brand = (Brand) content;
         assertFalse(brand.getContents().isEmpty());
-        
+
         item = brand.getContents().get(0);
         assertFalse(item.getVersions().isEmpty());
-        
+
         version = item.getVersions().iterator().next();
         assertFalse(version.getBroadcasts().isEmpty());
-        
+
         broadcast = version.getBroadcasts().iterator().next();
         assertEquals("pa:71118471", broadcast.getId());
-        
-        
-        for (CrewMember crewMember: item.people()) {
+
+        for (CrewMember crewMember : item.people()) {
             content = store.findByCanonicalUri(crewMember.getCanonicalUri());
             assertTrue(content instanceof Person);
-            assertEquals(crewMember.name(), ((Person)content).name());
+            assertEquals(crewMember.name(), ((Person) content).name());
         }
     }
-    
+
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
 
         public TestFileUpdater(PaProgrammeProcessor processor, AdapterLog log) {
