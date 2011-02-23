@@ -52,7 +52,7 @@ public class C4AtomApi {
 	
 	
 	public static void addImages(Described content, String anImage) {
-		if (anImage != null) {
+		if (! Strings.isNullOrEmpty(anImage)) {
 			Matcher matcher = IMAGE_PATTERN.matcher(anImage);
 			if (matcher.matches()) {
 				content.setThumbnail(matcher.group(1) + THUMBNAIL_SIZE + matcher.group(2));

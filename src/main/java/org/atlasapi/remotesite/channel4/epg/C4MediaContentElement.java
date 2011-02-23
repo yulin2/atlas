@@ -19,15 +19,15 @@ public class C4MediaContentElement extends Element {
     }
 
     public String thumbnail() {
-        return getMediaElementValue("thumbnail");
+        return getMediaElementValue("thumbnail").getAttributeValue("url");
     }
 
-    private String getMediaElementValue(String elementName) {
+    private Element getMediaElementValue(String elementName) {
         Elements childElements = this.getChildElements(elementName, "http://search.yahoo.com/mrss/");
-        if (childElements.size() == 0) {
+        if(childElements.size() == 0) {
             return null;
         }
-        return childElements.get(0).getValue();
+        return childElements.get(0);
     }
 
     @Override

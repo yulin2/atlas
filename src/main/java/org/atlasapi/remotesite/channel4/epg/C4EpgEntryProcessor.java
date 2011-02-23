@@ -32,6 +32,7 @@ import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.atlasapi.remotesite.channel4.C4EpisodesExtractor;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -158,7 +159,7 @@ public class C4EpgEntryProcessor {
         updateVersion(episode, entry, channel);
 
 
-        if (entry.media() != null && entry.media().thumbnail() != null) {
+        if (entry.media() != null && !Strings.isNullOrEmpty(entry.media().thumbnail())) {
             C4AtomApi.addImages(episode, entry.media().thumbnail());
         }
 
