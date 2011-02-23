@@ -71,9 +71,10 @@ public class PaLocalFileManager {
             return;
         }
 
-        FTPClient client = new FTPClient();
+        FTPClient client = null;
         
         try {
+            client = new FTPClient();
             client.connect(ftpHost);
             client.enterLocalPassiveMode();
             if (!client.login(ftpUsername, ftpPassword)) {
@@ -130,7 +131,9 @@ public class PaLocalFileManager {
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaLocalFileManager.class).withDescription("Error when trying to copy files from FTP"));
         } finally {
-            client.disconnect();
+            if (client != null) {
+                client.disconnect();
+            }
         }
     }
     
