@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.mongo.GroupContentNotExistException;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -100,7 +101,17 @@ public class PaProgrammeProcessor {
             person.setLastUpdated(new DateTime(DateTimeZones.UTC));
             person.setMediaType(null);
             
-            contentWriter.createOrUpdateSkeleton(person);
+            for (int i=0; i<5; i++) {
+                try {
+                    contentWriter.createOrUpdateSkeleton(person);
+                    continue;
+                } catch (GroupContentNotExistException e) {
+                    log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()+". Trying again ("+i+")"));
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e1) {}
+                }
+            }
         }
     }
 
