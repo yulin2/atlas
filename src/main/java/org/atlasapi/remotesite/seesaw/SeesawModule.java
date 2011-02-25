@@ -29,23 +29,17 @@ public class SeesawModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        
-        if (!feedUri.equalsIgnoreCase("DISABLED")) {
-            scheduler.schedule(rssUpdater(), DAILY);
-            log.record(new AdapterLogEntry(Severity.INFO)
-                .withDescription("Seesaw update scheduled task installed")
-                .withSource(SeesawRssUpdater.class));
+        if("DISABLED".equalsIgnoreCase(feedUri)) {
+            log.record(new AdapterLogEntry(Severity.WARN)
+            .withDescription("Feed URI required for Seesaw scheduled updater")
+            .withSource(SeesawRssUpdater.class));
         }
-        else {
-            log.record(new AdapterLogEntry(Severity.INFO)
-                .withDescription("Seesaw update scheduled task not installed, no feed uri given")
-                .withSource(SeesawRssUpdater.class));
-        }
+        scheduler.schedule(rssUpdater(), DAILY);
+        log.record(new AdapterLogEntry(Severity.INFO).withDescription("Seesaw update scheduled task installed").withSource(SeesawRssUpdater.class));
     }
     
     public @Bean SeesawRssUpdater rssUpdater() {
         return new SeesawRssUpdater(contentWriter, log, feedUri);
     }
 
-    
 }

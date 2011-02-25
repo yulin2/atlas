@@ -1,11 +1,12 @@
 package org.atlasapi;
 
+import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Lists;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -25,6 +26,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 	}
 
 	private void configure(Builder<Class<?>> builder) {
+	    builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
 		builder.add(AtlasModule.class);
 	}
 }

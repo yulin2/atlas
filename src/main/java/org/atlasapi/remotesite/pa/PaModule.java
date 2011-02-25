@@ -46,9 +46,7 @@ public class PaModule {
         scheduler.schedule(paCompleteUpdater(), WEEKLY);
         scheduler.schedule(paFileUpdater(), REPEATED);
         scheduler.schedule(paRecentUpdater(), AT_NIGHT);
-        log.record(new AdapterLogEntry(Severity.INFO)
-            .withDescription("PA update scheduled task installed")
-            .withSource(PaCompleteUpdater.class));
+        log.record(new AdapterLogEntry(Severity.INFO).withDescription("PA update scheduled task installed").withSource(PaCompleteUpdater.class));
     }
     
     @Bean PaLocalFileManager localFileManager() {

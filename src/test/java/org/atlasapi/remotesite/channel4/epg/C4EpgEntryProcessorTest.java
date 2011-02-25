@@ -240,6 +240,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 assertThat(contents.size(), is(equalTo(2)));
                 
                 Episode episode = Iterables.getLast(contents);
+                episode = episode.getCanonicalUri().endsWith("episode-59") ? episode : Iterables.getFirst(contents, episode);
                 assertThat(episode.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-59")));
                 assertThat(episode.getTitle(), is(equalTo("Dancing")));
                 assertThat(episode.getEpisodeNumber(), is(59));

@@ -35,16 +35,12 @@ public class ICTomorrowModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        if (!"DISABLED".equals(ictUsername)) {
-            scheduler.schedule(ictomorrowPlaylistUpdater(), AT_NIGHT);
-            log.record(new AdapterLogEntry(Severity.INFO)
-                .withDescription("ICTomorrow update scheduled task installed")
-                .withSource(ICTomorrowPlaylistUpdater.class));
-        } else {
-            log.record(new AdapterLogEntry(Severity.INFO)
-                .withDescription("Not running ICTomorrow update because user/pass not present")
-                .withSource(ICTomorrowPlaylistUpdater.class));
+        if ("DISABLED".equals(ictUsername) || "DISABLED".equals(ictPassword)) {
+            log.record(new AdapterLogEntry(Severity.INFO).withDescription("Username/Password required for ICTomorrow updater").withSource(getClass()));
+            return;
         }
+        scheduler.schedule(ictomorrowPlaylistUpdater(), AT_NIGHT);
+        log.record(new AdapterLogEntry(Severity.INFO).withDescription("ICTomorrow update scheduled task installed").withSource(ICTomorrowPlaylistUpdater.class));
     }
     
     public @Bean ICTomorrowPlaylistUpdater ictomorrowPlaylistUpdater() {

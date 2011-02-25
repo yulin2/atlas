@@ -14,33 +14,27 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
-import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
-import org.atlasapi.remotesite.bbc.BbcModule;
+import org.atlasapi.remotesite.archiveorg.ArchiveOrgAdapterModule;
 import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
-import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
-import org.atlasapi.remotesite.five.FiveModule;
-import org.atlasapi.remotesite.hbo.HboModule;
-import org.atlasapi.remotesite.hulu.HuluModule;
-import org.atlasapi.remotesite.ictomorrow.ICTomorrowModule;
-import org.atlasapi.remotesite.itunes.ItunesModule;
-import org.atlasapi.remotesite.itv.ItvModule;
-import org.atlasapi.remotesite.msnvideo.MsnVideoModule;
+import org.atlasapi.remotesite.hbo.HboAdapterModule;
+import org.atlasapi.remotesite.hulu.HuluAdapterModule;
+import org.atlasapi.remotesite.itunes.ItunesAdapterModule;
+import org.atlasapi.remotesite.itv.ItvAdapterModule;
+import org.atlasapi.remotesite.msnvideo.MsnVideoAdapterModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
-import org.atlasapi.remotesite.pa.PaModule;
-import org.atlasapi.remotesite.seesaw.SeesawModule;
 import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
-import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
-import org.atlasapi.remotesite.youtube.YouTubeModule;
+import org.atlasapi.remotesite.youtube.YouTubeAdapterModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,21 +45,12 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({ C4Module.class, ICTomorrowModule.class, BbcModule.class, ItvModule.class, ArchiveOrgModule.class, HuluModule.class, HboModule.class, ItunesModule.class, MsnVideoModule.class,
-        PaModule.class, SeesawModule.class, YouTubeModule.class, TVBlobModule.class, FiveModule.class })
+@Import({ItvAdapterModule.class, ArchiveOrgAdapterModule.class, HuluAdapterModule.class, HboAdapterModule.class, ItunesAdapterModule.class, MsnVideoAdapterModule.class, YouTubeAdapterModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
-	private @Autowired C4Module c4Module; 
-	private @Autowired ArchiveOrgModule archiveOrgModule;
-	private @Autowired HboModule hboModule;
 	
-	private @Autowired BbcModule bbcModule; 
-	private @Autowired ItvModule itvModule;
-	private @Autowired ItunesModule itunesModule;
-	private @Autowired MsnVideoModule msnVideoModule;
-	private @Autowired HuluModule huluModule;
-	private @Autowired YouTubeModule youTubeModule;
+	private @Autowired Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
 	
 	public @Bean SimpleScheduler scheduler() {
 	    return new SimpleScheduler();
@@ -81,15 +66,7 @@ public class RemoteSiteModule {
 		 
 		 List<SiteSpecificAdapter<? extends Identified>> adapters = Lists.newArrayList();
 		 
-		 adapters.addAll(youTubeModule.adapters());
-		 adapters.addAll(c4Module.adapters());
-		 adapters.addAll(bbcModule.adapters());
-		 adapters.addAll(itvModule.adapters());
-		 adapters.addAll(archiveOrgModule.adapters());
-		 adapters.addAll(hboModule.adapters());
-		 adapters.addAll(itunesModule.adapters());
-		 adapters.addAll(msnVideoModule.adapters());
-		 adapters.addAll(huluModule.adapters());
+		 adapters.addAll(remoteAdapters);
 		 
 		 adapters.add(new TedTalkAdapter());
 		 adapters.add(new DailyMotionItemAdapter());
