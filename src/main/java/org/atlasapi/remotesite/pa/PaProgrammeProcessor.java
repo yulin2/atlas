@@ -101,7 +101,11 @@ public class PaProgrammeProcessor {
             person.setLastUpdated(new DateTime(DateTimeZones.UTC));
             person.setMediaType(null);
             
-            contentWriter.createOrUpdateSkeleton(person);
+            try {
+                contentWriter.createOrUpdateSkeleton(person);
+            } catch (GroupContentNotExistException e) {
+                log.record(new AdapterLogEntry(Severity.WARN).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()+" for episode: "+episode.getCanonicalUri()));
+            }
         }
     }
 
