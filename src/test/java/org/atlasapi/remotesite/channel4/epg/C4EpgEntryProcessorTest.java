@@ -179,6 +179,8 @@ public class C4EpgEntryProcessorTest extends TestCase {
     private Episode existingEpisode() {
         Episode episode = new Episode("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-59", "c4:the-hoobs-series-1-episode-1", C4);
         episode.setTitle("Dancing");
+        episode.setSeriesNumber(1);
+        episode.setEpisodeNumber(59);
         
         Version version = new Version();
 
@@ -201,6 +203,8 @@ public class C4EpgEntryProcessorTest extends TestCase {
         final Brand brand = new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:the-hoobs", C4);
         Series series = new Series("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1", "c4:the-hoobs-series-1", C4);
         Episode episode = new Episode("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-58", "c4:the-hoobs-series-1-episode-58", C4);
+        episode.setSeriesNumber(1);
+        episode.setEpisodeNumber(58);
         brand.addContents(episode);
         series.addContents(episode);
 
