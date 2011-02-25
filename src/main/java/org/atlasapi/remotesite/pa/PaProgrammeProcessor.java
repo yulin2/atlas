@@ -101,17 +101,7 @@ public class PaProgrammeProcessor {
             person.setLastUpdated(new DateTime(DateTimeZones.UTC));
             person.setMediaType(null);
             
-            for (int i=0; i<5; i++) {
-                try {
-                    contentWriter.createOrUpdateSkeleton(person);
-                    continue;
-                } catch (GroupContentNotExistException e) {
-                    log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()+". Trying again ("+i+")"));
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e1) {}
-                }
-            }
+            contentWriter.createOrUpdateSkeleton(person);
         }
     }
 
