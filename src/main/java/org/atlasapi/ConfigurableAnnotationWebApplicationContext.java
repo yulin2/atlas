@@ -1,5 +1,13 @@
 package org.atlasapi;
 
+import org.atlasapi.application.ApplicationModule;
+import org.atlasapi.equiv.EquivModule;
+import org.atlasapi.feeds.AtlasFeedsModule;
+import org.atlasapi.logging.AtlasLoggingModule;
+import org.atlasapi.logging.HealthModule;
+import org.atlasapi.persistence.MongoContentPersistenceModule;
+import org.atlasapi.query.QueryModule;
+import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
@@ -25,8 +33,11 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 		super.setConfigLocations(Lists.transform(builder.build(), TO_FQN).toArray(new String[0]));
 	}
 
-	private void configure(Builder<Class<?>> builder) {
-	    builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
-		builder.add(AtlasModule.class);
-	}
+    private void configure(Builder<Class<?>> builder) {
+        builder.add(AtlasModule.class);
+        builder.add(AtlasLoggingModule.class, AtlasWebModule.class, EquivModule.class, QueryModule.class, 
+                MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class,
+                AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class);
+        builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
+    }
 }
