@@ -1,24 +1,23 @@
 package org.atlasapi;
 
+import java.io.File;
+import java.security.ProtectionDomain;
+
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.springframework.web.servlet.DispatcherServlet;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 public class AtlasProcessingMain {
     
+    private static final String LOCAL_WAR_DIR = "./src/main/webapp";
+    
     public static void main(String[] args) throws Exception {
         Server server = createServer();
-        ServletContextHandler ctx = new ServletContextHandler();
         
-        DispatcherServlet servlet = new DispatcherServlet();
-
-        servlet.setContextClass(AtlasProcessingWebApplicationContext.class);
-        
-        ctx.addServlet(new ServletHolder(servlet), "/");
+        WebAppContext ctx = new WebAppContext(warBase(), "/");
+        ctx.setDescriptor("WEB-INF/processing.xml");
 
         server.setHandler(ctx);
         
@@ -26,6 +25,15 @@ public class AtlasProcessingMain {
         server.join();
     }
  
+    private static String warBase() {
+        if (new File(LOCAL_WAR_DIR).exists()) {
+            return LOCAL_WAR_DIR;
+        }
+        ProtectionDomain domain = AtlasMain.class.getProtectionDomain();
+        System.out.println(domain.getCodeSource().getLocation().toString());
+        return domain.getCodeSource().getLocation().toString();
+    }
+    
     private static Server createServer() {
         int port = 8282;
         
