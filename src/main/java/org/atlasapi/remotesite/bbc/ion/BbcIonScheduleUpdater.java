@@ -115,75 +115,77 @@ public class BbcIonScheduleUpdater implements Runnable {
                 IonSchedule schedule = deserialiser.deserialise(httpClient.getContentsOf(uri));
                 for (IonBroadcast broadcast : schedule.getBlocklist()) {
                     //find and (create and) update item
-                    Item item = (Item) localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
-                    if (item == null) {
+                    Identified identified = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
+                    if (identified == null) {
                         if(fetcherClient != null) {
-                            item = fetcherClient.createItem(broadcast.getEpisodeId());
+                            identified = fetcherClient.createItem(broadcast.getEpisodeId());
                         } 
-                        if(item == null) {
-                            item = createItemFrom(broadcast);
+                        if(identified == null) {
+                            identified = createItemFrom(broadcast);
                         }
                     }
-                    updateItemDetails(item, broadcast);
-                    if (item instanceof Episode) {
-                        updateEpisodeDetails((Episode) item, broadcast);
-                    } else if (hasEpisodeDetails(broadcast.getEpisode())){
-                        log.record(new AdapterLogEntry(Severity.INFO).withDescription("Trying to update episode: " + item.getCanonicalUri() + " that turned out to be a "+item.getClass().getSimpleName()).withSource(getClass()));
-                    }
                     
-                    //if no series and no brand just store item
-                    if(Strings.isNullOrEmpty(broadcast.getSeriesId()) && Strings.isNullOrEmpty(broadcast.getBrandId())) {
-                        writer.createOrUpdate(item);
-                    } else {
-                        Series series = null;
-                        if (!Strings.isNullOrEmpty(broadcast.getSeriesId())) {
-                            Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getSeriesId());
-                            
-                            if (obj == null) {
-                                series = createSeries(broadcast);
-                            } else {
-                                if (obj instanceof Series) {
-                                    series = (Series) obj;
-                                } else {
-                                    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Trying to update item: " + item.getCanonicalUri() + " but got back series "+obj.getCanonicalUri()+" that turned out to be a "+obj.getClass().getSimpleName()).withSource(getClass()));
-                                }
-                            }
-                                
-                            if (series != null) {
-                                updateSeries(series, broadcast);
-                                addOrReplaceItemInPlaylist(item, series);
-                            }
+                    if (identified instanceof Item) {
+                        Item item = (Item) identified;
+                        updateItemDetails(item, broadcast);
+                        if (item instanceof Episode) {
+                            updateEpisodeDetails((Episode) item, broadcast);
+                        } else if (hasEpisodeDetails(broadcast.getEpisode())){
+                            log.record(new AdapterLogEntry(Severity.INFO).withDescription("Trying to update episode: " + item.getCanonicalUri() + " that turned out to be a "+item.getClass().getSimpleName()).withSource(getClass()));
                         }
-                    
-                        if (Strings.isNullOrEmpty(broadcast.getBrandId())) {
-                            if(series != null) { //no brand so just save series if it exists
-                                writer.createOrUpdate(series, true);
-                            }
-                            
+                        
+                        //if no series and no brand just store item
+                        if(Strings.isNullOrEmpty(broadcast.getSeriesId()) && Strings.isNullOrEmpty(broadcast.getBrandId())) {
+                            writer.createOrUpdate(item);
                         } else {
-                            Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getBrandId());
-                            Brand brand = null;
-                            
-                            if (obj == null) {
-                                brand = createBrandFrom(broadcast);
-                            } else {
-                                if (obj instanceof Brand) {
-                                    brand = (Brand) obj;
-                                } else if (obj instanceof Series) {
-                                    brand = brandFromSeries((Series) obj);
-                                    log.record(new AdapterLogEntry(Severity.INFO).withDescription("Update item: " + item.getCanonicalUri() + " but upsold series "+obj.getCanonicalUri()+" turned out to be a brand").withSource(getClass()));
+                            Series series = null;
+                            if (!Strings.isNullOrEmpty(broadcast.getSeriesId())) {
+                                Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getSeriesId());
+                                
+                                if (obj == null) {
+                                    series = createSeries(broadcast);
+                                } else {
+                                    if (obj instanceof Series) {
+                                        series = (Series) obj;
+                                    } else {
+                                        log.record(new AdapterLogEntry(Severity.WARN).withDescription("Trying to update item: " + item.getCanonicalUri() + " but got back series "+obj.getCanonicalUri()+" that turned out to be a "+obj.getClass().getSimpleName()).withSource(getClass()));
+                                    }
+                                }
+                                    
+                                if (series != null) {
+                                    updateSeries(series, broadcast);
+                                    addOrReplaceItemInPlaylist(item, series);
                                 }
                             }
-                            
-                            if (brand != null) {
-                                updateBrand(brand, broadcast);
-                                addOrReplaceItemInPlaylist(item, brand);
-                                writer.createOrUpdate(brand, true);
+                        
+                            if (Strings.isNullOrEmpty(broadcast.getBrandId())) {
+                                if(series != null) { //no brand so just save series if it exists
+                                    writer.createOrUpdate(series, true);
+                                }
+                                
+                            } else {
+                                Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getBrandId());
+                                Brand brand = null;
+                                
+                                if (obj == null) {
+                                    brand = createBrandFrom(broadcast);
+                                } else {
+                                    if (obj instanceof Brand) {
+                                        brand = (Brand) obj;
+                                    } else if (obj instanceof Series) {
+                                        brand = brandFromSeries((Series) obj);
+                                        log.record(new AdapterLogEntry(Severity.INFO).withDescription("Update item: " + item.getCanonicalUri() + " but upsold series "+obj.getCanonicalUri()+" turned out to be a brand").withSource(getClass()));
+                                    }
+                                }
+                                
+                                if (brand != null) {
+                                    updateBrand(brand, broadcast);
+                                    addOrReplaceItemInPlaylist(item, brand);
+                                    writer.createOrUpdate(brand, true);
+                                }
                             }
                         }
-                    }
                     
-                    if (item instanceof Item) {
                         createOrUpdatePeople((Item) item);
                     }
                 }

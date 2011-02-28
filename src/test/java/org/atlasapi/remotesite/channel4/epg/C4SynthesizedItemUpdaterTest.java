@@ -10,6 +10,8 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -28,9 +30,6 @@ import org.joda.time.DateTime;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-
-
-import junit.framework.TestCase;
 
 public class C4SynthesizedItemUpdaterTest extends TestCase {
 

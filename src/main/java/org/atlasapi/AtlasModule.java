@@ -14,17 +14,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi;
 
-import org.atlasapi.application.ApplicationModule;
-import org.atlasapi.equiv.EquivModule;
-import org.atlasapi.feeds.AtlasFeedsModule;
-import org.atlasapi.logging.AtlasLoggingModule;
-import org.atlasapi.logging.HealthModule;
-import org.atlasapi.persistence.MongoContentPersistenceModule;
-import org.atlasapi.query.QueryModule;
-import org.atlasapi.remotesite.RemoteSiteModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.properties.Configurer;
@@ -32,7 +23,6 @@ import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
 
 @Configuration
-@Import({AtlasLoggingModule.class, AtlasWebModule.class, EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class})
 public class AtlasModule {
 	
 	private final String mongoHost = Configurer.get("mongo.host").get();

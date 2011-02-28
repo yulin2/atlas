@@ -4,13 +4,10 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentWriters;
-import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.RepetitionRules;
@@ -35,15 +32,5 @@ public class YouTubeModule {
 	@PostConstruct
 	public void startFeedUpdater() {
 		scheduler.schedule(new YouTubeFeedUpdater(FEED_URLS, log, writers), RepetitionRules.every(Duration.standardMinutes(30)));
-	}
-	
-	public List<SiteSpecificAdapter<? extends Identified>> adapters() {
-		return ImmutableList.<SiteSpecificAdapter<? extends Identified>>of(new YouTubeAdapter(), youTubeFeedAdapter());
-		// Not included due to high load
-		//new YouTubeUserAdapter();
-	}
-
-	@Bean YouTubeFeedAdapter youTubeFeedAdapter() {
-		return new YouTubeFeedAdapter();
 	}
 }

@@ -18,8 +18,6 @@ package org.atlasapi;
 import junit.framework.TestCase;
 
 import org.atlasapi.query.v2.QueryController;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  * Test that we can load beans from the Spring configuration - checks that the config is wired correctly.
@@ -28,7 +26,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 public class SpringTest extends TestCase {
 
 	public void testCanCreateQueryController() throws Exception {
-		ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AtlasModule.class);
+	    ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
+		applicationContext.setConfigLocation(null);
+		applicationContext.refresh();
 		applicationContext.getBean(QueryController.class);
 	}
 }

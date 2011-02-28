@@ -2,18 +2,14 @@ package org.atlasapi.remotesite.bbc;
 
 import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
 
-import java.util.Collection;
-
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
-import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
@@ -28,15 +24,13 @@ import org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class BbcModule {
@@ -53,28 +47,20 @@ public class BbcModule {
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
 	
-	private @Value("${bbc.scheduledUpdates}") String enabled;
-	
-	@PostConstruct 
-	public void scheduleTasks() {
-		if (Boolean.parseBoolean(enabled)) {
-			scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
-			scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
-			try {
-				scheduler.schedule(bbcSchedulesUpdater(), SCHEDULED_UPDATE_TIME);
-			} catch (JAXBException e) {
-				log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withDescription("Couldn't create BBC Schedule Updater task"));
-			}
-			scheduler.schedule(bbcIonUpdater(0,0).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), TEN_MINUTES);
-			scheduler.schedule(bbcIonUpdater(7,7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), ONE_HOUR);
-			scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
-			log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass())
-				.withDescription("BBC update scheduled tasks installed"));
-		} else {
-			log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass())
-				.withDescription("Not installing BBC Scheduled tasks"));
-		}
-	}
+    @PostConstruct
+    public void scheduleTasks() {
+        scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
+        scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
+        try {
+            scheduler.schedule(bbcSchedulesUpdater(), SCHEDULED_UPDATE_TIME);
+        } catch (JAXBException e) {
+            log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withDescription("Couldn't create BBC Schedule Updater task"));
+        }
+        scheduler.schedule(bbcIonUpdater(0, 0).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), TEN_MINUTES);
+        scheduler.schedule(bbcIonUpdater(7, 7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), ONE_HOUR);
+        scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
+        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC update scheduled tasks installed"));
+    }
 	
 	private BbcIonScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
         return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack), contentStore, contentWriters, deserializerForClass(IonSchedule.class), log);
@@ -107,9 +93,5 @@ public class BbcModule {
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
 	    return new BbcIonOndemandChangeUpdater(contentStore, contentWriters, deserializerForClass(IonOndemandChanges.class), log);
-	}
-
-	public Collection<SiteSpecificAdapter<? extends Identified>> adapters() {
-		return ImmutableList.<SiteSpecificAdapter<? extends Identified>>of(bbcProgrammeAdapter());
 	}
 }
