@@ -16,7 +16,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 @Controller
 public class PaSingleDateUpdatingController {
     
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("paSingleDateUpdater").build());
+    private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("paSingleDateUpdater").build());
     private final PaProgrammeProcessor processor;
     private final AdapterLog log;
     private final PaLocalFileManager fileManager;
