@@ -83,19 +83,19 @@ public class C4BrandExtractorTest extends TestCase {
 
 		Item firstItem = brand.getContents().get(0);
 		
-		assertThat(firstItem.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4/episode-1"));
+		assertThat(firstItem.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1"));
 
-		assertThat(firstItem.getAliases(), is((Set<String>) ImmutableSet.of("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921543", "tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-4/episode-1")));
+		assertThat(firstItem.getAliases(), is((Set<String>) ImmutableSet.of("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921983", "tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1")));
 		
-		assertThat(firstItem.getTitle(), is(("Series 4 Episode 1")));
+		assertThat(firstItem.getTitle(), is(("Series 3 Episode 1")));
 		
 		Version firstItemVersion = Iterables.getOnlyElement(firstItem.getVersions());
 		
-		assertThat(firstItemVersion.getDuration(), is(2890));
+		assertThat(firstItemVersion.getDuration(), is(2949));
 
 		Encoding firstItemEncoding = Iterables.getOnlyElement(firstItemVersion.getManifestedAs());
 		Location firstItemLocation = Iterables.getOnlyElement(firstItemEncoding.getAvailableAt());
-		assertThat(firstItemLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921543"));
+		assertThat(firstItemLocation.getUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2921983"));
 		
 		Episode episodeNotOn4od = (Episode) find("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-5", brand.getContents());
 		assertThat(episodeNotOn4od.getVersions().size(), is(0));
