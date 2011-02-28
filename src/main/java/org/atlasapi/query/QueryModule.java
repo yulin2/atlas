@@ -19,6 +19,7 @@ import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -50,6 +51,7 @@ public class QueryModule {
 
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	private @Autowired MongoDbBackedContentStore store;
+	private @Autowired ScheduleResolver scheduleResolver;
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	
 	private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -111,7 +113,7 @@ public class QueryModule {
 	}
 	
 	@Bean ScheduleController schedulerController() {
-	    return new ScheduleController(queryExecutor(), configFetcher, log, atlasModelOutputter());
+	    return new ScheduleController(scheduleResolver, queryExecutor(), configFetcher, log, atlasModelOutputter());
 	}
 	
 	@Bean PeopleController peopleController() {

@@ -15,7 +15,6 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.base.Predicate;
@@ -34,13 +33,6 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 
 	public MergeOnOutputQueryExecutor(KnownTypeQueryExecutor delegate) {
 		this.delegate = delegate;
-	}
-	
-
-	@Override
-	public Schedule schedule(ContentQuery query) {
-	    // TODO: filter out duplicate items, try to have a single contiguous schedule
-	    return delegate.schedule(query);
 	}
 	
 	@Override

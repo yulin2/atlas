@@ -16,11 +16,14 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.mongo.MongoScheduleStore;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.google.inject.internal.Lists;
 import com.metabroadcast.common.persistence.MongoTestHelper;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 public class TVBlobDayPopulatorTest extends TestCase {
 
@@ -30,7 +33,8 @@ public class TVBlobDayPopulatorTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        this.store = new MongoDbBackedContentStore(MongoTestHelper.anEmptyTestDatabase());
+        DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
+        this.store = new MongoDbBackedContentStore(db);
         extractor = new TVBlobDayPopulator(store, store, "raiuno");
     }
     
@@ -40,14 +44,12 @@ public class TVBlobDayPopulatorTest extends TestCase {
         extractor.populate(is);
         
         ContentQuery query = ContentQueryBuilder.query().equalTo(Attributes.BROADCAST_ON, "http://tvblob.com/channel/raiuno").build();
-        List<Item> items = new MongoDBQueryExecutor(store).schedule(query).getItemsFromOnlyChannel();
         
         boolean foundMoreThanOneBroadcast = false;
         boolean foundBrandWithMoreThanOneEpisode = false;
         List<String> brandUris = Lists.newArrayList();
         
-        for (Item item: items) {
-            Episode episode = (Episode) item;
+        for (Episode episode: Iterables.filter(new MongoDBQueryExecutor(store).discover(query), Episode.class)) {
             if (episode.getContainer() != null) {
                 assertNotNull(episode.getContainer().getCanonicalUri());
                 if (brandUris.contains(episode.getContainer().getCanonicalUri())) {

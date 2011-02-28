@@ -9,13 +9,12 @@ import javax.annotation.PostConstruct;
 import nu.xom.Builder;
 import nu.xom.Document;
 
-import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
@@ -33,8 +32,8 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.sun.syndication.feed.atom.Feed;
 
 @Configuration
@@ -50,6 +49,7 @@ public class C4Module {
 	private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired ContentWriters contentWriter;
 	private @Autowired AdapterLog log;
+	private @Autowired ScheduleResolver scheduleResolver;
 	
     @PostConstruct
     public void startBackgroundTasks() {
@@ -64,7 +64,7 @@ public class C4Module {
     }
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, new ApplicationConfigurationQueryExecutor(new MongoDBQueryExecutor(contentStore)), contentWriter, log);
+	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, scheduleResolver, contentWriter, log);
         return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentStore, trimmer, log);
     }
 	

@@ -41,7 +41,6 @@ public abstract class BaseController {
     protected void errorViewFor(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary ae) throws IOException {
         log.record(new AdapterLogEntry(ae.id(), Severity.ERROR, new DateTime(DateTimeZones.UTC)).withCause(ae.exception()).withSource(this.getClass()));
         outputter.writeError(request, response, ae);
-
     }
     
     @SuppressWarnings("unchecked")

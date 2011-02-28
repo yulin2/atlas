@@ -2,11 +2,12 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
@@ -14,7 +15,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.hamcrest.Description;
@@ -27,24 +28,29 @@ import org.joda.time.Interval;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class BroadcastTrimmerTest extends TestCase {
+    private final Mockery context = new Mockery();
+    
+    private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
+    private final ContentWriter contentWriter = context.mock(ContentWriter.class);
+    private final Channel channel = Channel.CHANNEL_FOUR;
+    private final Set<Channel> channels = ImmutableSet.of(channel);
+    private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
 
     public void testTrimBroadcasts() {
-
-        Mockery context = new Mockery();
-        
-        final KnownTypeQueryExecutor queryExecutor = context.mock(KnownTypeQueryExecutor.class);
-        final ContentWriter contentWriter = context.mock(ContentWriter.class);
+        final Schedule schedule = Schedule.fromChannelMap(channelMap(), new Interval(100, 200));
         
         context.checking(new Expectations(){{
-            one(queryExecutor).schedule(with(any(ContentQuery.class))); will(returnValue(Schedule.fromItems(new Interval(100, 200), buildItems())));
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers)); will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
         AdapterLog log = new NullAdapterLog();
         
-        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, queryExecutor, contentWriter, log);
+        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, contentWriter, log);
         
         Interval scheduleInterval = new Interval(100, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableSet.of("c4:1234"));
@@ -88,5 +94,11 @@ public class BroadcastTrimmerTest extends TestCase {
         item.addVersion(version);
         
         return ImmutableSet.of(item);
+    }
+    
+    private Map<Channel, List<Item>> channelMap() {
+        Map<Channel, List<Item>> channelMap = Maps.newHashMap();
+        channelMap.put(Channel.CHANNEL_FOUR, Lists.newArrayList(buildItems()));
+        return channelMap;
     }
 }
