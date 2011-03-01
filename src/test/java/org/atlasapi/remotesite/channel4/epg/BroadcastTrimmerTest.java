@@ -87,10 +87,8 @@ public class BroadcastTrimmerTest extends TestCase {
         retain.setIsActivelyPublished(true);
         Broadcast remove = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(150), new DateTime(165)).withId("c4:2234");
         remove.setIsActivelyPublished(true);
-        //this gets stripped by the Schedule object.
-        Broadcast outsideInterval = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(205), new DateTime(620)).withId("c4:6234");
         
-        version.setBroadcasts(ImmutableSet.of(retain, outsideInterval, remove));
+        version.setBroadcasts(ImmutableSet.of(retain, remove));
         item.addVersion(version);
         
         return ImmutableSet.of(item);
