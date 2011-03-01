@@ -26,6 +26,7 @@ import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.hbo.HboAdapterModule;
+import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.atlasapi.remotesite.hulu.HuluAdapterModule;
 import org.atlasapi.remotesite.itunes.ItunesAdapterModule;
 import org.atlasapi.remotesite.itv.ItvAdapterModule;
@@ -45,7 +46,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({ItvAdapterModule.class, ArchiveOrgAdapterModule.class, HuluAdapterModule.class, HboAdapterModule.class, ItunesAdapterModule.class, MsnVideoAdapterModule.class, YouTubeAdapterModule.class})
+@Import({RemoteSiteHealthModule.class, ItvAdapterModule.class, ArchiveOrgAdapterModule.class, HuluAdapterModule.class, HboAdapterModule.class, ItunesAdapterModule.class, MsnVideoAdapterModule.class, YouTubeAdapterModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
