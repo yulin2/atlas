@@ -12,30 +12,40 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.EventFiringContentWriter;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.mongo.MongoScheduleStore;
+import org.atlasapi.persistence.content.mongo.ScheduleUpdatingContentListener;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.google.inject.internal.Lists;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class TVBlobDayPopulatorTest extends TestCase {
 
     private MongoDbBackedContentStore store;
+    private MongoScheduleStore scheduleStore;
     private TVBlobDayPopulator extractor;
+    private EventFiringContentWriter writer;
+    private final DateTime now = new DateTime(DateTimeZones.UTC);
     
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
+        this.scheduleStore = new MongoScheduleStore(db);
         this.store = new MongoDbBackedContentStore(db);
-        extractor = new TVBlobDayPopulator(store, store, "raiuno");
+        this.writer = new EventFiringContentWriter(store, new ScheduleUpdatingContentListener(scheduleStore));
+        extractor = new TVBlobDayPopulator(writer, store, "raiuno");
     }
     
     public void testShouldRetrievePlaylistAndItems() throws Exception {
@@ -43,6 +53,7 @@ public class TVBlobDayPopulatorTest extends TestCase {
         
         extractor.populate(is);
         
+        scheduleStore.schedule(now.minusYears(5), now, ImmutableSet.of(Channel.), ImmutableSet.of(Publisher.TVBLOB));
         ContentQuery query = ContentQueryBuilder.query().equalTo(Attributes.BROADCAST_ON, "http://tvblob.com/channel/raiuno").build();
         
         boolean foundMoreThanOneBroadcast = false;
