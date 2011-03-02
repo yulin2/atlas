@@ -3,14 +3,19 @@ package org.atlasapi.remotesite.health;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import org.atlasapi.content.criteria.ContentQuery;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.joda.time.DateTime;
@@ -18,28 +23,30 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.health.ProbeResult;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
-
-import junit.framework.TestCase;
 
 public class ScheduleProbeTest extends TestCase {
 
     private final TimeMachine clock = new TimeMachine();
     private final Mockery context = new Mockery();
-    private final KnownTypeQueryExecutor queryExecutor = context.mock(KnownTypeQueryExecutor.class);
+    private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
+    private final Set<Channel> channels = ImmutableSet.of(Channel.CHANNEL_FOUR);
+    private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
 
     public void testProbeProducesFailureResultWhenNoEntriesInSchedule() throws Exception {
 
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
         
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, queryExecutor, clock);
+        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, scheduleResolver, clock);
         
         context.checking(new Expectations(){{
-            one(queryExecutor).schedule(with(any(ContentQuery.class)));
-                will(returnValue(Schedule.fromItems(ImmutableList.of(Channel.CHANNEL_FOUR.uri()), dayIntervalAround(clock.now()), ImmutableList.<Item>of())));
+            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
+                    will(returnValue(schedule(Channel.CHANNEL_FOUR, ImmutableList.<Item>of(), dayIntervalAround(clock.now()))));
         }});
         
         ProbeResult result = probe.probe();
@@ -52,15 +59,15 @@ public class ScheduleProbeTest extends TestCase {
         
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
         
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, queryExecutor, clock);
+        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, scheduleResolver, clock);
         
                                     //start, duration in ms
         final Item item1 = broadcastItem(10, 10);
         final Item item2 = broadcastItem(22, 10);
         
         context.checking(new Expectations(){{
-            one(queryExecutor).schedule(with(any(ContentQuery.class)));
-                will(returnValue(Schedule.fromItems(dayIntervalAround(clock.now()), ImmutableList.<Item>of(item1, item2))));
+            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
+            will(returnValue(schedule(Channel.CHANNEL_FOUR, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
         ProbeResult result = probe.probe();
@@ -72,14 +79,14 @@ public class ScheduleProbeTest extends TestCase {
         
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
         
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, queryExecutor, clock);
+        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, scheduleResolver, clock);
         
         final Item item1 = broadcastItem(10, 10);
         final Item item2 = broadcastItem(300022, 10); //starts 5mins and 2 millis after
         
         context.checking(new Expectations(){{
-            one(queryExecutor).schedule(with(any(ContentQuery.class)));
-                will(returnValue(Schedule.fromItems(dayIntervalAround(clock.now()), ImmutableList.<Item>of(item1, item2))));
+            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
+            will(returnValue(schedule(Channel.CHANNEL_FOUR, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
         ProbeResult result = probe.probe();
@@ -95,14 +102,14 @@ public class ScheduleProbeTest extends TestCase {
         
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
         
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, queryExecutor, clock);
+        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, scheduleResolver, clock);
         
         final Item item1 = broadcastItem(10, 10);
         final Item item2 = broadcastItem(18, 10); //previous ends at 20
         
         context.checking(new Expectations(){{
-            one(queryExecutor).schedule(with(any(ContentQuery.class)));
-            will(returnValue(Schedule.fromItems(dayIntervalAround(clock.now()), ImmutableList.<Item>of(item1, item2))));
+            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
+            will(returnValue(schedule(Channel.CHANNEL_FOUR, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
         ProbeResult result = probe.probe();
@@ -118,14 +125,14 @@ public class ScheduleProbeTest extends TestCase {
         
         clock.jumpTo(new DateTime(3600020, DateTimeZones.UTC));
         
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, queryExecutor, clock);
+        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, scheduleResolver, clock);
         
         final Item item1 = broadcastItem(10, 10, 10);
         final Item item2 = broadcastItem(22, 10, 10);
         
         context.checking(new Expectations(){{
-            one(queryExecutor).schedule(with(any(ContentQuery.class)));
-                will(returnValue(Schedule.fromItems(dayIntervalAround(clock.now()), ImmutableList.<Item>of(item1, item2))));
+            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
+            will(returnValue(schedule(Channel.CHANNEL_FOUR, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
         }});
         
         ProbeResult result = probe.probe();
@@ -146,12 +153,11 @@ public class ScheduleProbeTest extends TestCase {
         item.setLastFetched(new DateTime(lastFetched, DateTimeZones.UTC));
         
         Version version = new Version();
-        
         Broadcast broadcast = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(start, DateTimeZones.UTC), new Duration(duration));
-        
+
         version.addBroadcast(broadcast);
         item.addVersion(version);
-        
+
         return item;
     }
 
@@ -159,5 +165,10 @@ public class ScheduleProbeTest extends TestCase {
         DateTime start = now.toLocalDate().toDateTimeAtStartOfDay(DateTimeZones.UTC);
         return new Interval(start, start.plusDays(1));
     }
-
+    
+    private Schedule schedule(Channel channel, List<Item> items, Interval interval) {
+        Map<Channel, List<Item>> channelMap = Maps.newHashMap();
+        channelMap.put(channel, items);
+        return Schedule.fromChannelMap(channelMap, interval);
+    }
 }
