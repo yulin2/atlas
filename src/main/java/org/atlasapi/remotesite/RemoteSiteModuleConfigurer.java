@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.channel4.C4Module;
@@ -25,6 +27,8 @@ import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 
 public class RemoteSiteModuleConfigurer {
+
+    private static Log logger = LogFactory.getLog(RemoteSiteModuleConfigurer.class);
 
     private Map<String, Class<?>> moduleMap = ImmutableMap.<String, Class<?>>builder()
         .put("bbc",     BbcModule.class)
@@ -57,6 +61,9 @@ public class RemoteSiteModuleConfigurer {
             
             if(moduleParam != null && moduleParam.toBoolean()) {
                 enabledModules.add(moduleEntry.getValue());
+                logger.info("Including module " + moduleName);
+            } else {
+                logger.info("Not including module " + moduleName);
             }
         }
         

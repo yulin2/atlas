@@ -12,14 +12,20 @@ import org.eclipse.jetty.webapp.WebAppContext;
 public class AtlasMain {
 
 	private static final String LOCAL_WAR_DIR = "./src/main/webapp";
+    private static int port = 8080;
 
 	public static void main(String[] args) throws Exception {
 		
-		Server server = createServer();
-		
 		WebAppContext ctx = new WebAppContext(warBase(), "/");
 		
+		if(Boolean.parseBoolean(System.getProperty("processing.config"))) {
+		    System.out.println(">>> Launching processing configuration");
+		    port = 8282;
+		}
+
+		Server server = createServer();
 		server.setHandler(ctx);
+		
 		server.start();
 		server.join();
 	}
@@ -34,8 +40,6 @@ public class AtlasMain {
 	}
 
 	private static Server createServer() {
-		int port = 8080;
-		
 		Server server = new Server();
 		
 		final SelectChannelConnector connector = new SelectChannelConnector();
