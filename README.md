@@ -28,7 +28,7 @@ It's worth noting that we don't current have a formal release process and everyt
 
 So, to get everything built and ready:
 
-    git clone http://github.com/atlasapi/atlas
+    git clone http://github.com/atlasapi/atlas.git
     cd atlas
     mvn clean install
     

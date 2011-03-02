@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 public class AtlasProcessingWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
     private static final Function<Class<?>, String> TO_FQN = new Function<Class<?>, String>() {
-
         @Override
         public String apply(Class<?> clazz) {
             return clazz.getCanonicalName();
