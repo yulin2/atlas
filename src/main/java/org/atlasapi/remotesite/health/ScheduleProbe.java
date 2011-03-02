@@ -12,6 +12,7 @@ import static org.atlasapi.media.entity.Schedule.ScheduleEntry.TO_ITEM;
 
 import java.util.List;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Channel;
@@ -116,7 +117,7 @@ public class ScheduleProbe implements HealthProbe {
             BROADCAST_ON.createQuery(EQUALS, ImmutableList.of(channel.uri())), 
             BROADCAST_TRANSMISSION_TIME.createQuery(AFTER, ImmutableList.of(date.minusMillis(1))),
             BROADCAST_TRANSMISSION_TIME.createQuery(BEFORE, ImmutableList.of(date.plusDays(1)))
-        ));
+        )).copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(ImmutableList.of(publisher)));
     }
 
     @Override

@@ -2,9 +2,10 @@ package org.atlasapi.remotesite.health;
 
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.AToZUriSource;
+import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,8 +19,7 @@ import com.metabroadcast.common.time.SystemClock;
 public class RemoteSiteHealthModule {
     
     private @Autowired MongoDbBackedContentStore store;
-    private @Autowired KnownTypeQueryExecutor queryExecutor;
-    
+
     private final Clock clock = new SystemClock();
 
     public @Bean HealthProbe bbcProbe() {
@@ -42,10 +42,10 @@ public class RemoteSiteHealthModule {
     }
     
     public @Bean HealthProbe c4ScheduleProbe() {
-        return new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, queryExecutor, clock);
+        return new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, new ApplicationConfigurationQueryExecutor(new MongoDBQueryExecutor(store)), clock);
     }
     
     public @Bean HealthProbe bbcScheduleProbe() {
-        return new ScheduleProbe(Publisher.BBC, Channel.BBC_ONE, queryExecutor, clock);
+        return new ScheduleProbe(Publisher.BBC, Channel.BBC_ONE, new ApplicationConfigurationQueryExecutor(new MongoDBQueryExecutor(store)), clock);
     }
 }

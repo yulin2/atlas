@@ -9,6 +9,7 @@ import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
+import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import com.google.common.base.Function;
@@ -38,7 +39,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         
         if(Boolean.parseBoolean(System.getProperty("processing.config"))) {
             System.out.println(">>> Including processing configuration modules");
-            builder.add(AtlasLoggingModule.class, AtlasWebModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class);
+            builder.add(AtlasLoggingModule.class, AtlasWebModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class);
         } else {
             builder.add(AtlasLoggingModule.class, AtlasWebModule.class, EquivModule.class, QueryModule.class, 
                     MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class,
