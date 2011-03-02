@@ -28,7 +28,6 @@ import com.google.common.io.Resources;
 import com.google.inject.internal.Lists;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.time.DateTimeZones;
 
 public class TVBlobDayPopulatorTest extends TestCase {
 
@@ -36,7 +35,7 @@ public class TVBlobDayPopulatorTest extends TestCase {
     private MongoScheduleStore scheduleStore;
     private TVBlobDayPopulator extractor;
     private EventFiringContentWriter writer;
-    private final DateTime now = new DateTime(DateTimeZones.UTC);
+    private final DateTime now = new DateTime("2010-07-20T00:00:00+00:00");
     private final Channel channel = new Channel("raiuno", "http://tvblob.com/channel/raiuno", "raiuno");
     
     @Override
@@ -54,7 +53,7 @@ public class TVBlobDayPopulatorTest extends TestCase {
         
         extractor.populate(is);
         
-        Schedule schedule = scheduleStore.schedule(now.minusYears(5), now, ImmutableSet.of(channel), ImmutableSet.of(Publisher.TVBLOB));
+        Schedule schedule = scheduleStore.schedule(now, now.plusDays(5), ImmutableSet.of(channel), ImmutableSet.of(Publisher.TVBLOB));
         List<Item> items = Iterables.getOnlyElement(schedule.scheduleChannels()).items();
         
         boolean foundBrandWithMoreThanOneEpisode = false;
