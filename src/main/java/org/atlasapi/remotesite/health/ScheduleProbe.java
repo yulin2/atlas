@@ -107,7 +107,7 @@ public class ScheduleProbe implements HealthProbe {
             
         }
         
-        result.add("Oldest Fetch", oldestFetch.toString("HH:MM:ss dd/mm/yyyy"), oldestFetch.isAfter(clock.now().minus(MAX_STALENESS)));
+        result.add("Oldest Fetch", oldestFetch.toString("HH:mm:ss dd/MM/yyyy"), oldestFetch.isAfter(clock.now().minus(MAX_STALENESS)));
     }
 
     private ContentQuery scheduleQuery() {
