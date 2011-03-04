@@ -43,9 +43,6 @@ class C4PreviousVersionDataMerger {
 			item.setVersions(oldItem.nativeVersions());
 			for (Version version : item.nativeVersions()) {
 				markLocationsAsUnavailable(version);
-				for (Broadcast broadcast : version.getBroadcasts()) {
-					markBroadcastAsNotActivelyPublished(broadcast);
-				}
 			}
 		}  else {
 			Version version = Iterables.get(versions, 0);
@@ -58,18 +55,10 @@ class C4PreviousVersionDataMerger {
 	    for (Version oldVersion: oldEpisode.nativeVersions()) {
 	        for (Broadcast broadcast: oldVersion.getBroadcasts()) {
 	            if (!version.getBroadcasts().contains(broadcast)) {
-	                markBroadcastAsNotActivelyPublished(broadcast);
 	                version.addBroadcast(broadcast);
 	            }
 	        }
 	    }
-	}
-
-	private void markBroadcastAsNotActivelyPublished(Broadcast broadcast) {
-		if (broadcast.isActivelyPublished()) {
-		    broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
-		}
-		broadcast.setIsActivelyPublished(Boolean.FALSE);
 	}
 	
 	private void addUnavailableLocations(Version version, Item oldEpisode) {
