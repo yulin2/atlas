@@ -11,7 +11,6 @@ import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
@@ -62,10 +61,5 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 		}
 		
 		return attr.createQuery(Operators.EQUALS, values);
-	}
-
-	@Override
-	public Schedule schedule(ContentQuery query) {
-		return delegate.schedule(queryForContent(query));
 	}
 }

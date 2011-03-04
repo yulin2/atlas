@@ -5,7 +5,6 @@ import java.util.List;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.Lists;
@@ -39,10 +38,5 @@ public class CurieResolvingQueryExecutor implements KnownTypeQueryExecutor {
 			}
 		}
 		return resolved;
-	}
-
-	@Override
-	public Schedule schedule(ContentQuery query) {
-		return delegate.schedule(query);
 	}
 }

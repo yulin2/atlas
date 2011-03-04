@@ -40,7 +40,7 @@ public class SeriesFetchingBbcSeriesNumberResolver implements BbcSeriesNumberRes
 	public SeriesFetchingBbcSeriesNumberResolver(SimpleHttpClient client) {
 		this.client = client;
 		cache = new MapMaker()
-			.expiration(1, TimeUnit.HOURS)
+			.expireAfterWrite(1, TimeUnit.HOURS)
 			.softValues()
 			.makeComputingMap(seriesNumber());
 	}
