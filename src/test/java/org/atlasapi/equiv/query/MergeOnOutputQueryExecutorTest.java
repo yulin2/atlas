@@ -14,7 +14,6 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
@@ -67,11 +66,6 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 			@Override
 			public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 				return ImmutableList.<Identified>copyOf(respondWith);
-			}
-
-			@Override
-			public Schedule schedule(ContentQuery query) {
-				throw new UnsupportedOperationException();
 			}
 		};
 	}

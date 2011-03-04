@@ -38,6 +38,10 @@ public class TVBlobServicesUpdater implements Runnable {
         } catch (Exception e) {
             LOG.warn("Unable to retrieve TVBlob services", e);
         }
+        
+//        for (TVBlobService service: services) {
+//            System.out.println("public final static Channel TVBLOB_"+service.getSlug().toUpperCase()+" = new Channel(\""+service.getName()+"\", \"http://tvblob.com/channel/"+service.getSlug()+"\", \""+service.getSlug()+"\");");
+//        }
 
         for (TVBlobService service : services) {
             String dayUrl = String.format(DAY_URL_BASE, service.getSlug(), day);
@@ -45,4 +49,8 @@ public class TVBlobServicesUpdater implements Runnable {
         }
     }
 
+    public static void main(String[] args) {
+        TVBlobServicesUpdater updater = new TVBlobServicesUpdater((ContentWriter) null, null, null);
+        updater.run();
+    }
 }

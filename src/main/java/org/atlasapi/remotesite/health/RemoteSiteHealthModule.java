@@ -2,10 +2,9 @@ package org.atlasapi.remotesite.health;
 
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.system.AToZUriSource;
-import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +19,8 @@ public class RemoteSiteHealthModule {
     
     private @Autowired MongoDbBackedContentStore store;
 
+    private @Autowired ScheduleResolver scheduleResolver;
+    
     private final Clock clock = new SystemClock();
 
     public @Bean HealthProbe bbcProbe() {
@@ -42,10 +43,10 @@ public class RemoteSiteHealthModule {
     }
     
     public @Bean HealthProbe c4ScheduleProbe() {
-        return new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, new ApplicationConfigurationQueryExecutor(new MongoDBQueryExecutor(store)), clock);
+        return new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, scheduleResolver, clock);
     }
     
     public @Bean HealthProbe bbcScheduleProbe() {
-        return new ScheduleProbe(Publisher.BBC, Channel.BBC_ONE, new ApplicationConfigurationQueryExecutor(new MongoDBQueryExecutor(store)), clock);
+        return new ScheduleProbe(Publisher.BBC, Channel.BBC_ONE, scheduleResolver, clock);
     }
 }
