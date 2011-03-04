@@ -74,7 +74,7 @@ public class PaProgrammeProcessor {
                     series.requireValue().addContents(episode.requireValue());
                 }
                 if (brand.hasValue()) {
-                    brand.requireValue().addContents(episode.requireValue());
+                    brand.requireValue().addOrReplace(episode.requireValue());
                     contentWriter.createOrUpdate(brand.requireValue(), true);
                 } else {
                     contentWriter.createOrUpdate(episode.requireValue());
