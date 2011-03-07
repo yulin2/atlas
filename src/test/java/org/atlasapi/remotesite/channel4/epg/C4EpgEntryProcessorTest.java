@@ -91,8 +91,8 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 
                 Encoding encoding = getOnlyElement(version.getManifestedAs());
                 Location location = getOnlyElement(encoding.getAvailableAt());
-                assertThat(location.getUri(), is(equalTo("http://int.channel4.com/programmes/the-hoobs/4od#2930251")));
-                assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
+                assertThat(location.getUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/4od#2930251")));
+                assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2009-06-07T22:00:00.000Z"))));
                 assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
             }
 
@@ -166,11 +166,11 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z").plus(Duration.standardMinutes(24).plus(Duration.standardSeconds(12))))));
                 
                 Encoding encoding = getOnlyElement(version.getManifestedAs());
-                assertThat(encoding.getAvailableAt().size(), is(2));
-                Location location = getLast(encoding.getAvailableAt()).getUri() == null ? Iterables.get(encoding.getAvailableAt(), 0) : getLast(encoding.getAvailableAt());
-                assertThat(location.getUri(), is(equalTo("http://int.channel4.com/programmes/the-hoobs/4od#2930251")));
-                assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
-                assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
+                assertThat(encoding.getAvailableAt().size(), is(1));
+                Location location = getOnlyElement(encoding.getAvailableAt());
+
+                // EPG update doesn't modify locations created overnight
+                assertThat(location.getUri(), is(equalTo("oldUri")));
                 return true;
             }
         };
@@ -189,7 +189,9 @@ public class C4EpgEntryProcessorTest extends TestCase {
         broadcast.withId("c4:345");
 
         Encoding encoding = new Encoding();
-        encoding.addAvailableAt(new Location());
+        Location location = new Location();
+        location.setUri("oldUri");
+		encoding.addAvailableAt(location);
         
         version.addBroadcast(broadcast);
         version.addManifestedAs(encoding);
@@ -261,8 +263,8 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 
                 Encoding encoding = getOnlyElement(version.getManifestedAs());
                 Location location = getOnlyElement(encoding.getAvailableAt());
-                assertThat(location.getUri(), is(equalTo("http://int.channel4.com/programmes/the-hoobs/4od#2930251")));
-                assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
+                assertThat(location.getUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/4od#2930251")));
+                assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2009-06-07T22:00:00.000Z"))));
                 assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
                 return true;
             }
@@ -270,17 +272,17 @@ public class C4EpgEntryProcessorTest extends TestCase {
     }
 
     private C4EpgEntry buildEntry() {
-        return new C4EpgEntry("tag:int.channel4.com,2009:slot/337")
+        return new C4EpgEntry("tag:www.channel4.com,2009:slot/337")
             .withTitle("Dancing")
             .withUpdated(new DateTime("2010-11-03T05:57:50.175Z"))
             .withSummary("Hoobs have been dancing the Hoobyjiggle since Hooby time began. But is there a Peep dance that fits to the Hoobyjiggle music?")
             .withLinks(ImmutableList.of(
-                    "http://int.channel4.com/programmes/the-hoobs/4od#2930251", 
-                    "http://int.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-59.atom"
+                    "http://www.channel4.com/programmes/the-hoobs/4od#2930251", 
+                    "http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-59.atom"
             )).withMedia(
                     new C4EpgMedia()
-                        .withPlayer("http://int.channel4.com/programmes/the-hoobs/4od#2930251")
-                        .withThumbnail("http://int.channel4.com/assets/programmes/images/the-hoobs/series-1/the-hoobs-s1-20090623112301_200x113.jpg")
+                        .withPlayer("http://www.channel4.com/programmes/the-hoobs/4od#2930251")
+                        .withThumbnail("http://www.channel4.com/assets/programmes/images/the-hoobs/series-1/the-hoobs-s1-20090623112301_200x113.jpg")
                         .withRating("nonadult")
                         .withRestriction(ImmutableSet.of(Countries.GB, Countries.IE)))
             .withBrandTitle("The Hoobs")
