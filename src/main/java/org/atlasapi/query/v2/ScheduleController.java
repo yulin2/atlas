@@ -2,8 +2,6 @@ package org.atlasapi.query.v2;
 
 import java.io.IOException;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +14,6 @@ import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.persistence.content.mongo.FullMongoScheduleRepopulator;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.DateTime;
@@ -36,13 +33,10 @@ public class ScheduleController extends BaseController {
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ApplicationConfigurationFetcher configFetcher;
     private final ScheduleResolver scheduleResolver;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    private final FullMongoScheduleRepopulator scheduleRepopulator;
     
-    public ScheduleController(ScheduleResolver scheduleResolver, FullMongoScheduleRepopulator scheduleRepopulator, KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
+    public ScheduleController(ScheduleResolver scheduleResolver, KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
         super(executor, configFetcher, log, outputter);
         this.scheduleResolver = scheduleResolver;
-        this.scheduleRepopulator = scheduleRepopulator;
         this.configFetcher = configFetcher;
     }
 
@@ -77,12 +71,6 @@ public class ScheduleController extends BaseController {
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
-    }
-    
-    @RequestMapping("/system/schedule/repopulate")
-    public void fullUpdate(HttpServletResponse response) {
-        executor.execute(scheduleRepopulator);
-        response.setStatus(HttpServletResponse.SC_OK);
     }
     
     private Set<Channel> channels(String channelString) {
