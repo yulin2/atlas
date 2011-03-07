@@ -152,7 +152,6 @@ public class C4BrandExtractorTest extends TestCase {
                         assertEquals(new DateTime("2010-08-11T14:06:33.341Z", DateTimeZones.UTC), broadcast.getLastUpdated());
                         found = true;
                     } else if (broadcast.getAliases().contains("tag:www.channel4.com:someid")) {
-                        assertFalse(broadcast.isActivelyPublished());
                         foundOld = true;
                     } else {
                         assertEquals(new DateTime("2010-11-03T05:57:50.175Z", DateTimeZones.UTC), broadcast.getLastUpdated());

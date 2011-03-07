@@ -3,16 +3,11 @@ package org.atlasapi.remotesite.channel4.epg;
 import static org.atlasapi.media.entity.Publisher.C4;
 
 import java.util.Set;
-import java.util.regex.Matcher;
 
-import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
-import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -20,11 +15,8 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgBrandlessEntryProcessor {
     
@@ -90,68 +82,9 @@ public class C4EpgBrandlessEntryProcessor {
         episode.setDescription(entry.summary());
         episode.setLastUpdated(entry.updated());
         
-        updateVersion(entry, episode, channel);
+        C4EpgEntryProcessor.updateVersion(episode, entry, channel);
         
         return episode;
-    }
-
-    private void updateVersion(C4EpgEntry entry, Episode episode, Channel channel) {
-        Version version = Iterables.getFirst(episode.getVersions(), new Version());
-        version.setDuration(entry.duration());
-        
-        Broadcast entryBroadcast = createBroadcast(entry, channel);
-        Set<Broadcast> broadcasts = Sets.newHashSet(entryBroadcast);
-        //copy in broadcasts.
-        for (Broadcast broadcast : version.getBroadcasts()) {
-            if (!entryBroadcast.getId().equals(broadcast.getId())) {
-                broadcasts.add(broadcast);
-            }
-        }
-        version.setBroadcasts(broadcasts);
-        
-        addLocationTo(version, entry);
-        
-        if(!episode.getVersions().contains(version)) {
-            episode.addVersion(version);
-        }
-    }
-
-    private void addLocationTo(Version version, C4EpgEntry entry) {
-        if (entry.media() != null && entry.media().player() != null) {
-            Location location = new Location();
-            location.setUri(entry.media().player());
-            location.setTransportType(TransportType.LINK);
-            
-            Policy policy = policyFrom(entry);
-            location.setPolicy(policy);
-            if(policy.getAvailabilityEnd() != null) {
-                location.setAvailable(new Interval(policy.getAvailabilityStart(), policy.getAvailabilityStart()).contains(new DateTime(DateTimeZones.UTC)));
-            }
-            
-            Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
-            Set<Location> locations = Sets.newHashSet(location);
-            for (Location existing : encoding.getAvailableAt()) {
-                if(!existing.getUri().equals(location.getUri())) {
-                    locations.add(existing);
-                }
-            }
-            encoding.setAvailableAt(locations);
-        }
-    }
-    
-    private Policy policyFrom(C4EpgEntry entry) {
-        Policy policy = new Policy();
-        policy.setLastUpdated(entry.updated());
-        
-        policy.setAvailableCountries(entry.media().availableCountries());
-        policy.setAvailabilityStart(entry.txDate());
-
-        Matcher matcher = C4EpgEntryProcessor.AVAILABILTY_RANGE_PATTERN.matcher(entry.available());
-        if (matcher.matches()) {
-            policy.setAvailabilityEnd(new DateTime(matcher.group(2)));
-        }
-
-        return policy;
     }
 
     private void updateBrand(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
@@ -179,7 +112,7 @@ public class C4EpgBrandlessEntryProcessor {
         for (Episode episode : brand.getContents()) {
             if(episode.getDescription().equals(entry.summary())) {
                 //Known from above that this is a new broadcast so just add.
-                updateVersion(entry, episode, channel);
+                C4EpgEntryProcessor.updateVersion(episode, entry, channel);
                 return;
             }
         }

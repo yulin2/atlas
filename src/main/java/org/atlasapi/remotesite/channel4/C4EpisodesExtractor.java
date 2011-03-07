@@ -239,8 +239,6 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		}
 		return null;
 	}
-
-	
 	
 	private String description(Entry entry) {
 		com.sun.syndication.feed.atom.Content description = entry.getSummary();
