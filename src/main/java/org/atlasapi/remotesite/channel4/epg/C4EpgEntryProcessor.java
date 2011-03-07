@@ -159,7 +159,6 @@ public class C4EpgEntryProcessor {
 
         updateVersion(episode, entry, channel);
 
-
         if (entry.media() != null && !Strings.isNullOrEmpty(entry.media().thumbnail())) {
             C4AtomApi.addImages(episode, entry.media().thumbnail());
         }
@@ -171,26 +170,34 @@ public class C4EpgEntryProcessor {
         return episode;
     }
 
-    private void updateVersion(Episode episode, C4EpgEntry entry, Channel channel) {
+    public static void updateVersion(Episode episode, C4EpgEntry entry, Channel channel) {
         Version version = Iterables.getFirst(episode.nativeVersions(), new Version());
         version.setDuration(entry.duration());
         
         version.setBroadcasts(updateBroadcasts(version.getBroadcasts(), entry, channel));
 
-        Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
-
-        updateEncoding(version, encoding, entry);
-
-        if (!version.getManifestedAs().contains(encoding)) {
-            version.addManifestedAs(encoding);
+        // Don't add/update locations unless this is the first time we've seen the item because
+        // we cannot determine the availability start without reading the /4od feed.
+        if (version.getManifestedAs().isEmpty()) {
+        	Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
+        	updateEncoding(version, encoding, entry);
+        	if (!version.getManifestedAs().contains(encoding)) {
+        		version.addManifestedAs(encoding);
+        	}
+        } else {
+        	for (Encoding encoding : version.getManifestedAs()) {
+        		for (Location location : encoding.getAvailableAt()) {
+        			location.setLastUpdated(entry.updated());
+        		}
+        	}
         }
-
+        
         if (!episode.getVersions().contains(version)) {
             episode.addVersion(version);
         }
     }
 
-    private Set<Broadcast> updateBroadcasts(Set<Broadcast> currentBroadcasts, C4EpgEntry entry, Channel channel) {
+    private static Set<Broadcast> updateBroadcasts(Set<Broadcast> currentBroadcasts, C4EpgEntry entry, Channel channel) {
         Broadcast entryBroadcast = broadcastFrom(entry, channel);
         
         Set<Broadcast> broadcasts = Sets.newHashSet(entryBroadcast);
@@ -203,7 +210,7 @@ public class C4EpgEntryProcessor {
         return broadcasts;
     }
 
-    private void updateEncoding(Version version, Encoding encoding, C4EpgEntry entry) {
+    private static void updateEncoding(Version version, Encoding encoding, C4EpgEntry entry) {
 
         if (entry.media() != null && entry.media().player() != null) {
             
@@ -215,7 +222,7 @@ public class C4EpgEntryProcessor {
                 }
             }
             
-            //other wise create a new one.
+            //otherwise create a new one.
             Location newLocation = new Location();
             updateLocation(newLocation, entry);
             encoding.addAvailableAt(newLocation);
@@ -223,7 +230,7 @@ public class C4EpgEntryProcessor {
 
     }
 
-    private void updateLocation(Location location, C4EpgEntry entry) {
+    static void updateLocation(Location location, C4EpgEntry entry) {
 
         location.setUri(entry.media().player());
         location.setTransportType(TransportType.LINK);
@@ -231,21 +238,22 @@ public class C4EpgEntryProcessor {
 
     }
 
-    private Policy policyFrom(C4EpgEntry entry) {
+    static Policy policyFrom(C4EpgEntry entry) {
         Policy policy = new Policy();
+        policy.setLastUpdated(entry.updated());
 
         policy.setAvailableCountries(entry.media().availableCountries());
-        policy.setAvailabilityStart(entry.txDate());
 
         Matcher matcher = AVAILABILTY_RANGE_PATTERN.matcher(entry.available());
         if (matcher.matches()) {
+        	policy.setAvailabilityStart(new DateTime(matcher.group(1)));
             policy.setAvailabilityEnd(new DateTime(matcher.group(2)));
         }
 
         return policy;
     }
 
-    private Broadcast broadcastFrom(C4EpgEntry entry, Channel channel) {
+    private static Broadcast broadcastFrom(C4EpgEntry entry, Channel channel) {
         Broadcast broadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration());
         broadcast.addAlias(entry.id());
 
