@@ -181,7 +181,7 @@ public class C4EpgEntryProcessor {
         if (version.getManifestedAs().isEmpty()) {
         	Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
         	updateEncoding(version, encoding, entry);
-        	if (!version.getManifestedAs().contains(encoding)) {
+        	if (!encoding.getAvailableAt().isEmpty() && !version.getManifestedAs().contains(encoding)) {
         		version.addManifestedAs(encoding);
         	}
         } else {
