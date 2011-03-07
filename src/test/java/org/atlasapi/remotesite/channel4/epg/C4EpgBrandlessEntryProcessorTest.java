@@ -85,7 +85,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
                 assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-08T00:05:00.000Z"))));
                 assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-08T00:05:00.000Z").plus(Duration.standardMinutes(110)))));
                 
-                assertThat(version.getManifestedAs().isEmpty(), is(true));
+                assertEquals(ImmutableSet.of(), version.getManifestedAs());
                 return true;
             }
         };
