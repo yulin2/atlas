@@ -52,11 +52,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
 @Import({AtlasFetchModule.WriterModule.class, AtlasFetchModule.ReaderModule.class})
 public class AtlasFetchModule {
 	
+	public @Bean SimpleScheduler scheduler() {
+	    return new SimpleScheduler();
+	}
+	
+	public @Bean ManualTaskTrigger manualTaskTrigger() {
+	    return new ManualTaskTrigger(scheduler());
+	}
 	
 	@Configuration
 	@Import({EquivModule.class})
