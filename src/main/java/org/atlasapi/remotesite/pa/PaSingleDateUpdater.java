@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.pa;
 import java.io.File;
 
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.collect.ImmutableSet;
@@ -11,9 +12,9 @@ import com.google.common.collect.ImmutableSet;
 public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     
     private final String dateString;
-    private final PaLocalFileManager fileManager;
+    private final DefaultPaProgrammeDataStore fileManager;
 
-    public PaSingleDateUpdater(PaProgrammeProcessor processor, AdapterLog log, PaLocalFileManager fileManager, String dateString) {
+    public PaSingleDateUpdater(PaProgrammeProcessor processor, AdapterLog log, DefaultPaProgrammeDataStore fileManager, String dateString) {
         super(processor, log);
         this.fileManager = fileManager;
         this.dateString = dateString;
