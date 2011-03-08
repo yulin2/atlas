@@ -1,11 +1,13 @@
 package org.atlasapi.remotesite.pa;
 
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 
 public class PaCompleteUpdater extends PaBaseProgrammeUpdater implements Runnable {
-    private final PaLocalFileManager fileManager;
+    
+    private final DefaultPaProgrammeDataStore fileManager;
 
-    public PaCompleteUpdater(PaProgrammeProcessor processor, PaLocalFileManager fileManager, AdapterLog log) {
+    public PaCompleteUpdater(PaProgrammeProcessor processor, DefaultPaProgrammeDataStore fileManager, AdapterLog log) {
         super(processor, log);
         this.fileManager = fileManager;
     }
@@ -14,4 +16,5 @@ public class PaCompleteUpdater extends PaBaseProgrammeUpdater implements Runnabl
     public void run() {
         this.processFiles(fileManager.localFiles());
     }
+    
 }

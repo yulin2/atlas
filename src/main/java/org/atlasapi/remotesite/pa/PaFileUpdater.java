@@ -6,7 +6,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 
 public class PaFileUpdater implements Runnable {
     
-    private final PaLocalFileManager fileManager;
+    private final PaFtpFileUpdater fileManager;
     private final AdapterLog log;
     private boolean isRunning = false;
     
@@ -14,7 +14,7 @@ public class PaFileUpdater implements Runnable {
         return isRunning;
     }
 
-    public PaFileUpdater(PaLocalFileManager fileManager, AdapterLog log) {
+    public PaFileUpdater(PaFtpFileUpdater fileManager, AdapterLog log) {
         this.fileManager = fileManager;
         this.log = log;
     }
