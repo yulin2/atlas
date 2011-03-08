@@ -16,14 +16,20 @@ package org.atlasapi.equiv;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.AggregateContentListener;
+import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.equiv.EquivalentUrlStore;
 import org.atlasapi.persistence.equiv.MongoEquivStore;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +37,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.scheduling.RepetitionRules;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class EquivModule {
@@ -58,5 +66,15 @@ public class EquivModule {
 	    EquivContentListener equivContentListener = new EquivContentListener(brandUpdater, itemUpdater);
 	    aggregateContentListener.addListener(equivContentListener);
 	    return equivContentListener;
+	}
+	
+	private @Autowired SimpleScheduler scheduler;
+	private @Autowired ScheduleResolver scheduleResolver;
+	private @Autowired AdapterLog log;
+	private @Autowired MongoDbBackedContentStore contentStore;
+	
+	@PostConstruct
+	public void scheduleEquivUpdaters() {
+	    scheduler.schedule(new BrandEquivUpdateTaskRunner(contentStore, scheduleResolver, log), RepetitionRules.every(Duration.standardHours(10)));
 	}
 }
