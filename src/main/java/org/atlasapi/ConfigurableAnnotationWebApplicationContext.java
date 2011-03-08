@@ -36,8 +36,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
     private void configure(Builder<Class<?>> builder) {
         builder.add(AtlasModule.class);
         
-        if(Boolean.parseBoolean(System.getProperty("processing.config"))) {
-            System.out.println(">>> Including processing configuration modules");
+        if(runProcessingOnly()) {
             builder.add(AtlasLoggingModule.class, AtlasWebModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class);
         } else {
             builder.add(AtlasLoggingModule.class, AtlasWebModule.class, EquivModule.class, QueryModule.class, 
@@ -47,4 +46,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         
         builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
     }
+
+	private boolean runProcessingOnly() {
+		return Boolean.parseBoolean(System.getProperty("processing.config"));
+	}
 }
