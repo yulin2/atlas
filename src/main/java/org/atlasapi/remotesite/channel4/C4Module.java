@@ -89,7 +89,7 @@ public class C4Module {
 	    return new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
 	}
 
-	protected @Bean C4AtomBackedBrandAdapter c4BrandFetcher() {
+	protected /*@Bean*/ C4AtomBackedBrandAdapter c4BrandFetcher() {
 		return new C4AtomBackedBrandAdapter(c4AtomFetcher(), contentStore, contentStore, log);
 	}
 }
