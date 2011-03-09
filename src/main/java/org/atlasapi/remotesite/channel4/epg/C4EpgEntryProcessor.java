@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.channel4.epg;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
+import static org.atlasapi.remotesite.channel4.C4BroadcastBuilder.broadcast;
 
 import java.util.List;
 import java.util.Set;
@@ -254,16 +255,10 @@ public class C4EpgEntryProcessor {
     }
 
     private static Broadcast broadcastFrom(C4EpgEntry entry, Channel channel) {
-        Broadcast broadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration());
-        broadcast.addAlias(entry.id());
+        Broadcast broadcast = broadcast().withChannel(channel.uri()).withTransmissionStart(entry.txDate()).withDuration(entry.duration()).withAtomId(entry.id()).build();
 
         broadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime(DateTimeZones.UTC));
         broadcast.setIsActivelyPublished(true);
-        
-        String id = entry.slotId();
-        if (id != null) {
-            broadcast.withId("c4:"+id);
-        }
 
         return broadcast;
     }

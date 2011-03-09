@@ -51,9 +51,7 @@ public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<
             
             if (txChannel != null) {
                 DateTime txStart = fmt.parseDateTime(startTime);
-                Broadcast broadcast = new Broadcast(txChannel, txStart, duration);
-                broadcast.addAlias(entry.getId());
-                broadcast.withId("c4:"+idFrom(entry.getId()));
+                Broadcast broadcast = C4BroadcastBuilder.broadcast().withChannel(txChannel).withTransmissionStart(txStart).withDuration(duration).withAtomId(entry.getId()).build();
                 broadcast.setLastUpdated(new DateTime(entry.getUpdated(), DateTimeZones.UTC));
                 version.addBroadcast(broadcast);
                 episodes.add(episode);
@@ -62,13 +60,4 @@ public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<
 
         return episodes;
     }
-
-    private String idFrom(String id) {
-        Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(id);
-        if(matcher.matches()) {
-            return matcher.group(1);
-        }
-        return null;
-    }
-
 }

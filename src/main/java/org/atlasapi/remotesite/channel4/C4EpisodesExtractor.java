@@ -83,15 +83,9 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	}
 	
 	private boolean include4odInfo = false;
-	private boolean inlcudeBroadcasts = false;
 	
 	public C4EpisodesExtractor includeOnDemands() {
 		this.include4odInfo = true;
-		return this;
-	}
-	
-	public C4EpisodesExtractor includeBroadcasts() {
-		this.inlcudeBroadcasts = true;
 		return this;
 	}
 	
@@ -302,17 +296,6 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			version.setRestriction(Restriction.from(ageRating, guidance));
 		} else {
 			version.setRestriction(Restriction.from(guidance));
-		}
-		
-		if (inlcudeBroadcasts) {
-			String txChannel = CHANNEL_LOOKUP.get(lookup.get(DC_TX_CHANNEL));
-			String txDate = lookup.get(DC_TX_DATE);
-			if (txChannel != null) {
-				DateTime txStart = new DateTime(txDate);
-				Broadcast broadcast = new Broadcast(txChannel, txStart, duration);
-				broadcast.setLastUpdated(lastUpdated);
-				version.addBroadcast(broadcast);
-			}
 		}
 		
 		if (include4odInfo) {
