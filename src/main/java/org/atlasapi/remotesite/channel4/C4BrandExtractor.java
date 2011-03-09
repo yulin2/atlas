@@ -58,7 +58,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
     public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentWriter, AdapterLog log) {
         feedClient = atomClient;
         this.log = log;
-        fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands().includeBroadcasts();
+        fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands();
         flattenedBrandExtrator = new C4EpisodesExtractor(log);
         seriesExtractor = new C4SeriesExtractor(contentResolver, log);
         clipExtractor = new C4ClipExtractor(atomClient, new C4EpisodesExtractor(log).includeOnDemands());

@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import junit.framework.TestCase;
@@ -82,6 +83,8 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
                 
                 Broadcast broadcast = getOnlyElement(version.getBroadcasts());
                 assertThat(broadcast.getId(), is(equalTo("c4:606")));
+                assertThat(broadcast.getAliases().size(), is(1));
+                assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4606"));
                 assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-08T00:05:00.000Z"))));
                 assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-08T00:05:00.000Z").plus(Duration.standardMinutes(110)))));
                 
@@ -92,7 +95,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
     }
 
     private C4EpgEntry buildEntry() {
-        return new C4EpgEntry("tag:int.channel4.com,2009:slot/606")
+        return new C4EpgEntry("tag:www.channel4.com,2009:slot/606")
             .withTitle("Robin Williams: Weapons of Self...")
             .withUpdated(new DateTime("2011-02-03T15:43:00.855Z"))
             .withSummary("...Destruction: Academy Award-winning actor, writer and comedian Robin Williams performs stand-up material at his sold-out US tour.")
