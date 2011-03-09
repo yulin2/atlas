@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
@@ -86,6 +87,8 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 
                 Broadcast broadcast = getOnlyElement(version.getBroadcasts());
                 assertThat(broadcast.getId(), is(equalTo("c4:337")));
+                assertThat(broadcast.getAliases().size(), is(1));
+                assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
                 assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
                 assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z").plus(Duration.standardMinutes(24).plus(Duration.standardSeconds(12))))));
                 
@@ -162,6 +165,8 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 assertThat(version.getBroadcasts().size(), is(2));
                 Broadcast broadcast = getLast(version.getBroadcasts()).getCurie() != null ? Iterables.get(version.getBroadcasts(), 0) : getLast(version.getBroadcasts());
                 assertThat(broadcast.getId(), is(equalTo("c4:337")));
+                assertThat(broadcast.getAliases().size(), is(1));
+                assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
                 assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
                 assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z").plus(Duration.standardMinutes(24).plus(Duration.standardSeconds(12))))));
                 
@@ -258,6 +263,8 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 
                 Broadcast broadcast = getOnlyElement(version.getBroadcasts());
                 assertThat(broadcast.getId(), is(equalTo("c4:337")));
+                assertThat(broadcast.getAliases().size(), is(1));
+                assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
                 assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
                 assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z").plus(Duration.standardMinutes(24).plus(Duration.standardSeconds(12))))));
                 

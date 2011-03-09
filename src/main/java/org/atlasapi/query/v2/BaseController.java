@@ -15,7 +15,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.query.content.parser.ApplicationConfigurationIncludingQueryBuilder;
 import org.atlasapi.query.content.parser.QueryStringBackedQueryBuilder;
-import org.atlasapi.query.content.parser.WebProfileDefaultQueryAttributesSetter;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Splitter;
@@ -35,7 +34,7 @@ public abstract class BaseController {
         this.executor = executor;
         this.log = log;
         this.outputter = outputter;
-        this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(new WebProfileDefaultQueryAttributesSetter()), configFetcher) ;
+        this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(), configFetcher) ;
     }
     
     protected void errorViewFor(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary ae) throws IOException {
