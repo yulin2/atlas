@@ -42,8 +42,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
-import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
 @Import({RemoteSiteHealthModule.class, ItvAdapterModule.class, ArchiveOrgAdapterModule.class, HuluAdapterModule.class, HboAdapterModule.class, ItunesAdapterModule.class, MsnVideoAdapterModule.class, YouTubeAdapterModule.class})
@@ -52,14 +50,6 @@ public class RemoteSiteModule {
 	private @Autowired AdapterLog log;
 	
 	private @Autowired Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
-	
-	public @Bean SimpleScheduler scheduler() {
-	    return new SimpleScheduler();
-	}
-	
-	public @Bean ManualTaskTrigger manualTaskTrigger() {
-	    return new ManualTaskTrigger(scheduler());
-	}
 	
 	public @Bean Fetcher<Identified> remoteFetcher() {
 		
