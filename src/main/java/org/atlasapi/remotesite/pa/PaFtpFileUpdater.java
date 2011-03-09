@@ -40,7 +40,7 @@ public class PaFtpFileUpdater {
     }
 
     public void updateFilesFromFtpSite() throws IOException {
-        if (Strings.isNullOrEmpty(ftpHost) || Strings.isNullOrEmpty(ftpCredentials.username()) || Strings.isNullOrEmpty(ftpCredentials.password()) || Strings.isNullOrEmpty(ftpFilesPath)) {
+        if (Strings.isNullOrEmpty(ftpHost) || Strings.isNullOrEmpty(ftpCredentials.username()) || Strings.isNullOrEmpty(ftpCredentials.password()) || ftpFilesPath == null) {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(PaFtpFileUpdater.class).withDescription("FTP details incomplete / missing, skipping FTP update"));
             return;
         }
@@ -84,7 +84,7 @@ public class PaFtpFileUpdater {
         if (!client.login(ftpCredentials.username(), ftpCredentials.password())) {
             throw new Exception("Unable to connect to " + ftpHost + " with username: " + ftpCredentials.username() + " and password...");
         }
-        if (!client.changeWorkingDirectory(ftpFilesPath)) {
+        if (!Strings.isNullOrEmpty(ftpFilesPath) && !client.changeWorkingDirectory(ftpFilesPath)) {
             throw new Exception("Unable to change working directory to " + ftpFilesPath);
         }
         return client;
