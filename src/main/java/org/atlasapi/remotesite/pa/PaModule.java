@@ -8,6 +8,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 import org.joda.time.Duration;
@@ -56,7 +57,7 @@ public class PaModule {
         return new PaFtpFileUpdater(ftpHost, new UsernameAndPassword(ftpUsername, ftpPassword), ftpPath, paProgrammeDataStore(), log);
     }
     
-    @Bean DefaultPaProgrammeDataStore paProgrammeDataStore() {
+    @Bean PaProgrammeDataStore paProgrammeDataStore() {
         S3Client s3client = new DefaultS3Client(s3access, s3secret, "pa-data");
         return new DefaultPaProgrammeDataStore(localFilesPath, s3client);
     }

@@ -12,13 +12,12 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.net.ftp.FTPFile;
 import org.atlasapi.s3.S3Client;
-import org.joda.time.DateTime;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.time.DateTimeZones;
 
 public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
 
@@ -74,19 +73,10 @@ public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
         return ftpFile.getTimestamp().getTime().after(new Date(existingFile.lastModified()));
     }
 
-    public List<File> localFiles() {
-        return ImmutableList.copyOf(localFolder.listFiles(filenameFilter));
-    }
-
-    public List<File> recentlyUpdatedFiles() {
-        final Long since = new DateTime(DateTimeZones.UTC).minusDays(2).getMillis();
-
-        return ImmutableList.copyOf(Iterables.filter(localFiles(), new Predicate<File>() {
-            @Override
-            public boolean apply(File input) {
-                return input.lastModified() > since;
-            }
-        }));
+    @Override
+    public List<File> localFiles(Predicate<File> filter) {
+        Predicate<File> fileFilter = filter == null ? Predicates.<File>alwaysTrue() : filter;
+        return ImmutableList.copyOf(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(filenameFilter)), fileFilter));
     }
 
     private Maybe<File> findExistingFile(String fileName) {
