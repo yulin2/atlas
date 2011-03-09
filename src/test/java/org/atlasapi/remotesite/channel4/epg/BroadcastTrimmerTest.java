@@ -67,14 +67,16 @@ public class BroadcastTrimmerTest extends TestCase {
             @Override
             public boolean matchesSafely(Item item) {
                 Set<Broadcast> broadcasts = Iterables.getOnlyElement(item.getVersions()).getBroadcasts();
-                if(broadcasts.size() != 2) {
+                if(broadcasts.size() != 3) {
                     return false;
                 }
-                return check(Iterables.get(broadcasts, 0)) && check(Iterables.get(broadcasts, 0));
+                return check(Iterables.get(broadcasts, 0)) && check(Iterables.get(broadcasts, 1)) && check(Iterables.get(broadcasts, 2));
             }
 
             private boolean check(Broadcast broadcast) {
-                return broadcast.getId().equals("c4:1234") && broadcast.isActivelyPublished() || broadcast.getId().equals("c4:2234") && !broadcast.isActivelyPublished();
+                return broadcast.getId().equals("c4:0234") && broadcast.isActivelyPublished()
+                    || broadcast.getId().equals("c4:1234") && broadcast.isActivelyPublished()
+                    || broadcast.getId().equals("c4:2234") && !broadcast.isActivelyPublished();
             }
         };
     }
@@ -83,12 +85,14 @@ public class BroadcastTrimmerTest extends TestCase {
         Item item = new Item("testUri", "testCurie", Publisher.C4);
         Version version = new Version();
         
+        Broadcast ignore = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(50), new DateTime(103)).withId("c4:0234");
+        ignore.setIsActivelyPublished(true);
         Broadcast retain = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(105), new DateTime(120)).withId("c4:1234");
         retain.setIsActivelyPublished(true);
         Broadcast remove = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(150), new DateTime(165)).withId("c4:2234");
         remove.setIsActivelyPublished(true);
         
-        version.setBroadcasts(ImmutableSet.of(retain, remove));
+        version.setBroadcasts(ImmutableSet.of(ignore, retain, remove));
         item.addVersion(version);
         
         return ImmutableSet.of(item);

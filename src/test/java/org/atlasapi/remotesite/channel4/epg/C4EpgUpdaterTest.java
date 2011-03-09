@@ -26,6 +26,8 @@ import org.jmock.Mockery;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -58,7 +60,7 @@ public class C4EpgUpdaterTest extends TestCase {
 
     @SuppressWarnings("unchecked")
     public void testRun() throws Exception {
-        final Schedule schedule = Schedule.fromChannelMap(Maps.<Channel, List<Item>>newHashMap(), new Interval(day, day.plusDays(1)));
+        final Schedule schedule = Schedule.fromChannelMap(ImmutableMap.<Channel, List<Item>>of(Channel.CHANNEL_FOUR, ImmutableList.<Item>of()), new Interval(day, day.plusDays(1)));
         
         context.checking(new Expectations() {{
             one(c4AtomFetcher).get(with(endsWith(String.format("%s/C4.atom", new DateTime(DateTimeZones.UTC).toString("yyyy/MM/dd")))));
