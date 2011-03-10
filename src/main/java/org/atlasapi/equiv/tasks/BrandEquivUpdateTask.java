@@ -1,4 +1,4 @@
-package org.atlasapi.equiv;
+package org.atlasapi.equiv.tasks;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.debugEntry;
 
@@ -77,9 +77,9 @@ public class BrandEquivUpdateTask implements Runnable {
         }
         
         if(!equivBrands.isEmpty()) {
-            contentWriter.createOrUpdate(brand, true);
+            contentWriter.createOrUpdate(brand, false);
             for (Brand equivBrand : equivBrands) {
-                contentWriter.createOrUpdate(equivBrand, true);
+                contentWriter.createOrUpdate(equivBrand, false);
             }
             log.record(debugEntry().withSource(getClass()).withDescription(String.format("Equivalised %s to %s others", brand.getCanonicalUri(), equivBrands.size())));
         }

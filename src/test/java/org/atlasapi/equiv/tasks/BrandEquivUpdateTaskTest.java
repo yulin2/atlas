@@ -1,4 +1,4 @@
-package org.atlasapi.equiv;
+package org.atlasapi.equiv.tasks;
 
 import static org.atlasapi.media.entity.Channel.BBC_ONE;
 import static org.hamcrest.Matchers.allOf;
@@ -9,6 +9,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
