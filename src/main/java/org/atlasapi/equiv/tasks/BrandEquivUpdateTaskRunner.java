@@ -1,4 +1,4 @@
-package org.atlasapi.equiv;
+package org.atlasapi.equiv.tasks;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 

@@ -18,6 +18,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.equiv.tasks.BrandEquivUpdateTaskRunner;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
