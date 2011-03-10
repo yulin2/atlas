@@ -1,11 +1,12 @@
 package org.atlasapi.equiv;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.debugEntry;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
@@ -17,14 +18,14 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -33,27 +34,31 @@ import com.google.common.collect.Ordering;
 import com.metabroadcast.common.stats.Count;
 import com.metabroadcast.common.stats.Counter;
 
-public class BrandEquivUpdateTask implements Callable<List<Brand>> {
+public class BrandEquivUpdateTask implements Runnable {
 
     private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4);
-
     private static final Duration BROADCAST_FLEXIBILITY = Duration.standardMinutes(1);
     
     private final Brand brand;
     private final ScheduleResolver scheduleResolver;
+    private final ContentWriter contentWriter;
+    private final AdapterLog log;
+
     private double certaintyThreshold = 0.9;
 
-    public BrandEquivUpdateTask(Brand brand, ScheduleResolver scheduleResolver) {
+    public BrandEquivUpdateTask(Brand brand, ScheduleResolver scheduleResolver, ContentWriter contentWriter, AdapterLog log) {
         this.brand = brand;
         this.scheduleResolver = scheduleResolver;
+        this.contentWriter = contentWriter;
+        this.log = log;
     }
 
     @Override
-    public List<Brand> call() throws Exception {
-        return updateEquivalence(brand);
+    public void run() {
+        updateEquivalence(brand);
     }
 
-    private List<Brand> updateEquivalence(Brand brand) {
+    private void updateEquivalence(Brand brand) {
         
         List<Brand> equivBrands = Lists.newArrayList();
         
@@ -71,7 +76,13 @@ public class BrandEquivUpdateTask implements Callable<List<Brand>> {
             }
         }
         
-        return equivBrands.isEmpty() ? equivBrands : ImmutableList.copyOf(Iterables.concat(ImmutableList.of(brand), equivBrands));
+        if(!equivBrands.isEmpty()) {
+            contentWriter.createOrUpdate(brand, true);
+            for (Brand equivBrand : equivBrands) {
+                contentWriter.createOrUpdate(equivBrand, true);
+            }
+            log.record(debugEntry().withSource(getClass()).withDescription(String.format("Equivalised %s to %s others", brand.getCanonicalUri(), equivBrands.size())));
+        }
     }
 
     private Multimap<Publisher, Brand> suggestedBrandsForItem(Item item) {
