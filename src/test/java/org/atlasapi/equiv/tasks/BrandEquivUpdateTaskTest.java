@@ -63,11 +63,11 @@ public class BrandEquivUpdateTaskTest extends TestCase {
         context.checking(new Expectations(){{
             one(scheduleResolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS); 
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(equivEpisode)), interval(40000, 260000))));
-            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withEquivalent("equivBrandUri"))), with(true));
-            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(true));
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withEquivalent("equivBrandUri"))), with(false));
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(false));
         }});
         
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).run();
+        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
         
         context.assertIsSatisfied();
     }
@@ -88,10 +88,10 @@ public class BrandEquivUpdateTaskTest extends TestCase {
         context.checking(new Expectations(){{
             one(scheduleResolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS); 
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode)), interval(40000, 260000))));
-            never(contentWriter).createOrUpdate(with(any(Container.class)), with(true));
+            never(contentWriter).createOrUpdate(with(any(Container.class)), with(false));
         }});
         
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).run();
+        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
         
         context.assertIsSatisfied();
     }
@@ -118,11 +118,11 @@ public class BrandEquivUpdateTaskTest extends TestCase {
             one(scheduleResolver).schedule(utcTime(240000), utcTime(460000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS); 
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of()), interval(240000, 460000))));
                 
-            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withEquivalent("equivBrandUri"))), with(true));
-            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(true));
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withEquivalent("equivBrandUri"))), with(false));
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(false));
         }});
 
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).run();
+        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
         
         context.assertIsSatisfied();
     }
@@ -148,10 +148,10 @@ public class BrandEquivUpdateTaskTest extends TestCase {
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode1)), interval(40000, 260000))));
             one(scheduleResolver).schedule(utcTime(240000), utcTime(460000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode2)), interval(240000, 460000))));
-            never(contentWriter).createOrUpdate(with(any(Container.class)), with(true));
+            never(contentWriter).createOrUpdate(with(any(Container.class)), with(false));
         }});
         
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).run();
+        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
         
         context.assertIsSatisfied();
     }
@@ -191,11 +191,11 @@ public class BrandEquivUpdateTaskTest extends TestCase {
             one(scheduleResolver).schedule(utcTime(640000), utcTime(860000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(equivEpisode2)), interval(640000, 860000))));
                 
-            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withEquivalent("equivBrandUri"))), with(true));
-            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectAUri"))), with(true));    
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withEquivalent("equivBrandUri"))), with(false));
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(false));    
         }});
 
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).withCertaintyThreshold(0.65).run();
+        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).withCertaintyThreshold(0.65).call();
         
         context.assertIsSatisfied();
     }
@@ -226,10 +226,10 @@ public class BrandEquivUpdateTaskTest extends TestCase {
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode1)), interval(40000, 260000))));
             one(scheduleResolver).schedule(utcTime(240000), utcTime(460000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode2)), interval(240000, 460000))));
-            never(contentWriter).createOrUpdate(with(any(Container.class)), with(true));
+            never(contentWriter).createOrUpdate(with(any(Container.class)), with(false));
         }});
 
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).run();
+        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
         
         context.assertIsSatisfied();
     }
