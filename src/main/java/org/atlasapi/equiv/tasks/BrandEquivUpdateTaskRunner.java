@@ -46,7 +46,7 @@ public class BrandEquivUpdateTaskRunner implements Runnable {
             contents = contentStore.iterate(queryFor(clock.now()), lastId, BATCH_SIZE);
             for (Brand brand : Iterables.filter(contents, Brand.class)) {
                 try {
-                    new BrandEquivUpdateTask(brand, scheduleResolver, contentStore, log).run();
+                    System.out.println(new BrandEquivUpdateTask(brand, scheduleResolver, contentStore, log).writesResults(false).call());
                 } catch (Exception e) {
                     log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+brand.getCanonicalUri()));
                 }
