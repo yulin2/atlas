@@ -1,8 +1,7 @@
 package org.atlasapi.equiv.tasks;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Described;
@@ -14,20 +13,24 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.metabroadcast.common.stats.Count;
 
 public abstract class EquivResult {
 
     protected List<EquivResult> subResults;
+    protected final Described desc;
 
-    public static EquivResult of(Brand brand, Iterable<Count<Brand>> countedEquivBrands) {
-        return Iterables.isEmpty(countedEquivBrands) ? new EmptyEquivResult(brand, brand.getContents().size()) : new MatchedEquivResult(brand, brand.getContents().size(), asMap(countedEquivBrands));
+    public EquivResult(Described desc) {
+        this.desc = desc;
     }
 
-    public static EquivResult of(Episode episode, Iterable<Count<Episode>> countedEquivEpisodes) {
+    public static EquivResult of(Brand brand, EquivalentSuggestions<Brand> countedEquivBrands, double certainty) {
+        return countedEquivBrands.getBinnedCountedSuggestions().isEmpty() ? new EmptyEquivResult(brand, brand.getContents().size()) : new MatchedEquivResult(brand, brand.getContents().size(), countedEquivBrands, certainty);
+    }
+
+    public static EquivResult of(Episode episode, EquivalentSuggestions<Episode> countedEquivEps, double certainty) {
         int broadcasts = countBroadcasts(episode);
-        return Iterables.isEmpty(countedEquivEpisodes) ? new EmptyEquivResult(episode, broadcasts) : new MatchedEquivResult(episode, broadcasts, asMap(countedEquivEpisodes));
+        return countedEquivEps.getBinnedCountedSuggestions().isEmpty() ? new EmptyEquivResult(episode, broadcasts) : new MatchedEquivResult(episode, broadcasts, countedEquivEps, certainty);
     }
     
     private static int countBroadcasts(Episode episode) {
@@ -37,25 +40,18 @@ public abstract class EquivResult {
         }
         return broadcasts;
     }
-
-    private static <T extends Described> Map<T, Long> asMap(Iterable<Count<T>> countedEquivDescs) {
-        return Maps.transformValues(Maps.uniqueIndex(countedEquivDescs, Count.<T>unpackTarget()), new Function<Count<T>, Long>() {
-            @Override
-            public Long apply(Count<T> input) {
-                return input.getCount();
-            }});
-    }
     
     private static class MatchedEquivResult extends EquivResult {
 
-        private final Described brand;
         private final int maxMatch;
-        private final Map<? extends Described, Long> equivs;
+        private final EquivalentSuggestions<? extends Described> equivs;
+        private final double certainty;
 
-        public MatchedEquivResult(Described desc, int maxMatch, Map<? extends Described, Long> equivs) {
-            this.brand = desc;
+        public MatchedEquivResult(Described desc, int maxMatch, EquivalentSuggestions<? extends Described> equivs, double certainty) {
+            super(desc);
             this.maxMatch = maxMatch;
             this.equivs = equivs;
+            this.certainty = certainty;
         }
         
         @Override
@@ -65,26 +61,28 @@ public abstract class EquivResult {
             }
             if(that instanceof MatchedEquivResult) {
                 MatchedEquivResult other = (MatchedEquivResult) that;
-                return Objects.equal(brand, other.brand) && Objects.equal(equivs, other.equivs);
+                return Objects.equal(desc, other.desc) && Objects.equal(equivs, other.equivs);
             }
             return false;
         }
         
         @Override
         public int hashCode() {
-            return Objects.hashCode(brand, equivs);
+            return Objects.hashCode(desc, equivs);
         }
         
         @Override
         public String toString() {
-            return String.format("%s/%s:%s, equivalent to %s", brand.getTitle(), brand.getCanonicalUri(), maxMatch, toString(equivs));
+            return String.format("%s/%s:%s, equivalent to %s\n%s", desc.getTitle(), desc.getCanonicalUri(), maxMatch, equivString(equivs), subResultsString());
         }
         
-        private String toString(Map<? extends Described, Long> brands) {
-            return Joiner.on(", ").join(Iterables.transform(brands.entrySet(), new Function<Entry<? extends Described, Long>, String>() {
+        public <T extends Described> String equivString(EquivalentSuggestions<T> equivs) {
+            final Set<Count<T>> certainSuggestions = equivs.allMatchedSuggestions(certainty);
+            return Joiner.on(", ").join(Iterables.transform(equivs.allSuggestions(), new Function<Count<T>, String>() {
                 @Override
-                public String apply(Entry<? extends Described, Long> input) {
-                    return String.format("%s/%s:%s\n%s", input.getKey().getTitle(), input.getKey().getCanonicalUri(), input.getValue(), subResultsString());
+                public String apply(Count<T> input) {
+                    T target = input.getTarget();
+                    return String.format("%s(%s):%s%s", target.getTitle(), target.getCanonicalUri(), input.getCount(), certainSuggestions.contains(input) ? " MATCHED" : ""); 
                 }
             }));
         }
@@ -92,11 +90,10 @@ public abstract class EquivResult {
     
     private static class EmptyEquivResult extends EquivResult {
 
-        private final Described desc;
         private final int maxMatch;
 
         public EmptyEquivResult(Described desc, int maxMatch) {
-            this.desc = desc;
+            super(desc);
             this.maxMatch = maxMatch;
         }
         
@@ -123,12 +120,16 @@ public abstract class EquivResult {
         }
     }
     
-    protected EquivResult withSubResults(Iterable<EquivResult> subResults) {
+    public Described described() {
+        return desc;
+    }
+    
+    public EquivResult withSubResults(Iterable<EquivResult> subResults) {
         this.subResults = ImmutableList.copyOf(subResults);
         return this;
     }
     
     protected String subResultsString() {
-        return "\t" + subResults == null ? "" : Joiner.on('\t').join(subResults);
+        return subResults == null ? "" : "\t" + Joiner.on('\t').join(subResults);
     }
 }
