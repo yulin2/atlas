@@ -9,7 +9,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
@@ -25,24 +24,19 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.google.common.collect.Ordering;
-import com.metabroadcast.common.stats.Count;
-import com.metabroadcast.common.stats.Counter;
 
 public class BrandEquivUpdateTask implements Callable<EquivResult> {
 
-    private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4);
+    private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
     private static final Duration BROADCAST_FLEXIBILITY = Duration.standardMinutes(1);
     
     private final Brand brand;
     private final ScheduleResolver scheduleResolver;
     private final ContentWriter contentWriter;
-//    private final AdapterLog log;
 
     private double certaintyThreshold = 0.9;
     private boolean writesResults = true;
@@ -51,7 +45,6 @@ public class BrandEquivUpdateTask implements Callable<EquivResult> {
         this.brand = brand;
         this.scheduleResolver = scheduleResolver;
         this.contentWriter = contentWriter;
-//        this.log = log;
     }
 
     @Override
@@ -67,21 +60,20 @@ public class BrandEquivUpdateTask implements Callable<EquivResult> {
         
         List<EquivResult> episodeEquivResults = Lists.newArrayListWithExpectedSize(brand.getContents().size());
         for (Episode episode : brand.getContents()) {
-            Multimap<Publisher, Episode> suggestedEquivalents = suggestedEquivalents(episode);
-            Map<Publisher, List<Count<Episode>>> countedEquivalentItems = countedSuggestedEquivalents(suggestedEquivalents);
-            
-            episodeEquivResults.add(EquivResult.of(episode, Ordering.natural().reverse().immutableSortedCopy(Iterables.concat(countedEquivalentItems.values()))));
-            suggestedBrands.putAll(Multimaps.forMap(getBrands(mostSuggestedPerPublisher(countedEquivalentItems))));
-        }
+            EquivalentSuggestions<Episode> suggestedEquivalentEpisodes = EquivalentSuggestions.from(equivalentsFor(episode)); 
 
-        Map<Publisher, List<Count<Brand>>> countedEquivalentBrands = countedSuggestedEquivalents(suggestedBrands);
-        
-        Map<Publisher, Brand> mostSuggestedBrandPerPublisher = mostSuggestedPerPublisher(countedEquivalentBrands);
+            episodeEquivResults.add(EquivResult.of(episode, suggestedEquivalentEpisodes, certaintyThreshold));
+            suggestedBrands.putAll(Multimaps.forMap(getBrands(suggestedEquivalentEpisodes.matchedSuggestions(certaintyThreshold))));
+        }   
+
+        EquivalentSuggestions<Brand> suggestedEquivalentBrands = EquivalentSuggestions.from(suggestedBrands);
         
         for (Publisher publisher : TARGET_PUBLISHERS) {
-            Brand mostSuggested = mostSuggestedBrandPerPublisher.get(publisher);
+            Brand mostSuggested = suggestedEquivalentBrands.matchedSuggestions(certaintyThreshold).get(publisher);
             if (mostSuggested != null) {
-                equivalise(brand, mostSuggested);
+                brand.addEquivalentTo(mostSuggested);
+                mostSuggested.addEquivalentTo(brand);
+                
                 equivBrands.add(mostSuggested);
             }
         }
@@ -93,7 +85,7 @@ public class BrandEquivUpdateTask implements Callable<EquivResult> {
             }
         }
         
-        return EquivResult.of(brand, Ordering.natural().reverse().immutableSortedCopy(Iterables.concat(countedEquivalentBrands.values()))).withSubResults(episodeEquivResults);
+        return EquivResult.of(brand, suggestedEquivalentBrands, certaintyThreshold).withSubResults(episodeEquivResults);
     }
 
     private Map<Publisher, Brand> getBrands(Map<Publisher, Episode> mostSuggestedPerPublisher) {
@@ -107,42 +99,8 @@ public class BrandEquivUpdateTask implements Callable<EquivResult> {
             }
         }), Predicates.notNull());
     }
-
-    private <T extends Identified> Map<Publisher, T> mostSuggestedPerPublisher(Map<Publisher, List<Count<T>>> suggestedEquivalentItems) {
-        return Maps.filterValues(Maps.transformValues(suggestedEquivalentItems, new Function<List<Count<T>>, T>() {
-            @Override
-            public T apply(List<Count<T>> input) {
-                Count<T> mostSuggestedCount = input.get(0);
-                
-                if(mostSuggestedCount.getCount() / Double.valueOf(sum(input)) > certaintyThreshold) {
-                    return mostSuggestedCount.getTarget();
-                }
-                return null;
-            }
-        }), Predicates.notNull());
-    }
     
-    private <T> long sum(Iterable<Count<T>> counts) {
-        long total = 0;
-        for (Count<T> count : counts) {
-            total += count.getCount();
-        }
-        return total;
-    }
-    
-    private <T extends Identified> Map<Publisher, List<Count<T>>> countedSuggestedEquivalents(Multimap<Publisher, T> binnedSuggested) {
-        Map<Publisher, List<Count<T>>> binnedSuggestedItemCounts = Maps.newHashMap();
-        
-        for (Publisher publisher : TARGET_PUBLISHERS) {
-            if(!binnedSuggested.get(publisher).isEmpty()) {
-                binnedSuggestedItemCounts.put(publisher, orderedCounts(binnedSuggested.get(publisher)));
-            }
-        }
-        
-        return binnedSuggestedItemCounts;
-    }
-
-    private Multimap<Publisher, Episode> suggestedEquivalents(Item item) {
+    private Multimap<Publisher, Episode> equivalentsFor(Item item) {
         Multimap<Publisher, Episode> binnedSuggestedItems = ArrayListMultimap.create();
         
         for (Version version : item.getVersions()) {
@@ -182,19 +140,6 @@ public class BrandEquivUpdateTask implements Callable<EquivResult> {
         return transmissionTime.isAfter(transmissionTime2.minus(BROADCAST_FLEXIBILITY)) && transmissionTime.isBefore(transmissionTime2.plus(BROADCAST_FLEXIBILITY));
     }
 
-    private void equivalise(Brand subjectBrand, Brand mostSuggested) {
-        subjectBrand.addEquivalentTo(mostSuggested);
-        mostSuggested.addEquivalentTo(subjectBrand);
-    }
-
-    private <T extends Identified> List<Count<T>> orderedCounts(Iterable<T> potEquivItems) {
-        Counter<T, T> counter = new Counter<T, T>();
-        for (T item : potEquivItems) {
-            counter.incrementCount(item, item);
-        }
-        return Ordering.natural().reverse().immutableSortedCopy(counter.counts(Ordering.usingToString()));
-    }
-    
     private Schedule scheduleAround(Broadcast broadcast) {
         DateTime start = broadcast.getTransmissionTime().minus(BROADCAST_FLEXIBILITY);
         DateTime end = broadcast.getTransmissionEndTime().plus(BROADCAST_FLEXIBILITY);

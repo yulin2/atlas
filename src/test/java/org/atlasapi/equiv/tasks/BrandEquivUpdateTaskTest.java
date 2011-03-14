@@ -39,7 +39,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class BrandEquivUpdateTaskTest extends TestCase {
     
-    private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4);
+    private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
     private final Mockery context = new Mockery();
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
     private final ContentWriter contentWriter = context.mock(ContentWriter.class);
