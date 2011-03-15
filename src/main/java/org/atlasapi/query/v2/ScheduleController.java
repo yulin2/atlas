@@ -85,7 +85,7 @@ public class ScheduleController extends BaseController {
     }
     
     private Set<Publisher> publishers(String publisherString, Maybe<ApplicationConfiguration> config) {
-        Set<Publisher> appPublishers = config.hasValue() ? ImmutableSet.copyOf(config.requireValue().publishersInOrder()) : ImmutableSet.<Publisher>of();
+        Set<Publisher> appPublishers = ImmutableSet.copyOf(config.hasValue() ? config.requireValue().publishersInOrder() : ApplicationConfiguration.DEFAULT_CONFIGURATION.publishersInOrder());
         if (Strings.isNullOrEmpty(publisherString)) {
             return appPublishers;
         }
