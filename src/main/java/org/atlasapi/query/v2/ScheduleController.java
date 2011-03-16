@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasErrorSummary;
 import org.atlasapi.beans.AtlasModelWriter;
@@ -14,7 +13,6 @@ import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Controller;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
@@ -31,13 +28,11 @@ import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 public class ScheduleController extends BaseController {
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
-    private final ApplicationConfigurationFetcher configFetcher;
     private final ScheduleResolver scheduleResolver;
     
-    public ScheduleController(ScheduleResolver scheduleResolver, KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
-        super(executor, configFetcher, log, outputter);
+    public ScheduleController(ScheduleResolver scheduleResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
+        super(configFetcher, log, outputter);
         this.scheduleResolver = scheduleResolver;
-        this.configFetcher = configFetcher;
     }
 
     @RequestMapping("/3.0/schedule.*")
@@ -56,7 +51,7 @@ public class ScheduleController extends BaseController {
                 throw new IllegalArgumentException("You must pass either 'on' or 'from' and 'to'");
             }
             
-            Set<Publisher> publishers = publishers(publisher, configFetcher.configurationFor(request));
+            Set<Publisher> publishers = publishers(publisher, appConfig(request));
             if (publishers.isEmpty()) {
                 throw new IllegalArgumentException("You must specify at least one publisher that you have permission to view");
             }
@@ -82,22 +77,5 @@ public class ScheduleController extends BaseController {
             }
         }
         return channels.build();
-    }
-    
-    private Set<Publisher> publishers(String publisherString, Maybe<ApplicationConfiguration> config) {
-        Set<Publisher> appPublishers = ImmutableSet.copyOf(config.hasValue() ? config.requireValue().publishersInOrder() : ApplicationConfiguration.DEFAULT_CONFIGURATION.publishersInOrder());
-        if (Strings.isNullOrEmpty(publisherString)) {
-            return appPublishers;
-        }
-        
-        ImmutableSet.Builder<Publisher> publishers = ImmutableSet.builder();
-        for (String publisherKey: URI_SPLITTER.split(publisherString)) {
-            Maybe<Publisher> publisher = Publisher.fromKey(publisherKey);
-            if (publisher.hasValue()) {
-                publishers.add(publisher.requireValue());
-            }
-        }
-        
-        return Sets.intersection(publishers.build(), appPublishers);
     }
 }

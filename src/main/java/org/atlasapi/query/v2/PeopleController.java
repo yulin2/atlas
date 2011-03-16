@@ -24,9 +24,12 @@ import com.metabroadcast.common.query.Selection;
 @Controller
 public class PeopleController extends BaseController {
 
+    private final KnownTypeQueryExecutor executor;
+
     public PeopleController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher,
                     AdapterLog log, AtlasModelWriter outputter) {
-        super(executor, configFetcher, log, outputter);
+        super(configFetcher, log, outputter);
+        this.executor = executor;
     }
 
     @RequestMapping("/3.0/people.*")
