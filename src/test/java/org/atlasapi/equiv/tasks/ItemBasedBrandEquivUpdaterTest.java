@@ -9,11 +9,9 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
-import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -22,8 +20,6 @@ import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -37,13 +33,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class BrandEquivUpdateTaskTest extends TestCase {
+public class ItemBasedBrandEquivUpdaterTest extends TestCase {
     
     private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
     private final Mockery context = new Mockery();
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
     private final ContentWriter contentWriter = context.mock(ContentWriter.class);
-    private final AdapterLog log = new SystemOutAdapterLog();
 
     // PA Brand with single item and broadcast
     // BBC brand with single item and identical broadcast
@@ -52,7 +47,7 @@ public class BrandEquivUpdateTaskTest extends TestCase {
     public void testBasicEquivalence() throws Exception {
 
         final Brand subjectBrand = new Brand("subjectUri", "subjectCurie", Publisher.PA);
-        subjectBrand.addContents(episodeWithBroadcasts("subjectIem", Publisher.PA, 
+        subjectBrand.addContents(episodeWithBroadcasts("subjectItem", Publisher.PA, 
                 new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000))));
         
         final Brand equivBrand = new Brand("equivBrandUri", "equivCurie", Publisher.BBC);
@@ -67,7 +62,7 @@ public class BrandEquivUpdateTaskTest extends TestCase {
             one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(false));
         }});
         
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
+        new ItemBasedBrandEquivUpdater(scheduleResolver, contentWriter).updateEquivalence(subjectBrand);
         
         context.assertIsSatisfied();
     }
@@ -76,6 +71,7 @@ public class BrandEquivUpdateTaskTest extends TestCase {
     //PA brand, 1 item, 1 broadcast
     //BBC brand, 1 item, different broadcast
     //Not equivalent. 
+    @SuppressWarnings("unchecked")
     public void testBasicNonEquivalence() throws Exception {
 
         Brand subjectBrand = new Brand("subjectUri", "subjectCurie", Publisher.PA);
@@ -88,10 +84,11 @@ public class BrandEquivUpdateTaskTest extends TestCase {
         context.checking(new Expectations(){{
             one(scheduleResolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS); 
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode)), interval(40000, 260000))));
-            never(contentWriter).createOrUpdate(with(any(Container.class)), with(false));
+                
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withNoEquivalent())), with(false));
         }});
-        
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
+
+        new ItemBasedBrandEquivUpdater(scheduleResolver, contentWriter).updateEquivalence(subjectBrand);
         
         context.assertIsSatisfied();
     }
@@ -122,13 +119,14 @@ public class BrandEquivUpdateTaskTest extends TestCase {
             one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(false));
         }});
 
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
+        new ItemBasedBrandEquivUpdater(scheduleResolver, contentWriter).updateEquivalence(subjectBrand);
         
         context.assertIsSatisfied();
     }
     
     //PA brand, 1 item, 2 broadcasts
     //BBC brand, 2 item with 1 identical broadcast each
+    @SuppressWarnings("unchecked")
     public void testNotEquivalentWhenItemsDifferent() throws Exception {
 
         Brand subjectBrand = new Brand("subjectUri", "subjectCurie", Publisher.PA);
@@ -148,10 +146,11 @@ public class BrandEquivUpdateTaskTest extends TestCase {
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode1)), interval(40000, 260000))));
             one(scheduleResolver).schedule(utcTime(240000), utcTime(460000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode2)), interval(240000, 460000))));
-            never(contentWriter).createOrUpdate(with(any(Container.class)), with(false));
+            
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withNoEquivalent())), with(false));
         }});
-        
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
+
+        new ItemBasedBrandEquivUpdater(scheduleResolver, contentWriter).updateEquivalence(subjectBrand);
         
         context.assertIsSatisfied();
     }
@@ -195,7 +194,7 @@ public class BrandEquivUpdateTaskTest extends TestCase {
             one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("equivBrandUri"),withEquivalent("subjectUri"))), with(false));    
         }});
 
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).withCertaintyThreshold(0.65).call();
+        new ItemBasedBrandEquivUpdater(scheduleResolver, contentWriter).withCertaintyThreshold(0.65).updateEquivalence(subjectBrand);
         
         context.assertIsSatisfied();
     }
@@ -203,6 +202,7 @@ public class BrandEquivUpdateTaskTest extends TestCase {
     //PA brand, 1 item, 2 broadcasts
     //BBC brand 1, 1 item with 1 identical broadcasts
     //BBC brand 2, 1 item with 1 identical broadcasts
+    @SuppressWarnings("unchecked")
     public void testNotEquivalentWhenNoMajorityBrand() throws Exception {
 
         Brand subjectBrand = new Brand("subjectUri", "subjectCurie", Publisher.PA);
@@ -226,10 +226,11 @@ public class BrandEquivUpdateTaskTest extends TestCase {
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode1)), interval(40000, 260000))));
             one(scheduleResolver).schedule(utcTime(240000), utcTime(460000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(notEquivEpisode2)), interval(240000, 460000))));
-            never(contentWriter).createOrUpdate(with(any(Container.class)), with(false));
+
+            one(contentWriter).createOrUpdate(with(brand(withCanonicalUri("subjectUri"),withNoEquivalent())), with(false));
         }});
 
-        new BrandEquivUpdateTask(subjectBrand, scheduleResolver, contentWriter, log).call();
+        new ItemBasedBrandEquivUpdater(scheduleResolver, contentWriter).updateEquivalence(subjectBrand);
         
         context.assertIsSatisfied();
     }
@@ -300,5 +301,29 @@ public class BrandEquivUpdateTaskTest extends TestCase {
                 return hasItems(uris).matches(idd.getEquivalentTo());
             }
         };
+    }
+    
+    private static Matcher<Identified> withNoEquivalent() {
+        return new TypeSafeMatcher<Identified>() {
+
+            private Identified idd;
+
+            @Override
+            public void describeTo(Description desc) {
+                desc.appendText("Identified with no equivalents, not:");
+                if(idd != null) {
+                    desc.appendValueList("", ",", "", idd.getEquivalentTo());
+                } else {
+                    desc.appendText("null");
+                }
+            }
+
+            @Override
+            public boolean matchesSafely(Identified idd) {
+                this.idd = idd;
+                return idd.getEquivalentTo().isEmpty();
+            }
+        };
+        
     }
 }
