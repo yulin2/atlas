@@ -48,11 +48,11 @@ public class QueryController extends BaseController {
 		try {
 			ContentQuery filter = builder.build(request);
 			if (!filter.getSelection().hasLimit()) {
-				errorViewFor(request, response, new AtlasErrorSummary().withMessage("No limit specified, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
+				outputter.writeError(request, response, new AtlasErrorSummary().withErrorCode("NO_LIMIT").withMessage("No limit specified, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
 				return;
 			}
 			if (filter.getSelection().getLimit() > MAX_LIMIT) {
-				errorViewFor(request, response, new AtlasErrorSummary().withMessage("Limit too high, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
+				outputter.writeError(request, response, new AtlasErrorSummary().withErrorCode("LIMIT_TOO_HIGH").withMessage("Limit too high, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
 				return;
 			}
 			modelAndViewFor(request, response, executor.discover(filter));
