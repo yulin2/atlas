@@ -18,7 +18,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.equiv.tasks.BrandEquivUpdateTaskRunner;
+import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
@@ -76,6 +76,6 @@ public class EquivModule {
 	
 	@PostConstruct
 	public void scheduleEquivUpdaters() {
-	    scheduler.schedule(new BrandEquivUpdateTaskRunner(contentStore, scheduleResolver, log), RepetitionRules.every(Duration.standardHours(10)));
+	    scheduler.schedule(new BrandEquivUpdateTask(contentStore, scheduleResolver, log), RepetitionRules.every(Duration.standardHours(10)));
 	}
 }
