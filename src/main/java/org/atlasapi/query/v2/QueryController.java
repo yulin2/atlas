@@ -31,12 +31,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.query.Selection;
 
 @Controller
 public class QueryController extends BaseController {
 	
 	private final KnownTypeQueryExecutor executor;
+	private static final int MAX_LIMIT = 50;
 
     public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
 	    super(configFetcher, log, outputter);
@@ -47,6 +49,14 @@ public class QueryController extends BaseController {
 	public void discover(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
 			ContentQuery filter = builder.build(request);
+			if (!filter.getSelection().hasLimit()) {
+				outputter.writeError(request, response, new AtlasErrorSummary().withErrorCode("NO_LIMIT").withMessage("No limit specified, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
+				return;
+			}
+			if (filter.getSelection().getLimit() > MAX_LIMIT) {
+				outputter.writeError(request, response, new AtlasErrorSummary().withErrorCode("LIMIT_TOO_HIGH").withMessage("Limit too high, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
+				return;
+			}
 			modelAndViewFor(request, response, executor.discover(filter));
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
