@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -47,20 +48,20 @@ public class ContentResolvingSearcher implements SearchResolver {
             Identified filtered = null;
             if (identified instanceof Brand) {
                 Brand brand = (Brand) ((Brand) identified).copy();
-                brand.setContents((Iterable<Episode>) null);
-                brand.setClips(null);
+                brand.setContents(ImmutableList.<Episode>of());
+                brand.setClips(ImmutableList.<Clip>of());
                 filtered = brand;
             } else if (identified instanceof Series) {
                 Series series = (Series) ((Series) identified).copy();
-                series.setContents((Iterable<Episode>) null);
-                series.setClips(null);
+                series.setContents(ImmutableList.<Episode>of());
+                series.setClips(ImmutableList.<Clip>of());
                 filtered = series;
             } else if (identified instanceof Content){
                 Content content = (Content) identified;
                 filtered = content.copy();
             } else if (identified instanceof Person) {
                 Person person = (Person) ((Person) identified).copy();
-                person.setContents((Iterable<Item>)null);
+                person.setContents(ImmutableList.<Item>of());
                 filtered = person;
             }
             
