@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasErrorSummary;
 import org.atlasapi.beans.AtlasModelWriter;
@@ -44,8 +45,9 @@ public class SearchController extends BaseController {
                 throw new IllegalArgumentException("You must specify a limit parameter");
             }
             
-            Set<Publisher> publishers = publishers(publisher, appConfig(request));
-            List<Identified> content = searcher.search(new Search(q), publishers, selection);
+            ApplicationConfiguration appConfig = appConfig(request);
+            Set<Publisher> publishers = publishers(publisher, appConfig);
+            List<Identified> content = searcher.search(new Search(q), publishers, appConfig, selection);
         
             modelAndViewFor(request, response, content);
         } catch (Exception e) {

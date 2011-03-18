@@ -2,6 +2,7 @@ package org.atlasapi.query.content.search;
 
 import java.util.List;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
@@ -31,13 +32,13 @@ public class ContentResolvingSearcher implements SearchResolver {
     }
 
     @Override
-    public List<Identified> search(Search search, Iterable<Publisher> publishers, Selection selection) {
+    public List<Identified> search(Search search, Iterable<Publisher> publishers, ApplicationConfiguration appConfig, Selection selection) {
         SearchResults searchResults = fuzzySearcher.contentSearch(search.query(), selection, publishers);
         if (searchResults.toUris().isEmpty()) {
             return ImmutableList.of();
         }
 
-        List<Identified> content = contentResolver.executeUriQuery(searchResults.toUris(), ContentQuery.MATCHES_EVERYTHING);
+        List<Identified> content = contentResolver.executeUriQuery(searchResults.toUris(), ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(appConfig));
         return filterOutSubItems(content);
     }
 
