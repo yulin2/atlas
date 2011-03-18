@@ -1,0 +1,26 @@
+{namespace atlas.templates.system.equivalence}
+
+/**
+ * @param result
+ */
+{template .result}
+<html>
+<head>
+<title>Equivalence for {$result.subject}</title>
+
+<style>
+{literal}
+
+table {
+    font-family: "Helvetica Neue","Helvetica",sans-serif;
+    text-align: left;
+}
+
+
+{/literal}
+</style>
+
+</head>
+<body>
+{$result}
+{/template}

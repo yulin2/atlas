@@ -5,89 +5,121 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.Sets;
 
 public class ItemBasedBrandEquivUpdater {
 
     private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
     
-    private final BroadcastBasedItemEquivUpdater itemEquivUpdater;
     private final ContentWriter contentWriter;
 
     private double certaintyThreshold = 0.9;
     private boolean writesResults = true;
 
-    public ItemBasedBrandEquivUpdater(ScheduleResolver resolver, ContentWriter contentWriter) {
-        this(new BroadcastBasedItemEquivUpdater(resolver), contentWriter);
-    }
-    
-    public ItemBasedBrandEquivUpdater(BroadcastBasedItemEquivUpdater itemUpdater, ContentWriter contentWriter) {
-        this.itemEquivUpdater = itemUpdater;
+    private SymmetricItemVersionMerger versionMerger = new SymmetricItemVersionMerger();
+
+    private BroadcastMatchingItemEquivGenerator itemEquivGenerator;
+
+    private final EquivCleaner equivCleaner;
+
+    public ItemBasedBrandEquivUpdater(ScheduleResolver scheduleResolver, ContentResolver contentResolver, ContentWriter contentWriter) {
         this.contentWriter = contentWriter;
+        this.itemEquivGenerator = new BroadcastMatchingItemEquivGenerator(scheduleResolver);
+        this.equivCleaner = new EquivCleaner(contentResolver);
     }
     
-    public EquivResult<Brand> updateEquivalence(Brand brand) {
+    public ContainerEquivResult<Container<?>, Item> updateEquivalence(Brand brand) {
+    
+        Set<Identified> oldEquivalences = Sets.newHashSet();
         
-        Multimap<Publisher, Brand> suggestedBrands = ArrayListMultimap.create();
-        
-        List<EquivResult<Item>> episodeEquivResults = Lists.newArrayListWithExpectedSize(brand.getContents().size());
+        // All the items that are *strongly* equivalent to items in this brand.
+        ListMultimap<Publisher, Item> binnedStrongSuggestions = ArrayListMultimap.create();
+
+        List<EquivResult<Item>> itemEquivResults = Lists.newArrayListWithCapacity(brand.getContents().size());
         for (Episode episode : brand.getContents()) {
             
-            EquivResult<Item> result = itemEquivUpdater.updateEquivalence(episode);
-            episodeEquivResults.add(result);
+            SuggestedEquivalents<Item> itemSuggestions = itemEquivGenerator.equivalentsFor(episode, TARGET_PUBLISHERS);
             
-            suggestedBrands.putAll(Multimaps.forMap(getBrands(result.strongSuggestions())));
-        }   
+            Map<Publisher, Item> strongSuggestions = itemSuggestions.strongSuggestions(certaintyThreshold);
+            
+            oldEquivalences.addAll(equivCleaner.cleanEquivalences(episode, strongSuggestions.values(), TARGET_PUBLISHERS));
 
-        SuggestedEquivalents<Brand> suggestedEquivalentBrands = SuggestedEquivalents.from(suggestedBrands);
-        
-        for (Publisher publisher : TARGET_PUBLISHERS) {
-            Brand mostSuggested = suggestedEquivalentBrands.strongSuggestions(certaintyThreshold).get(publisher);
-            if (mostSuggested != null) {
-                brand.addEquivalentTo(mostSuggested);
-                mostSuggested.addEquivalentTo(brand);
-            }
+            //version merging of strong suggestions
+            versionMerger.mergeVersions(episode, strongSuggestions.values());
+
+            //record for computing equivalent brands
+            binnedStrongSuggestions.putAll(Multimaps.forMap(strongSuggestions));
+            
+            itemEquivResults.add(EquivResult.of(episode, itemSuggestions, certaintyThreshold));
         }
         
+        
+        //The containers of the strongly suggested items for all items in this brand.
+        SuggestedEquivalents<Container<?>> brandSuggestedEquivalents = SuggestedEquivalents.from(containersFrom(binnedStrongSuggestions));
+        
+        Map<Publisher, Container<?>> strongSuggestions = brandSuggestedEquivalents.strongSuggestions(certaintyThreshold);
+        
+        oldEquivalences.addAll(equivCleaner.cleanEquivalences(brand, strongSuggestions.values(), TARGET_PUBLISHERS));
+
+        //create equivalence relation for strongly equivalent suggestions
+        for (Identified equiv : strongSuggestions.values()) {
+            brand.addEquivalentTo(equiv);
+            equiv.addEquivalentTo(brand);
+        }
+        
+        //Write: the subject brand, any old equivalents, all TLEs of all strongly suggested equivalent items (their versions will have been merged)
         if(writesResults) {
             contentWriter.createOrUpdate(brand, false);
-            for (Brand equivBrand : suggestedBrands.values()) {
-                contentWriter.createOrUpdate(equivBrand, false);
+            for (Identified equiv : ImmutableSet.copyOf(Iterables.concat(topLevelElements(binnedStrongSuggestions.values()), oldEquivalences))) {
+                if(equiv instanceof Item) {
+                    contentWriter.createOrUpdate((Item)equiv);
+                }
+                if(equiv instanceof Container<?>) {
+                    contentWriter.createOrUpdate((Container<?>)equiv, false);
+                }
             }
         }
         
-        return ContainerEquivResult.of(brand, suggestedEquivalentBrands, certaintyThreshold).withItemResults(episodeEquivResults);
+        return ContainerEquivResult.of(brand, brandSuggestedEquivalents, certaintyThreshold).withItemResults(itemEquivResults);
     }
 
-    private Map<Publisher, Brand> getBrands(Map<Publisher, ? extends Item> mostSuggestedPerPublisher) {
-        return Maps.filterValues(Maps.transformValues(mostSuggestedPerPublisher, new Function<Item, Brand>() {
+    private Set<Content> topLevelElements(Iterable<Item> suggestedItems) {
+        return ImmutableSet.copyOf(Iterables.transform(suggestedItems, new Function<Item, Content>() {
             @Override
-            public Brand apply(Item input) {
-                if(input.getFullContainer() instanceof Brand) {
-                    return (Brand) input.getFullContainer();
-                }
-                return null;
+            public Content apply(Item input) {
+                return input.getFullContainer() == null ? input : input.getFullContainer();
             }
-        }), Predicates.notNull());
+        }));
+    }
+
+    private Multimap<Publisher, Container<?>> containersFrom(ListMultimap<Publisher, Item> binnedSuggestedEquivalents) {
+        return Multimaps.transformValues(binnedSuggestedEquivalents, new Function<Item, Container<?>>() {
+            @Override
+            public Container<?> apply(Item input) {
+                return input.getFullContainer();
+            }
+        });
     }
     
-    
-    
     public ItemBasedBrandEquivUpdater withCertaintyThreshold(double threshold) {
-        this.itemEquivUpdater.withCertaintyThreshold(threshold);
         this.certaintyThreshold = threshold;
         return this;
     }

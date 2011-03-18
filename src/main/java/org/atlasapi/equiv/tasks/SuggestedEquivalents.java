@@ -1,6 +1,11 @@
 package org.atlasapi.equiv.tasks;
 
+import static com.google.common.base.Predicates.in;
+import static com.google.common.base.Predicates.not;
+import static com.google.common.base.Predicates.notNull;
+
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,30 +17,34 @@ import org.atlasapi.media.entity.Publisher;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.stats.Count;
-import com.metabroadcast.common.stats.Counter;
 
 public class SuggestedEquivalents<T> {
 
-    //Processes a multimap of suggestions into an publisher-binned map of ordered list of counts
+    // Processes a multimap of suggestions into an publisher-binned map of
+    // ordered list of counts
     public static <T extends Described> SuggestedEquivalents<T> from(Multimap<Publisher, T> binnedSuggestions) {
         Map<Publisher, List<Count<T>>> binnedCountedSuggestions = Maps.transformValues(binnedSuggestions.asMap(), new Function<Collection<T>, List<Count<T>>>() {
             @Override
             public List<Count<T>> apply(Collection<T> input) {
-                Counter<T, T> counter = new Counter<T, T>();
-                for (T t : input) {
-                    counter.incrementCount(t, t);
+                List<Count<T>> counts = Lists.newArrayList();
+                Set<T> seen = Sets.newHashSet();
+                for (T t : Iterables.filter(Iterables.filter(input, notNull()), not(in(seen)))) {
+                    counts.add(new Count<T>(t, Ordering.usingToString(), Collections.frequency(input, t)));
+                    seen.add(t);
                 }
-                return Ordering.natural().reverse().immutableSortedCopy(counter.counts(Ordering.usingToString()));
+                return counts.isEmpty()? null : Ordering.natural().reverse().immutableSortedCopy(counts);
             }
         });
-        return new SuggestedEquivalents<T>(binnedCountedSuggestions);
+        return new SuggestedEquivalents<T>(Maps.filterValues(binnedCountedSuggestions, Predicates.notNull()));
     }
 
     private final Map<Publisher, List<Count<T>>> binnedCountedSuggestions;
@@ -100,7 +109,7 @@ public class SuggestedEquivalents<T> {
             return "nothing";
         }
         
-        final Set<Count<T>> strongSuggestions = certainty == null ? ImmutableSet.<Count<T>>of() : allStrongSuggestions(certainty);
+        final List<Count<T>> strongSuggestions = certainty == null ? ImmutableList.<Count<T>>of() : allStrongSuggestions(certainty);
         return Joiner.on(", ").join(Iterables.transform(allSuggestions(), new Function<Count<T>, String>() {
             @Override
             public String apply(Count<T> input) {
@@ -110,19 +119,19 @@ public class SuggestedEquivalents<T> {
         }));
     }
     
-    private List<Count<T>> allSuggestions() {
+    public List<Count<T>> allSuggestions() {
         return Ordering.natural().reverse().immutableSortedCopy(Iterables.concat(binnedCountedSuggestions.values()));
     }
 
-    private Set<Count<T>> allStrongSuggestions(double certainty) {
-        return ImmutableSet.copyOf(Ordering.natural().immutableSortedCopy(binnedStrongSuggestions(certainty).values()));
+    public List<Count<T>> allStrongSuggestions(double certainty) {
+        return Ordering.natural().immutableSortedCopy(binnedStrongSuggestions(certainty).values());
     }
 
-    public SuggestedEquivalents<String> stringResult(Function<? super T, String> transformer) {
-        final Function<Count<T>, Count<String>> targetTransformer = Count.targetTransformer(Ordering.natural(), transformer);
-        return new SuggestedEquivalents<String>(Maps.transformValues(binnedCountedSuggestions, new Function<List<Count<T>>, List<Count<String>>>() {
+    public <V extends Comparable<? super V>> SuggestedEquivalents<V> transform(Function<? super T, V> transformer) {
+        final Function<Count<T>, Count<V>> targetTransformer = Count.targetTransformer(Ordering.natural(), transformer);
+        return new SuggestedEquivalents<V>(Maps.transformValues(binnedCountedSuggestions, new Function<List<Count<T>>, List<Count<V>>>() {
             @Override
-            public List<Count<String>> apply(List<Count<T>> input) {
+            public List<Count<V>> apply(List<Count<T>> input) {
                 return ImmutableList.copyOf(Iterables.transform(input, targetTransformer));
             }
         }));

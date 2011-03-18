@@ -9,6 +9,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.equiv.tasks.ContainerEquivResult;
 import org.atlasapi.equiv.tasks.EquivResult;
 import org.atlasapi.equiv.tasks.SuggestedEquivalents;
 import org.atlasapi.media.entity.Described;
@@ -30,7 +31,7 @@ public class EquivResultTranslatorTest extends TestCase {
                 Publisher.C4, ImmutableList.of(new Count<Described>(new Described("Three"),usingToString(),5))
         ));
         
-        EquivResult<Described> result = new EquivResult<Described>(new Described("One"), 10, suggestions, 0.9);
+        ContainerEquivResult<Described, Described> result = new ContainerEquivResult<Described, Described>(new Described("One"), 10, suggestions, 0.9);
         
         DBObject encoded = translator.toDBObject(result);
         
