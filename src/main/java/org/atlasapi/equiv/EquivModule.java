@@ -19,6 +19,10 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
+import org.atlasapi.equiv.tasks.persistence.CachingEquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.MongoEquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.www.EquivResultController;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
@@ -72,10 +76,17 @@ public class EquivModule {
 	private @Autowired SimpleScheduler scheduler;
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired AdapterLog log;
-	private @Autowired MongoDbBackedContentStore contentStore;
 	
 	@PostConstruct
 	public void scheduleEquivUpdaters() {
-	    scheduler.schedule(new BrandEquivUpdateTask(contentStore, scheduleResolver, log), RepetitionRules.every(Duration.standardHours(10)));
+	    scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), scheduleResolver, equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+	}
+	
+	@Bean EquivResultStore equivResultStore() {
+	    return new CachingEquivResultStore(new MongoEquivResultStore(db));
+	}
+	
+	@Bean EquivResultController equivResultController() {
+	    return new EquivResultController(equivResultStore());
 	}
 }

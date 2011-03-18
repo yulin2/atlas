@@ -24,6 +24,7 @@ public class ContainerEquivResultTranslator {
         }
     };
 
+    private static final String DESCRIBED = "described";
     private static final String SUGGESTED = "suggested";
     private static final String FULL_MATCH = "fullMatch";
     private static final String CERTAINTY = "certainty";
@@ -36,7 +37,7 @@ public class ContainerEquivResultTranslator {
     }
 
     public <T extends Described, U extends Described> DBObject toDBObject(ContainerEquivResult<T, U> result) {
-        DBObject dbo = toDBObject((EquivResult<T>)result);
+        DBObject dbo = subToDBObject((EquivResult<T>) result);
 
         List<EquivResult<U>> subResults = result.getItemResults();
         if (!subResults.isEmpty()) {
@@ -44,7 +45,7 @@ public class ContainerEquivResultTranslator {
             subList.addAll(ImmutableList.copyOf(Iterables.transform(subResults, new Function<EquivResult<U>, DBObject>() {
                 @Override
                 public DBObject apply(EquivResult<U> input) {
-                    return toDBObject(input);
+                    return subToDBObject(input);
                 }
             })));
             dbo.put(SUB, subList);
@@ -53,39 +54,49 @@ public class ContainerEquivResultTranslator {
         return dbo;
     }
 
-    public <T extends Described> DBObject toDBObject(EquivResult<T> result) {
+    public <T extends Described> DBObject subToDBObject(EquivResult<T> result) {
         BasicDBObject dbo = new BasicDBObject();
 
-        dbo.put(MongoConstants.ID, TRANSFORMER.apply(result.described()));
+        dbo.put(MongoConstants.ID, result.described().getCanonicalUri());
+
+        dbo.put(DESCRIBED, TRANSFORMER.apply(result.described()));
 
         dbo.put(CERTAINTY, result.certainty());
         dbo.put(FULL_MATCH, result.fullMatch());
 
         SuggestedEquivalents<T> suggestedEquivalents = result.suggestedEquivalents();
         if (suggestedEquivalents != null) {
-            dbo.put(SUGGESTED, suggestionsTranslator.toDBObject(suggestedEquivalents.stringResult(TRANSFORMER)));
+            dbo.put(SUGGESTED, suggestionsTranslator.toDBObject(suggestedEquivalents.transform(TRANSFORMER)));
         }
-        
+
         return dbo;
     }
 
-    public EquivResult<String> fromDBObject(DBObject dbo) {
+    public EquivResult<String> subFromDBObject(DBObject dbo) {
 
-        String desc = (String) dbo.get(MongoConstants.ID);
+        String desc = (String) dbo.get(DESCRIBED);
 
         SuggestedEquivalents<String> suggestions = suggestionsTranslator.fromDBObject((DBObject) dbo.get(SUGGESTED));
 
-        if (dbo.containsField(SUB)) {
+        return new EquivResult<String>(desc, (Integer) dbo.get(FULL_MATCH), suggestions, (Double) dbo.get(CERTAINTY));
+    }
+
+    public ContainerEquivResult<String, String> fromDBObject(DBObject dbo) {
+
+        EquivResult<String> basic = subFromDBObject(dbo);
+
+        ContainerEquivResult<String, String> containerEquivResult = new ContainerEquivResult<String, String>(basic.described(), (Integer) dbo.get(FULL_MATCH), basic.suggestedEquivalents(), (Double) dbo.get(CERTAINTY));
+
+        if(dbo.containsField(SUB)) {
             Iterable<EquivResult<String>> subResults = Iterables.transform((BasicDBList) dbo.get(SUB), new Function<Object, EquivResult<String>>() {
                 @Override
                 public EquivResult<String> apply(Object input) {
-                    return fromDBObject((DBObject) input);
+                    return subFromDBObject((DBObject) input);
                 }
             });
-            return new ContainerEquivResult<String, String>(desc, (Integer) dbo.get(FULL_MATCH), suggestions, (Double) dbo.get(CERTAINTY)).withItemResults(subResults);
+            containerEquivResult.withItemResults(subResults);
         }
-
-        return new EquivResult<String>(desc, (Integer) dbo.get(FULL_MATCH), suggestions, (Double) dbo.get(CERTAINTY));
+        return containerEquivResult;
     }
 
 }

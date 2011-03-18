@@ -6,6 +6,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 
 public class EquivResult<T> {
@@ -48,6 +49,10 @@ public class EquivResult<T> {
 
     public SuggestedEquivalents<T> suggestedEquivalents() {
         return suggestedEquivs;
+    }
+    
+    public <V extends Comparable<? super V>> EquivResult<V> transformResult(Function<? super T, V> transformer) {
+        return new EquivResult<V>(transformer.apply(desc), fullMatch, suggestedEquivs.transform(transformer), certainty);
     }
 
     @Override

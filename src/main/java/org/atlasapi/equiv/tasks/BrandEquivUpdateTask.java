@@ -4,6 +4,7 @@ import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 
 import java.util.List;
 
+import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
@@ -27,19 +28,19 @@ public class BrandEquivUpdateTask implements Runnable {
     private final Clock clock;
     private final MongoDbBackedContentStore contentStore;
     private final AdapterLog log;
-    private final EquivCleaner cleaner;
     private ItemBasedBrandEquivUpdater brandUpdater;
+    private final EquivResultStore equivResultStore;
 
-    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ScheduleResolver scheduleResolver, AdapterLog log) {
-        this(contentStore, scheduleResolver, log, new SystemClock());
+    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ScheduleResolver scheduleResolver, EquivResultStore equivResultStore, AdapterLog log) {
+        this(contentStore, scheduleResolver, equivResultStore, log, new SystemClock());
     }
     
-    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ScheduleResolver scheduleResolver, AdapterLog log, Clock clock) {
+    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ScheduleResolver scheduleResolver, EquivResultStore equivResultStore, AdapterLog log, Clock clock) {
         this.contentStore = contentStore;
+        this.equivResultStore = equivResultStore;
         this.log = log;
         this.clock = clock;
-        this.cleaner = new EquivCleaner(contentStore, contentStore);
-        this.brandUpdater = new ItemBasedBrandEquivUpdater(scheduleResolver, contentStore).writesResults(true);
+        this.brandUpdater = new ItemBasedBrandEquivUpdater(scheduleResolver, contentStore, contentStore).writesResults(true);
     }
     
     @Override
@@ -55,8 +56,7 @@ public class BrandEquivUpdateTask implements Runnable {
             for (Brand brand : Iterables.filter(contents, Brand.class)) {
                 processed++;
                 try {
-                    cleaner.cleanEquivalences(brand);
-                    brandUpdater.updateEquivalence(brand);
+                    equivResultStore.store(brandUpdater.updateEquivalence(brand));
                 } catch (Exception e) {
                     log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+brand.getCanonicalUri()));
                 }
