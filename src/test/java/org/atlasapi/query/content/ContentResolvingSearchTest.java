@@ -2,6 +2,7 @@ package org.atlasapi.query.content;
 
 import java.util.List;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
@@ -45,7 +46,7 @@ public class ContentResolvingSearchTest extends MockObjectTestCase {
             one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), ContentQuery.MATCHES_EVERYTHING); will(returnValue(ImmutableList.of(brand)));
         }});
         
-        List<Identified> content = searcher.search(new Search(searchQuery), publishers, selection);
+        List<Identified> content = searcher.search(new Search(searchQuery), publishers, ApplicationConfiguration.DEFAULT_CONFIGURATION, selection);
         assertFalse(content.isEmpty());
         Brand result = (Brand) Iterables.getOnlyElement(content);
         assertTrue(result.getContents().isEmpty());

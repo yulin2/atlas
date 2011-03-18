@@ -2,6 +2,7 @@ package org.atlasapi.query.content.search;
 
 import java.util.List;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
@@ -23,7 +24,7 @@ public class DummySearcher implements SearchResolver {
     }
 
     @Override
-    public List<Identified> search(Search arg0, Iterable<Publisher> arg1, Selection arg2) {
+    public List<Identified> search(Search arg0, Iterable<Publisher> arg1, ApplicationConfiguration appConfig, Selection arg2) {
         return ImmutableList.copyOf(respondWith);
     }
 }
