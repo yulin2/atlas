@@ -52,6 +52,7 @@ public class EquivModule {
 	private @Autowired DatabasedMongo db;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	private @Value("${freebase.enabled}") String freebaseEnabled;
+	private @Value("${equiv.updater.enabled}") String updaterEnabled;
 	
 	@Bean EquivController manualEquivAssignmentController() {
 		return new EquivController(store());
@@ -80,7 +81,9 @@ public class EquivModule {
 	
 	@PostConstruct
 	public void scheduleEquivUpdaters() {
-	    scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), scheduleResolver, equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+	    if(Boolean.valueOf(updaterEnabled)) {
+	        scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), scheduleResolver, equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+	    }
 	}
 	
 	@Bean EquivResultStore equivResultStore() {
