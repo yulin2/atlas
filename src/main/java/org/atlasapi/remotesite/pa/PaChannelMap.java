@@ -5,6 +5,7 @@ import java.util.Map;
 import org.atlasapi.media.entity.Channel;
 
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.base.Maybe;
 
 
 public class PaChannelMap {
@@ -764,4 +765,10 @@ public class PaChannelMap {
         return null;
     }
     
+    public Maybe<Channel> getChannel(int channelId) {
+        if (channelMap.containsKey(channelId)) {
+            return Maybe.fromPossibleNullValue(channelMap.get(channelId));
+        }
+        return Maybe.nothing();
+    }
 }

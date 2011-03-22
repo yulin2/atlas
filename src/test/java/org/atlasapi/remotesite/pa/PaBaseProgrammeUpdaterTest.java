@@ -23,7 +23,7 @@ import com.metabroadcast.common.time.TimeMachine;
 
 public class PaBaseProgrammeUpdaterTest extends TestCase {
 
-    private PaProgrammeProcessor programmeProcessor;
+    private PaProgDataProcessor programmeProcessor;
 
     private TimeMachine clock = new TimeMachine();
     private AdapterLog log = new SystemOutAdapterLog();
@@ -96,7 +96,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
 
-        public TestFileUpdater(PaProgrammeProcessor processor, AdapterLog log) {
+        public TestFileUpdater(PaProgDataProcessor processor, AdapterLog log) {
             super(processor, log);
         }
 

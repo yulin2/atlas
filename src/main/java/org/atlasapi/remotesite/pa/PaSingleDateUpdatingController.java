@@ -18,11 +18,11 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 public class PaSingleDateUpdatingController {
     
     private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("paSingleDateUpdater").build());
-    private final PaProgrammeProcessor processor;
+    private final PaProgDataProcessor processor;
     private final AdapterLog log;
     private final PaProgrammeDataStore fileManager;
 
-    public PaSingleDateUpdatingController(PaProgrammeProcessor processor, AdapterLog log, PaProgrammeDataStore fileManager) {
+    public PaSingleDateUpdatingController(PaProgDataProcessor processor, AdapterLog log, PaProgrammeDataStore fileManager) {
         this.processor = processor;
         this.log = log;
         this.fileManager = fileManager;
