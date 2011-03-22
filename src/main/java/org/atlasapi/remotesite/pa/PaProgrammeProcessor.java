@@ -41,7 +41,7 @@ import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class PaProgrammeProcessor {
+public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
@@ -66,7 +66,7 @@ public class PaProgrammeProcessor {
     public void process(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         try {
             Maybe<Brand> brand = getBrand(progData);
-            Maybe<Series> series = getSeries(progData);
+            Maybe<Series> series = getSeries(progData, brand.hasValue());
             Maybe<Episode> episode = getEpisode(progData, channelData, zone);
 
             if (episode.hasValue()) {
@@ -143,18 +143,21 @@ public class PaProgrammeProcessor {
         return Maybe.just(brand);
     }
 
-    private Maybe<Series> getSeries(ProgData progData) {
+    private Maybe<Series> getSeries(ProgData progData, boolean hasBrand) {
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
         
         String seriesUri = PA_BASE_URL + "/series/" + progData.getSeriesId() + "-" + progData.getSeriesNumber();
         
-        Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
-        Series series;
-        if (resolvedContent instanceof Series) {
-            series = (Series) resolvedContent;
-        } else {
+        Series series = null;
+        if (! hasBrand) {
+            Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
+            if (resolvedContent instanceof Series) {
+                series = (Series) resolvedContent;
+            } 
+        }
+        if (series == null) {
             series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         }
         
