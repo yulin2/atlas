@@ -11,6 +11,8 @@ public interface EquivResultStore {
     
     ContainerEquivResult<String, String> resultFor(String canonicalUri);
     
+    List<ContainerEquivResult<String,String>> resultsBeginningWith(String prefix);
+    
     List<ContainerEquivResult<String, String>> results();
 
     

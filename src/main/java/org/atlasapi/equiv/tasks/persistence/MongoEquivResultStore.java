@@ -1,6 +1,7 @@
 package org.atlasapi.equiv.tasks.persistence;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.atlasapi.equiv.tasks.ContainerEquivResult;
 import org.atlasapi.media.entity.Described;
@@ -15,10 +16,10 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 public class MongoEquivResultStore implements EquivResultStore {
-    
+
     private DBCollection results;
     private ContainerEquivResultTranslator equivTranslator;
-    
+
     public MongoEquivResultStore(DatabasedMongo mongo) {
         this(mongo, new ContainerEquivResultTranslator());
     }
@@ -35,12 +36,26 @@ public class MongoEquivResultStore implements EquivResultStore {
 
     @Override
     public ContainerEquivResult<String, String> resultFor(String canonicalUri) {
-        return equivTranslator.fromDBObject(results.findOne(new BasicDBObject(MongoConstants.ID, canonicalUri)));
+        DBObject resultDbo = results.findOne(new BasicDBObject(MongoConstants.ID, canonicalUri));
+        if (resultDbo == null) {
+            return null;
+        }
+        return equivTranslator.fromDBObject(resultDbo);
     }
 
     @Override
     public List<ContainerEquivResult<String, String>> results() {
         return ImmutableList.copyOf(Iterables.transform(results.find(), new Function<DBObject, ContainerEquivResult<String, String>>() {
+            @Override
+            public ContainerEquivResult<String, String> apply(DBObject input) {
+                return equivTranslator.fromDBObject(input);
+            }
+        }));
+    }
+
+    @Override
+    public List<ContainerEquivResult<String, String>> resultsBeginningWith(String prefix) {
+        return ImmutableList.copyOf(Iterables.transform(results.find(new BasicDBObject("described", Pattern.compile("^"+prefix))), new Function<DBObject, ContainerEquivResult<String, String>>() {
             @Override
             public ContainerEquivResult<String, String> apply(DBObject input) {
                 return equivTranslator.fromDBObject(input);
