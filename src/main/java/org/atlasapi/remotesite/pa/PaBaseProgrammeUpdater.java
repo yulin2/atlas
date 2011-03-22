@@ -33,7 +33,7 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
     private boolean isRunning = false;
 
     private final PaProgDataProcessor processor;
-    private final ExecutorService executor = Executors.newFixedThreadPool(8);
+    private final ExecutorService executor = Executors.newFixedThreadPool(10);
     private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 15);
 
     public PaBaseProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log) {
