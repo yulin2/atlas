@@ -47,6 +47,8 @@ public class PaChannelMap {
         channelMap.put(935, Channel.BBC_THREE);
         channelMap.put(742, Channel.BBC_FOUR);
         channelMap.put(1228, Channel.BBC_HD);
+        channelMap.put(734, Channel.CBEEBIES);
+        channelMap.put(733, Channel.CBBC);
         channelMap.put(85, Channel.BBC_NEWS);
         channelMap.put(56, Channel.BBC_PARLIMENT);
         channelMap.put(138, Channel.BBC_WORLD_NEWS);

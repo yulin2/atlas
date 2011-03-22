@@ -7,6 +7,7 @@ import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,9 @@ public class PaSingleDateUpdatingController {
     private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("paSingleDateUpdater").build());
     private final PaProgrammeProcessor processor;
     private final AdapterLog log;
-    private final PaLocalFileManager fileManager;
+    private final PaProgrammeDataStore fileManager;
 
-    public PaSingleDateUpdatingController(PaProgrammeProcessor processor, AdapterLog log, PaLocalFileManager fileManager) {
+    public PaSingleDateUpdatingController(PaProgrammeProcessor processor, AdapterLog log, PaProgrammeDataStore fileManager) {
         this.processor = processor;
         this.log = log;
         this.fileManager = fileManager;

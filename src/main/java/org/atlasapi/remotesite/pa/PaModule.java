@@ -7,6 +7,9 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
+import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
@@ -20,6 +23,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 import com.metabroadcast.common.scheduling.RepetitionRules.Weekly;
+import com.metabroadcast.common.security.UsernameAndPassword;
 import com.metabroadcast.common.time.DayOfWeek;
 
 @Configuration
@@ -49,9 +53,13 @@ public class PaModule {
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("PA update scheduled task installed").withSource(PaCompleteUpdater.class));
     }
     
-    @Bean PaLocalFileManager localFileManager() {
-        S3Client s3client = new S3Client(s3access, s3secret, "pa-data");
-        return new PaLocalFileManager(ftpHost, ftpUsername, ftpPassword, ftpPath, localFilesPath, s3client, log);
+    @Bean PaFtpFileUpdater ftpFileUpdater() {
+        return new PaFtpFileUpdater(ftpHost, new UsernameAndPassword(ftpUsername, ftpPassword), ftpPath, paProgrammeDataStore(), log);
+    }
+    
+    @Bean PaProgrammeDataStore paProgrammeDataStore() {
+        S3Client s3client = new DefaultS3Client(s3access, s3secret, "pa-data");
+        return new DefaultPaProgrammeDataStore(localFilesPath, s3client);
     }
     
     @Bean PaProgrammeProcessor paProgrammeProcessor() {
@@ -59,18 +67,18 @@ public class PaModule {
     }
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
-        return new PaCompleteUpdater(paProgrammeProcessor(), localFileManager(), log);
+        return new PaCompleteUpdater(paProgrammeProcessor(), paProgrammeDataStore(), log);
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        return new PaRecentUpdater(paProgrammeProcessor(), localFileManager(), log);
+        return new PaRecentUpdater(paProgrammeProcessor(), paProgrammeDataStore(), log);
     }
     
     @Bean PaFileUpdater paFileUpdater() {
-        return new PaFileUpdater(localFileManager(), log);
+        return new PaFileUpdater(ftpFileUpdater(), log);
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        return new PaSingleDateUpdatingController(paProgrammeProcessor(), log, localFileManager());
+        return new PaSingleDateUpdatingController(paProgrammeProcessor(), log, paProgrammeDataStore());
     }
 }
