@@ -11,16 +11,49 @@
 <style>
 {literal}
 
-table {
+* {
     font-family: "Helvetica Neue","Helvetica",sans-serif;
     text-align: left;
 }
 
+.strong {
+    font-weight:900;
+}
+.alt {
+    background-color: #aaa;
+}
 
 {/literal}
 </style>
 
 </head>
 <body>
-{$result}
+<h1>{$result.subject} - ({$result.fullMatch})</h1>
+<p>Equivalents:</p>
+<ul>
+{foreach $suggested in $result.suggested}
+    <li {if $suggested.strong}class="strong"{/if}>{$suggested.target} - {$suggested.count}</li>
+{ifempty}
+    <li>None</li>
+{/foreach}
+</ul>
+{if $result.sub}
+<table>
+    <tr><th>Items</th><th>Equivalences</th></tr>
+{foreach $sub in $result.sub}
+    <tr {if (index($sub) % 2) == 0}class="alt"{/if}>
+        <td rowspan="{print max(length($sub.suggested),1)}">{$sub.subject} - {$sub.fullMatch}</td>
+        {foreach $sug in $sub.suggested}
+        {if not isFirst($sug)}<tr {if (index($sub) % 2) == 0}class="alt"{/if}>{/if}<td {if $sug.strong}class="strong"{/if}>{$sug.target} - {$sug.count}</td></tr>
+        {ifempty}
+        <td>None</td></tr>
+        {/foreach}
+{ifempty}
+    <tr><td>None</td></tr>
+{/foreach}
+</table>
+{/if}
+
+</body>
+</html>
 {/template}

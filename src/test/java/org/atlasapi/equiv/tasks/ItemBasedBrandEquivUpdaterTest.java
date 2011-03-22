@@ -3,6 +3,7 @@ package org.atlasapi.equiv.tasks;
 import static org.atlasapi.media.entity.Channel.BBC_ONE;
 import static org.atlasapi.media.entity.Channel.BBC_THREE;
 import static org.atlasapi.media.entity.Channel.BBC_TWO;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 import java.util.Map;

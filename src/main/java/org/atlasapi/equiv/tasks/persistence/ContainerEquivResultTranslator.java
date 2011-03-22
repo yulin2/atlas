@@ -85,9 +85,10 @@ public class ContainerEquivResultTranslator {
 
         EquivResult<String> basic = subFromDBObject(dbo);
 
-        ContainerEquivResult<String, String> containerEquivResult = new ContainerEquivResult<String, String>(basic.described(), (Integer) dbo.get(FULL_MATCH), basic.suggestedEquivalents(), (Double) dbo.get(CERTAINTY));
+        ContainerEquivResult<String, String> containerEquivResult = new ContainerEquivResult<String, String>(basic.described(), (Integer) dbo.get(FULL_MATCH), basic.suggestedEquivalents(),
+                (Double) dbo.get(CERTAINTY));
 
-        if(dbo.containsField(SUB)) {
+        if (dbo.containsField(SUB)) {
             Iterable<EquivResult<String>> subResults = Iterables.transform((BasicDBList) dbo.get(SUB), new Function<Object, EquivResult<String>>() {
                 @Override
                 public EquivResult<String> apply(Object input) {

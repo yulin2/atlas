@@ -23,6 +23,7 @@ import org.atlasapi.equiv.tasks.persistence.CachingEquivResultStore;
 import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
 import org.atlasapi.equiv.tasks.persistence.MongoEquivResultStore;
 import org.atlasapi.equiv.tasks.persistence.www.EquivResultController;
+import org.atlasapi.equiv.tasks.persistence.www.SingleBrandEquivUpdateController;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
@@ -88,5 +89,9 @@ public class EquivModule {
 	
 	@Bean EquivResultController equivResultController() {
 	    return new EquivResultController(equivResultStore());
+	}
+	
+	@Bean SingleBrandEquivUpdateController singleBrandUpdater() {
+	    return new SingleBrandEquivUpdateController(scheduleResolver, new MongoDbBackedContentStore(db));
 	}
 }

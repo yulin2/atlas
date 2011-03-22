@@ -5,25 +5,17 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.equiv.tasks.ContainerEquivResult;
-import org.atlasapi.equiv.tasks.EquivResult;
 import org.atlasapi.media.entity.Described;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
 
 public class CachingEquivResultStore implements EquivResultStore {
 
-    private static final Function<Described, String> TRANSFORMER = new Function<Described, String>() {
-        @Override
-        public String apply(Described input) {
-            return String.format("%s/%s", input.getTitle(), input.getCanonicalUri());
-        }
-    };
-
     private final EquivResultStore delegate;
     private ConcurrentMap<String, ContainerEquivResult<String, String>> cache;
+    private ContainerEquivResultTransformer<Described, String> transformer = ContainerEquivResultTransformer.defaultTransformer();
 
     public CachingEquivResultStore(final EquivResultStore delegate) {
         this.delegate = delegate;
@@ -38,28 +30,26 @@ public class CachingEquivResultStore implements EquivResultStore {
     @Override
     public <T extends Described, U extends Described> void store(ContainerEquivResult<T, U> result) {
         delegate.store(result);
-        this.cache.put(result.described().getCanonicalUri(), toStringResult(result));
+        this.cache.put(result.described().getCanonicalUri(), transformer.transform(result));
     }
-
-    private <T extends Described, U extends Described> ContainerEquivResult<String, String> toStringResult(ContainerEquivResult<T, U> result) {
-        EquivResult<String> baseResult = result.transformResult(TRANSFORMER);
-        return new ContainerEquivResult<String, String>(baseResult, Iterables.transform(result.getItemResults(), new Function<EquivResult<U>, EquivResult<String>>() {
-
-            @Override
-            public EquivResult<String> apply(EquivResult<U> input) {
-                return input.transformResult(TRANSFORMER);
-            }
-        }));
-    }
-
+    
     @Override
     public ContainerEquivResult<String, String> resultFor(String canonicalUri) {
-        return cache.get(canonicalUri);
+        try {
+            return cache.get(canonicalUri);
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     @Override
     public List<ContainerEquivResult<String, String>> results() {
         return ImmutableList.copyOf(cache.values());
+    }
+
+    @Override
+    public List<ContainerEquivResult<String, String>> resultsBeginningWith(String prefix) {
+        return delegate.resultsBeginningWith(prefix);
     }
 
 }

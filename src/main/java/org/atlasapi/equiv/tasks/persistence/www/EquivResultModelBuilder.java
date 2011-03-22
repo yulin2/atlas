@@ -46,7 +46,7 @@ public class EquivResultModelBuilder implements ModelBuilder<EquivResult<String>
         
         List<Count<String>> strong = suggestedEquivalents.allStrongSuggestions(certainty);
         
-        for (Count<String> count : suggestedEquivalents.allStrongSuggestions(certainty)) {
+        for (Count<String> count : suggestedEquivalents.allSuggestions()) {
             model.add(new SimpleModel().put("target", count.getTarget()).put("count", Ints.saturatedCast(count.getCount())).put("strong",strong.contains(count)));
         }
         
