@@ -31,6 +31,7 @@ import org.atlasapi.remotesite.pa.bindings.StaffMember;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 
 import com.google.common.base.Splitter;
@@ -41,7 +42,7 @@ import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class PaProgrammeProcessor {
+public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
@@ -66,7 +67,7 @@ public class PaProgrammeProcessor {
     public void process(ProgData progData, ChannelData channelData, DateTimeZone zone) {
         try {
             Maybe<Brand> brand = getBrand(progData);
-            Maybe<Series> series = getSeries(progData);
+            Maybe<Series> series = getSeries(progData, brand.hasValue());
             Maybe<Episode> episode = getEpisode(progData, channelData, zone);
 
             if (episode.hasValue()) {
@@ -143,18 +144,21 @@ public class PaProgrammeProcessor {
         return Maybe.just(brand);
     }
 
-    private Maybe<Series> getSeries(ProgData progData) {
+    private Maybe<Series> getSeries(ProgData progData, boolean hasBrand) {
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
         
         String seriesUri = PA_BASE_URL + "/series/" + progData.getSeriesId() + "-" + progData.getSeriesNumber();
         
-        Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
-        Series series;
-        if (resolvedContent instanceof Series) {
-            series = (Series) resolvedContent;
-        } else {
+        Series series = null;
+        if (! hasBrand) {
+            Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
+            if (resolvedContent instanceof Series) {
+                series = (Series) resolvedContent;
+            } 
+        }
+        if (series == null) {
             series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         }
         
@@ -246,6 +250,7 @@ public class PaProgrammeProcessor {
 
         DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
         Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
+        broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
         addBroadcast(version, broadcast);
 
         return Maybe.just(episode);
@@ -254,12 +259,23 @@ public class PaProgrammeProcessor {
     private void addBroadcast(Version version, Broadcast broadcast) {
         if (! Strings.isNullOrEmpty(broadcast.getId())) {
             Set<Broadcast> broadcasts = Sets.newHashSet();
+            Maybe<Interval> broadcastInterval = broadcast.transmissionInterval();
             
             for (Broadcast currentBroadcast: version.getBroadcasts()) {
-                if ((! Strings.isNullOrEmpty(currentBroadcast.getId()) && ! broadcast.getId().equals(currentBroadcast.getId())) ||
-                     ! (currentBroadcast.getBroadcastOn().equals(broadcast.getBroadcastOn()) && currentBroadcast.getTransmissionTime().equals(broadcast.getTransmissionTime()) && currentBroadcast.getTransmissionEndTime().equals(broadcast.getTransmissionEndTime()))) {
-                    broadcasts.add(currentBroadcast);
+                // I know this is ugly, but it's easier to read.
+                if (Strings.isNullOrEmpty(currentBroadcast.getId())) {
+                    continue;
                 }
+                if (broadcast.getId().equals(currentBroadcast.getId())) {
+                    continue;
+                }
+                if (currentBroadcast.transmissionInterval().hasValue() && broadcastInterval.hasValue()) {
+                    Interval currentInterval = currentBroadcast.transmissionInterval().requireValue();
+                    if (currentBroadcast.getBroadcastOn().equals(broadcast.getBroadcastOn()) && currentInterval.overlaps(broadcastInterval.requireValue())) {
+                        continue;
+                    }
+                }
+                broadcasts.add(currentBroadcast);
             }
             broadcasts.add(broadcast);
             
