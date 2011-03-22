@@ -6,8 +6,6 @@ import junit.framework.TestCase;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.content.criteria.attribute.Attributes;
-import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
@@ -39,8 +37,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	
 	public void testMergingBrands() throws Exception {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(brand1, brand2, brand3));
-		ContentQuery query = new ContentQuery(Attributes.DESCRIPTION_TITLE.createQuery(Operators.EQUALS, ImmutableList.of("test")));
-		query = query.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.YOUTUBE, Publisher.BBC)));
+		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.YOUTUBE, Publisher.BBC)));
 		assertEquals(ImmutableList.of(brand3, brand2), merger.discover(query));
 		assertEquals(ImmutableList.of(brand3, brand2), merger.executeUriQuery(ImmutableList.of("1", "2", "3"), query));
 	}
@@ -48,8 +45,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	public void testMergingItems() throws Exception {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
-		ContentQuery query = new ContentQuery(Attributes.DESCRIPTION_TITLE.createQuery(Operators.EQUALS, ImmutableList.of("test")));
-		query = query.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
+		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
 		List<Content> merged = merger.discover(query);
 		assertEquals(ImmutableList.of(item1), merged);
 		assertEquals(ImmutableList.of(clip1), Iterables.getOnlyElement(merged).getClips());

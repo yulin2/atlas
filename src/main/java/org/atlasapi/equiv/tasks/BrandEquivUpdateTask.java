@@ -52,7 +52,7 @@ public class BrandEquivUpdateTask implements Runnable {
         String lastId = null;
         List<Content> contents;
         do {
-            contents = contentStore.iterate(queryFor(clock.now()), lastId, -BATCH_SIZE);
+            contents = contentStore.iterateOverContent(queryFor(clock.now()), lastId, -BATCH_SIZE);
             for (Brand brand : Iterables.filter(contents, Brand.class)) {
                 processed++;
                 try {

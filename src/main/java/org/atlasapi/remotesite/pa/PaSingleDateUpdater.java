@@ -3,17 +3,18 @@ package org.atlasapi.remotesite.pa;
 import java.io.File;
 
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.base.Predicate;
 
 @Controller
 public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     
     private final String dateString;
-    private final PaLocalFileManager fileManager;
+    private final PaProgrammeDataStore fileManager;
 
-    public PaSingleDateUpdater(PaProgrammeProcessor processor, AdapterLog log, PaLocalFileManager fileManager, String dateString) {
+    public PaSingleDateUpdater(PaProgrammeProcessor processor, AdapterLog log, PaProgrammeDataStore fileManager, String dateString) {
         super(processor, log);
         this.fileManager = fileManager;
         this.dateString = dateString;
@@ -21,10 +22,11 @@ public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
 
     @Override
     public void run() {
-        for (File file: fileManager.localFiles()) {
-            if (file.getAbsolutePath().contains(dateString)) {
-                processFiles(ImmutableSet.of(file));
+        processFiles(fileManager.localFiles(new Predicate<File>() {
+            @Override
+            public boolean apply(File input) {
+                return input.getName().contains(dateString);
             }
-        }
+        }));
     }
 }
