@@ -6,6 +6,7 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -24,7 +25,6 @@ import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.CastMember;
 import org.atlasapi.remotesite.pa.bindings.Category;
-import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.bindings.StaffMember;
@@ -53,7 +53,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private final ContentResolver contentResolver;
     private final AdapterLog log;
     
-    private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
     
     private final Splitter personSplitter = Splitter.on(", ");
@@ -64,11 +63,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         this.log = log;
     }
 
-    public void process(ProgData progData, ChannelData channelData, DateTimeZone zone) {
+    public void process(ProgData progData, Channel channel, DateTimeZone zone) {
         try {
             Maybe<Brand> brand = getBrand(progData);
             Maybe<Series> series = getSeries(progData, brand.hasValue());
-            Maybe<Episode> episode = getEpisode(progData, channelData, zone);
+            Maybe<Episode> episode = getEpisode(progData, channel, zone);
 
             if (episode.hasValue()) {
                 if (series.hasValue()) {
@@ -181,12 +180,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(series);
     }
 
-    private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData, DateTimeZone zone) {
-        String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
-        if (Strings.isNullOrEmpty(channelUri)) {
-            return Maybe.nothing();
-        }
-
+    private Maybe<Episode> getEpisode(ProgData progData, Channel channel, DateTimeZone zone) {
         String episodeUri = PA_BASE_URL + "/episodes/" + programmeId(progData);
         Identified resolvedContent = contentResolver.findByCanonicalUri(episodeUri);
 
@@ -249,7 +243,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
 
         DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
-        Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
+        Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
         broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
         addBroadcast(version, broadcast);
 
