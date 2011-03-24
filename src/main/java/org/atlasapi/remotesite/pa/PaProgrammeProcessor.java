@@ -6,6 +6,7 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -24,7 +25,6 @@ import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.CastMember;
 import org.atlasapi.remotesite.pa.bindings.Category;
-import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.bindings.StaffMember;
@@ -48,12 +48,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
     private static final String BROADCAST_ID_PREFIX = "pa:";
     private static final String YES = "yes";
+    private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
+    private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
+    private static final String CLOSED_CURIE = "pa:closed";
     
     private final ContentWriters contentWriter;
     private final ContentResolver contentResolver;
     private final AdapterLog log;
     
-    private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
     
     private final Splitter personSplitter = Splitter.on(", ");
@@ -64,11 +66,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         this.log = log;
     }
 
-    public void process(ProgData progData, ChannelData channelData, DateTimeZone zone) {
+    public void process(ProgData progData, Channel channel, DateTimeZone zone) {
         try {
             Maybe<Brand> brand = getBrand(progData);
             Maybe<Series> series = getSeries(progData, brand.hasValue());
-            Maybe<Episode> episode = getEpisode(progData, channelData, zone);
+            Maybe<Episode> episode = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getEpisode(progData, channel, zone);
 
             if (episode.hasValue()) {
                 if (series.hasValue()) {
@@ -86,6 +88,31 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
         }
+    }
+    
+    private boolean isClosedBrand(Maybe<Brand> brand) {
+        return brand.hasValue() && CLOSED_BRAND.equals(brand.requireValue().getCanonicalUri());
+    }
+    
+    private Maybe<Episode> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone) {
+        Identified resolvedContent = contentResolver.findByCanonicalUri(CLOSED_EPISODE);
+
+        Episode episode;
+        if (resolvedContent instanceof Episode) {
+            episode = (Episode) resolvedContent;
+        } else {
+            episode = getBasicEpisode(progData);
+        }
+        episode.setCanonicalUri(CLOSED_EPISODE);
+        episode.setCurie(CLOSED_CURIE);
+        episode.setTitle(progData.getTitle());
+        
+        Version version = findBestVersion(episode.getVersions());
+
+        Broadcast broadcast = broadcast(progData, channel, zone);
+        addBroadcast(version, broadcast);
+
+        return Maybe.just(episode);
     }
     
     private void createOrUpdatePeople(Episode episode) {
@@ -181,12 +208,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(series);
     }
 
-    private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData, DateTimeZone zone) {
-        String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
-        if (Strings.isNullOrEmpty(channelUri)) {
-            return Maybe.nothing();
-        }
-
+    private Maybe<Episode> getEpisode(ProgData progData, Channel channel, DateTimeZone zone) {
         String episodeUri = PA_BASE_URL + "/episodes/" + programmeId(progData);
         Identified resolvedContent = contentResolver.findByCanonicalUri(episodeUri);
 
@@ -246,14 +268,19 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         Version version = findBestVersion(episode.getVersions());
 
-        Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
-
-        DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
-        Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
-        broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
+        Broadcast broadcast = broadcast(progData, channel, zone);
         addBroadcast(version, broadcast);
 
         return Maybe.just(episode);
+    }
+
+    private Broadcast broadcast(ProgData progData, Channel channel, DateTimeZone zone) {
+        Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
+
+        DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
+        Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
+        broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
+        return broadcast;
     }
     
     private void addBroadcast(Version version, Broadcast broadcast) {

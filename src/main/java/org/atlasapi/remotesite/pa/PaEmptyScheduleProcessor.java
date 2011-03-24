@@ -7,7 +7,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -15,13 +14,11 @@ import org.joda.time.Duration;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.base.Maybe;
 
 public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
     
     private final PaProgDataProcessor delegate;
     private final ScheduleResolver scheduleResolver;
-    private final PaChannelMap channelMap = new PaChannelMap();
 
     public PaEmptyScheduleProcessor(PaProgDataProcessor delegate, ScheduleResolver scheduleResolver) {
         this.delegate = delegate;
@@ -29,12 +26,9 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
     }
 
     @Override
-    public void process(ProgData progData, ChannelData channelData, DateTimeZone zone) {
-        Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
-        if (channel.hasValue()) {
-            if (emptySlot(progData, channel.requireValue(), zone)) {
-                delegate.process(progData, channelData, zone);
-            }
+    public void process(ProgData progData, Channel channel, DateTimeZone zone) {
+        if (emptySlot(progData, channel, zone)) {
+            delegate.process(progData, channel, zone);
         }
     }
     
