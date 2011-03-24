@@ -71,7 +71,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     public void process(ProgData progData, Channel channel, DateTimeZone zone) {
         try {
-            if (Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
+            if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
                 return;
             }
             
