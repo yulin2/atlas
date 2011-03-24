@@ -92,7 +92,7 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                                     //new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
                                     int processed = recordsProcessed.incrementAndGet();
                                     
-                                    if (processed % 100 == 0) {
+                                    if (processed % 1000 == 0) {
                                         log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processed "+processed+" programmes from "+filename));
                                     }
                                 }
