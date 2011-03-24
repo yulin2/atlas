@@ -5,6 +5,7 @@ import java.util.Map;
 import org.atlasapi.media.entity.Channel;
 
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.base.Maybe;
 
 
 public class PaChannelMap {
@@ -47,6 +48,8 @@ public class PaChannelMap {
         channelMap.put(935, Channel.BBC_THREE);
         channelMap.put(742, Channel.BBC_FOUR);
         channelMap.put(1228, Channel.BBC_HD);
+        channelMap.put(734, Channel.CBEEBIES);
+        channelMap.put(733, Channel.CBBC);
         channelMap.put(85, Channel.BBC_NEWS);
         channelMap.put(56, Channel.BBC_PARLIMENT);
         channelMap.put(138, Channel.BBC_WORLD_NEWS);
@@ -762,4 +765,10 @@ public class PaChannelMap {
         return null;
     }
     
+    public Maybe<Channel> getChannel(int channelId) {
+        if (channelMap.containsKey(channelId)) {
+            return Maybe.fromPossibleNullValue(channelMap.get(channelId));
+        }
+        return Maybe.nothing();
+    }
 }

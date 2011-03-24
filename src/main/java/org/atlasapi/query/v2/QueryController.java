@@ -37,10 +37,12 @@ import com.metabroadcast.common.query.Selection;
 @Controller
 public class QueryController extends BaseController {
 	
+	private final KnownTypeQueryExecutor executor;
 	private static final int MAX_LIMIT = 50;
 
-	public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
-	    super(executor, configFetcher, log, outputter);
+    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
+	    super(configFetcher, log, outputter);
+        this.executor = executor;
 	}
 	
 	@RequestMapping("/3.0/discover.*")

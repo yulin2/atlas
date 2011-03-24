@@ -6,6 +6,7 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -24,13 +25,13 @@ import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.CastMember;
 import org.atlasapi.remotesite.pa.bindings.Category;
-import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.bindings.StaffMember;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 
 import com.google.common.base.Splitter;
@@ -41,18 +42,20 @@ import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class PaProgrammeProcessor {
+public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private static final String PA_BASE_URL = "http://pressassociation.com";
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
     private static final String BROADCAST_ID_PREFIX = "pa:";
     private static final String YES = "yes";
+    private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
+    private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
+    private static final String CLOSED_CURIE = "pa:closed";
     
     private final ContentWriters contentWriter;
     private final ContentResolver contentResolver;
     private final AdapterLog log;
     
-    private final PaChannelMap channelMap = new PaChannelMap();
     private final GenreMap genreMap = new PaGenreMap();
     
     private final Splitter personSplitter = Splitter.on(", ");
@@ -63,11 +66,11 @@ public class PaProgrammeProcessor {
         this.log = log;
     }
 
-    public void process(ProgData progData, ChannelData channelData, DateTimeZone zone) {
+    public void process(ProgData progData, Channel channel, DateTimeZone zone) {
         try {
             Maybe<Brand> brand = getBrand(progData);
-            Maybe<Series> series = getSeries(progData);
-            Maybe<Episode> episode = getEpisode(progData, channelData, zone);
+            Maybe<Series> series = getSeries(progData, brand.hasValue());
+            Maybe<Episode> episode = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getEpisode(progData, channel, zone);
 
             if (episode.hasValue()) {
                 if (series.hasValue()) {
@@ -85,6 +88,31 @@ public class PaProgrammeProcessor {
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
         }
+    }
+    
+    private boolean isClosedBrand(Maybe<Brand> brand) {
+        return brand.hasValue() && CLOSED_BRAND.equals(brand.requireValue().getCanonicalUri());
+    }
+    
+    private Maybe<Episode> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone) {
+        Identified resolvedContent = contentResolver.findByCanonicalUri(CLOSED_EPISODE);
+
+        Episode episode;
+        if (resolvedContent instanceof Episode) {
+            episode = (Episode) resolvedContent;
+        } else {
+            episode = getBasicEpisode(progData);
+        }
+        episode.setCanonicalUri(CLOSED_EPISODE);
+        episode.setCurie(CLOSED_CURIE);
+        episode.setTitle(progData.getTitle());
+        
+        Version version = findBestVersion(episode.getVersions());
+
+        Broadcast broadcast = broadcast(progData, channel, zone);
+        addBroadcast(version, broadcast);
+
+        return Maybe.just(episode);
     }
     
     private void createOrUpdatePeople(Episode episode) {
@@ -143,18 +171,21 @@ public class PaProgrammeProcessor {
         return Maybe.just(brand);
     }
 
-    private Maybe<Series> getSeries(ProgData progData) {
+    private Maybe<Series> getSeries(ProgData progData, boolean hasBrand) {
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
         
         String seriesUri = PA_BASE_URL + "/series/" + progData.getSeriesId() + "-" + progData.getSeriesNumber();
         
-        Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
-        Series series;
-        if (resolvedContent instanceof Series) {
-            series = (Series) resolvedContent;
-        } else {
+        Series series = null;
+        if (! hasBrand) {
+            Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
+            if (resolvedContent instanceof Series) {
+                series = (Series) resolvedContent;
+            } 
+        }
+        if (series == null) {
             series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         }
         
@@ -177,12 +208,7 @@ public class PaProgrammeProcessor {
         return Maybe.just(series);
     }
 
-    private Maybe<Episode> getEpisode(ProgData progData, ChannelData channelData, DateTimeZone zone) {
-        String channelUri = channelMap.getChannelUri(Integer.valueOf(channelData.getChannelId()));
-        if (Strings.isNullOrEmpty(channelUri)) {
-            return Maybe.nothing();
-        }
-
+    private Maybe<Episode> getEpisode(ProgData progData, Channel channel, DateTimeZone zone) {
         String episodeUri = PA_BASE_URL + "/episodes/" + programmeId(progData);
         Identified resolvedContent = contentResolver.findByCanonicalUri(episodeUri);
 
@@ -242,24 +268,41 @@ public class PaProgrammeProcessor {
 
         Version version = findBestVersion(episode.getVersions());
 
-        Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
-
-        DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
-        Broadcast broadcast = new Broadcast(channelUri, transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
+        Broadcast broadcast = broadcast(progData, channel, zone);
         addBroadcast(version, broadcast);
 
         return Maybe.just(episode);
+    }
+
+    private Broadcast broadcast(ProgData progData, Channel channel, DateTimeZone zone) {
+        Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
+
+        DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
+        Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
+        broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
+        return broadcast;
     }
     
     private void addBroadcast(Version version, Broadcast broadcast) {
         if (! Strings.isNullOrEmpty(broadcast.getId())) {
             Set<Broadcast> broadcasts = Sets.newHashSet();
+            Maybe<Interval> broadcastInterval = broadcast.transmissionInterval();
             
             for (Broadcast currentBroadcast: version.getBroadcasts()) {
-                if ((! Strings.isNullOrEmpty(currentBroadcast.getId()) && ! broadcast.getId().equals(currentBroadcast.getId())) ||
-                     ! (currentBroadcast.getBroadcastOn().equals(broadcast.getBroadcastOn()) && currentBroadcast.getTransmissionTime().equals(broadcast.getTransmissionTime()) && currentBroadcast.getTransmissionEndTime().equals(broadcast.getTransmissionEndTime()))) {
-                    broadcasts.add(currentBroadcast);
+                // I know this is ugly, but it's easier to read.
+                if (Strings.isNullOrEmpty(currentBroadcast.getId())) {
+                    continue;
                 }
+                if (broadcast.getId().equals(currentBroadcast.getId())) {
+                    continue;
+                }
+                if (currentBroadcast.transmissionInterval().hasValue() && broadcastInterval.hasValue()) {
+                    Interval currentInterval = currentBroadcast.transmissionInterval().requireValue();
+                    if (currentBroadcast.getBroadcastOn().equals(broadcast.getBroadcastOn()) && currentInterval.overlaps(broadcastInterval.requireValue())) {
+                        continue;
+                    }
+                }
+                broadcasts.add(currentBroadcast);
             }
             broadcasts.add(broadcast);
             

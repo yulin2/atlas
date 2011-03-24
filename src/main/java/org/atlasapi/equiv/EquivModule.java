@@ -18,7 +18,12 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.equiv.tasks.BrandEquivUpdateTaskRunner;
+import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
+import org.atlasapi.equiv.tasks.persistence.CachingEquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.MongoEquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.www.EquivResultController;
+import org.atlasapi.equiv.tasks.persistence.www.SingleBrandEquivUpdateController;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
@@ -47,6 +52,7 @@ public class EquivModule {
 	private @Autowired DatabasedMongo db;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	private @Value("${freebase.enabled}") String freebaseEnabled;
+	private @Value("${equiv.updater.enabled}") String updaterEnabled;
 	
 	@Bean EquivController manualEquivAssignmentController() {
 		return new EquivController(store());
@@ -72,10 +78,23 @@ public class EquivModule {
 	private @Autowired SimpleScheduler scheduler;
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired AdapterLog log;
-	private @Autowired MongoDbBackedContentStore contentStore;
 	
 	@PostConstruct
 	public void scheduleEquivUpdaters() {
-	    scheduler.schedule(new BrandEquivUpdateTaskRunner(contentStore, scheduleResolver, log), RepetitionRules.every(Duration.standardHours(10)));
+	    if(Boolean.valueOf(updaterEnabled)) {
+	        scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), scheduleResolver, equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+	    }
+	}
+	
+	@Bean EquivResultStore equivResultStore() {
+	    return new CachingEquivResultStore(new MongoEquivResultStore(db));
+	}
+	
+	@Bean EquivResultController equivResultController() {
+	    return new EquivResultController(equivResultStore());
+	}
+	
+	@Bean SingleBrandEquivUpdateController singleBrandUpdater() {
+	    return new SingleBrandEquivUpdateController(scheduleResolver, new MongoDbBackedContentStore(db));
 	}
 }
