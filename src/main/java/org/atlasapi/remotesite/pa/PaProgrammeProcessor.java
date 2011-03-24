@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.pa;
 
+import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.genres.GenreMap;
@@ -36,6 +37,7 @@ import org.joda.time.format.DateTimeFormat;
 
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.inject.internal.Sets;
@@ -51,6 +53,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
     private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
     private static final String CLOSED_CURIE = "pa:closed";
+    private static final List<String> IGNORED_BRANDS = ImmutableList.of("70214");
     
     private final ContentWriters contentWriter;
     private final ContentResolver contentResolver;
@@ -68,6 +71,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     public void process(ProgData progData, Channel channel, DateTimeZone zone) {
         try {
+            if (Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
+                return;
+            }
+            
             Maybe<Brand> brand = getBrand(progData);
             Maybe<Series> series = getSeries(progData, brand.hasValue());
             Maybe<Episode> episode = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getEpisode(progData, channel, zone);
