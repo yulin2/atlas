@@ -67,6 +67,14 @@ public class PerPublisherCurieExpanderTest extends TestCase {
 
 		assertThat(expander.expand("c4:ramsays-kitchen-nightmares-series-3"), is(Maybe.just("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3")));
 		assertThat(expander.expand("c4:ramsays-kitchen-nightmares-series-3-episode-1"), is(Maybe.just("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-1")));
+		
+		assertThat(expander.expand("c4:series-of-tests"), is(Maybe.just("http://www.channel4.com/programmes/series-of-tests")));
+		assertThat(expander.expand("c4:series-of-tests-series-1"), is(Maybe.just("http://www.channel4.com/programmes/series-of-tests/episode-guide/series-1")));
+		assertThat(expander.expand("c4:series-of-tests-series-1-episode-3"), is(Maybe.just("http://www.channel4.com/programmes/series-of-tests/episode-guide/series-1/episode-3")));
+
+		assertThat(expander.expand("c4:test-of-series"), is(Maybe.just("http://www.channel4.com/programmes/test-of-series")));
+		assertThat(expander.expand("c4:test-of-series-series-1"), is(Maybe.just("http://www.channel4.com/programmes/test-of-series/episode-guide/series-1")));
+		assertThat(expander.expand("c4:test-of-series-series-1-episode-3"), is(Maybe.just("http://www.channel4.com/programmes/test-of-series/episode-guide/series-1/episode-3")));
 	}
 	
 	public void testProducesC4Curies() throws Exception {

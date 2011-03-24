@@ -57,7 +57,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		item.setAliases(Sets.newHashSet("http://www.bbc.co.uk/p/bluepeter"));
 		Location location = new Location();
 		location.setUri("http://www.bbc.co.uk/bluepeter");
-		location.setEmbedCode("object><embed></embed></object>");
+		location.setEmbedCode("<object><embed></embed></object>");
 		item.addLocation(location);
 		DateTime transmitted = new DateTime(1990, 1, 1, 1, 1, 1, 1);
 		item.addBroadcast(new Broadcast("channel", transmitted, transmitted.plusHours(1)));
@@ -89,7 +89,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 												"<play:location>" +
 												"<available>true</available>" +
 												"<play:availableCountries/>" +
-												"<embedCode><![CDATA[object><embed></embed></object>]]></embedCode>" +
+												"<embedCode>&lt;object&gt;&lt;embed&gt;&lt;/embed&gt;&lt;/object&gt;</embedCode>" +
 												"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 												"</play:location>" +
 											"</play:locations>" +

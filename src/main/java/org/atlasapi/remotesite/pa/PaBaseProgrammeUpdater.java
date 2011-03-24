@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,6 +13,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -23,6 +25,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.xml.sax.XMLReader;
 
+import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public abstract class PaBaseProgrammeUpdater implements Runnable {
@@ -35,10 +39,24 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
     private final PaProgDataProcessor processor;
     private final ExecutorService executor = Executors.newFixedThreadPool(10);
     private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 15);
+    private final PaChannelMap channelMap = new PaChannelMap();
+    private List<Channel> supportedChannels = ImmutableList.of();
 
     public PaBaseProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log) {
         this.processor = processor;
         this.log = log;
+    }
+    
+    public void supportChannels(Iterable<Channel> channels) {
+        supportedChannels = ImmutableList.copyOf(channels);
+    }
+    
+    private boolean isSupported(Channel channel) {
+        if (supportedChannels.isEmpty() || supportedChannels.contains(channel)) {
+            return true;
+        }
+        
+        return false;
     }
 
     public boolean isRunning() {
@@ -83,18 +101,22 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                             }
 
                             public void afterUnmarshal(Object target, Object parent) {
+                                int processed = recordsProcessed.incrementAndGet();
+                                
                                 if (target instanceof ProgData) {
-                                    try {
-                                        boundedQueue.submitTask(new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone));
-                                    } catch (InterruptedException e) {
-                                        log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
+                                    Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(((ChannelData) parent).getChannelId()));
+                                    if (channel.hasValue() && isSupported(channel.requireValue())) {
+                                        try {
+                                            boundedQueue.submitTask(new ProcessProgrammeJob((ProgData) target, channel.requireValue(), zone));
+                                        } catch (Exception e) {
+                                            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
+                                        }
+                                        //new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
                                     }
-                                    //new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
-                                    int processed = recordsProcessed.incrementAndGet();
-                                    
-                                    if (processed % 1000 == 0) {
-                                        log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processed "+processed+" programmes from "+filename));
-                                    }
+                                }
+                                
+                                if (processed % 1000 == 0) {
+                                    log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processed "+processed+" programmes from "+filename));
                                 }
                             }
                         });
@@ -122,12 +144,12 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
     class ProcessProgrammeJob implements Runnable {
         
         private final ProgData progData;
-        private final ChannelData channelData;
+        private final Channel channel;
         private final DateTimeZone zone;
 
-        public ProcessProgrammeJob(ProgData progData, ChannelData channelData, DateTimeZone zone) {
+        public ProcessProgrammeJob(ProgData progData, Channel channel, DateTimeZone zone) {
             this.progData = progData;
-            this.channelData = channelData;
+            this.channel = channel;
             this.zone = zone;
         }
 
@@ -135,7 +157,7 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
         public void run() {
             try {
                 if (progData != null) {
-                    processor.process(progData, channelData, zone);
+                    processor.process(progData, channel, zone);
                 }
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing programme " + progData));
