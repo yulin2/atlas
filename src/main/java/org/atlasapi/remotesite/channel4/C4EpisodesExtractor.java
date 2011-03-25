@@ -20,8 +20,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Country;
@@ -64,6 +64,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	public static final String EPISODE_TITLE_TEMPLATE = "Series %s Episode %s";
 	public static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
 	public static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
+	private static final Pattern CLIP_ID_PATTERN = Pattern.compile("tag:www\\.channel4\\.com,\\d+:clip\\/(.+)");
 
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
@@ -149,17 +150,17 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		    return null;
 		}
 		
-		Clip episode = new Clip(clipUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(clipUri), Publisher.C4);
+		Clip clip = new Clip(clipUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(clipUri), Publisher.C4);
 
 		String fourOdUri = C4AtomApi.fourOdUri(entry);
 		if (fourOdUri != null) {
-			episode.addAlias(fourOdUri);
+			clip.addAlias(fourOdUri);
 		}
 
-		episode.setTitle(title(entry));
-		episode.setMediaType(MediaType.VIDEO);
-		episode.setIsLongForm(true);
-		return episode;
+		clip.setTitle(title(entry));
+		clip.setMediaType(MediaType.VIDEO);
+		clip.setIsLongForm(false);
+		return clip;
 	}
 
 	private Item createEpisode(Feed source, Entry entry, Map<String, String> lookup) {
@@ -279,6 +280,22 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		}
 		return location;
 	}
+	
+	private Location embedLocation(String embedId, Location linkLocation) {
+        Location location = new Location();
+        location.setTransportType(TransportType.EMBED);
+        location.setTransportSubType(TransportSubType.BRIGHTCOVE);
+        location.setLastUpdated(linkLocation.getLastUpdated());
+        location.setEmbedId(embedId);
+        
+        // The feed only contains available content
+        location.setAvailable(linkLocation.getAvailable());
+        if (linkLocation.getPolicy() != null) {
+            location.setPolicy(linkLocation.getPolicy().copy());
+        }
+
+        return location;
+    }
 
 
 	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
@@ -300,7 +317,15 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		
 		if (include4odInfo) {
 			Encoding encoding = new Encoding();
-			encoding.addAvailableAt(location(uri, locationId, lookup, availableCountries, lastUpdated));
+			Location location = location(uri, locationId, lookup, availableCountries, lastUpdated);
+            encoding.addAvailableAt(location);
+			
+			Matcher matcher = CLIP_ID_PATTERN.matcher(locationId);
+			if (matcher.matches()) {
+			    Location embedLocation = embedLocation(matcher.group(1), location);
+			    encoding.addAvailableAt(embedLocation);
+			}
+			
 			version.addManifestedAs(encoding);
 		}
 				
