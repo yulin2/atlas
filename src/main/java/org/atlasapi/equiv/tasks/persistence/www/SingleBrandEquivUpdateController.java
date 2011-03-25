@@ -14,7 +14,6 @@ import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,9 +32,9 @@ public class SingleBrandEquivUpdateController {
     
     private ContainerEquivResultTransformer<Described, String> transformer = ContainerEquivResultTransformer.defaultTransformer();
 
-    public SingleBrandEquivUpdateController(ScheduleResolver scheduleResolver, MongoDbBackedContentStore contentStore) {
+    public SingleBrandEquivUpdateController(ItemBasedBrandEquivUpdater brandUpdater, MongoDbBackedContentStore contentStore) {
         this.contentStore = contentStore;
-        this.brandUpdater = new ItemBasedBrandEquivUpdater(scheduleResolver, contentStore, contentStore).writesResults(true);
+        this.brandUpdater = brandUpdater;
     }
     
     @RequestMapping(value = "/system/equivalence/run", method = RequestMethod.GET)
