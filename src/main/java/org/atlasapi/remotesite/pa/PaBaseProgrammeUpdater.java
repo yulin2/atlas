@@ -19,7 +19,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
-import org.atlasapi.util.concurrency.BoundedExecutor;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -27,6 +26,7 @@ import org.xml.sax.XMLReader;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.concurrency.BoundedExecutor;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public abstract class PaBaseProgrammeUpdater implements Runnable {
