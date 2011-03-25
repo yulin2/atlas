@@ -29,8 +29,7 @@ import com.metabroadcast.common.stats.Count;
 
 public class SuggestedEquivalents<T> {
 
-    // Processes a multimap of suggestions into an publisher-binned map of
-    // ordered list of counts
+    // Processes a multimap of suggestions into an publisher-binned map of ordered list of counts
     public static <T extends Described> SuggestedEquivalents<T> from(Multimap<Publisher, T> binnedSuggestions) {
         Map<Publisher, List<Count<T>>> binnedCountedSuggestions = Maps.transformValues(binnedSuggestions.asMap(), new Function<Collection<T>, List<Count<T>>>() {
             @Override
@@ -87,7 +86,7 @@ public class SuggestedEquivalents<T> {
         if(this == that) {
             return true;
         }
-        if(that instanceof SuggestedEquivalents) {
+        if(that instanceof SuggestedEquivalents<?>) {
             SuggestedEquivalents<?> other = (SuggestedEquivalents<?>) that;
             return Objects.equal(binnedCountedSuggestions, other.binnedCountedSuggestions);
         }

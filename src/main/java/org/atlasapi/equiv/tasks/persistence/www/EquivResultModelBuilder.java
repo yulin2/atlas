@@ -26,7 +26,7 @@ public class EquivResultModelBuilder implements ModelBuilder<EquivResult<String>
         model.put("certainty", target.certainty());
         model.put("suggested", build(target.suggestedEquivalents(), target.certainty()));
         
-        if (target instanceof ContainerEquivResult) {
+        if (target instanceof ContainerEquivResult<?, ?>) {
             @SuppressWarnings("unchecked")
             ContainerEquivResult<String, String> containerEquivResult = (ContainerEquivResult<String, String>) target;
             model.put("sub", ImmutableList.copyOf(Iterables.transform(containerEquivResult.getItemResults(), new Function<EquivResult<String>, SimpleModel>() {

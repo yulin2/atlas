@@ -37,7 +37,7 @@ public class ItemBasedBrandEquivUpdater {
 
     private SymmetricItemVersionMerger versionMerger = new SymmetricItemVersionMerger();
 
-    private BroadcastMatchingItemEquivGenerator itemEquivGenerator;
+    private ItemEquivGenerator itemEquivGenerator;
 
     private final EquivCleaner equivCleaner;
 
