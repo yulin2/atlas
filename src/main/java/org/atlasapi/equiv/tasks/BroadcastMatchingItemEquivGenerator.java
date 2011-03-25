@@ -17,7 +17,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
-public class BroadcastMatchingItemEquivGenerator {
+public class BroadcastMatchingItemEquivGenerator implements ItemEquivGenerator {
 
     private static final Duration BROADCAST_FLEXIBILITY = Duration.standardMinutes(1);
     

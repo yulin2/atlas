@@ -38,7 +38,7 @@ public class BroadcastMatchingItemEquivGeneratorTest extends TestCase {
     
     private final Mockery context = new Mockery();
     private final ScheduleResolver resolver = context.mock(ScheduleResolver.class);
-    private final BroadcastMatchingItemEquivGenerator generator = new BroadcastMatchingItemEquivGenerator(resolver);
+    private final ItemEquivGenerator generator = new BroadcastMatchingItemEquivGenerator(resolver);
 
     public void testStrongSuggestionsForEquivalentBroadcast() {
         // Items with equivalent broadcasts
