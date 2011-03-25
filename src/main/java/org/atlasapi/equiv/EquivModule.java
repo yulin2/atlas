@@ -19,6 +19,10 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
+import org.atlasapi.equiv.tasks.BroadcastMatchingItemEquivGenerator;
+import org.atlasapi.equiv.tasks.DelegatingItemEquivGenerator;
+import org.atlasapi.equiv.tasks.ItemBasedBrandEquivUpdater;
+import org.atlasapi.equiv.tasks.ItemEquivGenerator;
 import org.atlasapi.equiv.tasks.persistence.CachingEquivResultStore;
 import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
 import org.atlasapi.equiv.tasks.persistence.MongoEquivResultStore;
@@ -82,8 +86,18 @@ public class EquivModule {
 	@PostConstruct
 	public void scheduleEquivUpdaters() {
 	    if(Boolean.valueOf(updaterEnabled)) {
-	        scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), scheduleResolver, equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+	        scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), itemBasedBrandEquivUpdater(), equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
 	    }
+	}
+	
+	@Bean ItemEquivGenerator itemEquivGenerator() {
+	    ItemEquivGenerator broadcastEquivGen = new BroadcastMatchingItemEquivGenerator(scheduleResolver);
+	    return new DelegatingItemEquivGenerator(ImmutableList.of(broadcastEquivGen));
+	}
+	
+	@Bean ItemBasedBrandEquivUpdater itemBasedBrandEquivUpdater() {
+	    MongoDbBackedContentStore mongoDbBackedContentStore = new MongoDbBackedContentStore(db);
+	    return new ItemBasedBrandEquivUpdater(itemEquivGenerator(), mongoDbBackedContentStore, mongoDbBackedContentStore).writesResults(true);
 	}
 	
 	@Bean EquivResultStore equivResultStore() {
@@ -95,6 +109,6 @@ public class EquivModule {
 	}
 	
 	@Bean SingleBrandEquivUpdateController singleBrandUpdater() {
-	    return new SingleBrandEquivUpdateController(scheduleResolver, new MongoDbBackedContentStore(db));
+	    return new SingleBrandEquivUpdateController(itemBasedBrandEquivUpdater(), new MongoDbBackedContentStore(db));
 	}
 }

@@ -17,8 +17,10 @@ import org.atlasapi.media.entity.Publisher;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -44,6 +46,17 @@ public class SuggestedEquivalents<T> {
             }
         });
         return new SuggestedEquivalents<T>(Maps.filterValues(binnedCountedSuggestions, Predicates.notNull()));
+    }
+    
+    public static <T extends Described> SuggestedEquivalents<T> merge(SuggestedEquivalents<T> first, SuggestedEquivalents<T> second) {
+        Preconditions.checkArgument(Sets.intersection(first.binnedCountedSuggestions.keySet(), second.binnedCountedSuggestions.keySet()).isEmpty(), "Cannot merge suggested equivalents");
+        
+        ImmutableMap.Builder<Publisher, List<Count<T>>> suggestions = ImmutableMap.builder();
+        
+        suggestions.putAll(first.binnedCountedSuggestions);
+        suggestions.putAll(second.binnedCountedSuggestions);
+        
+        return new SuggestedEquivalents<T>(suggestions.build());
     }
 
     private final Map<Publisher, List<Count<T>>> binnedCountedSuggestions;
