@@ -72,8 +72,7 @@ public class ItemBasedBrandEquivUpdater {
             itemEquivResults.add(EquivResult.of(episode, itemSuggestions, certaintyThreshold));
         }
 
-        // The containers of the strongly suggested items for all items in this
-        // brand.
+        // The containers of the strongly suggested items for all items in this brand.
         SuggestedEquivalents<Container<?>> brandSuggestedEquivalents = SuggestedEquivalents.from(containersFrom(binnedStrongSuggestions));
 
         Map<Publisher, Container<?>> strongSuggestions = brandSuggestedEquivalents.strongSuggestions(certaintyThreshold);
@@ -87,8 +86,7 @@ public class ItemBasedBrandEquivUpdater {
         }
 
         // Write: the subject brand, any old equivalents, all TLEs of all
-        // strongly suggested equivalent items (their versions will have been
-        // merged)
+        // strongly suggested equivalent items (their versions will have been merged)
         if (writesResults) {
             contentWriter.createOrUpdate(brand, false);
             for (Identified equiv : ImmutableSet.copyOf(Iterables.concat(topLevelElements(binnedStrongSuggestions.values()), oldEquivalences))) {
