@@ -14,8 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.equiv;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
@@ -39,6 +37,7 @@ import org.atlasapi.persistence.equiv.MongoEquivStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
+import org.atlasapi.remotesite.seesaw.SeesawBrandEquivGenerator;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +55,7 @@ public class EquivModule {
 	private @Autowired DatabasedMongo db;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	private @Value("${freebase.enabled}") String freebaseEnabled;
+	private @Value("${seesaw.equiv.enabled}") String seesawEquivEnabled;
 	private @Value("${equiv.updater.enabled}") String updaterEnabled;
 	
 	@Bean EquivController manualEquivAssignmentController() {
@@ -67,11 +67,15 @@ public class EquivModule {
 	}
 	
 	@Bean EquivContentListener equivContentListener() {
-	    List<EquivGenerator<Container<?>>> brandEquivGenerators = Boolean.parseBoolean(freebaseEnabled) 
-	            ? ImmutableList.<EquivGenerator<Container<?>>>of(new FreebaseBrandEquivGenerator())
-	            : ImmutableList.<EquivGenerator<Container<?>>>of();
+	    ImmutableList.Builder<EquivGenerator<Container<?>>> brandEquivGenerators = ImmutableList.builder(); 
+	    if (Boolean.parseBoolean(freebaseEnabled)) {
+	        brandEquivGenerators.add(new FreebaseBrandEquivGenerator());
+	    }
+	    if (Boolean.parseBoolean(seesawEquivEnabled)) {
+	        brandEquivGenerators.add(new SeesawBrandEquivGenerator(new MongoDbBackedContentStore(db)));
+	    }
 	    
-	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators, store());
+	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators.build(), store());
 	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());
 	    
 	    EquivContentListener equivContentListener = new EquivContentListener(brandUpdater, itemUpdater);
