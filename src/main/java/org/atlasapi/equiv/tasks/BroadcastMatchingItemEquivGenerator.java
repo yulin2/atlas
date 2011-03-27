@@ -17,9 +17,10 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
-public class BroadcastMatchingItemEquivGenerator {
+public class BroadcastMatchingItemEquivGenerator implements ItemEquivGenerator {
 
     private static final Duration BROADCAST_FLEXIBILITY = Duration.standardMinutes(1);
+    private static final Set<Publisher> SUPPORTED_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
     
     private final ScheduleResolver resolver;
 
@@ -27,17 +28,21 @@ public class BroadcastMatchingItemEquivGenerator {
         this.resolver = resolver;
     }
     
-    public SuggestedEquivalents<Item> equivalentsFor(Item item, Iterable<Publisher> targetPublishers) {
-        return SuggestedEquivalents.from(suggestEquivalentItems(item, ImmutableSet.copyOf(targetPublishers)));
+    public SuggestedEquivalents<Item> equivalentsFor(Item item) {
+        return SuggestedEquivalents.from(suggestEquivalentItems(item));
     }
     
-    private Multimap<Publisher, Item> suggestEquivalentItems(Item item, Set<Publisher> publishers) {
+    public Set<Publisher> supportedPublishers() {
+        return SUPPORTED_PUBLISHERS;
+    }
+    
+    private Multimap<Publisher, Item> suggestEquivalentItems(Item item) {
         Multimap<Publisher, Item> binnedSuggestedItems = ArrayListMultimap.create();
         
         for (Version version : item.getVersions()) {
             for (Broadcast broadcast : version.getBroadcasts()) {
                 
-                Schedule schedule = scheduleAround(broadcast, publishers);
+                Schedule schedule = scheduleAround(broadcast, SUPPORTED_PUBLISHERS);
                 for (ScheduleChannel channel : schedule.scheduleChannels()) {
                     for (Item scheduleItem : channel.items()) {
                         if(scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {

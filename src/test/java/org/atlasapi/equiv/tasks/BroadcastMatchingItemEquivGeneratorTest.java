@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 
 import java.util.List;
-import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -34,11 +33,9 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class BroadcastMatchingItemEquivGeneratorTest extends TestCase {
 
-    private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
-    
     private final Mockery context = new Mockery();
     private final ScheduleResolver resolver = context.mock(ScheduleResolver.class);
-    private final BroadcastMatchingItemEquivGenerator generator = new BroadcastMatchingItemEquivGenerator(resolver);
+    private final ItemEquivGenerator generator = new BroadcastMatchingItemEquivGenerator(resolver);
 
     public void testStrongSuggestionsForEquivalentBroadcast() {
         // Items with equivalent broadcasts
@@ -46,11 +43,11 @@ public class BroadcastMatchingItemEquivGeneratorTest extends TestCase {
         final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
         
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(Channel.BBC_ONE), TARGET_PUBLISHERS);
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(Channel.BBC_ONE), generator.supportedPublishers());
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
-        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1, TARGET_PUBLISHERS);
+        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1);
         
         context.assertIsSatisfied();
         
@@ -63,11 +60,11 @@ public class BroadcastMatchingItemEquivGeneratorTest extends TestCase {
         final Item item2 = episodeWithBroadcasts("notEquivItem", Publisher.BBC, new Broadcast(Channel.BBC_ONE.uri(), utcTime(120000), utcTime(130000)));
         
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS); 
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), generator.supportedPublishers()); 
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
 
-        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1, TARGET_PUBLISHERS);
+        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1);
         
         context.assertIsSatisfied();
         
@@ -89,14 +86,14 @@ public class BroadcastMatchingItemEquivGeneratorTest extends TestCase {
         );
         
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(Channel.BBC_ONE), TARGET_PUBLISHERS);
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(Channel.BBC_ONE), generator.supportedPublishers());
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
                 
-            one(resolver).schedule(utcTime(340000), utcTime(560000), ImmutableSet.of(Channel.BBC_TWO), TARGET_PUBLISHERS);
+            one(resolver).schedule(utcTime(340000), utcTime(560000), ImmutableSet.of(Channel.BBC_TWO), generator.supportedPublishers());
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_TWO, (List<Item>)ImmutableList.<Item>of(item3)), interval(340000, 560000))));
         }});
 
-        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1, TARGET_PUBLISHERS);
+        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1);
         
         context.assertIsSatisfied();
         
@@ -126,17 +123,17 @@ public class BroadcastMatchingItemEquivGeneratorTest extends TestCase {
                 new Broadcast(Channel.BBC_ONE.uri(), utcTime(300000), utcTime(400000)));
         
         context.checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), generator.supportedPublishers());
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
                 
-            one(resolver).schedule(utcTime(240000), utcTime(460000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
+            one(resolver).schedule(utcTime(240000), utcTime(460000), ImmutableSet.of(BBC_ONE), generator.supportedPublishers());
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item3)), interval(240000, 460000))));
                 
-            one(resolver).schedule(utcTime(640000), utcTime(860000), ImmutableSet.of(BBC_ONE), TARGET_PUBLISHERS);
+            one(resolver).schedule(utcTime(640000), utcTime(860000), ImmutableSet.of(BBC_ONE), generator.supportedPublishers());
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(640000, 860000))));
         }});
 
-        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1, TARGET_PUBLISHERS);
+        SuggestedEquivalents<Item> result = generator.equivalentsFor(item1);
         
         context.assertIsSatisfied();
         
