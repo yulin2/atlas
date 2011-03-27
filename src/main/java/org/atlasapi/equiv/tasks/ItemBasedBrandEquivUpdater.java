@@ -14,7 +14,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ScheduleResolver;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ArrayListMultimap;
@@ -28,22 +27,22 @@ import com.google.common.collect.Sets;
 
 public class ItemBasedBrandEquivUpdater {
 
-    private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
-
     private final ContentWriter contentWriter;
 
     private double certaintyThreshold = 0.9;
     private boolean writesResults = true;
 
-    private SymmetricItemVersionMerger versionMerger = new SymmetricItemVersionMerger();
+    private final SymmetricItemVersionMerger versionMerger = new SymmetricItemVersionMerger();
 
-    private BroadcastMatchingItemEquivGenerator itemEquivGenerator;
+    private final ItemEquivGenerator itemEquivGenerator;
+    private final Set<Publisher> publishers;
 
     private final EquivCleaner equivCleaner;
 
-    public ItemBasedBrandEquivUpdater(ScheduleResolver scheduleResolver, ContentResolver contentResolver, ContentWriter contentWriter) {
+    public ItemBasedBrandEquivUpdater(ItemEquivGenerator itemEquivGenerator, ContentResolver contentResolver, ContentWriter contentWriter) {
         this.contentWriter = contentWriter;
-        this.itemEquivGenerator = new BroadcastMatchingItemEquivGenerator(scheduleResolver);
+        this.itemEquivGenerator = itemEquivGenerator;
+        this.publishers = this.itemEquivGenerator.supportedPublishers();
         this.equivCleaner = new EquivCleaner(contentResolver);
     }
 
@@ -57,11 +56,11 @@ public class ItemBasedBrandEquivUpdater {
         List<EquivResult<Item>> itemEquivResults = Lists.newArrayListWithCapacity(brand.getContents().size());
         for (Episode episode : brand.getContents()) {
 
-            SuggestedEquivalents<Item> itemSuggestions = itemEquivGenerator.equivalentsFor(episode, TARGET_PUBLISHERS);
+            SuggestedEquivalents<Item> itemSuggestions = itemEquivGenerator.equivalentsFor(episode);
 
             Map<Publisher, Item> strongSuggestions = itemSuggestions.strongSuggestions(certaintyThreshold);
 
-            oldEquivalences.addAll(equivCleaner.cleanEquivalences(episode, strongSuggestions.values(), TARGET_PUBLISHERS));
+            oldEquivalences.addAll(equivCleaner.cleanEquivalences(episode, strongSuggestions.values(), publishers));
 
             // version merging of strong suggestions
             versionMerger.mergeVersions(episode, strongSuggestions.values());
@@ -72,13 +71,12 @@ public class ItemBasedBrandEquivUpdater {
             itemEquivResults.add(EquivResult.of(episode, itemSuggestions, certaintyThreshold));
         }
 
-        // The containers of the strongly suggested items for all items in this
-        // brand.
+        // The containers of the strongly suggested items for all items in this brand.
         SuggestedEquivalents<Container<?>> brandSuggestedEquivalents = SuggestedEquivalents.from(containersFrom(binnedStrongSuggestions));
 
         Map<Publisher, Container<?>> strongSuggestions = brandSuggestedEquivalents.strongSuggestions(certaintyThreshold);
 
-        oldEquivalences.addAll(equivCleaner.cleanEquivalences(brand, strongSuggestions.values(), TARGET_PUBLISHERS));
+        oldEquivalences.addAll(equivCleaner.cleanEquivalences(brand, strongSuggestions.values(), publishers));
 
         // create equivalence relation for strongly equivalent suggestions
         for (Identified equiv : strongSuggestions.values()) {
@@ -87,8 +85,7 @@ public class ItemBasedBrandEquivUpdater {
         }
 
         // Write: the subject brand, any old equivalents, all TLEs of all
-        // strongly suggested equivalent items (their versions will have been
-        // merged)
+        // strongly suggested equivalent items (their versions will have been merged)
         if (writesResults) {
             contentWriter.createOrUpdate(brand, false);
             for (Identified equiv : ImmutableSet.copyOf(Iterables.concat(topLevelElements(binnedStrongSuggestions.values()), oldEquivalences))) {

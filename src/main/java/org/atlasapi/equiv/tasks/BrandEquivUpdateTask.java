@@ -8,7 +8,6 @@ import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -28,19 +27,19 @@ public class BrandEquivUpdateTask implements Runnable {
     private final Clock clock;
     private final MongoDbBackedContentStore contentStore;
     private final AdapterLog log;
-    private ItemBasedBrandEquivUpdater brandUpdater;
+    private final ItemBasedBrandEquivUpdater brandUpdater;
     private final EquivResultStore equivResultStore;
 
-    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ScheduleResolver scheduleResolver, EquivResultStore equivResultStore, AdapterLog log) {
-        this(contentStore, scheduleResolver, equivResultStore, log, new SystemClock());
+    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ItemBasedBrandEquivUpdater brandUpdater, EquivResultStore equivResultStore, AdapterLog log) {
+        this(contentStore, brandUpdater, equivResultStore, log, new SystemClock());
     }
     
-    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ScheduleResolver scheduleResolver, EquivResultStore equivResultStore, AdapterLog log, Clock clock) {
+    public BrandEquivUpdateTask(MongoDbBackedContentStore contentStore, ItemBasedBrandEquivUpdater brandUpdater, EquivResultStore equivResultStore, AdapterLog log, Clock clock) {
         this.contentStore = contentStore;
         this.equivResultStore = equivResultStore;
         this.log = log;
         this.clock = clock;
-        this.brandUpdater = new ItemBasedBrandEquivUpdater(scheduleResolver, contentStore, contentStore).writesResults(true);
+        this.brandUpdater = brandUpdater;
     }
     
     @Override

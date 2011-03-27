@@ -55,7 +55,7 @@ public class EquivResult<T> {
         if (this == that) {
             return true;
         }
-        if (that instanceof EquivResult) {
+        if (that instanceof EquivResult<?>) {
             EquivResult<?> other = (EquivResult<?>) that;
             return Objects.equal(desc, other.desc) && Objects.equal(suggestedEquivs, other.suggestedEquivs);
         }

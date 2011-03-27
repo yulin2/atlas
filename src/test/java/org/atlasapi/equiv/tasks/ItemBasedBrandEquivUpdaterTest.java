@@ -3,7 +3,6 @@ package org.atlasapi.equiv.tasks;
 import static org.atlasapi.media.entity.Channel.BBC_ONE;
 import static org.atlasapi.media.entity.Channel.BBC_THREE;
 import static org.atlasapi.media.entity.Channel.BBC_TWO;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,8 @@ public class ItemBasedBrandEquivUpdaterTest extends TestCase {
     private static final Set<Publisher> TARGET_PUBLISHERS = ImmutableSet.of(Publisher.BBC, Publisher.ITV, Publisher.C4, Publisher.FIVE);
     private final Mockery context = new Mockery();
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
+    private final BroadcastMatchingItemEquivGenerator broadcastEquivGenerator = new BroadcastMatchingItemEquivGenerator(scheduleResolver);
+    private final DelegatingItemEquivGenerator delegatingEquivGenerator = new DelegatingItemEquivGenerator(ImmutableList.<ItemEquivGenerator>of(broadcastEquivGenerator));
     private final ContentResolver contentResolver = context.mock(ContentResolver.class);
 
     public void testUpdatesEquivalenceWithABrandAndStandAloneItem() throws Exception {
@@ -119,7 +120,9 @@ public class ItemBasedBrandEquivUpdaterTest extends TestCase {
         }});
         
         WriteChecker contentWriter = new WriteChecker();
-        EquivResult<Container<?>> updateEquivalence = new ItemBasedBrandEquivUpdater(scheduleResolver, contentResolver, contentWriter).withCertaintyThreshold(0.65).updateEquivalence(subjectBrand);
+        
+        @SuppressWarnings("unused")
+        EquivResult<Container<?>> updateEquivalence = new ItemBasedBrandEquivUpdater(delegatingEquivGenerator, contentResolver, contentWriter).withCertaintyThreshold(0.65).updateEquivalence(subjectBrand);
         
         context.assertIsSatisfied();
         
