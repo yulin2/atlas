@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.content.criteria.ContentQueryBuilder;
+import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -40,10 +42,11 @@ public class ContentResolvingSearchTest extends MockObjectTestCase {
     
     public void testShouldReturnSearchedForItem() {
         final String searchQuery = "test";
+        final ContentQuery query = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
         
         checking(new Expectations() {{ 
             one(fuzzySearcher).contentSearch(searchQuery, selection, publishers); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));
-            one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), ContentQuery.MATCHES_EVERYTHING); will(returnValue(ImmutableList.of(brand)));
+            one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), query); will(returnValue(ImmutableList.of(brand)));
         }});
         
         List<Identified> content = searcher.search(new Search(searchQuery), publishers, ApplicationConfiguration.DEFAULT_CONFIGURATION, selection);

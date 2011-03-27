@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.content.criteria.ContentQueryBuilder;
+import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
@@ -38,7 +40,8 @@ public class ContentResolvingSearcher implements SearchResolver {
             return ImmutableList.of();
         }
 
-        List<Identified> content = contentResolver.executeUriQuery(searchResults.toUris(), ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(appConfig));
+        ContentQuery query = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
+        List<Identified> content = contentResolver.executeUriQuery(searchResults.toUris(), query.copyWithApplicationConfiguration(appConfig));
         return filterOutSubItems(content);
     }
 
