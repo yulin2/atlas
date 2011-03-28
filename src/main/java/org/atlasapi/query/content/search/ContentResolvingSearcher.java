@@ -45,7 +45,7 @@ public class ContentResolvingSearcher implements SearchResolver {
 
         ContentQuery query = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
         List<Identified> content = contentResolver.executeUriQuery(searchResults.toUris(), query.copyWithApplicationConfiguration(appConfig));
-        return filterOutSubItems(filterByPublisher(content, ImmutableList.copyOf(publishers)));
+        return filterOutSubItems(Identified.sort(filterByPublisher(content, ImmutableList.copyOf(publishers)), searchResults.toUris()));
     }
     
     // This is a stop-gap until we find out what's going wrong
