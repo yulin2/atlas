@@ -1,16 +1,20 @@
 package org.atlasapi.remotesite.pa;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.atlasapi.media.entity.Channel;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 
 
 public class PaChannelMap {
 
-    Map<Integer, Channel> channelMap = Maps.newHashMap();
+    private final Map<Integer, Channel> channelMap = Maps.newHashMap();
+    private final Map<Channel, Integer> reverseMap = Maps.newHashMap();
     
     public PaChannelMap() {
         channelMap.put(4, Channel.BBC_ONE);
@@ -756,6 +760,18 @@ public class PaChannelMap {
         channelMap.put(1489, Channel.4FM);
         channelMap.put(1490, Channel.AMAZING_RADIO);
         channelMap.put(1494, Channel.BAYRADIO_(SPANISH));*/
+        
+        for (Entry<Integer, Channel> entry: channelMap.entrySet()) {
+            reverseMap.put(entry.getValue(), entry.getKey());
+        }
+    }
+    
+    private static List<Integer> radioChannels = ImmutableList.of(8, 33, 34, 77, 86, 87, 228, 232, 622, 480, 1008, 479, 631, 632, 1214, 633, 634, 637, 1301, 638, 1302, 641, 744, 745, 875, 932, 1227, 239, 240, 241, 242, 244, 245, 246, 503, 248, 249, 250, 251, 254, 255, 257, 258, 259, 260, 261, 262, 263, 264, 266, 273, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 289, 290, 291, 292, 293, 295, 297, 300, 301, 303, 1477, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 621, 323, 324, 325, 326, 329, 330, 333, 646, 336, 337, 338, 339, 341, 342, 346, 348, 349, 1575, 350, 351, 352, 353, 355, 356, 357, 358, 359, 360, 653, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 1191, 375, 376, 377, 378, 379, 380, 381, 383, 384, 385, 387, 386, 388, 389, 390, 391, 392, 394, 395, 396, 399, 401, 404, 405, 406, 407, 408, 409, 1594, 1596, 1592, 1588, 1590, 1598, 1599, 1593, 1595, 1597, 1600, 1591, 1589, 502, 424, 425, 426, 427, 428, 429, 430, 439, 440, 441, 445, 444, 455, 454, 456, 457, 460, 461, 462, 463, 464, 465, 466, 469, 470, 471, 472, 473, 475, 476, 477, 482, 478, 489, 491, 493, 499, 497, 495, 731, 510, 512, 514, 516, 1309, 1345, 524, 526, 528, 530, 532, 534, 536, 538, 540, 542, 544, 546, 548, 550, 552, 554, 556, 1027, 560, 562, 564, 567, 569, 570, 568, 575, 576, 577, 578, 580, 582, 583, 584, 585, 587, 588, 589, 590, 591, 592, 593, 596, 597, 600, 601, 603, 607, 673, 717, 715, 716, 718, 720, 721, 727, 902, 921, 923, 926, 927, 928, 930, 931, 940, 942, 944, 945, 946, 947, 950, 951, 952, 961, 964, 965, 966, 967, 968, 969, 970, 973, 975, 978, 985, 990, 1020, 1021, 1022, 1023, 1024, 1025, 1029, 1034, 1052, 1064, 1066, 1080, 1081, 1082, 1083, 1142, 1170, 1171, 1173, 1179, 1181, 1182, 1183, 1184, 1190, 1197, 1203, 1223, 1284, 1286, 1287, 1293, 1294, 1330, 1331, 1333, 1337, 1338, 1344, 1341, 1342, 1343, 1372, 1377, 1380, 1381, 1382, 1392, 1395, 1396, 1397, 1406, 1409, 1421, 1422, 1423, 1436, 1453, 1454, 1467, 1487, 1488, 1489, 1490, 1494);
+    
+    public boolean isRadioChannel(Channel channel) {
+        Integer id = reverseMap.get(channel);
+        
+        return id != null && radioChannels.contains(id);
     }
     
     public String getChannelUri(int channelId) {
