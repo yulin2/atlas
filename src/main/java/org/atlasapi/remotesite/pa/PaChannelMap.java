@@ -629,7 +629,7 @@ public class PaChannelMap {
         channelMap.put(564, Channel.BBC_RADIO_SUFFOLK);
 //        channelMap.put(567, Channel.BBC_RADIO_SWINDON);
         channelMap.put(569, Channel.BBC_RADIO_WILTSHIRE);
-//        channelMap.put(570, Channel.BBC_RADIO_RADIO¤WM);
+//        channelMap.put(570, Channel.BBC_RADIO_RADIOWM);
         channelMap.put(568, Channel.BBC_RADIO_YORK);
 /*        channelMap.put(575, Channel.ABSOLUTE_RADIO);
         channelMap.put(576, Channel.GALAXY_102);
