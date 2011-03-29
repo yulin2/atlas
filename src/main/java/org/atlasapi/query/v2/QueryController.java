@@ -46,6 +46,11 @@ public class QueryController extends BaseController {
         this.executor = executor;
 	}
     
+    @RequestMapping("/")
+    public String redirect() {
+        return "redirect:http://docs.atlasapi.org";
+    }
+    
     @RequestMapping(value = {"/2.0/*.*"})
     public void onePointZero(HttpServletRequest request, HttpServletResponse response) throws IOException {
         errorViewFor(request, response, UNSUPPORTED);
