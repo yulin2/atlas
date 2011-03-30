@@ -109,7 +109,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         if (resolvedContent instanceof Episode) {
             episode = (Episode) resolvedContent;
         } else {
-            episode = getBasicEpisode(progData);
+            episode = getBasicEpisode(progData, Specialization.TV);
         }
         episode.setCanonicalUri(CLOSED_EPISODE);
         episode.setCurie(CLOSED_CURIE);
@@ -217,14 +217,18 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
 
     private Maybe<Episode> getEpisode(ProgData progData, Channel channel, DateTimeZone zone) {
-        String episodeUri = PA_BASE_URL + "/episodes/" + programmeId(progData);
+        Specialization specialization = specialization(progData, channel);
+        
+        String episodeUri = specialization == Specialization.FILM
+                ? PA_BASE_URL + "/films/" + programmeId(progData)
+                : PA_BASE_URL + "/episodes/" + programmeId(progData);
         Identified resolvedContent = contentResolver.findByCanonicalUri(episodeUri);
 
         Episode episode;
         if (resolvedContent instanceof Episode) {
             episode = (Episode) resolvedContent;
         } else {
-            episode = getBasicEpisode(progData);
+            episode = getBasicEpisode(progData, specialization);
         }
         
         if (progData.getEpisodeTitle() != null) {
@@ -254,7 +258,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
         
         episode.setMediaType(channelMap.isRadioChannel(channel) ? MediaType.AUDIO : MediaType.VIDEO);
-        episode.setSpecialization(specialization(progData, channel));
+        
+        episode.setSpecialization(specialization);
         episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
 
         if (progData.getPictures() != null) {
@@ -345,8 +350,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return versions.iterator().next();
     }
 
-    private Episode getBasicEpisode(ProgData progData) {
-        Episode episode = new Episode(PA_BASE_URL + "/episodes/" + programmeId(progData), "pa:e-" + programmeId(progData), Publisher.PA);
+    private Episode getBasicEpisode(ProgData progData, Specialization specialization) {
+        Episode episode = specialization == Specialization.FILM 
+                       ? new Episode(PA_BASE_URL + "/films/" + programmeId(progData), "pa:f-" + programmeId(progData), Publisher.PA)
+                       : new Episode(PA_BASE_URL + "/episodes/" + programmeId(progData), "pa:e-" + programmeId(progData), Publisher.PA);
 
         Version version = new Version();
         version.setProvider(Publisher.PA);

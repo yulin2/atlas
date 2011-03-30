@@ -60,6 +60,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertNotNull(brand.getImage());
 
         Item item = brand.getContents().get(0);
+        assertTrue(item.getCanonicalUri().contains("episodes"));
         assertNotNull(item.getImage());
         assertFalse(item.getVersions().isEmpty());
         assertEquals(MediaType.VIDEO, item.getMediaType());
