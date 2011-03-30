@@ -80,7 +80,7 @@ public class NastyRenameChannelJob {
 
                             broadcasts.add(copy);
                         } else {
-                            //broadcasts.add(b);
+                            broadcasts.add(b);
                         }
                     }
 
