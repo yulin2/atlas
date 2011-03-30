@@ -29,6 +29,10 @@ import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
+import org.atlasapi.query.content.schedule.BroadcastRemovingScheduleOverlapListener;
+import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
+import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
+import org.atlasapi.query.content.schedule.ThreadedScheduleOverlapListener;
 import org.atlasapi.query.content.search.ContentResolvingSearcher;
 import org.atlasapi.query.content.search.DummySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
@@ -85,8 +89,14 @@ public class QueryModule {
 		return new QueryController(queryExecutor(), configFetcher, log, atlasModelOutputter());
 	}
 	
+	@Bean ScheduleOverlapListener scheduleOverlapListener() {
+	    BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(store, store);
+	    return new ThreadedScheduleOverlapListener(broadcastRemovingListener);
+	}
+	
 	@Bean ScheduleController schedulerController() {
-	    return new ScheduleController(scheduleResolver, configFetcher, log, atlasModelOutputter());
+	    ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, scheduleOverlapListener(), log);
+	    return new ScheduleController(resolver, configFetcher, log, atlasModelOutputter());
 	}
 	
 	@Bean PeopleController peopleController() {
