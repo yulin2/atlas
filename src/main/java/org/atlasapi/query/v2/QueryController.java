@@ -53,7 +53,7 @@ public class QueryController extends BaseController {
     
     @RequestMapping(value = {"/2.0/*.*"})
     public void onePointZero(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        errorViewFor(request, response, UNSUPPORTED);
+        outputter.writeError(request, response, UNSUPPORTED);
     }
 	
 	@RequestMapping("/3.0/discover.*")
