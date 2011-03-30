@@ -91,7 +91,7 @@ public class QueryModule {
 	
 	@Bean ScheduleOverlapListener scheduleOverlapListener() {
 	    BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(store, store);
-	    return new ThreadedScheduleOverlapListener(broadcastRemovingListener);
+	    return new ThreadedScheduleOverlapListener(broadcastRemovingListener, log);
 	}
 	
 	@Bean ScheduleController schedulerController() {
