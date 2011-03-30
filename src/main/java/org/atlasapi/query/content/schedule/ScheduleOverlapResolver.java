@@ -54,10 +54,9 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
         Item beforePrevious = null;
         Item previous = Iterables.getFirst(items, null);
         
-        boolean includeLast = true;
-        for (int i = 1; i < items.size(); i++) {
+        int i;
+        for (i = 1; i < items.size(); i++) {
             Item item = items.get(i);
-            includeLast = true;
         
             Maybe<Interval> previousInterval = ScheduleEntry.BROADCAST.apply(previous).transmissionInterval();
             Maybe<Interval> currentInterval = ScheduleEntry.BROADCAST.apply(item).transmissionInterval();
@@ -69,7 +68,6 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
                 }
                 if (overlapResolution.shouldRemoveCurrent()) {
                     i++;
-                    includeLast = false;
                 }
             } else {
                 results.add(previous);
@@ -79,7 +77,7 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
             previous = item;
         }
         
-        if (includeLast) {
+        if (items.size() >= i) {
             results.add(Iterables.getLast(items));
         }
 
@@ -117,10 +115,22 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
             return OverlapResolution.removeNeither();
         }
 
-        if (!beforeInterval.requireValue().overlaps(previousInterval.requireValue()) && !previousInterval.requireValue().overlaps(nextInterval.requireValue())) {
+        if (mutualOverlap(beforeInterval.requireValue(), previousInterval.requireValue(), currentInterval.requireValue(), nextInterval.requireValue())) {
+            if (broadcast.getLastUpdated() == null && previousBroadcast.getLastUpdated() == null) {
+                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription(
+                        "Unable to remove either " + previous + " or " + item + " as they exactly overlap and have no lastUpdated"));
+                return OverlapResolution.removeNeither();
+            } else if (broadcast.getLastUpdated() == null || broadcast.getLastUpdated().isBefore(previousBroadcast.getLastUpdated())) {
+                overlapListener.itemRemovedFromSchedule(item, broadcast);
+                return OverlapResolution.removeCurrent();
+            } else {
+                overlapListener.itemRemovedFromSchedule(previous, previousBroadcast);
+                return OverlapResolution.removePrevious();
+            }
+        } else if (currentIntervalOverlaps(beforeInterval.requireValue(), previousInterval.requireValue(), nextInterval.requireValue())) {
             overlapListener.itemRemovedFromSchedule(item, broadcast);
             return OverlapResolution.removeCurrent();
-        } else if (!beforeInterval.requireValue().overlaps(currentInterval.requireValue()) && !currentInterval.requireValue().overlaps(nextInterval.requireValue())) {
+        } else if (previousIntervalOverlaps(beforeInterval.requireValue(), currentInterval.requireValue(), nextInterval.requireValue())) {
             overlapListener.itemRemovedFromSchedule(previous, previousBroadcast);
             return OverlapResolution.removePrevious();
         } else {
@@ -128,6 +138,18 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
                     "Unable to remove either " + previous + " or " + item + " to stop overlapping broadcasts"));
             return OverlapResolution.removeNeither();
         }
+    }
+    
+    private boolean mutualOverlap(Interval beforeInterval, Interval previousInterval, Interval currentInterval, Interval nextInterval) {
+        return currentIntervalOverlaps(beforeInterval, previousInterval, nextInterval) && previousIntervalOverlaps(beforeInterval, currentInterval, nextInterval);
+    }
+    
+    private boolean currentIntervalOverlaps(Interval beforeInterval, Interval previousInterval, Interval nextInterval) {
+        return (!beforeInterval.overlaps(previousInterval) && !previousInterval.overlaps(nextInterval));
+    }
+    
+    private boolean previousIntervalOverlaps(Interval beforeInterval, Interval currentInterval, Interval nextInterval) {
+        return (!beforeInterval.overlaps(currentInterval) && !currentInterval.overlaps(nextInterval));
     }
     
     static class OverlapResolution {
