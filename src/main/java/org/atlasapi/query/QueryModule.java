@@ -30,6 +30,7 @@ import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
 import org.atlasapi.query.content.schedule.BroadcastRemovingScheduleOverlapListener;
+import org.atlasapi.query.content.schedule.NastyRenameChannelJob;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
 import org.atlasapi.query.content.schedule.ThreadedScheduleOverlapListener;
@@ -111,4 +112,7 @@ public class QueryModule {
 		return new DispatchingAtlasModelWriter();
 	}
 	
+	@Bean NastyRenameChannelJob nastyRenameChannelJob() {
+	    return new NastyRenameChannelJob(store);
+	}
 }
