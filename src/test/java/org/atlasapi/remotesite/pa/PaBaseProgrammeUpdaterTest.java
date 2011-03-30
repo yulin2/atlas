@@ -9,7 +9,9 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Person;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -60,6 +62,8 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         Item item = brand.getContents().get(0);
         assertNotNull(item.getImage());
         assertFalse(item.getVersions().isEmpty());
+        assertEquals(MediaType.VIDEO, item.getMediaType());
+        assertEquals(Specialization.TV, item.getSpecialization());
 
         assertEquals(18, item.people().size());
         assertEquals(14, item.actors().size());

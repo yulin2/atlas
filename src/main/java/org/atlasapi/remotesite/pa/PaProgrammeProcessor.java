@@ -58,6 +58,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private final ContentWriters contentWriter;
     private final ContentResolver contentResolver;
     private final AdapterLog log;
+    private final PaChannelMap channelMap = new PaChannelMap();
     
     private final GenreMap genreMap = new PaGenreMap();
     
@@ -75,8 +76,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 return;
             }
             
-            Maybe<Brand> brand = getBrand(progData);
-            Maybe<Series> series = getSeries(progData, brand.hasValue());
+            Maybe<Brand> brand = getBrand(progData, channel);
+            Maybe<Series> series = getSeries(progData, channel, brand.hasValue());
             Maybe<Episode> episode = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getEpisode(progData, channel, zone);
 
             if (episode.hasValue()) {
@@ -144,7 +145,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
     }
 
-    private Maybe<Brand> getBrand(ProgData progData) {
+    private Maybe<Brand> getBrand(ProgData progData, Channel channel) {
         String brandId = progData.getSeriesId();
         if (Strings.isNullOrEmpty(brandId) || Strings.isNullOrEmpty(brandId.trim())) {
             return Maybe.nothing();
@@ -160,7 +161,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
         
         brand.setTitle(progData.getTitle());
-        brand.setSpecialization(specialization(progData));
+        brand.setSpecialization(specialization(progData, channel));
         brand.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
 
         if (progData.getPictures() != null) {
@@ -178,7 +179,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(brand);
     }
 
-    private Maybe<Series> getSeries(ProgData progData, boolean hasBrand) {
+    private Maybe<Series> getSeries(ProgData progData, Channel channel, boolean hasBrand) {
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
@@ -197,7 +198,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
         
         series.setPublisher(Publisher.PA);
-        series.setSpecialization(specialization(progData));
+        series.setSpecialization(specialization(progData, channel));
         series.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
         
         if (progData.getPictures() != null) {
@@ -252,8 +253,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             }
         }
         
-        episode.setMediaType(MediaType.VIDEO);
-        episode.setSpecialization(specialization(progData));
+        episode.setMediaType(channelMap.isRadioChannel(channel) ? MediaType.AUDIO : MediaType.VIDEO);
+        episode.setSpecialization(specialization(progData, channel));
         episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
 
         if (progData.getPictures() != null) {
@@ -359,7 +360,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return episode;
     }
     
-    protected static Specialization specialization(ProgData progData) {
+    protected Specialization specialization(ProgData progData, Channel channel) {
+        if (channelMap.isRadioChannel(channel)) {
+            return Specialization.RADIO;
+        }
         return YES.equals(progData.getAttr().getFilm()) ? Specialization.FILM : Specialization.TV;
     }
 
