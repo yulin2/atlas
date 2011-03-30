@@ -140,7 +140,22 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 				matches.addAll(matches);
 			}
 		}
-		chosen.setContents(strategy.merge(items, matches));
+		chosen.setContents(mergeClips(strategy.merge(items, matches), notChosen));
+	}
+	
+	private <T extends Item> Iterable<T> mergeClips(Iterable<T> chosen, List<Container<T>> notChosenList) {
+	    for (Item item: chosen) {
+	        for (Container<T> notChosen: notChosenList) {
+	            for (Item notChosenItem: notChosen.getContents()) {
+	                if (notChosenItem.getEquivalentTo().contains(item.getCanonicalUri())) {
+	                    for (Clip clip: notChosenItem.getClips()) {
+	                        item.addClip(clip);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    return chosen;
 	}
 	
 	enum ItemIdStrategy {
