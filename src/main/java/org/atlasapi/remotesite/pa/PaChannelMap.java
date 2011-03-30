@@ -89,6 +89,7 @@ public class PaChannelMap {
         channelMap.put(1438, Channel.FOUR_MUSIC);
         
         channelMap.put(54, Channel.FIVE);
+        channelMap.put(1580, Channel.FIVE_HD);
         channelMap.put(1289, Channel.FIVER);
         channelMap.put(1290, Channel.FIVE_USA);
            
