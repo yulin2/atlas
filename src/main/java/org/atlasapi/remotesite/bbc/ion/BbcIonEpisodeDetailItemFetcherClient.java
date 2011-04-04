@@ -91,8 +91,10 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         
         item.setTitle(episode.getTitle());
         item.setDescription(episode.getSynopsis());
-        item.setThumbnail(episode.getMyImageBaseUrl() + episode.getId() + "_150_84.jpg");
-        item.setImage(episode.getMyImageBaseUrl() + episode.getId() + "_640_360.jpg");
+        if (! Strings.isNullOrEmpty(episode.getId())) {
+            item.setThumbnail(episode.getMyImageBaseUrl() + episode.getId() + "_150_84.jpg");
+            item.setImage(episode.getMyImageBaseUrl() + episode.getId() + "_640_360.jpg");
+        }
 
         if(episode.getVersions() != null) {
             for (IonVersion ionVersion : episode.getVersions()) {
