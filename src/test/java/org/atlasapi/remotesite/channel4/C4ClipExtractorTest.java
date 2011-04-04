@@ -43,6 +43,7 @@ public class C4ClipExtractorTest extends MockObjectTestCase {
 		            assertNotNull(embed);
                     assertNull(embed.getUri());
                     assertNotNull(embed.getEmbedId());
+                    assertTrue(embed.getEmbedCode().contains(embed.getEmbedId()));
                     assertEquals(TransportSubType.BRIGHTCOVE, embed.getTransportSubType());
 		        }
 		    }
