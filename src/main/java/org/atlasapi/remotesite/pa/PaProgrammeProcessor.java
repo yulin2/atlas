@@ -40,6 +40,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -323,18 +324,24 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
     }
     
-    private Set<CrewMember> people(ProgData progData) {
-        Set<CrewMember> people = Sets.newHashSet();
+    private List<CrewMember> people(ProgData progData) {
+        List<CrewMember> people = Lists.newArrayList();
         
         for (StaffMember staff: progData.getStaffMember()) {
             String roleKey = staff.getRole().toLowerCase().replace(' ', '_');
             for (String name: personSplitter.split(staff.getPerson())) {
-                people.add(CrewMember.crewMember(name, roleKey, Publisher.PA));
+                CrewMember crewMember = CrewMember.crewMember(name, roleKey, Publisher.PA);
+                if (! people.contains(crewMember)) {
+                    people.add(crewMember);
+                }
             }
         }
         
         for (CastMember cast: progData.getCastMember()) {
-            people.add(Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA));
+            Actor actor = Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA);
+            if (! people.contains(actor)) {
+                people.add(actor);
+            }
         }
         
         return people;
