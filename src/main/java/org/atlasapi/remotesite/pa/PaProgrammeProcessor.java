@@ -87,7 +87,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 }
                 if (brand.hasValue()) {
                     brand.requireValue().addOrReplace(episode.requireValue());
-                    contentWriter.createOrUpdate(brand.requireValue(), true);
+                    contentWriter.createOrUpdate(brand.requireValue(), false);
                 } else {
                     contentWriter.createOrUpdate(episode.requireValue());
                 }
@@ -153,13 +153,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
         String brandUri = PA_BASE_URL + "/brands/" + brandId;
-        Identified resolvedContent = contentResolver.findByCanonicalUri(brandUri);
-        Brand brand;
-        if (resolvedContent instanceof Brand) {
-            brand = (Brand) resolvedContent;
-        } else {
-            brand = new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
-        }
+        Brand brand = new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         
         brand.setTitle(progData.getTitle());
         brand.setSpecialization(specialization(progData, channel));
