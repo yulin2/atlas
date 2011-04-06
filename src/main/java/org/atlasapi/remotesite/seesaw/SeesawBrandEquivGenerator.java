@@ -136,5 +136,10 @@ public class SeesawBrandEquivGenerator implements EquivGenerator<Container<?>> {
             }
             return false;
         }
+        
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this).addValue(flattenedTitle).toString();
+        }
     }
 }
