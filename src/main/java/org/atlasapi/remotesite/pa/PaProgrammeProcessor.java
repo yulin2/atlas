@@ -40,6 +40,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -86,7 +87,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 }
                 if (brand.hasValue()) {
                     brand.requireValue().addOrReplace(episode.requireValue());
-                    contentWriter.createOrUpdate(brand.requireValue(), true);
+                    contentWriter.createOrUpdate(brand.requireValue(), false);
                 } else {
                     contentWriter.createOrUpdate(episode.requireValue());
                 }
@@ -152,13 +153,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
         String brandUri = PA_BASE_URL + "/brands/" + brandId;
-        Identified resolvedContent = contentResolver.findByCanonicalUri(brandUri);
-        Brand brand;
-        if (resolvedContent instanceof Brand) {
-            brand = (Brand) resolvedContent;
-        } else {
-            brand = new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
-        }
+        Brand brand = new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         
         brand.setTitle(progData.getTitle());
         brand.setSpecialization(specialization(progData, channel));
@@ -323,18 +318,24 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
     }
     
-    private Set<CrewMember> people(ProgData progData) {
-        Set<CrewMember> people = Sets.newHashSet();
+    private List<CrewMember> people(ProgData progData) {
+        List<CrewMember> people = Lists.newArrayList();
         
         for (StaffMember staff: progData.getStaffMember()) {
             String roleKey = staff.getRole().toLowerCase().replace(' ', '_');
             for (String name: personSplitter.split(staff.getPerson())) {
-                people.add(CrewMember.crewMember(name, roleKey, Publisher.PA));
+                CrewMember crewMember = CrewMember.crewMember(name, roleKey, Publisher.PA);
+                if (! people.contains(crewMember)) {
+                    people.add(crewMember);
+                }
             }
         }
         
         for (CastMember cast: progData.getCastMember()) {
-            people.add(Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA));
+            Actor actor = Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA);
+            if (! people.contains(actor)) {
+                people.add(actor);
+            }
         }
         
         return people;
