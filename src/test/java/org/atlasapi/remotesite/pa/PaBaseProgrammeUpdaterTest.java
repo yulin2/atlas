@@ -46,7 +46,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         Identified content = null;
 
         // lazy
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             Thread.sleep(500);
             content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
             if (content != null)
@@ -76,6 +76,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertEquals("pa:71118471", broadcast.getId());
 
         updater.run();
+        Thread.sleep(1000);
 
         content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
         assertNotNull(content);

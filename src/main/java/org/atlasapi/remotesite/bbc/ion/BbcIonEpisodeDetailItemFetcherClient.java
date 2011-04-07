@@ -17,6 +17,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
+import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonContributor;
@@ -144,7 +145,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private Version versionFrom(IonVersion ionVersion, String pid) {
         Version version = new Version();
         version.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ionVersion.getId());
-        version.setPublishedDuration(ionVersion.getDuration() != null ? Ints.saturatedCast(ionVersion.getDuration()) : null);
+        BbcProgrammeGraphExtractor.setDurations(version, ionVersion);
         version.setProvider(BBC);
         if(ionVersion.getBroadcasts() != null) {
             for (IonBroadcast ionBroadcast : ionVersion.getBroadcasts()) {

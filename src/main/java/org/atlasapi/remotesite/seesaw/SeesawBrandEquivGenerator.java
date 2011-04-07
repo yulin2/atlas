@@ -109,6 +109,7 @@ public class SeesawBrandEquivGenerator implements EquivGenerator<Container<?>> {
                 Set<Integer> seriesNumbers = seriesNumbersBuilder.build();
                 if (! Strings.isNullOrEmpty(brand.getTitle()) && ! seriesNumbers.isEmpty()) {
                     String flattened = brand.getTitle().replaceAll("\\W", "").toLowerCase();
+                    flattened = flattened.replaceFirst("series$", "");
                     if (! Strings.isNullOrEmpty(flattened)) {
                         return Maybe.just(new BrandEquivKey(flattened, seriesNumbers));
                     }
@@ -135,6 +136,11 @@ public class SeesawBrandEquivGenerator implements EquivGenerator<Container<?>> {
                 return flattenedTitle.equals(target.flattenedTitle);
             }
             return false;
+        }
+        
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this).addValue(flattenedTitle).toString();
         }
     }
 }
