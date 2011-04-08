@@ -21,12 +21,17 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
@@ -103,7 +108,21 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
                 }
                 
                 BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, versions, clips);
-                return itemExtractor.extract(source);
+                Item item = itemExtractor.extract(source);
+                
+                if (item instanceof Episode) {
+                    Episode episode = (Episode) item;
+                    if (content.series() != null) {
+                        Series series = createSkeletonSeries(content.series());
+                        series.addContents(episode);
+                    }
+                    if (content.brand() != null) {
+                        Brand brand = createSkeletonBrand(content.brand());
+                        brand.addContents(episode);
+                    }
+                }
+                
+                return item;
             }
             SlashProgrammesSeriesContainer rdfSeries = content.series();
 			if (rdfSeries != null) {
@@ -119,6 +138,18 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    private Series createSkeletonSeries(SlashProgrammesSeriesContainer rdfSeries) {
+        String seriesUri = rdfSeries.uri();
+        Series series = new Series(seriesUri, BbcUriCanonicaliser.curieFor(seriesUri), Publisher.BBC);
+        return series;
+    }
+    
+    private Brand createSkeletonBrand(SlashProgrammesContainerRef rdfBrand) {
+        String brandUri = rdfBrand.uri();
+        Brand brand = new Brand(brandUri, BbcUriCanonicaliser.curieFor(brandUri), Publisher.BBC);
+        return brand;
     }
 
     private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {
