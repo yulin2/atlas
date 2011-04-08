@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
+import org.atlasapi.feeds.radioplayer.RadioPlayerService;
 import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -26,7 +27,7 @@ public class BbcScheduleController {
     private final BbcProgrammeAdapter remoteFetcher;
     private final ContentWriter writer;
     private final AdapterLog log;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCScheduleUpdater").build());
+    private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("singleBBCScheduleUpdater").build());
 
     public BbcScheduleController(ContentResolver localFetcher, BbcProgrammeAdapter remoteFetcher, ContentWriter writer, AdapterLog log) {
         this.localFetcher = localFetcher;
@@ -39,7 +40,13 @@ public class BbcScheduleController {
     public void updateDay(@PathVariable String service, @PathVariable String date, HttpServletResponse response) throws JAXBException {
         Preconditions.checkArgument(date.length() == 8, "the date must be 8 digits");
         String dateString = date.substring(0, 4)+"/"+date.substring(4, 6)+"/"+date.substring(6, 8);
-        String baseScheduleUri = RadioPlayerServices.all.get(service).getScheduleUri();
+        RadioPlayerService radioPlayerService = RadioPlayerServices.all.get(service);
+        if (radioPlayerService == null) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        
+        String baseScheduleUri = radioPlayerService.getScheduleUri();
         
         String scheduleUri = String.format("%s/%s.xml", baseScheduleUri, dateString);
         BbcScheduledProgrammeUpdater updater = new BbcScheduledProgrammeUpdater(localFetcher, remoteFetcher, writer, ImmutableSet.of(scheduleUri), log);
