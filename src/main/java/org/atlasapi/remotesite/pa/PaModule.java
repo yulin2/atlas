@@ -82,6 +82,6 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        return new PaSingleDateUpdatingController(paProgrammeProcessor(), log, paProgrammeDataStore());
+        return new PaSingleDateUpdatingController(paProgrammeProcessor(), scheduleResolver, log, paProgrammeDataStore());
     }
 }
