@@ -87,10 +87,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 }
                 if (brand.hasValue()) {
                     brand.requireValue().addOrReplace(episode.requireValue());
-                    contentWriter.createOrUpdate(brand.requireValue(), false);
-                } else {
-                    contentWriter.createOrUpdate(episode.requireValue());
                 }
+                contentWriter.createOrUpdate(episode.requireValue());
                 
                 createOrUpdatePeople(episode.requireValue());
             }
