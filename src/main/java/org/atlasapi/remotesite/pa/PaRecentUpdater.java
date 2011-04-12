@@ -14,7 +14,7 @@ public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable 
     private final PaProgrammeDataStore fileManager;
 
     public PaRecentUpdater(PaProgDataProcessor processor, PaProgrammeDataStore fileManager, AdapterLog log) {
-        super(processor, log);
+        super(processor, fileManager, log);
         this.fileManager = fileManager;
     }
     
