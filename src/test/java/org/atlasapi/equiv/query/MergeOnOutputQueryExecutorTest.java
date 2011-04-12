@@ -10,7 +10,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
@@ -23,13 +23,16 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	private final Brand brand2 = new Brand("2", "c:2", Publisher.BBC);
 	private final Brand brand3 = new Brand("3", "c:3", Publisher.YOUTUBE);
 
-	private final Item item1 = new Item("i1", "c:i1", Publisher.BBC);
-	private final Item item2 = new Item("i2", "c:i2", Publisher.YOUTUBE);
+	private final Episode item1 = new Episode("i1", "c:i1", Publisher.BBC);
+	private final Episode item2 = new Episode("i2", "c:i2", Publisher.YOUTUBE);
 
 	private final Clip clip1 = new Clip("c1", "c:c1", Publisher.YOUTUBE);
 	
 	@Override
 	protected void setUp() throws Exception {
+	    brand1.addContents(item1);
+	    brand3.addContents(item2);
+	    
 		brand3.addEquivalentTo(brand1);
 		item1.addEquivalentTo(item2);
 		item2.addClip(clip1);
@@ -39,10 +42,16 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(brand1, brand2, brand3));
 		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.YOUTUBE, Publisher.BBC)));
 		assertEquals(ImmutableList.of(brand3, brand2), merger.discover(query));
-		assertEquals(ImmutableList.of(brand3, brand2), merger.executeUriQuery(ImmutableList.of("1", "2", "3"), query));
+		
+		List<Identified> identified = merger.executeUriQuery(ImmutableList.of("1", "2", "3"), query);
+        assertEquals(ImmutableList.of(brand3, brand2), identified);
+        Brand brand = (Brand) Iterables.get(identified, 0);
+        assertEquals(brand3, brand);
+        Episode item = Iterables.getOnlyElement(brand.getContents());
+        assertEquals(item.getClips(), ImmutableList.of(clip1));
 	}
 	
-	public void testMergingItems() throws Exception {
+	public void testMergingEpisodes() throws Exception {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
 		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));

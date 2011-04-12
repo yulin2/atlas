@@ -16,6 +16,8 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         
         assertNotNull(programme.getClips());
         assertFalse(programme.getClips().isEmpty());
+        assertTrue(programme.getImage().contains("b00w4hjy"));
+        assertTrue(programme.getThumbnail().contains("b00w4hjy"));
         
         for (Clip clip: programme.getClips()) {
             assertNotNull(clip.getCanonicalUri());

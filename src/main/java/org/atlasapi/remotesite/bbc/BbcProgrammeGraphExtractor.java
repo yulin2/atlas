@@ -53,6 +53,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
@@ -62,6 +63,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.time.Clock;
@@ -124,9 +126,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                 
                 IonVersion ionVersion = ionVersions.get(version.getCanonicalUri());
                 if(ionVersion != null) {
-                    if(ionVersion.getDuration() != null) {
-                        version.setDuration(standardSeconds(ionVersion.getDuration()));
-                    }
+                    setDurations(version, ionVersion);
                     version.setLastUpdated(ionVersion.getUpdated());
                     
                     if(!Strings.isNullOrEmpty(ionVersion.getGuidanceText())){ 
@@ -149,6 +149,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         }
 
         return item;
+    }
+
+    public static void setDurations(Version version, IonVersion ionVersion) {
+        if(ionVersion.getDuration() != null) {
+            Duration duration = standardSeconds(ionVersion.getDuration());
+            version.setDuration(duration);
+            version.setPublishedDuration(Ints.saturatedCast(duration.getStandardSeconds()));
+        }
     }
 
     private Set<Encoding> encodingsFrom(IonVersion ionVersion, String pid) {

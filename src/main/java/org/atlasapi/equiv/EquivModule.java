@@ -14,11 +14,18 @@ permissions and limitations under the License. */
 
 package org.atlasapi.equiv;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.equiv.tasks.BrandEquivUpdateTaskRunner;
+import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
+import org.atlasapi.equiv.tasks.BroadcastMatchingItemEquivGenerator;
+import org.atlasapi.equiv.tasks.DelegatingItemEquivGenerator;
+import org.atlasapi.equiv.tasks.ItemBasedBrandEquivUpdater;
+import org.atlasapi.equiv.tasks.ItemEquivGenerator;
+import org.atlasapi.equiv.tasks.persistence.CachingEquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.MongoEquivResultStore;
+import org.atlasapi.equiv.tasks.persistence.www.EquivResultController;
+import org.atlasapi.equiv.tasks.persistence.www.SingleBrandEquivUpdateController;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
@@ -30,6 +37,7 @@ import org.atlasapi.persistence.equiv.MongoEquivStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
+import org.atlasapi.remotesite.seesaw.SeesawBrandEquivGenerator;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +55,8 @@ public class EquivModule {
 	private @Autowired DatabasedMongo db;
 	private @Autowired AggregateContentListener aggregateContentListener;
 	private @Value("${freebase.enabled}") String freebaseEnabled;
+	private @Value("${seesaw.equiv.enabled}") String seesawEquivEnabled;
+	private @Value("${equiv.updater.enabled}") String updaterEnabled;
 	
 	@Bean EquivController manualEquivAssignmentController() {
 		return new EquivController(store());
@@ -57,11 +67,15 @@ public class EquivModule {
 	}
 	
 	@Bean EquivContentListener equivContentListener() {
-	    List<EquivGenerator<Container<?>>> brandEquivGenerators = Boolean.parseBoolean(freebaseEnabled) 
-	            ? ImmutableList.<EquivGenerator<Container<?>>>of(new FreebaseBrandEquivGenerator())
-	            : ImmutableList.<EquivGenerator<Container<?>>>of();
+	    ImmutableList.Builder<EquivGenerator<Container<?>>> brandEquivGenerators = ImmutableList.builder(); 
+	    if (Boolean.parseBoolean(freebaseEnabled)) {
+	        brandEquivGenerators.add(new FreebaseBrandEquivGenerator());
+	    }
+	    if (Boolean.parseBoolean(seesawEquivEnabled)) {
+	        brandEquivGenerators.add(new SeesawBrandEquivGenerator(new MongoDbBackedContentStore(db)));
+	    }
 	    
-	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators, store());
+	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators.build(), store());
 	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());
 	    
 	    EquivContentListener equivContentListener = new EquivContentListener(brandUpdater, itemUpdater);
@@ -72,10 +86,33 @@ public class EquivModule {
 	private @Autowired SimpleScheduler scheduler;
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired AdapterLog log;
-	private @Autowired MongoDbBackedContentStore contentStore;
 	
 	@PostConstruct
 	public void scheduleEquivUpdaters() {
-	    scheduler.schedule(new BrandEquivUpdateTaskRunner(contentStore, scheduleResolver, log), RepetitionRules.every(Duration.standardHours(10)));
+	    if(Boolean.valueOf(updaterEnabled)) {
+	        scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), itemBasedBrandEquivUpdater(), equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+	    }
+	}
+	
+	@Bean ItemEquivGenerator itemEquivGenerator() {
+	    ItemEquivGenerator broadcastEquivGen = new BroadcastMatchingItemEquivGenerator(scheduleResolver);
+	    return new DelegatingItemEquivGenerator(ImmutableList.of(broadcastEquivGen));
+	}
+	
+	@Bean ItemBasedBrandEquivUpdater itemBasedBrandEquivUpdater() {
+	    MongoDbBackedContentStore mongoDbBackedContentStore = new MongoDbBackedContentStore(db);
+	    return new ItemBasedBrandEquivUpdater(itemEquivGenerator(), mongoDbBackedContentStore, mongoDbBackedContentStore).writesResults(true);
+	}
+	
+	@Bean EquivResultStore equivResultStore() {
+	    return new CachingEquivResultStore(new MongoEquivResultStore(db));
+	}
+	
+	@Bean EquivResultController equivResultController() {
+	    return new EquivResultController(equivResultStore());
+	}
+	
+	@Bean SingleBrandEquivUpdateController singleBrandUpdater() {
+	    return new SingleBrandEquivUpdateController(itemBasedBrandEquivUpdater(), new MongoDbBackedContentStore(db));
 	}
 }

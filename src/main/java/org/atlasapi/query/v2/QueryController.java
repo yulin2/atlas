@@ -39,11 +39,22 @@ public class QueryController extends BaseController {
 	
 	private final KnownTypeQueryExecutor executor;
 	private static final int MAX_LIMIT = 50;
+	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
     public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
 	    super(configFetcher, log, outputter);
         this.executor = executor;
 	}
+    
+    @RequestMapping("/")
+    public String redirect() {
+        return "redirect:http://docs.atlasapi.org";
+    }
+    
+    @RequestMapping(value = {"/2.0/*.*"})
+    public void onePointZero(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        outputter.writeError(request, response, UNSUPPORTED);
+    }
 	
 	@RequestMapping("/3.0/discover.*")
 	public void discover(HttpServletRequest request, HttpServletResponse response) throws IOException {
