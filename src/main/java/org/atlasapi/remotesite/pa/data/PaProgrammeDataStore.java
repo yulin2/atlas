@@ -16,4 +16,5 @@ public interface PaProgrammeDataStore {
     
     List<File> localFiles(Predicate<File> filter);
     
+    File copyForProcessing(File file);
 }

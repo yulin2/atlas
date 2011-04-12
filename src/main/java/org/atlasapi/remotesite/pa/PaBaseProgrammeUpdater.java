@@ -19,6 +19,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
+import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -42,8 +43,11 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
     private final PaChannelMap channelMap = new PaChannelMap();
     private List<Channel> supportedChannels = ImmutableList.of();
 
-    public PaBaseProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log) {
+    private final PaProgrammeDataStore dataStore;
+
+    public PaBaseProgrammeUpdater(PaProgDataProcessor processor, PaProgrammeDataStore dataStore, AdapterLog log) {
         this.processor = processor;
+        this.dataStore = dataStore;
         this.log = log;
     }
     
@@ -92,6 +96,8 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                     Matcher matcher = FILEDATE.matcher(filename);
                     
                     if (matcher.matches()) {
+                        File fileToProcess = dataStore.copyForProcessing(file);
+                        
                         final DateTimeZone zone = getTimeZone(matcher.group(1));
                         log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processing file "+filename+" with timezone "+zone.toString()));
                         final AtomicInteger recordsProcessed = new AtomicInteger();
@@ -121,7 +127,7 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                             }
                         });
 
-                        reader.parse(filename);
+                        reader.parse(fileToProcess.toURI().toString());
                     }
                 } catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing file " + file.toString()));
