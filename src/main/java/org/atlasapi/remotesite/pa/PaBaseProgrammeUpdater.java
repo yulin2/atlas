@@ -38,8 +38,8 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
     private boolean isRunning = false;
 
     private final PaProgDataProcessor processor;
-    private final ExecutorService executor = Executors.newFixedThreadPool(20);
-    private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 25);
+    private final ExecutorService executor = Executors.newFixedThreadPool(25);
+    private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 50);
     private final PaChannelMap channelMap = new PaChannelMap();
     private List<Channel> supportedChannels = ImmutableList.of();
 
