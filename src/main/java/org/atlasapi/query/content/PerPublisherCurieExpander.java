@@ -55,9 +55,24 @@ public class PerPublisherCurieExpander implements CurieExpander {
 					String[] components = withoutPrefix.split(separator);
 					return String.format("http://www.channel4.com/programmes/%s/4od#%s", components[0], components[1]);
 				} else {
-					return String.format("http://www.channel4.com/programmes/%s", withoutPrefix.replace("-series", "/episode-guide/series").replace("-episode", "/episode"));
+				    Matcher m = c4CuriePattern.matcher(withoutPrefix);
+				    if(m.matches()) {
+				        StringBuilder expanded = new StringBuilder("http://www.channel4.com/programmes/").append(m.group(1));
+				        if(m.group(2) != null) {
+				            expanded.append("/episode-guide/");
+				            expanded.append(m.group(2).substring(1));
+				            if(m.group(3) != null) {
+	                            expanded.append("/");
+	                            expanded.append(m.group(3).substring(1));
+				            }
+				        }
+				        return expanded.toString();
+				    }
+					return null;
 				}
 			}
+			
+			final Pattern c4CuriePattern = Pattern.compile("([a-zA-Z0-9-]+?)(-series-\\d+)?(-episode-\\d+)?");
 
 			final Pattern c4BrandIdPattern = Pattern.compile("http://www.channel4.com/programmes/([^\\./&=]+)(?:/episode-guide/(series-\\d+)(?:/(episode-\\d+))?)?");
 			final Pattern c4odPattern = Pattern.compile("http://www.channel4.com/programmes/([^\\./&=]+)/4od#([^\\./&=]+).*");

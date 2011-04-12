@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import javax.xml.bind.JAXBException;
 
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -20,7 +20,6 @@ import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 /**
  * Updater to download advance BBC schedules and get URIplay to load data for
@@ -69,7 +68,11 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
                         Item fetchedItem = (Item) fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
                         if (fetchedItem != null) {
                             writeFetchedItem(fetchedItem);
+                        } else {
+                            log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Not processing programme with pid " + programme.pid()+ " it can't be retrieved by the fetcher"));
                         }
+                    } else {
+                        log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Not processing programme with pid " + programme.pid()+ " as it's not an episode"));
                     }
                 } catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception updating programme with pid " + programme.pid()));
@@ -84,33 +87,28 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
         if (fetchedItem instanceof Episode) {
             Episode fetchedEpisode = (Episode) fetchedItem;
             if (fetchedEpisode.getContainer() != null) {
-                Brand fetchedBrand = fetchBrandFor(fetchedEpisode.getContainer().getCanonicalUri());
-                if (fetchedBrand != null) {
-                    addOrReplaceEpisode(fetchedEpisode, fetchedBrand);
-                    writer.createOrUpdate(fetchedBrand, true);
+                Container<Item> fetchedContainer = fetchContainerFor(fetchedEpisode.getContainer().getCanonicalUri());
+                if (fetchedContainer != null) {
+                    fetchedContainer.addOrReplace(fetchedEpisode);
+                    writer.createOrUpdate(fetchedContainer, true);
+                } else {
+                    log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Item "+fetchedItem+" it's Brand can't be fetched"));
                 }
+            } else {
+                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Item "+fetchedItem+" as it has no container"));
             }
         } else {
             writer.createOrUpdate(fetchedItem);
         }
     }
 
-    private void addOrReplaceEpisode(Episode fetchedEpisode, Brand fetchedBrand) {
-        if (!fetchedBrand.getContents().contains(fetchedEpisode)) {
-            fetchedBrand.addContents(fetchedEpisode);
-        } else { // replace
-            List<Episode> currentItems = Lists.newArrayList(fetchedBrand.getContents());
-            currentItems.set(currentItems.indexOf(fetchedEpisode), fetchedEpisode);
-            fetchedBrand.setContents(currentItems);
+    @SuppressWarnings("unchecked")
+    private Container<Item> fetchContainerFor(String containerUri) {
+        Container<Item> fetchedContainer = (Container<Item>) localFetcher.findByCanonicalUri(containerUri);
+        if (fetchedContainer == null) {
+            fetchedContainer = (Container<Item>) fetcher.fetch(containerUri);
         }
-    }
-
-    private Brand fetchBrandFor(String brandUri) {
-        Brand fetchedBrand = (Brand) localFetcher.findByCanonicalUri(brandUri);
-        if (fetchedBrand == null) {
-            fetchedBrand = (Brand) fetcher.fetch(brandUri);
-        }
-        return fetchedBrand;
+        return fetchedContainer;
     }
 
     @Override
@@ -126,6 +124,7 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
                 public void run() {
                     log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Updating from schedule: " + uri));
                     update(uri);
+                    log.record(new AdapterLogEntry(Severity.DEBUG).withSource(getClass()).withDescription("Finished updating from schedule: " + uri));
                     done.countDown();
                 }
             });

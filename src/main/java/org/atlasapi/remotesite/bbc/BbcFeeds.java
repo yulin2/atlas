@@ -7,7 +7,7 @@ public class BbcFeeds {
 
 	private static final String SLASH_PROGRAMMES_BASE = "http://www.bbc.co.uk/programmes/";
 	
-	private static final Pattern PID_FINDER = Pattern.compile("([bp]00[a-z0-9]+)");
+	private static final Pattern PID_FINDER = Pattern.compile("([bp]\\d\\d[a-z0-9]+)");
 	
 	public static String pidFrom(String uri) {
 		Matcher matcher = PID_FINDER.matcher(uri);

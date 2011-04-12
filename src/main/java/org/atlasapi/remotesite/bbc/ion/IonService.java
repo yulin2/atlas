@@ -10,6 +10,32 @@ import com.metabroadcast.common.media.MimeType;
 
 public enum IonService {
 
+	IPLAYER_INTL_STREAM_MP3 {
+		@Override
+		public void applyTo(Encoding encoding) {
+			encoding.setDataContainerFormat(MimeType.AUDIO_MP3);
+			encoding.setAudioCoding(MimeType.AUDIO_MP3);
+		}
+
+		@Override
+		public void applyTo(Policy policy) {
+			policy.addAvailableCountry(Countries.ALL);
+		}
+	},
+	
+	IPLAYER_INTL_STREAM_AAC_WS_CONCRETE {
+		@Override
+		public void applyTo(Encoding encoding) {
+			encoding.setDataContainerFormat(MimeType.AUDIO_AAC);
+			encoding.setAudioCoding(MimeType.AUDIO_AAC);
+		}
+		
+		@Override
+		public void applyTo(Policy policy) {
+			policy.addAvailableCountry(Countries.ALL);
+		}
+	},
+	
 	IPLAYER_STREAMING_H264_FLV_LO {
 		
 		@Override

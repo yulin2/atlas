@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.pa;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -36,6 +37,7 @@ public class PaModule {
     private @Autowired ContentWriters contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired AdapterLog log;
+    private @Autowired ScheduleResolver scheduleResolver;
     
     private @Value("${pa.ftp.username}") String ftpUsername;
     private @Value("${pa.ftp.password}") String ftpPassword;
@@ -62,12 +64,13 @@ public class PaModule {
         return new DefaultPaProgrammeDataStore(localFilesPath, s3client);
     }
     
-    @Bean PaProgrammeProcessor paProgrammeProcessor() {
+    @Bean PaProgDataProcessor paProgrammeProcessor() {
         return new PaProgrammeProcessor(contentWriter, contentResolver, log);
     }
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
-        return new PaCompleteUpdater(paProgrammeProcessor(), paProgrammeDataStore(), log);
+        PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
+        return new PaCompleteUpdater(processor, paProgrammeDataStore(), log);
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
@@ -79,6 +82,6 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        return new PaSingleDateUpdatingController(paProgrammeProcessor(), log, paProgrammeDataStore());
+        return new PaSingleDateUpdatingController(paProgrammeProcessor(), scheduleResolver, log, paProgrammeDataStore());
     }
 }

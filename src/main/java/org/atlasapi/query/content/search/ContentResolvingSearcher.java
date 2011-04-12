@@ -4,9 +4,12 @@ import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.content.criteria.ContentQueryBuilder;
+import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -19,7 +22,9 @@ import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.search.model.Search;
 import org.atlasapi.search.model.SearchResults;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 
 public class ContentResolvingSearcher implements SearchResolver {
@@ -38,8 +43,19 @@ public class ContentResolvingSearcher implements SearchResolver {
             return ImmutableList.of();
         }
 
-        List<Identified> content = contentResolver.executeUriQuery(searchResults.toUris(), ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(appConfig));
-        return filterOutSubItems(content);
+        ContentQuery query = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
+        List<Identified> content = contentResolver.executeUriQuery(searchResults.toUris(), query.copyWithApplicationConfiguration(appConfig));
+        return filterOutSubItems(Identified.sort(filterByPublisher(content, ImmutableList.copyOf(publishers)), searchResults.toUris()));
+    }
+    
+    // This is a stop-gap until we find out what's going wrong
+    private List<Identified> filterByPublisher(Iterable<Identified> contents, final List<Publisher> publishers) {
+        return ImmutableList.copyOf(Iterables.filter(contents, new Predicate<Identified>() {
+            @Override
+            public boolean apply(Identified input) {
+                return input instanceof Described && publishers.contains(((Described) input).getPublisher());
+            }
+        }));
     }
 
     private List<Identified> filterOutSubItems(Iterable<Identified> contents) {

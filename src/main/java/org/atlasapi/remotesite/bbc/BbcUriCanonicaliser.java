@@ -25,10 +25,10 @@ import com.google.common.collect.Lists;
 public class BbcUriCanonicaliser implements Canonicaliser {
 
 	private static final List<Pattern> alternateUris = Lists.newArrayList(
-			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/programmes/([bp]00[^\\./]+)(\\.rdf)?"),
-			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/([bp]00[^\\./]+)"),
-			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/([bp]00[^\\./]+)/.*?(?<!\\.rdf)"),
-			Pattern.compile("https?://(?:www\\.)?fanhu.bz.*?([bp]00[^\\./]+).*"),
+			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/programmes/([bp]0\\d[^\\./]+)(\\.rdf)?"),
+			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/([bp]0\\d[^\\./]+)"),
+			Pattern.compile("https?://(?:www\\.)?bbc\\.co\\.uk/iplayer/.*?/([bp]0\\d[^\\./]+)/.*?(?<!\\.rdf)"),
+			Pattern.compile("https?://(?:www\\.)?fanhu.bz.*?([bp]0\\d[^\\./]+).*"),
 			Pattern.compile("https?://bbc\\.co\\.uk/i/([^\\.]+?)/?")
 	);
 
@@ -37,7 +37,7 @@ public class BbcUriCanonicaliser implements Canonicaliser {
 			Matcher matcher = p.matcher(uri);
 			if (matcher.matches()) {
 				String pid = matcher.group(1);
-				if (pid.startsWith("b00") || pid.startsWith("p00")) {
+				if (pid.startsWith("b0") || pid.startsWith("p0")) {
 					return pid;
 				} else {
 					return "b00" + pid;
