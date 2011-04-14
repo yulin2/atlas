@@ -390,6 +390,15 @@ public class PaChannelMap {
         channelMap.put(1562, Channel.SKY_3D);
         channelMap.put(1567, Channel.SKY_SPORTS_4_HD);
         
+        channelMap.put(1628, Channel.SKY_ATLANTIC);
+        channelMap.put(1629, Channel.SKY_ATLANTIC_HD);
+        channelMap.put(1318, Channel.SKY_MOVIES_SHOWCASE);
+        channelMap.put(1536, Channel.SKY_MOVIES_SHOWCASE_HD);
+        channelMap.put(122, Channel.SKY_LIVING);
+        channelMap.put(1070, Channel.SKY_LIVINGIT);
+        channelMap.put(1164, Channel.FX_PLUS);
+        channelMap.put(1442, Channel.BBC_ALBA);
+        
         channelMap.put(8, Channel.BBC_RADIO_RADIO3);
         channelMap.put(33, Channel.BBC_RADIO_RADIO4);
         channelMap.put(34, Channel.BBC_RADIO_RADIO4_LW);
