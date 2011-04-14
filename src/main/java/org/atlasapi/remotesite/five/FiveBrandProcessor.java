@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.five;
 
+import java.io.StringReader;
 import java.util.Set;
 
 import nu.xom.Builder;
@@ -15,10 +16,12 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.persistence.system.RemoteSiteClient;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.HttpResponse;
 
 public class FiveBrandProcessor {
     
@@ -28,12 +31,14 @@ public class FiveBrandProcessor {
     private final AdapterLog log;
     private final FiveEpisodeProcessor episodeProcessor;
     private final String baseApiUrl;
+    private final RemoteSiteClient<HttpResponse> httpClient;
 
-    public FiveBrandProcessor(ContentWriter writer, AdapterLog log, String baseApiUrl) {
+    public FiveBrandProcessor(ContentWriter writer, AdapterLog log, String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient) {
         this.writer = writer;
         this.log = log;
         this.baseApiUrl = baseApiUrl;
-        this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl);
+        this.httpClient = httpClient;
+        this.episodeProcessor = new FiveEpisodeProcessor(baseApiUrl, httpClient);
     }
     
     public void processShow(Element element) {
@@ -57,7 +62,7 @@ public class FiveBrandProcessor {
         
         Builder builder = new Builder(new EpisodeProcessingNodeFactory(brand, episodeProcessor));
         try {
-            builder.build(getShowUri(id) + WATCHABLES_URL_SUFFIX);
+            builder.build(new StringReader(httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body()));
             
             writer.createOrUpdate(brand, true);
         }
