@@ -20,7 +20,7 @@ import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -30,9 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
-import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class FiveEpisodeProcessor {
 
@@ -48,18 +46,18 @@ public class FiveEpisodeProcessor {
 
     private final GenreMap genreMap = new FiveGenreMap();
     private final DateTimeFormatter dateParser = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZZ");
-    private SimpleHttpClient screenScrapingClient;
+    private final RemoteSiteClient<HttpResponse> httpClient;
     private final Map<String, Series> seriesMap = Maps.newHashMap();
 
     private final String baseApiUrl;
 
-    public FiveEpisodeProcessor(String baseApiUrl) {
+    public FiveEpisodeProcessor(String baseApiUrl, RemoteSiteClient<HttpResponse> httpClient) {
         
         this.baseApiUrl = baseApiUrl;
-        screenScrapingClient = HttpClients.screenScrapingClient();
+        this.httpClient = httpClient;
     }
     
-    public Episode processEpisode(Element element) throws HttpException {
+    public Episode processEpisode(Element element) throws Exception {
         
         String id = childValue(element, "id");
 
@@ -89,7 +87,7 @@ public class FiveEpisodeProcessor {
         return episode;
     }
 
-    private Version getVersion(Element element) throws HttpException {
+    private Version getVersion(Element element) throws Exception {
         Version version = new Version();
         version.setDuration(Duration.standardSeconds(Long.parseLong(childValue(element, "duration"))));
         version.setProvider(Publisher.FIVE);
@@ -114,7 +112,7 @@ public class FiveEpisodeProcessor {
         return broadcasts;
     }
 
-    private Location getLocation(Element element) throws HttpException {
+    private Location getLocation(Element element) throws Exception {
         
         String originalVodUri = childValue(element, "vod_url").trim();
         
@@ -142,7 +140,6 @@ public class FiveEpisodeProcessor {
         location.setPolicy(policy);
         return location;
     }
-    
     
 
     private void processSeries(Episode episode, Element element) {
@@ -202,9 +199,9 @@ public class FiveEpisodeProcessor {
         return baseApiUrl + "/watchables/" + id;
     }
 
-    private String getLocationUri(String originalUri) throws HttpException {
-        
-        HttpResponse httpResponse = screenScrapingClient.get(originalUri);
+    private String getLocationUri(String originalUri) throws Exception {
+
+        HttpResponse httpResponse = httpClient.get(originalUri);
 
         return httpResponse.finalUrl();
     }

@@ -269,7 +269,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 }
             }
         }
-
+        
         episode.setPeople(people(progData));
 
         Version version = findBestVersion(episode.getVersions());
@@ -284,8 +284,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
 
         DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
+        
         Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
         broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
+        
+        if (progData.getAttr() != null) {
+            broadcast.setRepeat(getBooleanValue(progData.getAttr().getRepeat()));
+        }
+        
         return broadcast;
     }
     
@@ -380,5 +386,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     protected static String programmeId(ProgData progData) {
         return ! Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? progData.getRtFilmnumber() : progData.getProgId();
+    }
+    
+    private static Boolean getBooleanValue(String value) {
+        if (value != null) {
+            return value.equalsIgnoreCase(YES);
+        }
+        return null;
     }
 }
