@@ -29,6 +29,7 @@ import org.atlasapi.equiv.tasks.persistence.www.SingleBrandEquivUpdateController
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
@@ -37,8 +38,6 @@ import org.atlasapi.persistence.equiv.MongoEquivStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
-import org.atlasapi.remotesite.seesaw.SeesawBrandEquivGenerator;
-import org.atlasapi.remotesite.seesaw.SeesawItemEquivGenerator;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,9 +73,9 @@ public class EquivModule {
 	        brandEquivGenerators.add(new FreebaseBrandEquivGenerator());
 	    }
 	    if (Boolean.parseBoolean(seesawEquivEnabled)) {
-	        SeesawBrandEquivGenerator seesawBrandEquivGenerator = new SeesawBrandEquivGenerator(new MongoDbBackedContentStore(db));
+	        PublisherCachingBrandEquivGenerator seesawBrandEquivGenerator = new PublisherCachingBrandEquivGenerator(Publisher.SEESAW, new MongoDbBackedContentStore(db));
             brandEquivGenerators.add(seesawBrandEquivGenerator);
-	        itemEquivGenerators.add(new SeesawItemEquivGenerator(seesawBrandEquivGenerator));
+	        itemEquivGenerators.add(new ItemDelegatingToBrandEquivGenerator(seesawBrandEquivGenerator));
 	    }
 	    
 	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators.build(), store());

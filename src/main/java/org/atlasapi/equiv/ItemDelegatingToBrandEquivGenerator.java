@@ -1,18 +1,19 @@
-package org.atlasapi.remotesite.seesaw;
+package org.atlasapi.equiv;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Equiv;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.remotesite.EquivGenerator;
 
 import com.google.common.collect.ImmutableList;
 
-public class SeesawItemEquivGenerator implements EquivGenerator<Item> {
+public class ItemDelegatingToBrandEquivGenerator implements EquivGenerator<Item> {
     
-    private final SeesawBrandEquivGenerator brandEquivGenerator;
+    private final EquivGenerator<Container<?>> brandEquivGenerator;
 
-    public SeesawItemEquivGenerator(SeesawBrandEquivGenerator brandEquivGenerator) {
+    public ItemDelegatingToBrandEquivGenerator(EquivGenerator<Container<?>> brandEquivGenerator) {
         this.brandEquivGenerator = brandEquivGenerator;
     }
 

@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.seesaw;
+package org.atlasapi.equiv;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 
@@ -30,12 +30,14 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.caching.BackgroundComputingValue;
 import com.metabroadcast.common.persistence.mongo.MongoQueryBuilder;
 
-public class SeesawBrandEquivGenerator implements EquivGenerator<Container<?>> {
+public class PublisherCachingBrandEquivGenerator implements EquivGenerator<Container<?>> {
     
     private final BackgroundComputingValue<Map<BrandEquivKey, String>> brandKeys;
+    private final Publisher publisher;
 
-    public SeesawBrandEquivGenerator(MongoDbBackedContentStore retrospectiveContentLister) {
-        this.brandKeys = new BackgroundComputingValue<Map<BrandEquivKey, String>>(Duration.standardHours(1), new BrandEquivKeyGenerator(retrospectiveContentLister));
+    public PublisherCachingBrandEquivGenerator(Publisher publisher, MongoDbBackedContentStore retrospectiveContentLister) {
+        this.publisher = publisher;
+        this.brandKeys = new BackgroundComputingValue<Map<BrandEquivKey, String>>(Duration.standardHours(1), new BrandEquivKeyGenerator(publisher, retrospectiveContentLister));
         this.brandKeys.start();
     }
     
@@ -46,7 +48,7 @@ public class SeesawBrandEquivGenerator implements EquivGenerator<Container<?>> {
 
     @Override
     public List<Equiv> equivalent(Container<?> content) {
-        if (content != null && Publisher.SEESAW != content.getPublisher()) {
+        if (content != null && publisher != content.getPublisher()) {
             Maybe<BrandEquivKey> fromBrand = BrandEquivKey.fromBrand(content);
             if (fromBrand.hasValue()) {
                 
@@ -63,11 +65,12 @@ public class SeesawBrandEquivGenerator implements EquivGenerator<Container<?>> {
     class BrandEquivKeyGenerator implements Callable<Map<BrandEquivKey, String>> {
         
         private final MongoDbBackedContentStore retroLister;
-        private final MongoQueryBuilder query = where().fieldEquals("publisher", Publisher.SEESAW.key());
+        private final MongoQueryBuilder query;
         private static final int BATCH_SIZE = 10;
 
-        public BrandEquivKeyGenerator(MongoDbBackedContentStore retroLister) {
+        public BrandEquivKeyGenerator(Publisher publisher, MongoDbBackedContentStore retroLister) {
             this.retroLister = retroLister;
+            this.query = where().fieldEquals("publisher", publisher.key());
         }
         
         @Override
