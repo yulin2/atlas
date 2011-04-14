@@ -38,6 +38,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
 import org.atlasapi.remotesite.seesaw.SeesawBrandEquivGenerator;
+import org.atlasapi.remotesite.seesaw.SeesawItemEquivGenerator;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,15 +69,18 @@ public class EquivModule {
 	
 	@Bean EquivContentListener equivContentListener() {
 	    ImmutableList.Builder<EquivGenerator<Container<?>>> brandEquivGenerators = ImmutableList.builder(); 
+	    ImmutableList.Builder<EquivGenerator<Item>> itemEquivGenerators = ImmutableList.builder();
 	    if (Boolean.parseBoolean(freebaseEnabled)) {
 	        brandEquivGenerators.add(new FreebaseBrandEquivGenerator());
 	    }
 	    if (Boolean.parseBoolean(seesawEquivEnabled)) {
-	        brandEquivGenerators.add(new SeesawBrandEquivGenerator(new MongoDbBackedContentStore(db)));
+	        SeesawBrandEquivGenerator seesawBrandEquivGenerator = new SeesawBrandEquivGenerator(new MongoDbBackedContentStore(db));
+            brandEquivGenerators.add(seesawBrandEquivGenerator);
+	        itemEquivGenerators.add(new SeesawItemEquivGenerator(seesawBrandEquivGenerator));
 	    }
 	    
 	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators.build(), store());
-	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());
+	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(itemEquivGenerators.build(), store());
 	    
 	    EquivContentListener equivContentListener = new EquivContentListener(brandUpdater, itemUpdater);
 	    aggregateContentListener.addListener(equivContentListener);

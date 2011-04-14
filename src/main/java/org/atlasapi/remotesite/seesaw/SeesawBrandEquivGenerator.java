@@ -46,7 +46,7 @@ public class SeesawBrandEquivGenerator implements EquivGenerator<Container<?>> {
 
     @Override
     public List<Equiv> equivalent(Container<?> content) {
-        if (Publisher.SEESAW != content.getPublisher()) {
+        if (content != null && Publisher.SEESAW != content.getPublisher()) {
             Maybe<BrandEquivKey> fromBrand = BrandEquivKey.fromBrand(content);
             if (fromBrand.hasValue()) {
                 
