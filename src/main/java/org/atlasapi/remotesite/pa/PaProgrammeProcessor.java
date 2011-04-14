@@ -325,6 +325,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private List<CrewMember> people(ProgData progData) {
         List<CrewMember> people = Lists.newArrayList();
         
+        for (CastMember cast: progData.getCastMember()) {
+            Actor actor = Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA);
+            if (! people.contains(actor)) {
+                people.add(actor);
+            }
+        }
+        
         for (StaffMember staff: progData.getStaffMember()) {
             String roleKey = staff.getRole().toLowerCase().replace(' ', '_');
             for (String name: personSplitter.split(staff.getPerson())) {
@@ -332,13 +339,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 if (! people.contains(crewMember)) {
                     people.add(crewMember);
                 }
-            }
-        }
-        
-        for (CastMember cast: progData.getCastMember()) {
-            Actor actor = Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA);
-            if (! people.contains(actor)) {
-                people.add(actor);
             }
         }
         
