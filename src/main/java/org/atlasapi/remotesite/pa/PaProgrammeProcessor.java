@@ -12,13 +12,11 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.mongo.GroupContentNotExistException;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -47,7 +45,6 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
-    private static final String PA_BASE_URL = "http://pressassociation.com";
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
     private static final String BROADCAST_ID_PREFIX = "pa:";
     private static final String YES = "yes";
@@ -64,11 +61,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private final GenreMap genreMap = new PaGenreMap();
     
     private final Splitter personSplitter = Splitter.on(", ");
+    private final PaPersonWriter personWriter;
 
     public PaProgrammeProcessor(ContentWriters contentWriter, ContentResolver contentResolver, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
         this.log = log;
+        this.personWriter = new PaPersonWriter(contentWriter, contentResolver, log);
     }
 
     public void process(ProgData progData, Channel channel, DateTimeZone zone) {
@@ -90,7 +89,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 }
                 contentWriter.createOrUpdate(episode.requireValue());
                 
-                createOrUpdatePeople(episode.requireValue());
+                personWriter.createOrUpdatePeople(episode.requireValue());
             }
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
@@ -122,35 +121,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(episode);
     }
     
-    private void createOrUpdatePeople(Episode episode) {
-        for (CrewMember crewMember: episode.people()) {
-            Identified resolvedContent = contentResolver.findByCanonicalUri(crewMember.getCanonicalUri());
-            
-            Person person = null;
-            if (resolvedContent instanceof Person) {
-                person = (Person) resolvedContent;
-            } else {
-                person = crewMember.toPerson();
-            }
-            person.addContents(episode);
-            person.setLastUpdated(new DateTime(DateTimeZones.UTC));
-            person.setMediaType(null);
-            
-            try {
-                contentWriter.createOrUpdateSkeleton(person);
-            } catch (GroupContentNotExistException e) {
-                log.record(new AdapterLogEntry(Severity.WARN).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()+" for episode: "+episode.getCanonicalUri()));
-            }
-        }
-    }
-
     private Maybe<Brand> getBrand(ProgData progData, Channel channel) {
         String brandId = progData.getSeriesId();
         if (Strings.isNullOrEmpty(brandId) || Strings.isNullOrEmpty(brandId.trim())) {
             return Maybe.nothing();
         }
 
-        String brandUri = PA_BASE_URL + "/brands/" + brandId;
+        String brandUri = PaHelper.getBrandUri(brandId);
         Brand brand = new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         
         brand.setTitle(progData.getTitle());
@@ -177,7 +154,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             return Maybe.nothing();
         }
         
-        String seriesUri = PA_BASE_URL + "/series/" + progData.getSeriesId() + "-" + progData.getSeriesNumber();
+        String seriesUri = PaHelper.getSeriesUri(progData.getSeriesId(), progData.getSeriesNumber());
         
         Series series = null;
         if (! hasBrand) {
@@ -213,8 +190,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Specialization specialization = specialization(progData, channel);
         
         String episodeUri = specialization == Specialization.FILM
-                ? PA_BASE_URL + "/films/" + programmeId(progData)
-                : PA_BASE_URL + "/episodes/" + programmeId(progData);
+                ? PaHelper.getFilmUri(programmeId(progData))
+                : PaHelper.getEpisodeUri(programmeId(progData));
         Identified resolvedContent = contentResolver.findByCanonicalUri(episodeUri);
 
         Episode episode;
@@ -357,8 +334,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     private Episode getBasicEpisode(ProgData progData, Specialization specialization) {
         Episode episode = specialization == Specialization.FILM 
-                       ? new Episode(PA_BASE_URL + "/films/" + programmeId(progData), "pa:f-" + programmeId(progData), Publisher.PA)
-                       : new Episode(PA_BASE_URL + "/episodes/" + programmeId(progData), "pa:e-" + programmeId(progData), Publisher.PA);
+                       ? new Episode(PaHelper.getFilmUri(programmeId(progData)), PaHelper.getFilmCurie(programmeId(progData)), Publisher.PA)
+                       : new Episode(PaHelper.getEpisodeUri(programmeId(progData)), "pa:e-" + programmeId(progData), Publisher.PA);
 
         Version version = new Version();
         version.setProvider(Publisher.PA);
