@@ -105,14 +105,19 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         
         if (episode.getContributors() != null) {
             for (IonContributor contributor: episode.getContributors()) {
-                item.addPerson(personFrom(contributor));
+                Maybe<CrewMember> possiblePerson = personFrom(contributor);
+                if (possiblePerson.hasValue()) {
+                	item.addPerson(possiblePerson.requireValue());
+                } else {
+                	log.record(new AdapterLogEntry(WARN).withSource(getClass()).withDescription("Unknown person: " + contributor.getRoleName()));
+                }
             }
         }
 
         return item;
     }
     
-    private CrewMember personFrom(IonContributor contributor) {
+    private Maybe<CrewMember> personFrom(IonContributor contributor) {
         CrewMember person = null;
         String uri = PERSON_BASE_URL+contributor.getId();
         String curie = PERSON_BASE_CURIE+contributor.getId();
@@ -120,13 +125,16 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         if (ACTOR_ROLE_NAME.equals(contributor.getRoleName())) {
             person = new Actor(uri, curie, Publisher.BBC).withCharacter(contributor.getCharacterName()).withRole(Role.ACTOR);
         } else {
-            Role role = Role.fromKey(contributor.getRole().toLowerCase().replace(' ', '_'));
-            person = new CrewMember(uri, curie, Publisher.BBC).withRole(role);
+            Maybe<Role> role = Role.fromPossibleKey(contributor.getRole().toLowerCase().replace(' ', '_'));
+            if (role.isNothing()) {
+            	return Maybe.nothing();
+            }
+            person = new CrewMember(uri, curie, Publisher.BBC).withRole(role.requireValue());
         }
         person.withName(contributor.getGivenName()+" "+contributor.getFamilyName()).withProfileLink("http://www.bbc.co.uk"+contributor.getSearchUrl());
         person.setLastUpdated(contributor.getUpdated());
         
-        return person;
+        return Maybe.just(person);
     }
 
     private Broadcast broadcastFrom(IonBroadcast ionBroadcast) {
