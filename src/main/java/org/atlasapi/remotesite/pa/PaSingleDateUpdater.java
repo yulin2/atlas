@@ -15,7 +15,7 @@ public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     private final PaProgrammeDataStore fileManager;
 
     public PaSingleDateUpdater(PaProgDataProcessor processor, AdapterLog log, PaProgrammeDataStore fileManager, String dateString) {
-        super(processor, fileManager, log);
+        super(processor, fileManager, log, dateString);
         this.fileManager = fileManager;
         this.dateString = dateString;
     }

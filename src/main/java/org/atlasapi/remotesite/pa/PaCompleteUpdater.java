@@ -12,7 +12,7 @@ public class PaCompleteUpdater extends PaBaseProgrammeUpdater implements Runnabl
     private final PaProgrammeDataStore fileManager;
 
     public PaCompleteUpdater(PaProgDataProcessor processor, PaProgrammeDataStore fileManager, AdapterLog log) {
-        super(processor, fileManager, log);
+        super(processor, fileManager, log, "complete");
         this.fileManager = fileManager;
     }
     
