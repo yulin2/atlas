@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +20,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
+import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -27,9 +29,13 @@ import org.xml.sax.XMLReader;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.concurrency.BoundedExecutor;
+import com.metabroadcast.common.health.HealthProbe;
+import com.metabroadcast.common.health.ProbeResult;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public abstract class PaBaseProgrammeUpdater implements Runnable {
+public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
+
+    private static final String NOT_CURRENTLY_RUNNING = "not currently running";
 
     private static final Pattern FILEDATE = Pattern.compile("^.*/(\\d+)_.*$");
     
@@ -37,14 +43,24 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
     private boolean isRunning = false;
 
     private final PaProgDataProcessor processor;
-    private final ExecutorService executor = Executors.newFixedThreadPool(20);
-    private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 25);
+    private final ExecutorService executor = Executors.newFixedThreadPool(25);
+    private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 50);
     private final PaChannelMap channelMap = new PaChannelMap();
     private List<Channel> supportedChannels = ImmutableList.of();
+    private final AtomicInteger processed = new AtomicInteger(0);
+    private final AtomicReference<Maybe<String>> processingProgramme = new AtomicReference<Maybe<String>>(Maybe.<String>nothing());
+    private final AtomicReference<Maybe<String>> processingChannel = new AtomicReference<Maybe<String>>(Maybe.<String>nothing());
+    private final AtomicReference<Maybe<String>> processingFile = new AtomicReference<Maybe<String>>(Maybe.<String>nothing());
 
-    public PaBaseProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log) {
+    private final PaProgrammeDataStore dataStore;
+
+    private final String slug;
+
+    public PaBaseProgrammeUpdater(PaProgDataProcessor processor, PaProgrammeDataStore dataStore, AdapterLog log, String slug) {
         this.processor = processor;
+        this.dataStore = dataStore;
         this.log = log;
+        this.slug = slug;
     }
     
     public void supportChannels(Iterable<Channel> channels) {
@@ -92,22 +108,28 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                     Matcher matcher = FILEDATE.matcher(filename);
                     
                     if (matcher.matches()) {
+                        File fileToProcess = dataStore.copyForProcessing(file);
+                        
                         final DateTimeZone zone = getTimeZone(matcher.group(1));
+                        processingFile.set(Maybe.just(filename));
                         log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processing file "+filename+" with timezone "+zone.toString()));
-                        final AtomicInteger recordsProcessed = new AtomicInteger();
+                        processed.set(0);
                         
                         unmarshaller.setListener(new Unmarshaller.Listener() {
                             public void beforeUnmarshal(Object target, Object parent) {
                             }
 
                             public void afterUnmarshal(Object target, Object parent) {
-                                int processed = recordsProcessed.incrementAndGet();
+                                int processedCount = processed.incrementAndGet();
                                 
                                 if (target instanceof ProgData) {
                                     Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(((ChannelData) parent).getChannelId()));
                                     if (channel.hasValue() && isSupported(channel.requireValue())) {
                                         try {
-                                            boundedQueue.submitTask(new ProcessProgrammeJob((ProgData) target, channel.requireValue(), zone));
+                                            ProgData prog = (ProgData) target;
+                                            processingProgramme.set(Maybe.just(prog.getSeriesId() != null ? prog.getSeriesId() : "0" + " - " + prog.getProgId() + " - " + prog.getTitle()));
+                                            processingChannel.set(Maybe.just(channel.requireValue().title()));
+                                            boundedQueue.submitTask(new ProcessProgrammeJob(prog, channel.requireValue(), zone));
                                         } catch (Exception e) {
                                             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
                                         }
@@ -115,13 +137,13 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                                     }
                                 }
                                 
-                                if (processed % 1000 == 0) {
+                                if (processedCount % 1000 == 0) {
                                     log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processed "+processed+" programmes from "+filename));
                                 }
                             }
                         });
 
-                        reader.parse(filename);
+                        reader.parse(fileToProcess.toURI().toString());
                     }
                 } catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing file " + file.toString()));
@@ -131,8 +153,12 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
         } finally {
             isRunning = false;
+            processed.set(0);
+            processingFile.set(Maybe.<String>nothing());
+            processingProgramme.set(Maybe.<String>nothing());
+            processingChannel.set(Maybe.<String>nothing());
         }
-    }  
+    }
     
     protected static DateTimeZone getTimeZone(String date) {
         String timezoneDateString = date + "-11:00";
@@ -163,5 +189,24 @@ public abstract class PaBaseProgrammeUpdater implements Runnable {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing programme " + progData));
             }
         }
+    }
+    
+    @Override
+    public String title() {
+        return "Pa Updater for "+processingFile.get().valueOrDefault(NOT_CURRENTLY_RUNNING);
+    }
+
+    @Override
+    public ProbeResult probe() throws Exception {
+        ProbeResult probe = new ProbeResult(title());
+        probe.addInfo("Currently processing programme", processingProgramme.get().valueOrDefault(NOT_CURRENTLY_RUNNING));
+        probe.addInfo("Currently processing channel", processingChannel.get().valueOrDefault(NOT_CURRENTLY_RUNNING));
+        probe.addInfo("Number processed so far", String.valueOf(processed.get()));
+        return probe;
+    }
+
+    @Override
+    public String slug() {
+        return "paupdater_"+slug;
     }
 }

@@ -14,7 +14,7 @@ public class TVBlobService {
     private String twitter;
     private String type;
     private String slug;
-    private Integer hd;
+    private Boolean hd;
     
     public List<String> getDvb_ids() {
         return dvb_ids;
@@ -65,10 +65,10 @@ public class TVBlobService {
         Preconditions.checkNotNull(slug);
         this.slug = slug;
     }
-    public Integer getHd() {
+    public Boolean getHd() {
         return hd;
     }
-    public void setHd(Integer hd) {
+    public void setHd(Boolean hd) {
         this.hd = hd;
     }
     
