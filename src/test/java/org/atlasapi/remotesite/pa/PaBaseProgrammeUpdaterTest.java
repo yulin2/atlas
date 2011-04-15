@@ -104,7 +104,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
 
         public TestFileUpdater(PaProgDataProcessor processor, AdapterLog log) {
-            super(processor, new DefaultPaProgrammeDataStore("/data/pa", null), log);
+            super(processor, new DefaultPaProgrammeDataStore("/data/pa", null), log, null);
         }
 
         @Override

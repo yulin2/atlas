@@ -57,6 +57,7 @@ public class EquivModule {
 	private @Value("${freebase.enabled}") String freebaseEnabled;
 	private @Value("${seesaw.equiv.enabled}") String seesawEquivEnabled;
 	private @Value("${equiv.updater.enabled}") String updaterEnabled;
+	private @Value("${itunes.equiv.enabled}") String itunesEquivEnabled;
 	
 	@Bean EquivController manualEquivAssignmentController() {
 		return new EquivController(store());
@@ -76,6 +77,11 @@ public class EquivModule {
 	        PublisherCachingBrandEquivGenerator seesawBrandEquivGenerator = new PublisherCachingBrandEquivGenerator(Publisher.SEESAW, new MongoDbBackedContentStore(db));
             brandEquivGenerators.add(seesawBrandEquivGenerator);
 	        itemEquivGenerators.add(new ItemDelegatingToBrandEquivGenerator(seesawBrandEquivGenerator));
+	    }
+	    if (Boolean.parseBoolean(itunesEquivEnabled)) {
+	        PublisherCachingBrandEquivGenerator itunesBrandEquivGenerator = new PublisherCachingBrandEquivGenerator(Publisher.ITUNES, new MongoDbBackedContentStore(db));
+            brandEquivGenerators.add(itunesBrandEquivGenerator);
+            itemEquivGenerators.add(new ItemDelegatingToBrandEquivGenerator(itunesBrandEquivGenerator));
 	    }
 	    
 	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators.build(), store());
