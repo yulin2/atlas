@@ -70,5 +70,4 @@ public class BrandEquivUpdateTask implements Runnable {
     private MongoQueryBuilder queryFor(DateTime now) {
         return where().fieldEquals("publisher", Publisher.PA.key())/*.fieldAfter("lastFetched", now.minus(Duration.standardDays(1)))*/;
     }
-
 }

@@ -17,6 +17,7 @@ import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.remotesite.ContentWriters;
+import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
@@ -103,7 +104,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
 
         public TestFileUpdater(PaProgDataProcessor processor, AdapterLog log) {
-            super(processor, log);
+            super(processor, new DefaultPaProgrammeDataStore("/data/pa", null), log, null);
         }
 
         @Override

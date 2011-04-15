@@ -29,6 +29,7 @@ import org.atlasapi.equiv.tasks.persistence.www.SingleBrandEquivUpdateController
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
@@ -37,7 +38,6 @@ import org.atlasapi.persistence.equiv.MongoEquivStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
-import org.atlasapi.remotesite.seesaw.SeesawBrandEquivGenerator;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +57,7 @@ public class EquivModule {
 	private @Value("${freebase.enabled}") String freebaseEnabled;
 	private @Value("${seesaw.equiv.enabled}") String seesawEquivEnabled;
 	private @Value("${equiv.updater.enabled}") String updaterEnabled;
+	private @Value("${itunes.equiv.enabled}") String itunesEquivEnabled;
 	
 	@Bean EquivController manualEquivAssignmentController() {
 		return new EquivController(store());
@@ -68,15 +69,23 @@ public class EquivModule {
 	
 	@Bean EquivContentListener equivContentListener() {
 	    ImmutableList.Builder<EquivGenerator<Container<?>>> brandEquivGenerators = ImmutableList.builder(); 
+	    ImmutableList.Builder<EquivGenerator<Item>> itemEquivGenerators = ImmutableList.builder();
 	    if (Boolean.parseBoolean(freebaseEnabled)) {
 	        brandEquivGenerators.add(new FreebaseBrandEquivGenerator());
 	    }
 	    if (Boolean.parseBoolean(seesawEquivEnabled)) {
-	        brandEquivGenerators.add(new SeesawBrandEquivGenerator(new MongoDbBackedContentStore(db)));
+	        PublisherCachingBrandEquivGenerator seesawBrandEquivGenerator = new PublisherCachingBrandEquivGenerator(Publisher.SEESAW, new MongoDbBackedContentStore(db));
+            brandEquivGenerators.add(seesawBrandEquivGenerator);
+	        itemEquivGenerators.add(new ItemDelegatingToBrandEquivGenerator(seesawBrandEquivGenerator));
+	    }
+	    if (Boolean.parseBoolean(itunesEquivEnabled)) {
+	        PublisherCachingBrandEquivGenerator itunesBrandEquivGenerator = new PublisherCachingBrandEquivGenerator(Publisher.ITUNES, new MongoDbBackedContentStore(db));
+            brandEquivGenerators.add(itunesBrandEquivGenerator);
+            itemEquivGenerators.add(new ItemDelegatingToBrandEquivGenerator(itunesBrandEquivGenerator));
 	    }
 	    
 	    BrandEquivUpdater brandUpdater = new BrandEquivUpdater(brandEquivGenerators.build(), store());
-	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(ImmutableList.<EquivGenerator<Item>>of(), store());
+	    ItemEquivUpdater itemUpdater = new ItemEquivUpdater(itemEquivGenerators.build(), store());
 	    
 	    EquivContentListener equivContentListener = new EquivContentListener(brandUpdater, itemUpdater);
 	    aggregateContentListener.addListener(equivContentListener);
