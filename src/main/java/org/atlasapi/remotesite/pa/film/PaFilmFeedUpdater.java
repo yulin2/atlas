@@ -23,10 +23,10 @@ public class PaFilmFeedUpdater implements Runnable {
     private final AdapterLog log;
     private final PaFilmProcessor processor;
     
-    public PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter) {
+    public PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, PaFilmProcessor paFilmProcessor, ContentWriter contentWriter) {
         this.feedUrl = feedUrl;
         this.log = log;
-        this.processor = new PaFilmProcessor(contentResolver, contentWriter, log);
+        this.processor = paFilmProcessor;
     }
 
     @Override
