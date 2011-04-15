@@ -42,7 +42,8 @@ public class PaSingleDateUpdatingController {
 
     @RequestMapping("/system/update/pa/{dateString}")
     public void runUpdate(@PathVariable String dateString, HttpServletResponse response) {
-        executor.execute(new PaSingleDateUpdater(processor, log, fileManager, dateString));
+        PaSingleDateUpdater updater = new PaSingleDateUpdater(processor, log, fileManager, dateString);
+        executor.execute(updater);
         response.setStatus(200);
     }
     
