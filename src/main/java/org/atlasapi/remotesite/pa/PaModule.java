@@ -7,6 +7,7 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
@@ -38,6 +39,7 @@ public class PaModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired AdapterLog log;
     private @Autowired ScheduleResolver scheduleResolver;
+    private @Autowired ItemsPeopleWriter peopleWriter;
     
     private @Value("${pa.ftp.username}") String ftpUsername;
     private @Value("${pa.ftp.password}") String ftpPassword;
@@ -63,7 +65,7 @@ public class PaModule {
     }
     
     @Bean PaProgDataProcessor paProgrammeProcessor() {
-        return new PaProgrammeProcessor(contentWriter, contentResolver, log);
+        return new PaProgrammeProcessor(contentWriter, contentResolver, peopleWriter, log);
     }
     
     @Bean PaCompleteUpdater paCompleteUpdater() {

@@ -18,8 +18,8 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.pa.PaHelper;
-import org.atlasapi.remotesite.pa.PaPersonWriter;
 import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
@@ -33,13 +33,13 @@ public class PaFilmProcessor {
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
     private final AdapterLog log;
-    private final PaPersonWriter personWriter;
+    private final ItemsPeopleWriter personWriter;
 
-    public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, AdapterLog log) {
+    public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log) {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
         this.log = log;
-        this.personWriter = new PaPersonWriter(contentWriter, contentResolver, log);
+        this.personWriter = peopleWriter;
     }
     
     public void process(Element filmElement) {
