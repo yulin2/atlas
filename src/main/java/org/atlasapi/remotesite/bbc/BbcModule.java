@@ -11,7 +11,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
-import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
@@ -79,11 +78,6 @@ public class BbcModule {
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
 	    return new BbcIonScheduleController(contentStore, contentWriters, log);
 	}
-	
-	@Bean BbcIonEpisodeController episodeController() {
-	    return new BbcIonEpisodeController(contentWriters, log);
-	}
-
 	@Bean Runnable bbcHighlightsUpdater() {
 		return new BbcIplayerHightlightsAdapter(contentWriters, log);
 	}
