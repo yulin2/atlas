@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.bbc;
 import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
 
 import javax.annotation.PostConstruct;
-import javax.xml.bind.JAXBException;
 
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -19,8 +18,6 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUriSource;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
-import org.atlasapi.remotesite.bbc.schedule.BbcScheduledProgrammeUpdater;
-import org.atlasapi.remotesite.bbc.schedule.DatedBbcScheduleUriSource;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,11 +48,6 @@ public class BbcModule {
     public void scheduleTasks() {
         scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
         scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
-        try {
-            scheduler.schedule(bbcSchedulesUpdater(), SCHEDULED_UPDATE_TIME);
-        } catch (JAXBException e) {
-            log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withDescription("Couldn't create BBC Schedule Updater task"));
-        }
         scheduler.schedule(bbcIonUpdater(0, 0).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), TEN_MINUTES);
         scheduler.schedule(bbcIonUpdater(7, 7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)).withAlwaysUseRemote(), ONE_HOUR);
         scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
@@ -65,11 +57,6 @@ public class BbcModule {
 	private BbcIonScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
         return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack), contentStore, contentWriters, deserializerForClass(IonSchedule.class), log);
     }
-
-    @Bean Runnable bbcSchedulesUpdater() throws JAXBException {
-	    DatedBbcScheduleUriSource uriSource = new DatedBbcScheduleUriSource().withLookAhead(10);
-		return new BbcScheduledProgrammeUpdater(contentStore, bbcProgrammeAdapter(), contentWriters, uriSource, log);
-	}
 	
 	@Bean BbcScheduleController bbcScheduleController() {
 	    return new BbcScheduleController(contentStore, bbcProgrammeAdapter(), contentWriters, log);
