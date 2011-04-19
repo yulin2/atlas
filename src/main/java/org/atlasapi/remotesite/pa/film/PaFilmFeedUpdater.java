@@ -13,27 +13,45 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class PaFilmFeedUpdater implements Runnable {
     
+    private final static DateTimeFormatter dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+    
     private final SimpleHttpClient client = HttpClients.webserviceClient();
     private final String feedUrl;
     private final AdapterLog log;
     private final PaFilmProcessor processor;
+    private final boolean doCompleteUpdate;
     
-    public PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, PaFilmProcessor paFilmProcessor, ContentWriter contentWriter) {
+    public PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, PaFilmProcessor processor) {
+        this(feedUrl, log, contentResolver, contentWriter, processor, false);
+    }
+    
+    private PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, PaFilmProcessor processor, boolean doCompleteUpdate) {
         this.feedUrl = feedUrl;
         this.log = log;
-        this.processor = paFilmProcessor;
+        this.processor = processor;
+        this.doCompleteUpdate = doCompleteUpdate;
+    }
+    
+    public static PaFilmFeedUpdater completeUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, PaFilmProcessor processor) {
+        return new PaFilmFeedUpdater(feedUrl, log, contentResolver, contentWriter, processor, true);
     }
 
     @Override
     public void run() {
-        String lastUpdated = "14/04/2011";
+        String requestUri = feedUrl;
         
-        String requestUri = feedUrl + "?lastUpdated=" + lastUpdated;
+        if (!doCompleteUpdate) {
+            requestUri += "?lastUpdated=" + dateFormat.print(new DateTime(DateTimeZone.UTC).minusDays(3));
+        }
         try {
             Builder builder = new Builder(new FilmProcessingNodeFactory());
             builder.build(new StringReader(client.getContentsOf(requestUri)));

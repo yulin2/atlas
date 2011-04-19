@@ -57,7 +57,7 @@ public class BbcModule {
             log.record(new AdapterLogEntry(Severity.INFO).withCause(e).withDescription("Couldn't create BBC Schedule Updater task"));
         }
         scheduler.schedule(bbcIonUpdater(0, 0).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), TEN_MINUTES);
-        scheduler.schedule(bbcIonUpdater(7, 7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), ONE_HOUR);
+        scheduler.schedule(bbcIonUpdater(7, 7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)).withAlwaysUseRemote(), ONE_HOUR);
         scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC update scheduled tasks installed"));
     }
@@ -78,7 +78,6 @@ public class BbcModule {
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
 	    return new BbcIonScheduleController(contentStore, contentWriters, log);
 	}
-
 	@Bean Runnable bbcHighlightsUpdater() {
 		return new BbcIplayerHightlightsAdapter(contentWriters, log);
 	}
