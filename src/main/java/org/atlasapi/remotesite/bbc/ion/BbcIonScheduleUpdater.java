@@ -50,8 +50,6 @@ public class BbcIonScheduleUpdater implements Runnable {
     private final ContentResolver localFetcher;
     private final AdapterLog log;
     
-    private boolean alwaysUseRemote = false; 
-
     private final ContentWriter writer;
     private final BbcIonDeserializer<IonSchedule> deserialiser;
     private BbcItemFetcherClient fetcherClient;
@@ -118,7 +116,7 @@ public class BbcIonScheduleUpdater implements Runnable {
                 for (IonBroadcast broadcast : schedule.getBlocklist()) {
                     //find and (create and) update item
                     Identified identified = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
-                    if (identified == null || alwaysUseRemote) {
+                    if (identified == null) {
                         if(fetcherClient != null) {
                             identified = fetcherClient.createItem(broadcast.getEpisodeId());
                         } 
@@ -343,9 +341,4 @@ public class BbcIonScheduleUpdater implements Runnable {
             }
         }
     }
-    
-    public BbcIonScheduleUpdater withAlwaysUseRemote() {
-		this.alwaysUseRemote = true;
-		return this;
-	}
 }
