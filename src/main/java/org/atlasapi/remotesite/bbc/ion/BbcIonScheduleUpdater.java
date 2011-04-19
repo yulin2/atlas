@@ -49,7 +49,7 @@ public class BbcIonScheduleUpdater implements Runnable {
     private final Iterable<String> uriSource;
     private final ContentResolver localFetcher;
     private final AdapterLog log;
-
+    
     private final ContentWriter writer;
     private final BbcIonDeserializer<IonSchedule> deserialiser;
     private BbcItemFetcherClient fetcherClient;
@@ -340,7 +340,5 @@ public class BbcIonScheduleUpdater implements Runnable {
                 return broadcast;
             }
         }
-
     }
-
 }
