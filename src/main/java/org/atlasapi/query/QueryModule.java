@@ -18,6 +18,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
+import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
@@ -29,6 +30,7 @@ import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
+import org.atlasapi.query.content.people.ContentResolvingPeopleResolver;
 import org.atlasapi.query.content.schedule.BroadcastRemovingScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.NastyRenameChannelJob;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
@@ -55,6 +57,7 @@ public class QueryModule {
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	private @Autowired MongoDbBackedContentStore store;
 	private @Autowired ScheduleResolver scheduleResolver;
+	private @Autowired PeopleResolver peopleResolver;
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	
 	private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -101,7 +104,7 @@ public class QueryModule {
 	}
 	
 	@Bean PeopleController peopleController() {
-	    return new PeopleController(queryExecutor(), configFetcher, log, atlasModelOutputter());
+	    return new PeopleController(new ContentResolvingPeopleResolver(peopleResolver, queryExecutor()), configFetcher, log, atlasModelOutputter());
 	}
 	
 	@Bean SearchController searchController() {
