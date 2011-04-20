@@ -16,8 +16,9 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 
 import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 
-public class BbcSlashProgrammesAtoZUpdater implements Runnable {
+public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 	
     private static final String ATOZ_BASE = "http://www.bbc.co.uk/%s/programmes/a-z/all.rdf";
     private static final String SLASH_PROGRAMMES_BASE_URI = "http://www.bbc.co.uk/programmes/";
@@ -41,16 +42,20 @@ public class BbcSlashProgrammesAtoZUpdater implements Runnable {
     }
 
     @Override
-    public void run() {
+    public void runTask() {
     	ExecutorService executor = Executors.newFixedThreadPool(3);
         for (String channel : channels) {
-            String uri = String.format(ATOZ_BASE, channel);
+            final String uri = String.format(ATOZ_BASE, channel);
             try {
                 SlashProgrammesAtoZRdf atoz = client.get(uri);
                 for (final String pid : atoz.programmeIds()) {
                     executor.execute(new Runnable() {
 						@Override
 						public void run() {
+							if (!shouldContinue()) {
+								return;
+							}
+							reportStatus(uri + " : " + pid);
 							loadAndSave(pid);							
 						}
                     });
