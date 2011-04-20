@@ -19,8 +19,10 @@ import java.util.List;
 
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.QueuingPersonWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
+import org.atlasapi.query.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgAdapterModule;
 import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
@@ -50,6 +52,7 @@ public class RemoteSiteModule {
 	private @Autowired AdapterLog log;
 	
 	private @Autowired Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
+	private @Autowired QueuingPersonWriter personWriter;
 	
 	public @Bean Fetcher<Identified> remoteFetcher() {
 		
@@ -81,5 +84,9 @@ public class RemoteSiteModule {
 	
 	public @Bean ContentWriters contentWriters() {
 		return new ContentWriters();
+	}
+	
+	public @Bean QueuingItemsPeopleWriter peopleWriter() {
+	    return new QueuingItemsPeopleWriter(personWriter, log);
 	}
 }

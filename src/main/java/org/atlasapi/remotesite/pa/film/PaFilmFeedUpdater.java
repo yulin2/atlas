@@ -30,19 +30,19 @@ public class PaFilmFeedUpdater implements Runnable {
     private final PaFilmProcessor processor;
     private final boolean doCompleteUpdate;
     
-    public PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter) {
-        this(feedUrl, log, contentResolver, contentWriter, false);
+    public PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, PaFilmProcessor processor) {
+        this(feedUrl, log, contentResolver, contentWriter, processor, false);
     }
     
-    private PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, boolean doCompleteUpdate) {
+    private PaFilmFeedUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, PaFilmProcessor processor, boolean doCompleteUpdate) {
         this.feedUrl = feedUrl;
         this.log = log;
-        this.processor = new PaFilmProcessor(contentResolver, contentWriter, log);
+        this.processor = processor;
         this.doCompleteUpdate = doCompleteUpdate;
     }
     
-    public static PaFilmFeedUpdater completeUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter) {
-        return new PaFilmFeedUpdater(feedUrl, log, contentResolver, contentWriter, true);
+    public static PaFilmFeedUpdater completeUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, PaFilmProcessor processor) {
+        return new PaFilmFeedUpdater(feedUrl, log, contentResolver, contentWriter, processor, true);
     }
 
     @Override

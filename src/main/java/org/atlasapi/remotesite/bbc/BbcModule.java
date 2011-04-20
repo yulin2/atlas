@@ -8,6 +8,7 @@ import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
@@ -25,15 +26,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.scheduling.RepetitionRules;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class BbcModule {
 
 	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(4, 0, 0));
-	private final static Daily SCHEDULED_UPDATE_TIME = RepetitionRules.daily(new LocalTime(5, 0, 0));
 	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	private final static Every TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
 	private final static Every SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
@@ -43,6 +43,7 @@ public class BbcModule {
 	private @Autowired ContentWriters contentWriters;
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
+	private @Autowired ItemsPeopleWriter itemsPeopleWriter;
 	
     @PostConstruct
     public void scheduleTasks() {
@@ -55,7 +56,7 @@ public class BbcModule {
     }
 	
 	private BbcIonScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
-        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack), contentStore, contentWriters, deserializerForClass(IonSchedule.class), log);
+        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack), contentStore, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
     }
 	
 	@Bean BbcScheduleController bbcScheduleController() {
@@ -63,7 +64,7 @@ public class BbcModule {
 	}
 	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
-	    return new BbcIonScheduleController(contentStore, contentWriters, log);
+	    return new BbcIonScheduleController(contentStore, contentWriters, itemsPeopleWriter, log);
 	}
 	@Bean Runnable bbcHighlightsUpdater() {
 		return new BbcIplayerHightlightsAdapter(contentWriters, log);
