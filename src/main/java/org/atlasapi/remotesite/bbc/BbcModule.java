@@ -49,8 +49,17 @@ public class BbcModule {
     public void scheduleTasks() {
         scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
         scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
-        scheduler.schedule(bbcIonUpdater(0, 0).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), TEN_MINUTES);
-        scheduler.schedule(bbcIonUpdater(7, 7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), ONE_HOUR);
+        
+        scheduler.schedule(bbcIonUpdater(0, 0)
+        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+        		.withName("BBC Ion schedule update (today only)"), 
+        		TEN_MINUTES);
+        
+        scheduler.schedule(bbcIonUpdater(7, 7)
+        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+        		.withName("BBC Ion schedule update (14 days)"),
+        		ONE_HOUR);
+        
         scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC update scheduled tasks installed"));
     }

@@ -40,9 +40,10 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class BbcIonScheduleUpdater implements Runnable {
+public class BbcIonScheduleUpdater extends ScheduledTask {
 
     private static final int THREADS = 5;
     private final Iterable<String> uriSource;
@@ -75,7 +76,7 @@ public class BbcIonScheduleUpdater implements Runnable {
     }
     
     @Override
-    public void run() {
+    public void runTask() {
         DateTime start = new DateTime(DateTimeZones.UTC);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Update initiated"));
 
@@ -111,10 +112,18 @@ public class BbcIonScheduleUpdater implements Runnable {
 
         @Override
         public void run() {
-            log.record(new AdapterLogEntry(DEBUG).withSource(getClass()).withDescription("BBC Ion Schedule update for " + uri));
+            if (!shouldContinue()) {
+            	return;
+            }
+            reportStatus(uri);
+        	log.record(new AdapterLogEntry(DEBUG).withSource(getClass()).withDescription("BBC Ion Schedule update for " + uri));
             try {
                 IonSchedule schedule = deserialiser.deserialise(httpClient.getContentsOf(uri));
                 for (IonBroadcast broadcast : schedule.getBlocklist()) {
+                	if (!shouldContinue()) {
+                		return;
+                    }
+                	  
                     //find and (create and) update item
                     Identified identified = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
                     if (identified == null) {
