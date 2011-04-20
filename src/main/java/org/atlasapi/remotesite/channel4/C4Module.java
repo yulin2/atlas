@@ -32,8 +32,8 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
+import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.sun.syndication.feed.atom.Feed;
 
 @Configuration
@@ -64,7 +64,7 @@ public class C4Module {
     }
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, scheduleResolver, contentWriter, log);
+	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, scheduleResolver, contentStore, contentWriter, log);
         return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentStore, trimmer, log);
     }
 	

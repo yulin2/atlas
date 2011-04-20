@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -24,10 +25,12 @@ public class BroadcastTrimmer {
     private final ContentWriter writer;
     private final AdapterLog log;
     private final ScheduleResolver scheduleResolver;
+	private final ContentResolver resolver;
 
-    public BroadcastTrimmer(Publisher publisher, ScheduleResolver scheduleResolver, ContentWriter writer, AdapterLog log) {
+    public BroadcastTrimmer(Publisher publisher, ScheduleResolver scheduleResolver, ContentResolver resolver, ContentWriter writer, AdapterLog log) {
         this.scheduleResolver = scheduleResolver;
         this.publisher = publisher;
+		this.resolver = resolver;
         this.writer = writer;
         this.log = log;
     }
@@ -38,7 +41,9 @@ public class BroadcastTrimmer {
             Schedule schedule = scheduleResolver.schedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher));
 
             //For each item, check that it's broadcasts are in correct in the acceptable set, set actively published false if not.
-            for (Item item : Iterables.getOnlyElement(schedule.scheduleChannels()).items()) {
+            for (Item itemEmbeddedInSchedule : Iterables.getOnlyElement(schedule.scheduleChannels()).items()) {
+            	// load the item from the main db to avoid reading stale data
+            	Item item = (Item) resolver.findByCanonicalUri(itemEmbeddedInSchedule.getCanonicalUri());
                 boolean changed = false;
                 for (Version version : item.nativeVersions()) {
                     for (Broadcast broadcast : version.getBroadcasts()) {
@@ -56,7 +61,7 @@ public class BroadcastTrimmer {
                 }
             }
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.WARN).withDescription("Exception attempting to trim broadcasts for " + channel.title() + " between " + scheduleInterval).withCause(e));
+            log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Exception attempting to trim broadcasts for " + channel.title() + " between " + scheduleInterval).withCause(e));
         }
     }
 
