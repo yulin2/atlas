@@ -98,11 +98,12 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         broadcast = version.getBroadcasts().iterator().next();
         assertEquals("pa:71118471", broadcast.getId());
 
-        for (CrewMember crewMember : item.people()) {
-            content = store.findByCanonicalUri(crewMember.getCanonicalUri());
-            assertTrue(content instanceof Person);
-            assertEquals(crewMember.name(), ((Person) content).name());
-        }
+// Test people get created
+//        for (CrewMember crewMember : item.people()) {
+//            content = store.findByCanonicalUri(crewMember.getCanonicalUri());
+//            assertTrue(content instanceof Person);
+//            assertEquals(crewMember.name(), ((Person) content).name());
+//        }
     }
 
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
