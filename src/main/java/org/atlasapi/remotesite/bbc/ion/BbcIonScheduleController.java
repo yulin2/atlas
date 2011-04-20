@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.springframework.stereotype.Controller;
@@ -31,10 +32,12 @@ public class BbcIonScheduleController {
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCIonScheduleUpdater").build());
     private final BbcItemFetcherClient fetcherClient;
     private final BbcIonDeserializer<IonSchedule> deserialiser;
+    private final ItemsPeopleWriter itemsPeopleWriter;
 
-    public BbcIonScheduleController(ContentResolver localFetcher, ContentWriter writer, AdapterLog log) {
+    public BbcIonScheduleController(ContentResolver localFetcher, ContentWriter writer, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
         this.localFetcher = localFetcher;
         this.writer = writer;
+        this.itemsPeopleWriter = itemsPeopleWriter;
         this.log = log;
         this.deserialiser = deserializerForClass(IonSchedule.class);
         this.fetcherClient = new BbcIonEpisodeDetailItemFetcherClient(log);
@@ -45,7 +48,7 @@ public class BbcIonScheduleController {
         Preconditions.checkArgument(date.length() == 8, "the date must be 8 digits");
         
         String scheduleUri = String.format(BbcIonScheduleUriSource.SCHEDULE_PATTERN, service, date);
-        BbcIonScheduleUpdater updater = new BbcIonScheduleUpdater(ImmutableList.of(scheduleUri), localFetcher, writer, deserialiser, log);
+        BbcIonScheduleUpdater updater = new BbcIonScheduleUpdater(ImmutableList.of(scheduleUri), localFetcher, writer, deserialiser, itemsPeopleWriter, log);
         if(!Strings.isNullOrEmpty(detail) && Boolean.parseBoolean(detail)) {
             updater.withItemFetchClient(fetcherClient);
         }

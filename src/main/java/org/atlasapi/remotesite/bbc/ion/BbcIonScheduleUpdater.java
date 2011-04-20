@@ -11,12 +11,10 @@ import java.util.concurrent.TimeUnit;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -26,6 +24,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcAliasCompiler;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
@@ -54,12 +53,14 @@ public class BbcIonScheduleUpdater implements Runnable {
     private final BbcIonDeserializer<IonSchedule> deserialiser;
     private BbcItemFetcherClient fetcherClient;
     private SimpleHttpClient httpClient;
+    private final ItemsPeopleWriter itemsPeopleWriter;
 
-    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, AdapterLog log) {
+    public BbcIonScheduleUpdater(Iterable<String> uriSource, ContentResolver localFetcher, ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
         this.uriSource = uriSource;
         this.localFetcher = localFetcher;
         this.writer = writer;
         this.deserialiser = deserialiser;
+        this.itemsPeopleWriter = itemsPeopleWriter;
         this.log = log;
     }
 
@@ -195,21 +196,7 @@ public class BbcIonScheduleUpdater implements Runnable {
         }
         
         private void createOrUpdatePeople(Item item) {
-            for (CrewMember crewMember: item.people()) {
-                Identified resolvedContent = localFetcher.findByCanonicalUri(crewMember.getCanonicalUri());
-                
-                Person person = null;
-                if (resolvedContent instanceof Person) {
-                    person = (Person) resolvedContent;
-                } else {
-                    person = crewMember.toPerson();
-                }
-                person.addContents(item);
-                person.setLastUpdated(new DateTime(DateTimeZones.UTC));
-                person.setMediaType(null);
-                
-                writer.createOrUpdateSkeleton(person);
-            }
+            itemsPeopleWriter.createOrUpdatePeople(item);
         }
         
         private Brand brandFromSeries(Series series) {

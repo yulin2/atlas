@@ -12,6 +12,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.query.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.hamcrest.Matcher;
@@ -39,6 +40,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final ContentWriter writer = context.mock(ContentWriter.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
+    private final DummyItemsPeopleWriter itemsPeopleWriter = new DummyItemsPeopleWriter();
     
     @SuppressWarnings("unchecked")
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
@@ -53,7 +55,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
         
     }
     
@@ -75,7 +77,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
     }
 
     @SuppressWarnings("unchecked")
@@ -100,7 +102,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {
