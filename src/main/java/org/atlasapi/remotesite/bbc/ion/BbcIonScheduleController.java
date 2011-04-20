@@ -9,8 +9,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.springframework.stereotype.Controller;

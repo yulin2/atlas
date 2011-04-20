@@ -5,10 +5,10 @@ import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerFo
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;

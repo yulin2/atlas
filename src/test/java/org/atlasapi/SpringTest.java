@@ -17,6 +17,7 @@ package org.atlasapi;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.persistence.content.people.QueuingPersonWriter;
 import org.atlasapi.query.v2.QueryController;
 
 /**
@@ -31,4 +32,12 @@ public class SpringTest extends TestCase {
 		applicationContext.refresh();
 		applicationContext.getBean(QueryController.class);
 	}
+	
+	public void testCanCreatProcessing() throws Exception {
+	    System.setProperty("processing.config", "true");
+        ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
+        applicationContext.setConfigLocation(null);
+        applicationContext.refresh();
+        applicationContext.getBean(QueuingPersonWriter.class);
+    }
 }
