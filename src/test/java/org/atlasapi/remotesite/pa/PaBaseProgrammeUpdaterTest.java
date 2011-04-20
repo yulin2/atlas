@@ -16,12 +16,14 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.query.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.persistence.MongoTestHelper;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.TimeMachine;
 
 public class PaBaseProgrammeUpdaterTest extends TestCase {
@@ -36,9 +38,11 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        store = new MongoDbBackedContentStore(MongoTestHelper.anEmptyTestDatabase(), clock);
+        DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
+        store = new MongoDbBackedContentStore(db, clock);
+        
         contentWriters.add(store);
-        programmeProcessor = new PaProgrammeProcessor(contentWriters, store, log);
+        programmeProcessor = new PaProgrammeProcessor(contentWriters, store, new DummyItemsPeopleWriter(), log);
     }
 
     public void testShouldCreateCorrectPaData() throws Exception {
