@@ -17,7 +17,7 @@ package org.atlasapi;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.persistence.content.people.QueuingPersonWriter;
+import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
 
 /**
@@ -38,6 +38,6 @@ public class SpringTest extends TestCase {
         ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
         applicationContext.setConfigLocation(null);
         applicationContext.refresh();
-        applicationContext.getBean(QueuingPersonWriter.class);
+        applicationContext.getBean(MongoPersonStore.class);
     }
 }
