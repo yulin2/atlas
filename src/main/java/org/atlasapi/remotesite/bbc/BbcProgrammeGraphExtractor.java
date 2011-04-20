@@ -123,7 +123,6 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                 Version version = version(versionRdf);
                 version.setProvider(BBC);
                 
-                
                 IonVersion ionVersion = ionVersions.get(version.getCanonicalUri());
                 if(ionVersion != null) {
                     setDurations(version, ionVersion);

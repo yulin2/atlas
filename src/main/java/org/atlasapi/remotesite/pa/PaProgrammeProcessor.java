@@ -20,6 +20,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.query.content.people.ItemsPeopleWriter;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.CastMember;
@@ -61,13 +62,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private final GenreMap genreMap = new PaGenreMap();
     
     private final Splitter personSplitter = Splitter.on(", ");
-    private final PaPersonWriter personWriter;
+    private final ItemsPeopleWriter personWriter;
 
-    public PaProgrammeProcessor(ContentWriters contentWriter, ContentResolver contentResolver, AdapterLog log) {
+    public PaProgrammeProcessor(ContentWriters contentWriter, ContentResolver contentResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
         this.log = log;
-        this.personWriter = new PaPersonWriter(contentWriter, contentResolver, log);
+        this.personWriter = itemsPeopleWriter;
     }
 
     public void process(ProgData progData, Channel channel, DateTimeZone zone) {
