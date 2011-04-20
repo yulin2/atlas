@@ -14,10 +14,8 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
-import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
@@ -36,7 +34,6 @@ import org.joda.time.DateTime;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.time.DateTimeZones;
 
@@ -111,7 +108,7 @@ public class C4EpgEntryProcessor {
         String brandUri = C4_PROGRAMMES_BASE + brandName;
         Brand brand = (Brand) contentStore.findByCanonicalUri(brandUri);
         if (brand != null) {
-            addOrReplaceItemInPlaylist(episode, brand);
+        	brand.addOrReplace(episode);
         } else {
             brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4);
             brand.addContents(episode);
@@ -124,7 +121,7 @@ public class C4EpgEntryProcessor {
     private Series updateSeries(String seriesUri, String brandName, Episode episode) {
         Series series = (Series) contentStore.findByCanonicalUri(seriesUri);
         if (series != null) {
-            addOrReplaceItemInPlaylist(episode, series);
+            series.addOrReplace(episode);
         } else {
             series = new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri), C4);
             series.addContents(episode);
@@ -132,18 +129,6 @@ public class C4EpgEntryProcessor {
             series.withSeriesNumber(episode.getSeriesNumber());
         }
         return series;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends Item> void addOrReplaceItemInPlaylist(Item item, Container<T> playlist) {
-        int itemIndex = playlist.getContents().indexOf(item);
-        if (itemIndex >= 0) {
-            List<T> items = Lists.newArrayList(playlist.getContents());
-            items.set(itemIndex, (T) item);
-            playlist.setContents(items);
-        } else {
-            playlist.addContents((T) item);
-        }
     }
 
     private Episode updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel) {

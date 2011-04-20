@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -39,18 +40,22 @@ public class BroadcastTrimmerTest extends TestCase {
     private final Channel channel = Channel.CHANNEL_FOUR;
     private final Set<Channel> channels = ImmutableSet.of(channel);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
+    private final ContentResolver contentResolver = context.mock(ContentResolver.class);
 
+    private Item item = buildItem();
+    
     public void testTrimBroadcasts() {
         final Schedule schedule = Schedule.fromChannelMap(channelMap(), new Interval(100, 200));
         
         context.checking(new Expectations(){{
             oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers)); will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
+            allowing(contentResolver).findByCanonicalUri(item.getCanonicalUri()); will(returnValue(item));
         }});
         
         AdapterLog log = new NullAdapterLog();
         
-        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, contentWriter, log);
+        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, contentResolver, contentWriter, log);
         
         Interval scheduleInterval = new Interval(100, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableSet.of("c4:1234"));
@@ -80,9 +85,9 @@ public class BroadcastTrimmerTest extends TestCase {
             }
         };
     }
-    
-    private Iterable<? extends Item> buildItems() {
-        Item item = new Item("testUri", "testCurie", Publisher.C4);
+
+	private static Item buildItem() {
+		Item item = new Item("testUri", "testCurie", Publisher.C4);
         Version version = new Version();
         
         Broadcast ignore = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(50), new DateTime(103)).withId("c4:0234");
@@ -94,13 +99,12 @@ public class BroadcastTrimmerTest extends TestCase {
         
         version.setBroadcasts(ImmutableSet.of(ignore, retain, remove));
         item.addVersion(version);
-        
-        return ImmutableSet.of(item);
-    }
+		return item;
+	}
     
     private Map<Channel, List<Item>> channelMap() {
         Map<Channel, List<Item>> channelMap = Maps.newHashMap();
-        channelMap.put(Channel.CHANNEL_FOUR, Lists.newArrayList(buildItems()));
+        channelMap.put(Channel.CHANNEL_FOUR, Lists.newArrayList(item));
         return channelMap;
     }
 }

@@ -49,7 +49,7 @@ public class C4EpgUpdaterTest extends TestCase {
     
     private final AdapterLog log = new NullAdapterLog();
     
-    private final BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, contentWriter, log);
+    private final BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, contentStore,  contentWriter, log);
     
     private final C4EpgUpdater updater = new C4EpgUpdater(c4AtomFetcher, new C4EpgEntryProcessor(contentWriter, contentStore, log), new C4EpgBrandlessEntryProcessor(contentWriter, contentStore, log), trimmer, log, new DayRangeGenerator());
     
