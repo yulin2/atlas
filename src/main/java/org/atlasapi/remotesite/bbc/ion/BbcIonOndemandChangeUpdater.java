@@ -59,7 +59,6 @@ public class BbcIonOndemandChangeUpdater implements Runnable {
                 for (IonOndemandChange change : changes.getBlocklist()) {
                     String uri = SLASH_PROGRAMMES_BASE + change.getEpisodeId();
                     try {
-
                         Item item = (Item) localFetcher.findByCanonicalUri(uri);
                         if (item != null) {
                             itemUpdater.updateItemDetails(item, change);
@@ -71,8 +70,10 @@ public class BbcIonOndemandChangeUpdater implements Runnable {
                 }
                 limitedLastRun = new DateTime(DateTimeZones.UTC);
             } catch (Exception e) {
-                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription(
-                        "Unable to process ondemand changes for " + String.format(CHANGES_URL, lastRun.toString())));
+                log.record(new AdapterLogEntry(Severity.WARN)
+                	.withSource(getClass())
+                	.withCause(e)
+                	.withDescription("Unable to process ondemand changes for " + String.format(CHANGES_URL, lastRun.toString())));
             } finally {
                 isRunning = false;
             }
