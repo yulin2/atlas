@@ -10,8 +10,8 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
-import org.joda.time.Interval;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
@@ -19,7 +19,6 @@ import com.metabroadcast.common.time.SystemClock;
 
 public class BbcIonOndemandItemUpdater {
 
-    private final Clock clock;
     private BbcProgrammeEncodingAndLocationCreator encodingCreator;
     
     public BbcIonOndemandItemUpdater() {
@@ -27,7 +26,6 @@ public class BbcIonOndemandItemUpdater {
     }
 
     public BbcIonOndemandItemUpdater(Clock clock) {
-        this.clock = clock;
         this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
     }
 
@@ -47,18 +45,21 @@ public class BbcIonOndemandItemUpdater {
                     BbcProgrammeGraphExtractor.iplayerPageFrom(BbcIonOndemandChangeUpdater.SLASH_PROGRAMMES_BASE + change.getEpisodeId()));
             if (location.hasValue()) {
                 if (!revoked) {
-                    updateAvailability(location.requireValue(), change);
+                    updateAvailability(location.requireValue(), change, true);
                 } else {
                     removeLocation(encoding.requireValue(), location.requireValue());
                 }
             } else if (!revoked) {
                 Location newLocation = encodingCreator.location(change);
+                newLocation.setAvailable(true);
                 encoding.requireValue().addAvailableAt(newLocation);
             }
         } else if (!revoked) {
-            Maybe<Encoding> newEncoding = encodingCreator.createEncoding(change);
-            if (newEncoding.hasValue()) {
-                version.addManifestedAs(newEncoding.requireValue());
+            Maybe<Encoding> possibleEncoding = encodingCreator.createEncoding(change);
+            if (possibleEncoding.hasValue()) {
+                Encoding newEncoding = possibleEncoding.requireValue();
+                Iterables.getOnlyElement(newEncoding.getAvailableAt()).setAvailable(true);
+				version.addManifestedAs(newEncoding);
             }
         }
     }
@@ -95,16 +96,11 @@ public class BbcIonOndemandItemUpdater {
         return Maybe.nothing();
     }
 
-    private void updateAvailability(Location location, IonOndemandChange change) {
+    private void updateAvailability(Location location, IonOndemandChange change, boolean available) {
         Policy policy = location.getPolicy();
         policy.setAvailabilityStart(change.getScheduledStart());
         policy.setAvailabilityEnd(change.getDiscoverableEnd());
-
-        location.setAvailable(availableNow(policy));
-    }
-
-    private boolean availableNow(Policy policy) {
-        return new Interval(policy.getAvailabilityStart(), policy.getAvailabilityEnd()).contains(clock.now());
+        location.setAvailable(available);
     }
 
     private Maybe<Encoding> encoding(Set<Encoding> encodings, String encodingUri) {
