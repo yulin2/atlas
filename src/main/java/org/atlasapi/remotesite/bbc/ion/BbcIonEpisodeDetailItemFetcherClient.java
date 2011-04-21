@@ -84,7 +84,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
             item.setSeriesUri(SLASH_PROGRAMMES_ROOT + episodeDetail.getSeriesId());
         }
         if(Strings.isNullOrEmpty(episodeDetail.getSubseriesId()) && episodeDetail.getPosition() != null) {
-            item.setSeriesNumber(Ints.saturatedCast(episodeDetail.getPosition()));
+            item.setEpisodeNumber(Ints.saturatedCast(episodeDetail.getPosition()));
         }
     }
 
