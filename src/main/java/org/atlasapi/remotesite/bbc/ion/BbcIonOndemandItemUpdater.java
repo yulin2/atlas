@@ -50,9 +50,12 @@ public class BbcIonOndemandItemUpdater {
                     removeLocation(encoding.requireValue(), location.requireValue());
                 }
             } else if (!revoked) {
-                Location newLocation = encodingCreator.location(change);
-                newLocation.setAvailable(true);
-                encoding.requireValue().addAvailableAt(newLocation);
+                Maybe<Location> possibleNewLocation = encodingCreator.location(change);
+                if (possibleNewLocation.hasValue()) {
+                	Location newLocation = possibleNewLocation.requireValue();
+					newLocation.setAvailable(true);
+                	encoding.requireValue().addAvailableAt(newLocation);
+                }
             }
         } else if (!revoked) {
             Maybe<Encoding> possibleEncoding = encodingCreator.createEncoding(change);
