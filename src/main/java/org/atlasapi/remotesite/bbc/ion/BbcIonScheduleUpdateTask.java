@@ -64,7 +64,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
         try {
             IonSchedule schedule = deserialiser.deserialise(httpClient.getContentsOf(uri));
             for (IonBroadcast broadcast : schedule.getBlocklist()) {
-                  
+                try { 
                 //find and (create and) update item
                 Identified identified = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
                 if (identified == null) {
@@ -138,6 +138,9 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                     }
                 
                     createOrUpdatePeople((Item) item);
+                }
+                } catch (Exception e) {
+                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri + " trying to process broadcast for " + SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId()).withSource(getClass()));
                 }
             }
         } catch (Exception e) {
