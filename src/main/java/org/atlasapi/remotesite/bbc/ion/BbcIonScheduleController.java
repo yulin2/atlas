@@ -48,7 +48,7 @@ public class BbcIonScheduleController {
         Preconditions.checkArgument(date.length() == 8, "the date must be 8 digits");
         
         String scheduleUri = String.format(BbcIonScheduleUriSource.SCHEDULE_PATTERN, service, date);
-        BbcIonScheduleUpdater updater = new BbcIonScheduleUpdater(ImmutableList.of(scheduleUri), localFetcher, writer, deserialiser, itemsPeopleWriter, log);
+        BbcIonUriSourceScheduleUpdater updater = new BbcIonUriSourceScheduleUpdater(ImmutableList.of(scheduleUri), localFetcher, writer, deserialiser, itemsPeopleWriter, log);
         if(!Strings.isNullOrEmpty(detail) && Boolean.parseBoolean(detail)) {
             updater.withItemFetchClient(fetcherClient);
         }

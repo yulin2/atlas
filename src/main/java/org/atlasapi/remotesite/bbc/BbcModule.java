@@ -11,11 +11,10 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDateRangeScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
-import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
-import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUriSource;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
@@ -64,8 +63,8 @@ public class BbcModule {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC update scheduled tasks installed"));
     }
 	
-	private BbcIonScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
-        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack), contentStore, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
+	private BbcIonDateRangeScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
+        return new BbcIonDateRangeScheduleUpdater(lookBack, lookAhead, contentStore, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
     }
 	
 	@Bean BbcScheduleController bbcScheduleController() {
