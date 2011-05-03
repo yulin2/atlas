@@ -55,7 +55,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
         
     }
     
@@ -77,7 +77,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
     }
 
     @SuppressWarnings("unchecked")
@@ -102,7 +102,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )), with(true));
         }});
 
-        new BbcIonScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {
