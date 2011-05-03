@@ -24,19 +24,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
-import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 
 @Configuration
 public class BbcModule {
 
-	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(4, 0, 0));
-	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	private final static Every TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
-	private final static Every SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
-	private final static Every ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
+	private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.NEVER;
+	private final static RepetitionRule HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
+	private final static RepetitionRule TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
+	private final static RepetitionRule SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
+	private final static RepetitionRule ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
 
     private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired ContentWriters contentWriters;

@@ -85,13 +85,17 @@ public enum IonService {
 	public void applyToEncoding(Encoding encoding) {
 		applyTo(encoding);
 		for (Location location : encoding.getAvailableAt()) {
-			Policy policy = location.getPolicy();
-			if (policy == null) {
-				policy = new Policy();
-				location.setPolicy(policy);
-			}
-			applyTo(policy);
+			applyToLocation(location);
 		}
+	}
+
+	public void applyToLocation(Location location) {
+		Policy policy = location.getPolicy();
+		if (policy == null) {
+			policy = new Policy();
+			location.setPolicy(policy);
+		}
+		applyTo(policy);
 	}
 
 	public static Maybe<IonService> fromString(String s) {
