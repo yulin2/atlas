@@ -217,11 +217,10 @@ public class C4EpgEntryProcessor {
     }
 
     static void updateLocation(Location location, C4EpgEntry entry) {
-
         location.setUri(entry.media().player());
         location.setTransportType(TransportType.LINK);
         location.setPolicy(policyFrom(entry));
-
+		location.setLastUpdated(entry.updated());
     }
 
     static Policy policyFrom(C4EpgEntry entry) {
