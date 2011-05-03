@@ -59,12 +59,12 @@ public class PaFilmProcessor {
             Version version = new Version();
             version.setProvider(Publisher.PA);
             Element certificateElement = filmElement.getFirstChildElement("certificate");
-            if (!Strings.isNullOrEmpty(certificateElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
+            if (certificateElement != null && !Strings.isNullOrEmpty(certificateElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
                 version.setRestriction(Restriction.from(Integer.parseInt(certificateElement.getValue())));
             }
             
             Element durationElement = filmElement.getFirstChildElement("running_time");
-            if (durationElement != null && !Strings.isNullOrEmpty(durationElement.getValue())) {
+            if (durationElement != null && !Strings.isNullOrEmpty(durationElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(durationElement.getValue())) {
                 version.setDuration(Duration.standardMinutes(Long.parseLong(durationElement.getValue())));
             }
             
@@ -102,12 +102,16 @@ public class PaFilmProcessor {
         for (int i = 0; i < directorElements.size(); i++) {
             Element directorElement = directorElements.get(i);
             
-            String role = directorElement.getFirstChildElement("role").getValue();
+            String role = directorElement.getFirstChildElement("role").getValue().replace(" ", "_");
             
             String name = name(directorElement);
             
             if (name != null) {
-                actors.add(CrewMember.crewMember(name, role, Publisher.PA));
+                try {
+                    actors.add(CrewMember.crewMember(name, role, Publisher.PA));
+                } catch (IllegalArgumentException e) {
+                    log.record(new AdapterLogEntry(Severity.WARN).withCause(e).withDescription("Unknown role found for crew member").withSource(getClass()));
+                }
             }
         }
         

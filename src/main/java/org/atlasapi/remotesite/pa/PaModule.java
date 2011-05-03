@@ -11,6 +11,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.film.PaFilmModule;
 import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 import org.joda.time.Duration;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -29,6 +31,7 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 import com.metabroadcast.common.time.DayOfWeek;
 
 @Configuration
+@Import(PaFilmModule.class)
 public class PaModule {
     private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
     private final static Every REPEATED = RepetitionRules.every(Duration.standardHours(5));
