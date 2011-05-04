@@ -35,8 +35,10 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
         try {
             String feedContents = client.getContentsOf(feedUri);
             reportStatus("Feed contents received");
-            Builder builder = new Builder(new FilmProcessingNodeFactory());
+            FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
+            Builder builder = new Builder(filmProcessingNodeFactory);
             builder.build(new StringReader(feedContents));
+            reportStatus("Finished. Processed " + filmProcessingNodeFactory.getFilmCount() + " films");
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withUri(feedUri).withDescription("Exception while fetching film feed"));
             throw new RuntimeException(e);
@@ -44,9 +46,14 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     }
     
     private class FilmProcessingNodeFactory extends NodeFactory {
+        int currentFilmNumber = 0;
+        
         @Override
         public Nodes finishMakingElement(Element element) {
             if (element.getLocalName().equalsIgnoreCase("movie") && shouldContinue()) {
+                currentFilmNumber++;
+                reportStatus("Processing film number " + currentFilmNumber);
+                
                 try {
                     processor.process(element);
                 }
@@ -59,6 +66,10 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
             else {
                 return super.finishMakingElement(element);
             }
+        }
+        
+        public int getFilmCount() {
+            return currentFilmNumber;
         }
     }
 }
