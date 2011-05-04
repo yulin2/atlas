@@ -16,11 +16,9 @@ import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Months;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.hp.hpl.jena.sparql.function.library.date;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.url.UrlEncoding;
