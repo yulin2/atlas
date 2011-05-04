@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
@@ -39,40 +40,42 @@ public class PreviewFilmProcessor {
     public void process(Element movieElement) {
         
         String id = movieElement.getAttributeValue("movie_id");
-        Item item = new Item(getFilmUri(id), getFilmCurie(id), Publisher.PREVIEW_NETWORKS);
+        Film film = new Film(getFilmUri(id), getFilmCurie(id), Publisher.PREVIEW_NETWORKS);
         
         String originalTitle = get(movieElement, "original_title");
         Integer duration = getInt(movieElement, "movie_duration");
         
+        film.setYear(getInt(movieElement, "production_year"));
         String website = get(movieElement, "official_website");
+
         String imdbLink = "http://imdb.com/title/" + movieElement.getAttributeValue("imdb_id");
-        item.addAlias(imdbLink);
+        film.addAlias(imdbLink);
         if (!Strings.isNullOrEmpty(website)) {
-            item.addAlias(website);
+            film.setWebsiteUrl(website);
         }
 
         List<CrewMember> crewMembers = getCrewMembers(movieElement);
-        item.setPeople(crewMembers);
+        film.setPeople(crewMembers);
         
         Element regionElement = movieElement.getFirstChildElement("regions").getFirstChildElement("region");
         
         Set<String> categories = getCategories(regionElement);
-        item.setGenres(categories);
+        film.setGenres(categories);
         
-        setImages(item, regionElement);
+        setImages(film, regionElement);
         
         Element productElement = regionElement.getFirstChildElement("products").getFirstChildElement("product");
         
-        item.setTitle(get(productElement, "product_title"));
-        item.setDescription(get(productElement, "description"));
+        film.setTitle(get(productElement, "product_title"));
+        film.setDescription(get(productElement, "description"));
         
         Version version = new Version();
         version.setDuration(Duration.standardMinutes(duration));
-        item.addVersion(version);
+        film.addVersion(version);
         
-        item.setClips(getClips(productElement, id));
+        film.setClips(getClips(productElement, id));
         
-        contentWriter.createOrUpdate(item);
+        contentWriter.createOrUpdate(film);
     }
     
     private List<Clip> getClips(Element productElement, String movieId) {
