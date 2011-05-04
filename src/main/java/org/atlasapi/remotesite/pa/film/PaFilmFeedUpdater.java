@@ -16,11 +16,9 @@ import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Months;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import com.hp.hpl.jena.sparql.function.library.date;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.url.UrlEncoding;
@@ -64,8 +62,10 @@ public class PaFilmFeedUpdater extends ScheduledTask {
         try {
             String feedContents = client.getContentsOf(requestUri);
             reportStatus("Feed contents received");
-            Builder builder = new Builder(new FilmProcessingNodeFactory());
+            FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
+            Builder builder = new Builder(filmProcessingNodeFactory);
             builder.build(new StringReader(feedContents));
+            reportStatus("Finished. Processed " + filmProcessingNodeFactory.getFilmCount() + " films");
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withUri(requestUri).withDescription("Exception while fetching film feed"));
             throw new RuntimeException(e);
@@ -73,9 +73,14 @@ public class PaFilmFeedUpdater extends ScheduledTask {
     }
 
     private class FilmProcessingNodeFactory extends NodeFactory {
+        private int currentFilmNumber = 0;
+        
         @Override
         public Nodes finishMakingElement(Element element) {
             if (element.getLocalName().equalsIgnoreCase("film") && shouldContinue()) {
+                currentFilmNumber++;
+                reportStatus("Processing film number " + currentFilmNumber);
+                
                 try {
                     processor.process(element);
                 }
@@ -88,6 +93,10 @@ public class PaFilmFeedUpdater extends ScheduledTask {
             else {
                 return super.finishMakingElement(element);
             }
+        }
+        
+        public int getFilmCount() {
+            return currentFilmNumber;
         }
     }
 }
