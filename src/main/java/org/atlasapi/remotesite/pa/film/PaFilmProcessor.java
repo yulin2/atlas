@@ -7,6 +7,7 @@ import nu.xom.Elements;
 
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -45,16 +46,23 @@ public class PaFilmProcessor {
     public void process(Element filmElement) {
         String id = filmElement.getFirstChildElement("film_reference_no").getValue();
         
-        Item film;
+        Film film;
         Identified existingFilm = contentResolver.findByCanonicalUri(PaHelper.getFilmUri(id));
         if (existingFilm != null) {
-            film = (Item) existingFilm;
+            if (existingFilm instanceof Film) {
+                film = (Film) existingFilm;
+            }
+            else {
+                film = new Film();
+                Item.copyTo((Item) existingFilm, film);
+            }
         }
         else {
-            film = new Item(PaHelper.getFilmUri(id), PaHelper.getFilmCurie(id), Publisher.PA);
+            film = new Film(PaHelper.getFilmUri(id), PaHelper.getFilmCurie(id), Publisher.PA);
             
             film.setSpecialization(Specialization.FILM);
             film.setTitle(filmElement.getFirstChildElement("title").getValue());
+            film.setYear(Integer.parseInt(filmElement.getFirstChildElement("year").getValue()));
             
             Version version = new Version();
             version.setProvider(Publisher.PA);
