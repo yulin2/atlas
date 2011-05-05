@@ -62,7 +62,10 @@ public class PaFilmProcessor {
             
             film.setSpecialization(Specialization.FILM);
             film.setTitle(filmElement.getFirstChildElement("title").getValue());
-            film.setYear(Integer.parseInt(filmElement.getFirstChildElement("year").getValue()));
+            String year = filmElement.getFirstChildElement("year").getValue();
+            if (!Strings.isNullOrEmpty(year) && MoreStrings.containsOnlyAsciiDigits(year)) {
+                film.setYear(Integer.parseInt(year));
+            }
             
             Version version = new Version();
             version.setProvider(Publisher.PA);
