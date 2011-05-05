@@ -140,7 +140,7 @@ public class PaFilmProcessor {
         }
         
         if (forename != null && surname != null) {
-           return forename + " " + surname;
+           return forename.getValue() + " " + surname.getValue();
         }
         else {
             if (forename != null) {
