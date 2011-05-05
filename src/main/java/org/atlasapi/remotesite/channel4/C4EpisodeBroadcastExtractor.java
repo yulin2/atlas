@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
