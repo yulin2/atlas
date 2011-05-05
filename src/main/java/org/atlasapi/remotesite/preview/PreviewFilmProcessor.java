@@ -42,7 +42,6 @@ public class PreviewFilmProcessor {
         String id = movieElement.getAttributeValue("movie_id");
         Film film = new Film(getFilmUri(id), getFilmCurie(id), Publisher.PREVIEW_NETWORKS);
         
-        String originalTitle = get(movieElement, "original_title");
         Integer duration = getInt(movieElement, "movie_duration");
         
         film.setYear(getInt(movieElement, "production_year"));
@@ -97,6 +96,7 @@ public class PreviewFilmProcessor {
             embedLocation.setTransportType(TransportType.EMBED);
             embedLocation.setEmbedCode(getEmbedCode(movieId, clipTypeId, "cinema"));
             embedEncoding.addAvailableAt(embedLocation);
+            version.addManifestedAs(embedEncoding);
             
             Elements fileElements = clipElement.getFirstChildElement("files").getChildElements("file");
             for (int j = 0; j < fileElements.size(); j++) {
@@ -127,6 +127,7 @@ public class PreviewFilmProcessor {
                 version.addManifestedAs(encoding);
             }
             
+            clip.addVersion(version);
             clips.add(clip);
         }
         return clips;
