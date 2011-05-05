@@ -38,13 +38,14 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         
         if(runProcessingOnly()) {
             builder.add(AtlasLoggingModule.class, AtlasWebModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class);
+            builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
             builder.add(AtlasLoggingModule.class, AtlasWebModule.class, EquivModule.class, QueryModule.class, 
                     MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class,
                     AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class);
         }
         
-        builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
+        
     }
 
 	private boolean runProcessingOnly() {
