@@ -156,11 +156,11 @@ public class PreviewFilmProcessor {
     }
     
     private String getEmbedCode(String movieId, String clipType, String mediaType) {
-        return "<object width=\"600\" height=\"338\" classid=\"clsid:D27CDB6E-AE6D-11cf-96B8-444553540000\" id=\"pnplayer\">" +
-        		"<param name=\"movie\" value=\"http://www.player.previewnetworks.com/v4.0/PNPlayer.swf?\"/>" +
-        		"<param name=\"FlashVars\" value=\"file=http://uk.player-feed.previewnetworks.com/v3.1/cinema/MovieID/Channel_User_ID/?clip_type=X\" />" +
-        		"<param name=\"allowfullscreen\" value=\"true\"/><param name=\"allowscriptaccess\" value=\"always\"/>" +
-        		"<embed type=\"application/x-shockwave-flash\" src=\"http://www.player.previewnetworks.com/v4.0/PNPlayer.swf?\" FlashVars=\"file=http://uk.player-feed.previewnetworks.com/v3.1/" + mediaType + "/" + movieId + "/" + USER_ID_REPLACEMENT + "/?clip_type=" + clipType + "\" allowfullscreen=\"true\" allowscriptaccess=\"always\" width=\"600\" height=\"338\">" +
+        return "<object width='600' height='338' classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000' id='pnplayer'>" +
+        		"<param name='movie' value='http://www.player.previewnetworks.com/v4.0/PNPlayer.swf?'/>" +
+        		"<param name='FlashVars' value='file=http://uk.player-feed.previewnetworks.com/v3.1/cinema/MovieID/Channel_User_ID/?clip_type=X' />" +
+        		"<param name='allowfullscreen' value='true'/><param name='allowscriptaccess' value='always'/>" +
+        		"<embed type='application/x-shockwave-flash' src='http://www.player.previewnetworks.com/v4.0/PNPlayer.swf?' FlashVars='file=http://uk.player-feed.previewnetworks.com/v3.1/" + mediaType + "/" + movieId + "/" + USER_ID_REPLACEMENT + "/?clip_type=" + clipType + "' allowfullscreen='true' allowscriptaccess='always' width='600' height='338'>" +
         		"</embed></object>";
     }
     
