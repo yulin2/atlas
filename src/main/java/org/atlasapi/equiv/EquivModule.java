@@ -16,11 +16,12 @@ package org.atlasapi.equiv;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.equiv.tasks.BrandEquivUpdateTask;
 import org.atlasapi.equiv.tasks.BroadcastMatchingItemEquivGenerator;
 import org.atlasapi.equiv.tasks.DelegatingItemEquivGenerator;
+import org.atlasapi.equiv.tasks.FilmEquivUpdater;
 import org.atlasapi.equiv.tasks.ItemBasedBrandEquivUpdater;
 import org.atlasapi.equiv.tasks.ItemEquivGenerator;
+import org.atlasapi.equiv.tasks.PaEquivUpdateTask;
 import org.atlasapi.equiv.tasks.persistence.CachingEquivResultStore;
 import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
 import org.atlasapi.equiv.tasks.persistence.MongoEquivResultStore;
@@ -32,6 +33,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.AggregateContentListener;
 import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.equiv.EquivalentUrlStore;
 import org.atlasapi.persistence.equiv.MongoEquivStore;
@@ -94,12 +96,13 @@ public class EquivModule {
 	
 	private @Autowired SimpleScheduler scheduler;
 	private @Autowired ScheduleResolver scheduleResolver;
+	private @Autowired SearchResolver searchResolver;
 	private @Autowired AdapterLog log;
 	
 	@PostConstruct
 	public void scheduleEquivUpdaters() {
 	    if(Boolean.valueOf(updaterEnabled)) {
-	        scheduler.schedule(new BrandEquivUpdateTask(new MongoDbBackedContentStore(db), itemBasedBrandEquivUpdater(), equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+	        scheduler.schedule(new PaEquivUpdateTask(new MongoDbBackedContentStore(db), itemBasedBrandEquivUpdater(), filmEquivUpdater(), equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
 	    }
 	}
 	
@@ -111,6 +114,10 @@ public class EquivModule {
 	@Bean ItemBasedBrandEquivUpdater itemBasedBrandEquivUpdater() {
 	    MongoDbBackedContentStore mongoDbBackedContentStore = new MongoDbBackedContentStore(db);
 	    return new ItemBasedBrandEquivUpdater(itemEquivGenerator(), mongoDbBackedContentStore, mongoDbBackedContentStore).writesResults(true);
+	}
+	
+	@Bean FilmEquivUpdater filmEquivUpdater() {
+	    return new FilmEquivUpdater(searchResolver, new MongoDbBackedContentStore(db));
 	}
 	
 	@Bean EquivResultStore equivResultStore() {
