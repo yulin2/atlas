@@ -80,6 +80,11 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			sortByPrefs(query, same);
 			T chosen = same.get(0);
 			
+			// defend against broken transitive equivalence
+			if (merged.contains(chosen)) {
+				continue;
+			}
+			
 			List<T> notChosen = same.subList(1, same.size());
 			
 			if (chosen instanceof Container<?>) {
