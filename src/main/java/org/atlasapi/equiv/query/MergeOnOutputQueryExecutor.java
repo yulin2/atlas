@@ -127,18 +127,22 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	}
 	
 
-	public void mergeIn(ApplicationConfiguration config, Item chosen, Iterable<? extends Item> notChosen) {
+	public <T extends Item> void mergeIn(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
 		for (Item notChosenItem : notChosen) {
 			for (Clip clip : notChosenItem.getClips()) {
 				chosen.addClip(clip);
 			}
 		}
+		applyImagePrefs(config, chosen, notChosen);
+	}
+
+	private <T extends Content> void applyImagePrefs(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
 		if (config.imagePrecedenceEnabled()) {
-			Iterable<Item> all = Iterables.concat(ImmutableList.of(chosen), notChosen);
-			List<Item> topImageMatches = toContentOrdering(config.imagePrecedenceOrdering()).leastOf(Iterables.filter(all, HAS_IMAGE_FIELD_SET), 1);
+			Iterable<T> all = Iterables.concat(ImmutableList.of(chosen), notChosen);
+			List<T> topImageMatches = toContentOrdering(config.imagePrecedenceOrdering()).leastOf(Iterables.filter(all, HAS_IMAGE_FIELD_SET), 1);
 			
 			if (!topImageMatches.isEmpty()) {
-				Item top = topImageMatches.get(0);
+				T top = topImageMatches.get(0);
 				chosen.setImage(top.getImage());
 				chosen.setThumbnail(top.getThumbnail());
 			}
@@ -153,8 +157,9 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	};
 	
 	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container<T> chosen, List<Container<T>> notChosen) {
-		Iterable<T> merged = addMissingItems(chosen, notChosen);
-		chosen.setContents(mergeInUnSelectedData(config, merged, notChosen));
+		Iterable<T> withMissingItems = addMissingItems(chosen, notChosen);
+		chosen.setContents(mergeInUnSelectedData(config, withMissingItems, notChosen));
+		applyImagePrefs(config, chosen, notChosen);
 	}
 
 	private <T extends Item> Iterable<T> addMissingItems(Container<T> chosen, List<Container<T>> notChosen) {
