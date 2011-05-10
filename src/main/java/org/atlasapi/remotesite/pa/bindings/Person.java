@@ -10,11 +10,12 @@ package org.atlasapi.remotesite.pa.bindings;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import com.google.common.base.Function;
+import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 
 /**
@@ -22,69 +23,63 @@ import com.google.common.base.Function;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "categoryName",
-    "categoryCode"
+    "value"
 })
-@XmlRootElement(name = "category")
-public class Category {
+@XmlRootElement(name = "person")
+public class Person {
 
-    @XmlElement(name = "category_name", required = true)
-    protected String categoryName;
-    @XmlElement(name = "category_code", required = true)
-    protected String categoryCode;
+    @XmlAttribute(name = "person_id", required = false)
+    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
+    protected String personId;
+    @XmlValue
+    protected String value;
 
     /**
-     * Gets the value of the categoryName property.
+     * Gets the value of the personId property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getCategoryName() {
-        return categoryName;
+    public String getPersonId() {
+        return personId;
     }
 
     /**
-     * Sets the value of the categoryName property.
+     * Sets the value of the personId property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setCategoryName(String value) {
-        this.categoryName = value;
+    public void setPersonId(String value) {
+        this.personId = value;
     }
 
     /**
-     * Gets the value of the categoryCode property.
+     * Gets the value of the value property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getCategoryCode() {
-        return categoryCode;
+    public String getvalue() {
+        return value;
     }
 
     /**
-     * Sets the value of the categoryCode property.
+     * Sets the value of the value property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setCategoryCode(String value) {
-        this.categoryCode = value;
+    public void setvalue(String value) {
+        this.value = value;
     }
 
-    public static Function<Category, String> TO_GENRE_URIS = new Function<Category, String>() {
-        @Override
-        public String apply(Category from) {
-            return "http://pressassociation.com/genres/" + from.getCategoryCode();
-        }
-    };
 }
