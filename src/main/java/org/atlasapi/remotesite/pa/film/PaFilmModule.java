@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.pa.film;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentWriters;
 import org.joda.time.LocalTime;
@@ -30,8 +29,6 @@ public class PaFilmModule {
     private ContentWriters contentWriter;
     @Autowired
     private ContentResolver contentResolver;
-    @Autowired
-    private ItemsPeopleWriter peopleWriter;
 
     @PostConstruct
     public void startUp() {
@@ -51,6 +48,6 @@ public class PaFilmModule {
     
     @Bean
     public PaFilmProcessor paFilmProcessor() {
-        return new PaFilmProcessor(contentResolver, contentWriter, peopleWriter, log);
+        return new PaFilmProcessor(contentResolver, contentWriter);
     }
 }
