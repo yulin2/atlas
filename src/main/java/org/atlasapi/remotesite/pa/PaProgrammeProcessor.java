@@ -36,7 +36,6 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -44,6 +43,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
@@ -54,7 +54,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
     private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
     private static final String CLOSED_CURIE = "pa:closed";
-    private static final List<String> IGNORED_BRANDS = ImmutableList.of("70214");
+    private static final List<String> IGNORED_BRANDS = ImmutableList.of("70214", "84575");
     
     private final ContentWriters contentWriter;
     private final ContentResolver contentResolver;
@@ -63,7 +63,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private final GenreMap genreMap = new PaGenreMap();
     
-    private final Splitter personSplitter = Splitter.on(", ");
     private final ItemsPeopleWriter personWriter;
 
     public PaProgrammeProcessor(ContentWriters contentWriter, ContentResolver contentResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
@@ -90,6 +89,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 if (brand.hasValue()) {
                     brand.requireValue().addOrReplace(episode.requireValue());
                 }
+                
                 contentWriter.createOrUpdate(episode.requireValue());
                 
                 personWriter.createOrUpdatePeople(episode.requireValue());
@@ -212,7 +212,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         setCommonDetails(progData, channel, zone, film);
         
-        film.setYear(Integer.parseInt(progData.getFilmYear()));
+        if (progData.getFilmYear() != null && MoreStrings.containsOnlyAsciiDigits(progData.getFilmYear())) {
+            film.setYear(Integer.parseInt(progData.getFilmYear()));
+        }
         
         return Maybe.just(film);
     }
@@ -334,16 +336,18 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         List<CrewMember> people = Lists.newArrayList();
         
         for (CastMember cast: progData.getCastMember()) {
-            Actor actor = Actor.actor(cast.getActor(), cast.getCharacter(), Publisher.PA);
-            if (! people.contains(actor)) {
-                people.add(actor);
+            if (!Strings.isNullOrEmpty(cast.getActor().getPersonId())) {
+                Actor actor = Actor.actor(cast.getActor().getPersonId(), cast.getActor().getvalue(), cast.getCharacter(), Publisher.PA);
+                if (! people.contains(actor)) {
+                    people.add(actor);
+                }
             }
         }
         
-        for (StaffMember staff: progData.getStaffMember()) {
-            String roleKey = staff.getRole().toLowerCase().replace(' ', '_');
-            for (String name: personSplitter.split(staff.getPerson())) {
-                CrewMember crewMember = CrewMember.crewMember(name, roleKey, Publisher.PA);
+        for (StaffMember staffMember: progData.getStaffMember()) {
+            if (!Strings.isNullOrEmpty(staffMember.getPerson().getPersonId())) {
+                String roleKey = staffMember.getRole().toLowerCase().replace(' ', '_');
+                CrewMember crewMember = CrewMember.crewMember(staffMember.getPerson().getPersonId(), staffMember.getPerson().getvalue(), roleKey, Publisher.PA);
                 if (! people.contains(crewMember)) {
                     people.add(crewMember);
                 }
