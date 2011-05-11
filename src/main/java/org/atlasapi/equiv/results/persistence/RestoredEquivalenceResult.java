@@ -1,7 +1,5 @@
 package org.atlasapi.equiv.results.persistence;
 
-import org.atlasapi.equiv.results.persistence.EquivalenceResultTranslator.EquivalenceIdentifier;
-
 import com.google.common.collect.Table;
 
 public class RestoredEquivalenceResult {
