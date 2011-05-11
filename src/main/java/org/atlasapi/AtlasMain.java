@@ -35,7 +35,6 @@ public class AtlasMain {
 			return LOCAL_WAR_DIR;
 		}
 		ProtectionDomain domain = AtlasMain.class.getProtectionDomain();
-		System.out.println(domain.getCodeSource().getLocation().toString());
         return domain.getCodeSource().getLocation().toString();
 	}
 
@@ -47,7 +46,9 @@ public class AtlasMain {
 		
 		connector.setAcceptQueueSize(200);
 		
-		connector.setThreadPool(new QueuedThreadPool(500));
+		QueuedThreadPool pool = new QueuedThreadPool(100);
+		pool.setName("jetty-request-thread");
+		connector.setThreadPool(pool);
 		
 		// one acceptor per CPU (ish)
 		connector.setAcceptors(4);
