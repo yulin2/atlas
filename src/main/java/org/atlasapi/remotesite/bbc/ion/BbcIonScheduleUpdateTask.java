@@ -194,6 +194,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
 
     private void updateBrand(Brand brand, IonBroadcast broadcast) {
         brand.setTitle(broadcast.getEpisode().getBrandTitle());
+        BbcIonEpisodeDetailItemFetcherClient.addImagesTo("http://www.bbc.co.uk/iplayer/images/progbrand/", broadcast.getBrandId(), brand);
     }
 
     private Item createItemFrom(IonBroadcast broadcast) {
