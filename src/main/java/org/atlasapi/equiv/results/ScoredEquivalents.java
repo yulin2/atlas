@@ -70,7 +70,7 @@ public class ScoredEquivalents<T extends Content> {
                 for (Entry<T, Double> equivScore : input.entrySet()) {
                     scores.add(ScoredEquivalent.equivalentScore(equivScore.getKey(), equivScore.getValue()));
                 }
-                return Ordering.natural().immutableSortedCopy(scores);
+                return Ordering.natural().reverse().immutableSortedCopy(scores);
             }
         });
     }
