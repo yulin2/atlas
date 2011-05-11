@@ -3,9 +3,9 @@ package org.atlasapi.equiv.update;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.equiv.extractor.EquivalenceExtractor;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 
@@ -16,11 +16,11 @@ import com.google.common.collect.Iterables;
 public class BasicEquivalenceUpdater<T extends Content> implements ContentEquivalenceUpdater<T> {
 
     private final Set<ContentEquivalenceGenerator<T>> calculators;
-    private final EquivalenceExtractor<T> extractor;
+    private final EquivalenceResultBuilder<T> builder;
 
-    public BasicEquivalenceUpdater(Set<ContentEquivalenceGenerator<T>> calculators, EquivalenceExtractor<T> extractor) {
+    public BasicEquivalenceUpdater(Set<ContentEquivalenceGenerator<T>> calculators, EquivalenceResultBuilder<T> builder) {
         this.calculators = calculators;
-        this.extractor = extractor;
+        this.builder = builder;
     }
     
     public EquivalenceResult<T> updateEquivalences(final T content) {
@@ -30,7 +30,7 @@ public class BasicEquivalenceUpdater<T extends Content> implements ContentEquiva
                 return input.generateEquivalences(content);
             }
         }));
-        return new EquivalenceResult<T>(content, scores, extractor);
+        return builder.resultFor(content, scores);
     }
     
 }
