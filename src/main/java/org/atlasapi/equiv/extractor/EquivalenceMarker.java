@@ -5,8 +5,8 @@ import java.util.List;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 
-public interface EquivalenceExtractor<T extends Content> {
+public interface EquivalenceMarker<T extends Content> {
 
-    List<ScoredEquivalent<T>> extractFrom(List<ScoredEquivalent<T>> equivalents);
+    List<ScoredEquivalent<T>> mark(List<ScoredEquivalent<T>> equivalents);
     
 }

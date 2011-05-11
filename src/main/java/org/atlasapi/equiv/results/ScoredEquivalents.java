@@ -1,10 +1,10 @@
 package org.atlasapi.equiv.results;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.atlasapi.equiv.extractor.EquivalenceCombiner;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
@@ -45,24 +45,12 @@ public class ScoredEquivalents<T extends Content> {
         }
 
         public ScoredEquivalents<T> build() {
-            return new ScoredEquivalents<T>(source, equivs);
+            return new ScoredEquivalents<T>(source, ImmutableMap.copyOf(equivs), computeOrderedEquivs(equivs));
         }
     }
-
-    private final String source;
-    private final Map<Publisher, Map<T, Double>> equivs;
-
-    private ScoredEquivalents(String source, Map<Publisher, Map<T, Double>> equivs) {
-        this.source = source;
-        this.equivs = ImmutableMap.copyOf(equivs);
-    }
-
-    public String source() {
-        return source;
-    }
-
-    public Map<Publisher, List<ScoredEquivalent<T>>> getOrderedEquivalents() {
-        return Maps.transformValues(equivs, new Function<Map<T, Double>, List<ScoredEquivalent<T>>>() {
+    
+    private static <T extends Content> Map<Publisher, List<ScoredEquivalent<T>>> computeOrderedEquivs(Map<Publisher,Map<T,Double>> equivs) {
+        return ImmutableMap.copyOf(Maps.transformValues(equivs, new Function<Map<T, Double>, List<ScoredEquivalent<T>>>() {
 
             @Override
             public List<ScoredEquivalent<T>> apply(Map<T, Double> input) {
@@ -72,7 +60,48 @@ public class ScoredEquivalents<T extends Content> {
                 }
                 return Ordering.natural().reverse().immutableSortedCopy(scores);
             }
-        });
+        }));
+    }
+    
+    public static <T extends Content> ScoredEquivalents<T> fromOrderedEquivs(String source, Map<Publisher, List<ScoredEquivalent<T>>> ordered) {
+        return new ScoredEquivalents<T>(source, computeEquivs(ordered), ordered);
+    }
+    
+    private static <T extends Content> Map<Publisher, Map<T, Double>> computeEquivs(Map<Publisher, List<ScoredEquivalent<T>>> equivs) {
+        return ImmutableMap.copyOf(Maps.transformValues(equivs, new Function<List<ScoredEquivalent<T>>, Map<T, Double>>() {
+            @Override
+            public Map<T, Double> apply(List<ScoredEquivalent<T>> input) {
+                return ImmutableMap.copyOf(Maps.transformValues(Maps.uniqueIndex(input, new Function<ScoredEquivalent<T>, T>() {
+                    @Override
+                    public T apply(ScoredEquivalent<T> input) {
+                        return input.equivalent();
+                    }
+                }), new Function<ScoredEquivalent<T>, Double>() {
+                    @Override
+                    public Double apply(ScoredEquivalent<T> input) {
+                        return input.score();
+                    }
+                }));
+            }
+        }));
+    }
+
+    private final String source;
+    private final Map<Publisher, Map<T, Double>> equivs;
+    private final Map<Publisher, List<ScoredEquivalent<T>>> ordered;
+
+    private ScoredEquivalents(String source, Map<Publisher, Map<T, Double>> equivs, Map<Publisher, List<ScoredEquivalent<T>>> ordered) {
+        this.source = source;
+        this.equivs = equivs;
+        this.ordered= ordered;
+    }
+
+    public String source() {
+        return source;
+    }
+
+    public Map<Publisher, List<ScoredEquivalent<T>>> getOrderedEquivalents() {
+        return this.ordered;
     }
 
     @Override
@@ -97,32 +126,15 @@ public class ScoredEquivalents<T extends Content> {
         return String.format("%s: %s", source, equivs);
     }
 
-    public ScoredEquivalents<T> combine(ScoredEquivalents<T> other) {
+    public ScoredEquivalents<T> combine(EquivalenceCombiner<T> combiner, ScoredEquivalents<T> other) {
         if(other == null) {
             return this;
         }
         Map<Publisher, Map<T, Double>> combined = Maps.newHashMap();
         for (Publisher publisher : ImmutableSet.copyOf(Iterables.concat(equivs.keySet(), other.equivs.keySet()))) {
-            combined.put(publisher, combine(equivs.get(publisher), other.equivs.get(publisher)));
+            combined.put(publisher, combiner.combine(equivs.get(publisher), other.equivs.get(publisher)));
         }
-        return new ScoredEquivalents<T>(String.format("%s/%s", source, other.source), combined);
+        return new ScoredEquivalents<T>(String.format("%s/%s", source, other.source), combined, computeOrderedEquivs(combined));
     }
 
-    private Map<T, Double> combine(Map<T, Double> left, Map<T, Double> right) {
-        if (left == null) {
-            return right;
-        }
-        if (right == null) {
-            return left;
-        }
-        HashMap<T, Double> combined = Maps.newHashMap();
-        for (T equiv : ImmutableSet.copyOf(Iterables.concat(left.keySet(), right.keySet()))) {
-            combined.put(equiv, add(left.get(equiv),right.get(equiv)));
-        }
-        return combined;
-    }
-
-    private Double add(Double left, Double right) {
-        return left != null ? (right != null ? left + right : left) : right;
-    }
 }

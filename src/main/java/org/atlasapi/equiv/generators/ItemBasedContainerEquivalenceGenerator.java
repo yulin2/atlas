@@ -3,9 +3,8 @@ package org.atlasapi.equiv.generators;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.atlasapi.equiv.extractor.EquivalenceExtractor;
-import org.atlasapi.equiv.extractor.TopEquivalenceExtractor;
 import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.equiv.results.ScoredEquivalents.ScoredEquivalentsBuilder;
@@ -27,13 +26,13 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
         
         ScoredEquivalentsBuilder<Container<?>> containerEquivalents = ScoredEquivalents.fromSource("item");
         
-        EquivalenceExtractor<Item> extractor = new TopEquivalenceExtractor<Item>();
+        EquivalenceResultBuilder<Item> builder = new EquivalenceResultBuilder<Item>(null, null);
         
         for (Item item : container.getContents()) {
             
             EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences(item);
             
-            for (Entry<Publisher, List<ScoredEquivalent<Item>>> strongEquivalentBin : itemEquivalences.copyWithExtractor(extractor).strongEquivalences().entrySet()) {
+            for (Entry<Publisher, List<ScoredEquivalent<Item>>> strongEquivalentBin : itemEquivalences.rebuildWith(builder).combinedEquivalences().entrySet()) {
                 for (ScoredEquivalent<Item> strongEquivalent : strongEquivalentBin.getValue()) {
                     
                     Container<?> containerEquivalent = strongEquivalent.equivalent().getFullContainer();
