@@ -4,15 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.atlasapi.equiv.extractor.EquivalenceCombiner;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
@@ -45,8 +42,12 @@ public class ScoredEquivalents<T extends Content> {
         }
 
         public ScoredEquivalents<T> build() {
-            return new ScoredEquivalents<T>(source, ImmutableMap.copyOf(equivs), computeOrderedEquivs(equivs));
+            return fromMappedEquivs(source, ImmutableMap.copyOf(equivs));
         }
+    }
+    
+    public static <T extends Content> ScoredEquivalents<T> fromMappedEquivs(String source, Map<Publisher, Map<T, Double>> equivs) {
+        return new ScoredEquivalents<T>(source, ImmutableMap.copyOf(equivs), computeOrderedEquivs(equivs));
     }
     
     private static <T extends Content> Map<Publisher, List<ScoredEquivalent<T>>> computeOrderedEquivs(Map<Publisher,Map<T,Double>> equivs) {
@@ -104,6 +105,10 @@ public class ScoredEquivalents<T extends Content> {
         return this.ordered;
     }
 
+    public Map<Publisher, Map<T, Double>> getMappedEquivalents() {
+        return equivs;
+    }
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -111,30 +116,30 @@ public class ScoredEquivalents<T extends Content> {
         }
         if (that instanceof ScoredEquivalents) {
             ScoredEquivalents<?> other = (ScoredEquivalents<?>) that;
-            return Objects.equal(source, other.source) && Objects.equal(equivs, other.equivs);
+            return Objects.equal(source, other.source) && Objects.equal(equivs, other.equivs) && Objects.equal(ordered, other.ordered);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hashCode(source, equivs, ordered);
     }
 
     @Override
     public String toString() {
-        return String.format("%s: %s", source, equivs);
+        return String.format("%s: %s", source, ordered);
     }
 
-    public ScoredEquivalents<T> combine(EquivalenceCombiner<T> combiner, ScoredEquivalents<T> other) {
-        if(other == null) {
-            return this;
-        }
-        Map<Publisher, Map<T, Double>> combined = Maps.newHashMap();
-        for (Publisher publisher : ImmutableSet.copyOf(Iterables.concat(equivs.keySet(), other.equivs.keySet()))) {
-            combined.put(publisher, combiner.combine(equivs.get(publisher), other.equivs.get(publisher)));
-        }
-        return new ScoredEquivalents<T>(String.format("%s/%s", source, other.source), combined, computeOrderedEquivs(combined));
-    }
+//    public ScoredEquivalents<T> combine(EquivalenceCombiner<T> combiner, ScoredEquivalents<T> other) {
+//        if(other == null) {
+//            return this;
+//        }
+//        Map<Publisher, Map<T, Double>> combined = Maps.newHashMap();
+//        for (Publisher publisher : ImmutableSet.copyOf(Iterables.concat(equivs.keySet(), other.equivs.keySet()))) {
+//            combined.put(publisher, combiner.combine(equivs.get(publisher), other.equivs.get(publisher)));
+//        }
+//        return new ScoredEquivalents<T>(String.format("%s/%s", source, other.source), combined, computeOrderedEquivs(combined));
+//    }
 
 }

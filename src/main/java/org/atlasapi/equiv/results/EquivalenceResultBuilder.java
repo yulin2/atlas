@@ -3,8 +3,8 @@ package org.atlasapi.equiv.results;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.equiv.extractor.EquivalenceCombiner;
-import org.atlasapi.equiv.extractor.EquivalenceMarker;
+import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
+import org.atlasapi.equiv.results.marking.EquivalenceMarker;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
@@ -40,11 +40,7 @@ public class EquivalenceResultBuilder<T extends Content> {
     }
 
     private ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> equivalents) {
-        ScoredEquivalents<T> combined = null;
-        for (ScoredEquivalents<T> scoredEquivalents : equivalents) {
-            combined = scoredEquivalents.combine(combiner, combined);
-        }
-        return combined != null ? combined : ScoredEquivalents.<T> fromSource("empty combination").build();
+        return !equivalents.isEmpty() ? combiner.combine(equivalents) : ScoredEquivalents.<T> fromSource("empty combination").build();
     }
 
 }

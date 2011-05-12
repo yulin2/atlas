@@ -67,7 +67,7 @@ public final class ScoredEquivalent<T extends Content> implements Comparable<Sco
     
     @Override
     public String toString() {
-        return String.format("%s : %+.2f", target.getCanonicalUri(), score);
+        return String.format("%s : %+.2f", strong ? target.getCanonicalUri().toUpperCase() : target.getCanonicalUri(), score);
     }
 
     @Override
