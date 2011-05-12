@@ -64,29 +64,6 @@ public class ScoredEquivalents<T extends Content> {
         }));
     }
     
-    public static <T extends Content> ScoredEquivalents<T> fromOrderedEquivs(String source, Map<Publisher, List<ScoredEquivalent<T>>> ordered) {
-        return new ScoredEquivalents<T>(source, computeEquivs(ordered), ordered);
-    }
-    
-    private static <T extends Content> Map<Publisher, Map<T, Double>> computeEquivs(Map<Publisher, List<ScoredEquivalent<T>>> equivs) {
-        return ImmutableMap.copyOf(Maps.transformValues(equivs, new Function<List<ScoredEquivalent<T>>, Map<T, Double>>() {
-            @Override
-            public Map<T, Double> apply(List<ScoredEquivalent<T>> input) {
-                return ImmutableMap.copyOf(Maps.transformValues(Maps.uniqueIndex(input, new Function<ScoredEquivalent<T>, T>() {
-                    @Override
-                    public T apply(ScoredEquivalent<T> input) {
-                        return input.equivalent();
-                    }
-                }), new Function<ScoredEquivalent<T>, Double>() {
-                    @Override
-                    public Double apply(ScoredEquivalent<T> input) {
-                        return input.score();
-                    }
-                }));
-            }
-        }));
-    }
-
     private final String source;
     private final Map<Publisher, Map<T, Double>> equivs;
     private final Map<Publisher, List<ScoredEquivalent<T>>> ordered;

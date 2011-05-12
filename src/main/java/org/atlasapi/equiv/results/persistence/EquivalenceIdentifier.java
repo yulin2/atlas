@@ -35,7 +35,7 @@ public class EquivalenceIdentifier {
     
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, title, publisher);
+        return Objects.hashCode(id, title, publisher, strong);
     }
     
     @Override
@@ -45,7 +45,7 @@ public class EquivalenceIdentifier {
         }
         if(that instanceof EquivalenceIdentifier) {
             EquivalenceIdentifier other = (EquivalenceIdentifier) that;
-            return id.equals(other.id) && title.equals(other.title) && publisher.equals(other.publisher);
+            return id.equals(other.id) && title.equals(other.title) && publisher.equals(other.publisher) && strong == other.strong;
         }
         return false;
     }
