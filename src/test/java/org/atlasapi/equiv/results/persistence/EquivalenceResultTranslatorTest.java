@@ -5,11 +5,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.equiv.extractor.AddingEquivalenceCombiner;
-import org.atlasapi.equiv.extractor.TopEquivalenceMarker;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
+import org.atlasapi.equiv.results.marking.TopEquivalenceMarker;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 

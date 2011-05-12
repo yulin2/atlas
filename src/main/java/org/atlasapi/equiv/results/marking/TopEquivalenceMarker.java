@@ -1,4 +1,4 @@
-package org.atlasapi.equiv.extractor;
+package org.atlasapi.equiv.results.marking;
 
 import java.util.List;
 
