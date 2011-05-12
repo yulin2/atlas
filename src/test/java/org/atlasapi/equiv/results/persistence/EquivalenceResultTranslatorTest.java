@@ -9,7 +9,7 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
-import org.atlasapi.equiv.results.marking.TopEquivalenceMarker;
+import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 
@@ -22,7 +22,7 @@ import com.mongodb.DBObject;
 public class EquivalenceResultTranslatorTest extends TestCase {
 
     private final EquivalenceResultTranslator translator = new EquivalenceResultTranslator();
-    private final EquivalenceResultBuilder<Item> resultBuilder = EquivalenceResultBuilder.<Item>from(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceMarker.<Item>create());
+    private final EquivalenceResultBuilder<Item> resultBuilder = EquivalenceResultBuilder.<Item>from(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
 
     public final Item target = target("target", "Target", Publisher.BBC);
     public final Item equivalent1 = target("equivalent1", "Equivalent1", Publisher.BBC);
@@ -66,10 +66,10 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         assertFalse(restoredResult.sourceResults().isEmpty());
         
-        Set<Cell<EquivalenceIdentifier, String, Double>> cells = restoredResult.sourceResults().cellSet();
+        Set<Cell<String, String, Double>> cells = restoredResult.sourceResults().cellSet();
         assertEquals(1, cells.size());
         assertEquals(5.0, Iterables.getOnlyElement(cells).getValue());
-        assertEquals(equivalent1.getCanonicalUri(), Iterables.getOnlyElement(cells).getRowKey().id());
+        assertEquals(equivalent1.getCanonicalUri(), Iterables.getOnlyElement(cells).getRowKey());
         assertEquals("source1", Iterables.getOnlyElement(cells).getColumnKey());
         
         assertEquals(1, restoredResult.combinedResults().size());
@@ -96,13 +96,16 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         assertFalse(restoredResult.sourceResults().isEmpty());
         
-        EquivalenceIdentifier id1 = new EquivalenceIdentifier(equivalent1.getCanonicalUri(), equivalent1.getTitle(), true, equivalent1.getPublisher().title());
-        assertEquals(10.0, restoredResult.sourceResults().get(id1, "source1"));
-        assertEquals(5.0, restoredResult.sourceResults().get(id1, "source2"));
+        String eq1Uri = equivalent1.getCanonicalUri();
+        assertEquals(10.0, restoredResult.sourceResults().get(eq1Uri, "source1"));
+        assertEquals(5.0, restoredResult.sourceResults().get(eq1Uri, "source2"));
 
-        EquivalenceIdentifier id2 = new EquivalenceIdentifier(equivalent2.getCanonicalUri(), equivalent2.getTitle(), false, equivalent2.getPublisher().title());
-        assertEquals(5.0, restoredResult.sourceResults().get(id2, "source1"));
-        assertNull(restoredResult.sourceResults().get(id2, "source2"));
+        String eq2Uri = equivalent2.getCanonicalUri();
+        assertEquals(5.0, restoredResult.sourceResults().get(eq2Uri, "source1"));
+        assertNull(restoredResult.sourceResults().get(eq2Uri, "source2"));
+        
+        EquivalenceIdentifier id1 = new EquivalenceIdentifier(eq1Uri, equivalent1.getTitle(), true, equivalent1.getPublisher().title());
+        EquivalenceIdentifier id2 = new EquivalenceIdentifier(eq2Uri, equivalent2.getTitle(), false, equivalent2.getPublisher().title());
         
         assertEquals(2, restoredResult.combinedResults().size());
         assertEquals(restoredResult.combinedResults(), ImmutableMap.of(
@@ -129,21 +132,24 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         assertFalse(restoredResult.sourceResults().isEmpty());
         
-        EquivalenceIdentifier id1 = new EquivalenceIdentifier(equivalent1.getCanonicalUri(), equivalent1.getTitle(), false, equivalent1.getPublisher().title());
-        assertEquals(10.0, restoredResult.sourceResults().get(id1, "source1"));
-        assertEquals(5.0, restoredResult.sourceResults().get(id1, "source2"));
-        assertNull(restoredResult.sourceResults().get(id1, "source3"));
+        String eq1Uri = equivalent1.getCanonicalUri();
+        assertEquals(10.0, restoredResult.sourceResults().get(eq1Uri, "source1"));
+        assertEquals(5.0, restoredResult.sourceResults().get(eq1Uri, "source2"));
+        assertNull(restoredResult.sourceResults().get(eq1Uri, "source3"));
 
-        EquivalenceIdentifier id2 = new EquivalenceIdentifier(equivalent2.getCanonicalUri(), equivalent2.getTitle(), false, equivalent2.getPublisher().title());
-        assertEquals(5.0, restoredResult.sourceResults().get(id2, "source1"));
-        assertNull(restoredResult.sourceResults().get(id2, "source2"));
-        assertNull(restoredResult.sourceResults().get(id2, "source3"));
+        String eq2Uri = equivalent2.getCanonicalUri();
+        assertEquals(5.0, restoredResult.sourceResults().get(eq2Uri, "source1"));
+        assertNull(restoredResult.sourceResults().get(eq2Uri, "source2"));
+        assertNull(restoredResult.sourceResults().get(eq2Uri, "source3"));
 
-        EquivalenceIdentifier id3 = new EquivalenceIdentifier(equivalent3.getCanonicalUri(), equivalent3.getTitle(), false, equivalent3.getPublisher().title());
-        assertEquals(5.0, restoredResult.sourceResults().get(id3, "source1"));
-        assertEquals(5.0, restoredResult.sourceResults().get(id3, "source2"));
-        assertEquals(5.0, restoredResult.sourceResults().get(id3, "source3"));
+        String eq3Uri = equivalent3.getCanonicalUri();
+        assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source1"));
+        assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source2"));
+        assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source3"));
         
+        EquivalenceIdentifier id1 = new EquivalenceIdentifier(eq1Uri, equivalent1.getTitle(), true, equivalent1.getPublisher().title());
+        EquivalenceIdentifier id2 = new EquivalenceIdentifier(eq2Uri, equivalent2.getTitle(), false, equivalent2.getPublisher().title());
+        EquivalenceIdentifier id3 = new EquivalenceIdentifier(eq3Uri, equivalent3.getTitle(), true, equivalent3.getPublisher().title());
         assertEquals(3, restoredResult.combinedResults().size());
         assertEquals(restoredResult.combinedResults(), ImmutableMap.of(
                 id1, 15.0,

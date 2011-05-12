@@ -1,10 +1,14 @@
 package org.atlasapi.equiv.results.persistence;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
+import static com.google.common.collect.Iterables.transform;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
+import static org.atlasapi.media.entity.Identified.TO_URI;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.ScoredEquivalent;
@@ -41,11 +45,13 @@ public class EquivalenceResultTranslator {
         TranslatorUtils.from(dbo, ID, result.target().getCanonicalUri());
         TranslatorUtils.from(dbo, TITLE, result.target().getTitle());
         
+        TranslatorUtils.fromSet(dbo, copyOf(transform(transform(result.strongEquivalences().values(), ScoredEquivalent.<T>toEquivalent()), TO_URI)), STRONG);
+        
         Map<Publisher, List<ScoredEquivalent<T>>> combinedEquivalences = result.combinedEquivalences();
         dbo.put(COMBINED, serializeBinnedEquivalences(combinedEquivalences));
 
         BasicDBList equivScores = new BasicDBList();
-        for (ScoredEquivalents<T> scoredEquivalents : result.scores()) {
+        for (ScoredEquivalents<T> scoredEquivalents : result.rawScores()) {
             BasicDBList sourceScores = serializeBinnedEquivalences(scoredEquivalents.getOrderedEquivalents());
             equivScores.add(new BasicDBObject(ImmutableMap.of(SOURCE, scoredEquivalents.source(), PUBLISHER_SCORES, sourceScores)));
         }
@@ -71,8 +77,7 @@ public class EquivalenceResultTranslator {
             publisherEquivalents.add(new BasicDBObject(ImmutableMap.of(
                     ID, scoredEquivalent.equivalent().getCanonicalUri(),
                     TITLE, scoredEquivalent.equivalent().getTitle(),
-                    SCORE, scoredEquivalent.score(),
-                    STRONG, scoredEquivalent.isStrong()
+                    SCORE, scoredEquivalent.score()
             )));
         }
         publisherStrong.put(SCORES, publisherEquivalents);
@@ -87,16 +92,17 @@ public class EquivalenceResultTranslator {
         String targetId = TranslatorUtils.toString(dbo, ID);
         String targetTitle = TranslatorUtils.toString(dbo, TITLE);
         
+        Set<String> strongs = TranslatorUtils.toSet(dbo, STRONG);
         
         Map<EquivalenceIdentifier, Double> totals = Maps.newHashMap();
         for (DBObject publisherBin : TranslatorUtils.toDBObjectList(dbo, COMBINED)) {
             String publisher = publisherName(publisherBin);
             for (DBObject strongScore : TranslatorUtils.toDBObjectList(publisherBin, SCORES)) {
-                totals.put(identifierFrom(strongScore, publisher), TranslatorUtils.toDouble(strongScore, SCORE));
+                totals.put(identifierFrom(strongScore, publisher,strongs), TranslatorUtils.toDouble(strongScore, SCORE));
             }
         }
         
-        Table<EquivalenceIdentifier, String, Double> results = HashBasedTable.create();
+        Table<String, String, Double> results = HashBasedTable.create();
         for (DBObject sourceEquivScores : TranslatorUtils.toDBObjectList(dbo, SOURCE_SCORES)) {
             String sourceName = TranslatorUtils.toString(sourceEquivScores, SOURCE);
             
@@ -108,19 +114,16 @@ public class EquivalenceResultTranslator {
         return new RestoredEquivalenceResult(targetId, targetTitle, results, totals);
     }
 
-    private EquivalenceIdentifier identifierFrom(DBObject strongScore, String publisher) {
+    private EquivalenceIdentifier identifierFrom(DBObject strongScore, String publisher, Set<String> strongIds) {
         String id = TranslatorUtils.toString(strongScore, ID);
         String title = TranslatorUtils.toString(strongScore, TITLE);
-        Boolean strong = TranslatorUtils.toBoolean(strongScore, STRONG);
-        EquivalenceIdentifier identifier = new EquivalenceIdentifier(id, title, strong, publisher);
+        EquivalenceIdentifier identifier = new EquivalenceIdentifier(id, title, strongIds.contains(id), publisher);
         return identifier;
     }
 
-    private void unserializePublisherBin(Table<EquivalenceIdentifier, String, Double> results, DBObject scoreBin, String sourceName) {
-        String publisher = publisherName(scoreBin);
-        
+    private void unserializePublisherBin(Table<String, String, Double> results, DBObject scoreBin, String sourceName) {
         for (DBObject scoreDbo : TranslatorUtils.toDBObjectList(scoreBin, SCORES)) {
-            results.put(identifierFrom(scoreDbo, publisher), sourceName, TranslatorUtils.toDouble(scoreDbo, SCORE));
+            results.put(TranslatorUtils.toString(scoreDbo, ID), sourceName, TranslatorUtils.toDouble(scoreDbo, SCORE));
         }
     }
 

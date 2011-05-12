@@ -2,34 +2,31 @@ package org.atlasapi.equiv.results;
 
 import org.atlasapi.media.entity.Content;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
 import com.google.common.primitives.Doubles;
-
 
 public final class ScoredEquivalent<T extends Content> implements Comparable<ScoredEquivalent<?>> {
 
-    private final T target;
-    private final double score;
-    private final boolean strong;
-    
     public static final <T extends Content> ScoredEquivalent<T> equivalentScore(T equivalent, double score) {
-        return new ScoredEquivalent<T>(equivalent, score, false);
+        return new ScoredEquivalent<T>(equivalent, score);
     }
     
-    public static final <T extends Content> Predicate<ScoredEquivalent<T>> strongFilter() {
-        return new Predicate<ScoredEquivalent<T>>() {
+    public static final <T extends Content> Function<ScoredEquivalent<T>, T> toEquivalent() {
+        return new Function<ScoredEquivalent<T>, T>() {
             @Override
-            public boolean apply(ScoredEquivalent<T> input) {
-                return input.isStrong();
+            public T apply(ScoredEquivalent<T> input) {
+                return input.equivalent();
             }
         };
     }
+    
+    private final T target;
+    private final double score;
 
-    private ScoredEquivalent(T equivalent, double score, boolean strong) {
+    private ScoredEquivalent(T equivalent, double score) {
         target = equivalent;
         this.score = score;
-        this.strong = strong;
     }
 
     public T equivalent() {
@@ -38,14 +35,6 @@ public final class ScoredEquivalent<T extends Content> implements Comparable<Sco
 
     public double score() {
         return score;
-    }
-
-    public boolean isStrong() {
-        return strong;
-    }
-    
-    public ScoredEquivalent<T> copyAsStrong() {
-        return new ScoredEquivalent<T>(target, score, true);
     }
     
     @Override
@@ -67,7 +56,7 @@ public final class ScoredEquivalent<T extends Content> implements Comparable<Sco
     
     @Override
     public String toString() {
-        return String.format("%s : %+.2f", strong ? target.getCanonicalUri().toUpperCase() : target.getCanonicalUri(), score);
+        return String.format("%s : %+.2f", target.getCanonicalUri(), score);
     }
 
     @Override
