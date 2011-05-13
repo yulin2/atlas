@@ -25,7 +25,7 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
         
         ScoredEquivalentsBuilder<Container<?>> containerEquivalents = ScoredEquivalents.fromSource("item");
         
-        for (Item item : container.getContents()) {
+         for (Item item : container.getContents()) {
             
             EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences(item);
             

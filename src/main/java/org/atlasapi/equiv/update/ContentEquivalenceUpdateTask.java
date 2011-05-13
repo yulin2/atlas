@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.RetrospectiveContentLister;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 
@@ -20,7 +20,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
 
     private static final int BATCH_SIZE = 10;
     
-    private final MongoDbBackedContentStore contentStore;
+    private final RetrospectiveContentLister contentStore;
     private final AdapterLog log;
     private final ContentEquivalenceUpdater<Content> rootUpdater;
     
@@ -29,7 +29,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     private Predicate<Content> publisherFilter = Predicates.alwaysTrue();
 
     
-    public ContentEquivalenceUpdateTask(MongoDbBackedContentStore contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log) {
+    public ContentEquivalenceUpdateTask(RetrospectiveContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log) {
         this.contentStore = contentStore;
         this.rootUpdater = rootUpdater;
         this.log = log;

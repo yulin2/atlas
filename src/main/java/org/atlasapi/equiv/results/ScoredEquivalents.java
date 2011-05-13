@@ -42,7 +42,7 @@ public class ScoredEquivalents<T extends Content> {
         }
 
         public ScoredEquivalents<T> build() {
-            return fromMappedEquivs(source, ImmutableMap.copyOf(equivs));
+            return fromMappedEquivs(source, equivs);
         }
     }
     

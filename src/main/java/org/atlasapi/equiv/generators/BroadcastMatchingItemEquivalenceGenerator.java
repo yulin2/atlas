@@ -22,19 +22,17 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     private final ScheduleResolver resolver;
     private final Set<Publisher> supportedPublishers;
     private final Duration flexibility;
-    private final Double matchScore;
 
-    public BroadcastMatchingItemEquivalenceGenerator(ScheduleResolver resolver, Set<Publisher> supportedPublishers, Duration flexibility, Double matchScore) {
+    public BroadcastMatchingItemEquivalenceGenerator(ScheduleResolver resolver, Set<Publisher> supportedPublishers, Duration flexibility) {
         this.resolver = resolver;
         this.supportedPublishers = supportedPublishers;
         this.flexibility = flexibility;
-        this.matchScore = matchScore;
     }
     
     @Override
     public ScoredEquivalents<Item> generateEquivalences(Item content) {
         
-        ScoredEquivalentsBuilder<Item> scores = ScoredEquivalents.fromSource("broadcast matcher");
+        ScoredEquivalentsBuilder<Item> scores = ScoredEquivalents.fromSource("broadcast");
         
         for (Version version : content.getVersions()) {
             for (Broadcast broadcast : version.getBroadcasts()) {
@@ -43,7 +41,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
                 for (ScheduleChannel channel : schedule.scheduleChannels()) {
                     for (Item scheduleItem : channel.items()) {
                         if(scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
-                            scores.addEquivalent((Item) scheduleItem, matchScore);
+                            scores.addEquivalent((Item) scheduleItem, 1.0);
                         }
                     }
                 }

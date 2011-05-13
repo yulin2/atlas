@@ -15,7 +15,7 @@ public class MongoEquivalenceResultStore implements EquivalenceResultStore {
     private EquivalenceResultTranslator translator;
 
     public MongoEquivalenceResultStore(DatabasedMongo mongo) {
-        this.equivResults = mongo.collection("equivResults");
+        this.equivResults = mongo.collection("equivalence");
         this.translator = new EquivalenceResultTranslator();
     }
     

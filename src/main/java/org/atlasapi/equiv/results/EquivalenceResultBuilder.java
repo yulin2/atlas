@@ -15,7 +15,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public class EquivalenceResultBuilder<T extends Content> {
 
-    public static <T extends Content> EquivalenceResultBuilder<T> from(EquivalenceCombiner<T> combiner, EquivalenceExtractor<T> marker) {
+    public static <T extends Content> EquivalenceResultBuilder<T> resultBuilder(EquivalenceCombiner<T> combiner, EquivalenceExtractor<T> marker) {
         return new EquivalenceResultBuilder<T>(combiner, marker);
     }
 
