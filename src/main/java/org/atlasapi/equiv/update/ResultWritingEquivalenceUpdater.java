@@ -6,6 +6,10 @@ import org.atlasapi.media.entity.Content;
 
 public class ResultWritingEquivalenceUpdater<T extends Content> implements ContentEquivalenceUpdater<T> {
 
+    public static <T extends Content> ResultWritingEquivalenceUpdater<T> resultWriter(ContentEquivalenceUpdater<T> delegate, EquivalenceResultStore store) {
+        return new ResultWritingEquivalenceUpdater<T>(delegate, store);
+    }
+    
     private final ContentEquivalenceUpdater<T> delegate;
     private final EquivalenceResultStore store;
 

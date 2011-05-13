@@ -22,7 +22,7 @@ import com.mongodb.DBObject;
 public class EquivalenceResultTranslatorTest extends TestCase {
 
     private final EquivalenceResultTranslator translator = new EquivalenceResultTranslator();
-    private final EquivalenceResultBuilder<Item> resultBuilder = EquivalenceResultBuilder.<Item>from(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
+    private final EquivalenceResultBuilder<Item> resultBuilder = EquivalenceResultBuilder.<Item>resultBuilder(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
 
     public final Item target = target("target", "Target", Publisher.BBC);
     public final Item equivalent1 = target("equivalent1", "Equivalent1", Publisher.BBC);

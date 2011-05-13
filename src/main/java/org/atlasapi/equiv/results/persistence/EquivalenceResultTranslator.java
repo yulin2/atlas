@@ -15,6 +15,7 @@ import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
+import org.joda.time.DateTime;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
@@ -22,21 +23,25 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 public class EquivalenceResultTranslator {
 
-    private static final String SOURCE = "source";
-    private static final String SCORE = "score";
-    private static final String PUBLISHER = "publisher";
-    private static final String SOURCE_SCORES = "sourceScores";
-    private static final String PUBLISHER_SCORES = "publisherScores";
-    private static final String SCORES = "scores";
+    private static final String TITLE = "title";
     private static final String COMBINED = "combined";
     private static final String STRONG = "strong";
-    private static final String TITLE = "title";
+    private static final String TIMESTAMP = "timestamp";
+
+    private static final String SOURCE_SCORES = "sourceScores";
+
+    private static final String SOURCE = "source";
+    private static final String PUBLISHER_SCORES = "publisherScores";
+    private static final String PUBLISHER = "publisher";
+    private static final String SCORES = "scores";
+    private static final String SCORE = "score";
 
 
     public <T extends Content> DBObject toDBObject(EquivalenceResult<T> result) {
@@ -56,6 +61,8 @@ public class EquivalenceResultTranslator {
             equivScores.add(new BasicDBObject(ImmutableMap.of(SOURCE, scoredEquivalents.source(), PUBLISHER_SCORES, sourceScores)));
         }
         dbo.put(SOURCE_SCORES, equivScores);
+        
+        TranslatorUtils.fromDateTime(dbo, TIMESTAMP, new DateTime(DateTimeZones.UTC));
         
         return dbo;
     }
@@ -111,7 +118,7 @@ public class EquivalenceResultTranslator {
             }
         }
         
-        return new RestoredEquivalenceResult(targetId, targetTitle, results, totals);
+        return new RestoredEquivalenceResult(targetId, targetTitle, results, totals, TranslatorUtils.toDateTime(dbo, TIMESTAMP));
     }
 
     private EquivalenceIdentifier identifierFrom(DBObject strongScore, String publisher, Set<String> strongIds) {
