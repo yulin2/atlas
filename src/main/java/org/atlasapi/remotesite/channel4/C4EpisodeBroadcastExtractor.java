@@ -7,6 +7,9 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.joda.time.DateTime;
@@ -23,7 +26,12 @@ import com.sun.syndication.feed.atom.Feed;
 public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<Episode>> {
     
     private final DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE dd MMMM yyyy hh:mm aa").withZone(DateTimeZones.LONDON);
+	private final AdapterLog log;
 
+    public C4EpisodeBroadcastExtractor(AdapterLog log) {
+		this.log = log;
+	}
+    
     @SuppressWarnings("unchecked")
     @Override
     public List<Episode> extract(Feed source) {
@@ -36,6 +44,11 @@ public class C4EpisodeBroadcastExtractor implements ContentExtractor<Feed, List<
             Integer episodeNumber = C4AtomApi.readAsNumber(lookup, C4EpisodesExtractor.DC_EPISODE_NUMBER);
             
             String itemUri = C4AtomApi.canonicalUri(entry);
+            
+            if (itemUri == null) {
+            	log.record(new AdapterLogEntry(Severity.WARN).withDescription("Could not find cannonical uri from epg entry " + entry.getId()));
+            	continue;
+            }
             
             Episode episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
             episode.setEpisodeNumber(episodeNumber);
