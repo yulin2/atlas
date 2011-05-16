@@ -46,6 +46,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -69,19 +70,18 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
-	public static Map<String, String> CHANNEL_LOOKUP = channelLookup();
+	public static Map<String, String> CHANNEL_LOOKUP = ImmutableMap.<String, String>builder()
+		.put("C4", "http://www.channel4.com")
+		.put("M4", "http://www.channel4.com/more4")
+		.put("E4", "http://www.e4.com")
+		.put("4M", "http://www.4music.com")
+	.build();
+	
+	
 	private final AdapterLog log;
 	
 	public C4EpisodesExtractor(AdapterLog log) {
         this.log = log;
-	}
-	
-	private static Map<String, String> channelLookup() {
-		Map<String, String> channelLookup = Maps.newHashMap();
-		channelLookup.put("C4", "http://www.channel4.com");
-		channelLookup.put("M4", "http://www.channel4.com/more4");
-		channelLookup.put("E4", "http://www.e4.com");
-		return channelLookup;
 	}
 	
 	private boolean include4odInfo = false;
