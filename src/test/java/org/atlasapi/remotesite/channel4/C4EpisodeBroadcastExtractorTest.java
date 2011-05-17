@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.logging.NullAdapterLog;
 
 import com.google.common.io.Resources;
 import com.sun.syndication.feed.atom.Feed;
@@ -15,7 +16,7 @@ public class C4EpisodeBroadcastExtractorTest extends TestCase {
     
     private final AtomFeedBuilder gleeAtom = new AtomFeedBuilder(Resources.getResource(getClass(), "glee-epg.atom"));
     private final Feed gleeFeed = gleeAtom.build();
-    private final C4EpisodeBroadcastExtractor extractor = new C4EpisodeBroadcastExtractor();
+    private final C4EpisodeBroadcastExtractor extractor = new C4EpisodeBroadcastExtractor(new NullAdapterLog());
     
     public void testShouldExtractBroadcast() throws Exception {
         List<Episode> episodes = extractor.extract(gleeFeed);

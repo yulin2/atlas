@@ -3,10 +3,13 @@ package org.atlasapi;
 import org.atlasapi.application.ApplicationModule;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.feeds.AtlasFeedsModule;
+import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
+import org.atlasapi.persistence.ManualScheduleRebuildModule;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
+import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -34,17 +37,15 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 	}
 
     private void configure(Builder<Class<?>> builder) {
-        builder.add(AtlasModule.class);
+        builder.add(AtlasModule.class, AtlasLoggingModule.class, AtlasWebModule.class, QueryModule.class, MongoContentPersistenceModule.class, 
+                AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class, RadioPlayerModule.class);
         
         if(runProcessingOnly()) {
-            builder.add(AtlasLoggingModule.class, AtlasWebModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class);
+            builder.add(EquivModule.class, ManualScheduleRebuildModule.class);
+            builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
-            builder.add(AtlasLoggingModule.class, AtlasWebModule.class, EquivModule.class, QueryModule.class, 
-                    MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class,
-                    AtlasFeedsModule.class, HealthModule.class, ApplicationModule.class);
+            builder.add(AtlasFeedsModule.class, QueryWebModule.class, ApplicationModule.class);
         }
-        
-        builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
     }
 
 	private boolean runProcessingOnly() {

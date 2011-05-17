@@ -5,6 +5,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -84,7 +85,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
             item.setSeriesUri(SLASH_PROGRAMMES_ROOT + episodeDetail.getSeriesId());
         }
         if(Strings.isNullOrEmpty(episodeDetail.getSubseriesId()) && episodeDetail.getPosition() != null) {
-            item.setSeriesNumber(Ints.saturatedCast(episodeDetail.getPosition()));
+            item.setEpisodeNumber(Ints.saturatedCast(episodeDetail.getPosition()));
         }
     }
 
@@ -93,8 +94,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         item.setTitle(episode.getTitle());
         item.setDescription(episode.getSynopsis());
         if (! Strings.isNullOrEmpty(episode.getId())) {
-            item.setThumbnail(episode.getMyImageBaseUrl() + episode.getId() + "_150_84.jpg");
-            item.setImage(episode.getMyImageBaseUrl() + episode.getId() + "_640_360.jpg");
+            addImagesTo(episode.getMyImageBaseUrl().toString(), episode.getId(),item);
         }
 
         if(episode.getVersions() != null) {
@@ -116,6 +116,12 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
 
         return item;
     }
+
+	static void addImagesTo(String prefix, String pid, Content item) {
+		String path = prefix + pid;
+		item.setThumbnail(path + "_150_84.jpg");
+		item.setImage(path + "_640_360.jpg");
+	}
     
     private Maybe<CrewMember> personFrom(IonContributor contributor) {
         CrewMember person = null;

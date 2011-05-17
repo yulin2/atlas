@@ -18,14 +18,9 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.ContentPersistenceModule;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.equiv.EquivalentContentFinder;
-import org.atlasapi.persistence.equiv.EquivalentContentMerger;
-import org.atlasapi.persistence.equiv.EquivalentContentMergingContentWriter;
-import org.atlasapi.persistence.equiv.EquivalentUrlFinder;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.query.uri.SavingFetcher;
@@ -45,7 +40,6 @@ import org.atlasapi.remotesite.youtube.YouTubeFeedCanonicaliser;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 import org.atlasapi.system.AliasController;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -68,12 +62,8 @@ public class AtlasFetchModule {
 	}
 	
 	@Configuration
-	@Import({EquivModule.class})
 	public static class WriterModule {
 	
-		private @Value("${equivalence.enabled}") boolean enableEquivalence;
-		
-		private @Autowired EquivalentUrlFinder finder;
 		private @Autowired ContentPersistenceModule persistence;
 		private @Autowired RemoteSiteModule remote;
 		private @Autowired ReaderModule reader;
@@ -82,11 +72,6 @@ public class AtlasFetchModule {
 		public @Bean ContentWriter contentWriter() {		
 			
 			ContentWriter writer = persistence.persistentWriter();
-			
-			if (enableEquivalence) {
-				EquivalentContentMerger merger = new EquivalentContentMerger(new EquivalentContentFinder(finder, reader.contentResolverThatDoesntSave()));
-				writer = new EquivalentContentMergingContentWriter(writer, merger);
-			}
 			
 			remote.contentWriters().add(writer);
 			return writer;

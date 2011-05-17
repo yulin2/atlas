@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.04 18/11/2010 mrj -->
+<!-- listings Radio Times DTD v2.05 27/04/2011 mrj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
@@ -156,12 +156,21 @@ channel_number: the channel_number of the current channel for this provider
 <!-- production staff role -->
 <!ELEMENT role (#PCDATA)>
 
-<!-- an actor in the cast -->
+<!-- an actor in the cast 
+person_id: A unique id for this person
+-->
 <!ELEMENT actor (#PCDATA)>
+<!ATTLIST actor
+	person_id CDATA #REQUIRED
+>
 
-<!-- name of member of the production staff -->
+<!-- name of member of the production staff 
+person_id: A unique id for this person
+-->
 <!ELEMENT person (#PCDATA)>
-
+<!ATTLIST person
+	person_id CDATA #REQUIRED
+>
 <!-- programme synopsis 
 	programme billings such as synopsis, extra detail and x-refs
 -->

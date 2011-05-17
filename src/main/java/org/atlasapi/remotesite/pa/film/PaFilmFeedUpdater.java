@@ -14,15 +14,19 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.url.UrlEncoding;
 
-public class PaFilmFeedUpdater implements Runnable {
+public class PaFilmFeedUpdater extends ScheduledTask {
     
     private final static DateTimeFormatter dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+    private final static DateTime START_DATE = new DateTime(2011, DateTimeConstants.APRIL, 12, 0, 0, 0, 0);
     
     private final SimpleHttpClient client = HttpClients.webserviceClient();
     private final String feedUrl;
@@ -44,26 +48,39 @@ public class PaFilmFeedUpdater implements Runnable {
     public static PaFilmFeedUpdater completeUpdater(String feedUrl, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, PaFilmProcessor processor) {
         return new PaFilmFeedUpdater(feedUrl, log, contentResolver, contentWriter, processor, true);
     }
-
+    
     @Override
-    public void run() {
+    protected void runTask() {
         String requestUri = feedUrl;
         
-        if (!doCompleteUpdate) {
-            requestUri += "?lastUpdated=" + dateFormat.print(new DateTime(DateTimeZone.UTC).minusDays(3));
+        if (doCompleteUpdate) {
+            requestUri += "/since?lastUpdated=" + UrlEncoding.encode(dateFormat.print(START_DATE));
+        } else {
+            requestUri += "/since?lastUpdated=" + UrlEncoding.encode(dateFormat.print(new DateTime(DateTimeZone.UTC).minusDays(3)));
         }
+        
         try {
-            Builder builder = new Builder(new FilmProcessingNodeFactory());
-            builder.build(new StringReader(client.getContentsOf(requestUri)));
+            String feedContents = client.getContentsOf(requestUri);
+            reportStatus("Feed contents received");
+            FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
+            Builder builder = new Builder(filmProcessingNodeFactory);
+            builder.build(new StringReader(feedContents));
+            reportStatus("Finished. Processed " + filmProcessingNodeFactory.getFilmCount() + " films");
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withUri(requestUri).withDescription("Exception while fetching film feed"));
+            throw new RuntimeException(e);
         } 
     }
 
     private class FilmProcessingNodeFactory extends NodeFactory {
+        private int currentFilmNumber = 0;
+        
         @Override
         public Nodes finishMakingElement(Element element) {
-            if (element.getLocalName().equalsIgnoreCase("film")) {
+            if (element.getLocalName().equalsIgnoreCase("film") && shouldContinue()) {
+                currentFilmNumber++;
+                reportStatus("Processing film number " + currentFilmNumber);
+                
                 try {
                     processor.process(element);
                 }
@@ -76,6 +93,10 @@ public class PaFilmFeedUpdater implements Runnable {
             else {
                 return super.finishMakingElement(element);
             }
+        }
+        
+        public int getFilmCount() {
+            return currentFilmNumber;
         }
     }
 }

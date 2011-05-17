@@ -41,11 +41,17 @@ public class BbcProgrammeEncodingAndLocationCreator {
         return Maybe.nothing();
     }
     
-    public Location location(IonOndemandChange ondemand) {
-        return location(ondemand, ondemand.getEpisodeId());
+    public Maybe<Location> location(IonOndemandChange ondemand) {
+        Location location = location(ondemand, ondemand.getEpisodeId());
+        Maybe<IonService> possibleService = IonService.fromString(ondemand.getService());
+        if (possibleService.isNothing()) {
+        	return Maybe.nothing();
+        }
+        possibleService.requireValue().applyToLocation(location);
+        return Maybe.just(location);
     }
 
-    public Location location(IonOndemandChange ondemand, String episodeId) {
+    private Location location(IonOndemandChange ondemand, String episodeId) {
         Location location = new Location();
 
         Policy policy = policyFrom(ondemand);
