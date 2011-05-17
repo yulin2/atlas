@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasErrorSummary;
+import org.atlasapi.beans.AtlasModelType;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -49,7 +50,7 @@ public class SearchController extends BaseController {
             Set<Publisher> publishers = publishers(publisher, appConfig);
             List<Identified> content = searcher.search(new Search(q), publishers, appConfig, selection);
         
-            modelAndViewFor(request, response, content);
+            modelAndViewFor(request, response, content, AtlasModelType.CONTENT);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
