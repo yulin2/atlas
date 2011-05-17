@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasErrorSummary;
+import org.atlasapi.beans.AtlasModelType;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
@@ -62,7 +63,7 @@ public class ScheduleController extends BaseController {
             }
             
             Schedule schedule = scheduleResolver.schedule(fromWhen, toWhen, channels, publishers);
-            modelAndViewFor(request, response, schedule.scheduleChannels());
+            modelAndViewFor(request, response, schedule.scheduleChannels(), AtlasModelType.SCHEDULE);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
