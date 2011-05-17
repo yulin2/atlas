@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Content;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 public class MongoEquivalenceResultStore implements EquivalenceResultStore {
 
@@ -20,8 +21,10 @@ public class MongoEquivalenceResultStore implements EquivalenceResultStore {
     }
     
     @Override
-    public <T extends Content> void store(EquivalenceResult<T> result) {
-        equivResults.update(where().fieldEquals(ID, result.target().getCanonicalUri()).build(), translator.toDBObject(result), true, false);
+    public <T extends Content> RestoredEquivalenceResult store(EquivalenceResult<T> result) {
+        DBObject dbo = translator.toDBObject(result);
+        equivResults.update(where().fieldEquals(ID, result.target().getCanonicalUri()).build(), dbo, true, false);
+        return translator.fromDBObject(dbo);
     }
 
     @Override

@@ -102,7 +102,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
 
         String eq2Uri = equivalent2.getCanonicalUri();
         assertEquals(5.0, restoredResult.sourceResults().get(eq2Uri, "source1"));
-        assertNull(restoredResult.sourceResults().get(eq2Uri, "source2"));
+        assertEquals(Double.NaN, restoredResult.sourceResults().get(eq2Uri, "source2"));
         
         EquivalenceIdentifier id1 = new EquivalenceIdentifier(eq1Uri, equivalent1.getTitle(), true, equivalent1.getPublisher().title());
         EquivalenceIdentifier id2 = new EquivalenceIdentifier(eq2Uri, equivalent2.getTitle(), false, equivalent2.getPublisher().title());
@@ -135,12 +135,12 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         String eq1Uri = equivalent1.getCanonicalUri();
         assertEquals(10.0, restoredResult.sourceResults().get(eq1Uri, "source1"));
         assertEquals(5.0, restoredResult.sourceResults().get(eq1Uri, "source2"));
-        assertNull(restoredResult.sourceResults().get(eq1Uri, "source3"));
+        assertEquals(Double.NaN, restoredResult.sourceResults().get(eq1Uri, "source3"));
 
         String eq2Uri = equivalent2.getCanonicalUri();
         assertEquals(5.0, restoredResult.sourceResults().get(eq2Uri, "source1"));
-        assertNull(restoredResult.sourceResults().get(eq2Uri, "source2"));
-        assertNull(restoredResult.sourceResults().get(eq2Uri, "source3"));
+        assertEquals(Double.NaN, restoredResult.sourceResults().get(eq2Uri, "source2"));
+        assertEquals(Double.NaN, restoredResult.sourceResults().get(eq2Uri, "source3"));
 
         String eq3Uri = equivalent3.getCanonicalUri();
         assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source1"));

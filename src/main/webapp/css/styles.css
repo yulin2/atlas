@@ -150,3 +150,19 @@ input[type="checkbox"] {
 	cursor:pointer;
 	margin:2px;
 }
+
+table {
+    border: 1px solid #CCC;
+    border-collapse: collapse;
+    margin: 10px;
+}
+td,th {
+    text-align: center;
+    border: 1px solid #CCC;
+    padding: 2px;
+}
+p.time{
+    font-size:90%;
+    color:#aaa;
+    margin: 10px;
+}

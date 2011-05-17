@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.generators;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.ScoredEquivalents;
@@ -15,7 +16,10 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquivalenceGenerator<Item>{
 
@@ -34,10 +38,11 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         
         ScoredEquivalentsBuilder<Item> scores = ScoredEquivalents.fromSource("broadcast");
         
+        int broadcasts = 0;
         for (Version version : content.getVersions()) {
             for (Broadcast broadcast : version.getBroadcasts()) {
-                
-                Schedule schedule = scheduleAround(broadcast, supportedPublishers);
+                broadcasts++;
+                Schedule schedule = scheduleAround(broadcast, Sets.difference(supportedPublishers, ImmutableSet.of(content.getPublisher())));
                 for (ScheduleChannel channel : schedule.scheduleChannels()) {
                     for (Item scheduleItem : channel.items()) {
                         if(scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
@@ -49,9 +54,23 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
             }
         }
         
-        return scores.build();
+        return scale(scores.build(), broadcasts);
     }
     
+    private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
+        return ScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.getMappedEquivalents(), new Function<Map<Item, Double>, Map<Item, Double>>() {
+            @Override
+            public Map<Item, Double> apply(Map<Item, Double> input) {
+                return Maps.transformValues(input, new Function<Double,Double>(){
+
+                    @Override
+                    public Double apply(Double input) {
+                        return input / broadcasts;
+                    }});
+            }
+        }));
+    }
+
     private boolean hasQualifyingBroadcast(Item item, Broadcast referenceBroadcast) {
         for (Version version : item.nativeVersions()) {
             for (Broadcast broadcast : version.getBroadcasts()) {

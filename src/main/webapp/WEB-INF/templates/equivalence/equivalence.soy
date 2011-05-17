@@ -1,0 +1,91 @@
+{namespace atlas.templates.equivalence}
+
+/**
+ *
+ */
+{template .head}
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Atlas Equivalence</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+    <script src="/js/base.js"></script>
+    <script src="/js/soyutils.js"></script>
+    <script type="text/javascript" src="/js/generated/equivalence-widgets-js_templates.js"></script>
+    <script src="/js/equivalence.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+</head>
+{/template}
+
+/**
+ *
+ */
+{template .header}
+    <header>
+        <h1><a href="/system/equivalence">Equivalence</a></h1>
+    </header>
+{/template}
+
+/**
+ * @param result
+ */
+{template .result}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.widgets.result}
+    {param result: $result /}
+{/call}
+</body>
+</html>
+{/template}
+
+/**
+ * @param containerResults
+ * @param itemResults
+ */
+{template .recent}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Recently Processed Containers</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $containerResults /}
+{/call}
+<h2>Recently Processed Items</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $itemResults /}
+{/call}
+</body>
+</html>
+{/template}
+
+/**
+ * @param containerResults
+ */
+{template .recentContainers}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Recently Processed Containers</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $containerResults /}
+{/call}
+</body>
+</html>
+{/template}
+
+/**
+ * @param itemResults
+ */
+{template .recentItems}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Recently Processed Items</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $itemResults /}
+{/call}
+</body>
+</html>
+{/template}
