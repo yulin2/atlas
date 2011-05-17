@@ -46,7 +46,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
     private final C4EpisodesExtractor fourOditemExtrator;
     private final C4EpisodesExtractor flattenedBrandExtrator;
     
-    private final C4EpisodeBroadcastExtractor broadcastExtractor = new C4EpisodeBroadcastExtractor();
+    private final C4EpisodeBroadcastExtractor broadcastExtractor;
     private final C4ClipExtractor clipExtractor;
     private final RemoteSiteClient<Feed> feedClient;
 	private final C4PreviousVersionDataMerger versionMerger;
@@ -64,6 +64,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
         clipExtractor = new C4ClipExtractor(atomClient, new C4EpisodesExtractor(log).includeOnDemands());
         versionMerger = new C4PreviousVersionDataMerger(contentResolver);
         synthesizedItemUpdater = new C4SynthesizedItemUpdater(contentResolver, contentWriter);
+        broadcastExtractor = new C4EpisodeBroadcastExtractor(log);
     }
 
     @Override
