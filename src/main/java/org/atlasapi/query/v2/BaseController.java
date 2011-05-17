@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasErrorSummary;
+import org.atlasapi.beans.AtlasModelType;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -50,11 +51,11 @@ public abstract class BaseController {
     }
     
     @SuppressWarnings("unchecked")
-    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, Collection<?> queryResults) throws IOException {
+    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, Collection<?> queryResults, AtlasModelType type) throws IOException {
         if (queryResults == null) {
             errorViewFor(request, response, AtlasErrorSummary.forException(new Exception("Query result was null")));
         }
-        outputter.writeTo(request, response, (Collection<Object>) queryResults);
+        outputter.writeTo(request, response, (Collection<Object>) queryResults, type);
     }
     
     protected ApplicationConfiguration appConfig(HttpServletRequest request) {
