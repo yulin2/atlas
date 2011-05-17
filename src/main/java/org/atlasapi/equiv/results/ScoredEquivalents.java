@@ -108,15 +108,4 @@ public class ScoredEquivalents<T extends Content> {
         return String.format("%s: %s", source, ordered);
     }
 
-//    public ScoredEquivalents<T> combine(EquivalenceCombiner<T> combiner, ScoredEquivalents<T> other) {
-//        if(other == null) {
-//            return this;
-//        }
-//        Map<Publisher, Map<T, Double>> combined = Maps.newHashMap();
-//        for (Publisher publisher : ImmutableSet.copyOf(Iterables.concat(equivs.keySet(), other.equivs.keySet()))) {
-//            combined.put(publisher, combiner.combine(equivs.get(publisher), other.equivs.get(publisher)));
-//        }
-//        return new ScoredEquivalents<T>(String.format("%s/%s", source, other.source), combined, computeOrderedEquivs(combined));
-//    }
-
 }
