@@ -21,7 +21,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.properties.Configurer;
 
 public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
 

@@ -7,7 +7,6 @@ import nu.xom.Element;
 import nu.xom.NodeFactory;
 import nu.xom.Nodes;
 
-import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -16,34 +15,45 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.pa.film.PaFilmFeedUpdater;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 
-public class PreviewFilmClipFeedUpdater implements Runnable {
+public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     
     private final SimpleHttpClient client = HttpClients.webserviceClient();
     private final PreviewFilmProcessor processor;
     private final AdapterLog log;
     private final String feedUri;
     
-    public PreviewFilmClipFeedUpdater(String feedUri, ContentResolver contentResolver, ContentWriter contentWriter, AdapterLog log) {
+    public PreviewFilmClipFeedUpdater(String feedUri, ContentWriter contentWriter, AdapterLog log) {
         this.feedUri = feedUri;
         this.log = log;
-        processor = new PreviewFilmProcessor(contentResolver, contentWriter, log);
+        this.processor = new PreviewFilmProcessor(contentWriter);
     }
 
     @Override
-    public void run() {
+    protected void runTask() {
         try {
-            Builder builder = new Builder(new FilmProcessingNodeFactory());
-            builder.build(new StringReader(client.getContentsOf(feedUri)));
+            String feedContents = client.getContentsOf(feedUri);
+            reportStatus("Feed contents received");
+            FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
+            Builder builder = new Builder(filmProcessingNodeFactory);
+            builder.build(new StringReader(feedContents));
+            reportStatus("Finished. Processed " + filmProcessingNodeFactory.getFilmCount() + " films");
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withUri(feedUri).withDescription("Exception while fetching film feed"));
+            throw new RuntimeException(e);
         } 
     }
     
     private class FilmProcessingNodeFactory extends NodeFactory {
+        int currentFilmNumber = 0;
+        
         @Override
         public Nodes finishMakingElement(Element element) {
-            if (element.getLocalName().equalsIgnoreCase("film")) {
+            if (element.getLocalName().equalsIgnoreCase("movie") && shouldContinue()) {
+                currentFilmNumber++;
+                reportStatus("Processing film number " + currentFilmNumber);
+                
                 try {
                     processor.process(element);
                 }
@@ -56,6 +66,10 @@ public class PreviewFilmClipFeedUpdater implements Runnable {
             else {
                 return super.finishMakingElement(element);
             }
+        }
+        
+        public int getFilmCount() {
+            return currentFilmNumber;
         }
     }
 }

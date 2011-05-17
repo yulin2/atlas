@@ -69,7 +69,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertEquals(MediaType.VIDEO, item.getMediaType());
         assertEquals(Specialization.TV, item.getSpecialization());
 
-        assertEquals(18, item.people().size());
+        assertEquals(17, item.people().size());
         assertEquals(14, item.actors().size());
 
         Version version = item.getVersions().iterator().next();

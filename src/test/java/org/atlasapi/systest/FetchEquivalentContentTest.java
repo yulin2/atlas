@@ -44,6 +44,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.QueryModule;
+import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.StubFetcher;
@@ -137,7 +138,7 @@ public class FetchEquivalentContentTest extends TestCase {
 	}
 
 	@Configuration
-	@Import({EquivModule.class, QueryModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
+	@Import({EquivModule.class, QueryModule.class, QueryWebModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class})
 	public static class AtlasModuleWithLocalMongoAndFakeFetchers {
 		
 	    public @Bean ContextConfigurer config() {

@@ -11,11 +11,10 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonDateRangeScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
-import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
-import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUriSource;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
@@ -25,19 +24,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
-import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 
 @Configuration
 public class BbcModule {
 
-	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(4, 0, 0));
-	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	private final static Every TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
-	private final static Every SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
-	private final static Every ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
+	private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.NEVER;
+	private final static RepetitionRule HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
+	private final static RepetitionRule TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
+	private final static RepetitionRule SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
+	private final static RepetitionRule ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
 
     private @Autowired MongoDbBackedContentStore contentStore;
 	private @Autowired ContentWriters contentWriters;
@@ -49,14 +47,23 @@ public class BbcModule {
     public void scheduleTasks() {
         scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
         scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
-        scheduler.schedule(bbcIonUpdater(0, 0).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), TEN_MINUTES);
-        scheduler.schedule(bbcIonUpdater(7, 7).withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log)), ONE_HOUR);
+        
+        scheduler.schedule(bbcIonUpdater(0, 0)
+        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+        		.withName("BBC Ion schedule update (today only)"), 
+        		TEN_MINUTES);
+        
+        scheduler.schedule(bbcIonUpdater(7, 7)
+        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+        		.withName("BBC Ion schedule update (14 days)"),
+        		ONE_HOUR);
+        
         scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC update scheduled tasks installed"));
     }
 	
-	private BbcIonScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
-        return new BbcIonScheduleUpdater(new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack), contentStore, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
+	private BbcIonDateRangeScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
+        return new BbcIonDateRangeScheduleUpdater(lookBack, lookAhead, contentStore, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
     }
 	
 	@Bean BbcScheduleController bbcScheduleController() {
