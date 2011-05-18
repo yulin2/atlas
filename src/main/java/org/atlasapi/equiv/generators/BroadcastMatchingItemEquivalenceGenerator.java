@@ -35,7 +35,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
     
     @Override
-    public ScoredEquivalents<Item> generateEquivalences(Item content) {
+    public ScoredEquivalents<Item> generateEquivalences(Item content, Set<Item> suggestions) {
         
         ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
         

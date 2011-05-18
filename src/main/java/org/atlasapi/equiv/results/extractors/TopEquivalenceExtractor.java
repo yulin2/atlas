@@ -7,6 +7,9 @@ import org.atlasapi.media.entity.Content;
 
 import com.metabroadcast.common.base.Maybe;
 
+/**
+ * Always selects the equivalent with the highest score
+ */
 public class TopEquivalenceExtractor<T extends Content> implements EquivalenceExtractor<T> {
 
     public static <T extends Content> TopEquivalenceExtractor<T> create() {

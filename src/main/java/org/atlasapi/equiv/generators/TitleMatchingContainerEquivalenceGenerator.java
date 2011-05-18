@@ -1,6 +1,7 @@
 package org.atlasapi.equiv.generators;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
@@ -27,18 +28,30 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
     }
     
     @Override
-    public ScoredEquivalents<Container<?>> generateEquivalences(Container<?> content) {
+    public ScoredEquivalents<Container<?>> generateEquivalences(Container<?> content, Set<Container<?>> suggestions) {
         ScoredEquivalentsBuilder<Container<?>> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
         List<Identified> search = searchForEquivalents(content);
         
-        for (Container<?> found : Iterables.filter(search, Container.class)) {
-            equivalents.addEquivalent(found, 1.0);
+        for (Container<?> found : ImmutableSet.copyOf(Iterables.concat(Iterables.filter(search, Container.class), suggestions))) {
+            equivalents.addEquivalent(found, score(content.getTitle(), found.getTitle()));
         }
         
         return equivalents.build();
     }
     
+    private double score(String subjectTitle, String equivalentTitle) {
+        double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
+        double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
+        return commonPrefix / (subjectTitle.length()/1.0) - difference;
+    }
+
+    private double commonPrefixLength(String t1, String t2) {
+        int i = 0;
+        for(; i < Math.min(t1.length(), t2.length()) && t1.charAt(i)==t2.charAt(i); i++){}
+        return i;
+    }
+
     private List<Identified> searchForEquivalents(Container<?> content) {
         SetView<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(publishers);
@@ -46,5 +59,4 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
         List<Identified> search = searchResolver.search(new Search(content.getTitle()), publishers, appConfig , new Selection(0, 10));
         return search;
     }
-
 }

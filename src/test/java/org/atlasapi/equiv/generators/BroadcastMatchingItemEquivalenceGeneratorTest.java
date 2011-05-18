@@ -43,7 +43,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTes
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
-        ScoredEquivalents<Item> equivalents = generator.generateEquivalences(item1);
+        ScoredEquivalents<Item> equivalents = generator.generateEquivalences(item1, ImmutableSet.<Item>of());
         
         Map<Publisher, Map<Item, Double>> mappedEquivalents = equivalents.equivalents();
         assertThat(mappedEquivalents.size(), is(1));

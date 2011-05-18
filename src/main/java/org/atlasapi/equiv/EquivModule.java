@@ -25,8 +25,10 @@ import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
+import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
-import org.atlasapi.equiv.results.extractors.ThresholdEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.persistence.MongoEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
@@ -49,6 +51,7 @@ import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.AggregateContentListener;
@@ -171,7 +174,12 @@ public class EquivModule {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(1))
         );
-        return resultWriter(new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder(AddingEquivalenceCombiner.<Item>create(), ThresholdEquivalenceExtractor.<Item>fromPercent(90))), equivalenceResultStore());
+        EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder();
+        return resultWriter(new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder), equivalenceResultStore());
+    }
+
+    private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder() {
+        return resultBuilder(AddingEquivalenceCombiner.<T>create(), MinimumScoreEquivalenceExtractor.minimumFrom(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), 0.0));
     }
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
@@ -179,7 +187,8 @@ public class EquivModule {
                 new ItemBasedContainerEquivalenceGenerator(itemUpdater()),
                 new TitleMatchingContainerEquivalenceGenerator(searchResolver)
         );
-        return resultWriter(new BasicEquivalenceUpdater<Container<?>>(containerGenerators , resultBuilder(AddingEquivalenceCombiner.<Container<?>>create(), ThresholdEquivalenceExtractor.<Container<?>>fromPercent(90))), equivalenceResultStore());
+        EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder();
+        return resultWriter(new BasicEquivalenceUpdater<Container<?>>(containerGenerators , resultBuilder), equivalenceResultStore());
     }
 
     public @Bean RootEquivalenceUpdater contentUpdater() {
