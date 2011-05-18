@@ -3,8 +3,9 @@ package org.atlasapi.equiv.generators;
 import java.util.Map;
 import java.util.Set;
 
+import org.atlasapi.equiv.results.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
-import org.atlasapi.equiv.results.ScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
@@ -36,7 +37,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     @Override
     public ScoredEquivalents<Item> generateEquivalences(Item content) {
         
-        ScoredEquivalentsBuilder<Item> scores = ScoredEquivalents.fromSource("broadcast");
+        ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
         
         int broadcasts = 0;
         for (Version version : content.getVersions()) {
@@ -58,7 +59,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
     
     private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
-        return ScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), new Function<Map<Item, Double>, Map<Item, Double>>() {
+        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), new Function<Map<Item, Double>, Map<Item, Double>>() {
             @Override
             public Map<Item, Double> apply(Map<Item, Double> input) {
                 return Maps.transformValues(input, new Function<Double,Double>(){

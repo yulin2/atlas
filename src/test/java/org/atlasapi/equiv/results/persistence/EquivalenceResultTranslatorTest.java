@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;
@@ -53,7 +54,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     public void testCodecForTrivialResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                ScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).build()
+                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).build()
         );
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
@@ -82,8 +83,8 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     public void testCodecForSinglePublisherResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                ScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent2, 5.0).addEquivalent(equivalent1, 5.0).build(),
-                ScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, 5.0).build()
+                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent2, 5.0).addEquivalent(equivalent1, 5.0).build(),
+                DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, 5.0).build()
         );
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
@@ -117,9 +118,9 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     public void testCodecForTwoPublisherResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                ScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent2, 5.0).addEquivalent(equivalent3, 5.0).addEquivalent(equivalent1, 5.0).build(),
-                ScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent3, 5.0).build(),
-                ScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, 5.0).build()
+                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent2, 5.0).addEquivalent(equivalent3, 5.0).addEquivalent(equivalent1, 5.0).build(),
+                DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent3, 5.0).build(),
+                DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, 5.0).build()
         );
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);

@@ -3,8 +3,9 @@ package org.atlasapi.equiv.generators;
 import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.results.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
-import org.atlasapi.equiv.results.ScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -27,7 +28,7 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
     
     @Override
     public ScoredEquivalents<Container<?>> generateEquivalences(Container<?> content) {
-        ScoredEquivalentsBuilder<Container<?>> equivalents = ScoredEquivalents.fromSource("Title");
+        ScoredEquivalentsBuilder<Container<?>> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
         List<Identified> search = searchForEquivalents(content);
         

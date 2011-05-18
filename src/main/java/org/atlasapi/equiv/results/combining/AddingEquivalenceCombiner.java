@@ -3,6 +3,7 @@ package org.atlasapi.equiv.results.combining;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
@@ -30,7 +31,7 @@ public class AddingEquivalenceCombiner<T extends Content> extends FoldingEquival
         for (Publisher publisher : ImmutableSet.copyOf(Iterables.concat(combinedMappedEquivalents.keySet(), scoredMappedEquivalents.keySet()))) {
             result.put(publisher, combine(combinedMappedEquivalents.get(publisher), scoredMappedEquivalents.get(publisher)));
         }
-        return ScoredEquivalents.fromMappedEquivs(String.format("%s/%s", combined.source(), scoredEquivalents.source()), result);
+        return DefaultScoredEquivalents.fromMappedEquivs(String.format("%s/%s", combined.source(), scoredEquivalents.source()), result);
     }
     
     public Map<T, Double> combine(Map<T, Double> left, Map<T, Double> right) {
