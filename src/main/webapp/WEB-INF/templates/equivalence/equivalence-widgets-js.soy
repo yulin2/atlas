@@ -50,10 +50,10 @@
 {foreach $equivalence in $result.equivalences}
   <tr>
     <td>{if $equivalence.strong}✔{else}✘{/if}</td>
-    <td><a href="?uri={$equivalence.encodedId}">{$equivalence.publisher}/{$equivalence.title}</a></td>
+    <td><a href="?uri={$equivalence.encodedId}">{$equivalence.title} ({$equivalence.publisher})</a></td>
     <td>{$equivalence.scores['combined']}</td>
     {foreach $source in $result.sources}
-        <td>{if $equivalence.scores[$source]}{$equivalence.scores[$source]}{else}N/A{/if}</td>
+        <td>{if $equivalence.scores[$source] != 'NaN'}{$equivalence.scores[$source]}{else}N/A{/if}</td>
     {/foreach}
   </tr>
 {/foreach}

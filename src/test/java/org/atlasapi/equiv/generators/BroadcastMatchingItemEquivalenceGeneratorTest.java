@@ -45,7 +45,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTes
         
         ScoredEquivalents<Item> equivalents = generator.generateEquivalences(item1);
         
-        Map<Publisher, Map<Item, Double>> mappedEquivalents = equivalents.getMappedEquivalents();
+        Map<Publisher, Map<Item, Double>> mappedEquivalents = equivalents.equivalents();
         assertThat(mappedEquivalents.size(), is(1));
         
         Map<Item, Double> scoreMap = mappedEquivalents.get(BBC);

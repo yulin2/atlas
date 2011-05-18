@@ -46,8 +46,8 @@ public class EquivalenceResult<T extends Content> {
         return Objects.hashCode(target(), scores);
     }
     
-    public Map<Publisher, List<ScoredEquivalent<T>>> combinedEquivalences() {
-        return this.combined.getOrderedEquivalents();
+    public Map<Publisher, Map<T, Double>> combinedEquivalences() {
+        return this.combined.equivalents();
     }
     
     public Map<Publisher, ScoredEquivalent<T>> strongEquivalences() {
