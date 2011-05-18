@@ -48,7 +48,7 @@ public class EquivalenceResultBuilder<T extends Content> {
     }
 
     private ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> equivalents) {
-        return !equivalents.isEmpty() ? combiner.combine(equivalents) : ScoredEquivalents.<T> fromSource("empty combination").build();
+        return !equivalents.isEmpty() ? combiner.combine(equivalents) : DefaultScoredEquivalents.<T> fromSource("empty combination").build();
     }
 
     private Map<Publisher, List<ScoredEquivalent<T>>> order(Map<Publisher,Map<T,Double>> equivs) {
