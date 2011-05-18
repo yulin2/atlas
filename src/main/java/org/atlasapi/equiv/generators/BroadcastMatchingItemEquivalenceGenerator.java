@@ -58,7 +58,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
     
     private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
-        return ScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.getMappedEquivalents(), new Function<Map<Item, Double>, Map<Item, Double>>() {
+        return ScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), new Function<Map<Item, Double>, Map<Item, Double>>() {
             @Override
             public Map<Item, Double> apply(Map<Item, Double> input) {
                 return Maps.transformValues(input, new Function<Double,Double>(){

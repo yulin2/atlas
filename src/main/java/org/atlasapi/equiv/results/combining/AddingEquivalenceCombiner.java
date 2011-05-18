@@ -23,8 +23,8 @@ public class AddingEquivalenceCombiner<T extends Content> extends FoldingEquival
             return scoredEquivalents;
         }
         
-        Map<Publisher, Map<T, Double>> combinedMappedEquivalents = combined.getMappedEquivalents();
-        Map<Publisher, Map<T, Double>> scoredMappedEquivalents = scoredEquivalents.getMappedEquivalents();
+        Map<Publisher, Map<T, Double>> combinedMappedEquivalents = combined.equivalents();
+        Map<Publisher, Map<T, Double>> scoredMappedEquivalents = scoredEquivalents.equivalents();
         
         Map<Publisher, Map<T, Double>> result = Maps.newHashMap();
         for (Publisher publisher : ImmutableSet.copyOf(Iterables.concat(combinedMappedEquivalents.keySet(), scoredMappedEquivalents.keySet()))) {

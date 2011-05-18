@@ -5,7 +5,6 @@ import static com.google.common.collect.Iterables.transform;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.media.entity.Identified.TO_URI;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -51,20 +50,20 @@ public class EquivalenceResultTranslator {
         
         BasicDBList equivList = new BasicDBList();
         
-        for (Entry<Publisher, List<ScoredEquivalent<T>>> combinedEquivBin : result.combinedEquivalences().entrySet()) {
+        for (Entry<Publisher, Map<T, Double>> combinedEquivBin : result.combinedEquivalences().entrySet()) {
             Publisher publisher = combinedEquivBin.getKey();
-            for (ScoredEquivalent<T> combinedEquiv : combinedEquivBin.getValue()) {
+            for (Entry<T, Double> combinedEquiv : combinedEquivBin.getValue().entrySet()) {
                 DBObject equivDbo = new BasicDBObject();
                 
-                TranslatorUtils.from(equivDbo, ID, combinedEquiv.equivalent().getCanonicalUri());
-                TranslatorUtils.from(equivDbo, TITLE, combinedEquiv.equivalent().getTitle());
+                TranslatorUtils.from(equivDbo, ID, combinedEquiv.getKey().getCanonicalUri());
+                TranslatorUtils.from(equivDbo, TITLE, combinedEquiv.getKey().getTitle());
                 TranslatorUtils.from(equivDbo, PUBLISHER, publisher.key());
-                TranslatorUtils.from(equivDbo, COMBINED, combinedEquiv.score());
+                TranslatorUtils.from(equivDbo, COMBINED, combinedEquiv.getValue());
                 
                 BasicDBList scoreList = new BasicDBList();
                 for (ScoredEquivalents<T> source : result.rawScores()) {
-                    Map<T, Double> publisherBin = source.getMappedEquivalents().get(publisher);
-                    Double sourceScore = publisherBin != null ? publisherBin.get(combinedEquiv.equivalent()) : null;
+                    Map<T, Double> publisherBin = source.equivalents().get(publisher);
+                    Double sourceScore = publisherBin != null ? publisherBin.get(combinedEquiv.getKey()) : null;
                     BasicDBObject scoreDbo = new BasicDBObject();
                     scoreDbo.put(SOURCE, source.source());
                     scoreDbo.put(SCORE, sourceScore);
