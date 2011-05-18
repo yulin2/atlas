@@ -57,7 +57,7 @@ public class RestoredEquivalenceResultModelBuilder implements ModelBuilder<Resto
     }
     
     private String format(Double d) {
-        return String.format("%+.3f", d);
+        return String.format("%+.5f", d);
     }
     
 }

@@ -1,6 +1,7 @@
 package org.atlasapi.equiv.generators;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
@@ -27,7 +28,7 @@ public class TitleMatchingItemEquivalenceGenerator implements ContentEquivalence
     }
     
     @Override
-    public ScoredEquivalents<Item> generateEquivalences(Item content) {
+    public ScoredEquivalents<Item> generateEquivalences(Item content, Set<Item> suggestions) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
         List<Identified> search = searchForEquivalents(content);

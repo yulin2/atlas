@@ -7,15 +7,18 @@ import org.atlasapi.media.entity.Content;
 
 import com.metabroadcast.common.base.Maybe;
 
-public class ThresholdEquivalenceExtractor<T extends Content> implements EquivalenceExtractor<T> {
+/**
+ * Selects the equivalent with the highest score given its score is above a given percentage threshold of the total of all equivalents' scores
+ */
+public class PercentThresholdEquivalenceExtractor<T extends Content> implements EquivalenceExtractor<T> {
     
-    public static <T extends Content> ThresholdEquivalenceExtractor<T> fromPercent(int percent) {
-        return new ThresholdEquivalenceExtractor<T>(percent/100.0);
+    public static <T extends Content> PercentThresholdEquivalenceExtractor<T> fromPercent(int percent) {
+        return new PercentThresholdEquivalenceExtractor<T>(percent/100.0);
     }
 
     private final Double threshold;
 
-    public ThresholdEquivalenceExtractor(Double threshold) {
+    public PercentThresholdEquivalenceExtractor(Double threshold) {
         this.threshold = threshold;
     }
     
