@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasErrorSummary;
+import org.atlasapi.beans.AtlasModelType;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -68,7 +69,7 @@ public class QueryController extends BaseController {
 				outputter.writeError(request, response, new AtlasErrorSummary().withErrorCode("LIMIT_TOO_HIGH").withMessage("Limit too high, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
 				return;
 			}
-			modelAndViewFor(request, response, executor.discover(filter));
+			modelAndViewFor(request, response, executor.discover(filter), AtlasModelType.CONTENT);
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}
@@ -90,7 +91,7 @@ public class QueryController extends BaseController {
 			if (Iterables.isEmpty(uris)) {
 				throw new IllegalArgumentException("No uris specified");
 			}
-			modelAndViewFor(request, response, executor.executeUriQuery(uris, filter));
+			modelAndViewFor(request, response, executor.executeUriQuery(uris, filter), AtlasModelType.CONTENT);
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}

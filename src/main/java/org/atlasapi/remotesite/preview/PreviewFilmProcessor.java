@@ -9,7 +9,6 @@ import nu.xom.Nodes;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
@@ -210,17 +209,20 @@ public class PreviewFilmProcessor {
         
         Elements actorElements = movieElement.getFirstChildElement("actors").getChildElements("actor");
         for (int i = 0; i < actorElements.size(); i++) {
-            people.add(Actor.actor(actorElements.get(i).getValue(), null, Publisher.PREVIEW_NETWORKS));
+            Element actorElement = actorElements.get(i);
+            people.add(PreviewPeople.actor(actorElement.getAttributeValue("id"), actorElement.getValue(), null));
         }
         
         Elements directorElements = movieElement.getFirstChildElement("directors").getChildElements("director");
         for (int i = 0; i < directorElements.size(); i++) {
-            people.add(CrewMember.crewMember(directorElements.get(i).getValue(), "director", Publisher.PREVIEW_NETWORKS));
+            Element directorElement = directorElements.get(i);
+            people.add(PreviewPeople.crewMember("director", directorElement.getAttributeValue("id"), directorElement.getValue(), "director"));
         }
         
         Elements writerElements = movieElement.getFirstChildElement("writers").getChildElements("writer");
         for (int i = 0; i < writerElements.size(); i++) {
-            people.add(CrewMember.crewMember(writerElements.get(i).getValue(), "writer", Publisher.PREVIEW_NETWORKS));
+            Element writerElement = writerElements.get(i);
+            people.add(PreviewPeople.crewMember("writer", writerElement.getAttributeValue("id"), writerElement.getValue(), "writer"));
         }
         
         return people;

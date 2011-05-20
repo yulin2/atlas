@@ -65,7 +65,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		result.add(item);
 		graph.add(result);
 		
-		new JaxbXmlTranslator().writeTo(request, response, graph);
+		new JaxbXmlTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
 		
 		String output = response.getResponseAsString();
 		assertThat(output, containsString("<play:item>" +
@@ -113,7 +113,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		result.setContents(ImmutableList.<Description>of(list));
 		graph.add(result);
 		
-		new JaxbXmlTranslator().writeTo(request, response, graph);
+		new JaxbXmlTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
 		
 		assertThat(response.getResponseAsString(), containsString("<play:item>" +
 														"<aliases/>" +
