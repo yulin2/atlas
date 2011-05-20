@@ -52,7 +52,7 @@ public class JsonTranslatorTest extends TestCase {
 		item.addLocation(location);
 		graph.add(item);
 		
-		new JsonTranslator().writeTo(request, response, graph);
+		new JsonTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
 		
 		String output = response.getResponseAsString();
 		assertThat(output, containsString("\"uri\":\"http://www.bbc.co.uk/bluepeter\""));
