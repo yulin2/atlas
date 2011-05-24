@@ -42,6 +42,7 @@ public class RestoredEquivalenceResultModelBuilder implements ModelBuilder<Resto
             
             equivalences.add(equivModel);
         }
+        model.put("hasStrong", hasStrong);
         model.put("equivalences", equivalences);
         model.putStrings("sources", target.sourceResults().columnKeySet());
         

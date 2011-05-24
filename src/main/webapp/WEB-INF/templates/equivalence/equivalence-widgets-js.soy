@@ -6,7 +6,7 @@
 {template .resultsTable}
 {if length($results) > 0}
 <table>
-    <tr><th>Time</th><th>Content</th><th></th></tr>
+    <tr><th>Time</th><th>Content</th><th></th><th></th></tr>
 {foreach $result in $results}
     {call atlas.templates.equivalence.widgets.tableResult}
         {param result: $result /}
@@ -25,6 +25,7 @@
 <tr>
     <td>{$result.time}</td>
     <td title="{$result.id}"><a href="/system/equivalence/result?uri={$result.encodedId}">{$result.title}</a></td>
+    <td>{length($result.equivalences)}</td>
     <td>{if $result.hasStrong}✔{else}✘{/if}</td>
 </tr>
 {/template}
@@ -63,4 +64,86 @@
 <p>No suggested equivalences</p>
 {/if}
 <p class="time">{$result.time}</p>
+{/template}
+
+/**
+ * @param probes
+ */
+{template .probes}
+<ul>
+{foreach $probe in $probes}
+<li>
+    {call atlas.templates.equivalence.widgets.probe}
+        {param probe: $probe /}
+    {/call}
+</li>
+{/foreach}
+</ul>
+{/template}
+
+/**
+ * @param probe
+ */
+{template .probe}
+<table class="probe" id="{$probe.target}">
+    <tr><td colspan="3" style="font-weight:bold">{if $probe.title}{$probe.title}{else}{$probe.target}{/if}</td><tr>
+    <tr><td colspan="3">
+    {if $probe.title}
+        {$probe.target} - {$probe.timestamp}</td></tr>
+        {call atlas.templates.equivalence.widgets.probeExpectations}
+            {param expectations: $probe.expected /}
+            {param label}
+                Expected Equivalent
+            {/param}
+        {/call}
+	    {call atlas.templates.equivalence.widgets.probeExpectations}
+	        {param expectations: $probe.notExpected /}
+            {param label}
+                Expected NOT Equivalent
+            {/param}
+	    {/call}
+	    {foreach $expected in $probe.others}
+        <tr>
+        {if isFirst($expected)}
+            <td rowspan="{print length($probe.others)}">Other Equivalent</td>
+        {/if}
+            <td>{$expected.id}</td>
+            <td>{$expected.score}</td>
+        </tr>
+    {/foreach}
+    {else}
+        No result yet</td></tr>
+    {/if}
+    <tr><td colspan="3"><a href="update?uri={$probe.target}" class="probeEdit">edit</a></td></tr>
+</table>
+{/template}
+
+/**
+ * @param expectations
+ * @param label
+ */
+{template .probeExpectations}
+    {foreach $expected in $expectations}
+	    <tr>
+	    {if isFirst($expected)}
+	        <td rowspan="{print length($expectations)}">{$label}</td>
+	        
+	    {/if}
+	        <td class="{if $expected.correctExpectation}correct{else}incorrect{/if}">{$expected.id}</td>
+	        <td>{if $expected.score}{$expected.score}{else}None{/if}</td>
+	    </tr>
+	{/foreach}
+{/template}
+
+/**
+ * @param probe
+ * @param hideId
+ */
+{template .updateProbe}
+<form action="./update" method="POST">
+    <p><label>{if not $hideId}Target URI:{/if}<input style="width:440px" type="{if $hideId}hidden{else}text{/if}" name="uri" value="{$probe.target}"/></p>
+    <p><label>Must be equivalent to:<textarea name="expect">{$probe.expectedEquivalent}</textarea></p>
+    <p><label>Must NOT be equivalent to:<textarea name="notExpect">{$probe.expectedNotEquivalent}</textarea></p>
+    <p><input type="submit" value="Update" /></p>
+</form>
 {/template}

@@ -27,23 +27,16 @@ import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
+import org.atlasapi.equiv.results.combining.ScalingEquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.persistence.MongoEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
+import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
+import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
+import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
-import org.atlasapi.equiv.tasks.BroadcastMatchingItemEquivGenerator;
-import org.atlasapi.equiv.tasks.DelegatingItemEquivGenerator;
-import org.atlasapi.equiv.tasks.FilmEquivUpdater;
-import org.atlasapi.equiv.tasks.ItemBasedBrandEquivUpdater;
-import org.atlasapi.equiv.tasks.ItemEquivGenerator;
-import org.atlasapi.equiv.tasks.PaEquivUpdateTask;
-import org.atlasapi.equiv.tasks.persistence.CachingEquivResultStore;
-import org.atlasapi.equiv.tasks.persistence.EquivResultStore;
-import org.atlasapi.equiv.tasks.persistence.MongoEquivResultStore;
-import org.atlasapi.equiv.tasks.persistence.www.EquivResultController;
-import org.atlasapi.equiv.tasks.persistence.www.SingleBrandEquivUpdateController;
 import org.atlasapi.equiv.update.BasicEquivalenceUpdater;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdateController;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdateTask;
@@ -123,40 +116,40 @@ public class EquivModule {
 	    return equivContentListener;
 	}
 	
-	private @Autowired SimpleScheduler scheduler;
-	
-	@PostConstruct
-	public void scheduleEquivUpdaters() {
-	    if(Boolean.valueOf(updaterEnabled)) {
-	        scheduler.schedule(new PaEquivUpdateTask(new MongoDbBackedContentStore(db), itemBasedBrandEquivUpdater(), filmEquivUpdater(), equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
-	    }
-	}
-	
-	@Bean ItemEquivGenerator itemEquivGenerator() {
-	    ItemEquivGenerator broadcastEquivGen = new BroadcastMatchingItemEquivGenerator(scheduleResolver);
-	    return new DelegatingItemEquivGenerator(ImmutableList.of(broadcastEquivGen));
-	}
-	
-	@Bean ItemBasedBrandEquivUpdater itemBasedBrandEquivUpdater() {
-	    MongoDbBackedContentStore mongoDbBackedContentStore = new MongoDbBackedContentStore(db);
-	    return new ItemBasedBrandEquivUpdater(itemEquivGenerator(), mongoDbBackedContentStore, mongoDbBackedContentStore).writesResults(true);
-	}
-	
-	@Bean FilmEquivUpdater filmEquivUpdater() {
-	    return new FilmEquivUpdater(searchResolver, new MongoDbBackedContentStore(db));
-	}
-	
-	@Bean EquivResultStore equivResultStore() {
-	    return new CachingEquivResultStore(new MongoEquivResultStore(db));
-	}
-	
-	@Bean EquivResultController equivResultController() {
-	    return new EquivResultController(equivResultStore());
-	}
-	
-	@Bean SingleBrandEquivUpdateController singleBrandUpdater() {
-	    return new SingleBrandEquivUpdateController(itemBasedBrandEquivUpdater(), new MongoDbBackedContentStore(db));
-	}
+//	private @Autowired SimpleScheduler scheduler;
+//	
+//	@PostConstruct
+//	public void scheduleEquivUpdaters() {
+//	    if(Boolean.valueOf(updaterEnabled)) {
+//	        scheduler.schedule(new PaEquivUpdateTask(new MongoDbBackedContentStore(db), itemBasedBrandEquivUpdater(), filmEquivUpdater(), equivResultStore(), log), RepetitionRules.every(Duration.standardHours(10)));
+//	    }
+//	}
+//	
+//	@Bean ItemEquivGenerator itemEquivGenerator() {
+//	    ItemEquivGenerator broadcastEquivGen = new BroadcastMatchingItemEquivGenerator(scheduleResolver);
+//	    return new DelegatingItemEquivGenerator(ImmutableList.of(broadcastEquivGen));
+//	}
+//	
+//	@Bean ItemBasedBrandEquivUpdater itemBasedBrandEquivUpdater() {
+//	    MongoDbBackedContentStore mongoDbBackedContentStore = new MongoDbBackedContentStore(db);
+//	    return new ItemBasedBrandEquivUpdater(itemEquivGenerator(), mongoDbBackedContentStore, mongoDbBackedContentStore).writesResults(true);
+//	}
+//	
+//	@Bean FilmEquivUpdater filmEquivUpdater() {
+//	    return new FilmEquivUpdater(searchResolver, new MongoDbBackedContentStore(db));
+//	}
+//	
+//	@Bean EquivResultStore equivResultStore() {
+//	    return new CachingEquivResultStore(new MongoEquivResultStore(db));
+//	}
+//	
+//	@Bean EquivResultController equivResultController() {
+//	    return new EquivResultController(equivResultStore());
+//	}
+//	
+//	@Bean SingleBrandEquivUpdateController singleBrandUpdater() {
+//	    return new SingleBrandEquivUpdateController(itemBasedBrandEquivUpdater(), new MongoDbBackedContentStore(db));
+//	}
 	private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.weekly(DayOfWeek.MONDAY, new LocalTime(9, 00));
     
     private @Autowired ScheduleResolver scheduleResolver;
@@ -174,12 +167,14 @@ public class EquivModule {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(1))
         );
-        EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder();
-        return resultWriter(new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder), equivalenceResultStore());
+        EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder(itemGenerators.size());
+        return resultWriter(new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder, log), equivalenceResultStore());
     }
 
-    private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder() {
-        return resultBuilder(AddingEquivalenceCombiner.<T>create(), MinimumScoreEquivalenceExtractor.minimumFrom(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), 0.0));
+    private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder(int calculators) {
+        return resultBuilder(
+                new ScalingEquivalenceCombiner<T>(AddingEquivalenceCombiner.<T>create(), 1.0/calculators), 
+                MinimumScoreEquivalenceExtractor.minimumFrom(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), 0.0));
     }
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
@@ -187,8 +182,8 @@ public class EquivModule {
                 new ItemBasedContainerEquivalenceGenerator(itemUpdater()),
                 new TitleMatchingContainerEquivalenceGenerator(searchResolver)
         );
-        EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder();
-        return resultWriter(new BasicEquivalenceUpdater<Container<?>>(containerGenerators , resultBuilder), equivalenceResultStore());
+        EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder(containerGenerators.size());
+        return resultWriter(new BasicEquivalenceUpdater<Container<?>>(containerGenerators, resultBuilder, log), equivalenceResultStore());
     }
 
     public @Bean RootEquivalenceUpdater contentUpdater() {
@@ -196,7 +191,7 @@ public class EquivModule {
     }
     
     public @Bean ContentEquivalenceUpdateTask updateTask() {
-        return new ContentEquivalenceUpdateTask(contentLister, contentUpdater(), log);
+        return new ContentEquivalenceUpdateTask(contentLister, contentUpdater(), log, db);
     }
     
     @PostConstruct
@@ -217,5 +212,14 @@ public class EquivModule {
     
     public @Bean RecentResultController recentController() {
         return new RecentResultController(equivalenceResultStore());
+    }
+    
+    //Probes...
+    public @Bean EquivalenceProbeStore equivProbeStore() { 
+        return new MongoEquivalenceProbeStore(db);
+    }
+    
+    public @Bean EquivalenceResultProbeController equivProbeController() {
+        return new EquivalenceResultProbeController(equivalenceResultStore(), equivProbeStore());
     }
 }

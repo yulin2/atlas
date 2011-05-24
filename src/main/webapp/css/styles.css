@@ -166,3 +166,25 @@ p.time{
     color:#aaa;
     margin: 10px;
 }
+
+td.correct {
+    background-color: #9F9;
+}
+
+td.incorrect {
+    background-color: #F44;
+}
+
+textarea {
+    width: 450px;
+    height:50px;
+    margin-left: 10px;
+}
+
+.probe form p {
+    text-align:right;
+}
+
+.probe form p label {
+    vertical-align: top;
+}
