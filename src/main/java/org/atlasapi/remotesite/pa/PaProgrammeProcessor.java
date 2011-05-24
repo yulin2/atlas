@@ -398,7 +398,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         if (channelMap.isRadioChannel(channel)) {
             return Specialization.RADIO;
         }
-        return YES.equals(progData.getAttr().getFilm()) ? Specialization.FILM : Specialization.TV;
+        return Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? Specialization.TV : Specialization.FILM;
     }
 
     protected static DateTime getTransmissionTime(String date, String time, DateTimeZone zone) {
