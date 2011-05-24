@@ -89,3 +89,34 @@
 </body>
 </html>
 {/template}
+
+/**
+ * @param probes
+ */
+{template .probes}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Probes</h2>
+{call atlas.templates.equivalence.widgets.probes}
+    {param probes: $probes /}
+{/call}
+</body>
+{/template}
+
+/**
+ * @param probe
+ */
+{template .probeUpdate}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Probe Update</h2>
+<table class="probe"><tr><td>
+{call atlas.templates.equivalence.widgets.updateProbe}
+    {param probe: $probe /}
+    {param hideId: false /}
+{/call}
+</td></tr></table>
+</body>
+{/template}

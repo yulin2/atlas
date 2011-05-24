@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.update;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +12,8 @@ import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -20,10 +24,12 @@ public class BasicEquivalenceUpdater<T extends Content> implements ContentEquiva
 
     private final Set<ContentEquivalenceGenerator<T>> calculators;
     private final EquivalenceResultBuilder<T> builder;
+    private final AdapterLog log;
 
-    public BasicEquivalenceUpdater(Set<ContentEquivalenceGenerator<T>> calculators, EquivalenceResultBuilder<T> builder) {
+    public BasicEquivalenceUpdater(Set<ContentEquivalenceGenerator<T>> calculators, EquivalenceResultBuilder<T> builder, AdapterLog log) {
         this.calculators = calculators;
         this.builder = builder;
+        this.log = log;
     }
     
     public EquivalenceResult<T> updateEquivalences(final T content) {
@@ -32,9 +38,17 @@ public class BasicEquivalenceUpdater<T extends Content> implements ContentEquiva
         List<ScoredEquivalents<T>> scores = Lists.newArrayList();
         
         for (ContentEquivalenceGenerator<T> calculator : calculators) {
-            ScoredEquivalents<T> scoredEquivalents = calculator.generateEquivalences(content, suggestions);
-            suggestions.addAll(extractSuggestions(scoredEquivalents.equivalents()));
-            scores.add(scoredEquivalents);
+            try {
+                ScoredEquivalents<T> scoredEquivalents = calculator.generateEquivalences(content, suggestions);
+                suggestions.addAll(extractSuggestions(scoredEquivalents.equivalents()));
+                scores.add(scoredEquivalents);
+            }catch (Exception e) {
+                log.record(new AdapterLogEntry(WARN)
+                    .withSource(getClass())
+                    .withCause(e)
+                    .withDescription(String.format("Exception in equivalence generator %s for %s", calculator.getClass().getSimpleName(), content.getCanonicalUri()))
+                );
+            }
         }
         
         return builder.resultFor(content, scores);
