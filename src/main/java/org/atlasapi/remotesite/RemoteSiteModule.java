@@ -50,7 +50,8 @@ public class RemoteSiteModule {
 	private @Autowired AdapterLog log;
 	
 	private @Autowired Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
-	
+	private @Autowired YouTubeAdapterModule youTubeAdapterModule;
+
 	public @Bean Fetcher<Identified> remoteFetcher() {
 		
 		 PerSiteAdapterDispatcher dispatcher = new PerSiteAdapterDispatcher(log);
@@ -62,6 +63,7 @@ public class RemoteSiteModule {
 		 adapters.add(new TedTalkAdapter());
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
+         adapters.add(youTubeAdapterModule.youTubeAdapter());
 
 		 adapters.add(new BbcPodcastAdapter());
 		 
