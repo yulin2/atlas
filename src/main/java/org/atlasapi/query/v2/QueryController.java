@@ -39,7 +39,6 @@ import com.metabroadcast.common.query.Selection;
 public class QueryController extends BaseController {
 	
 	private final KnownTypeQueryExecutor executor;
-	private static final int MAX_LIMIT = 50;
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
     public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
@@ -59,20 +58,7 @@ public class QueryController extends BaseController {
 	
 	@RequestMapping("/3.0/discover.*")
 	public void discover(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		try {
-			ContentQuery filter = builder.build(request);
-			if (!filter.getSelection().hasLimit()) {
-				outputter.writeError(request, response, new AtlasErrorSummary().withErrorCode("NO_LIMIT").withMessage("No limit specified, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
-				return;
-			}
-			if (filter.getSelection().getLimit() > MAX_LIMIT) {
-				outputter.writeError(request, response, new AtlasErrorSummary().withErrorCode("LIMIT_TOO_HIGH").withMessage("Limit too high, specify a limit <= " + MAX_LIMIT).withStatusCode(HttpStatusCode.BAD_REQUEST));
-				return;
-			}
-			modelAndViewFor(request, response, executor.discover(filter), AtlasModelType.CONTENT);
-		} catch (Exception e) {
-			errorViewFor(request, response, AtlasErrorSummary.forException(e));
-		}
+	    outputter.writeError(request, response, UNSUPPORTED);
 	}
 	
 	@RequestMapping("/3.0/content.*")
