@@ -45,7 +45,7 @@ public class RecentResultController {
         SimpleModelList resultsList = new SimpleModelList();
         
         for (RestoredEquivalenceResult result : Lists.reverse(latestResults)) {
-            resultsList.add(resultModelBuilder.build(result));
+            resultsList.add(resultModelBuilder.build(result, null));
         }
         
         return resultsList.asListOfMaps();

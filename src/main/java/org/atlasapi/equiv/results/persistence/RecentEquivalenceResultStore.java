@@ -59,6 +59,11 @@ public class RecentEquivalenceResultStore implements EquivalenceResultStore {
         return delegate.forId(canonicalUri);
     }
     
+    @Override
+    public List<RestoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
+        return delegate.forIds(canonicalUris);
+    }
+    
     public List<RestoredEquivalenceResult> latestItemResults() {
         return ImmutableList.copyOf(mrwItemCache.values());
     }
@@ -66,4 +71,5 @@ public class RecentEquivalenceResultStore implements EquivalenceResultStore {
     public List<RestoredEquivalenceResult> latestContainerResults() {
         return ImmutableList.copyOf(mrwContainerCache.values());
     }
+
 }

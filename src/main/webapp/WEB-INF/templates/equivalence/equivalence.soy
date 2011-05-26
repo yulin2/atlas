@@ -36,6 +36,22 @@
 {call atlas.templates.equivalence.widgets.result}
     {param result: $result /}
 {/call}
+<p style="margin: 10px;"><a href="./results?uri={$result.encodedId}">Child Results</a></p>
+</body>
+</html>
+{/template}
+
+/**
+ * @param results
+ */
+{template .results}
+{call atlas.templates.equivalence.head /}
+<body>
+{foreach $result in $results}
+	{call atlas.templates.equivalence.widgets.result}
+	    {param result: $result /}
+	{/call}
+{/foreach}
 </body>
 </html>
 {/template}

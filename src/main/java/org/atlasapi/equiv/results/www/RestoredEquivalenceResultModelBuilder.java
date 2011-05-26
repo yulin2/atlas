@@ -5,17 +5,16 @@ import java.util.Map.Entry;
 
 import org.atlasapi.equiv.results.persistence.EquivalenceIdentifier;
 import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
+import org.atlasapi.equiv.results.probe.EquivalenceResultProbe;
 import org.eclipse.jetty.util.UrlEncoded;
 
-import com.metabroadcast.common.model.ModelBuilder;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class RestoredEquivalenceResultModelBuilder implements ModelBuilder<RestoredEquivalenceResult> {
+public class RestoredEquivalenceResultModelBuilder {
 
-    @Override
-    public SimpleModel build(RestoredEquivalenceResult target) {
+    public SimpleModel build(RestoredEquivalenceResult target, EquivalenceResultProbe probe) {
         SimpleModel model = new SimpleModel();
         
         model.put("id", target.id());
@@ -40,6 +39,8 @@ public class RestoredEquivalenceResultModelBuilder implements ModelBuilder<Resto
             
             hasStrong |= key.strong();
             
+            equivModel.put("expected", expected(key, probe));
+            
             equivalences.add(equivModel);
         }
         model.put("hasStrong", hasStrong);
@@ -47,6 +48,18 @@ public class RestoredEquivalenceResultModelBuilder implements ModelBuilder<Resto
         model.putStrings("sources", target.sourceResults().columnKeySet());
         
         return model;
+    }
+
+    private String expected(EquivalenceIdentifier key, EquivalenceResultProbe probe) {
+        if (probe != null) {
+            if (probe.expectedEquivalent().contains(key.id())) {
+                return "expected";
+            }
+            if (probe.expectedNotEquivalent().contains(key.id())) {
+                return "notexpected";
+            }
+        }
+        return "unknown";
     }
 
     private SimpleModel scores(Double value, Map<String, Double> row) {
