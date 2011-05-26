@@ -207,7 +207,7 @@ public class EquivModule {
     }
     
     public @Bean EquivalenceResultController resultController() {
-        return new EquivalenceResultController(equivalenceResultStore());
+        return new EquivalenceResultController(equivalenceResultStore(), equivProbeStore(), contentResolver);
     }
     
     public @Bean RecentResultController recentController() {

@@ -9,7 +9,7 @@ $("a.probeEdit").live('click', function(){
     return false;
 });
 
-$("input[type='submit']").live('click', function(){
+$("input.probeUpdate").live('click', function(){
     var li = $(this).closest("li");
     $.ajax({
             type:"POST",
@@ -18,6 +18,32 @@ $("input[type='submit']").live('click', function(){
             success: function(data) {
                 li.html(atlas.templates.equivalence.widgets.probe(data));
             }
+    });
+    return false;
+});
+
+$("input.resultProbeUpdate").live('click', function(){
+    var button = $(this);
+    button.closest("th").css("background-color","#f00");
+    var update = {"expect":"","notExpect":""};
+    $(this).closest("table").find("tbody").children().each(function(index,row){
+        var selected = $(row).find("input:checked");
+        update[selected.attr("value")] += selected.attr("name") + ","
+    });
+    var data = "uri="+button.attr("id");
+    $.each(update, function(k,v){
+        if(k != "unkown") {
+            data += "&" +  k + "=" + v.substring(0, v.length - 1);
+        }
+    });
+    console.log(update);
+    $.ajax({
+        type:"POST",
+        url: "/system/equivalence/probes/update.json",
+        data: data,
+        success: function(data) {
+            button.closest("th").css("background-color","#fff");
+        }
     });
     return false;
 });

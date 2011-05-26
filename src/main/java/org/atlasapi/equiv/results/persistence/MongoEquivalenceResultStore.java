@@ -3,9 +3,14 @@ package org.atlasapi.equiv.results.persistence;
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 
+import java.util.List;
+
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.media.entity.Content;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -30,6 +35,17 @@ public class MongoEquivalenceResultStore implements EquivalenceResultStore {
     @Override
     public RestoredEquivalenceResult forId(String canonicalUri) {
         return translator.fromDBObject(equivResults.findOne(canonicalUri));
+    }
+
+    @Override
+    public List<RestoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
+        return ImmutableList.copyOf(Iterables.transform(equivResults.find(where().idIn(canonicalUris).build()), new Function<DBObject, RestoredEquivalenceResult>() {
+
+            @Override
+            public RestoredEquivalenceResult apply(DBObject input) {
+                return translator.fromDBObject(input);
+            }
+        }));
     }
 
 }
