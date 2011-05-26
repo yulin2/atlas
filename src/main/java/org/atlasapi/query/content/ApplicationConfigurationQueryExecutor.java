@@ -36,9 +36,9 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 	}
 	
 	private ContentQuery queryForContent(ContentQuery query) {
-		Iterable<AtomicQuery> softs = ImmutableList.of((AtomicQuery)
+		Iterable<AtomicQuery> softs = ImmutableList.of(/*(AtomicQuery)
 			mergeAttribute(Attributes.VERSION_PROVIDER, query)
-		);
+		*/);
 		
 		query.setSoftConstraints(softs);
 
