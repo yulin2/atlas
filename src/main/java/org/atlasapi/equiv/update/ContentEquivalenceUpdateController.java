@@ -21,11 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class ContentEquivalenceUpdateController {
 
-    private final RootEquivalenceUpdater contentUpdater;
+    private final ContentEquivalenceUpdater<Content> contentUpdater;
     private final ContentResolver contentResolver;
     private final ExecutorService executor;
 
-    public ContentEquivalenceUpdateController(RootEquivalenceUpdater contentUpdater, ContentResolver contentResolver) {
+    public ContentEquivalenceUpdateController(ContentEquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver) {
         this.contentUpdater = contentUpdater;
         this.contentResolver = contentResolver;
         this.executor = Executors.newSingleThreadExecutor();

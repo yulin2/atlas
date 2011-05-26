@@ -40,7 +40,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         builder.add(AtlasModule.class, AtlasLoggingModule.class, AtlasWebModule.class, QueryModule.class, MongoContentPersistenceModule.class, 
                 AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class, RadioPlayerModule.class);
         
-        builder.add(EquivModule.class);
         if(runProcessingOnly()) {
             builder.add(EquivModule.class, ManualScheduleRebuildModule.class);
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());

@@ -41,6 +41,7 @@ import org.atlasapi.equiv.update.BasicEquivalenceUpdater;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdateController;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.LookupWritingEquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.equiv.www.EquivController;
 import org.atlasapi.media.entity.Container;
@@ -56,6 +57,9 @@ import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.equiv.EquivalentUrlStore;
 import org.atlasapi.persistence.equiv.MongoEquivStore;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.lookup.LookupWriter;
+import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
+import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.remotesite.EquivGenerator;
 import org.atlasapi.remotesite.freebase.FreebaseBrandEquivGenerator;
 import org.joda.time.Duration;
@@ -186,8 +190,12 @@ public class EquivModule {
         return resultWriter(new BasicEquivalenceUpdater<Container<?>>(containerGenerators, resultBuilder, log), equivalenceResultStore());
     }
 
-    public @Bean RootEquivalenceUpdater contentUpdater() {
-        return new RootEquivalenceUpdater(containerUpdater(), itemUpdater());
+    public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
+        return new LookupWritingEquivalenceUpdater<Content>(new RootEquivalenceUpdater(containerUpdater(), itemUpdater()), lookupWriter());
+    }
+    
+    public @Bean LookupWriter lookupWriter() {
+        return new TransitiveLookupWriter(new MongoLookupEntryStore(db));
     }
     
     public @Bean ContentEquivalenceUpdateTask updateTask() {
