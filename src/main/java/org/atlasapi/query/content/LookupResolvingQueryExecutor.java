@@ -11,7 +11,9 @@ import org.atlasapi.persistence.lookup.entry.Equivalent;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
@@ -37,9 +39,16 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 if (Iterables.isEmpty(equivUris)) {
                     return ImmutableList.of();
                 }
-                return delegate.executeUriQuery(equivUris, query);
+                return setEquivalentToFields(delegate.executeUriQuery(equivUris, query));
             }
         })));
     }
 
+    private List<Identified> setEquivalentToFields(List<Identified> equivItems) {
+        ImmutableSet<String> uris = ImmutableSet.copyOf(Iterables.transform(equivItems, Identified.TO_URI));
+        for (Identified ided : equivItems) {
+            ided.setEquivalentTo(Sets.difference(uris, ImmutableSet.of(ided.getCanonicalUri())));
+        }
+        return equivItems;
+    }
 }
