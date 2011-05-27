@@ -34,11 +34,14 @@ public class PublisherFilteringLookupResolver implements LookupResolver {
             }
         }), Equivalent.TO_ID);
         
+        Equivalent equivForRequested = filteredEquivs.get(id);
+        
+        if(equivForRequested == null) {
+            return ImmutableList.of();
+        }
+        
         if(!config.precedenceEnabled()) {
-            Equivalent equivalent = filteredEquivs.get(id);
-            
-            return equivalent != null ? ImmutableList.of(equivalent) : ImmutableList.<Equivalent>of();
-            
+            return equivForRequested != null ? ImmutableList.of(equivForRequested) : ImmutableList.<Equivalent>of();
         }
         
         return ImmutableList.copyOf(filteredEquivs.values());
