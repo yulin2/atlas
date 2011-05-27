@@ -60,6 +60,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private final ContentResolver contentResolver;
     private final AdapterLog log;
     private final PaChannelMap channelMap = new PaChannelMap();
+    private final PaCountryMap countryMap = new PaCountryMap();
     
     private final GenreMap genreMap = new PaGenreMap();
     
@@ -238,6 +239,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         episode.setMediaType(channelMap.isRadioChannel(channel) ? MediaType.AUDIO : MediaType.VIDEO);
         episode.setSpecialization(specialization(progData, channel));
         episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
+        
+        if (progData.getCountry() != null) {
+            episode.setCountriesOfOrigin(countryMap.parseCountries(progData.getCountry()));
+        }
+        
+        if (progData.getAttr() != null) {
+            episode.setBlackAndWhite(getBooleanValue(progData.getAttr().getBw()));
+        }
 
         if (progData.getPictures() != null) {
             for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
@@ -300,6 +309,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         if (progData.getAttr() != null) {
             broadcast.setRepeat(getBooleanValue(progData.getAttr().getRepeat()));
+            broadcast.setSubtitled(getBooleanValue(progData.getAttr().getSubtitles()));
+            broadcast.setSigned(getBooleanValue(progData.getAttr().getSignLang()));
+            broadcast.setAudioDescribed(getBooleanValue(progData.getAttr().getAudioDes()));
+            broadcast.setHighDefinition(getBooleanValue(progData.getAttr().getHd()));
+            broadcast.setWidescreen(getBooleanValue(progData.getAttr().getWidescreen()));
+            broadcast.setLive(getBooleanValue(progData.getAttr().getLive()));
+            broadcast.setSurround(getBooleanValue(progData.getAttr().getSurround()));
         }
         
         return broadcast;

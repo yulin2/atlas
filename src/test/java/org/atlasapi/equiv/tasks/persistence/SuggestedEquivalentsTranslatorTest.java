@@ -9,7 +9,6 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.tasks.SuggestedEquivalents;
-import org.atlasapi.equiv.tasks.persistence.SuggestedEquivalentsTranslator;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableList;

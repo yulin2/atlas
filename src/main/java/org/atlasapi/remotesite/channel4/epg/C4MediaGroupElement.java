@@ -6,8 +6,8 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.Node;
 
-import org.atlasapi.media.entity.Countries;
-import org.atlasapi.media.entity.Country;
+import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.intl.Country;
 
 public class C4MediaGroupElement extends Element {
 
