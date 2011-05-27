@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
@@ -54,13 +55,13 @@ public class QueryModule {
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 		KnownTypeQueryExecutor queryExecutor = new MongoDBQueryExecutor(store);
 		
-		queryExecutor = new LookupResolvingQueryExecutor(queryExecutor, new PublisherFilteringLookupResolver(new BasicLookupResolver(new MongoLookupEntryStore(db))));
-		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
+		
+		queryExecutor = new LookupResolvingQueryExecutor(queryExecutor, new PublisherFilteringLookupResolver(new BasicLookupResolver(new MongoLookupEntryStore(db))));
 		
 	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
 		
-	    //queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
+	    queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
 	    
 	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
 	}
