@@ -14,13 +14,16 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
-import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.lookup.BasicLookupResolver;
+import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
+import org.atlasapi.query.content.LookupResolvingQueryExecutor;
+import org.atlasapi.query.content.PublisherFilteringLookupResolver;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
@@ -35,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 @Configuration
 public class QueryModule {
@@ -42,22 +46,23 @@ public class QueryModule {
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	private @Autowired MongoDbBackedContentStore store;
 	
+	private @Autowired DatabasedMongo db;
+	
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	private @Value("${atlas.search.host}") String searchHost;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
-		KnownTypeQueryExecutor defuzzingExecutor = new MongoDBQueryExecutor(store);
+		KnownTypeQueryExecutor queryExecutor = new MongoDBQueryExecutor(store);
 		
-		UriFetchingQueryExecutor uriFetching = new UriFetchingQueryExecutor(localOrRemoteFetcher, defuzzingExecutor);
+		queryExecutor = new LookupResolvingQueryExecutor(queryExecutor, new PublisherFilteringLookupResolver(new BasicLookupResolver(new MongoLookupEntryStore(db))));
 		
-	    CurieResolvingQueryExecutor curieResolving = new CurieResolvingQueryExecutor(uriFetching);
+		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
 		
-		MergeOnOutputQueryExecutor brandMerger = new MergeOnOutputQueryExecutor(curieResolving);
-	    if (Boolean.parseBoolean(applicationsEnabled)) {
-	        return new ApplicationConfigurationQueryExecutor(brandMerger);
-	    } else {
-	        return brandMerger;
-	    }
+	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
+		
+	    //queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
+	    
+	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
 	}
 	
 	@Bean SearchResolver searchResolver() {
