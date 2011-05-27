@@ -7,14 +7,13 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -23,6 +22,7 @@ import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jdom.Element;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.intl.Countries;
 
 public class MsnVideoItemAdapter implements SiteSpecificAdapter<Episode> {
     private static final Pattern itemUriPattern = Pattern.compile("http://video.uk.msn.com/watch/video/([\\w\\-\\+%]+)/(\\w+)");

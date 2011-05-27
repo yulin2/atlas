@@ -9,14 +9,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jaxen.JaxenException;
@@ -24,6 +23,7 @@ import org.jdom.Element;
 
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.currency.Price;
+import com.metabroadcast.common.intl.Countries;
 
 public class SeesawItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
     static final Log LOG = LogFactory.getLog(SeesawItemContentExtractor.class);

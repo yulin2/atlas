@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.Country;
+import com.metabroadcast.common.intl.Country;
 
 public class C4EpgMedia {
 

@@ -22,9 +22,10 @@ import java.util.Collections;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Policy;
 import org.joda.time.Duration;
+
+import com.metabroadcast.common.intl.Countries;
 
 
 public class BbcProgrammesPolicyClientTest extends TestCase {
