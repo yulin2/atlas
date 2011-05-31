@@ -3,6 +3,7 @@ package org.atlasapi.equiv.tasks;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
+import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -11,8 +12,6 @@ import org.atlasapi.media.entity.Version;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-
-import junit.framework.TestCase;
 
 public class SymmetricItemVersionMergerTest extends TestCase {
 

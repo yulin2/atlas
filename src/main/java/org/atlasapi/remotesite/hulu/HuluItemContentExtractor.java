@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
@@ -26,6 +25,7 @@ import org.jdom.Element;
 import org.joda.time.Duration;
 
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.intl.Countries;
 
 public class HuluItemContentExtractor implements ContentExtractor<HtmlNavigator, Episode> {
     

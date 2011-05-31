@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.itunes;
 
-import org.atlasapi.media.entity.Countries;
-import org.atlasapi.media.entity.Country;
+import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.intl.Country;
 
 public class ItunesAdapterHelper {
     public static final String LOOKUP_URL_BASE = "http://ax.phobos.apple.com.edgesuite.net/WebObjects/MZStoreServices.woa/wa/wsLookup?limit=200&media=tvShow";

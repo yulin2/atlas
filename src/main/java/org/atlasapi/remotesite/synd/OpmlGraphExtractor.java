@@ -23,7 +23,6 @@ import org.apache.commons.lang.StringUtils;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -39,6 +38,7 @@ import org.joda.time.Duration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.intl.Countries;
 import com.sun.syndication.feed.opml.Outline;
 
 /**
