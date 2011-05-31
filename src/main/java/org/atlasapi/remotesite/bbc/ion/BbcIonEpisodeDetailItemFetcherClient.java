@@ -7,12 +7,12 @@ import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -26,6 +26,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
+import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
 import com.google.common.primitives.Ints;
@@ -161,6 +162,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         version.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ionVersion.getId());
         BbcProgrammeGraphExtractor.setDurations(version, ionVersion);
         version.setProvider(BBC);
+        version.setDuration(Duration.standardSeconds(ionVersion.getDuration()));
         if(ionVersion.getBroadcasts() != null) {
             for (IonBroadcast ionBroadcast : ionVersion.getBroadcasts()) {
                 Broadcast broadcast = broadcastFrom(ionBroadcast);
