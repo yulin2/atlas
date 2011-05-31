@@ -121,7 +121,7 @@ public class PaChannelMap {
         channelMap.put(1204, Channel.CITV);
         channelMap.put(1485, Channel.FIVER_PLUS1);
         channelMap.put(1484, Channel.FIVE_USA_PLUS1);
-        channelMap.put(55, Channel.THE_ADULT_CHANNEL);
+        //channelMap.put(55, Channel.THE_ADULT_CHANNEL);
         channelMap.put(59, Channel.MTV_HITS);
         channelMap.put(63, Channel.MTV_BASE);
         channelMap.put(64, Channel.MTV);
@@ -141,7 +141,7 @@ public class PaChannelMap {
         channelMap.put(95, Channel.CNN);
         channelMap.put(102, Channel.CARTOON_NETWORK);
         channelMap.put(99, Channel.GOD_CHANNEL);
-        channelMap.put(103, Channel.PLAYBOY_TV);
+        //channelMap.put(103, Channel.PLAYBOY_TV);
         channelMap.put(168, Channel.ANIMAL_PLANET);
         channelMap.put(700, Channel.ANIMAL_PLANET_PLUS1);
         channelMap.put(114, Channel.SKY_NEWS);
@@ -167,7 +167,7 @@ public class PaChannelMap {
         channelMap.put(136, Channel.THE_DISNEY_CHANNEL);
         channelMap.put(707, Channel.THE_DISNEY_CHANNEL_PLUS1);
         channelMap.put(138, Channel.BBC_WORLD_NEWS);
-        channelMap.put(139, Channel.TELEVISION_X);
+        //channelMap.put(139, Channel.TELEVISION_X);
         channelMap.put(150, Channel.VH1);
         channelMap.put(151, Channel.MTV_CLASSIC);
         channelMap.put(169, Channel.DISCOVERY);
@@ -217,7 +217,7 @@ public class PaChannelMap {
         channelMap.put(602, Channel.SKY_ARTS_1);
         channelMap.put(614, Channel.EURONEWS);
         channelMap.put(619, Channel.B4U_MOVIES);
-        channelMap.put(644, Channel.RED_HOT_AMATEUR);
+        //channelMap.put(644, Channel.RED_HOT_AMATEUR);
         channelMap.put(663, Channel.EXTREME_SPORTS);
         channelMap.put(664, Channel.MTV_DANCE);
         channelMap.put(678, Channel.STAR_PLUS);
@@ -242,7 +242,7 @@ public class PaChannelMap {
         channelMap.put(959, Channel.BLISS);
         channelMap.put(962, Channel.ESPN_AMERICA);
         channelMap.put(1582, Channel.ESPN_AMERICA_HD);
-        channelMap.put(963, Channel.RED_HOT_40);
+        //channelMap.put(963, Channel.RED_HOT_40);
         channelMap.put(74, Channel.DAVE);
         channelMap.put(1079, Channel.DAVE_JA_VU);
         channelMap.put(977, Channel.PRICE_DROP_TV);
@@ -262,7 +262,7 @@ public class PaChannelMap {
         channelMap.put(1470, Channel.LIVINGIT_PLUS1);
         channelMap.put(1076, Channel.EUROSPORT_2);
         channelMap.put(1084, Channel.REALLY);
-        channelMap.put(1087, Channel.RED_HOT_TV);
+        //channelMap.put(1087, Channel.RED_HOT_TV);
         channelMap.put(974, Channel.COMEDY_CENTRAL_EXTRA);
         channelMap.put(1539, Channel.COMEDY_CENTRAL_EXTRA_PLUS1);
         channelMap.put(1586, Channel.COMEDY_CENTRAL_HD);
