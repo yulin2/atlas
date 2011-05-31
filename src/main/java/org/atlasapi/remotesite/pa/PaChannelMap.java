@@ -17,6 +17,8 @@ public class PaChannelMap {
     private final Map<Channel, Integer> reverseMap = Maps.newHashMap();
     
     public PaChannelMap() {
+
+    
         channelMap.put(4, Channel.BBC_ONE);
         channelMap.put(1, Channel.BBC_ONE_NORTHERN_IRELAND);
         channelMap.put(2, Channel.BBC_ONE_SCOTLAND);
@@ -31,7 +33,9 @@ public class PaChannelMap {
         channelMap.put(16, Channel.BBC_ONE_SOUTH_EAST);
         channelMap.put(17, Channel.BBC_ONE_SOUTH_WEST);
         channelMap.put(18, Channel.BBC_ONE_WEST);
-        channelMap.put(713, Channel.BBC_ONE);
+        
+        // covered by code 4, disable to avoid duplicates
+       // channelMap.put(713, Channel.BBC_ONE);
         
         channelMap.put(52, Channel.BBC_TWO);
         channelMap.put(19, Channel.BBC_TWO_NORTHERN_IRELAND);
