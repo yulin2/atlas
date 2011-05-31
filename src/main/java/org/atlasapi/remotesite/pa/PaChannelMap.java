@@ -405,7 +405,7 @@ public class PaChannelMap {
         channelMap.put(77, Channel.BBC_RADIO_RADIO1);
         channelMap.put(86, Channel.BBC_RADIO_RADIO2);
         channelMap.put(87, Channel.BBC_RADIO_5LIVE);
-//        channelMap.put(228, Channel.CLASSIC_FM);
+        channelMap.put(228, Channel.CLASSIC_FM_RADIO);
         channelMap.put(232, Channel.BBC_RADIO_RADIOSCOTLAND);
 //        channelMap.put(622, Channel.BBC_RADIO_SCOTLAND_MW);
 //        channelMap.put(480, Channel.RTE_RADIO_1_FM);
@@ -548,18 +548,18 @@ public class PaChannelMap {
         channelMap.put(389, Channel.WESTSOUND_AYRSHIRE_1035AM);
         channelMap.put(390, Channel.WISH_FM);
         channelMap.put(391, Channel.CHOICE);
-        channelMap.put(392, Channel.WYVERN_FM);
-        channelMap.put(394, Channel.XFM);
-        channelMap.put(395, Channel.YORK_HOSPITAL_RADIO);
+        channelMap.put(392, Channel.WYVERN_FM);*/
+        channelMap.put(394, Channel.XFM_RADIO);
+        /*channelMap.put(395, Channel.YORK_HOSPITAL_RADIO);
         channelMap.put(396, Channel.YORKSHIRE_COAST_96.2FM);
         channelMap.put(399, Channel.TRAX_FM);
         channelMap.put(401, Channel.BRMB_96.4);
         channelMap.put(404, Channel.CITY_BEAT_96.7_FM);
         channelMap.put(405, Channel.KISS_101);
         channelMap.put(406, Channel.GALAXY_NORTH_EAST);
-        channelMap.put(407, Channel.HALLAM_FM);
-        channelMap.put(408, Channel.HEART_LONDON);
-        channelMap.put(409, Channel.HEART_WEST_MIDLANDS);
+        channelMap.put(407, Channel.HALLAM_FM);*/
+        channelMap.put(408, Channel.HEART_LONDON_RADIO);
+        /*channelMap.put(409, Channel.HEART_WEST_MIDLANDS);
         channelMap.put(1594, Channel.HEART_ESSEX);
         channelMap.put(1596, Channel.HEART_SOUTH_COAST);
         channelMap.put(1592, Channel.RTE_PULSE);
@@ -600,13 +600,13 @@ public class PaChannelMap {
         channelMap.put(469, Channel.FORTH_ONE);
         channelMap.put(470, Channel.FORTH_2);
         channelMap.put(471, Channel.DUNE_FM);
-        channelMap.put(472, Channel.DOWNTOWN_RADIO);
-        channelMap.put(473, Channel.TALKSPORT);
-        channelMap.put(475, Channel.COOL_FM);
+        channelMap.put(472, Channel.DOWNTOWN_RADIO);*/
+        channelMap.put(473, Channel.TALKSPORT_RADIO);
+        /*channelMap.put(475, Channel.COOL_FM);
         channelMap.put(476, Channel.RADIO_CITY_96.7);
-        channelMap.put(477, Channel.REAL_RADIO_(NORTH_WEST));
-        channelMap.put(482, Channel.CAPITAL_RADIO);
-        channelMap.put(478, Channel.RTE_RAIDIÓ_NA_GAELTACHTA);
+        channelMap.put(477, Channel.REAL_RADIO_(NORTH_WEST));*/
+        channelMap.put(482, Channel.CAPITAL_FM);
+        /*channelMap.put(478, Channel.RTE_RAIDIÓ_NA_GAELTACHTA);
         channelMap.put(489, Channel.GALAXY_SCOTLAND);
         channelMap.put(491, Channel.COVENTRY_AND_WARWICKSHIRE_FM);*/
         channelMap.put(493, Channel.BBC_RADIO_MANCHESTER);
@@ -645,8 +645,8 @@ public class PaChannelMap {
         channelMap.put(569, Channel.BBC_RADIO_WILTSHIRE);
 //        channelMap.put(570, Channel.BBC_RADIO_RADIOWM);
         channelMap.put(568, Channel.BBC_RADIO_YORK);
-/*        channelMap.put(575, Channel.ABSOLUTE_RADIO);
-        channelMap.put(576, Channel.GALAXY_102);
+        channelMap.put(575, Channel.ABSOLUTE_RADIO);
+/*        channelMap.put(576, Channel.GALAXY_102);
         channelMap.put(577, Channel.GALAXY_105);
         channelMap.put(578, Channel.GALAXY_102.2);
         channelMap.put(580, Channel.102.2_SMOOTH_RADIO);
@@ -699,9 +699,9 @@ public class PaChannelMap {
         channelMap.put(967, Channel.MAGIC_DIGITAL);
         channelMap.put(968, Channel.SPIRIT_FM_96.6_AND_102.3);
         channelMap.put(969, Channel.RIVIERA_RADIO);
-        channelMap.put(970, Channel.BUZZ_ASIA);
-        channelMap.put(973, Channel.HEAT);
-        channelMap.put(975, Channel.SPECTRUM_FM);
+        channelMap.put(970, Channel.BUZZ_ASIA);*/
+        channelMap.put(973, Channel.HEAT_RADIO);
+        /*channelMap.put(975, Channel.SPECTRUM_FM);
         channelMap.put(978, Channel.NORTH_NORFOLK_RADIO);
         channelMap.put(985, Channel.BCB_106.6FM);
         channelMap.put(990, Channel.100.4_SMOOTH_RADIO);
@@ -726,10 +726,10 @@ public class PaChannelMap {
         channelMap.put(1173, Channel.KMFM_107.6);
         channelMap.put(1179, Channel.WAVE_96.5FM);
         channelMap.put(1181, Channel.U105.8);
-        channelMap.put(1182, Channel.WYRE_107.2);
-        channelMap.put(1183, Channel.SMASH_HITS!);
-        channelMap.put(1184, Channel.KERRANG!);
-        channelMap.put(1190, Channel.CONNECT_FM_106.8);
+        channelMap.put(1182, Channel.WYRE_107.2);*/
+        channelMap.put(1183, Channel.SMASH_HITS_RADIO);
+        channelMap.put(1184, Channel.KERRANG_RADIO);
+        /*channelMap.put(1190, Channel.CONNECT_FM_106.8);
         channelMap.put(1197, Channel.TORBAY_HOSPITAL_RADIO);
         channelMap.put(1203, Channel.EXETER_HOSPITAL_RADIO);
         channelMap.put(1223, Channel.103_THE_EYE);
@@ -738,9 +738,9 @@ public class PaChannelMap {
         channelMap.put(1287, Channel.FOREST_FM);
         channelMap.put(1293, Channel.102_TOWN_FM);
         channelMap.put(1294, Channel.THE_SEVERN);
-        channelMap.put(1330, Channel.ABSOLUTE_XTREME);
-        channelMap.put(1331, Channel.ABSOLUTE_CLASSIC_ROCK);
-        channelMap.put(1333, Channel.ARROW);
+        channelMap.put(1330, Channel.ABSOLUTE_XTREME);*/
+        channelMap.put(1331, Channel.ABSOLUTE_CLASSIC_ROCK_RADIO);
+        /*channelMap.put(1333, Channel.ARROW);
         channelMap.put(1337, Channel.CHILL);
         channelMap.put(1338, Channel.FUN_KIDS);
         channelMap.put(1344, Channel.CHOICE_FM);
