@@ -19,10 +19,13 @@ import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -66,27 +69,28 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 			return found;
 		} 
 
-		boolean foundAtLeastOneUri = false;
-		
-		List<String> resolvedUris = found.isEmpty() ? Lists.<String>newArrayList() : Lists.newArrayList(Iterables.transform(found, Identified.TO_URI));
+		List<String> resolvedUris = ImmutableList.copyOf(Iterables.transform(found, Identified.TO_URI));
+		List<String> fetchedUris = Lists.newArrayList();
+		List<ContentGroup> youtubeContentGroups = Lists.newArrayList();
 		
 		for (String missingUri : missingUris) {
 			Identified remoteContent = fetcher.fetch(missingUri);
 			if (remoteContent != null) {
-				foundAtLeastOneUri = true;
-				resolvedUris.add(remoteContent.getCanonicalUri());
-			} else {
-				resolvedUris.add(missingUri);
+			    if (remoteContent instanceof ContentGroup && ((ContentGroup) remoteContent).getPublisher().equals(Publisher.YOUTUBE)) {
+			        youtubeContentGroups.add((ContentGroup) remoteContent);
+			    } else {
+			        fetchedUris.add(remoteContent.getCanonicalUri());
+			    }
 			}
 		}
 		
 		// If we couldn't resolve any of the missing uris then we should just return the results of the original query
-		if (!foundAtLeastOneUri) {
-			return found;
+		if (fetchedUris.isEmpty()) {
+			return ImmutableList.copyOf(Iterables.concat(found, youtubeContentGroups));
 		}
-
+		
 		// re-attempt the query now the missing uris have been fetched
-		return delegate.executeUriQuery(resolvedUris, query);
+		return ImmutableList.copyOf(Iterables.concat(youtubeContentGroups, delegate.executeUriQuery(Iterables.concat(resolvedUris, fetchedUris), query)));
 	}
 	
 	private static Set<String> missingUris(Iterable<? extends Identified> content, Iterable<String> uris) {
