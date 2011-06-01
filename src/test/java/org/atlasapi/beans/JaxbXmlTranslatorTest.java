@@ -25,6 +25,7 @@ import org.atlasapi.media.entity.simple.Broadcast;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
+import org.atlasapi.media.entity.simple.ContentIdentifier.ItemIdentifier;
 import org.atlasapi.media.entity.simple.Location;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.joda.time.DateTime;
@@ -102,11 +103,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		Set<Object> graph = Sets.newHashSet();
 
 		Playlist list = new Playlist();
-		Item item = new Item();
-		item.setTitle("Blue Peter");
-		Location location = new Location();
-		location.setUri("http://www.bbc.co.uk/bluepeter");
-		item.addLocation(location);
+		ItemIdentifier item = new ItemIdentifier("http://www.bbc.co.uk/bluepeter");
+
 		list.add(item);
 		
 		ContentQueryResult result = new ContentQueryResult();
@@ -115,22 +113,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 		new JaxbXmlTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
 		
-		assertThat(response.getResponseAsString(), containsString("<play:item>" +
-														"<aliases/>" +
-														"<clips/>" +
-														"<play:genres/>" +
-														"<play:sameAs/>" +
-														"<play:tags/>" +
-	                                         			"<title>Blue Peter</title>" +
-	                                         			"<play:broadcasts/>" +
-														"<play:locations>" +
-															"<play:location>" +
-															"<available>true</available>" +
-															"<play:availableCountries/>" +
-															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
-															"</play:location>" +
-														  "</play:locations>" +
-				                                          "<play:people/>" +
-													  "</play:item>"));
+		assertThat(response.getResponseAsString(), containsString("<play:item><type>Item</type>" +
+															            "<uri>http://www.bbc.co.uk/bluepeter</uri>" +
+													              "</play:item>"));
 	}
 }
