@@ -16,8 +16,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Lists;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
