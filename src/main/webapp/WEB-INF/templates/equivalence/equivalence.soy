@@ -1,0 +1,138 @@
+{namespace atlas.templates.equivalence}
+
+/**
+ *
+ */
+{template .head}
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Atlas Equivalence</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+    <script src="/js/base.js"></script>
+    <script src="/js/soyutils.js"></script>
+    <script type="text/javascript" src="/js/generated/equivalence-widgets-js_templates.js"></script>
+    <script src="/js/equivalence.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="/css/styles.css" />
+</head>
+{/template}
+
+/**
+ *
+ */
+{template .header}
+    <header>
+        <h1><a href="/system/equivalence">Equivalence</a></h1>
+    </header>
+{/template}
+
+/**
+ * @param result
+ */
+{template .result}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.widgets.result}
+    {param result: $result /}
+{/call}
+<p style="margin: 10px;"><a href="./results?uri={$result.encodedId}">Child Results</a></p>
+</body>
+</html>
+{/template}
+
+/**
+ * @param results
+ */
+{template .results}
+{call atlas.templates.equivalence.head /}
+<body>
+{foreach $result in $results}
+	{call atlas.templates.equivalence.widgets.result}
+	    {param result: $result /}
+	{/call}
+{/foreach}
+</body>
+</html>
+{/template}
+
+/**
+ * @param containerResults
+ * @param itemResults
+ */
+{template .recent}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Recently Processed Containers</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $containerResults /}
+{/call}
+<h2>Recently Processed Items</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $itemResults /}
+{/call}
+</body>
+</html>
+{/template}
+
+/**
+ * @param containerResults
+ */
+{template .recentContainers}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Recently Processed Containers</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $containerResults /}
+{/call}
+</body>
+</html>
+{/template}
+
+/**
+ * @param itemResults
+ */
+{template .recentItems}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Recently Processed Items</h2>
+{call atlas.templates.equivalence.widgets.resultsTable}
+    {param results: $itemResults /}
+{/call}
+</body>
+</html>
+{/template}
+
+/**
+ * @param probes
+ */
+{template .probes}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Probes</h2>
+{call atlas.templates.equivalence.widgets.probes}
+    {param probes: $probes /}
+{/call}
+</body>
+{/template}
+
+/**
+ * @param probe
+ */
+{template .probeUpdate}
+{call atlas.templates.equivalence.head /}
+<body>
+{call atlas.templates.equivalence.header /}
+<h2>Probe Update</h2>
+<table class="probe"><tr><td>
+{call atlas.templates.equivalence.widgets.updateProbe}
+    {param probe: $probe /}
+    {param hideId: false /}
+{/call}
+</td></tr></table>
+</body>
+{/template}
