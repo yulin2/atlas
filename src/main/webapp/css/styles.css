@@ -150,3 +150,41 @@ input[type="checkbox"] {
 	cursor:pointer;
 	margin:2px;
 }
+
+table {
+    border: 1px solid #CCC;
+    border-collapse: collapse;
+    margin: 10px;
+}
+td,th {
+    text-align: center;
+    border: 1px solid #CCC;
+    padding: 2px;
+}
+p.time{
+    font-size:90%;
+    color:#aaa;
+    margin: 10px;
+}
+
+td.correct {
+    background-color: #9F9;
+}
+
+td.incorrect {
+    background-color: #F44;
+}
+
+textarea {
+    width: 450px;
+    height:50px;
+    margin-left: 10px;
+}
+
+.probe form p {
+    text-align:right;
+}
+
+.probe form p label {
+    vertical-align: top;
+}
