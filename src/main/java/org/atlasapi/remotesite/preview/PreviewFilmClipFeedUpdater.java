@@ -33,6 +33,7 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     @Override
     protected void runTask() {
         try {
+            reportStatus("Requesting feed contents (" + feedUri + ")");
             String feedContents = client.getContentsOf(feedUri);
             reportStatus("Feed contents received");
             FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();

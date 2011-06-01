@@ -13,7 +13,6 @@ import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
@@ -29,6 +28,12 @@ import com.metabroadcast.common.text.MoreStrings;
 public class PreviewFilmProcessor {
     
     private static final String USER_ID_REPLACEMENT = "%PREVIEW_KEY%";
+    private static final int LOBBY_STILL_LARGE_ID = 23;
+    private static final int LOBBY_STILL_1_ID = 5;
+    private static final int LOBBY_STILL_2_ID = 6;
+    private static final int VIDEO_STILL_LARGE_ID = 22;
+    private static final int VIDEO_STILL_1_ID = 7;
+    
     
     private final ContentWriter contentWriter;
 
@@ -60,7 +65,7 @@ public class PreviewFilmProcessor {
         Set<String> categories = getCategories(regionElement);
         film.setGenres(categories);
         
-        setImages(film, regionElement);
+        film.setImage(getImage(regionElement));
         
         Element productElement = regionElement.getFirstChildElement("products").getFirstChildElement("product");
         
@@ -163,18 +168,32 @@ public class PreviewFilmProcessor {
         		"</embed></object>";
     }
     
-    private void setImages(Item item, Element regionElement) {
-        Nodes nodes = regionElement.getFirstChildElement("pictures").query("picture[@type_name='poster']/url");
-        
+    private String getImage(Element regionElement) {
+        Nodes nodes = regionElement.getFirstChildElement("pictures").query("picture[@type_id='" + LOBBY_STILL_LARGE_ID + "']/url");
         if (nodes.size() > 0) {
-            item.setThumbnail(nodes.get(0).getValue());
+            return nodes.get(0).getValue();
         }
         
-        nodes = regionElement.getFirstChildElement("pictures").query("picture[@type_name='poster_large']/url");
-        
+        nodes = regionElement.getFirstChildElement("pictures").query("picture[@type_id='" + LOBBY_STILL_1_ID + "']/url");
         if (nodes.size() > 0) {
-            item.setImage(nodes.get(0).getValue());
+            return nodes.get(0).getValue();
         }
+        
+        nodes = regionElement.getFirstChildElement("pictures").query("picture[@type_id='" + LOBBY_STILL_2_ID + "']/url");
+        if (nodes.size() > 0) {
+            return nodes.get(0).getValue();
+        }
+        
+        nodes = regionElement.getFirstChildElement("pictures").query("picture[@type_id='" + VIDEO_STILL_LARGE_ID + "']/url");
+        if (nodes.size() > 0) {
+            return nodes.get(0).getValue();
+        }
+        
+        nodes = regionElement.getFirstChildElement("pictures").query("picture[@type_id='" + VIDEO_STILL_1_ID + "']/url");
+        if (nodes.size() > 0) {
+            return nodes.get(0).getValue();
+        }
+        return null;
     }
     
     private String getFilmCurie(String id) {

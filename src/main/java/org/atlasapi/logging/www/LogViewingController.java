@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.LogReader;
 import org.atlasapi.persistence.logging.AdapterLogEntry.ExceptionSummary;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.persistence.logging.LogReader;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;

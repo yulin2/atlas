@@ -16,7 +16,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -38,6 +37,7 @@ import org.joda.time.Duration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgEntryProcessorTest extends TestCase {

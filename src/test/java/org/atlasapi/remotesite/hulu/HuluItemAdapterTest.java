@@ -4,12 +4,13 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Countries;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser;
+
+import com.metabroadcast.common.intl.Countries;
 
 public class HuluItemAdapterTest extends TestCase {
     
