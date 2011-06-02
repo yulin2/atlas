@@ -85,6 +85,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
                                						"<transmissionTime>1990-01-01T01:01:01.001Z</transmissionTime>" +
                                					"</play:broadcast>" +
                                				"</play:broadcasts>" +
+                               				"<play:countriesOfOrigin/>" +
 											"<play:locations>" +
 												"<play:location>" +
 												"<available>true</available>" +
@@ -123,6 +124,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 														"<play:tags/>" +
 	                                         			"<title>Blue Peter</title>" +
 	                                         			"<play:broadcasts/>" +
+	                                         			"<play:countriesOfOrigin/>" +
 														"<play:locations>" +
 															"<play:location>" +
 															"<available>true</available>" +
