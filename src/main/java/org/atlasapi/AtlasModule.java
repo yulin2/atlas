@@ -27,10 +27,15 @@ public class AtlasModule {
 	
 	private final String mongoHost = Configurer.get("mongo.host").get();
 	private final String dbName = Configurer.get("mongo.dbName").get();
+	private final Boolean processingConfig = Configurer.get("processing.config").toBoolean();
 
 	public @Bean DatabasedMongo mongo() {
 		try {
-			return new DatabasedMongo(new Mongo(mongoHost), dbName);
+			Mongo mongo = new Mongo(mongoHost);
+			if(!processingConfig) {
+			    mongo.slaveOk();
+			}
+			return new DatabasedMongo(mongo, dbName);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
