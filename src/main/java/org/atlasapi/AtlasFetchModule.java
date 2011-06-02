@@ -38,7 +38,6 @@ import org.atlasapi.remotesite.tinyurl.SavingShortUrlCanonicaliser;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
 import org.atlasapi.remotesite.youtube.YouTubeFeedCanonicaliser;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
-import org.atlasapi.system.AliasController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -81,9 +80,6 @@ public class AtlasFetchModule {
 			reader.savingFetcher().setStore(contentWriter());
 		}
 		
-		public @Bean AliasController aliasController() {
-			return new AliasController(persistence.contentStore(), reader.contentResolverThatDoesntSave());
-		}
 	}
 	
 	@Configuration
