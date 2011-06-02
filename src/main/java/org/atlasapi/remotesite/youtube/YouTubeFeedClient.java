@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.youtube;
 
+import java.util.Map;
+
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.youtube.YouTubeModel.Content;
@@ -8,14 +10,18 @@ import org.atlasapi.remotesite.youtube.YouTubeModel.Player;
 import org.atlasapi.remotesite.youtube.YouTubeModel.Thumbnail;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoFeed;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.url.Urls;
 
 public class YouTubeFeedClient implements RemoteSiteClient<VideoFeed> {
+    
+    private static final Map<String, String> FETCH_PARAMETERS = ImmutableMap.of("v", "2", "alt", "jsonc");
 
     private final SimpleHttpClient client;
     private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
@@ -33,7 +39,7 @@ public class YouTubeFeedClient implements RemoteSiteClient<VideoFeed> {
     }
 
     public VideoFeed get(String uri) throws Exception {
-        HttpResponse httpResponse = client.get(uri+"?v=2&alt=jsonc");
+        HttpResponse httpResponse = client.get(Urls.appendParameters(uri, FETCH_PARAMETERS));
         if (httpResponse.statusCode() >= 300) {
             throw new HttpStatusCodeException(httpResponse); 
         }
