@@ -4,7 +4,7 @@ import org.atlasapi.query.uri.canonical.Canonicaliser;
 
 public class YouTubeFeedCanonicaliser implements Canonicaliser {
     
-    private static final String BASE_URL = "http://gdata.youtube.com/feeds/api/standardfeeds/";
+    private static final String BASE_URL = "http://gdata.youtube.com/feeds/api/";
 
     @Override
     public String canonicalise(String uri) {
