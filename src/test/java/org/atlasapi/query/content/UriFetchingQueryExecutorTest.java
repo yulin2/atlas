@@ -14,6 +14,9 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.content;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+
 import java.util.List;
 
 import org.atlasapi.content.criteria.ContentQuery;
@@ -62,7 +65,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 			
 			// the result of the fetcher cannot be returned directly because further view restrictions / filters
 			// need to be applied -- so the query is retried with the item now loaded into the db
-			one(delegate).executeUriQuery(ImmutableList.of("item1"), A_FILTER); will(returnValue(ImmutableList.of(item1)));
+			one(delegate).executeUriQuery(with(hasItem("item1")), with(A_FILTER)); will(returnValue(ImmutableList.of(item1)));
 		}});
 		
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);
@@ -85,7 +88,7 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		checking(new Expectations() {{ 
 			one(delegate).executeUriQuery(urisOfItems1And2, A_FILTER); will(returnValue(ImmutableList.of(item1)));
 			one(fetcher).fetch("item2"); will(returnValue(item2));
-			one(delegate).executeUriQuery(urisOfItems1And2, A_FILTER); will(returnValue(ImmutableList.of(item1, item2)));
+			one(delegate).executeUriQuery(with(hasItems("item1", "item2")), with(A_FILTER)); will(returnValue(ImmutableList.of(item1, item2)));
 		}});
 
 		executor.executeUriQuery(urisOfItems1And2, A_FILTER);

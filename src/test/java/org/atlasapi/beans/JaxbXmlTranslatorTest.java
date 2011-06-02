@@ -117,5 +117,6 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		assertThat(response.getResponseAsString(), containsString("<play:item><type>Item</type>" +
 															            "<uri>http://www.bbc.co.uk/bluepeter</uri>" +
 													              "</play:item>"));
+
 	}
 }
