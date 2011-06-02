@@ -162,7 +162,9 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         version.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ionVersion.getId());
         BbcProgrammeGraphExtractor.setDurations(version, ionVersion);
         version.setProvider(BBC);
-        version.setDuration(Duration.standardSeconds(ionVersion.getDuration()));
+        if(ionVersion.getDuration() != null) {
+            version.setDuration(Duration.standardSeconds(ionVersion.getDuration()));
+        }
         if(ionVersion.getBroadcasts() != null) {
             for (IonBroadcast ionBroadcast : ionVersion.getBroadcasts()) {
                 Broadcast broadcast = broadcastFrom(ionBroadcast);
