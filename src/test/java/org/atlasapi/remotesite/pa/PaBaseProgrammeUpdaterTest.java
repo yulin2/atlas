@@ -11,10 +11,15 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.mongo.LookupResolvingContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.persistence.lookup.BasicLookupResolver;
+import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 
@@ -30,17 +35,18 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
     private TimeMachine clock = new TimeMachine();
     private AdapterLog log = new SystemOutAdapterLog();
-    private MongoDbBackedContentStore store;
+    private ContentResolver resolver;
     private ContentWriters contentWriters = new ContentWriters();
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
-        store = new MongoDbBackedContentStore(db, clock);
+        MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(db);
+        resolver = new LookupResolvingContentResolver(new MongoContentResolver(db), new BasicLookupResolver(lookupStore));
         
-        contentWriters.add(store);
-        programmeProcessor = new PaProgrammeProcessor(contentWriters, store, new DummyItemsPeopleWriter(), log);
+        contentWriters.add(new MongoContentWriter(db, lookupStore, clock));
+        programmeProcessor = new PaProgrammeProcessor(contentWriters, resolver, new DummyItemsPeopleWriter(), log);
     }
 
     public void testShouldCreateCorrectPaData() throws Exception {
@@ -51,7 +57,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         // lazy
         for (int i = 0; i < 10; i++) {
             Thread.sleep(500);
-            content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
+            content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
             if (content != null)
                 continue;
         }
@@ -81,7 +87,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         updater.run();
         Thread.sleep(1000);
 
-        content = store.findByCanonicalUri("http://pressassociation.com/brands/122139");
+        content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
         assertNotNull(content);
         assertTrue(content instanceof Brand);
         brand = (Brand) content;

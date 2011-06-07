@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -19,6 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
 
@@ -58,18 +63,23 @@ public class EquivalenceResultController {
     @RequestMapping(value = "/system/equivalence/results", method = RequestMethod.GET)
     public String showSubResults(Map<String, Object> model, HttpServletResponse response, @RequestParam(value = "uri", required = true) String uri) throws IOException {
 
-        Identified ided = contentResolver.findByCanonicalUri(uri);
+        Maybe<Identified> ided = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
 
-        if (ided == null) {
+        if (ided.isNothing()) {
             response.sendError(NOT_FOUND.code(), "Unknown URI");
             return null;
         }
 
         SimpleModelList resultModelList = new SimpleModelList();
 
-        if (ided instanceof Container) {
+        if (ided.requireValue() instanceof Container) {
 
-            List<RestoredEquivalenceResult> results = store.forIds(((Container<?>) ided).getContentUris());
+            List<RestoredEquivalenceResult> results = store.forIds(Iterables.transform(((Container<?>) ided.requireValue()).getChildRefs(), new Function<ChildRef, String>() {
+                @Override
+                public String apply(ChildRef input) {
+                    return input.getUri();
+                }
+            }));
 
             for (RestoredEquivalenceResult result : results) {
                 resultModelList.add(resultModelBuilder.build(result, probeStore.probeFor(uri)));
