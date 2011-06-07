@@ -25,7 +25,7 @@ public class ContentResolvingPeopleResolver {
         Person person = delegate.person(uri);
         
         if (person != null) {
-            List<Content> content = ImmutableList.copyOf(Iterables.filter(contentResolver.executeUriQuery(person.getContentUris(), filter), Content.class));
+            List<Content> content = ImmutableList.copyOf(Iterables.filter(Iterables.concat(contentResolver.executeUriQuery(person.getContentUris(), filter).values()), Content.class));
             person.setContents(content);
         }
         
