@@ -10,7 +10,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -21,7 +20,9 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.internal.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class TVBlobDayPopulator {
@@ -84,9 +85,10 @@ public class TVBlobDayPopulator {
                             Broadcast broadcast = new Broadcast(channel, start.toDateTime(DateTimeZones.UTC), end.toDateTime(DateTimeZones.UTC));
                             broadcast.setLastUpdated(new DateTime(DateTimeZones.UTC));
 
-                            Identified currentContent = contentResolver.findByCanonicalUri(episode.getCanonicalUri());
-                            if (currentContent != null && currentContent instanceof Episode) {
-                                episode.setVersions(((Episode) currentContent).getVersions());
+                            String episodeUri = episode.getCanonicalUri();
+                            Maybe<Identified> currentContent = contentResolver.findByCanonicalUris(ImmutableList.of(episodeUri)).get(episodeUri);
+                            if (currentContent.hasValue() && currentContent.requireValue() instanceof Episode) {
+                                episode.setVersions(((Episode) currentContent.requireValue()).getVersions());
                             }
 
                             Version version = episode.getVersions().iterator().next();
@@ -95,19 +97,9 @@ public class TVBlobDayPopulator {
                             version.setBroadcasts(expireBroadcasts(broadcasts));
 
                             if (brand != null) {
-                                brand.addContents(episode);
-                                Identified currentBrand = contentResolver.findByCanonicalUri(brand.getCanonicalUri());
-                                if (currentBrand != null && currentBrand instanceof Brand) {
-                                    for (Item item : ((Brand) currentBrand).getContents()) {
-                                        if (!brand.getContents().contains(item)) {
-                                            brand.addContents((Episode) item);
-                                        }
-                                    }
-                                }
-                                contentStore.createOrUpdate(brand, true);
-                            } else {
-                                contentStore.createOrUpdate(episode);
+                                contentStore.createOrUpdate(brand);
                             }
+                            contentStore.createOrUpdate(episode);
 
                             numBroadcasts++;
                         }
@@ -208,7 +200,7 @@ public class TVBlobDayPopulator {
 
     private String title(String title, String subTitle) {
         if (title != null) {
-            if (subTitle != null && ! "null".equals(subTitle)) {
+            if (subTitle != null && !"null".equals(subTitle)) {
                 title = title + " - " + subTitle;
             }
             return title;

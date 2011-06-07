@@ -90,7 +90,7 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
                 Container<Item> fetchedContainer = fetchContainerFor(fetchedEpisode.getContainer().getCanonicalUri());
                 if (fetchedContainer != null) {
                     fetchedContainer.addOrReplace(fetchedEpisode);
-                    writer.createOrUpdate(fetchedContainer, true);
+                    writer.createOrUpdate(fetchedContainer);
                 } else {
                     log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Item "+fetchedItem+" it's Brand can't be fetched"));
                 }

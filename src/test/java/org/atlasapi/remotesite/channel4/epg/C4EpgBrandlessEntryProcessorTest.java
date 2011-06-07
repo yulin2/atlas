@@ -45,7 +45,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
         
         context.checking(new Expectations(){{
             allowing(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(null));
-            one(writer).createOrUpdate(with(synthesizedBrand()), with(true));
+            one(writer).createOrUpdate(with(synthesizedBrand()));
         }});
         
         C4EpgBrandlessEntryProcessor processor = new C4EpgBrandlessEntryProcessor(writer, resolver, log);
@@ -111,7 +111,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
         
         context.checking(new Expectations(){{
             allowing(resolver).findByCanonicalUri(with(allOf(endsWith("gilmore-girls"),not(containsString("synthesized"))))); will(returnValue(realBrand()));
-            one(writer).createOrUpdate(with(updatedRealBrand()), with(true));
+            one(writer).createOrUpdate(with(updatedRealBrand()));
         }});
         
         C4EpgBrandlessEntryProcessor processor = new C4EpgBrandlessEntryProcessor(writer, resolver, log);

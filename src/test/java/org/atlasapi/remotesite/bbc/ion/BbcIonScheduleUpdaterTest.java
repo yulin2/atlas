@@ -74,7 +74,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
             one(writer).createOrUpdate((Brand) with(allOf(
                     uri(SLASH_PROGRAMMES_ROOT+"b006m86d")
-            )), with(true));
+            )));
         }});
 
         new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
@@ -96,10 +96,10 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
             one(writer).createOrUpdate((Brand)with(allOf(
                     uri(SLASH_PROGRAMMES_ROOT+"b00xb44r")
-            )), with(true));
+            )));
             one(writer).createOrUpdate((Brand)with(allOf(
                     uri(SLASH_PROGRAMMES_ROOT+"b007gf9k")
-            )), with(true));
+            )));
         }});
 
         new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();

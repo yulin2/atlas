@@ -80,7 +80,7 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 		    	if (content instanceof Item) {
 		    		writer.createOrUpdate((Item) content);
 		    	} else if (content instanceof Container<?>) {
-		        	writer.createOrUpdate((Container<?>) content, true);
+		        	writer.createOrUpdate((Container<?>) content);
 		    	} else {
 		            throw new IllegalArgumentException("Could not persist content (unknown type): " + content);
 		    	}

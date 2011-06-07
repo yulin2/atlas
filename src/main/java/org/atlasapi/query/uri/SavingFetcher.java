@@ -57,7 +57,7 @@ public class SavingFetcher implements Fetcher<Identified> {
 	
     private void createOrUpdateContent(Identified root, boolean markMissingItemsAsUnavailable) {
         if (root instanceof Container<?>) {
-            store.createOrUpdate((Container<?>) root, markMissingItemsAsUnavailable);
+            store.createOrUpdate((Container<?>) root);
         }
         if (root instanceof Item) {
            store.createOrUpdate((Item) root);

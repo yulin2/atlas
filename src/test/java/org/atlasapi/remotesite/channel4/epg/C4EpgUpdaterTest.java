@@ -68,7 +68,7 @@ public class C4EpgUpdaterTest extends TestCase {
                 will(returnValue(new Document(new Element("feed"))));
             allowing(contentStore).findByCanonicalUri(with(any(String.class)));
                 will(returnValue(null));
-            allowing(contentWriter).createOrUpdate(with(any(Container.class)), with(true));
+            allowing(contentWriter).createOrUpdate(with(any(Container.class)));
             allowing(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(any(Iterable.class)), with(any(Iterable.class))); will(returnValue(schedule));
         }});
         

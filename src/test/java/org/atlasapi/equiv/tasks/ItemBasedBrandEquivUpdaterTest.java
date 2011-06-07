@@ -146,7 +146,7 @@ public class ItemBasedBrandEquivUpdaterTest extends TestCase {
             writtenContent.put(item.getCanonicalUri(), item);
         }
         @Override
-        public void createOrUpdate(Container<?> container, boolean markMissingItemsAsUnavailable) {
+        public void createOrUpdate(Container<?> container) {
             writtenContent.put(container.getCanonicalUri(), container);
         }
 

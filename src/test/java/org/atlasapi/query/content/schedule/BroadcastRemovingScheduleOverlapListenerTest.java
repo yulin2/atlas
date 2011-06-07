@@ -7,19 +7,29 @@ import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.content.mongo.LookupResolvingContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentWriter;
+import org.atlasapi.persistence.lookup.BasicLookupResolver;
+import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.SystemClock;
 
 public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
 
     private DatabasedMongo db;
-    private MongoDbBackedContentStore store;
+    private ContentWriter writer;
+    private ContentResolver resolver;
     
     private BroadcastRemovingScheduleOverlapListener listener;
     
@@ -35,7 +45,9 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
         super.setUp();
         
         db = MongoTestHelper.anEmptyTestDatabase();
-        store = new MongoDbBackedContentStore(db);
+        MongoLookupEntryStore lookupWriter = new MongoLookupEntryStore(db);
+        writer = new MongoContentWriter(db, lookupWriter , new SystemClock());
+        resolver = new LookupResolvingContentResolver(new MongoContentResolver(db), new BasicLookupResolver(lookupWriter));
         
         Version version = new Version();
         version.addBroadcast(broadcast1);
@@ -44,21 +56,21 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
         
         item.addVersion(version);
         
-        store.createOrUpdate(item);
-        listener = new BroadcastRemovingScheduleOverlapListener(store, store);
+        writer.createOrUpdate(item);
+        listener = new BroadcastRemovingScheduleOverlapListener(resolver, writer);
     }
     
     public void testRemoveBroadcast() {
         listener.itemRemovedFromSchedule(item, broadcast1);
         
-        Item result = (Item) store.findByCanonicalUri(item.getCanonicalUri());
-        Version v = Iterables.getOnlyElement(result.getVersions());
+        ResolvedContent result =  resolver.findByCanonicalUris(ImmutableList.of(item.getCanonicalUri()));
+        Version v = Iterables.getOnlyElement(((Item)result.get(item.getCanonicalUri()).requireValue()).getVersions());
         assertEquals(v.getBroadcasts(), ImmutableSet.of(broadcast2, broadcast3));
         
         listener.itemRemovedFromSchedule(item, broadcast2);
         
-        result = (Item) store.findByCanonicalUri(item.getCanonicalUri());
-        v = Iterables.getOnlyElement(result.getVersions());
+        result = resolver.findByCanonicalUris(ImmutableList.of(item.getCanonicalUri()));
+        v = Iterables.getOnlyElement(((Item)result.get(item.getCanonicalUri()).requireValue()).getVersions());
         assertEquals(v.getBroadcasts(), ImmutableSet.of(broadcast3));
     }
 }

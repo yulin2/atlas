@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
@@ -24,6 +25,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
@@ -33,8 +35,10 @@ import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgEntryProcessor {
@@ -76,11 +80,13 @@ public class C4EpgEntryProcessor {
 
             String itemUri = uriFrom(entry, webSafeBrandName);
 
-            Episode episode = (Episode) contentStore.findByCanonicalUri(itemUri);
-            if (episode == null) {
+            Episode episode = null;
+            Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
+            if (resolved.isNothing()) {
                 episode = new Episode(itemUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(itemUri), Publisher.C4);
                 episode.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s/episode-%s", webSafeBrandName, entry.seriesNumber(), entry.episodeNumber()));
-                
+            } else {
+                episode = (Episode) resolved.requireValue();
             }
             //look for a synthesized equivalent of this item and copy any broadcast/locations and remove its versions.
             updateFromPossibleSynthesized(webSafeBrandName, entry, episode);
@@ -92,7 +98,7 @@ public class C4EpgEntryProcessor {
             }
             Brand brand = updateBrand(webSafeBrandName, episode, entry);
 
-            contentWriter.createOrUpdate(brand, true);
+            contentWriter.createOrUpdate(brand);
 
         } catch (Exception e) {
             log.record(new AdapterLogEntry(WARN).withCause(e).withSource(getClass()).withDescription("Exception processing entry: " + entry.id()));
@@ -106,20 +112,20 @@ public class C4EpgEntryProcessor {
 
     private Brand updateBrand(String brandName, Episode episode, C4EpgEntry entry) {
         String brandUri = C4_PROGRAMMES_BASE + brandName;
-        Brand brand = (Brand) contentStore.findByCanonicalUri(brandUri);
-        if (brand != null) {
-        	brand.addOrReplace(episode);
-        } else {
-            brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4);
-            brand.addContents(episode);
+        Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableSet.of(brandUri)).get(brandUri);
+        
+        if(resolved.isNothing()) {
+            Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4);
             brand.setTitle(entry.brandTitle());
             brand.addAlias(TAG_ALIAS_BASE+brandName);
+            return brand;
+        } else {
+            return (Brand) resolved.requireValue();
         }
-        return brand;
     }
 
     private Series updateSeries(String seriesUri, String brandName, Episode episode) {
-        Series series = (Series) contentStore.findByCanonicalUri(seriesUri);
+        Series series = (Series) contentStore.findByCanonicalUris(ImmutableSet.of(seriesUri));
         if (series != null) {
             series.addOrReplace(episode);
         } else {

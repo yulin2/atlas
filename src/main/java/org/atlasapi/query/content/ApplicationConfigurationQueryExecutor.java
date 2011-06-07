@@ -1,6 +1,7 @@
 package org.atlasapi.query.content;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.AtomicQuery;
@@ -8,7 +9,6 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -25,13 +25,13 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 		this.delegate = delegate;
 	}		
 		
-	@Override
-	public List<Content> discover(ContentQuery query) {
-		return delegate.discover(queryForContent(query));
-	}
+//	@Override
+//	public List<Content> discover(ContentQuery query) {
+//		return delegate.discover(queryForContent(query));
+//	}
 
 	@Override
-	public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<String,List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return delegate.executeUriQuery(uris, queryForContent(query));
 	}
 	

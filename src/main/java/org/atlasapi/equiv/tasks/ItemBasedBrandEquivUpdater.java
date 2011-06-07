@@ -87,13 +87,13 @@ public class ItemBasedBrandEquivUpdater {
         // Write: the subject brand, any old equivalents, all TLEs of all
         // strongly suggested equivalent items (their versions will have been merged)
         if (writesResults) {
-            contentWriter.createOrUpdate(brand, false);
+            contentWriter.createOrUpdate(brand);
             for (Identified equiv : ImmutableSet.copyOf(Iterables.concat(topLevelElements(binnedStrongSuggestions.values()), oldEquivalences))) {
                 if (equiv instanceof Item) {
                     contentWriter.createOrUpdate((Item) equiv);
                 }
                 if (equiv instanceof Container<?>) {
-                    contentWriter.createOrUpdate((Container<?>) equiv, false);
+                    contentWriter.createOrUpdate((Container<?>) equiv);
                 }
             }
         }

@@ -56,7 +56,7 @@ public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 			one(scheduleClient).get("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"); will(returnValue(schedule));
 
 			one(localFetcher).findByCanonicalUri("brandUri"); will(returnValue(brand));
-			one(writer).createOrUpdate(with(any(Brand.class)), with(true));
+			one(writer).createOrUpdate(with(any(Brand.class)));
 			one(writer).createOrUpdate(with(any(Item.class)));
 		}});
 

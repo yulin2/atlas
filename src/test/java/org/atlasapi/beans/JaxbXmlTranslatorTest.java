@@ -22,6 +22,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.simple.Broadcast;
+import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
@@ -104,9 +105,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		Set<Object> graph = Sets.newHashSet();
 
 		Playlist list = new Playlist();
-		ItemIdentifier item = new ItemIdentifier("http://www.bbc.co.uk/bluepeter");
 
-		list.add(item);
+		list.add(ContentIdentifier.identifierFrom("http://www.bbc.co.uk/bluepeter", "Item"));
 		
 		ContentQueryResult result = new ContentQueryResult();
 		result.setContents(ImmutableList.<Description>of(list));
@@ -114,9 +114,10 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 		new JaxbXmlTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
 		
-		assertThat(response.getResponseAsString(), containsString("<play:item><type>Item</type>" +
-															            "<uri>http://www.bbc.co.uk/bluepeter</uri>" +
-													              "</play:item>"));
 
+		assertThat(response.getResponseAsString(), containsString("<play:item>" +
+															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
+															"<type>Item</type>" +
+													  "</play:item>"));
 	}
 }

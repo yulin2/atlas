@@ -52,7 +52,7 @@ public class C4EpgBrandlessEntryProcessor {
                 updateBrand(entry, brand, brandName, channel);
             }
             
-            contentWriter.createOrUpdate(brand, true);
+            contentWriter.createOrUpdate(brand);
             
         }catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception processing brandless entry " + entry.id()));
