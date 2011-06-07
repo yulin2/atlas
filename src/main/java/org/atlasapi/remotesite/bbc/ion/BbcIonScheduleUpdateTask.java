@@ -66,7 +66,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
             for (IonBroadcast broadcast : schedule.getBlocklist()) {
                 try { 
                 //find and (create and) update item
-                Identified identified = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
+                Identified identified = localFetcher.findByCanonicalUris(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
                 if (identified == null) {
                     if(fetcherClient != null) {
                         identified = fetcherClient.createItem(broadcast.getEpisodeId());
@@ -111,7 +111,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                     
                         if (Strings.isNullOrEmpty(broadcast.getBrandId())) {
                             if(series != null) { //no brand so just save series if it exists
-                                writer.createOrUpdate(series, true);
+                                writer.createOrUpdate(series);
                             }
                             
                         } else {
@@ -132,7 +132,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                             if (brand != null) {
                                 updateBrand(brand, broadcast);
                                 addOrReplaceItemInPlaylist(item, brand);
-                                writer.createOrUpdate(brand, true);
+                                writer.createOrUpdate(brand);
                             }
                         }
                     }

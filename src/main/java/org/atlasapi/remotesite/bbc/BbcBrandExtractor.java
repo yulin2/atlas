@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
@@ -48,7 +49,7 @@ public class BbcBrandExtractor  {
 		Series series = new Series();
 		populatePlaylistAttributes(series, rdfSeries);
 		List<String> episodeUris = episodesFrom(rdfSeries.episodeResourceUris());
-		addDirectlyIncludedEpisodesTo((MutableContentList) series, episodeUris);
+		addDirectlyIncludedEpisodesTo(series, episodeUris);
     	return series;
 	}
 
@@ -98,7 +99,7 @@ public class BbcBrandExtractor  {
         }
     }
 
-	private void addDirectlyIncludedEpisodesTo(MutableContentList<Episode> playlist, List<String> episodes) {
+	private void addDirectlyIncludedEpisodesTo(Container<?> playlist, List<String> episodes) {
 		for (String episodeUri : mostRecent(episodes)) {
 			Identified found = subContentExtractor.fetch(episodeUri);
 			if (!(found instanceof Item)) {

@@ -151,4 +151,5 @@ public class EquivModule {
     public @Bean EquivalenceResultProbeController equivProbeController() {
         return new EquivalenceResultProbeController(equivalenceResultStore(), equivProbeStore());
     }
+
 }

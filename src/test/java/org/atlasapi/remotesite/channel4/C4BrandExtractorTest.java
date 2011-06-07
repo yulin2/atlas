@@ -69,7 +69,7 @@ public class C4BrandExtractorTest extends TestCase {
         public void createOrUpdate(Item item) {
         }
         @Override
-        public void createOrUpdate(Container<?> container, boolean markMissingItemsAsUnavailable) {
+        public void createOrUpdate(Container<?> container) {
         }
         @Override
         public void createOrUpdateSkeleton(ContentGroup playlist) {

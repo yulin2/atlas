@@ -76,7 +76,7 @@ public class C4AtoZAtomContentLoader implements Runnable {
 		        Brand brand = fetchBrand(brandUri);
 		        if (brand != null) {
 		        	brands.add(brand);
-		        	writer.createOrUpdate(brand, true);
+		        	writer.createOrUpdate(brand);
 		        }
 		    }
 		}

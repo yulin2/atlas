@@ -79,7 +79,7 @@ public class AtlasFetchModule {
 		public @PostConstruct void passWriterToReader() {
 			reader.savingFetcher().setStore(contentWriter());
 		}
-		
+
 	}
 	
 	@Configuration

@@ -77,7 +77,7 @@ public class QueryController extends BaseController {
 			if (Iterables.isEmpty(uris)) {
 				throw new IllegalArgumentException("No uris specified");
 			}
-			modelAndViewFor(request, response, executor.executeUriQuery(uris, filter), AtlasModelType.CONTENT);
+			modelAndViewFor(request, response, ImmutableList.copyOf(Iterables.concat(executor.executeUriQuery(uris, filter).values())), AtlasModelType.CONTENT);
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}

@@ -15,10 +15,10 @@ permissions and limitations under the License. */
 package org.atlasapi.query.content;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -26,9 +26,11 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -49,59 +51,52 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		this.delegate = delegate;
 	}
 	
-	@Override
-	public List<Content> discover(ContentQuery query) {
-		return delegate.discover(query);
-	}
+//	@Override
+//	public List<Content> discover(ContentQuery query) {
+//		return delegate.discover(query);
+//	}
 	
 	@Override
-	public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return executeContentQuery(uris, query);
 	}
 	
-	public List<Identified> executeContentQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<String, List<Identified>> executeContentQuery(Iterable<String> uris, ContentQuery query) {
 
-		List<Identified> found = delegate.executeUriQuery(uris, query);
+		Map<String, List<Identified>> found = delegate.executeUriQuery(uris, query);
 		
-		Set<String> missingUris = missingUris(found, uris);
+		Set<String> missingUris = missingUris(found.keySet(), uris);
 		
 		if (missingUris.isEmpty()) {
 			return found;
 		} 
 
-		List<String> resolvedUris = ImmutableList.copyOf(Iterables.transform(found, Identified.TO_URI));
 		List<String> fetchedUris = Lists.newArrayList();
-		List<ContentGroup> youtubeContentGroups = Lists.newArrayList();
+		Map<String, List<Identified>> youtubeContentGroups = Maps.newHashMap();
 		
 		for (String missingUri : missingUris) {
 			Identified remoteContent = fetcher.fetch(missingUri);
 			if (remoteContent != null) {
 			    if (remoteContent instanceof ContentGroup && ((ContentGroup) remoteContent).getPublisher().equals(Publisher.YOUTUBE)) {
-			        youtubeContentGroups.add((ContentGroup) remoteContent);
+			        youtubeContentGroups.put(missingUri, ImmutableList.of(remoteContent));
 			    } else {
 			        fetchedUris.add(remoteContent.getCanonicalUri());
 			    }
 			}
 		}
+
+		Builder<String, List<Identified>> results = ImmutableMap.<String, List<Identified>>builder().putAll(found).putAll(youtubeContentGroups);
 		
 		// If we couldn't resolve any of the missing uris then we should just return the results of the original query
 		if (fetchedUris.isEmpty()) {
-			return ImmutableList.copyOf(Iterables.concat(found, youtubeContentGroups));
+            return results.build();
 		}
 		
 		// re-attempt the query now the missing uris have been fetched
-		return ImmutableList.copyOf(Iterables.concat(youtubeContentGroups, delegate.executeUriQuery(Iterables.concat(resolvedUris, fetchedUris), query)));
+		return results.putAll(delegate.executeUriQuery(fetchedUris, query)).build();
 	}
 	
-	private static Set<String> missingUris(Iterable<? extends Identified> content, Iterable<String> uris) {
-		return Sets.difference(ImmutableSet.copyOf(uris), urisFrom(content));
-	}
-
-	private static Set<String> urisFrom(Iterable<? extends Identified> contents) {
-		Set<String> uris = Sets.newHashSet();
-		for (Identified content : contents) {
-			uris.addAll(content.getAllUris());
-		}
-		return uris;
+	private static Set<String> missingUris(Iterable<String> content, Iterable<String> uris) {
+		return Sets.difference(ImmutableSet.copyOf(uris), ImmutableSet.copyOf(content));
 	}
 }

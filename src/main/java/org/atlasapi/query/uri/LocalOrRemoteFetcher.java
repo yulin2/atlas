@@ -18,7 +18,12 @@ package org.atlasapi.query.uri;
 
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
 import org.atlasapi.persistence.system.Fetcher;
+
+import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.base.Maybe;
 
 /**
  * Aggregate {@link Fetcher} that checks a local datastore for resources,
@@ -38,17 +43,21 @@ public class LocalOrRemoteFetcher implements Fetcher<Identified>, ContentResolve
 
 	public Identified fetch(String uri) {
 		
-		Identified local = localStore.findByCanonicalUri(uri);
+		Maybe<Identified> local = localStore.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
 		
-		if (local == null) {
+		if (local.isNothing()) {
 			return remoteFetcher.fetch(uri); 
 		} else {
-		    return local;
+		    return local.requireValue();
 		}
 	}
 
 	@Override
-	public Identified findByCanonicalUri(String uri) {
-		return fetch(uri);
+	public ResolvedContent findByCanonicalUris(Iterable<String> uris) {
+		ResolvedContentBuilder builder = ResolvedContent.builder();
+		for (String uri : uris) {
+            builder.put(uri, fetch(uri));
+        }
+        return builder.build();
 	}
 }

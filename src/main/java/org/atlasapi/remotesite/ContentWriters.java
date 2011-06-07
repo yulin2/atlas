@@ -39,6 +39,7 @@ public class ContentWriters implements ContentWriter {
 	}
 
 	@Override
+	@Deprecated
 	public void createOrUpdateSkeleton(ContentGroup playlist) {
 		for (ContentWriter writer : writers) {
 			writer.createOrUpdateSkeleton(playlist);
@@ -46,9 +47,9 @@ public class ContentWriters implements ContentWriter {
 	}
 
 	@Override
-	public void createOrUpdate(Container<?> container, boolean markMissingItemsAsUnavailable) {
+	public void createOrUpdate(Container<?> container) {
 		for (ContentWriter writer : writers) {
-			writer.createOrUpdate(container, markMissingItemsAsUnavailable);
+			writer.createOrUpdate(container);
 		}
 	}
 }

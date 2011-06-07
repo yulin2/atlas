@@ -63,8 +63,8 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 			one(itemClient).get("http://api.channel4.com/programmes/atoz/a.atom"); will(returnValue(atoza.build()));
 			one(itemClient).get("http://api.channel4.com/programmes/atoz/a/page-2.atom"); will(returnValue(atoza2.build()));
 			
-			one(writer).createOrUpdate(brand101, true);
-			one(writer).createOrUpdate(brand202, true);
+			one(writer).createOrUpdate(brand101);
+			one(writer).createOrUpdate(brand202);
 			one(writer).createOrUpdateSkeleton(new ContentGroup(uri, null));
 
 			allowing(brandAdapter).fetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(brand101));

@@ -52,7 +52,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
     public void testProcessNewItemSeriesBrand() {
         
         context.checking(new Expectations(){{
-            allowing(resolver).findByCanonicalUri(with(any(String.class))); will(returnValue(null));
+            allowing(resolver).findByCanonicalUris(with(Expectations.<Iterable<String>>anything())); will(returnValue(null));
         }});
         
         ContentWriter writer = new ContentWriter() {
@@ -62,7 +62,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
             }
 
             @Override
-            public void createOrUpdate(Container<?> container, boolean markMissingItemsAsUnavailable) {
+            public void createOrUpdate(Container<?> container) {
                 assertTrue(container instanceof Brand);
                 Brand brand = (Brand) container;
                 
@@ -116,17 +116,18 @@ public class C4EpgEntryProcessorTest extends TestCase {
         final Episode episode = existingEpisode();
         final Series series = new Series("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1", "c4:the-hoobs-series-1", C4);
         final Brand brand = new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:the-hoobs", C4);
-        series.addContents(episode);
-        brand.addContents(episode);
+
+        episode.setContainer(brand);
+        episode.setSeriesUri("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1");
         
         final ContentWriter writer = context.mock(ContentWriter.class);
         
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUri(with(endsWith("episode-59"))); will(returnValue(episode)); //item
-            one(resolver).findByCanonicalUri(with(containsString("synthesized"))); will(returnValue(null)); //no synth item
-            one(resolver).findByCanonicalUri(with(endsWith("series-1"))); will(returnValue(series)); //series
-            one(resolver).findByCanonicalUri(with(endsWith("the-hoobs"))); will(returnValue(brand)); //brand
-            one(writer).createOrUpdate(with(updatedBrandWithExistingItem()), with(true));
+            one(resolver).findByCanonicalUris(with(hasItem(endsWith("episode-59")))); will(returnValue(episode)); //item
+            one(resolver).findByCanonicalUris(with(hasItem(containsString("synthesized")))); will(returnValue(null)); //no synth item
+            one(resolver).findByCanonicalUris(with(hasItem(endsWith("series-1")))); will(returnValue(series)); //series
+            one(resolver).findByCanonicalUris(with(hasItem(endsWith("the-hoobs")))); will(returnValue(brand)); //brand
+            one(writer).createOrUpdate(with(updatedBrandWithExistingItem()));
         }});
         
         C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
@@ -210,19 +211,20 @@ public class C4EpgEntryProcessorTest extends TestCase {
         final Brand brand = new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:the-hoobs", C4);
         Series series = new Series("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1", "c4:the-hoobs-series-1", C4);
         Episode episode = new Episode("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-58", "c4:the-hoobs-series-1-episode-58", C4);
+        
+        episode.setContainer(brand);
+        episode.setSeriesUri(series.getCanonicalUri());
         episode.setSeriesNumber(1);
         episode.setEpisodeNumber(58);
-        brand.addContents(episode);
-        series.addContents(episode);
 
         final ContentWriter writer = context.mock(ContentWriter.class);
         
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUri(with(endsWith("episode-59"))); will(returnValue(null)); //item
-            one(resolver).findByCanonicalUri(with(containsString("synthesized"))); will(returnValue(null)); //no synth item
-            one(resolver).findByCanonicalUri(with(endsWith("series-1"))); will(returnValue(null)); //series
-            one(resolver).findByCanonicalUri(with(endsWith("the-hoobs"))); will(returnValue(brand)); //brand
-            one(writer).createOrUpdate(with(updatedBrandWithNewItem()), with(true));
+            one(resolver).findByCanonicalUris(with(hasItem(endsWith("episode-59")))); will(returnValue(null)); //item
+            one(resolver).findByCanonicalUris(with(hasItem(containsString("synthesized")))); will(returnValue(null)); //no synth item
+            one(resolver).findByCanonicalUris(with(hasItem(endsWith("series-1")))); will(returnValue(null)); //series
+            one(resolver).findByCanonicalUris(with(hasItem(endsWith("the-hoobs")))); will(returnValue(brand)); //brand
+            one(writer).createOrUpdate(with(updatedBrandWithNewItem()));
         }});
         
         C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);

@@ -13,13 +13,13 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -41,34 +41,41 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	}
 	
 	@Override
-	public List<Identified> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
 		ApplicationConfiguration config = query.getConfiguration();
 		if (!config.precedenceEnabled()) {
 			return delegate.executeUriQuery(uris, query);
 		}
-		List<Content> content = Lists.newArrayList();
-		List<Identified> identified = Lists.newArrayList();
-		for (Identified id : delegate.executeUriQuery(uris, query)) {
-			if (id instanceof Content) {
-				content.add((Content) id);
-			} else {
-				identified.add((ContentGroup) id);
-			}
-		}
-		return ImmutableList.copyOf(Iterables.<Identified>concat(mergeDuplicates(config, content), identified));
+		return Maps.transformValues(delegate.executeUriQuery(uris, query), new Function<List<Identified>,List<Identified>>(){
+            @Override
+            public List<Identified> apply(List<Identified> input) {
+                
+                List<Content> content = Lists.newArrayList();
+                List<Identified> ids  = Lists.newArrayList();
+                
+                for (Identified ided : input) {
+                    if(ided instanceof Content) {
+                        content.add((Content)ided);
+                    } else {
+                        ids.add(ided);
+                    }
+                }
+
+                return ImmutableList.copyOf(Iterables.concat(mergeDuplicates(query.getConfiguration(), content), ids));
+            }});
 	}
 	
-	@Override
-	public List<Content> discover(ContentQuery query) {
-		return merge(query.getConfiguration(), delegate.discover(query));
-	}
-
-	private List<Content> merge(ApplicationConfiguration config, List<Content> content) {
-		if (!config.precedenceEnabled()) {
-			return content;
-		}
-		return mergeDuplicates(config, content);
-	}
+//	@Override
+//	public List<Content> discover(ContentQuery query) {
+//		return merge(query.getConfiguration(), delegate.discover(query));
+//	}
+//
+//	private List<Content> merge(ApplicationConfiguration config, List<Content> content) {
+//		if (!config.precedenceEnabled()) {
+//			return content;
+//		}
+//		return mergeDuplicates(config, content);
+//	}
 
 	@SuppressWarnings("unchecked")
 	private <T extends Content> List<T> mergeDuplicates(ApplicationConfiguration config, List<T> contents) {
@@ -157,8 +164,8 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	};
 	
 	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container<T> chosen, List<Container<T>> notChosen) {
-		Iterable<T> withMissingItems = addMissingItems(chosen, notChosen);
-		chosen.setContents(mergeInUnSelectedData(config, withMissingItems, notChosen));
+		//Iterable<T> withMissingItems = addMissingItems(chosen, notChosen);
+		//chosen.setContents(mergeInUnSelectedData(config, withMissingItems, notChosen));
 		applyImagePrefs(config, chosen, notChosen);
 	}
 

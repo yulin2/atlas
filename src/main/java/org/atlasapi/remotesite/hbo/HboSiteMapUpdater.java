@@ -42,7 +42,7 @@ public class HboSiteMapUpdater implements Runnable {
                     if (brandAdapter.canFetch(linkElement.getValue())) {
                         Brand brand = brandAdapter.fetch(linkElement.getValue());
                         if (brand != null) {
-                            contentWriter.createOrUpdate(brand, true);
+                            contentWriter.createOrUpdate(brand);
                         }
                     }
                 }

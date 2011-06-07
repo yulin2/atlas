@@ -16,19 +16,16 @@ package org.atlasapi.query;
 
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.BasicLookupResolver;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
-import org.atlasapi.query.content.PublisherFilteringLookupResolver;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
 import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
-import org.atlasapi.query.content.schedule.NastyRenameChannelJob;
 import org.atlasapi.query.content.search.ContentResolvingSearcher;
 import org.atlasapi.query.content.search.DummySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
@@ -45,7 +42,6 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 public class QueryModule {
 
 	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
-	private @Autowired MongoDbBackedContentStore store;
 	
 	private @Autowired DatabasedMongo db;
 	
@@ -53,11 +49,9 @@ public class QueryModule {
 	private @Value("${atlas.search.host}") String searchHost;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
-		KnownTypeQueryExecutor queryExecutor = new MongoDBQueryExecutor(store);
+		KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new MongoContentResolver(db), new BasicLookupResolver(new MongoLookupEntryStore(db)));
 		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
-		
-		queryExecutor = new LookupResolvingQueryExecutor(queryExecutor, new PublisherFilteringLookupResolver(new BasicLookupResolver(new MongoLookupEntryStore(db))));
 		
 	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
 		
@@ -73,9 +67,5 @@ public class QueryModule {
 	    }
 	    
 	    return new DummySearcher();
-	}
-	
-	@Bean NastyRenameChannelJob nastyRenameChannelJob() {
-	    return new NastyRenameChannelJob(store);
 	}
 }

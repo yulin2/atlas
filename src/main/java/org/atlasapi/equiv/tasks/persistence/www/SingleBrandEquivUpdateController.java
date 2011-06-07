@@ -14,12 +14,13 @@ import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.model.ModelBuilder;
 
@@ -32,7 +33,7 @@ public class SingleBrandEquivUpdateController {
     
     private ContainerEquivResultTransformer<Described, String> transformer = ContainerEquivResultTransformer.defaultTransformer();
 
-    public SingleBrandEquivUpdateController(ItemBasedBrandEquivUpdater brandUpdater, MongoDbBackedContentStore contentStore) {
+    public SingleBrandEquivUpdateController(ItemBasedBrandEquivUpdater brandUpdater, ContentResolver contentStore) {
         this.contentStore = contentStore;
         this.brandUpdater = brandUpdater;
     }
@@ -40,7 +41,8 @@ public class SingleBrandEquivUpdateController {
     @RequestMapping(value = "/system/equivalence/run", method = RequestMethod.GET)
     public String updateBrand(Map<String,Object> model, @RequestParam(value = "uri", required = true) String brandUri, HttpServletResponse response) {
         
-        Identified identified = contentStore.findByCanonicalUri(brandUri);
+        ResolvedContent resolved = contentStore.findByCanonicalUris(ImmutableList.of(brandUri));
+        Identified identified = resolved.asResolvedMap().get(brandUri);
         if(identified instanceof Brand) {
             ContainerEquivResult<Container<?>, Item> equivResult = brandUpdater.updateEquivalence((Brand)identified);
             model.put("result", resultModelBuilder.build(transformer.transform(equivResult)));

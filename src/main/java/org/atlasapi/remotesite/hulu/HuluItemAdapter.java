@@ -104,7 +104,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
         public void run() {
             try {
                 Brand brand = brandAdapter.fetch(uri);
-                contentStore.createOrUpdate(brand, true);
+                contentStore.createOrUpdate(brand);
             } catch (Exception e) {
                 LOG.warn("Unable to retrieve hulu brand :" + uri + " while hydrating item", e);
             }

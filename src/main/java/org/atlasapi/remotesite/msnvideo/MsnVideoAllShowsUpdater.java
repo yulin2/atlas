@@ -46,7 +46,7 @@ public class MsnVideoAllShowsUpdater implements Runnable {
                     if (brandAdapter.canFetch(link)) {
                         Brand brand = brandAdapter.fetch(link);
                         if (brand != null) {
-                            contentWriter.createOrUpdate(brand, true);
+                            contentWriter.createOrUpdate(brand);
                         }
                     }
                     else {

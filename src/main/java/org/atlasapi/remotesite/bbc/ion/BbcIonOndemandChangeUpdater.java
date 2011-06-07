@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.bbc.ion;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.atlasapi.remotesite.HttpClients.ATLAS_USER_AGENT;
 
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -14,7 +15,9 @@ import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Ordering;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
@@ -59,8 +62,9 @@ public class BbcIonOndemandChangeUpdater implements Runnable {
                 for (IonOndemandChange change : changes.getBlocklist()) {
                     String uri = SLASH_PROGRAMMES_BASE + change.getEpisodeId();
                     try {
-                        Item item = (Item) localFetcher.findByCanonicalUri(uri);
-                        if (item != null) {
+                        Maybe<Identified> maybeItem = localFetcher.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
+                        if (maybeItem.hasValue() && maybeItem.requireValue() instanceof Item) {
+                            Item item = (Item) maybeItem.requireValue();
                             itemUpdater.updateItemDetails(item, change);
                             writer.createOrUpdate(item);
                         }

@@ -36,7 +36,7 @@ public class SeesawRssUpdater implements Runnable {
             contentProcessor.joinContent();
             
             for (Brand brand : contentProcessor.getAllBrands()) {
-                contentWriter.createOrUpdate(brand, true);
+                contentWriter.createOrUpdate(brand);
             }
             
             for (Item item : contentProcessor.getAllItems()) {

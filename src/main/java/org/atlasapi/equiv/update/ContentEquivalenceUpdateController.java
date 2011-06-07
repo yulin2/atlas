@@ -13,13 +13,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+
 @Controller
 public class ContentEquivalenceUpdateController {
+    
+    private final Splitter commaSplitter = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final ContentEquivalenceUpdater<Content> contentUpdater;
     private final ContentResolver contentResolver;
@@ -28,29 +34,23 @@ public class ContentEquivalenceUpdateController {
     public ContentEquivalenceUpdateController(ContentEquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver) {
         this.contentUpdater = contentUpdater;
         this.contentResolver = contentResolver;
-        this.executor = Executors.newSingleThreadExecutor();
+        this.executor = Executors.newFixedThreadPool(5);
     }
 
     @RequestMapping(value = "/system/equivalence/update", method = RequestMethod.POST)
-    public void runUpdate(HttpServletResponse response, @RequestParam(value = "uri", required = true) String uri) throws IOException {
+    public void runUpdate(HttpServletResponse response, @RequestParam(value = "uris", required = true) String uris) throws IOException {
 
-        Identified resolved = contentResolver.findByCanonicalUri(uri);
+        ResolvedContent resolved = contentResolver.findByCanonicalUris(commaSplitter.split(uris));
 
-        if (resolved == null) {
+        if (resolved.isEmpty()) {
             response.setStatus(NOT_FOUND.code());
             response.setContentLength(0);
             return;
         }
 
-        Content content;
-        try {
-            content = (Content) resolved;
-        } catch (ClassCastException cce) {
-            response.sendError(BAD_REQUEST.code(), "Not Content");
-            return;
+        for (Content content : Iterables.filter(resolved.getAllResolvedResults(), Content.class)) {
+            executor.submit(updateFor(content));
         }
-
-        executor.submit(updateFor(content));
         response.setStatus(OK.code());
 
     }
