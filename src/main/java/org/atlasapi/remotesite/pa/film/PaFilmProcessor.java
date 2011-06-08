@@ -36,6 +36,7 @@ public class PaFilmProcessor {
     private final ContentWriter contentWriter;
     private final ItemsPeopleWriter peopleWriter;
     private final AdapterLog log;
+    private final PaCountryMapper countryMapper = new PaCountryMapper();
 
     public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log) {
         this.contentResolver = contentResolver;
@@ -81,6 +82,11 @@ public class PaFilmProcessor {
             }
             
             film.addVersion(version);
+        }
+        
+        Element countriesElement = filmElement.getFirstChildElement("country_of_origin");
+        if (countriesElement != null && !Strings.isNullOrEmpty(countriesElement.getValue())) {
+            film.setCountriesOfOrigin(countryMapper.mapToCountries(countriesElement.getValue()));
         }
         
         List<CrewMember> otherPublisherPeople = getOtherPublisherPeople(film);
