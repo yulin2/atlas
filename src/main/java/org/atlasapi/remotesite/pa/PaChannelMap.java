@@ -403,6 +403,11 @@ public class PaChannelMap {
         channelMap.put(1164, Channel.FX_PLUS);
         channelMap.put(1442, Channel.BBC_ALBA);
         
+        channelMap.put(1632, Channel.MTV_MUSIC);
+        channelMap.put(128, Channel.DISCOVERY_KNOWLEDGE);
+        channelMap.put(1533, Channel.LIVING_PLUS2);
+        channelMap.put(658, Channel.S4C2);
+        
         channelMap.put(8, Channel.BBC_RADIO_RADIO3);
         channelMap.put(33, Channel.BBC_RADIO_RADIO4);
         channelMap.put(34, Channel.BBC_RADIO_RADIO4_LW);
