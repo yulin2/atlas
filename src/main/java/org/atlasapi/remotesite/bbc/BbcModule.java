@@ -13,9 +13,10 @@ import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDateRangeScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
+import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateBuilder;
+import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
-import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
 import org.joda.time.Duration;
@@ -58,7 +59,7 @@ public class BbcModule {
         		.withName("BBC Ion schedule update (14 days)"),
         		ONE_HOUR);
         
-        scheduler.schedule(bbcIonOndemandChangeUpdater(), SEVEN_MINUTES);
+        scheduler.schedule(bbcIonOndemandChangeUpdater().withName("BBC Ion Ondemand Change Updater"), SEVEN_MINUTES);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC update scheduled tasks installed"));
     }
 	
@@ -86,6 +87,14 @@ public class BbcModule {
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
-	    return new BbcIonOndemandChangeUpdater(contentStore, contentWriters, deserializerForClass(IonOndemandChanges.class), log);
+	    return new BbcIonOndemandChangeUpdater(bbcIonOndemandChangeUpdateBuilder(), log);
+	}
+
+    private BbcIonOndemandChangeUpdateBuilder bbcIonOndemandChangeUpdateBuilder() {
+        return new BbcIonOndemandChangeUpdateBuilder(contentStore, contentWriters, log);
+    }
+	
+	@Bean BbcIonOndemandChangeUpdateController bbcIonOndemandChangeController() {
+	    return new BbcIonOndemandChangeUpdateController(bbcIonOndemandChangeUpdateBuilder());
 	}
 }
