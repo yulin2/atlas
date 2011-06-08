@@ -25,8 +25,8 @@ public class PaChannelMap {
         channelMap.put(3, Channel.BBC_ONE_WALES);
         channelMap.put(9, Channel.BBC_ONE_EAST);
         channelMap.put(10, Channel.BBC_ONE_EAST_MIDLANDS);
-//        channelMap.put(11, Channel.BBC_ONE_MIDLANDS);
-//        channelMap.put(12, Channel.BBC_ONE_NORTH);
+        channelMap.put(11, Channel.BBC_ONE_WEST_MIDLANDS);
+        channelMap.put(12, Channel.BBC_ONE_YORKSHIRE);
         channelMap.put(13, Channel.BBC_ONE_NORTH_EAST);
         channelMap.put(14, Channel.BBC_ONE_NORTH_WEST);
         channelMap.put(15, Channel.BBC_ONE_SOUTH);
