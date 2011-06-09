@@ -57,7 +57,7 @@ public class BbcIonOndemandChangeUpdateBuilder {
         return new BbcIonOndemandChangeUpdate(start);
     }
 
-    public class BbcIonOndemandChangeUpdate implements Runnable {
+    public class BbcIonOndemandChangeUpdate {
 
         private final DateTime start;
 
@@ -65,7 +65,7 @@ public class BbcIonOndemandChangeUpdateBuilder {
             this.start = start;
         }
 
-        public void run() {
+        public DateTime runUpdate() {
             CompletionService<Void> completer = new ExecutorCompletionService<Void>(updateProcessor);
             
             DateTime fromDateTime = start;
@@ -102,6 +102,7 @@ public class BbcIonOndemandChangeUpdateBuilder {
                         .withDescription("Unable to fetch ondemand changes for " + String.format(CHANGES_URL, fromDateTime.toString())));
             }
             
+            return fromDateTime;
         }
         
         private String fetch(DateTime limitedLastRun) throws HttpException {
