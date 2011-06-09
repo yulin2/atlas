@@ -27,10 +27,7 @@ public class BbcIonOndemandChangeUpdater extends ScheduledTask {
             isRunning = true;
             log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Ondemand Change Updater starting from %s", lastRun.toDateTime(DateTimeZones.UTC))));
             
-            DateTime start = lastRun;
-            lastRun = new DateTime(DateTimeZones.UTC);
-            
-            updateBuilder.updateStartingFrom(start).run();
+            lastRun = updateBuilder.updateStartingFrom(lastRun).runUpdate();
             
             log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Ondemand Change Updater finished with %s", lastRun.toDateTime(DateTimeZones.UTC))));
             isRunning = false;
