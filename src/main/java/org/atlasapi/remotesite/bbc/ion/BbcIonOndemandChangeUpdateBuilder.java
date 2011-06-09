@@ -69,39 +69,46 @@ public class BbcIonOndemandChangeUpdateBuilder {
             CompletionService<Void> completer = new ExecutorCompletionService<Void>(updateProcessor);
             
             DateTime fromDateTime = start;
+                
+            Set<Future<Void>> tasks = Sets.newHashSet();
+
             try {
-                
-                Set<Future<Void>> tasks = Sets.newHashSet();
-                
                 for (int i = 0; i < MAX_FORWARD_STEPS; i++) {
 
-                    log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription(String.format("Fetching ondemand change tasks from %s. ",fromDateTime.toDateTime(DateTimeZones.UTC))));
+                    log.record(AdapterLogEntry.debugEntry().withSource(getClass())
+                            .withDescription(String.format("Fetching ondemand change tasks from %s. ", fromDateTime.toDateTime(DateTimeZones.UTC))));
                     String json = fetch(fromDateTime);
                     IonOndemandChanges changes = deserialiser.deserialise(json);
-                    
+
                     for (IonOndemandChange change : changes.getBlocklist()) {
                         tasks.add(completer.submit(updateTaskBuilder.taskForChange(change)));
                     }
-                    log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription(String.format("Added %s ondemand change tasks from %s. ",changes.getBlocklist().size(),fromDateTime.toDateTime(DateTimeZones.UTC))));
+                    log.record(AdapterLogEntry.debugEntry().withSource(getClass())
+                            .withDescription(String.format("Added %s ondemand change tasks from %s. ", changes.getBlocklist().size(), fromDateTime.toDateTime(DateTimeZones.UTC))));
 
                     if (changes.getNextFromDatetime() == null || fromDateTime.equals(changes.getNextFromDatetime())) {
                         break;
                     }
                     fromDateTime = changes.getNextFromDatetime();
                 }
+            } catch (Exception e) {
+                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Unable to fetch ondemand changes for " + String.format(CHANGES_URL, fromDateTime.toString())));
+            }
 
+            int done = 0;
+            try {
                 for (int t = 1; t <= tasks.size(); t++) {
                     completer.take();
+                    done++;
                     if (t % 20 == 0) {
                         log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription(String.format("Completed %d ondemand change tasks", t)));
                     }
                 }
-                log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription(String.format("Completed %s ondemand change tasks",tasks.size())));
             } catch (Exception e) {
-                log.record(warnEntry().withSource(getClass()).withCause(e)
-                        .withDescription("Unable to fetch ondemand changes for " + String.format(CHANGES_URL, fromDateTime.toString())));
+                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Exception processing ondemand change"));
             }
-            
+            log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription(String.format("Completed %s ondemand change tasks", done)));
+
             return fromDateTime;
         }
         
