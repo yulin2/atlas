@@ -1,6 +1,5 @@
 package org.atlasapi.equiv.update;
 
-import static com.metabroadcast.common.http.HttpStatusCode.BAD_REQUEST;
 import static com.metabroadcast.common.http.HttpStatusCode.NOT_FOUND;
 import static com.metabroadcast.common.http.HttpStatusCode.OK;
 
@@ -11,7 +10,6 @@ import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.springframework.stereotype.Controller;
