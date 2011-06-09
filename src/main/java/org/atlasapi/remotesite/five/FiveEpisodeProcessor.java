@@ -25,6 +25,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -37,12 +38,12 @@ public class FiveEpisodeProcessor {
     private static final String FIVE = "https://pdb.five.tv/internal/channels/C5";
     private static final String FIVER = "https://pdb.five.tv/internal/channels/C6";
     private static final String FIVE_USA = "https://pdb.five.tv/internal/channels/C7";
-    private static final Map<String, String> channelMap = Maps.newHashMapWithExpectedSize(3);
-    static {
-        channelMap.put(FIVE, Channel.FIVE.uri());
-        channelMap.put(FIVER, Channel.FIVER.uri());
-        channelMap.put(FIVE_USA, Channel.FIVE_USA.uri());
-    }
+    
+    private static final Map<String, String> channelMap = ImmutableMap.<String, String>builder()
+        .put(FIVE, Channel.FIVE.uri())
+        .put(FIVER, Channel.FIVER.uri())
+        .put(FIVE_USA, Channel.FIVE_USA.uri())
+    .build();
 
     private final GenreMap genreMap = new FiveGenreMap();
     private final DateTimeFormatter dateParser = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssZZ");
