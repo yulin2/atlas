@@ -4,6 +4,7 @@ import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerFo
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -37,7 +38,7 @@ public class BbcModule {
 	private final static RepetitionRule SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
 	private final static RepetitionRule ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
 
-    private @Autowired MongoDbBackedContentStore contentStore;
+    private @Autowired ContentResolver contentResolver;
 	private @Autowired ContentWriters contentWriters;
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
@@ -63,15 +64,15 @@ public class BbcModule {
     }
 	
 	private BbcIonDateRangeScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
-        return new BbcIonDateRangeScheduleUpdater(lookBack, lookAhead, contentStore, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
+        return new BbcIonDateRangeScheduleUpdater(lookBack, lookAhead, contentResolver, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
     }
 	
 	@Bean BbcScheduleController bbcScheduleController() {
-	    return new BbcScheduleController(contentStore, bbcProgrammeAdapter(), contentWriters, log);
+	    return new BbcScheduleController(contentResolver, bbcProgrammeAdapter(), contentWriters, log);
 	}
 	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
-	    return new BbcIonScheduleController(contentStore, contentWriters, itemsPeopleWriter, log);
+	    return new BbcIonScheduleController(contentResolver, contentWriters, itemsPeopleWriter, log);
 	}
 	@Bean Runnable bbcHighlightsUpdater() {
 		return new BbcIplayerHightlightsAdapter(contentWriters, log);
@@ -90,7 +91,7 @@ public class BbcModule {
 	}
 
     private BbcIonOndemandChangeUpdateBuilder bbcIonOndemandChangeUpdateBuilder() {
-        return new BbcIonOndemandChangeUpdateBuilder(contentStore, contentWriters, log);
+        return new BbcIonOndemandChangeUpdateBuilder(contentResolver, contentWriters, log);
     }
 	
 	@Bean BbcIonOndemandChangeUpdateController bbcIonOndemandChangeController() {

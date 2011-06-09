@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
@@ -11,7 +12,9 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 class C4PreviousVersionDataMerger {
@@ -24,14 +27,20 @@ class C4PreviousVersionDataMerger {
 	
 	void merge(Item item) {
 		
-		Item oldItem = (Item) contentResolver.findByCanonicalUri(item.getCanonicalUri());
+		String itemUri = item.getCanonicalUri();
+        Maybe<Identified> maybeOldItem = contentResolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
 		
-		if (oldItem == null || oldItem.nativeVersions().isEmpty()) {
-			// can't merge if this is the first time we've seen
-			// the item
-			return;
-		}
+        if (!maybeOldItem.hasValue()) {
+            // can't merge if this is the first time we've seen the item
+            return;
+        }
 		
+        Item oldItem = (Item) maybeOldItem.requireValue();
+        
+        if(oldItem.nativeVersions().isEmpty()) {
+            return;
+        }
+        
 		if (!Publisher.C4.equals(oldItem.getPublisher())) {
 			// sanity check, if the item we got back was not in the C4 namespace
 			// then we shouldn't do anything

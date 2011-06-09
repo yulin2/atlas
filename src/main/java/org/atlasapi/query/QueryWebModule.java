@@ -3,6 +3,8 @@ package org.atlasapi.query;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
@@ -24,7 +26,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class QueryWebModule {
     
-    private @Autowired MongoDbBackedContentStore store;
+    private @Autowired ContentWriter contentWriter;
+    private @Autowired ContentResolver contentResolver;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
     private @Autowired PeopleResolver peopleResolver;
@@ -40,7 +43,7 @@ public class QueryWebModule {
     }
     
     @Bean ScheduleOverlapListener scheduleOverlapListener() {
-        BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(store, store);
+        BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(contentResolver, contentWriter);
         return new ThreadedScheduleOverlapListener(broadcastRemovingListener, log);
     }
     

@@ -70,7 +70,7 @@ public class AtlasFetchModule {
 		@Primary
 		public @Bean ContentWriter contentWriter() {		
 			
-			ContentWriter writer = persistence.persistentWriter();
+			ContentWriter writer = persistence.contentWriter();
 			
 			remote.contentWriters().add(writer);
 			return writer;
@@ -91,12 +91,12 @@ public class AtlasFetchModule {
 		
 		@Primary
 		public @Bean CanonicalisingFetcher contentResolver() {
-			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), savingFetcher());
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentResolver(), savingFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		
 		public @Bean CanonicalisingFetcher contentResolverThatDoesntSave() {
-			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentStore(), remote.remoteFetcher());
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentResolver(), remote.remoteFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		

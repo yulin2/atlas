@@ -9,9 +9,11 @@ import javax.xml.bind.JAXBException;
 
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -19,7 +21,9 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 import org.atlasapi.remotesite.bbc.schedule.ChannelSchedule.Programme;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 
 /**
  * Updater to download advance BBC schedules and get URIplay to load data for
@@ -104,11 +108,11 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 
     @SuppressWarnings("unchecked")
     private Container<Item> fetchContainerFor(String containerUri) {
-        Container<Item> fetchedContainer = (Container<Item>) localFetcher.findByCanonicalUri(containerUri);
-        if (fetchedContainer == null) {
-            fetchedContainer = (Container<Item>) fetcher.fetch(containerUri);
+        Maybe<Identified> fetchedContainer = localFetcher.findByCanonicalUris(ImmutableList.of(containerUri)).get(containerUri);
+        if (fetchedContainer.hasValue()) {
+            return (Container<Item>) fetchedContainer.requireValue();
         }
-        return fetchedContainer;
+        return (Container<Item>) fetcher.fetch(containerUri);
     }
 
     @Override

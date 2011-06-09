@@ -19,7 +19,9 @@ import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.base.Maybe;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
@@ -88,11 +90,14 @@ public class C4AtoZAtomContentLoader implements Runnable {
 			return brandAdapter.fetch(brandUri);
 		} catch (Exception e) {
 			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(brandUri).withSource(brandAdapter.getClass()));
-			Identified found = resolver.findByCanonicalUri(brandUri);
-			if (found != null && found instanceof Brand && Publisher.C4.equals(((Brand) found).getPublisher())) {
-				return (Brand) found;
-			}
-			return null;
+			Maybe<Identified> maybeIdentified = resolver.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
+            if (maybeIdentified.hasValue()) {
+                Identified identified = maybeIdentified.requireValue();
+                if (identified instanceof Brand && Publisher.C4.equals(((Brand) identified).getPublisher())) {
+                    return (Brand) identified;
+                }
+            }
+            return null;
 		}
 	}
     

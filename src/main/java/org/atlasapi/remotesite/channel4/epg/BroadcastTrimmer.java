@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
@@ -16,8 +17,10 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.Interval;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 
 public class BroadcastTrimmer {
 
@@ -43,21 +46,26 @@ public class BroadcastTrimmer {
             //For each item, check that it's broadcasts are in correct in the acceptable set, set actively published false if not.
             for (Item itemEmbeddedInSchedule : Iterables.getOnlyElement(schedule.scheduleChannels()).items()) {
             	// load the item from the main db to avoid reading stale data
-            	Item item = (Item) resolver.findByCanonicalUri(itemEmbeddedInSchedule.getCanonicalUri());
-                boolean changed = false;
-                for (Version version : item.nativeVersions()) {
-                    for (Broadcast broadcast : version.getBroadcasts()) {
-                        //double-check the broadcast is in the valid interval/channel
-                        if(contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
-                            if (broadcast.getId() != null && !acceptableIds.contains(broadcast.getId())) {
-                                broadcast.setIsActivelyPublished(false);
-                                changed = true;
+            	String itemEmbeddedInScheduleUri = itemEmbeddedInSchedule.getCanonicalUri();
+                Maybe<Identified> maybeItem = resolver.findByCanonicalUris(ImmutableList.of(itemEmbeddedInScheduleUri)).get(itemEmbeddedInScheduleUri);
+                if(maybeItem.hasValue()) {
+                    Item item = (Item) maybeItem.requireValue();
+                    boolean changed = false;
+                    for (Version version : item.nativeVersions()) {
+                        for (Broadcast broadcast : version.getBroadcasts()) {
+                            // double-check the broadcast is in the valid
+                            // interval/channel
+                            if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
+                                if (broadcast.getId() != null && !acceptableIds.contains(broadcast.getId())) {
+                                    broadcast.setIsActivelyPublished(false);
+                                    changed = true;
+                                }
                             }
                         }
                     }
-                }
-                if(changed) {
-                    writer.createOrUpdate(item);
+                    if (changed) {
+                        writer.createOrUpdate(item);
+                    }
                 }
             }
         } catch (Exception e) {
