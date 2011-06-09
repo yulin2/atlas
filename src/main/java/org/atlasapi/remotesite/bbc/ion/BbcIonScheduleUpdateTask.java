@@ -18,6 +18,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -30,8 +31,10 @@ import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class BbcIonScheduleUpdateTask implements Runnable {
@@ -64,16 +67,20 @@ public class BbcIonScheduleUpdateTask implements Runnable {
         try {
             IonSchedule schedule = deserialiser.deserialise(httpClient.getContentsOf(uri));
             for (IonBroadcast broadcast : schedule.getBlocklist()) {
+                String itemUri = SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId();
                 try { 
                 //find and (create and) update item
-                Identified identified = localFetcher.findByCanonicalUris(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId());
-                if (identified == null) {
+                Maybe<Identified> possibleIdentified = localFetcher.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
+                Identified identified = null;
+                if (!possibleIdentified.hasValue()) {
                     if(fetcherClient != null) {
                         identified = fetcherClient.createItem(broadcast.getEpisodeId());
                     } 
                     if(identified == null) {
                         identified = createItemFrom(broadcast);
                     }
+                } else {
+                    identified = possibleIdentified.requireValue();
                 }
                 
                 if (identified instanceof Item) {
@@ -91,15 +98,16 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                     } else {
                         Series series = null;
                         if (!Strings.isNullOrEmpty(broadcast.getSeriesId())) {
-                            Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getSeriesId());
+                            String seriesUri = SLASH_PROGRAMMES_ROOT + broadcast.getSeriesId();
+                            Maybe<Identified> maybeSeries = localFetcher.findByCanonicalUris(ImmutableList.of(seriesUri)).get(seriesUri);
                             
-                            if (obj == null) {
+                            if (!maybeSeries.hasValue()) {
                                 series = createSeries(broadcast);
                             } else {
-                                if (obj instanceof Series) {
-                                    series = (Series) obj;
+                                if (maybeSeries.requireValue() instanceof Series) {
+                                    series = (Series) maybeSeries.requireValue();
                                 } else {
-                                    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Trying to update item: " + item.getCanonicalUri() + " but got back series "+obj.getCanonicalUri()+" that turned out to be a "+obj.getClass().getSimpleName()).withSource(getClass()));
+                                    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Trying to update item: " + item.getCanonicalUri() + " but got back series "+maybeSeries.requireValue().getCanonicalUri()+" that turned out to be a "+maybeSeries.getClass().getSimpleName()).withSource(getClass()));
                                 }
                             }
                                 
@@ -109,23 +117,26 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                             }
                         }
                     
+                        //TODO: need to write series anyway!
                         if (Strings.isNullOrEmpty(broadcast.getBrandId())) {
                             if(series != null) { //no brand so just save series if it exists
                                 writer.createOrUpdate(series);
                             }
                             
                         } else {
-                            Identified obj = localFetcher.findByCanonicalUri(SLASH_PROGRAMMES_ROOT + broadcast.getBrandId());
+                            String brandUri = SLASH_PROGRAMMES_ROOT + broadcast.getBrandId();
+                            Maybe<Identified> maybeIdentified = localFetcher.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
                             Brand brand = null;
                             
-                            if (obj == null) {
+                            if (!maybeIdentified.hasValue()) {
                                 brand = createBrandFrom(broadcast);
                             } else {
-                                if (obj instanceof Brand) {
-                                    brand = (Brand) obj;
-                                } else if (obj instanceof Series) {
-                                    brand = brandFromSeries((Series) obj);
-                                    log.record(new AdapterLogEntry(Severity.INFO).withDescription("Update item: " + item.getCanonicalUri() + " but upsold series "+obj.getCanonicalUri()+" turned out to be a brand").withSource(getClass()));
+                                Identified ided = maybeIdentified.requireValue();
+                                if (ided instanceof Brand) {
+                                    brand = (Brand) ided;
+                                } else if (ided instanceof Series) {
+                                    brand = brandFromSeries((Series) ided);
+                                    log.record(new AdapterLogEntry(Severity.INFO).withDescription("Update item: " + item.getCanonicalUri() + " but upsold series "+ided.getCanonicalUri()+" turned out to be a brand").withSource(getClass()));
                                 }
                             }
                             
@@ -140,7 +151,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                     createOrUpdatePeople((Item) item);
                 }
                 } catch (Exception e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri + " trying to process broadcast for " + SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId()).withSource(getClass()));
+                    log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri + " trying to process broadcast for " + itemUri).withSource(getClass()));
                 }
             }
         } catch (Exception e) {

@@ -124,8 +124,10 @@ public class C4EpgEntryProcessor {
     }
 
     private Series updateSeries(String seriesUri, String brandName, Episode episode) {
-        Series series = (Series) contentStore.findByCanonicalUris(ImmutableSet.of(seriesUri));
-        if (series != null) {
+        Maybe<Identified> maybeSeries = contentStore.findByCanonicalUris(ImmutableSet.of(seriesUri)).get(seriesUri);
+        Series series = null;
+        if (maybeSeries.hasValue()) {
+            series = (Series) maybeSeries.requireValue();
             series.addOrReplace(episode);
         } else {
             series = new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri), C4);

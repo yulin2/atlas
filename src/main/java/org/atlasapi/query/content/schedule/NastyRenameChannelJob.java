@@ -14,6 +14,8 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.RetrospectiveContentLister;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,11 +26,15 @@ import com.google.common.collect.Sets;
 
 @Controller
 public class NastyRenameChannelJob {
+
     private static final int BATCH_SIZE = 100;
 
-    private final MongoDbBackedContentStore store;
+    private final ContentWriter store;
 
-    public NastyRenameChannelJob(MongoDbBackedContentStore store) {
+    private final RetrospectiveContentLister lister;
+
+    public NastyRenameChannelJob(RetrospectiveContentLister lister, ContentWriter store) {
+        this.lister = lister;
         this.store = store;
     }
 
@@ -40,7 +46,7 @@ public class NastyRenameChannelJob {
         try {
             String fromId = null;
             while (true) {
-                List<Content> roots = store.iterateOverContent(where().fieldEquals("contents.versions.broadcasts.broadcastOn", from.uri()), fromId, -BATCH_SIZE);
+                List<Content> roots = lister.iterateOverContent(where().fieldEquals("contents.versions.broadcasts.broadcastOn", from.uri()), fromId, -BATCH_SIZE);
                 if (roots.isEmpty()) {
                     break;
                 }

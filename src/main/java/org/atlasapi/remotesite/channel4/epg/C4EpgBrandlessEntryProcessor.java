@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -16,7 +17,9 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 
 public class C4EpgBrandlessEntryProcessor {
     
@@ -44,11 +47,14 @@ public class C4EpgBrandlessEntryProcessor {
             String brandName = realBrandName != null ? realBrandName : brandName(entry.title());
             
             //try to get container for the item.
-            Brand brand = (Brand) contentStore.findByCanonicalUri(REAL_PROGRAMME_BASE + brandName);
+            String brandUri = REAL_PROGRAMME_BASE + brandName;
+            Maybe<Identified> maybeBrand = contentStore.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
             
-            if(brand == null) {
+            Brand brand = null;
+            if(!maybeBrand.hasValue()) {
                 brand = brandFromEntry(entry, brandName, channel);
             } else {
+                brand = (Brand) maybeBrand.requireValue();
                 updateBrand(entry, brand, brandName, channel);
             }
             

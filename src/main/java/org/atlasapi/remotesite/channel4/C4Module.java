@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import nu.xom.Builder;
 import nu.xom.Document;
 
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -45,7 +46,7 @@ public class C4Module {
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
 
-	private @Autowired MongoDbBackedContentStore contentStore;
+	private @Autowired ContentResolver contentResolver;
 	private @Autowired ContentWriters contentWriter;
 	private @Autowired AdapterLog log;
 	private @Autowired ScheduleResolver scheduleResolver;
@@ -63,8 +64,8 @@ public class C4Module {
     }
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, scheduleResolver, contentStore, contentWriter, log);
-        return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentStore, trimmer, log);
+	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, scheduleResolver, contentResolver, contentWriter, log);
+        return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentResolver, trimmer, log);
     }
 	
 	@Bean public RemoteSiteClient<Document> c4EpgAtomClient() {
@@ -77,7 +78,7 @@ public class C4Module {
 	}
 
     @Bean C4AtoZAtomContentLoader c4AtozUpdater() {
-		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentWriter, contentStore, log);
+		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentWriter, contentResolver, log);
 	}
 	
 	@Bean C4HighlightsAdapter c4HighlightsUpdater() {
@@ -89,6 +90,6 @@ public class C4Module {
 	}
 
 	protected /*@Bean*/ C4AtomBackedBrandAdapter c4BrandFetcher() {
-		return new C4AtomBackedBrandAdapter(c4AtomFetcher(), contentStore, contentStore, log);
+		return new C4AtomBackedBrandAdapter(c4AtomFetcher(), contentResolver, contentWriter, log);
 	}
 }
