@@ -4,6 +4,7 @@ import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerFo
 import static org.hamcrest.core.AllOf.allOf;
 import junit.framework.TestCase;
 
+import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -13,6 +14,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.hamcrest.Matcher;
@@ -20,7 +22,6 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -30,65 +31,64 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class BbcIonScheduleUpdaterTest extends TestCase {
 
-    private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
+    private static final String ION_FEED_URI = "uri";
+    
+	private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
+	private static final String ITEM_A = SLASH_PROGRAMMES_ROOT + "b00y377q";
     
     private Mockery context = new Mockery();
     
     private final BbcIonDeserializer<IonSchedule> deserialiser = deserializerForClass(IonSchedule.class);
     
-    private final SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
-    private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final ContentWriter writer = context.mock(ContentWriter.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
     private final DummyItemsPeopleWriter itemsPeopleWriter = new DummyItemsPeopleWriter();
     
     @SuppressWarnings("unchecked")
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
-        final String newItemNoBrandNoSeriesJson = Resources.toString(Resources.getResource("ion-item-no-brand-no-series.json"), Charsets.UTF_8);
 
+        ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
+        FixedResponseHttpClient httpClient = FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-no-brand-no-series.json"));
+        
         context.checking(new Expectations(){{
-            one(httpClient).getContentsOf("uri");will(returnValue(newItemNoBrandNoSeriesJson));
-            one(resolver).findByCanonicalUri(SLASH_PROGRAMMES_ROOT + "b00y377q");will(returnValue(null));
             one(writer).createOrUpdate((Item)with(allOf(
-                    uri(SLASH_PROGRAMMES_ROOT+"b00y377q"),
+                    uri(ITEM_A),
                     title("Pleasure and Pain with Michael Mosley"),
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
-        
+        new BbcIonUriSourceScheduleUpdater(ImmutableList.of(ION_FEED_URI), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
     }
     
     @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandNoSeries() throws Exception {
-        final String newItemNoBrandNoSeriesJson = Resources.toString(Resources.getResource("ion-item-brand-no-series.json"), Charsets.UTF_8);
+
+    	final String item1 = SLASH_PROGRAMMES_ROOT + "b00y1w9h";
+    	final String item2 = SLASH_PROGRAMMES_ROOT + "b006m86d";
+    	
+        ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
+        SimpleHttpClient httpClient = FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-no-series.json"));
 
         context.checking(new Expectations(){{
-            one(httpClient).getContentsOf("uri");will(returnValue(newItemNoBrandNoSeriesJson));
-            one(resolver).findByCanonicalUri(SLASH_PROGRAMMES_ROOT + "b00y1w9h");will(returnValue(null));
-            one(resolver).findByCanonicalUri(SLASH_PROGRAMMES_ROOT + "b006m86d");will(returnValue(null));
             one(writer).createOrUpdate((Item)with(allOf(
-                    uri(SLASH_PROGRAMMES_ROOT+"b00y1w9h"),
+                    uri(item1),
                     title("28/01/2011"),
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y1w7k"))
             )));
             one(writer).createOrUpdate((Brand) with(allOf(
-                    uri(SLASH_PROGRAMMES_ROOT+"b006m86d")
+                    uri(item2)
             )));
         }});
 
-        new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonUriSourceScheduleUpdater(ImmutableList.of(ION_FEED_URI), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
     }
 
     @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
-        final String newItemNoBrandNoSeriesJson = Resources.toString(Resources.getResource("ion-item-brand-series.json"), Charsets.UTF_8);
+        ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
+        SimpleHttpClient httpClient = FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-series.json"));
 
         context.checking(new Expectations(){{
-            one(httpClient).getContentsOf("uri");will(returnValue(newItemNoBrandNoSeriesJson));
-            one(resolver).findByCanonicalUri(SLASH_PROGRAMMES_ROOT + "b00y439c");will(returnValue(null));
-            one(resolver).findByCanonicalUri(SLASH_PROGRAMMES_ROOT + "b00xb44r");will(returnValue(null));
-            one(resolver).findByCanonicalUri(SLASH_PROGRAMMES_ROOT + "b007gf9k");will(returnValue(null));
             one(writer).createOrUpdate((Item)with(allOf(
                     uri(SLASH_PROGRAMMES_ROOT+"b00y1w9h"),
                     title("Episode 4"),
@@ -102,7 +102,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
         }});
 
-        new BbcIonUriSourceScheduleUpdater(ImmutableList.of("uri"), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonUriSourceScheduleUpdater(ImmutableList.of(ION_FEED_URI), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {

@@ -32,7 +32,7 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
 	private final String respondsTo;
 	private final String data;
 
-	private FixedResponseHttpClient(String respondsTo, String data) {
+	public FixedResponseHttpClient(String respondsTo, String data) {
 		this.respondsTo = respondsTo;
 		this.data = data;
 	}
