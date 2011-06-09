@@ -109,7 +109,7 @@ public class BbcIplayerHightlightsAdapter implements Runnable {
 		if (selfLink == null) {
 			return null;
 		}
-		return contentUriFrom(selfLink);
+		return BbcFeeds.slashProgrammesUriForPid(BbcFeeds.pidFrom(selfLink));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -118,15 +118,6 @@ public class BbcIplayerHightlightsAdapter implements Runnable {
 			if ("self".equals(link.getRel())) {
 				return link.getHref();
 			}
-		}
-		return null;
-	}
-	
-	private static String contentUriFrom(String selfLink) {
-		Pattern pidPattern = Pattern.compile("http://feeds\\.bbc\\.co\\.uk.*?/b00(.+)");
-		Matcher matcher = pidPattern.matcher(selfLink);
-		if (matcher.find()) {
-			return "http://www.bbc.co.uk/programmes/b00" + matcher.group(1);
 		}
 		return null;
 	}
