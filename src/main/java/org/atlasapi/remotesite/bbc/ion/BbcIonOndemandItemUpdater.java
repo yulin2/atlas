@@ -31,7 +31,7 @@ public class BbcIonOndemandItemUpdater {
 
     public void updateItemDetails(Item item, IonOndemandChange change) {
         boolean revoked = "revoked".equals(change.getRevocationStatus());
-        Maybe<Version> version = version(item.getVersions(), BbcIonOndemandChangeUpdater.SLASH_PROGRAMMES_BASE + change.getVersionId());
+        Maybe<Version> version = version(item.getVersions(), BbcIonOndemandChangeTaskBuilder.SLASH_PROGRAMMES_BASE + change.getVersionId());
 
         if (version.hasValue()) {
             processVersion(change, revoked, version.requireValue());
@@ -39,10 +39,10 @@ public class BbcIonOndemandItemUpdater {
     }
 
     private void processVersion(IonOndemandChange change, boolean revoked, Version version) {
-        Maybe<Encoding> encoding = encoding(version.getManifestedAs(), BbcIonOndemandChangeUpdater.SLASH_PROGRAMMES_BASE + change.getId());
+        Maybe<Encoding> encoding = encoding(version.getManifestedAs(), BbcIonOndemandChangeTaskBuilder.SLASH_PROGRAMMES_BASE + change.getId());
         if (encoding.hasValue()) {
             Maybe<Location> location = location(encoding.requireValue().getAvailableAt(),
-                    BbcProgrammeGraphExtractor.iplayerPageFrom(BbcIonOndemandChangeUpdater.SLASH_PROGRAMMES_BASE + change.getEpisodeId()));
+                    BbcProgrammeGraphExtractor.iplayerPageFrom(BbcIonOndemandChangeTaskBuilder.SLASH_PROGRAMMES_BASE + change.getEpisodeId()));
             if (location.hasValue()) {
                 if (!revoked) {
                     updateAvailability(location.requireValue(), change, true);
