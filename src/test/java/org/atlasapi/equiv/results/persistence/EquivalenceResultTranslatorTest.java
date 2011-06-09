@@ -5,9 +5,9 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;

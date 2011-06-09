@@ -10,7 +10,6 @@ import nu.xom.Builder;
 import nu.xom.Document;
 
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

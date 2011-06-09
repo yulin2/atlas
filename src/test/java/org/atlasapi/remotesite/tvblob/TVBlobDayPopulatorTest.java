@@ -15,7 +15,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.EventFiringContentWriter;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleUpdatingContentListener;
 import org.joda.time.DateTime;

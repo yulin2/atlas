@@ -6,7 +6,6 @@ import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.query.content.people.ContentResolvingPeopleResolver;

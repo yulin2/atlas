@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.health;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.persistence.content.mongo.MongoDbBackedContentStore;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

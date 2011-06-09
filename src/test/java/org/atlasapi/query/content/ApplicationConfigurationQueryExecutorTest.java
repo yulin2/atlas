@@ -7,10 +7,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.content.criteria.attribute.Attributes;
-import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Described;
@@ -18,15 +15,10 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.mongo.LookupResolvingContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
-import org.atlasapi.persistence.content.mongo.MongoDBQueryExecutor;
 import org.atlasapi.persistence.lookup.NewLookupWriter;
-import org.joda.time.Duration;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
