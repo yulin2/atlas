@@ -7,6 +7,7 @@ import java.util.Set;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Version;
@@ -18,6 +19,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
@@ -50,17 +52,14 @@ public class C4EpgBrandlessEntryProcessor {
             String brandUri = REAL_PROGRAMME_BASE + brandName;
             Maybe<Identified> maybeBrand = contentStore.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
             
-            Brand brand = null;
             if(!maybeBrand.hasValue()) {
-                brand = brandFromEntry(entry, brandName, channel);
+                writeBrandFromEntry(entry, brandName, channel);
             } else {
-                brand = (Brand) maybeBrand.requireValue();
-                updateBrand(entry, brand, brandName, channel);
+                Brand brand = (Brand) maybeBrand.requireValue();
+                Episode episode = extractRelevantEpisode(entry, brand, brandName, channel);
+                contentWriter.createOrUpdate(episode);
             }
-            
-            contentWriter.createOrUpdate(brand);
-            
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception processing brandless entry " + entry.id()));
         }
     }
@@ -69,15 +68,17 @@ public class C4EpgBrandlessEntryProcessor {
      * Give synthesized brands 'real' uris so that when/if they appear in the /programmes feed they are
      * matched up 
      */
-    private Brand brandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
+    private void writeBrandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
         Brand brand = new Brand(REAL_PROGRAMME_BASE + synthBrandName, "c4:"+synthBrandName, C4);
         brand.addAlias(REAL_TAG_BASE + synthBrandName);
         brand.setTitle(entry.title());
         brand.setLastUpdated(entry.updated());
         
-        brand.addContents(episodeFrom(entry, synthBrandName, channel));
+        contentWriter.createOrUpdate(brand);
         
-        return brand;
+        Episode episode = episodeFrom(entry, synthBrandName, channel);
+        episode.setContainer(brand);
+        contentWriter.createOrUpdate(episode);
     }
 
     private Episode episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel) {
@@ -93,10 +94,11 @@ public class C4EpgBrandlessEntryProcessor {
         return episode;
     }
 
-    private void updateBrand(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
+    private Episode extractRelevantEpisode(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
         boolean found = false;
         //look for an episode with a broadcast with this entry's id, replace if found.
-        for (Episode episode : brand.getContents()) {
+        Iterable<Episode> subItems = Iterables.filter(contentStore.findByCanonicalUris(Iterables.transform(brand.getChildRefs(), ChildRef.TO_URI)).getAllResolvedResults(), Episode.class);
+		for (Episode episode : subItems) {
             for (Version version : episode.getVersions()) {
                 Set<Broadcast> broadcasts = Sets.newHashSet();
                 for (Broadcast broadcast : version.getBroadcasts()) {
@@ -109,21 +111,20 @@ public class C4EpgBrandlessEntryProcessor {
                 }
                 if(found) {
                     version.setBroadcasts(broadcasts);
-                    return;
+                    return episode;
                 }
             }
         }
         
         //Try to locate an item with the same description.
-        for (Episode episode : brand.getContents()) {
+        for (Episode episode : subItems) {
             if(episode.getDescription().equals(entry.summary())) {
                 //Known from above that this is a new broadcast so just add.
                 C4EpgEntryProcessor.updateVersion(episode, entry, channel);
-                return;
+                return episode;
             }
         }
-        //otherwise create a new one.
-        brand.addContents(episodeFrom(entry, synthbrandName, channel));
+        return episodeFrom(entry, synthbrandName, channel);
     }
 
     private Broadcast createBroadcast(C4EpgEntry entry, Channel channel) {
