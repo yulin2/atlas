@@ -20,6 +20,7 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.pa.PaCountryMap;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Duration;
 
@@ -36,6 +37,7 @@ public class PaFilmProcessor {
     private final ContentWriter contentWriter;
     private final ItemsPeopleWriter peopleWriter;
     private final AdapterLog log;
+    private final PaCountryMap countryMapper = new PaCountryMap();
 
     public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log) {
         this.contentResolver = contentResolver;
@@ -81,6 +83,11 @@ public class PaFilmProcessor {
             }
             
             film.addVersion(version);
+        }
+        
+        Element countriesElement = filmElement.getFirstChildElement("country_of_origin");
+        if (countriesElement != null && !Strings.isNullOrEmpty(countriesElement.getValue())) {
+            film.setCountriesOfOrigin(countryMapper.parseCountries(countriesElement.getValue()));
         }
         
         List<CrewMember> otherPublisherPeople = getOtherPublisherPeople(film);
