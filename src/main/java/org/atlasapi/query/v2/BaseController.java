@@ -54,8 +54,9 @@ public abstract class BaseController {
     protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, Collection<?> queryResults, AtlasModelType type) throws IOException {
         if (queryResults == null) {
             errorViewFor(request, response, AtlasErrorSummary.forException(new Exception("Query result was null")));
+        } else {
+            outputter.writeTo(request, response, (Collection<Object>) queryResults, type);
         }
-        outputter.writeTo(request, response, (Collection<Object>) queryResults, type);
     }
     
     protected ApplicationConfiguration appConfig(HttpServletRequest request) {
