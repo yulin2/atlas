@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.five;
 
 import java.io.StringReader;
+import java.util.List;
 import java.util.Set;
 
 import nu.xom.Builder;
@@ -11,6 +12,7 @@ import nu.xom.Nodes;
 
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -20,6 +22,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpResponse;
 
@@ -60,14 +63,16 @@ public class FiveBrandProcessor {
             brand.setImage(image.requireValue());
         }
         
-        Builder builder = new Builder(new EpisodeProcessingNodeFactory(brand, episodeProcessor));
+        EpisodeProcessingNodeFactory nodeFactory = new EpisodeProcessingNodeFactory(episodeProcessor);
         try {
-            builder.build(new StringReader(httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body()));
-            
-            writer.createOrUpdate(brand);
-        }
-        catch(Exception e) {
+        	new Builder(nodeFactory).build(new StringReader(httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body()));
+        } catch(Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception while trying to parse episodes for brand " + brand.getTitle()));
+            return;
+        }
+        writer.createOrUpdate(brand);
+        for (Item item : nodeFactory.items) {
+        	writer.createOrUpdate(item);
         }
     }
     
@@ -112,19 +117,18 @@ public class FiveBrandProcessor {
     
     private class EpisodeProcessingNodeFactory extends NodeFactory {
         
-        private final Brand brand;
         private final FiveEpisodeProcessor episodeProcessor;
+		private final List<Item> items = Lists.newArrayList();
 
-        public EpisodeProcessingNodeFactory(Brand brand, FiveEpisodeProcessor episodeProcessor) {
-            this.brand = brand;
-            this.episodeProcessor = episodeProcessor;
+        public EpisodeProcessingNodeFactory(FiveEpisodeProcessor episodeProcessor) {
+			this.episodeProcessor = episodeProcessor;
         }
         
         @Override
         public Nodes finishMakingElement(Element element) {
             if (element.getLocalName().equalsIgnoreCase("watchable")) {
                 try {
-                    brand.addContents(episodeProcessor.processEpisode(element));
+                    items.add(episodeProcessor.processEpisode(element));
                 }
                 catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.ERROR).withSource(FiveEpisodeProcessor.class).withCause(e).withDescription("Exception when processing episode"));

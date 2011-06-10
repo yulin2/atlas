@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -36,62 +37,66 @@ import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class HuluBrandAdapter implements SiteSpecificAdapter<Brand> {
+public class HuluBrandAdapter {
 
-    public static final String BASE_URI = "http://www.hulu.com/";
+	private static final Log LOG = LogFactory.getLog(HuluBrandAdapter.class);
+
+	public static final String BASE_URI = "http://www.hulu.com/";
     private static final Pattern SUB_BRAND_PATTERN = Pattern.compile("(" + BASE_URI + ").+?\\/([a-z\\-]+).*");
     private static final Pattern ALIAS_PATTERN = Pattern.compile("(" + BASE_URI + "[a-z\\-]+).*");
     private final SimpleHttpClient httpClient;
     private final ContentExtractor<HtmlNavigator, Brand> extractor;
     private SiteSpecificAdapter<Episode> episodeAdapter;
-    static final Log LOG = LogFactory.getLog(HuluBrandAdapter.class);
+	private final ContentWriter writer;
 
-    public HuluBrandAdapter() {
-        this(HttpClients.screenScrapingClient(), new HuluBrandContentExtractor());
+    public HuluBrandAdapter(ContentWriter writer) {
+        this(HttpClients.screenScrapingClient(), new HuluBrandContentExtractor(), writer);
     }
 
-    public HuluBrandAdapter(SimpleHttpClient httpClient, ContentExtractor<HtmlNavigator, Brand> extractor) {
+    public HuluBrandAdapter(SimpleHttpClient httpClient, ContentExtractor<HtmlNavigator, Brand> extractor, ContentWriter writer) {
         this.httpClient = httpClient;
         this.extractor = extractor;
+		this.writer = writer;
     }
 
-    @Override
-    public Brand fetch(String uri) {
+    public void loadAndSave(String uri) {
+    	if (!canFetch(uri)) {
+    		throw new IllegalArgumentException("Cannot load hulu uri " + uri + " as it is not in the expected format");
+    	}
         LOG.info("Retrieving Hulu brand: " + uri + " with " + httpClient.getClass() + " : " + httpClient.toString());
         try {
             String content = getContent(uri);
-            if (content != null) {
-                HtmlNavigator navigator = new HtmlNavigator(content);
-
-                Brand brand = extractor.extract(navigator);
-                List<Episode> episodes = Lists.newArrayList();
-
-                if (episodeAdapter != null) {
-                    for (Episode item : brand.getContents()) {
-                        try {
-                            Episode episode = episodeAdapter.fetch(item.getCanonicalUri());
-                            if (episode != null) {
-                            	episodes.add(episode);
-                            }
-                        } catch (FetchException fe) {
-                            LOG.warn("Failed to retrieve episode: " + item.getCanonicalUri() + " with message: " + fe.getMessage());
-                        }
-                    }
-                    brand.setContents(episodes);
-                }
-
-                LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getContents().size() + " episodes");
-                return brand;
-            } else {
-            	return null;
+            if (content == null) {
+            	return;
             }
+            HtmlNavigator navigator = new HtmlNavigator(content);
+
+            Brand brand = extractor.extract(navigator);
+            List<Episode> episodes = Lists.newArrayList();
+
+            if (episodeAdapter != null) {
+                for (Episode item : brand.getContents()) {
+                    try {
+                        Episode episode = episodeAdapter.fetch(item.getCanonicalUri());
+                        if (episode != null) {
+                        	episodes.add(episode);
+                        }
+                    } catch (FetchException fe) {
+                        LOG.warn("Failed to retrieve episode: " + item.getCanonicalUri() + " with message: " + fe.getMessage());
+                    }
+                }
+            }
+            LOG.info("Retrieved Hulu brand: " + uri + " with " + brand.getContents().size() + " episodes");
+            for (Episode episode : episodes) {
+            	writer.createOrUpdate(episode);
+            }
+            writer.createOrUpdate(brand);
         } catch (Exception e) {
             throw new FetchException("Error retrieving Brand: " + uri + " with error: " + e.getMessage(), e);
         }
     }
 
-    @Override
-    public boolean canFetch(String uri) {
+    private boolean canFetch(String uri) {
         return Pattern.compile(BASE_URI + "[a-z\\-]+").matcher(uri).matches() && !ignoredUrl(uri);
     }
 

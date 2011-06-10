@@ -4,7 +4,6 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.metabroadcast.common.time.DateTimeZones.UTC;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
@@ -12,13 +11,13 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -37,13 +36,13 @@ public class C4SynthesizedItemUpdaterTest extends TestCase {
         
         Mockery context = new Mockery();
         
-        final ContentResolver resolver = context.mock(ContentResolver.class);
         final ContentWriter writer = context.mock(ContentWriter.class);
         
+        StubContentResolver resolver = new StubContentResolver().respondTo(synthEpisode());
+
         C4SynthesizedItemUpdater updater = new C4SynthesizedItemUpdater(resolver, writer);
         
         context.checking(new Expectations(){{
-            one(resolver).findByCanonicalUri(with(endsWith("brand-name/synthesized/1234"))); will(returnValue(synthEpisode()));
             one(writer).createOrUpdate(with(trimmedSynthEpisode()));
         }});
         
@@ -98,7 +97,7 @@ public class C4SynthesizedItemUpdaterTest extends TestCase {
     }
 
     private Episode synthEpisode() {
-        Episode episode = new Episode("synthUri", "canonUri", C4);
+        Episode episode = new Episode("http://www.channel4.com/programmes/brand-name/synthesized/1234", "canonUri", C4);
         
         Version version = new Version();
         
