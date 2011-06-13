@@ -41,7 +41,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 @Configuration
 public class QueryModule {
 
-	private @Autowired @Qualifier("contentResolver") CanonicalisingFetcher localOrRemoteFetcher;
+	private @Autowired @Qualifier("remoteSiteContentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	
 	private @Autowired DatabasedMongo db;
 	

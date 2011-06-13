@@ -59,7 +59,7 @@ public class C4Module {
         }
         scheduler.schedule(c4EpgUpdater(), TWO_HOURS);
         scheduler.schedule(c4AtozUpdater(), BRAND_UPDATE_TIME);
-        scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
+//        scheduler.schedule(c4HighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("C4 update scheduled tasks installed").withSource(getClass()));
     }
 
@@ -80,11 +80,11 @@ public class C4Module {
     @Bean C4AtoZAtomContentLoader c4AtozUpdater() {
 		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentWriter, contentResolver, log);
 	}
-	
-	@Bean C4HighlightsAdapter c4HighlightsUpdater() {
-		return new C4HighlightsAdapter(contentWriter, log);
-	}
-	
+//	
+//	@Bean C4HighlightsAdapter c4HighlightsUpdater() {
+//		return new C4HighlightsAdapter(contentWriter, log);
+//	}
+//	
 	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {
 	    return new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
 	}

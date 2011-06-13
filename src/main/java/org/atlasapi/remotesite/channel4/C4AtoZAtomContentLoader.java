@@ -5,7 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -15,7 +14,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -28,7 +26,6 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4AtoZAtomContentLoader implements Runnable {
 	
-    private static final String C4_ATOZ_URI_FORMAT=  "http://www.channel4.com/programmes/atoz/%s";
     private static final Pattern PAGE_PATTERN = Pattern.compile("(http://api.channel4.com/programmes/atoz/.+/page-\\d+.atom).*");
     
     private final RemoteSiteClient<Feed> feedClient;
@@ -47,9 +44,6 @@ public class C4AtoZAtomContentLoader implements Runnable {
 
     @VisibleForTesting
     void loadAndSaveByLetter(String letter) throws Exception {
-        	String playlistUri = String.format(C4_ATOZ_URI_FORMAT, letter);
-        	
-            ContentGroup playlist = new ContentGroup(playlistUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(playlistUri), Publisher.C4);
             
             boolean hasNext = false;
             String currentPage = C4AtomApi.createAtoZRequest(letter, ".atom");
@@ -65,8 +59,6 @@ public class C4AtoZAtomContentLoader implements Runnable {
                     hasNext = false;
                 }
             } while (hasNext);
-            playlist.setContents(brands);
-        	writer.createOrUpdateSkeleton(playlist);
     }
 
 	@SuppressWarnings("unchecked")
