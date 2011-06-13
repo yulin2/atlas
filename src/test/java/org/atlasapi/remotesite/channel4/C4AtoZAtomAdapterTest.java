@@ -15,12 +15,10 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.channel4;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
@@ -35,7 +33,7 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 
 	String uri = "http://www.channel4.com/programmes/atoz/a";
 	
-	private SiteSpecificAdapter<Brand> brandAdapter;
+	private C4BrandUpdater brandAdapter;
 	private RemoteSiteClient<Feed> itemClient;
 	private C4AtoZAtomContentLoader adapter;
 	private ContentWriter writer;
@@ -51,10 +49,10 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		brandAdapter = mock(SiteSpecificAdapter.class);
+		brandAdapter = mock(C4BrandUpdater.class);
 		itemClient = mock(RemoteSiteClient.class);
 		writer = mock(ContentWriter.class);
-		adapter = new C4AtoZAtomContentLoader(itemClient, brandAdapter, writer, null, new NullAdapterLog());
+		adapter = new C4AtoZAtomContentLoader(itemClient, brandAdapter, new NullAdapterLog());
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
@@ -66,8 +64,8 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 			one(writer).createOrUpdate(brand101);
 			one(writer).createOrUpdate(brand202);
 
-			allowing(brandAdapter).fetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(brand101));
-			allowing(brandAdapter).fetch("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(brand202));
+			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(brand101));
+			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(brand202));
 			allowing(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(true));
 			allowing(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(true));
 		}});
