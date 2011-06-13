@@ -14,6 +14,7 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -65,13 +66,18 @@ public class FiveBrandProcessor {
         
         EpisodeProcessingNodeFactory nodeFactory = new EpisodeProcessingNodeFactory(episodeProcessor);
         try {
-        	new Builder(nodeFactory).build(new StringReader(httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body()));
+        	String responseBody = httpClient.get(getShowUri(id) + WATCHABLES_URL_SUFFIX).body();
+            new Builder(nodeFactory).build(new StringReader(responseBody));
         } catch(Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception while trying to parse episodes for brand " + brand.getTitle()));
             return;
         }
         writer.createOrUpdate(brand);
+        for (Series series : episodeProcessor.getSeriesMap().values()) {
+            writer.createOrUpdate(series);
+        }
         for (Item item : nodeFactory.items) {
+            item.setContainer(brand);
         	writer.createOrUpdate(item);
         }
     }
