@@ -7,7 +7,6 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 public class ItvUpdater implements Runnable {
@@ -15,20 +14,17 @@ public class ItvUpdater implements Runnable {
 
     private final RemoteSiteClient<List<ItvProgramme>> client;
 
-    private final ContentWriters writer;
-
     private final SiteSpecificAdapter<Brand> brandAdapter;
 
     private final AdapterLog log;
 
-    public ItvUpdater(SiteSpecificAdapter<Brand> brandAdapter, ContentWriters writer, AdapterLog log) {
-        this(new ItvCatchupClient(), brandAdapter, writer, log);
+    public ItvUpdater(SiteSpecificAdapter<Brand> brandAdapter, AdapterLog log) {
+        this(new ItvCatchupClient(), brandAdapter, log);
     }
 
-    public ItvUpdater(RemoteSiteClient<List<ItvProgramme>> client, SiteSpecificAdapter<Brand> brandAdapter, ContentWriters writer, AdapterLog log) {
+    public ItvUpdater(RemoteSiteClient<List<ItvProgramme>> client, SiteSpecificAdapter<Brand> brandAdapter, AdapterLog log) {
         this.client = client;
         this.brandAdapter = brandAdapter;
-        this.writer = writer;
         this.log = log;
     }
 
