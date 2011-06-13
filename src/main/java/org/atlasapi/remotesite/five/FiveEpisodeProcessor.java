@@ -148,7 +148,7 @@ public class FiveEpisodeProcessor {
         if (seasonLinkElement != null) {
             Element seasonElement = seasonLinkElement.getFirstChildElement("season");
             String id = childValue(seasonElement, "id");
-            Series series = seriesMap.get(id);
+            Series series = getSeriesMap().get(id);
             if (series == null){ 
                 series = new Series(seasonLinkElement.getAttributeValue("href"), getSeriesCurie(id), Publisher.FIVE);
                 series.setGenres(genreMap.mapRecognised(ImmutableSet.of(childValue(seasonElement, "genre"))));
@@ -176,7 +176,7 @@ public class FiveEpisodeProcessor {
                     }
                 }
 
-                seriesMap.put(id, series);
+                getSeriesMap().put(id, series);
             }
             
             episode.setSeries(series);
@@ -270,5 +270,9 @@ public class FiveEpisodeProcessor {
         }
         
         return null;
+    }
+
+    public Map<String, Series> getSeriesMap() {
+        return seriesMap;
     }
 }

@@ -23,7 +23,7 @@ public class ItvModule {
     
     @PostConstruct 
     public void scheduleTasks() {
-        scheduler.schedule(updater(), RepetitionRules.daily(new LocalTime(4, 0, 0)));
+        scheduler.schedule(updater().withName("ITV Updater"), RepetitionRules.daily(new LocalTime(4, 0, 0)));
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("ITV scheduled updater installed"));
     }
     

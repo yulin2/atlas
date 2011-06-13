@@ -8,7 +8,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,19 +23,14 @@ private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0)
     private @Autowired ContentWriters contentWriter;
     private @Autowired AdapterLog log;
     
-    private @Value("${five.apiBaseUrl}") String apiBaseUrl;
-    
     @PostConstruct
     public void startBackgroundTasks() {
-        if ("disabled".equalsIgnoreCase(apiBaseUrl)) {
-            log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("API Base required for Five updater"));
-            return;
-        }
-        scheduler.schedule(fiveUpdater(), DAILY);
+        scheduler.schedule(fiveUpdater().withName("Five Updater"), DAILY);
+        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("Installed Five updater"));
     }
     
     @Bean
     public FiveUpdater fiveUpdater() {
-        return new FiveUpdater(contentWriter, log, apiBaseUrl);
+        return new FiveUpdater(contentWriter, log);
     }
 }
