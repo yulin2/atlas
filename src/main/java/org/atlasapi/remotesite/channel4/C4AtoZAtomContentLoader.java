@@ -4,21 +4,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
-import com.metabroadcast.common.base.Maybe;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
@@ -28,18 +20,17 @@ public class C4AtoZAtomContentLoader implements Runnable {
     private static final Pattern PAGE_PATTERN = Pattern.compile("(http://api.channel4.com/programmes/atoz/.+/page-\\d+.atom).*");
     
     private final RemoteSiteClient<Feed> feedClient;
-    private final C4AtomBackedBrandAdapter brandAdapter;
+    private final C4BrandUpdater brandUpdater;
 	private final AdapterLog log;
     
-    public C4AtoZAtomContentLoader(RemoteSiteClient<Feed> feedClient, C4AtomBackedBrandAdapter brandExtractor, AdapterLog log) {
+    public C4AtoZAtomContentLoader(RemoteSiteClient<Feed> feedClient, C4BrandUpdater brandUpdater, AdapterLog log) {
         this.feedClient = feedClient;
-        this.brandAdapter = brandExtractor;
+        this.brandUpdater = brandUpdater;
 		this.log = log;
     }
 
     @VisibleForTesting
     void loadAndSaveByLetter(String letter) throws Exception {
-            
             boolean hasNext = false;
             String currentPage = C4AtomApi.createAtoZRequest(letter, ".atom");
             do {
@@ -59,7 +50,7 @@ public class C4AtoZAtomContentLoader implements Runnable {
 	private void loadAndSaveFromFeed(Feed feed) {
 		for (Entry entry: (List<Entry>) feed.getEntries()) {
 		    String brandUri = extarctUriFromLinks(entry);
-		    if (brandUri != null && brandAdapter.canFetch(brandUri)) {
+		    if (brandUri != null && brandUpdater.canFetch(brandUri)) {
 		        writeBrand(brandUri);
 		    }
 		}
@@ -67,9 +58,9 @@ public class C4AtoZAtomContentLoader implements Runnable {
 
 	private void writeBrand(String brandUri) {
 		try {
-			 brandAdapter.writeBrandFrom(brandUri);
+			 brandUpdater.createOrUpdateBrand(brandUri);
 		} catch (Exception e) {
-			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(brandUri).withSource(brandAdapter.getClass()));
+			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(brandUri).withSource(brandUpdater.getClass()));
 		}
 	}
     

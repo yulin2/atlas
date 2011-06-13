@@ -10,22 +10,25 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+
+import java.util.List;
+
 import junit.framework.TestCase;
 
+import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.SeriesRef;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.remotesite.channel4.RecordingContentWriter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -51,59 +54,49 @@ public class C4EpgEntryProcessorTest extends TestCase {
     //Item, series and brand don't exist so all are made.
     public void testProcessNewItemSeriesBrand() {
         
-        context.checking(new Expectations(){{
-            allowing(resolver).findByCanonicalUris(with(Expectations.<Iterable<String>>anything())); will(returnValue(null));
-        }});
-        
-        ContentWriter writer = new ContentWriter() {
-            @Override
-            public void createOrUpdate(Item item) {
-                throw new RuntimeException();
-            }
+    	ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
 
-            @Override
-            public void createOrUpdate(Container<?> container) {
-                assertTrue(container instanceof Brand);
-                Brand brand = (Brand) container;
-                
-                assertThat(brand.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs")));
-                assertThat(brand.getCurie(), is(equalTo("c4:the-hoobs")));
-                
-                assertThat(brand.getSeries().size(), is(equalTo(1)));
-                assertThat(getOnlyElement(brand.getSeries()).getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1")));
-
-                ImmutableList<Episode> contents = brand.getContents();
-                assertThat(contents.size(), is(equalTo(1)));
-                
-                Episode episode = getOnlyElement(contents);
-                assertThat(episode.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-59")));
-                assertThat(episode.getTitle(), is(equalTo("Dancing")));
-                assertThat(episode.getEpisodeNumber(), is(59));
-                assertThat(episode.getSeriesNumber(), is(1));
-                
-                
-                Version version = getOnlyElement(episode.getVersions());
-                assertThat(version.getDuration().longValue(), is(equalTo(Duration.standardMinutes(24).plus(Duration.standardSeconds(12)).getStandardSeconds())));
-                
-                Broadcast broadcast = getOnlyElement(version.getBroadcasts());
-                assertThat(broadcast.getId(), is(equalTo("c4:337")));
-                assertThat(broadcast.getAliases().size(), is(1));
-                assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
-                assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
-                assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z").plus(Duration.standardMinutes(24).plus(Duration.standardSeconds(12))))));
-                
-                Encoding encoding = getOnlyElement(version.getManifestedAs());
-                Location location = getOnlyElement(encoding.getAvailableAt());
-                assertThat(location.getUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/4od#2930251")));
-                assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2009-06-07T22:00:00.000Z"))));
-                assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
-            }
-        };
-        
-        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
-        
+    	RecordingContentWriter writer = new RecordingContentWriter();
+    	
+    	C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
         processor.process(buildEntry(), CHANNEL_FOUR);
         
+        Brand brand = Iterables.getOnlyElement(writer.updatedBrands);
+        
+        assertThat(brand.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs")));
+        assertThat(brand.getCurie(), is(equalTo("c4:the-hoobs")));
+        
+        
+        Series series = Iterables.getOnlyElement(writer.updatedSeries);
+        assertThat(series.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1")));
+        assertThat(series.getParent().getUri(), is(brand.getCanonicalUri()));
+        
+        List<Episode> contents = ImmutableList.copyOf(Iterables.filter(writer.updatedItems, Episode.class));
+        assertThat(contents.size(), is(equalTo(1)));
+        
+        Episode episode = getOnlyElement(contents);
+        assertThat(episode.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-59")));
+        assertThat(episode.getTitle(), is(equalTo("Dancing")));
+        assertThat(episode.getEpisodeNumber(), is(59));
+        assertThat(episode.getSeriesNumber(), is(1));
+        assertThat(episode.getSeriesRef().getUri(), is(series.getCanonicalUri()));
+        
+        
+        Version version = getOnlyElement(episode.getVersions());
+        assertThat(version.getDuration().longValue(), is(equalTo(Duration.standardMinutes(24).plus(Duration.standardSeconds(12)).getStandardSeconds())));
+        
+        Broadcast broadcast = getOnlyElement(version.getBroadcasts());
+        assertThat(broadcast.getId(), is(equalTo("c4:337")));
+        assertThat(broadcast.getAliases().size(), is(1));
+        assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
+        assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
+        assertThat(broadcast.getTransmissionEndTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z").plus(Duration.standardMinutes(24).plus(Duration.standardSeconds(12))))));
+        
+        Encoding encoding = getOnlyElement(version.getManifestedAs());
+        Location location = getOnlyElement(encoding.getAvailableAt());
+        assertThat(location.getUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/4od#2930251")));
+        assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2009-06-07T22:00:00.000Z"))));
+        assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
     }
     
     public void testProcessExistingItemSeriesBrand() { 
@@ -113,7 +106,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         final Brand brand = new Brand("http://www.channel4.com/programmes/the-hoobs", "c4:the-hoobs", C4);
 
         episode.setContainer(brand);
-        episode.setSeriesUri("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1");
+        episode.setSeries(series);
         
         final ContentWriter writer = context.mock(ContentWriter.class);
         

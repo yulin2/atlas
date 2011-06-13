@@ -22,18 +22,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.sun.syndication.feed.atom.Feed;
 
-public class C4AtomBackedBrandAdapter {
+public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 
 	private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://www.channel4.com/programmes/([^/\\s]+)(/4od)?");
 
@@ -42,20 +39,21 @@ public class C4AtomBackedBrandAdapter {
 	private final RemoteSiteClient<Feed> feedClient;
 	private final C4BrandExtractor extractor;
 	
-	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, AdapterLog log) {
+	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, AdapterLog log) {
 		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, contentStore, log));
 	}
 	
-	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> feedClient, C4BrandExtractor extractor) {
+	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> feedClient, C4BrandExtractor extractor) {
 		this.feedClient = feedClient;
 		this.extractor = extractor;
 	}
 	
-	boolean canFetch(String uri) {
+	@Override
+	public boolean canFetch(String uri) {
 		return BRAND_PAGE_PATTERN.matcher(uri).matches();
 	}
 
-	public void writeBrandFrom(String uri) {
+	public void createOrUpdateBrand(String uri) {
 		if (!canFetch(uri)) {
 			throw new IllegalArgumentException("Cannot fetch C4 uri: " + uri + " as it is not in the expected format: " + BRAND_PAGE_PATTERN.toString());
 		}
