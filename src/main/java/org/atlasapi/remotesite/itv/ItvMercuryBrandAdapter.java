@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
@@ -19,8 +20,8 @@ public class ItvMercuryBrandAdapter implements SiteSpecificAdapter<Brand> {
     private final RemoteSiteClient<Map<String, Object>> client;
     private final ContentExtractor<Map<String, Object>, Brand> brandExtractor;
 
-    public ItvMercuryBrandAdapter() {
-        this(new ItvMercuryClient(), new ItvMercuryBrandExtractor());
+    public ItvMercuryBrandAdapter(ContentWriter writer) {
+        this(new ItvMercuryClient(), new ItvMercuryBrandExtractor(writer));
     }
 
     public ItvMercuryBrandAdapter(RemoteSiteClient<Map<String, Object>> client, ContentExtractor<Map<String, Object>, Brand> brandExtractor) {
