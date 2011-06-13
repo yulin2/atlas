@@ -18,7 +18,6 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
@@ -29,16 +28,12 @@ public class C4AtoZAtomContentLoader implements Runnable {
     private static final Pattern PAGE_PATTERN = Pattern.compile("(http://api.channel4.com/programmes/atoz/.+/page-\\d+.atom).*");
     
     private final RemoteSiteClient<Feed> feedClient;
-    private final SiteSpecificAdapter<Brand> brandAdapter;
+    private final C4AtomBackedBrandAdapter brandAdapter;
 	private final AdapterLog log;
-	private final ContentWriter writer;
-	private final ContentResolver resolver;
     
-    public C4AtoZAtomContentLoader(RemoteSiteClient<Feed> feedClient, SiteSpecificAdapter<Brand> brandAdapter, ContentWriter writer, ContentResolver resolver, AdapterLog log) {
+    public C4AtoZAtomContentLoader(RemoteSiteClient<Feed> feedClient, C4AtomBackedBrandAdapter brandExtractor, AdapterLog log) {
         this.feedClient = feedClient;
-        this.brandAdapter = brandAdapter;
-		this.writer = writer;
-		this.resolver = resolver;
+        this.brandAdapter = brandExtractor;
 		this.log = log;
     }
 
@@ -47,10 +42,9 @@ public class C4AtoZAtomContentLoader implements Runnable {
             
             boolean hasNext = false;
             String currentPage = C4AtomApi.createAtoZRequest(letter, ".atom");
-            List<Brand> brands = Lists.newArrayList();
             do {
                 Feed feed = feedClient.get(currentPage);
-                brands.addAll(loadAndSaveFromFeed(feed));
+                loadAndSaveFromFeed(feed);
                 String nextUrl = extractNextLinkFromLinks(feed);
                 if (nextUrl != null) {
                     hasNext = true;
@@ -62,34 +56,20 @@ public class C4AtoZAtomContentLoader implements Runnable {
     }
 
 	@SuppressWarnings("unchecked")
-	private List<Brand> loadAndSaveFromFeed(Feed feed) {
-		List<Brand> brands = Lists.newArrayList();
+	private void loadAndSaveFromFeed(Feed feed) {
 		for (Entry entry: (List<Entry>) feed.getEntries()) {
 		    String brandUri = extarctUriFromLinks(entry);
 		    if (brandUri != null && brandAdapter.canFetch(brandUri)) {
-		        Brand brand = fetchBrand(brandUri);
-		        if (brand != null) {
-		        	brands.add(brand);
-		        	writer.createOrUpdate(brand);
-		        }
+		        writeBrand(brandUri);
 		    }
 		}
-		return brands;
 	}
 
-	private Brand fetchBrand(String brandUri) {
+	private void writeBrand(String brandUri) {
 		try {
-			return brandAdapter.fetch(brandUri);
+			 brandAdapter.writeBrandFrom(brandUri);
 		} catch (Exception e) {
 			log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withUri(brandUri).withSource(brandAdapter.getClass()));
-			Maybe<Identified> maybeIdentified = resolver.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
-            if (maybeIdentified.hasValue()) {
-                Identified identified = maybeIdentified.requireValue();
-                if (identified instanceof Brand && Publisher.C4.equals(((Brand) identified).getPublisher())) {
-                    return (Brand) identified;
-                }
-            }
-            return null;
 		}
 	}
     

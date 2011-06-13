@@ -98,11 +98,6 @@ public class C4EpgEntryProcessorTest extends TestCase {
                 assertThat(location.getPolicy().getAvailabilityStart(), is(equalTo(new DateTime("2009-06-07T22:00:00.000Z"))));
                 assertThat(location.getPolicy().getAvailabilityEnd(), is(equalTo(new DateTime("2018-12-07T00:00:00.000Z"))));
             }
-
-            @Override
-            public void createOrUpdateSkeleton(ContentGroup playlist) {
-                throw new RuntimeException();
-            }
         };
         
         C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
@@ -213,7 +208,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         Episode episode = new Episode("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-58", "c4:the-hoobs-series-1-episode-58", C4);
         
         episode.setContainer(brand);
-        episode.setSeriesUri(series.getCanonicalUri());
+        episode.setSeries(series);
         episode.setSeriesNumber(1);
         episode.setEpisodeNumber(58);
 

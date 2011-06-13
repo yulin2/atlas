@@ -39,9 +39,9 @@ class C4ClipExtractor {
 		}
 	}
 	
-	public void fetchAndAddClipsTo(Brand brand) {
+	void fetchAndAddClipsTo(Brand brand, List<Episode> episodes) {
 		List<Clip> clips = clipsFrom(brand);
-		Map<String, org.atlasapi.media.entity.Item> lookup = toEpisodeLookup(brand.getContents());
+		Map<String, org.atlasapi.media.entity.Item> lookup = toEpisodeLookup(episodes);
 		for (Clip clip : clips) {
 			Item episode = findEpisode(lookup, clip);
 			

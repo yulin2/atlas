@@ -22,10 +22,10 @@ public class C4SeriesExtractorTest extends TestCase {
 
 	private final AtomFeedBuilder seriesFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-series-3.atom"));
 	
-	@SuppressWarnings("unchecked")
 	public void testParsingASeries() throws Exception {
 		
-		Series series = new C4SeriesExtractor(null, new NullAdapterLog()).extract(seriesFeed.build());
+		SeriesAndEpisodes seriesAndEpisodes = new C4SeriesExtractor(null, new NullAdapterLog()).extract(seriesFeed.build());
+		Series series = seriesAndEpisodes.getSeries();
 		
 		assertThat(series.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3"));
 		assertThat(series.getCurie(), is("c4:ramsays-kitchen-nightmares-series-3"));
@@ -37,7 +37,7 @@ public class C4SeriesExtractorTest extends TestCase {
 		assertThat(series.getTitle(), is("Series 3 - Ramsay's Kitchen Nightmares"));
 		assertThat(series.getDescription(), startsWith("Multi Michelin-starred chef Gordon Ramsay"));
 		
-		List<Episode> episodes = (List) series.getContents();
+		List<Episode> episodes = seriesAndEpisodes.getEpisodes();
 		
 		Episode firstEpisode = episodes.get(0);
 		

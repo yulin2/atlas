@@ -19,7 +19,6 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.channel4.epg.C4SynthesizedItemUpdater;
 import org.jdom.Element;
@@ -34,7 +33,7 @@ import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
 
-public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
+public class C4BrandExtractor {
 
     private static final String BRAND_FLATTENED_NAME = "relation.BrandFlattened";
 
@@ -53,10 +52,13 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
     private final AdapterLog log;
 
-    private C4SynthesizedItemUpdater synthesizedItemUpdater;
+    private final C4SynthesizedItemUpdater synthesizedItemUpdater;
+
+	private final ContentWriter contentWriter;
 
     public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentWriter, AdapterLog log) {
         feedClient = atomClient;
+		this.contentWriter = contentWriter;
         this.log = log;
         fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands();
         flattenedBrandExtrator = new C4EpisodesExtractor(log);
@@ -67,8 +69,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
         broadcastExtractor = new C4EpisodeBroadcastExtractor(log);
     }
 
-    @Override
-    public Brand extract(Feed source) {
+    public void write(Feed source) {
         Brand brand = basicDetailsExtractor.extract(source);
         
         List<Episode> episodes = itemsFor(brand);
@@ -87,28 +88,22 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
             }
             
             if (episode.getImage() == null) {
-                Series seriesSummary = episode.getSeries();
-				if (seriesSummary != null && seriesSummary.getImage() != null) {
-                    episode.setImage(seriesSummary.getImage());
-                    episode.setThumbnail(seriesSummary.getThumbnail());
-                } else {
-                    episode.setImage(brand.getImage());
-                    episode.setThumbnail(brand.getThumbnail());
-                }
+                episode.setImage(brand.getImage());
+                episode.setThumbnail(brand.getThumbnail());
             }
         }
 
         populateBroadcasts(episodes, brand);
 
+        clipExtractor.fetchAndAddClipsTo(brand, episodes);
+
+        contentWriter.createOrUpdate(brand);
+
         for (Episode episode : episodes) {
 			versionMerger.merge(episode);
-		}
-        
-        brand.setContents(episodes);
-        
-        clipExtractor.fetchAndAddClipsTo(brand);
-        
-        return brand;
+			episode.setContainer(brand);
+			contentWriter.createOrUpdate(episode);
+        }
     }
 
 	private boolean equivalentTitles(Brand brand, Episode episode) {
@@ -125,8 +120,11 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
         	return (List) flattenedBrandExtrator.extract(possibleEpisodeGuide);
         }
         	
-		for (Series sery : fetchSeries(brand, possibleEpisodeGuide)) {
-            items.addAll((List) sery.getContents());
+		for (SeriesAndEpisodes seriesAndEpisodes : fetchSeries(brand, possibleEpisodeGuide)) {
+            items.addAll((List) seriesAndEpisodes.getEpisodes());
+            Series series = seriesAndEpisodes.getSeries();
+            series.setParent(brand);
+			contentWriter.createOrUpdate(series);
         }
 		return items;
 	}
@@ -144,7 +142,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
 
 	private static Pattern ID_PATTERN = Pattern.compile("tag:www.channel4.com,\\d+:/programmes/([a-z0-9\\-]+)/episode-guide(?:/series-(\\d+)(?:/episode-(\\d+))?)?");
 
-    private List<Series> fetchSeries(Brand brand, Feed episodeGuide) {
+    private List<SeriesAndEpisodes> fetchSeries(Brand brand, Feed episodeGuide) {
 
         Matcher matcher = ID_PATTERN.matcher(episodeGuide.getId());
 
@@ -168,15 +166,16 @@ public class C4BrandExtractor implements ContentExtractor<Feed, Brand> {
         return setSeriesTitles(loadSeriesFromFeeds(extractSeriesAtomFeedsFrom(episodeGuide)), brand);
     }
 
-    private List<Series> setSeriesTitles(List<Series> series, Brand brand) {
-        for (Series sery : series) {
-            sery.setTitle(brand.getTitle() + " - Series " + sery.getSeriesNumber());
+    private List<SeriesAndEpisodes> setSeriesTitles(List<SeriesAndEpisodes> seriesAndEpisodes, Brand brand) {
+        for (SeriesAndEpisodes seriesAndEpisode : seriesAndEpisodes) {
+        	Series series = seriesAndEpisode.getSeries();
+			series.setTitle(brand.getTitle() + " - Series " + series.getSeriesNumber());
         }
-        return series;
+        return seriesAndEpisodes;
     }
 
-    private List<Series> loadSeriesFromFeeds(List<String> seriesFeeds) {
-        List<Series> series = Lists.newArrayList();
+    private List<SeriesAndEpisodes> loadSeriesFromFeeds(List<String> seriesFeeds) {
+        List<SeriesAndEpisodes> series = Lists.newArrayList();
         for (String uri : seriesFeeds) {
             try {
                 series.add(seriesExtractor.extract(feedClient.get(uri)));

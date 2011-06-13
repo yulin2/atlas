@@ -33,38 +33,38 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.sun.syndication.feed.atom.Feed;
 
-public class C4AtomBackedBrandAdapter implements SiteSpecificAdapter<Brand> {
+public class C4AtomBackedBrandAdapter {
 
 	private static final Pattern BRAND_PAGE_PATTERN = Pattern.compile("http://www.channel4.com/programmes/([^/\\s]+)(/4od)?");
 
 	private final Log log = LogFactory.getLog(getClass());
 	
 	private final RemoteSiteClient<Feed> feedClient;
-	private final ContentExtractor<Feed, Brand> extractor;
+	private final C4BrandExtractor extractor;
 	
 	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, AdapterLog log) {
 		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, contentStore, log));
 	}
 	
-	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> feedClient, ContentExtractor<Feed, Brand> extractor) {
+	public C4AtomBackedBrandAdapter(RemoteSiteClient<Feed> feedClient, C4BrandExtractor extractor) {
 		this.feedClient = feedClient;
 		this.extractor = extractor;
 	}
 	
-	@Override
-	public boolean canFetch(String uri) {
+	boolean canFetch(String uri) {
 		return BRAND_PAGE_PATTERN.matcher(uri).matches();
 	}
 
-	@Override
-	public Brand fetch(String uri) {
+	public void writeBrandFrom(String uri) {
+		if (!canFetch(uri)) {
+			throw new IllegalArgumentException("Cannot fetch C4 uri: " + uri + " as it is not in the expected format: " + BRAND_PAGE_PATTERN.toString());
+		}
 		try {
 			log.info("Fetching C4 brand " + uri);
-			return extractor.extract(feedClient.get(atomUrl(uri)));
+			extractor.write(feedClient.get(atomUrl(uri)));
 		} catch (HttpStatusCodeException e) {
 			if (HttpServletResponse.SC_NOT_FOUND == e.getStatusCode()) {
-				// Return null to signify Brand not found on C4
-				return null;
+				// ignore
 			}
 			throw new RuntimeException(e);
 		} catch (Exception e) {

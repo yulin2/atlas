@@ -78,7 +78,7 @@ public class C4Module {
 	}
 
     @Bean C4AtoZAtomContentLoader c4AtozUpdater() {
-		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), contentWriter, contentResolver, log);
+		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), log);
 	}
 //	
 //	@Bean C4HighlightsAdapter c4HighlightsUpdater() {
