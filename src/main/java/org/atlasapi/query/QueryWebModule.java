@@ -10,7 +10,6 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.query.content.people.ContentResolvingPeopleResolver;
 import org.atlasapi.query.content.schedule.BroadcastRemovingScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
@@ -53,7 +52,7 @@ public class QueryWebModule {
     }
     
     @Bean PeopleController peopleController() {
-        return new PeopleController(new ContentResolvingPeopleResolver(peopleResolver, queryExecutor), configFetcher, log, atlasModelOutputter());
+        return new PeopleController(peopleResolver, configFetcher, log, atlasModelOutputter());
     }
     
     @Bean SearchController searchController() {

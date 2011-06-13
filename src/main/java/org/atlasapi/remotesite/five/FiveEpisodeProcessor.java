@@ -179,9 +179,8 @@ public class FiveEpisodeProcessor {
                 seriesMap.put(id, series);
             }
             
-            episode.setSeriesUri(series.getCanonicalUri());
+            episode.setSeries(series);
             episode.setSeriesNumber(series.getSeriesNumber());
-            series.addContents(episode);
         }
     }
 

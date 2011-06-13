@@ -47,7 +47,7 @@ public class BbcModule {
     @PostConstruct
     public void scheduleTasks() {
         scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
-        scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
+//        scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
         
         scheduler.schedule(bbcIonUpdater(0, 0)
         		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
@@ -74,9 +74,10 @@ public class BbcModule {
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
 	    return new BbcIonScheduleController(contentResolver, contentWriters, itemsPeopleWriter, log);
 	}
-	@Bean Runnable bbcHighlightsUpdater() {
-		return new BbcIplayerHightlightsAdapter(contentWriters, log);
-	}
+
+	//	@Bean Runnable bbcHighlightsUpdater() {
+//		return new BbcIplayerHightlightsAdapter(contentWriters, log);
+//	}
 
 	@Bean Runnable bbcFeedsUpdater() {
 		return new BbcSlashProgrammesAtoZUpdater(contentWriters, log);

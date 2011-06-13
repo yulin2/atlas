@@ -95,8 +95,9 @@ public class C4EpgEntryProcessor {
             if(episode.getSeriesNumber() != null) {
                 updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode);
             }
+             
+            contentWriter.createOrUpdate(episode);
             Brand brand = updateBrand(webSafeBrandName, episode, entry);
-
             contentWriter.createOrUpdate(brand);
 
         } catch (Exception e) {
