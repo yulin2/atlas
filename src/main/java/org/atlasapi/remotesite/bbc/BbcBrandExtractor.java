@@ -6,7 +6,6 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -15,6 +14,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -30,7 +30,7 @@ public class BbcBrandExtractor  {
 
 	// Some Brands have a lot of episodes, if there are more than this number we
 	// only look at the most recent episodes
-	private static final int MAX_EPISODES = 1000;
+	private static final int MAX_EPISODES = 5000;
 
 	private static final BbcProgrammesGenreMap genreMap = new BbcProgrammesGenreMap();
 	private static final Pattern IMAGE_STEM = Pattern.compile("^(.+)_[0-9]+_[0-9]+\\.[a-zA-Z]+$");
@@ -38,33 +38,53 @@ public class BbcBrandExtractor  {
 	private final BbcProgrammeAdapter subContentExtractor;
 	private final AdapterLog log;
 
-	public BbcBrandExtractor(BbcProgrammeAdapter subContentExtractor, AdapterLog log) {
+	private final ContentWriter contentWriter;
+
+	public BbcBrandExtractor(BbcProgrammeAdapter subContentExtractor, ContentWriter contentWriter, AdapterLog log) {
 		this.subContentExtractor = subContentExtractor;
+		this.contentWriter = contentWriter;
 		this.log = log;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Series extractSeriesFrom(SlashProgrammesSeriesContainer rdfSeries) {
+	public Series writeSeries(SlashProgrammesSeriesContainer rdfSeries, Brand brand) {
 		Series series = new Series();
 		populatePlaylistAttributes(series, rdfSeries);
 		List<String> episodeUris = episodesFrom(rdfSeries.episodeResourceUris());
-		addDirectlyIncludedEpisodesTo(series, episodeUris);
+		if (brand != null) {
+			series.setParent(brand);
+		}
+		contentWriter.createOrUpdate(series);
+		saveItemsInContainers(episodeUris,  brand == null ? series : brand, series);
     	return series;
 	}
+	
+	public void saveItemsInContainers(List<String> episodeUris, Container<?> container, Series series) {
+		for (String episodeUri : mostRecent(episodeUris)) {
+			Identified found = subContentExtractor.fetchItem(episodeUri);
+			if (!(found instanceof Item)) {
+				log.record(new AdapterLogEntry(Severity.WARN).withUri(episodeUri).withSource(getClass()).withDescription("Expected Item for PID: " + episodeUri));
+				continue;
+			}
+			((Item) found).setContainer(container);
+			if (series != null) {
+				((Episode) found).setSeries(series);
+			}
+			contentWriter.createOrUpdate((Item) found);
+		}
+	}
 
-	public Brand extractBrandFrom(SlashProgrammesContainerRef brandRef, boolean hydrate) {
+	public Brand writeBrand(SlashProgrammesContainerRef brandRef) {
 		Brand brand = new Brand();
 		populatePlaylistAttributes(brand, brandRef);
-		if(hydrate) {
-		    hydrateBrand(brandRef, brand);
-		}
+		contentWriter.createOrUpdate(brand);
+		writeBrandEpisodes(brandRef, brand);
 		return brand;
 	}
 
-    private void hydrateBrand(SlashProgrammesContainerRef brandRef, Brand brand) {
+    private void writeBrandEpisodes(SlashProgrammesContainerRef brandRef, Brand brand) {
         List<String> episodes = brandRef.episodes == null ? ImmutableList.<String>of() : episodesFrom(brandRef.episodeResourceUris());
-        addDirectlyIncludedEpisodesTo(brand, episodes);
-
+        
+        saveItemsInContainers(episodes, brand, null);
 
         if (brandRef.series != null) {
         	for (SlashProgrammesSeriesRef seriesRef : brandRef.series) {
@@ -73,8 +93,8 @@ public class BbcBrandExtractor  {
         			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(seriesRef.resourceUri()).withDescription("Could not extract PID from series ref " + seriesRef.resourceUri() + " for brand with uri " + brand.getCanonicalUri()));
         			continue;
         		}
-        		String uri = "http://www.bbc.co.uk/programmes/" + seriesPid;
-        		Series series = (Series) subContentExtractor.fetch(uri);
+        		String uri = BbcFeeds.slashProgrammesUriForPid(seriesPid);
+        		Series series = (Series) subContentExtractor.createOrUpdate(uri, brand);
         		if (series == null || series.getMediaType() == null || brand == null || brand.getMediaType() == null) {
         			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
         			continue;
@@ -85,29 +105,9 @@ public class BbcBrandExtractor  {
         		if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(series.getSpecialization())) {
                     series.setSpecialization(brand.getSpecialization());
                 }
-        		for (Content item : series.getContents()) {
-        			if(brand.getMediaType() != null && !brand.getMediaType().equals(item.getMediaType())) {
-        				item.setMediaType(brand.getMediaType());
-        			}
-        			if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(item.getSpecialization())) {
-        			    item.setSpecialization(brand.getSpecialization());
-                    }
-        			brand.addContents((Episode) item);
-        		}
         	}
         }
     }
-
-	private void addDirectlyIncludedEpisodesTo(Container<?> playlist, List<String> episodes) {
-		for (String episodeUri : mostRecent(episodes)) {
-			Identified found = subContentExtractor.fetch(episodeUri);
-			if (!(found instanceof Item)) {
-				log.record(new AdapterLogEntry(Severity.WARN).withUri(episodeUri).withSource(getClass()).withDescription("Expected Item for PID: " + episodeUri));
-				continue;
-			} 
-			playlist.addContents(ImmutableList.of((Episode) found)); 
-		}
-	}
 
 	private List<String> episodesFrom(List<String> uriFragments) {
 		List<String> uris = Lists.newArrayListWithCapacity(uriFragments.size());
@@ -129,30 +129,30 @@ public class BbcBrandExtractor  {
 		return episodes.subList(episodes.size() - MAX_EPISODES, episodes.size());
 	}
 
-	private void populatePlaylistAttributes(Described container, SlashProgrammesBase brandRef) {
-		String brandUri = brandRef.uri();
+	private void populatePlaylistAttributes(Described container, SlashProgrammesBase containerRefRef) {
+		String brandUri = containerRefRef.uri();
 		container.setCanonicalUri(brandUri);
 		container.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
 		container.setPublisher(Publisher.BBC);
-		container.setTitle(brandRef.title());
-		if (brandRef.getMasterbrand() != null) {
-		    MediaType mediaType = BbcMasterbrandMediaTypeMap.lookup(brandRef.getMasterbrand().getResourceUri()).valueOrNull();
+		container.setTitle(containerRefRef.title());
+		if (containerRefRef.getMasterbrand() != null) {
+		    MediaType mediaType = BbcMasterbrandMediaTypeMap.lookup(containerRefRef.getMasterbrand().getResourceUri()).valueOrNull();
 		    container.setMediaType(mediaType);
-            if (brandRef.isFilmFormat()) {
+            if (containerRefRef.isFilmFormat()) {
                 container.setSpecialization(Specialization.FILM);
             } else if (mediaType != null) {
                 container.setSpecialization(MediaType.VIDEO == mediaType ? Specialization.TV : Specialization.RADIO);
             }
 		}
-		if (brandRef.getDepiction() != null) {
-			Matcher matcher = IMAGE_STEM.matcher(brandRef.getDepiction().resourceUri());
+		if (containerRefRef.getDepiction() != null) {
+			Matcher matcher = IMAGE_STEM.matcher(containerRefRef.getDepiction().resourceUri());
 			if (matcher.matches()) {
 				String base = matcher.group(1);
 				container.setImage(base + BbcProgrammeGraphExtractor.FULL_IMAGE_EXTENSION);
 				container.setThumbnail(base + BbcProgrammeGraphExtractor.THUMBNAIL_EXTENSION);
 			}
 		}
-		container.setGenres(genreMap.map(brandRef.genreUris()));
-		container.setDescription(brandRef.description());
+		container.setGenres(genreMap.map(containerRefRef.genreUris()));
+		container.setDescription(containerRefRef.description());
 	}
 }

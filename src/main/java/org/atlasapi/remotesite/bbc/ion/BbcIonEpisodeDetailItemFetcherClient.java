@@ -11,12 +11,14 @@ import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
@@ -38,7 +40,6 @@ import com.metabroadcast.common.time.SystemClock;
 public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClient {
 
     private static final String CURIE_BASE = "bbc:";
-    private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
     private static final String EPISODE_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/episodedetail/episode/%s/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json";
     private static final String ACTOR_ROLE_NAME = "ACTOR";
     private static final String PERSON_BASE_URL = "http://www.bbc.co.uk/people/";
@@ -73,17 +74,17 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private Item createItemFrom(IonEpisodeDetail episodeDetail) {
         Item item = null;
         if (!Strings.isNullOrEmpty(episodeDetail.getBrandId()) || !Strings.isNullOrEmpty(episodeDetail.getSeriesId())) {
-            item = new Episode(SLASH_PROGRAMMES_ROOT+episodeDetail.getId(), CURIE_BASE+episodeDetail.getId(), BBC);
+            item = new Episode(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getId()), CURIE_BASE+episodeDetail.getId(), BBC);
             updateEpisodeDetails((Episode)item, episodeDetail);
         } else {
-            item = new Item(SLASH_PROGRAMMES_ROOT+episodeDetail.getId(), CURIE_BASE+episodeDetail.getId(), BBC);
+            item = new Item(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getId()), CURIE_BASE+episodeDetail.getId(), BBC);
         }
         return updateItemDetails(item, episodeDetail);
     }
 
     private void updateEpisodeDetails(Episode item, IonEpisodeDetail episodeDetail) {
         if(episodeDetail.getSeriesId() != null) {
-            item.setSeriesUri(SLASH_PROGRAMMES_ROOT + episodeDetail.getSeriesId());
+            item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
         }
         if(Strings.isNullOrEmpty(episodeDetail.getSubseriesId()) && episodeDetail.getPosition() != null) {
             item.setEpisodeNumber(Ints.saturatedCast(episodeDetail.getPosition()));
@@ -159,7 +160,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     
     private Version versionFrom(IonVersion ionVersion, String pid) {
         Version version = new Version();
-        version.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ionVersion.getId());
+        version.setCanonicalUri(BbcFeeds.slashProgrammesUriForPid(ionVersion.getId()));
         BbcProgrammeGraphExtractor.setDurations(version, ionVersion);
         version.setProvider(BBC);
         if(ionVersion.getDuration() != null) {
