@@ -91,11 +91,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                     } else if (hasEpisodeDetails(broadcast.getEpisode())){
                         log.record(new AdapterLogEntry(Severity.INFO).withDescription("Trying to update episode: " + item.getCanonicalUri() + " that turned out to be a "+item.getClass().getSimpleName()).withSource(getClass()));
                     }
-                    
-                    //if no series and no brand just store item
-                    if(Strings.isNullOrEmpty(broadcast.getSeriesId()) && Strings.isNullOrEmpty(broadcast.getBrandId())) {
-                        writer.createOrUpdate(item);
-                    } else {
+                    if(!Strings.isNullOrEmpty(broadcast.getSeriesId()) || !Strings.isNullOrEmpty(broadcast.getBrandId())) {
                         Series series = null;
                         if (!Strings.isNullOrEmpty(broadcast.getSeriesId())) {
                             String seriesUri = SLASH_PROGRAMMES_ROOT + broadcast.getSeriesId();
@@ -113,15 +109,13 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                                 
                             if (series != null) {
                                 updateSeries(series, broadcast);
-                                addOrReplaceItemInPlaylist(item, series);
                             }
                         }
                     
                         //TODO: need to write series anyway!
                         if (Strings.isNullOrEmpty(broadcast.getBrandId())) {
-                            if(series != null) { //no brand so just save series if it exists
-                                writer.createOrUpdate(series);
-                            }
+                        	writer.createOrUpdate(series);
+                        	((Episode) item).setSeries(series);
                             
                         } else {
                             String brandUri = SLASH_PROGRAMMES_ROOT + broadcast.getBrandId();
@@ -142,12 +136,12 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                             
                             if (brand != null) {
                                 updateBrand(brand, broadcast);
-                                addOrReplaceItemInPlaylist(item, brand);
+                                item.setContainer(brand);
                                 writer.createOrUpdate(brand);
                             }
                         }
                     }
-                
+                    writer.createOrUpdate(item);
                     createOrUpdatePeople((Item) item);
                 }
                 } catch (Exception e) {
@@ -177,18 +171,6 @@ public class BbcIonScheduleUpdateTask implements Runnable {
         brand.setSpecialization(series.getSpecialization());
         
         return brand;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends Item> void addOrReplaceItemInPlaylist(Item item, Container<T> playlist) {
-        int itemIndex = playlist.getContents().indexOf(item);
-        if (itemIndex >= 0) {
-            List<T> items = Lists.newArrayList(playlist.getContents());
-            items.set(itemIndex, (T) item);
-            playlist.setContents(items);
-        } else {
-            playlist.addContents((T) item);
-        }
     }
 
     private void updateSeries(Series series, IonBroadcast broadcast) {

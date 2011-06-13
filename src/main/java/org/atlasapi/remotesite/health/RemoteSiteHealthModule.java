@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.health;
 
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import com.metabroadcast.common.time.SystemClock;
 @Configuration
 public class RemoteSiteHealthModule {
     
-    private @Autowired MongoDbBackedContentStore store;
+    private @Autowired ContentResolver store;
 
     private @Autowired ScheduleResolver scheduleResolver;
     
