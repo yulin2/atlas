@@ -39,10 +39,7 @@ public class ItvUpdater implements Runnable {
 
             for (ItvProgramme programme : itvBrands) {
                 try {
-                    Brand brand = brandAdapter.fetch(ItvMercuryBrandAdapter.BASE_URL + programme.programmeId());
-                    if (brand != null) {
-                        writer.createOrUpdate(brand);
-                    }
+                    brandAdapter.fetch(ItvMercuryBrandAdapter.BASE_URL + programme.programmeId());
                 } catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.WARN).withDescription("Unable to update ITV brand: "+programme.programmeId()).withCause(e));
                 }
