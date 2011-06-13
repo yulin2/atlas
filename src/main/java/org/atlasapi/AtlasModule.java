@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.properties.Configurer;
+import com.metabroadcast.common.properties.Parameter;
 import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
 
@@ -27,12 +28,11 @@ public class AtlasModule {
 	
 	private final String mongoHost = Configurer.get("mongo.host").get();
 	private final String dbName = Configurer.get("mongo.dbName").get();
-	private final Boolean processingConfig = Configurer.get("processing.config").toBoolean();
 
 	public @Bean DatabasedMongo mongo() {
 		try {
 			Mongo mongo = new Mongo(mongoHost);
-			if(!processingConfig) {
+			if(!processingConfig()) {
 			    mongo.slaveOk();
 			}
 			return new DatabasedMongo(mongo, dbName);
@@ -41,7 +41,12 @@ public class AtlasModule {
 		}
 	}
 	 
-    public @Bean ContextConfigurer config() {
+    private static boolean processingConfig() {
+    	Parameter param = Configurer.get("processing.config");
+    	return param != null && param.toBoolean();
+	}
+
+	public @Bean ContextConfigurer config() {
 		ContextConfigurer c = new ContextConfigurer();
 		c.init();
 		return c;

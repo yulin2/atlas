@@ -17,7 +17,6 @@ package org.atlasapi.remotesite;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 
@@ -36,14 +35,6 @@ public class ContentWriters implements ContentWriter {
 	
 	public void add(ContentWriter writer) {
 		this.writers.add(writer);
-	}
-
-	@Override
-	@Deprecated
-	public void createOrUpdateSkeleton(ContentGroup playlist) {
-		for (ContentWriter writer : writers) {
-			writer.createOrUpdateSkeleton(playlist);
-		}
 	}
 
 	@Override

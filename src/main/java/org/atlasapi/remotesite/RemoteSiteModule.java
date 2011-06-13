@@ -22,20 +22,12 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgAdapterModule;
-import org.atlasapi.remotesite.bbc.BbcPodcastAdapter;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
-import org.atlasapi.remotesite.hbo.HboAdapterModule;
-import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
-import org.atlasapi.remotesite.hulu.HuluAdapterModule;
-import org.atlasapi.remotesite.itunes.ItunesAdapterModule;
 import org.atlasapi.remotesite.itv.ItvAdapterModule;
-import org.atlasapi.remotesite.msnvideo.MsnVideoAdapterModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
-import org.atlasapi.remotesite.synd.OpmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
-import org.atlasapi.remotesite.youtube.YouTubeAdapterModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,13 +36,13 @@ import org.springframework.context.annotation.Import;
 import com.google.common.collect.Lists;
 
 @Configuration
-@Import({RemoteSiteHealthModule.class, ItvAdapterModule.class, ArchiveOrgAdapterModule.class, HuluAdapterModule.class, HboAdapterModule.class, ItunesAdapterModule.class, MsnVideoAdapterModule.class, YouTubeAdapterModule.class})
+@Import({ItvAdapterModule.class, ArchiveOrgAdapterModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
 	
 	private @Autowired Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
-	private @Autowired YouTubeAdapterModule youTubeAdapterModule;
+//	private @Autowired YouTubeAdapterModule youTubeAdapterModule;
 
 	public @Bean Fetcher<Identified> remoteFetcher() {
 		
@@ -63,9 +55,8 @@ public class RemoteSiteModule {
 		 adapters.add(new TedTalkAdapter());
 		 adapters.add(new DailyMotionItemAdapter());
 		 adapters.add(new BlipTvAdapter());
-         adapters.add(youTubeAdapterModule.youTubeAdapter());
+        // adapters.add(youTubeAdapterModule.youTubeAdapter());
 
-		 adapters.add(new BbcPodcastAdapter());
 		 
 		 adapters.add(new VimeoAdapter());
 		 
@@ -75,7 +66,6 @@ public class RemoteSiteModule {
 		 flickrAdapter.setPublisher(Publisher.FLICKR);
 		 
 		 adapters.add(flickrAdapter);
-		 adapters.add(new OpmlAdapter(dispatcher));
 		 
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;

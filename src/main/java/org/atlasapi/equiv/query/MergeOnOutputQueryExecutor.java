@@ -1,11 +1,9 @@
 package org.atlasapi.equiv.query;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -21,12 +19,10 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 
@@ -64,18 +60,6 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
                 return ImmutableList.copyOf(Iterables.concat(mergeDuplicates(query.getConfiguration(), content), ids));
             }});
 	}
-	
-//	@Override
-//	public List<Content> discover(ContentQuery query) {
-//		return merge(query.getConfiguration(), delegate.discover(query));
-//	}
-//
-//	private List<Content> merge(ApplicationConfiguration config, List<Content> content) {
-//		if (!config.precedenceEnabled()) {
-//			return content;
-//		}
-//		return mergeDuplicates(config, content);
-//	}
 
 	@SuppressWarnings("unchecked")
 	private <T extends Content> List<T> mergeDuplicates(ApplicationConfiguration config, List<T> contents) {
@@ -164,51 +148,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	};
 	
 	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container<T> chosen, List<Container<T>> notChosen) {
-		//Iterable<T> withMissingItems = addMissingItems(chosen, notChosen);
-		//chosen.setContents(mergeInUnSelectedData(config, withMissingItems, notChosen));
 		applyImagePrefs(config, chosen, notChosen);
-	}
-
-	private <T extends Item> Iterable<T> addMissingItems(Container<T> chosen, List<Container<T>> notChosen) {
-		List<T> items = findItemsSuitableForMerging(chosen, notChosen);
-		if (items.isEmpty()) {
-			// nothing to merge
-			return chosen.getContents();
-		}
-		ItemIdStrategy strategy = ItemIdStrategy.findBest(items);
-		
-		if (strategy == null) {
-			return chosen.getContents();
-		}
-		List<T> matches = Lists.newArrayList();
-		for (Container<T> equivalent : notChosen) {
-			if (strategy.equals(ItemIdStrategy.findBest(equivalent.getContents()))) {
-				matches.addAll(matches);
-			}
-		}
-		return strategy.merge(items, matches);
-	}
-	
-	private <T extends Item> Iterable<T> mergeInUnSelectedData(ApplicationConfiguration config, Iterable<T> chosen, List<Container<T>> notChosenList) {
-		Map<T, Collection<T>> alternativeItemLookup = buildChosenItemLookup(chosen, notChosenList);
-		for (Entry<T, Collection<T>> entry : alternativeItemLookup.entrySet()) {
-			mergeIn(config, entry.getKey(), entry.getValue());
-		}
-		return chosen;
-	}
-
-	private <T extends Item> Map<T, Collection<T>> buildChosenItemLookup(Iterable<T> chosen, List<Container<T>> notChosenList) {
-		Multimap<T, T> alternativeItemLookup = HashMultimap.create(); 
-		for (T item: chosen) {
-	        for (Container<T> notChosen: notChosenList) {
-	            for (T notChosenItem: notChosen.getContents()) {
-	                if (notChosenItem.getEquivalentTo().contains(item.getCanonicalUri())) {
-	                	alternativeItemLookup.put(item, notChosenItem);
-	                }
-	            }
-	        }
-	    }
-		return alternativeItemLookup.asMap();
 	}
 	
 	enum ItemIdStrategy {
@@ -259,20 +199,5 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		}
 		
 		public abstract <T extends Item> Iterable<T> merge(List<T> items, List<T> matches);
-	}
-	
-
-	private <T  extends Item> List<T> findItemsSuitableForMerging(Container<T> brand, Iterable<Container<T>> equivalentBrands) {
-		List<T> items = brand.getContents();
-		if (items.isEmpty()) {
-			for (Container<T> equivalent : equivalentBrands) {
-				if (!equivalent.getContents().isEmpty()) {
-					if (ItemIdStrategy.findBest(equivalent.getContents()) != null) {
-						return equivalent.getContents();
-					}
-				}
-			}
-		}
-		return items;
 	}
 }

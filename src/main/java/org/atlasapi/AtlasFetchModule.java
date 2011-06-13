@@ -31,8 +31,6 @@ import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.facebook.FacebookCanonicaliser;
-import org.atlasapi.remotesite.hulu.HuluBrandAdapter;
-import org.atlasapi.remotesite.hulu.HuluItemAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.tinyurl.SavingShortUrlCanonicaliser;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
@@ -89,8 +87,7 @@ public class AtlasFetchModule {
 		
 		private @Autowired RemoteSiteModule remote;
 		
-		@Primary
-		public @Bean CanonicalisingFetcher contentResolver() {
+		public @Bean CanonicalisingFetcher remoteSiteContentResolver() {
 			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentResolver(), savingFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
@@ -109,8 +106,8 @@ public class AtlasFetchModule {
 			canonicalisers.add(new TedTalkAdapter.TedTalkCanonicaliser());
 			canonicalisers.add(new DailyMotionItemAdapter.DailyMotionItemCanonicaliser());
 			canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());
-			canonicalisers.add(new HuluItemAdapter.HuluItemCanonicaliser());
-			canonicalisers.add(new HuluBrandAdapter.HuluBrandCanonicaliser());
+//			canonicalisers.add(new HuluItemAdapter.HuluItemCanonicaliser());
+//			canonicalisers.add(new HuluBrandAdapter.HuluBrandCanonicaliser());
 			canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), persistence.shortUrlSaver()));
 			return canonicalisers;
 		}

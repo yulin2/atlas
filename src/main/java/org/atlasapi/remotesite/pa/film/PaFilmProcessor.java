@@ -48,7 +48,7 @@ public class PaFilmProcessor {
         String id = filmElement.getFirstChildElement("film_reference_no").getValue();
         
         Film film;
-        Identified existingFilm = contentResolver.findByCanonicalUri(PaHelper.getFilmUri(id));
+        Identified existingFilm = contentResolver.findByCanonicalUris(ImmutableList.of(PaHelper.getFilmUri(id))).getFirstValue().valueOrNull();
         if (existingFilm != null) {
             if (existingFilm instanceof Film) {
                 film = (Film) existingFilm;

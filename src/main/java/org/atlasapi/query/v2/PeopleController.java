@@ -11,8 +11,8 @@ import org.atlasapi.beans.AtlasModelType;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Person;
+import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.query.content.people.ContentResolvingPeopleResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -22,9 +22,9 @@ import com.metabroadcast.common.query.Selection;
 @Controller
 public class PeopleController extends BaseController {
 
-    private final ContentResolvingPeopleResolver resolver;
+    private final PeopleResolver resolver;
 
-    public PeopleController(ContentResolvingPeopleResolver resolver, ApplicationConfigurationFetcher configFetcher,
+    public PeopleController(PeopleResolver resolver, ApplicationConfigurationFetcher configFetcher,
                     AdapterLog log, AtlasModelWriter outputter) {
         super(configFetcher, log, outputter);
         this.resolver = resolver;
@@ -43,7 +43,7 @@ public class PeopleController extends BaseController {
                 throw new IllegalArgumentException("No uri specified");
             }
             
-            Person person = resolver.person(uri, filter);
+            Person person = resolver.person(uri);
             
             modelAndViewFor(request, response, ImmutableList.of(person), AtlasModelType.PEOPLE);
         } catch (Exception e) {

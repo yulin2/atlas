@@ -80,23 +80,36 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             }
             
             Maybe<Brand> brand = getBrand(progData, channel);
+            if (brand.hasValue()) {
+            	contentWriter.createOrUpdate(brand.requireValue());
+            }
+            
             Maybe<Series> series = getSeries(progData, channel, brand.hasValue());
-            Maybe<? extends Item> episode = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getFilmOrEpisode(progData, channel, zone);
+            if (series.hasValue()) {
+            	if (brand.hasValue()) {
+            		series.requireValue().setParent(brand.requireValue());
+            	}
+            	contentWriter.createOrUpdate(series.requireValue());
+            }
+            
+            Maybe<? extends Item> item = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getFilmOrEpisode(progData, channel, zone, brand.hasValue() || series.hasValue());
 
-            if (episode.hasValue()) {
-                if (series.hasValue() && episode.requireValue() instanceof Episode) {
-                    series.requireValue().addContents((Episode) episode.requireValue());
+            if (item.hasValue()) {
+                if (series.hasValue() && item.requireValue() instanceof Episode) {
+                    Episode episode = (Episode) item.requireValue();
+                    episode.setSeries(series.requireValue());
                 }
                 if (brand.hasValue()) {
-                    brand.requireValue().addOrReplace(episode.requireValue());
+                	item.requireValue().setContainer(brand.requireValue());
+                } else if (series.hasValue()) {
+                	item.requireValue().setContainer(series.requireValue());
                 }
-                
-                contentWriter.createOrUpdate(episode.requireValue());
-                
-                personWriter.createOrUpdatePeople(episode.requireValue());
+                contentWriter.createOrUpdate(item.requireValue());
+                personWriter.createOrUpdatePeople(item.requireValue());
             }
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
+        	e.printStackTrace();
+        	log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
         }
     }
     
@@ -105,13 +118,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Maybe<? extends Item> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone) {
-        Identified resolvedContent = contentResolver.findByCanonicalUri(CLOSED_EPISODE);
+        Identified resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(CLOSED_EPISODE)).getFirstValue().requireValue();
 
         Episode episode;
         if (resolvedContent instanceof Episode) {
             episode = (Episode) resolvedContent;
         } else {
-            episode = getBasicEpisode(progData);
+            episode = (Episode) getBasicEpisode(progData, true);
         }
         episode.setCanonicalUri(CLOSED_EPISODE);
         episode.setCurie(CLOSED_CURIE);
@@ -157,19 +170,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         if (Strings.isNullOrEmpty(progData.getSeriesNumber()) || Strings.isNullOrEmpty(progData.getSeriesId())) {
             return Maybe.nothing();
         }
-        
         String seriesUri = PaHelper.getSeriesUri(progData.getSeriesId(), progData.getSeriesNumber());
         
-        Series series = null;
-        if (! hasBrand) {
-            Identified resolvedContent = contentResolver.findByCanonicalUri(seriesUri);
-            if (resolvedContent instanceof Series) {
-                series = (Series) resolvedContent;
-            } 
-        }
-        if (series == null) {
-            series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
-        }
+        Series series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
@@ -190,22 +193,23 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(series);
     }
     
-    private Maybe<? extends Item> getFilmOrEpisode(ProgData progData, Channel channel, DateTimeZone zone) {
-        return specialization(progData, channel) == Specialization.FILM ? getFilm(progData, channel, zone) : getEpisode(progData, channel, zone);
+    private Maybe<? extends Item> getFilmOrEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode) {
+        return specialization(progData, channel) == Specialization.FILM ? getFilm(progData, channel, zone) : getEpisode(progData, channel, zone, isEpisode);
     }
     
     private Maybe<Film> getFilm(ProgData progData, Channel channel, DateTimeZone zone) {
         String filmUri = PaHelper.getFilmUri(programmeId(progData));
-        Identified resolvedContent = contentResolver.findByCanonicalUri(filmUri);
+        Maybe<Identified> possiblePreviousData = contentResolver.findByCanonicalUris(ImmutableList.of(filmUri)).getFirstValue();
         
         Film film;
-        if (resolvedContent != null) {
-            if (resolvedContent instanceof Film) {
-                film = (Film) resolvedContent;
+        if (possiblePreviousData.hasValue()) {
+        	Identified previous = possiblePreviousData.requireValue();
+            if (previous instanceof Film) {
+                film = (Film) previous;
             }
             else {
                 film = new Film();
-                Item.copyTo((Episode) resolvedContent, film);
+                Item.copyTo((Episode) previous, film);
             }
         } else {
             film = getBasicFilm(progData);
@@ -235,7 +239,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 }
             }
         }
-        
+
         episode.setMediaType(channelMap.isRadioChannel(channel) ? MediaType.AUDIO : MediaType.VIDEO);
         episode.setSpecialization(specialization(progData, channel));
         episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
@@ -271,32 +275,32 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         addBroadcast(version, broadcast);
     }
 
-    private Maybe<Episode> getEpisode(ProgData progData, Channel channel, DateTimeZone zone) {
+    private Maybe<Item> getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode) {
         
         String episodeUri = PaHelper.getEpisodeUri(programmeId(progData));
-        Identified resolvedContent = contentResolver.findByCanonicalUri(episodeUri);
+        Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(episodeUri)).getFirstValue();
 
-        Episode episode;
-        if (resolvedContent instanceof Episode) {
-            episode = (Episode) resolvedContent;
+        Item item;
+        if (possiblePrevious.hasValue() && possiblePrevious.requireValue() instanceof Episode) {
+            item = (Episode) possiblePrevious.requireValue();
         } else {
-            episode = getBasicEpisode(progData);
+            item = getBasicEpisode(progData, isEpisode);
         }
         
-        setCommonDetails(progData, channel, zone, episode);
+        setCommonDetails(progData, channel, zone, item);
         
         try {
             if (progData.getEpisodeNumber() != null) {
-                episode.setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
+                ((Episode) item).setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
             }
             if (progData.getSeriesNumber() != null) {
-                episode.setSeriesNumber(Integer.valueOf(progData.getSeriesNumber()));
+            	 ((Episode) item).setSeriesNumber(Integer.valueOf(progData.getSeriesNumber()));
             }
         } catch (NumberFormatException e) {
             // sometimes we don't get valid numbers
         }
         
-        return Maybe.just(episode);
+        return Maybe.just(item);
     }
 
     private Broadcast broadcast(ProgData progData, Channel channel, DateTimeZone zone) {
@@ -391,12 +395,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return film;
     }
 
-    private Episode getBasicEpisode(ProgData progData) {
-        Episode episode = new Episode(PaHelper.getEpisodeUri(programmeId(progData)), "pa:e-" + programmeId(progData), Publisher.PA);
-
-        setBasicDetails(progData, episode);
-
-        return episode;
+    private Item getBasicEpisode(ProgData progData, boolean isEpisode) {
+        Item item = isEpisode ? new Episode() : new Item();
+        item.setCanonicalUri(PaHelper.getEpisodeUri(programmeId(progData)));
+        item.setCurie("pa:e-" + programmeId(progData));
+        item.setPublisher(Publisher.PA);
+        setBasicDetails(progData, item);
+        return item;
     }
     
     private void setBasicDetails(ProgData progData, Item item) {
