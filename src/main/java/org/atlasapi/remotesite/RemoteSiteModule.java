@@ -24,7 +24,6 @@ import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgAdapterModule;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
-import org.atlasapi.remotesite.itv.ItvAdapterModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.vimeo.VimeoAdapter;
@@ -36,7 +35,7 @@ import org.springframework.context.annotation.Import;
 import com.google.common.collect.Lists;
 
 @Configuration
-@Import({ItvAdapterModule.class, ArchiveOrgAdapterModule.class})
+@Import({ArchiveOrgAdapterModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
