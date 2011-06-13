@@ -8,16 +8,25 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.persistence.content.ContentResolver;
+
+import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.base.Maybe;
 
 public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container<?>> {
 
     private static final String NAME = "Item";
     private final ContentEquivalenceUpdater<Item> itemUpdater;
+    private final ContentResolver resolver;
 
-    public ItemBasedContainerEquivalenceGenerator(ContentEquivalenceUpdater<Item> itemUpdater) {
+    public ItemBasedContainerEquivalenceGenerator(ContentEquivalenceUpdater<Item> itemUpdater, ContentResolver resolver) {
         this.itemUpdater = itemUpdater;
+        this.resolver = resolver;
     }
     
     @Override
@@ -25,20 +34,32 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
         
         ScoredEquivalentsBuilder<Container<?>> containerEquivalents = DefaultScoredEquivalents.fromSource(NAME);
         
-         for (Item item : container.getContents()) {
+         for (ChildRef ref : container.getChildRefs()) {
             
-            EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences(item);
-
-            for (ScoredEquivalent<Item> strongEquivalent : itemEquivalences.strongEquivalences().values()) {
-                Container<?> containerEquivalent = strongEquivalent.equivalent().getFullContainer();
-                if (containerEquivalent != null) {
-                    containerEquivalents.addEquivalent(containerEquivalent, normalize(strongEquivalent.score(), container.getContents().size()));
+            String itemUri = ref.getUri();
+            Maybe<Identified> maybeItem = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
+            
+            if(maybeItem.hasValue()) {
+                
+                Item item = (Item) maybeItem.requireValue();
+                
+                EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences(item);
+                
+                for (ScoredEquivalent<Item> strongEquivalent : itemEquivalences.strongEquivalences().values()) {
+                    ParentRef parentEquivalent = strongEquivalent.equivalent().getContainer();
+                    if (resolve(parentEquivalent) != null) {
+                        containerEquivalents.addEquivalent(resolve(parentEquivalent), normalize(strongEquivalent.score(), container.getChildRefs().size()));
+                    }
                 }
             }
             
         }
         
         return containerEquivalents.build();
+    }
+
+    private Container<?> resolve(ParentRef parentEquivalent) {
+        return (Container<?>) resolver.findByCanonicalUris(ImmutableList.of(parentEquivalent.getUri())).getFirstValue().requireValue();
     }
 
     private double normalize(double score, int itemCount) {
