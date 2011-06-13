@@ -92,13 +92,15 @@ public class C4EpgEntryProcessor {
 
             updateEpisodeDetails(episode, entry, channel);
             
-            if(episode.getSeriesNumber() != null) {
-                updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode);
-            }
-             
-            contentWriter.createOrUpdate(episode);
             Brand brand = updateBrand(webSafeBrandName, episode, entry);
+            if(episode.getSeriesNumber() != null) {
+                updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode, brand);
+            }
+
             contentWriter.createOrUpdate(brand);
+
+            episode.setContainer(brand);
+            contentWriter.createOrUpdate(episode);
 
         } catch (Exception e) {
             log.record(new AdapterLogEntry(WARN).withCause(e).withSource(getClass()).withDescription("Exception processing entry: " + entry.id()));
@@ -124,19 +126,19 @@ public class C4EpgEntryProcessor {
         }
     }
 
-    private Series updateSeries(String seriesUri, String brandName, Episode episode) {
+    private void updateSeries(String seriesUri, String brandName, Episode episode, Brand brand) {
         Maybe<Identified> maybeSeries = contentStore.findByCanonicalUris(ImmutableSet.of(seriesUri)).get(seriesUri);
         Series series = null;
         if (maybeSeries.hasValue()) {
             series = (Series) maybeSeries.requireValue();
-            series.addOrReplace(episode);
         } else {
             series = new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri), C4);
-            series.addContents(episode);
             series.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s", brandName, episode.getSeriesNumber()));
             series.withSeriesNumber(episode.getSeriesNumber());
         }
-        return series;
+        series.setParent(brand);
+        contentWriter.createOrUpdate(series);
+        episode.setSeries(series);
     }
 
     private Episode updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel) {

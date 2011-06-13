@@ -1,8 +1,10 @@
 package org.atlasapi.remotesite.channel4;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
@@ -18,7 +20,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
 
-public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
+public class C4SeriesExtractor implements ContentExtractor<Feed, SeriesAndEpisodes> {
 
 	private static final Pattern SERIES_ID = Pattern.compile("series-(\\d+)");
 	private final C4EpisodesExtractor episodesExtractor; 
@@ -28,7 +30,7 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 	}
 	
 	@Override
-	public Series extract(Feed source) {
+	public SeriesAndEpisodes extract(Feed source) {
 
 		Preconditions.checkArgument(C4AtomApi.isASeriesFeed(source), "Not a series feed, feed has id: " + source.getId());
 		
@@ -50,8 +52,12 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, Series> {
 		
 		series.setMediaType(MediaType.VIDEO);
 		series.setSpecialization(Specialization.TV);
-		series.setContents(episodesExtractor.extract(source));
-		return series;
+		
+		List<Episode> episodes = episodesExtractor.extract(source);
+		for (Episode episode : episodes) {
+			episode.setSeries(series);
+		}
+		return new SeriesAndEpisodes(series, episodes);
 	}
 	
 	private Integer seriesNumberFrom(Feed source) {
