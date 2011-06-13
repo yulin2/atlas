@@ -1,18 +1,39 @@
 package org.atlasapi.remotesite.itv;
 
+import java.util.List;
+
 import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 
+import com.google.common.collect.Lists;
+
 public class ItvMercuryBrandAdapterTest extends TestCase {
-    private final SiteSpecificAdapter<Brand> adapter = new ItvMercuryBrandAdapter();
+    
+    private final List<Item> items = Lists.newArrayList();
+    private final ContentWriter itemStoringWriter = new ContentWriter() {
+        
+        
+        @Override
+        public void createOrUpdate(Container<?> container) {
+        }
+        
+        @Override
+        public void createOrUpdate(Item item) {
+            items.add(item);
+        }
+    };
+    
+    private final SiteSpecificAdapter<Brand> adapter = new ItvMercuryBrandAdapter(itemStoringWriter);
     
     public void testShouldGetBrand() throws Exception {
         String uri = "http://www.itv.com/itvplayer/video/?Filter=Emmerdale";
@@ -24,9 +45,9 @@ public class ItvMercuryBrandAdapterTest extends TestCase {
 //        assertFalse(brand.getGenres().isEmpty());
         assertNotNull(brand.getTitle());
         assertNotNull(brand.getDescription());
-        assertFalse(brand.getContents().isEmpty());
+        assertFalse(brand.getChildRefs().isEmpty());
         
-        for (Item item: brand.getContents()) {
+        for (Item item: items) {
             assertNotNull(item.getTitle());
             assertNotNull(item.getDescription());
             //assertFalse(item.getGenres().isEmpty());

@@ -8,7 +8,9 @@ import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.ContentExtractor;
 
 import com.google.common.collect.ImmutableSet;
@@ -20,7 +22,12 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
     private final ItvMercuryEpisodeExtractor episodeExtractor = new ItvMercuryEpisodeExtractor();
     private final static ItvGenreMap genreMap = new ItvGenreMap();
     private final static Pattern IMAGE = Pattern.compile(".*\\d+x\\d+(/.+.jpg)");
+    private final ContentWriter writer;
 
+    public ItvMercuryBrandExtractor(ContentWriter writer) {
+        this.writer = writer;
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public Brand extract(Map<String, Object> values) {
@@ -67,6 +74,7 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
                         for (Map<String, Object> episodeInfo : episodes) {
                             Episode episode = episodeExtractor.extract(episodeInfo);
                             if (episode != null) {
+                                episode.setContainer(brand);
                                 parsedEpisodes.add(episode);
                             }
                         }
@@ -74,7 +82,13 @@ public class ItvMercuryBrandExtractor implements ContentExtractor<Map<String, Ob
                 }
             }
         }
-        brand.setContents(parsedEpisodes);
+        
+        writer.createOrUpdate(brand);
+        for (Episode episode : parsedEpisodes) {
+            writer.createOrUpdate(episode);
+        }
+        
+        brand.setChildRefs(Lists.transform(parsedEpisodes, Item.TO_CHILD_REF));
         return brand;
     }
 
