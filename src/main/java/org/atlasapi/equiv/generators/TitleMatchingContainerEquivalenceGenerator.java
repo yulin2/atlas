@@ -41,9 +41,15 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
     }
     
     private double score(String subjectTitle, String equivalentTitle) {
+        subjectTitle = alphaNumeric(subjectTitle);
+        equivalentTitle = alphaNumeric(equivalentTitle);
         double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
         double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
         return commonPrefix / (subjectTitle.length()/1.0) - difference;
+    }
+
+    private String alphaNumeric(String title) {
+        return title.replaceAll("[^\\d\\w]", "");
     }
 
     private double commonPrefixLength(String t1, String t2) {
@@ -59,4 +65,5 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
         List<Identified> search = searchResolver.search(new Search(content.getTitle()), publishers, appConfig , new Selection(0, 10));
         return search;
     }
+    
 }
