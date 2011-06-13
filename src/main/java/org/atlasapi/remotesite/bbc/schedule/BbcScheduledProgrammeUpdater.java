@@ -13,7 +13,6 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -69,9 +68,9 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
             for (Programme programme : programmes) {
                 try {
                     if (programme.isEpisode()) {
-                        Item fetchedItem = (Item) fetcher.fetch(SLASH_PROGRAMMES_BASE_URI + programme.pid());
+                        Item fetchedItem = (Item) fetcher.createOrUpdate(SLASH_PROGRAMMES_BASE_URI + programme.pid());
                         if (fetchedItem != null) {
-                            writeFetchedItem(fetchedItem);
+                            fetchAndSaveContainerIfRequired(fetchedItem);
                         } else {
                             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Not processing programme with pid " + programme.pid()+ " it can't be retrieved by the fetcher"));
                         }
@@ -87,33 +86,27 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
         }
     }
 
-    private void writeFetchedItem(Item fetchedItem) {
+    @SuppressWarnings("unchecked")
+	private void fetchAndSaveContainerIfRequired(Item fetchedItem) {
         if (fetchedItem instanceof Episode) {
             Episode fetchedEpisode = (Episode) fetchedItem;
-            if (fetchedEpisode.getContainer() != null) {
-                Container<Item> fetchedContainer = fetchContainerFor(fetchedEpisode.getContainer().getCanonicalUri());
-                if (fetchedContainer != null) {
-                    fetchedContainer.addOrReplace(fetchedEpisode);
-                    writer.createOrUpdate(fetchedContainer);
-                } else {
-                    log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Item "+fetchedItem+" it's Brand can't be fetched"));
-                }
-            } else {
-                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Item "+fetchedItem+" as it has no container"));
+			if (fetchedEpisode.getContainer() != null) {
+				String containerUri = fetchedEpisode.getContainer().getUri();
+				Maybe<Identified> locallySavedContainer = localFetcher.findByCanonicalUris(ImmutableList.of(containerUri)).getFirstValue();
+				if (locallySavedContainer.isNothing()) {
+					Container<Item> fetchedContainer = (Container<Item>) fetcher.createOrUpdate(containerUri);
+					if (fetchedContainer == null) {
+						log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Item " + fetchedItem + " it's Brand can't be fetched"));
+						return;
+					}
+				}
+			} else {
+                log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Episode "+fetchedItem+" as it has no container"));
+                return;
             }
-        } else {
-            writer.createOrUpdate(fetchedItem);
-        }
+        } 
     }
 
-    @SuppressWarnings("unchecked")
-    private Container<Item> fetchContainerFor(String containerUri) {
-        Maybe<Identified> fetchedContainer = localFetcher.findByCanonicalUris(ImmutableList.of(containerUri)).get(containerUri);
-        if (fetchedContainer.hasValue()) {
-            return (Container<Item>) fetchedContainer.requireValue();
-        }
-        return (Container<Item>) fetcher.fetch(containerUri);
-    }
 
     @Override
     public void run() {

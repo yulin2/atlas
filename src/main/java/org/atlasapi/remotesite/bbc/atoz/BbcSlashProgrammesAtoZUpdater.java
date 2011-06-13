@@ -26,18 +26,16 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
     private final RemoteSiteClient<SlashProgrammesAtoZRdf> client;
     private final BbcProgrammeAdapter fetcher;
     private final List<String> channels = ImmutableList.of("radio2", "radio1", "radio3", "radio4", "bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd");
-	private final ContentWriter writer;
 	
 	private final AdapterLog log;
     
     public BbcSlashProgrammesAtoZUpdater(ContentWriter writer, AdapterLog log) {
-        this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(log), writer, log);
+        this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(writer, log), log);
     }
 
-    public BbcSlashProgrammesAtoZUpdater(RemoteSiteClient<SlashProgrammesAtoZRdf> client, BbcProgrammeAdapter fetcher, ContentWriter writer, AdapterLog log) {
+    public BbcSlashProgrammesAtoZUpdater(RemoteSiteClient<SlashProgrammesAtoZRdf> client, BbcProgrammeAdapter fetcher, AdapterLog log) {
         this.client = client;
         this.fetcher = fetcher;
-		this.writer = writer;
 		this.log = log;
     }
 
@@ -75,16 +73,7 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 	private void loadAndSave(String pid) {
 		String uri = SLASH_PROGRAMMES_BASE_URI + pid;
 		try {
-			Identified content = fetcher.fetch(uri);
-		    if (content != null) {
-		    	if (content instanceof Item) {
-		    		writer.createOrUpdate((Item) content);
-		    	} else if (content instanceof Container<?>) {
-		        	writer.createOrUpdate((Container<?>) content);
-		    	} else {
-		            throw new IllegalArgumentException("Could not persist content (unknown type): " + content);
-		    	}
-		    }
+			fetcher.createOrUpdate(uri);
 		} catch (Exception e) {
         	log.record(new AdapterLogEntry(Severity.WARN).withCause(e).withUri(uri).withSource(getClass()));
 		}

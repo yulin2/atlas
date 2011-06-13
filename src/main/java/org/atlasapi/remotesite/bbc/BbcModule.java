@@ -18,7 +18,6 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
-import org.atlasapi.remotesite.bbc.schedule.BbcScheduleController;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,10 +66,6 @@ public class BbcModule {
         return new BbcIonDateRangeScheduleUpdater(lookBack, lookAhead, contentResolver, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
     }
 	
-	@Bean BbcScheduleController bbcScheduleController() {
-	    return new BbcScheduleController(contentResolver, bbcProgrammeAdapter(), contentWriters, log);
-	}
-	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
 	    return new BbcIonScheduleController(contentResolver, contentWriters, itemsPeopleWriter, log);
 	}
@@ -81,10 +76,6 @@ public class BbcModule {
 
 	@Bean Runnable bbcFeedsUpdater() {
 		return new BbcSlashProgrammesAtoZUpdater(contentWriters, log);
-	}
-	
-	@Bean BbcProgrammeAdapter bbcProgrammeAdapter() {
-		return new BbcProgrammeAdapter(log);
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {

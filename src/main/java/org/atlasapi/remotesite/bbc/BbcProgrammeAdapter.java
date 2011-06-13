@@ -25,13 +25,11 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
-import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
@@ -40,7 +38,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
-public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
+public class BbcProgrammeAdapter  {
 
     static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile("^http://www\\.bbc\\.co\\.uk/programmes/([pb]00[^/\\.]+)$");
 
@@ -54,16 +52,19 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
 
     private final BbcSlashProgrammesClipRdfClient clipClient;
 
-    public BbcProgrammeAdapter(AdapterLog log) {
-        this(new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcSlashProgrammesClipRdfClient(), new BbcProgrammeGraphExtractor(log), log);
+	private final ContentWriter writer;
+
+    public BbcProgrammeAdapter(ContentWriter writer, AdapterLog log) {
+        this(writer, new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcSlashProgrammesClipRdfClient(), new BbcProgrammeGraphExtractor(log), log);
     }
 
-    public BbcProgrammeAdapter(BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, BbcSlashProgrammesClipRdfClient clipClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
-        this.versionClient = versionClient;
+    public BbcProgrammeAdapter(ContentWriter writer, BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, BbcSlashProgrammesClipRdfClient clipClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
+        this.writer = writer;
+		this.versionClient = versionClient;
         this.episodeClient = episodeClient;
         this.clipClient = clipClient;
         this.itemExtractor = propertyExtractor;
-        this.brandExtractor = new BbcBrandExtractor(this, log);
+        this.brandExtractor = new BbcBrandExtractor(this, writer, log);
     }
 
     public boolean canFetch(String uri) {
@@ -71,86 +72,85 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
         return matcher.matches();
     }
 
-    @Override
-    public Identified fetch(String uri) {
-        return fetch(uri, true);
+    public Identified createOrUpdate(String uri) {
+    	return createOrUpdate(uri, null);
     }
     
-    public Identified fetch(String uri, boolean hydrate) {
+    public Identified createOrUpdate(String uri, Brand parentBrand) {
+    	if (!canFetch(uri)) {
+    		throw new IllegalArgumentException("URI " + uri + " does not match acceptable URI pattern " + SLASH_PROGRAMMES_URL_PATTERN);
+    	}
         try {
             SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
             if (content == null) {
+            	// Nothing to write
                 return null;
             }
             if (content.episode() != null) {
-                List<SlashProgrammesVersionRdf> versions = null;
-                if (content.episode().versions() != null && !content.episode().versions().isEmpty()) {
-                    versions = ImmutableList.copyOf(Iterables.transform(content.episode().versions(), new Function<SlashProgrammesVersion,SlashProgrammesVersionRdf>(){
-						@Override
-						public SlashProgrammesVersionRdf apply(SlashProgrammesVersion input) {
-							return readSlashProgrammesDataForVersion(input);
-						}}));
-                }
-                
-                Set<SlashProgrammesClip> clipRefs = content.episode().clips();
-                Set<BbcProgrammeSource.ClipAndVersion> clips = Sets.newHashSet();
-                if (clipRefs != null && !clipRefs.isEmpty()) {
-                    for (SlashProgrammesClip clipRef: clipRefs) {
-                        SlashProgrammesRdf clip = readSlashProgrammesDataForClip(clipRef);
-                        
-                        SlashProgrammesVersionRdf clipVersion = null;
-                        if (clip.clip().versions() != null && ! clip.clip().versions().isEmpty()) {
-                            clipVersion = readSlashProgrammesDataForVersion(clip.clip().versions().get(0));
-                        }
-                        
-                        clips.add(new BbcProgrammeSource.ClipAndVersion(clip, clipVersion));
-                    }
-                }
-                
-                BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, versions, clips);
-                Item item = itemExtractor.extract(source);
-                
-                if (item instanceof Episode) {
-                    Episode episode = (Episode) item;
-                    if (content.series() != null) {
-                        Series series = createSkeletonSeries(content.series());
-                        series.addContents(episode);
-                    }
-                    if (content.brand() != null) {
-                        Brand brand = createSkeletonBrand(content.brand());
-                        brand.addContents(episode);
-                    }
-                }
-                
-                return item;
+                return createOrUpdateTopLevelItem(uri, content);
             }
             SlashProgrammesSeriesContainer rdfSeries = content.series();
 			if (rdfSeries != null) {
-            	return brandExtractor.extractSeriesFrom(rdfSeries);
+            	return brandExtractor.writeSeries(rdfSeries, parentBrand);
             }
-            
             if (content.brand() != null) {
-                return brandExtractor.extractBrandFrom(content.brand(), hydrate);
+                return brandExtractor.writeBrand(content.brand());
             }
-            
             return null;
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
     
-    private Series createSkeletonSeries(SlashProgrammesSeriesContainer rdfSeries) {
-        String seriesUri = rdfSeries.uri();
-        Series series = new Series(seriesUri, BbcUriCanonicaliser.curieFor(seriesUri), Publisher.BBC);
-        return series;
-    }
+    private Identified createOrUpdateTopLevelItem(String uri, SlashProgrammesRdf content) {
+		Item item = fetchItem(uri, content);
+		if (item instanceof Episode) {
+		    throw new IllegalArgumentException("Not top level: " + uri);
+		}
+		writer.createOrUpdate(item);
+		return item;
+	}
     
-    private Brand createSkeletonBrand(SlashProgrammesContainerRef rdfBrand) {
-        String brandUri = rdfBrand.uri();
-        Brand brand = new Brand(brandUri, BbcUriCanonicaliser.curieFor(brandUri), Publisher.BBC);
-        return brand;
+    Item fetchItem(String uri) {
+    	SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
+        if (content == null) {
+        	throw new IllegalArgumentException("No data for uri " + uri);
+        }
+        if (content.episode() == null) {
+        	throw new IllegalArgumentException("URI not an ite, " + uri);
+        }
+        return fetchItem(uri, content);
     }
+
+	private Item fetchItem(String uri, SlashProgrammesRdf content) {
+		List<SlashProgrammesVersionRdf> versions = null;
+		if (content.episode().versions() != null && !content.episode().versions().isEmpty()) {
+		    versions = ImmutableList.copyOf(Iterables.transform(content.episode().versions(), new Function<SlashProgrammesVersion,SlashProgrammesVersionRdf>(){
+				@Override
+				public SlashProgrammesVersionRdf apply(SlashProgrammesVersion input) {
+					return readSlashProgrammesDataForVersion(input);
+				}}));
+		}
+		
+		Set<SlashProgrammesClip> clipRefs = content.episode().clips();
+		Set<BbcProgrammeSource.ClipAndVersion> clips = Sets.newHashSet();
+		if (clipRefs != null && !clipRefs.isEmpty()) {
+		    for (SlashProgrammesClip clipRef: clipRefs) {
+		        SlashProgrammesRdf clip = readSlashProgrammesDataForClip(clipRef);
+		        
+		        SlashProgrammesVersionRdf clipVersion = null;
+		        if (clip.clip().versions() != null && ! clip.clip().versions().isEmpty()) {
+		            clipVersion = readSlashProgrammesDataForVersion(clip.clip().versions().get(0));
+		        }
+		        
+		        clips.add(new BbcProgrammeSource.ClipAndVersion(clip, clipVersion));
+		    }
+		}
+		
+		BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, versions, clips);
+		Item item = itemExtractor.extract(source);
+		return item;
+	}
 
     private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {
         try {

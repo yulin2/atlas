@@ -160,7 +160,6 @@ public class BbcIonScheduleUpdateTask implements Runnable {
     private Brand brandFromSeries(Series series) {
         Brand brand = new Brand(series.getCanonicalUri(), series.getCurie(), series.getPublisher());
         brand.setEquivalentTo(series.getEquivalentTo());
-        brand.setContents(series.getContents());
         brand.setTitle(series.getTitle());
         brand.setDescription(series.getDescription());
         brand.setImage(series.getImage());
