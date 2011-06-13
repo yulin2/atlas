@@ -104,7 +104,7 @@ public class EquivModule {
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
         Set<ContentEquivalenceGenerator<Container<?>>> containerGenerators = ImmutableSet.<ContentEquivalenceGenerator<Container<?>>>of(
-                new ItemBasedContainerEquivalenceGenerator(itemUpdater()),
+                new ItemBasedContainerEquivalenceGenerator(itemUpdater(), contentResolver),
                 new TitleMatchingContainerEquivalenceGenerator(searchResolver)
         );
         EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder(containerGenerators.size());
