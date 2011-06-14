@@ -50,6 +50,15 @@ header {
 	border-bottom:1px solid #ccc;
 }
 
+nav {
+	margin-top: 5px;
+}
+
+nav h3 {
+	margin-left: 0;
+	display: inline;
+}
+
 h2 {
 	margin:12px;
 	border-bottom:1px solid #ccc;
