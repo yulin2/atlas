@@ -9,7 +9,7 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.mongo.KnownTypeContentResolver;
+import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.LookupResolver;
 
