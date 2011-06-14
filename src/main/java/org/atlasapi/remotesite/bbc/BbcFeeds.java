@@ -18,6 +18,9 @@ public class BbcFeeds {
 	}
 
 	public static String slashProgrammesUriForPid(String pid) {
+	    if (!PID_FINDER.matcher(pid).matches()) {
+	        throw new IllegalArgumentException("PID " + pid + " did not match the BBC PID pattern " + PID_FINDER);
+	    }
 		return SLASH_PROGRAMMES_BASE + pid;
 	}
 	
