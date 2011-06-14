@@ -8,6 +8,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
@@ -40,22 +41,22 @@ public class BroadcastTrimmerTest extends TestCase {
     private final Channel channel = Channel.CHANNEL_FOUR;
     private final Set<Channel> channels = ImmutableSet.of(channel);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
-    private final ContentResolver contentResolver = context.mock(ContentResolver.class);
 
     private Item item = buildItem();
     
     public void testTrimBroadcasts() {
         final Schedule schedule = Schedule.fromChannelMap(channelMap(), new Interval(100, 200));
         
+        ContentResolver resolver = new StubContentResolver().respondTo(item);
+        
         context.checking(new Expectations(){{
             oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers)); will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
-            allowing(contentResolver).findByCanonicalUri(item.getCanonicalUri()); will(returnValue(item));
         }});
         
         AdapterLog log = new NullAdapterLog();
         
-        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, contentResolver, contentWriter, log);
+        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
         
         Interval scheduleInterval = new Interval(100, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableSet.of("c4:1234"));

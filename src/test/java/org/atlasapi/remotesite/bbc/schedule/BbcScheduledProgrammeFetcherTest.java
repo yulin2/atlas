@@ -26,7 +26,7 @@ public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 
 	RemoteSiteClient<ChannelSchedule> scheduleClient = mock(RemoteSiteClient.class);
 
-	BbcProgrammeAdapter fetcher = new TestBbcProgrammeAdapter(new NullAdapterLog());
+	//BbcProgrammeAdapter fetcher = new TestBbcProgrammeAdapter(new NullAdapterLog());
 
 	ContentResolver localFetcher = mock(ContentResolver.class);
 	ContentWriter writer = mock(ContentWriter.class);
@@ -45,36 +45,36 @@ public class BbcScheduledProgrammeFetcherTest extends MockObjectTestCase {
 	final Item item = new Item("itemUri", "itemCurie", Publisher.BBC);
 	
 	public void testFetchExtractedEpisodePid() throws Exception {
-	    
-        brand.setContents(containedInBrand);
-        
-        replacingEpisode.setContainer(brand);
-		
-		BbcScheduledProgrammeUpdater scheduleFetcher = new BbcScheduledProgrammeUpdater(scheduleClient, localFetcher, fetcher, writer, Lists.newArrayList("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"), new NullAdapterLog());
-		
-		checking(new Expectations() {{ 
-			one(scheduleClient).get("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"); will(returnValue(schedule));
-
-			one(localFetcher).findByCanonicalUri("brandUri"); will(returnValue(brand));
-			one(writer).createOrUpdate(with(any(Brand.class)));
-			one(writer).createOrUpdate(with(any(Item.class)));
-		}});
-
-		scheduleFetcher.run();
-		
-		assertThat(brand.getContents().size(), is(equalTo(1)));
-		assertThat(brand.getContents().get(0).getCurie(), is(equalTo("replacingCurie")));
+    	fail("update this test");
+//        brand.setContents(containedInBrand);
+//        
+//        replacingEpisode.setContainer(brand);
+//		
+//		BbcScheduledProgrammeUpdater scheduleFetcher = new BbcScheduledProgrammeUpdater(scheduleClient, localFetcher, fetcher, writer, Lists.newArrayList("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"), new NullAdapterLog());
+//		
+//		checking(new Expectations() {{ 
+//			one(scheduleClient).get("http://www.bbc.co.uk/bbctwo/programmes/schedules/england/2009/11/05.xml"); will(returnValue(schedule));
+//
+//			one(localFetcher).findByCanonicalUri("brandUri"); will(returnValue(brand));
+//			one(writer).createOrUpdate(with(any(Brand.class)));
+//			one(writer).createOrUpdate(with(any(Item.class)));
+//		}});
+//
+//		scheduleFetcher.run();
+//		
+//		assertThat(brand.getContents().size(), is(equalTo(1)));
+//		assertThat(brand.getContents().get(0).getCurie(), is(equalTo("replacingCurie")));
 	}
 	
-	private class TestBbcProgrammeAdapter extends BbcProgrammeAdapter {
-
-        public TestBbcProgrammeAdapter(AdapterLog log) {
-            super(log);
-        }
-	    
-        @Override
-        public Content fetch(String uri, boolean hydrate) {
-            return uri.endsWith("b00abcd") ? replacingEpisode : item;
-        }
-	}
+//	private class TestBbcProgrammeAdapter extends BbcProgrammeAdapter {
+//
+//        public TestBbcProgrammeAdapter(AdapterLog log) {
+//            super(log);
+//        }
+//	    
+//        @Override
+//        public Content fetch(String uri, boolean hydrate) {
+//            return uri.endsWith("b00abcd") ? replacingEpisode : item;
+//        }
+//	}
 }
