@@ -80,6 +80,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             
             Maybe<Brand> brand = getBrand(progData, channel);
             if (brand.hasValue()) {
+                if (isClosedBrand(brand)) {
+                    brand.requireValue().setScheduleOnly(true);
+                }
             	contentWriter.createOrUpdate(brand.requireValue());
             }
             
@@ -117,17 +120,18 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Maybe<? extends Item> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone) {
-        Identified resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(CLOSED_EPISODE)).getFirstValue().requireValue();
+        Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(CLOSED_EPISODE)).getFirstValue();
 
         Episode episode;
-        if (resolvedContent instanceof Episode) {
-            episode = (Episode) resolvedContent;
+        if (resolvedContent.hasValue() && resolvedContent.requireValue() instanceof Episode) {
+            episode = (Episode) resolvedContent.requireValue();
         } else {
             episode = (Episode) getBasicEpisode(progData, true);
         }
         episode.setCanonicalUri(CLOSED_EPISODE);
         episode.setCurie(CLOSED_CURIE);
         episode.setTitle(progData.getTitle());
+        episode.setScheduleOnly(true);
         
         Version version = findBestVersion(episode.getVersions());
 
@@ -289,11 +293,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         setCommonDetails(progData, channel, zone, item);
         
         try {
-            if (progData.getEpisodeNumber() != null) {
-                ((Episode) item).setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
-            }
-            if (progData.getSeriesNumber() != null) {
-            	 ((Episode) item).setSeriesNumber(Integer.valueOf(progData.getSeriesNumber()));
+            if (item instanceof Episode) {
+                if (progData.getEpisodeNumber() != null) {
+                    ((Episode) item).setEpisodeNumber(Integer.valueOf(progData.getEpisodeNumber()));
+                }
+                if (progData.getSeriesNumber() != null) {
+                	 ((Episode) item).setSeriesNumber(Integer.valueOf(progData.getSeriesNumber()));
+                }
             }
         } catch (NumberFormatException e) {
             // sometimes we don't get valid numbers
