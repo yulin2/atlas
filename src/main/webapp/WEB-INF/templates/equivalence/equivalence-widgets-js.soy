@@ -136,7 +136,7 @@
 	        <td rowspan="{print length($expectations)}">{$label}</td>
 	        
 	    {/if}
-	        <td class="{if $expected.correctExpectation}correct{else}incorrect{/if}"><a href="../result?uri={$expected.encodedId}">{$expected.id}</a></td>
+	        <td class="{if $expected.correctExpectation}correct{else}incorrect{/if}"><a href="/system/equivalence/result?uri={$expected.encodedId}">{$expected.id}</a></td>
 	        <td>{if $expected.score}{$expected.score}{else}None{/if}</td>
 	    </tr>
 	{/foreach}
