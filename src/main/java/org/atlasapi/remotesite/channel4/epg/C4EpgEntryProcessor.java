@@ -93,11 +93,11 @@ public class C4EpgEntryProcessor {
             updateEpisodeDetails(episode, entry, channel);
             
             Brand brand = updateBrand(webSafeBrandName, episode, entry);
+            contentWriter.createOrUpdate(brand);
+
             if(episode.getSeriesNumber() != null) {
                 updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode, brand);
             }
-
-            contentWriter.createOrUpdate(brand);
 
             episode.setContainer(brand);
             contentWriter.createOrUpdate(episode);
