@@ -83,7 +83,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     }
 
     private void updateEpisodeDetails(Episode item, IonEpisodeDetail episodeDetail) {
-        if(episodeDetail.getSeriesId() != null) {
+        if(!Strings.isNullOrEmpty(episodeDetail.getSeriesId())) {
             item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
         }
         if(Strings.isNullOrEmpty(episodeDetail.getSubseriesId()) && episodeDetail.getPosition() != null) {
