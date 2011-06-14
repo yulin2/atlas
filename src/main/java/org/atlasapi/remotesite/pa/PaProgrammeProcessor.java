@@ -120,7 +120,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Maybe<? extends Item> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone) {
-        Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(CLOSED_EPISODE)).getFirstValue();
+        String uri = CLOSED_EPISODE+getClosedPostfix(channel);
+        Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
 
         Episode episode;
         if (resolvedContent.hasValue() && resolvedContent.requireValue() instanceof Episode) {
@@ -128,8 +129,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         } else {
             episode = (Episode) getBasicEpisode(progData, true);
         }
-        episode.setCanonicalUri(CLOSED_EPISODE);
-        episode.setCurie(CLOSED_CURIE);
+        episode.setCanonicalUri(uri);
+        episode.setCurie(CLOSED_CURIE+getClosedPostfix(channel));
         episode.setTitle(progData.getTitle());
         episode.setScheduleOnly(true);
         
@@ -139,6 +140,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         addBroadcast(version, broadcast);
 
         return Maybe.just(episode);
+    }
+    
+    private String getClosedPostfix(Channel channel) {
+        return "_"+channel.key();
     }
     
     private Maybe<Brand> getBrand(ProgData progData, Channel channel) {
