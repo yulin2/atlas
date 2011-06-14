@@ -109,15 +109,14 @@ public class BbcIonScheduleUpdateTask implements Runnable {
                                 
                             if (series != null) {
                                 updateSeries(series, broadcast);
+                                writer.createOrUpdate(series);
+                            	((Episode) item).setSeries(series);
                             }
                         }
-                    
-                        //TODO: need to write series anyway!
                         if (Strings.isNullOrEmpty(broadcast.getBrandId())) {
-                        	writer.createOrUpdate(series);
-                        	((Episode) item).setSeries(series);
-                            
-                        } else {
+                        	// Item is in a top-level series
+                        	item.setContainer(series);
+                        } else {	
                             String brandUri = SLASH_PROGRAMMES_ROOT + broadcast.getBrandId();
                             Maybe<Identified> maybeIdentified = localFetcher.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
                             Brand brand = null;
