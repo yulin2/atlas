@@ -94,10 +94,10 @@
  */
 {template .probe}
 <table class="probe" id="{$probe.target}">
-    <tr><td colspan="3" style="font-weight:bold">{if $probe.title}{$probe.title}{else}<a href="../result?uri={$probe.encodedId}">{$probe.target}</a>{/if}</td><tr>
+    <tr><td colspan="3" style="font-weight:bold">{if $probe.title}{$probe.title}{else}<a href="/system/equivalence/result?uri={$probe.encodedId}">{$probe.target}</a>{/if}</td><tr>
     <tr><td colspan="3">
     {if $probe.title}
-        <a href="../result?uri={$probe.encodedId}">{$probe.target}</a> - {$probe.timestamp}</td></tr>
+        <a href="/system/equivalence/result?uri={$probe.encodedId}">{$probe.target}</a> - {$probe.timestamp}</td></tr>
         {call atlas.templates.equivalence.widgets.probeExpectations}
             {param expectations: $probe.expected /}
             {param label}
