@@ -50,57 +50,59 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     }
 
     public void testShouldCreateCorrectPaData() throws Exception {
-        TestFileUpdater updater = new TestFileUpdater(programmeProcessor, log);
-        updater.run();
-        Identified content = null;
-
-        // lazy
-        for (int i = 0; i < 10; i++) {
-            Thread.sleep(500);
-            content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
-            if (content != null)
-                continue;
-        }
-
-        assertNotNull(content);
-        assertTrue(content instanceof Brand);
-        Brand brand = (Brand) content;
-        assertFalse(brand.getContents().isEmpty());
-        assertNotNull(brand.getImage());
-
-        Item item = brand.getContents().get(0);
-        assertTrue(item.getCanonicalUri().contains("episodes"));
-        assertNotNull(item.getImage());
-        assertFalse(item.getVersions().isEmpty());
-        assertEquals(MediaType.VIDEO, item.getMediaType());
-        assertEquals(Specialization.TV, item.getSpecialization());
-
-        assertEquals(17, item.people().size());
-        assertEquals(14, item.actors().size());
-
-        Version version = item.getVersions().iterator().next();
-        assertFalse(version.getBroadcasts().isEmpty());
-
-        Broadcast broadcast = version.getBroadcasts().iterator().next();
-        assertEquals("pa:71118471", broadcast.getId());
-
-        updater.run();
-        Thread.sleep(1000);
-
-        content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
-        assertNotNull(content);
-        assertTrue(content instanceof Brand);
-        brand = (Brand) content;
-        assertFalse(brand.getContents().isEmpty());
-
-        item = brand.getContents().get(0);
-        assertFalse(item.getVersions().isEmpty());
-
-        version = item.getVersions().iterator().next();
-        assertFalse(version.getBroadcasts().isEmpty());
-
-        broadcast = version.getBroadcasts().iterator().next();
-        assertEquals("pa:71118471", broadcast.getId());
+    	fail("update this test");
+    	
+//        TestFileUpdater updater = new TestFileUpdater(programmeProcessor, log);
+//        updater.run();
+//        Identified content = null;
+//
+//        // lazy
+//        for (int i = 0; i < 10; i++) {
+//            Thread.sleep(500);
+//            content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
+//            if (content != null)
+//                continue;
+//        }
+//
+//        assertNotNull(content);
+//        assertTrue(content instanceof Brand);
+//        Brand brand = (Brand) content;
+//        assertFalse(brand.getContents().isEmpty());
+//        assertNotNull(brand.getImage());
+//
+//        Item item = brand.getContents().get(0);
+//        assertTrue(item.getCanonicalUri().contains("episodes"));
+//        assertNotNull(item.getImage());
+//        assertFalse(item.getVersions().isEmpty());
+//        assertEquals(MediaType.VIDEO, item.getMediaType());
+//        assertEquals(Specialization.TV, item.getSpecialization());
+//
+//        assertEquals(17, item.people().size());
+//        assertEquals(14, item.actors().size());
+//
+//        Version version = item.getVersions().iterator().next();
+//        assertFalse(version.getBroadcasts().isEmpty());
+//
+//        Broadcast broadcast = version.getBroadcasts().iterator().next();
+//        assertEquals("pa:71118471", broadcast.getId());
+//
+//        updater.run();
+//        Thread.sleep(1000);
+//
+//        content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
+//        assertNotNull(content);
+//        assertTrue(content instanceof Brand);
+//        brand = (Brand) content;
+//        assertFalse(brand.getContents().isEmpty());
+//
+//        item = brand.getContents().get(0);
+//        assertFalse(item.getVersions().isEmpty());
+//
+//        version = item.getVersions().iterator().next();
+//        assertFalse(version.getBroadcasts().isEmpty());
+//
+//        broadcast = version.getBroadcasts().iterator().next();
+//        assertEquals("pa:71118471", broadcast.getId());
 
 // Test people get created
 //        for (CrewMember crewMember : item.people()) {

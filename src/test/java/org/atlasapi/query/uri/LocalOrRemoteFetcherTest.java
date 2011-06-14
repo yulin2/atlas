@@ -15,8 +15,10 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.uri;
 
+import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.system.Fetcher;
 import org.jmock.Expectations;
@@ -31,25 +33,21 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 	static final String URI = "http://example.com";
     
 	Fetcher<Identified> remoteFetcher;
-	ContentResolver resources;
 	
-	Fetcher<Identified> localOrRemoteFetcher;
-	
-	Identified bean = new Item();
+	Item bean = new Item(URI, URI, Publisher.BBC);
 	
 	@Override
 	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 		super.setUp();
 		remoteFetcher = mock(Fetcher.class);
-		resources = mock(ContentResolver.class);
-		localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
 	}
 
 	public void testQueriesRemoteFetcherForNewUri() throws Exception {
+		ContentResolver resources = StubContentResolver.RESOLVES_NOTHING;
+		LocalOrRemoteFetcher localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
 		
 		checking(new Expectations() {{ 
-			one(resources).findByCanonicalUri(URI); will(returnValue(null));
 			one(remoteFetcher).fetch(URI); will(returnValue(bean));
 		}});
 		
@@ -57,11 +55,8 @@ public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
 	}
 	
 	public void testLoadsKnownResourcesFromDatabaseAndDoesNotFetch() throws Exception {
-		
-		checking(new Expectations() {{ 
-			one(resources).findByCanonicalUri(URI); will(returnValue(bean));
-		}});
-		
+		ContentResolver resources = new StubContentResolver().respondTo(bean);
+		LocalOrRemoteFetcher localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
 		localOrRemoteFetcher.fetch(URI);
 	}
 	

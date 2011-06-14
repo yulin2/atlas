@@ -35,8 +35,7 @@ public class ContentResolvingSearchTest extends MockObjectTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        brand.addContents(item);
-        
+        brand.setChildRefs(ImmutableList.of(item.childRef()));
         searcher = new ContentResolvingSearcher(fuzzySearcher, contentResolver);
     }
     
@@ -52,7 +51,7 @@ public class ContentResolvingSearchTest extends MockObjectTestCase {
         List<Identified> content = searcher.search(new Search(searchQuery), publishers, ApplicationConfiguration.DEFAULT_CONFIGURATION, selection);
         assertFalse(content.isEmpty());
         Brand result = (Brand) Iterables.getOnlyElement(content);
-        assertTrue(result.getContents().isEmpty());
+        assertTrue(result.getChildRefs().isEmpty());
         assertTrue(result.getClips().isEmpty());
     }
 }

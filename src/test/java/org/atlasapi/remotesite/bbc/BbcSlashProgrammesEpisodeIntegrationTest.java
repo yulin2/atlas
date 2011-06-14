@@ -8,21 +8,22 @@ import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 
 public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
 
-    private BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(new SystemOutAdapterLog());
+ //   private BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(new SystemOutAdapterLog());
     
     public void testClientGetsEpisode() throws Exception {
-        Content programme = (Content) adapter.fetch("http://www.bbc.co.uk/programmes/b00w4hjy");
-        assertNotNull(programme);
-        
-        assertNotNull(programme.getClips());
-        assertFalse(programme.getClips().isEmpty());
-        assertTrue(programme.getImage().contains("b00w4hjy"));
-        assertTrue(programme.getThumbnail().contains("b00w4hjy"));
-        
-        for (Clip clip: programme.getClips()) {
-            assertNotNull(clip.getCanonicalUri());
-            assertNotNull(clip.getVersions());
-            assertFalse(clip.getVersions().isEmpty());
-        }
+    	fail("update this test");
+//        Content programme = (Content) adapter.fetch("http://www.bbc.co.uk/programmes/b00w4hjy");
+//        assertNotNull(programme);
+//        
+//        assertNotNull(programme.getClips());
+//        assertFalse(programme.getClips().isEmpty());
+//        assertTrue(programme.getImage().contains("b00w4hjy"));
+//        assertTrue(programme.getThumbnail().contains("b00w4hjy"));
+//        
+//        for (Clip clip: programme.getClips()) {
+//            assertNotNull(clip.getCanonicalUri());
+//            assertNotNull(clip.getVersions());
+//            assertFalse(clip.getVersions().isEmpty());
+//        }
     }
 }

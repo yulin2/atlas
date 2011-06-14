@@ -41,16 +41,17 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	}
 	
 	public void testMergingBrands() throws Exception {
-		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(brand1, brand2, brand3));
-		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.YOUTUBE, Publisher.BBC)));
-//		assertEquals(ImmutableList.of(brand3, brand2), merger.discover(query));
-		
-		Map<String, List<Identified>> identified = merger.executeUriQuery(ImmutableList.of("1", "2", "3"), query);
-        assertEquals(ImmutableList.of(brand3, brand2), ImmutableList.copyOf(Iterables.concat(identified.values())));
-        Brand brand = (Brand) Iterables.get(identified.get(brand3.getCanonicalUri()), 0);
-        assertEquals(brand3, brand);
-        Episode item = Iterables.getOnlyElement(brand.getContents());
-        assertEquals(item.getClips(), ImmutableList.of(clip1));
+		fail("refactor this test");
+//		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(brand1, brand2, brand3));
+//		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.YOUTUBE, Publisher.BBC)));
+////		assertEquals(ImmutableList.of(brand3, brand2), merger.discover(query));
+//		
+//		Map<String, List<Identified>> identified = merger.executeUriQuery(ImmutableList.of("1", "2", "3"), query);
+//        assertEquals(ImmutableList.of(brand3, brand2), ImmutableList.copyOf(Iterables.concat(identified.values())));
+//        Brand brand = (Brand) Iterables.get(identified.get(brand3.getCanonicalUri()), 0);
+//        assertEquals(brand3, brand);
+//        Episode item = Iterables.getOnlyElement(brand.getContents());
+//        assertEquals(item.getClips(), ImmutableList.of(clip1));
 	}
 	
 	public void testMergingEpisodes() throws Exception {
