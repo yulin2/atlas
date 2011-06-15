@@ -69,7 +69,7 @@ public class FiveUpdater extends ScheduledTask {
                     log.record(new AdapterLogEntry(Severity.ERROR).withSource(FiveUpdater.class).withCause(e).withDescription("Exception when processing show"));
                     failed++;
                 } finally {
-                    reportStatus(String.format("%s processed. %s failed", processed, failed));
+                    reportStatus(String.format("%s processed. %s failed", ++processed, failed));
                 }
                 
                 return new Nodes();
