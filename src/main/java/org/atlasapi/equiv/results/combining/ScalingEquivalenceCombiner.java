@@ -7,6 +7,10 @@ import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 
 public class ScalingEquivalenceCombiner<T extends Content> implements EquivalenceCombiner<T> {
+    
+    public static <T extends Content> ScalingEquivalenceCombiner<T> scale(EquivalenceCombiner<T> delegate, double scaler) {
+        return new ScalingEquivalenceCombiner<T>(delegate, scaler);
+    }
 
     private final EquivalenceCombiner<T> delegate;
     private final double scaler;

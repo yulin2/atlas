@@ -6,24 +6,34 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
 public class ScaledScoredEquivalents<T extends Content> implements ScoredEquivalents<T> {
     
-    public static <T extends Content> ScaledScoredEquivalents<T> scale(ScoredEquivalents<T> input, double scaler) {
-        if(input instanceof ScaledScoredEquivalents) {
-            ScaledScoredEquivalents<T> scaledInput = (ScaledScoredEquivalents<T>) input;
-            return new ScaledScoredEquivalents<T>(scaledInput.base, scaledInput.scaler);
-        } else {
-            return new ScaledScoredEquivalents<T>(input, scaler);
-        }
+    public static <T extends Content> ScaledScoredEquivalents<T> scale(ScoredEquivalents<T> input, final double scaler) {
+        return scale(input, new Function<Double, Double>() {
+            @Override
+            public Double apply(Double input) {
+                return input * scaler;
+            }
+        });
     }
 
+    public static <T extends Content> ScaledScoredEquivalents<T> scale(ScoredEquivalents<T> input, Function<Double, Double> basicScale) {
+        if(input instanceof ScaledScoredEquivalents) {
+            ScaledScoredEquivalents<T> scaledInput = (ScaledScoredEquivalents<T>) input;
+            return new ScaledScoredEquivalents<T>(scaledInput.base, Functions.compose(basicScale, scaledInput.scaler));
+        } else {
+            return new ScaledScoredEquivalents<T>(input, basicScale);
+        }
+    }
+    
     private final ScoredEquivalents<T> base;
-    private final double scaler;
+    private final Function<Double, Double> scaler;
 
-    private ScaledScoredEquivalents(ScoredEquivalents<T> base, double scaler) {
+    private ScaledScoredEquivalents(ScoredEquivalents<T> base, Function<Double, Double> scaler) {
         this.base = base;
         this.scaler = scaler;
     }
@@ -42,12 +52,7 @@ public class ScaledScoredEquivalents<T extends Content> implements ScoredEquival
         return ImmutableMap.copyOf(Maps.transformValues(equivalents, new Function<Map<T, Double>, Map<T, Double>>() {
             @Override
             public Map<T, Double> apply(Map<T, Double> input) {
-                return ImmutableMap.copyOf(Maps.transformValues(input, new Function<Double, Double>() {
-                    @Override
-                    public Double apply(Double input) {
-                        return input * scaler;
-                    }
-                }));
+                return ImmutableMap.copyOf(Maps.transformValues(input, scaler));
             }
         }));
     }
