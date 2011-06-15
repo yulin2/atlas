@@ -23,7 +23,11 @@
  */
 {template .header}
     <header>
-        <h1><a href="/system/equivalence">Equivalence</a></h1>
+        <h1><a href="/system/equivalence/results/recent">Equivalence</a></h1>
+		<nav>
+			<h3><a href="/system/equivalence/results/recent">Recently Processed</a></h3>
+			<h3><a href="/system/equivalence/probes">Probes</a></h3>
+		</nav>
     </header>
 {/template}
 
@@ -33,6 +37,7 @@
 {template .result}
 {call atlas.templates.equivalence.head /}
 <body>
+{call atlas.templates.equivalence.header /}
 {call atlas.templates.equivalence.widgets.result}
     {param result: $result /}
 {/call}
@@ -47,6 +52,7 @@
 {template .results}
 {call atlas.templates.equivalence.head /}
 <body>
+{call atlas.templates.equivalence.header /}
 {foreach $result in $results}
 	{call atlas.templates.equivalence.widgets.result}
 	    {param result: $result /}
