@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.preview;
 
 import java.io.StringReader;
+import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
 import nu.xom.Element;
@@ -15,11 +16,17 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.pa.film.PaFilmFeedUpdater;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     
-    private final SimpleHttpClient client = HttpClients.webserviceClient();
+    private final SimpleHttpClient client = new SimpleHttpClientBuilder()
+        .withUserAgent(HttpClients.ATLAS_USER_AGENT)
+        .withSocketTimeout(5, TimeUnit.MINUTES)
+        .withConnectionTimeout(1, TimeUnit.MINUTES)
+    .build();
+    
     private final PreviewFilmProcessor processor;
     private final AdapterLog log;
     private final String feedUri;

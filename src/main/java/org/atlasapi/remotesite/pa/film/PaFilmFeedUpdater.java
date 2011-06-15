@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa.film;
 
 import java.io.StringReader;
+import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
 import nu.xom.Element;
@@ -20,6 +21,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.url.UrlEncoding;
 
@@ -28,7 +30,12 @@ public class PaFilmFeedUpdater extends ScheduledTask {
     private final static DateTimeFormatter dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
     private final static DateTime START_DATE = new DateTime(2011, DateTimeConstants.APRIL, 12, 0, 0, 0, 0);
     
-    private final SimpleHttpClient client = HttpClients.webserviceClient();
+    private final SimpleHttpClient client = new SimpleHttpClientBuilder()
+        .withUserAgent(HttpClients.ATLAS_USER_AGENT)
+        .withSocketTimeout(5, TimeUnit.MINUTES)
+        .withConnectionTimeout(1, TimeUnit.MINUTES)
+    .build();
+    
     private final String feedUrl;
     private final AdapterLog log;
     private final PaFilmProcessor processor;
