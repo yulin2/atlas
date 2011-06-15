@@ -4,8 +4,11 @@ import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_CONTAINERS;
 import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_ITEMS;
+import static org.hamcrest.Matchers.instanceOf;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentTable;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
@@ -47,7 +50,9 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
             @Override
             public boolean handle(Content content, ContentListingProgress progress) {
                 try {
-                    /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
+                    if(!(content instanceof Film && Publisher.PA.equals(content.getPublisher()))) {
+                        /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
+                    }
                 } catch (Exception e) {
                     log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+content.getCanonicalUri()));
                 } 
