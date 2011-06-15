@@ -3,11 +3,8 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.DEBUG;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
-import java.util.List;
-
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -18,7 +15,6 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -32,7 +28,6 @@ import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.SimpleHttpClient;

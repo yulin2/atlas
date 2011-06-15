@@ -57,6 +57,7 @@ public class C4EpgBrandlessEntryProcessor {
             } else {
                 Brand brand = (Brand) maybeBrand.requireValue();
                 Episode episode = extractRelevantEpisode(entry, brand, brandName, channel);
+                episode.setContainer(brand);
                 contentWriter.createOrUpdate(episode);
             }
         } catch (Exception e) {
