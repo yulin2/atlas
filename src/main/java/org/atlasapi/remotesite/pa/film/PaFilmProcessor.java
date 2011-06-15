@@ -7,6 +7,7 @@ import nu.xom.Elements;
 
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -139,11 +140,16 @@ public class PaFilmProcessor {
             Element directorElement = directorElements.get(i);
             
             String role = directorElement.getFirstChildElement("role").getValue();
+            role = role.trim().replace(" ", "_");
             
             String name = name(directorElement);
             
             if (name != null) {
-                actors.add(CrewMember.crewMemberWithoutId(name, role, Publisher.RADIO_TIMES));
+                if (Role.fromPossibleKey(role).isNothing()) {
+                    log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Ignoring crew member with unrecognised role: " + role));
+                } else {
+                    actors.add(CrewMember.crewMemberWithoutId(name, role, Publisher.RADIO_TIMES));
+                }
             }
         }
         
