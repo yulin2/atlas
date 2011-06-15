@@ -46,7 +46,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         
         processed.set(0);
         
-        contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), currentProgress, new ContentListingHandler() {
+        boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), currentProgress, new ContentListingHandler() {
 
             @Override
             public boolean handle(Content content, ContentListingProgress progress) {
@@ -70,8 +70,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
             
         });
         
-        if(shouldContinue()) {
-            //mark finished
+        if(finished) {
             updateProgress(ContentListingProgress.START);
         }
         log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Finish equivalence task. %s top-level content processed", processed)));
