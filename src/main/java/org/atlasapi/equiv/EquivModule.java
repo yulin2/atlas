@@ -48,7 +48,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.RetrospectiveContentLister;
+import org.atlasapi.persistence.content.ContentLister;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -79,7 +79,7 @@ public class EquivModule {
     
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
-    private @Autowired RetrospectiveContentLister contentLister;
+    private @Autowired ContentLister contentLister;
     private @Autowired ContentResolver contentResolver;
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler taskScheduler;

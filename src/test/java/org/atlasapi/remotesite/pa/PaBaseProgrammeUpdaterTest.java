@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -43,9 +44,10 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         super.setUp();
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
         MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(db);
-        resolver = new LookupResolvingContentResolver(new MongoContentResolver(db), new BasicLookupResolver(lookupStore));
+        MongoContentTables tables = new MongoContentTables(db);
+        resolver = new LookupResolvingContentResolver(new MongoContentResolver(tables), new BasicLookupResolver(lookupStore));
         
-        contentWriters.add(new MongoContentWriter(db, lookupStore, clock));
+        contentWriters.add(new MongoContentWriter(tables, lookupStore, clock));
         programmeProcessor = new PaProgrammeProcessor(contentWriters, resolver, new DummyItemsPeopleWriter(), log);
     }
 

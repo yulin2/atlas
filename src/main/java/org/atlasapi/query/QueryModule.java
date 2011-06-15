@@ -17,6 +17,7 @@ package org.atlasapi.query;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.BasicLookupResolver;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
@@ -49,7 +50,7 @@ public class QueryModule {
 	private @Value("${atlas.search.host}") String searchHost;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
-		KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new MongoContentResolver(db), new BasicLookupResolver(new MongoLookupEntryStore(db)));
+		KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new MongoContentResolver(new MongoContentTables(db)), new BasicLookupResolver(new MongoLookupEntryStore(db)));
 		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
 		

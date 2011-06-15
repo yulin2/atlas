@@ -12,6 +12,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.lookup.BasicLookupResolver;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
@@ -46,8 +47,9 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
         
         db = MongoTestHelper.anEmptyTestDatabase();
         MongoLookupEntryStore lookupWriter = new MongoLookupEntryStore(db);
-        writer = new MongoContentWriter(db, lookupWriter , new SystemClock());
-        resolver = new LookupResolvingContentResolver(new MongoContentResolver(db), new BasicLookupResolver(lookupWriter));
+        MongoContentTables tables = new MongoContentTables(db);
+        writer = new MongoContentWriter(tables, lookupWriter , new SystemClock());
+        resolver = new LookupResolvingContentResolver(new MongoContentResolver(tables), new BasicLookupResolver(lookupWriter));
         
         Version version = new Version();
         version.addBroadcast(broadcast1);
