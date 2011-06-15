@@ -72,7 +72,11 @@ public class C4BrandExtractor {
     public void write(Feed source) {
         Brand brand = basicDetailsExtractor.extract(source);
         
-        List<Episode> episodes = itemsFor(brand);
+        List<Series> allSeries = Lists.newArrayList();
+        
+        List<Episode> episodes = itemsFor(brand, allSeries);
+        
+        
 
         Map<String, Episode> onDemandEpisodes = onDemandEpisodes(brand);
 
@@ -98,6 +102,10 @@ public class C4BrandExtractor {
         clipExtractor.fetchAndAddClipsTo(brand, episodes);
 
         contentWriter.createOrUpdate(brand);
+        
+        for (Series series : allSeries) {
+            contentWriter.createOrUpdate(series);
+        }
 
         for (Episode episode : episodes) {
 			versionMerger.merge(episode);
@@ -112,7 +120,7 @@ public class C4BrandExtractor {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Episode> itemsFor(Brand brand) {
+	private List<Episode> itemsFor(Brand brand, List<Series> allSeries) {
 		List<Episode> items = Lists.newArrayList();
         Feed possibleEpisodeGuide = readEpisodeGuide(brand);
         
@@ -124,7 +132,7 @@ public class C4BrandExtractor {
             items.addAll((List) seriesAndEpisodes.getEpisodes());
             Series series = seriesAndEpisodes.getSeries();
             series.setParent(brand);
-			contentWriter.createOrUpdate(series);
+			allSeries.add(series);
         }
 		return items;
 	}

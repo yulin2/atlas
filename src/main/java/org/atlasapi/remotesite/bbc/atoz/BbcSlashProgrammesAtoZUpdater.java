@@ -5,9 +5,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -25,7 +22,7 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 
     private final RemoteSiteClient<SlashProgrammesAtoZRdf> client;
     private final BbcProgrammeAdapter fetcher;
-    private final List<String> channels = ImmutableList.of("radio2", "radio1", "radio3", "radio4", "bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd");
+    private final List<String> channels = ImmutableList.of("bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd", "radio2", "radio1", "radio3", "radio4");
 	
 	private final AdapterLog log;
     

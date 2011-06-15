@@ -11,16 +11,16 @@ import org.eclipse.jetty.webapp.WebAppContext;
 
 public class AtlasMain {
 
-	private static final String LOCAL_WAR_DIR = "./src/main/webapp";
-    private static int port = 8080;
+	private static final boolean IS_PROCESSING = Boolean.parseBoolean(System.getProperty("processing.config"));
+	
+    private static final String LOCAL_WAR_DIR = "./src/main/webapp";
 
 	public static void main(String[] args) throws Exception {
 		
 		WebAppContext ctx = new WebAppContext(warBase(), "/");
 		
-		if(Boolean.parseBoolean(System.getProperty("processing.config"))) {
+		if(IS_PROCESSING) {
 		    System.out.println(">>> Launching processing configuration");
-		    port = 8282;
 		}
 
 		Server server = createServer();
@@ -42,6 +42,14 @@ public class AtlasMain {
 		Server server = new Server();
 		
 		final SelectChannelConnector connector = new SelectChannelConnector();
+		
+		int port = defaultPort();
+		
+		String customPort = System.getProperty("server.port");
+        if (customPort != null) {
+            port = Integer.parseInt(customPort);
+        }
+		
 		connector.setPort(port);
 		
 		connector.setAcceptQueueSize(200);
@@ -59,4 +67,8 @@ public class AtlasMain {
 		server.setConnectors(new Connector[] { connector });
 		return server;
 	}
+
+    private static int defaultPort() {
+        return IS_PROCESSING ? 8282 : 8080;
+    }
 }
