@@ -15,6 +15,8 @@ permissions and limitations under the License. */
 package org.atlasapi.query;
 
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
+import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentTables;
@@ -50,7 +52,11 @@ public class QueryModule {
 	private @Value("${atlas.search.host}") String searchHost;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
-		KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new MongoContentResolver(new MongoContentTables(db)), new BasicLookupResolver(new MongoLookupEntryStore(db)));
+	    
+	    KnownTypeContentResolver contentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(new MongoContentTables(db)));
+		BasicLookupResolver lookupResolver = new BasicLookupResolver(new MongoLookupEntryStore(db));
+		
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(contentResolver, lookupResolver);
 		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
 		
