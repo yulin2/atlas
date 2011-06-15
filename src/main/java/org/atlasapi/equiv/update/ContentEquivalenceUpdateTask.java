@@ -49,23 +49,32 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), currentProgress, new ContentListingHandler() {
 
             @Override
-            public void handle(Content content, ContentListingProgress progress) {
+            public boolean handle(Content content, ContentListingProgress progress) {
                 try {
                     /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
                     //TODO filter to avoid repetition
                 } catch (Exception e) {
                     log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+content.getCanonicalUri()));
-                } finally {
-                    reportStatus(String.format("Processed %d top-level content", processed.incrementAndGet()));
-                    if(processed.get() % 10 == 0) {
+                } 
+                reportStatus(String.format("Processed %d top-level content", processed.incrementAndGet()));
+                if (shouldContinue()) {
+                    if (processed.get() % 10 == 0) {
                         updateProgress(progress);
                     }
+                    return true;
+                } else {
+                    updateProgress(progress);
+                    return false;
                 }
             }
             
         });
         
-        log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Finish equivalence task. %s brands processed", processed)));
+        if(shouldContinue()) {
+            //mark finished
+            updateProgress(ContentListingProgress.START);
+        }
+        log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Finish equivalence task. %s top-level content processed", processed)));
     }
 
     private void updateProgress(ContentListingProgress progress) {
