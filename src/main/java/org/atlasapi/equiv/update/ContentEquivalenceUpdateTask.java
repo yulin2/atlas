@@ -1,6 +1,5 @@
 package org.atlasapi.equiv.update;
 
-import static com.metabroadcast.common.persistence.mongo.MongoBuilders.update;
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_CONTAINERS;
@@ -18,8 +17,10 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
@@ -67,7 +68,6 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
                     return false;
                 }
             }
-            
         });
         
         if(finished) {
@@ -77,18 +77,23 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     }
 
     private void updateProgress(ContentListingProgress progress) {
-        DBObject update = update().setField("lastId", progress.getUri()).setField("collection", progress.getTable().toString()).build();
-        scheduling.update(where().fieldEquals(ID, "equivalence").build(), update, true, false);
+        DBObject update = new BasicDBObject();
+        TranslatorUtils.from(update, "lastId", progress.getUri() == null ? "start" : progress.getUri());
+        TranslatorUtils.from(update, "collection",  progress.getTable() == null ? null : progress.getTable().toString());
+        
+        scheduling.update(where().fieldEquals(ID, "equivalence").build(), new BasicDBObject(MongoConstants.SET, update), true, false);
     }
     
     private ContentListingProgress getProgress() {
         DBObject progress = scheduling.findOne("equivalence");
-        if(progress == null) {
+        if(progress == null || TranslatorUtils.toString(progress, "lastId").equals("start")) {
             return ContentListingProgress.START;
         }
         
         String lastId = TranslatorUtils.toString(progress, "lastId");
-        ContentTable table = ContentTable.valueOf(TranslatorUtils.toString(progress, "collection"));
+        String tableName = TranslatorUtils.toString(progress, "collection");
+        ContentTable table = tableName == null ? null : ContentTable.valueOf(tableName);
+        
         return new ContentListingProgress(lastId, table);
     }
 
