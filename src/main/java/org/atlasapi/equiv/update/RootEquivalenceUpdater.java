@@ -14,7 +14,7 @@ public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content
         this.containerUpdater = containerUpdater;
         this.itemUpdater = itemUpdater;
     }
-    
+
     @Override
     public EquivalenceResult<Content> updateEquivalences(Content content) {
         if(content instanceof Container<?>) {
