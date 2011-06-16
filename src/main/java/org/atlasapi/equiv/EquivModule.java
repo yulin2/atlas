@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.equiv;
 
+import static org.atlasapi.equiv.generators.ScalingEquivalenceGenerator.scale;
 import static org.atlasapi.equiv.results.EquivalenceResultBuilder.resultBuilder;
 import static org.atlasapi.equiv.update.ResultWritingEquivalenceUpdater.resultWriter;
 
@@ -48,9 +49,9 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentLister;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.LookupWriter;
 import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
@@ -62,6 +63,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
@@ -104,8 +106,18 @@ public class EquivModule {
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
         Set<ContentEquivalenceGenerator<Container<?>>> containerGenerators = ImmutableSet.<ContentEquivalenceGenerator<Container<?>>>of(
-                new ItemBasedContainerEquivalenceGenerator(itemUpdater(), contentResolver),
-                new TitleMatchingContainerEquivalenceGenerator(searchResolver)
+                scale(new ItemBasedContainerEquivalenceGenerator(itemUpdater(), contentResolver), new Function<Double, Double>() {
+                    @Override
+                    public Double apply(Double input) {
+                        return Math.min(1, input * 20);
+                    }
+                }), 
+                scale(new TitleMatchingContainerEquivalenceGenerator(searchResolver), new Function<Double, Double>() {
+                    @Override
+                    public Double apply(Double input) {
+                        return input > 0 ? input / 2 : input;
+                    }
+                })
         );
         EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder(containerGenerators.size());
         return resultWriter(new BasicEquivalenceUpdater<Container<?>>(containerGenerators, resultBuilder, log), equivalenceResultStore());

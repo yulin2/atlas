@@ -65,11 +65,6 @@ public class AtlasModule {
             }
         }), Predicates.notNull()));
     }
-	 
-    private static boolean processingConfig() {
-    	Parameter param = Configurer.get("processing.config");
-    	return param != null && param.toBoolean();
-	}
 
 	public @Bean ContextConfigurer config() {
 		ContextConfigurer c = new ContextConfigurer();
