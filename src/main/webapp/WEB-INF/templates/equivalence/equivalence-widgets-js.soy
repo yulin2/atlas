@@ -55,9 +55,13 @@
     <td>{if $equivalence.strong}✔{else}✘{/if}</td>
     <td><a href="?uri={$equivalence.encodedId}">{$equivalence.title} ({$equivalence.publisher})</a></td>
     <td><a href="http://atlasapi.org/3.0/content.json?uri={$equivalence.encodedId}"><img src="/images/external.png"></a></td>
-    <td>{$equivalence.scores['combined']}</td>
+    <td {if $equivalence.scores['combined'] > 0}title="{print round($equivalence.scores['combined']/$result.totals['combined']*100) }%"{/if}>
+        {round($equivalence.scores['combined'], 5)}
+    </td>
     {foreach $source in $result.sources}
-        <td>{if $equivalence.scores[$source] != 'NaN'}{$equivalence.scores[$source]}{else}N/A{/if}</td>
+        <td {if $equivalence.scores[$source] > 0}title="{print round($equivalence.scores[$source]/$result.totals[$source]*100) }%"{/if}>
+            {round($equivalence.scores[$source], 5)}
+        </td>
     {/foreach}
     <td><input type="radio" name="{$equivalence.encodedId}" value="expect" {if $equivalence.expected == 'expected'}checked{/if}></td>
     <td><input type="radio" name="{$equivalence.encodedId}" value="notExpect" {if $equivalence.expected == 'notexpected'}checked{/if}></td>
@@ -67,6 +71,14 @@
     {/if}
   </tr>
 {/foreach}
+<tr>
+    <td></td><td>Totals</td><td></td>
+    <td>{print round($result.totals['combined'], 5)}</td>
+    {foreach $source in $result.sources}
+        <td>{print round($result.totals[$source], 5)}</td>
+    {/foreach}
+    <td colspan="4"></td>
+</tr>
 </table>
 {else}
 <p>No suggested equivalences</p>

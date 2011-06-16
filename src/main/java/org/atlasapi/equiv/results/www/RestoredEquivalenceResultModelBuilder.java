@@ -8,6 +8,7 @@ import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbe;
 import org.eclipse.jetty.util.UrlEncoded;
 
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -24,6 +25,8 @@ public class RestoredEquivalenceResultModelBuilder {
         
         boolean hasStrong = false;
         
+        Map<String, Double> totals = Maps.newHashMap();
+        
         SimpleModelList equivalences = new SimpleModelList();
         for (Entry<EquivalenceIdentifier, Double> equivalence : target.combinedResults().entrySet()) {
             SimpleModel equivModel = new SimpleModel();
@@ -35,7 +38,7 @@ public class RestoredEquivalenceResultModelBuilder {
             equivModel.put("title", key.title());
             equivModel.put("strong", key.strong());
             equivModel.put("publisher", key.publisher());
-            equivModel.put("scores", scores(equivalence.getValue(), target.sourceResults().row(key.id())));
+            equivModel.put("scores", scores(equivalence.getValue(), target.sourceResults().row(key.id()), totals));
             
             hasStrong |= key.strong();
             
@@ -43,10 +46,19 @@ public class RestoredEquivalenceResultModelBuilder {
             
             equivalences.add(equivModel);
         }
+        model.put("totals", model(totals));
         model.put("hasStrong", hasStrong);
         model.put("equivalences", equivalences);
         model.putStrings("sources", target.sourceResults().columnKeySet());
         
+        return model;
+    }
+
+    private SimpleModel model(Map<String, Double> totals) {
+        SimpleModel model = new SimpleModel();
+        for (Entry<String, Double> totalScore : totals.entrySet()) {
+            model.put(totalScore.getKey(), totalScore.getValue());
+        }
         return model;
     }
 
@@ -62,16 +74,26 @@ public class RestoredEquivalenceResultModelBuilder {
         return "unknown";
     }
 
-    private SimpleModel scores(Double value, Map<String, Double> row) {
-        SimpleModel scoreModel = new SimpleModel().put("combined", format(value));
-        for (Entry<String, Double> sourceScore : row.entrySet()) {
-            scoreModel.put(sourceScore.getKey(), format(sourceScore.getValue()));
+    private SimpleModel scores(Double combined, Map<String, Double> sourceScores, Map<String, Double> totals) {
+        SimpleModel scoreModel = new SimpleModel().put("combined", combined);
+        
+        if(!combined.isNaN() && combined > 0) {
+            Double runningTotal = totals.get("combined");
+            totals.put("combined", runningTotal == null ? combined : combined + runningTotal);
+        }
+        
+        for (Entry<String, Double> sourceScore : sourceScores.entrySet()) {
+            String source = sourceScore.getKey();
+            Double score = sourceScore.getValue();
+            
+            scoreModel.put(source, score);
+            
+            if(!score.isNaN() && score > 0) {
+                Double sourceTotal = totals.get(source);
+                totals.put(source, sourceTotal == null ? score : score + sourceTotal);
+            }
         }
         return scoreModel;
-    }
-    
-    private String format(Double d) {
-        return String.format("%+.5f", d);
     }
     
 }

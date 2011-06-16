@@ -42,7 +42,10 @@ public class PercentThresholdEquivalenceExtractor<T extends Content> implements 
         Double total = 0.0;
         
         for (ScoredEquivalent<T> scoredEquivalent : equivalents) {
-            total += scoredEquivalent.score();
+            double score = scoredEquivalent.score();
+            if(score > 0) {
+                total += score;
+            }
         }
         
         return total;
