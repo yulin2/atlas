@@ -16,8 +16,6 @@ package org.atlasapi.remotesite.bbc;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +23,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -39,8 +36,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 public class BbcProgrammeAdapter  {
-
-    static final Pattern SLASH_PROGRAMMES_URL_PATTERN = Pattern.compile("^http://www\\.bbc\\.co\\.uk/programmes/([pb]00[^/\\.]+)$");
 
     private final BbcSlashProgrammesEpisodeRdfClient episodeClient;
     private final ContentExtractor<BbcProgrammeSource, Item> itemExtractor;
@@ -68,8 +63,7 @@ public class BbcProgrammeAdapter  {
     }
 
     public boolean canFetch(String uri) {
-        Matcher matcher = SLASH_PROGRAMMES_URL_PATTERN.matcher(uri);
-        return matcher.matches();
+        return BbcFeeds.isACanonicalSlashProgrammesUri(uri);
     }
 
     public Identified createOrUpdate(String uri) {
@@ -78,7 +72,7 @@ public class BbcProgrammeAdapter  {
     
     public Identified createOrUpdate(String uri, Brand parentBrand) {
     	if (!canFetch(uri)) {
-    		throw new IllegalArgumentException("URI " + uri + " does not match acceptable URI pattern " + SLASH_PROGRAMMES_URL_PATTERN);
+    		throw new IllegalArgumentException("URI " + uri + " is not a canonical /programmes URI");
     	}
         try {
             SlashProgrammesRdf content = readSlashProgrammesDataForEpisode(uri);
