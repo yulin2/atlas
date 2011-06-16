@@ -4,7 +4,6 @@ import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_CONTAINERS;
 import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_ITEMS;
-import static org.hamcrest.Matchers.instanceOf;
 
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Film;
