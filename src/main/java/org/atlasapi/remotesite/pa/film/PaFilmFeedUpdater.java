@@ -81,20 +81,21 @@ public class PaFilmFeedUpdater extends ScheduledTask {
 
     private class FilmProcessingNodeFactory extends NodeFactory {
         private int currentFilmNumber = 0;
+        private int failures = 0;
         
         @Override
         public Nodes finishMakingElement(Element element) {
             if (element.getLocalName().equalsIgnoreCase("film") && shouldContinue()) {
-                currentFilmNumber++;
-                reportStatus("Processing film number " + currentFilmNumber);
                 
                 try {
                     processor.process(element);
                 }
                 catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.ERROR).withSource(PaFilmFeedUpdater.class).withCause(e).withDescription("Exception when processing film"));
+                    failures++;
                 }
                 
+                reportStatus(String.format("Processing film number %s. %s failures ", ++currentFilmNumber, failures));
                 return new Nodes();
             }
             else {

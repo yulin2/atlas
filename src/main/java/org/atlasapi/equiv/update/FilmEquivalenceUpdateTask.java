@@ -2,10 +2,12 @@ package org.atlasapi.equiv.update;
 
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
-import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_CONTAINERS;
 import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_ITEMS;
+import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentTable;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
@@ -23,16 +25,17 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
-public class ContentEquivalenceUpdateTask extends ScheduledTask {
 
-    private final ContentLister contentStore;
-    private final ContentEquivalenceUpdater<Content> rootUpdater;
+public class FilmEquivalenceUpdateTask  extends ScheduledTask {
+
+    private final ContentLister contentLister;
+    private final ContentEquivalenceUpdater<Film> rootUpdater;
     private final AdapterLog log;
     private final DBCollection scheduling;
     
-    public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, DatabasedMongo db) {
-        this.contentStore = contentStore;
-        this.rootUpdater = rootUpdater;
+    public FilmEquivalenceUpdateTask(ContentLister contentLister, ContentEquivalenceUpdater<Film> updater, AdapterLog log, DatabasedMongo db) {
+        this.contentLister = contentLister;
+        this.rootUpdater = updater;
         this.log = log;
         this.scheduling = db.collection("scheduling");
     }
@@ -42,12 +45,15 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         ContentListingProgress currentProgress = getProgress();
         log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Start equivalence task from %s", startProgress(currentProgress.getUri()))));
         
-        boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), ContentListingCriteria.defaultCriteria().startingAt(currentProgress), new ContentListingHandler() {
+        ContentListingCriteria criteria = defaultCriteria().forPublisher(Publisher.PA).startingAt(currentProgress);
+        boolean finished = contentLister.listContent(ImmutableSet.of(TOP_LEVEL_ITEMS), criteria, new ContentListingHandler() {
 
             @Override
             public boolean handle(Content content, ContentListingProgress progress) {
                 try {
-                    /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
+                    if (content instanceof Film) {
+                        /* EquivalenceResult<Content> result = */rootUpdater.updateEquivalences((Film) content);
+                    }
                 } catch (Exception e) {
                     log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+content.getCanonicalUri()));
                 } 
@@ -81,11 +87,11 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         TranslatorUtils.from(update, "total", progress.total());
         TranslatorUtils.from(update, "count", progress.count());
         
-        scheduling.update(where().fieldEquals(ID, "equivalence").build(), new BasicDBObject(MongoConstants.SET, update), true, false);
+        scheduling.update(where().fieldEquals(ID, "filmEquivalence").build(), new BasicDBObject(MongoConstants.SET, update), true, false);
     }
     
     private ContentListingProgress getProgress() {
-        DBObject progress = scheduling.findOne("equivalence");
+        DBObject progress = scheduling.findOne("filmEquivalence");
         if(progress == null || TranslatorUtils.toString(progress, "lastId").equals("start")) {
             return ContentListingProgress.START;
         }

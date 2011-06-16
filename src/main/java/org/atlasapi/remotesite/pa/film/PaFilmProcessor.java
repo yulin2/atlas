@@ -39,13 +39,11 @@ public class PaFilmProcessor {
     private final ItemsPeopleWriter peopleWriter;
     private final AdapterLog log;
     private final PaCountryMap countryMapper = new PaCountryMap();
-    private final FilmEquivUpdater equivUpdater;
 
-    public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, FilmEquivUpdater equivUpdater, AdapterLog log) {
+    public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log) {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
         this.peopleWriter = peopleWriter;
-        this.equivUpdater = equivUpdater;
         this.log = log;
     }
     
@@ -103,7 +101,6 @@ public class PaFilmProcessor {
         }
         
         contentWriter.createOrUpdate(film);
-        equivUpdater.updateEquivalence(film);
         
         peopleWriter.createOrUpdatePeople(film);
     }
