@@ -11,6 +11,7 @@ import org.atlasapi.query.uri.SavingFetcher;
 import com.google.inject.internal.Lists;
 
 public class SeesawSitemapUpdater implements Runnable {
+    
     public static final String SITEMAP_INDEX = "http://www.seesaw.com/googlesitemaps/Sitemapindex";
     
     private final RemoteSiteClient<List<String>> sitemapIndexClient = new SeesawSitemapIndexClient();
