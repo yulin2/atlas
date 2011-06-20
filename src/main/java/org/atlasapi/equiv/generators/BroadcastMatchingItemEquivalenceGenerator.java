@@ -35,10 +35,9 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
     
     @Override
-    public ScoredEquivalents<Item> generateEquivalences(Item content, Set<Item> suggestions) {
-        
+    public ScoredEquivalents<Item> generate(Item content) {
         ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
-        
+
         int broadcasts = 0;
         for (Version version : content.getVersions()) {
             for (Broadcast broadcast : version.getBroadcasts()) {
@@ -46,18 +45,23 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
                 Schedule schedule = scheduleAround(broadcast, Sets.difference(supportedPublishers, ImmutableSet.of(content.getPublisher())));
                 for (ScheduleChannel channel : schedule.scheduleChannels()) {
                     for (Item scheduleItem : channel.items()) {
-                        if(scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
+                        if (scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
                             scores.addEquivalent((Item) scheduleItem, 1.0);
                         }
                     }
                 }
-                
+
             }
         }
-        
+
         return scale(scores.build(), broadcasts);
     }
-    
+
+    @Override
+    public ScoredEquivalents<Item> generateEquivalences(Item content, Set<Item> suggestions) {
+        return generate(content);
+    }
+
     private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
         return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), new Function<Map<Item, Double>, Map<Item, Double>>() {
             @Override
