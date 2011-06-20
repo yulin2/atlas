@@ -1,13 +1,16 @@
-package org.atlasapi.remotesite.pa.film;
+package org.atlasapi.equiv.generators;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.results.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.lookup.LookupWriter;
 import org.atlasapi.search.model.Search;
 
 import com.google.common.base.Preconditions;
@@ -18,32 +21,36 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 
-public class FilmEquivUpdater {
+public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Film> {
     
     private static final ApplicationConfiguration config = new ApplicationConfiguration(ImmutableSet.of(Publisher.PREVIEW_NETWORKS), null);
+    
     private final SearchResolver searchResolver;
-    private final LookupWriter lookupWriter;
 
-    public FilmEquivUpdater(SearchResolver searchResolver, LookupWriter lookupWriter) {
+    public FilmEquivalenceGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
-        this.lookupWriter = lookupWriter;
     }
     
-    public void updateEquivalence(Film film) {
+    @Override
+    public ScoredEquivalents<Film> generateEquivalences(Film film, Set<Film> suggestions) {
+
+        ScoredEquivalentsBuilder<Film> scores = DefaultScoredEquivalents.<Film>fromSource("Film");
         
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
-            return;
+            return scores.build();
         }
         
         List<Identified> possibleEquivalentFilms = searchResolver.search(new Search(film.getTitle()), ImmutableList.of(Publisher.PREVIEW_NETWORKS), config, Selection.ALL);
         
         Iterable<Film> equivalentFilms = Iterables.filter(Iterables.filter(possibleEquivalentFilms, Film.class), new EquivalentFilmPredicate(film));
         
-        if (!Iterables.isEmpty(equivalentFilms)) {
-            lookupWriter.writeLookup(film, equivalentFilms);
+        for (Film equivFilm : equivalentFilms) {
+            scores.addEquivalent(equivFilm, 1);
         }
+        
+        return scores.build();
     }
-    
+
     private class EquivalentFilmPredicate implements Predicate<Film> {
         
         private final Film film;
