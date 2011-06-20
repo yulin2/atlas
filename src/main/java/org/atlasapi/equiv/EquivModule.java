@@ -100,7 +100,11 @@ public class EquivModule {
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(1))
         );
         EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder(itemGenerators.size());
-        return resultWriter(new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder, log), equivalenceResultStore());
+        
+        ContentEquivalenceUpdater<Item> itemUpdater = new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder, log);
+        itemUpdater = resultWriter(itemUpdater, equivalenceResultStore());
+        itemUpdater = new LookupWritingEquivalenceUpdater<Item>(itemUpdater, lookupWriter());
+        return itemUpdater;
     }
 
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder(int calculators) {
@@ -125,11 +129,16 @@ public class EquivModule {
                 })
         );
         EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder(containerGenerators.size());
-        return resultWriter(new BasicEquivalenceUpdater<Container<?>>(containerGenerators, resultBuilder, log), equivalenceResultStore());
+        
+        ContentEquivalenceUpdater<Container<?>> containerUpdater = new BasicEquivalenceUpdater<Container<?>>(containerGenerators, resultBuilder, log);
+        containerUpdater = resultWriter(containerUpdater, equivalenceResultStore());
+        containerUpdater = new LookupWritingEquivalenceUpdater<Container<?>>(containerUpdater, lookupWriter());
+        
+        return containerUpdater;
     }
 
     public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
-        return new LookupWritingEquivalenceUpdater<Content>(new RootEquivalenceUpdater(containerUpdater(), itemUpdater()), lookupWriter());
+        return new RootEquivalenceUpdater(containerUpdater(), itemUpdater());
     }
     
     public @Bean LookupWriter lookupWriter() {
