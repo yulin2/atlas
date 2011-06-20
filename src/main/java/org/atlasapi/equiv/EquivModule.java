@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
+import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
@@ -42,10 +43,13 @@ import org.atlasapi.equiv.update.BasicEquivalenceUpdater;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdateController;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.FilmEquivalenceUpdateTask;
+import org.atlasapi.equiv.update.FilteringContentLister;
 import org.atlasapi.equiv.update.LookupWritingEquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -64,6 +68,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
@@ -131,14 +136,32 @@ public class EquivModule {
         return new TransitiveLookupWriter(new MongoLookupEntryStore(db));
     }
     
-    public @Bean ContentEquivalenceUpdateTask updateTask() {
-        return new ContentEquivalenceUpdateTask(contentLister, contentUpdater(), log, db);
+    public @Bean ContentEquivalenceUpdateTask mainUpdateTask() {
+        ContentLister filteringLister = new FilteringContentLister(contentLister, new Predicate<Content>() {
+            @Override
+            public boolean apply(Content input) {
+                return !(input instanceof Film && Publisher.PA.equals(input.getPublisher()));
+            }
+        });
+        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, db);
+    }
+    
+    public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
+        EquivalenceResultBuilder<Film> standardResultBuilder = standardResultBuilder(1);
+        Set<ContentEquivalenceGenerator<Film>> generators = ImmutableSet.<ContentEquivalenceGenerator<Film>>of(
+//                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(1)),
+                new FilmEquivalenceGenerator(searchResolver)
+        );
+        ContentEquivalenceUpdater<Film> basicUpdater = new BasicEquivalenceUpdater<Film>(generators, standardResultBuilder, log);
+        ContentEquivalenceUpdater<Film> updater = new LookupWritingEquivalenceUpdater<Film>(resultWriter(basicUpdater , equivalenceResultStore()), lookupWriter());
+        return new FilmEquivalenceUpdateTask(contentLister, updater, log, db);
     }
     
     @PostConstruct
     public void scheduleUpdater() {
         if(Boolean.parseBoolean(updaterEnabled)) {
-            taskScheduler.schedule(updateTask().withName("Content Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(mainUpdateTask().withName("Content Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
         }
     }
     

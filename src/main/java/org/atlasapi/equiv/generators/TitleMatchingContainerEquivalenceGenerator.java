@@ -34,7 +34,9 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
         List<Identified> search = searchForEquivalents(content);
         
         for (Container<?> found : ImmutableSet.copyOf(Iterables.concat(Iterables.filter(search, Container.class), suggestions))) {
-            equivalents.addEquivalent(found, score(content.getTitle(), found.getTitle()));
+            if(content.getMediaType().equals(found.getMediaType())) {
+                equivalents.addEquivalent(found, score(content.getTitle(), found.getTitle()));
+            }
         }
         
         return equivalents.build();
