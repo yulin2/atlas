@@ -16,6 +16,7 @@ package org.atlasapi.equiv;
 
 import static org.atlasapi.equiv.generators.ScalingEquivalenceGenerator.scale;
 import static org.atlasapi.equiv.results.EquivalenceResultBuilder.resultBuilder;
+import static org.atlasapi.equiv.results.extractors.FilteringEquivalenceExtractor.filteringExtractor;
 import static org.atlasapi.equiv.update.ResultWritingEquivalenceUpdater.resultWriter;
 
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.combining.ScalingEquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
@@ -110,7 +112,14 @@ public class EquivModule {
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder(int calculators) {
         return resultBuilder(
                 new ScalingEquivalenceCombiner<T>(AddingEquivalenceCombiner.<T>create(), 1.0/calculators), 
-                MinimumScoreEquivalenceExtractor.minimumFrom(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), 0.0));
+                    MinimumScoreEquivalenceExtractor.minimumFrom(
+                        filteringExtractor(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), new Predicate<ScoredEquivalent<T>>(){
+                            @Override
+                            public boolean apply(ScoredEquivalent<T> input) {
+                                return input.score() > 0.2;
+                            }}), 
+                        0.2)
+                );
     }
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
