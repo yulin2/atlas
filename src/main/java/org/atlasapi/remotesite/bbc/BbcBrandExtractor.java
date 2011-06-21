@@ -58,7 +58,7 @@ public class BbcBrandExtractor  {
     	return series;
 	}
 	
-	public void saveItemsInContainers(List<String> episodeUris, Container<?> container, Series series) {
+	public void saveItemsInContainers(List<String> episodeUris, Container container, Series series) {
 		for (String episodeUri : mostRecent(episodeUris)) {
 			Identified found = subContentExtractor.fetchItem(episodeUri);
 			if (!(found instanceof Item)) {

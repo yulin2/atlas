@@ -38,7 +38,7 @@ public class ContentWriters implements ContentWriter {
 	}
 
 	@Override
-	public void createOrUpdate(Container<?> container) {
+	public void createOrUpdate(Container container) {
 		for (ContentWriter writer : writers) {
 			writer.createOrUpdate(container);
 		}
