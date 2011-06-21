@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.query.Selection;
 
-public class TitleMatchingContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container<?>> {
+public class TitleMatchingContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container> {
 
     private final SearchResolver searchResolver;
 
@@ -28,12 +28,12 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
     }
     
     @Override
-    public ScoredEquivalents<Container<?>> generateEquivalences(Container<?> content, Set<Container<?>> suggestions) {
-        ScoredEquivalentsBuilder<Container<?>> equivalents = DefaultScoredEquivalents.fromSource("Title");
+    public ScoredEquivalents<Container> generateEquivalences(Container content, Set<Container> suggestions) {
+        ScoredEquivalentsBuilder<Container> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
         List<Identified> search = searchForEquivalents(content);
         
-        for (Container<?> found : ImmutableSet.copyOf(Iterables.concat(Iterables.filter(search, Container.class), suggestions))) {
+        for (Container found : ImmutableSet.copyOf(Iterables.concat(Iterables.filter(search, Container.class), suggestions))) {
             if(content.getMediaType().equals(found.getMediaType())) {
                 equivalents.addEquivalent(found, score(content.getTitle(), found.getTitle()));
             }
@@ -60,7 +60,7 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
         return i;
     }
 
-    private List<Identified> searchForEquivalents(Container<?> content) {
+    private List<Identified> searchForEquivalents(Container content) {
         SetView<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(publishers);
         

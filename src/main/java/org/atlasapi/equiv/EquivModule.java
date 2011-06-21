@@ -113,8 +113,8 @@ public class EquivModule {
                 MinimumScoreEquivalenceExtractor.minimumFrom(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), 0.0));
     }
     
-    public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
-        Set<ContentEquivalenceGenerator<Container<?>>> containerGenerators = ImmutableSet.<ContentEquivalenceGenerator<Container<?>>>of(
+    public @Bean ContentEquivalenceUpdater<Container> containerUpdater() {
+        Set<ContentEquivalenceGenerator<Container>> containerGenerators = ImmutableSet.<ContentEquivalenceGenerator<Container>>of(
                 scale(new ItemBasedContainerEquivalenceGenerator(itemUpdater(), contentResolver), new Function<Double, Double>() {
                     @Override
                     public Double apply(Double input) {
@@ -128,11 +128,11 @@ public class EquivModule {
                     }
                 })
         );
-        EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder(containerGenerators.size());
+        EquivalenceResultBuilder<Container> resultBuilder = standardResultBuilder(containerGenerators.size());
         
-        ContentEquivalenceUpdater<Container<?>> containerUpdater = new BasicEquivalenceUpdater<Container<?>>(containerGenerators, resultBuilder, log);
+        ContentEquivalenceUpdater<Container> containerUpdater = new BasicEquivalenceUpdater<Container>(containerGenerators, resultBuilder, log);
         containerUpdater = resultWriter(containerUpdater, equivalenceResultStore());
-        containerUpdater = new LookupWritingEquivalenceUpdater<Container<?>>(containerUpdater, lookupWriter());
+        containerUpdater = new LookupWritingEquivalenceUpdater<Container>(containerUpdater, lookupWriter());
         
         return containerUpdater;
     }

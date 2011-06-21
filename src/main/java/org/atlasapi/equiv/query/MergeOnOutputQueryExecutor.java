@@ -86,8 +86,8 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			
 			List<T> notChosen = same.subList(1, same.size());
 			
-			if (chosen instanceof Container<?>) {
-				mergeIn(config, (Container<Item>) chosen, (List<Container<Item>>) notChosen);
+			if (chosen instanceof Container) {
+				mergeIn(config, (Container) chosen, (List<Container>) notChosen);
 			}
 			if (chosen instanceof Item) {
 				mergeIn(config, (Item) chosen, (List<Item>) notChosen);
@@ -147,7 +147,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		}
 	};
 	
-	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container<T> chosen, List<Container<T>> notChosen) {
+	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container chosen, List<Container> notChosen) {
 		applyImagePrefs(config, chosen, notChosen);
 	}
 	

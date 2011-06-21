@@ -18,7 +18,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 
-public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container<?>> {
+public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container> {
 
     private static final String NAME = "Item";
     private final ContentEquivalenceUpdater<Item> itemUpdater;
@@ -30,9 +30,9 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
     }
     
     @Override
-    public ScoredEquivalents<Container<?>> generateEquivalences(Container<?> container, Set<Container<?>> suggestions) {
+    public ScoredEquivalents<Container> generateEquivalences(Container container, Set<Container> suggestions) {
         
-        ScoredEquivalentsBuilder<Container<?>> containerEquivalents = DefaultScoredEquivalents.fromSource(NAME);
+        ScoredEquivalentsBuilder<Container> containerEquivalents = DefaultScoredEquivalents.fromSource(NAME);
         
          for (ChildRef ref : container.getChildRefs()) {
             
@@ -58,8 +58,8 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
         return containerEquivalents.build();
     }
 
-    private Container<?> resolve(ParentRef parentEquivalent) {
-        return (Container<?>) resolver.findByCanonicalUris(ImmutableList.of(parentEquivalent.getUri())).getFirstValue().requireValue();
+    private Container resolve(ParentRef parentEquivalent) {
+        return (Container) resolver.findByCanonicalUris(ImmutableList.of(parentEquivalent.getUri())).getFirstValue().requireValue();
     }
 
     private double normalize(double score, int itemCount) {

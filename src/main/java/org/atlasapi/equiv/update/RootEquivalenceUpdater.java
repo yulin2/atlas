@@ -7,18 +7,18 @@ import org.atlasapi.media.entity.Item;
 
 public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content> {
 
-    private final ContentEquivalenceUpdater<Container<?>> containerUpdater;
+    private final ContentEquivalenceUpdater<Container> containerUpdater;
     private final ContentEquivalenceUpdater<Item> itemUpdater;
 
-    public RootEquivalenceUpdater(ContentEquivalenceUpdater<Container<?>> containerUpdater, ContentEquivalenceUpdater<Item> itemUpdater) {
+    public RootEquivalenceUpdater(ContentEquivalenceUpdater<Container> containerUpdater, ContentEquivalenceUpdater<Item> itemUpdater) {
         this.containerUpdater = containerUpdater;
         this.itemUpdater = itemUpdater;
     }
 
     @Override
     public EquivalenceResult<Content> updateEquivalences(Content content) {
-        if(content instanceof Container<?>) {
-            return updateContainer((Container<?>)content);
+        if(content instanceof Container) {
+            return updateContainer((Container)content);
         }
         if(content instanceof Item) {
             return updateItem((Item)content);
@@ -27,7 +27,7 @@ public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content
     }
 
     @SuppressWarnings("unchecked")
-    private <Y extends Content> EquivalenceResult<Y> updateContainer(Container<?> content) {
+    private <Y extends Content> EquivalenceResult<Y> updateContainer(Container content) {
         EquivalenceResult<Y> updateEquivalences = (EquivalenceResult<Y>) containerUpdater.updateEquivalences(content);
         return updateEquivalences;
     }

@@ -24,7 +24,7 @@ public class ItvMercuryBrandAdapterTest extends TestCase {
         
         
         @Override
-        public void createOrUpdate(Container<?> container) {
+        public void createOrUpdate(Container container) {
         }
         
         @Override

@@ -22,7 +22,7 @@ public class RecordingContentWriter implements ContentWriter {
 	}
 
 	@Override
-	public void createOrUpdate(Container<?> container) {
+	public void createOrUpdate(Container container) {
 		if (container instanceof Brand) {
 			updatedBrands.add((Brand) container);
 		} else if (container instanceof Series) {
