@@ -77,7 +77,7 @@ public class RestoredEquivalenceResultModelBuilder {
     private SimpleModel scores(Double combined, Map<String, Double> sourceScores, Map<String, Double> totals) {
         SimpleModel scoreModel = new SimpleModel().put("combined", combined);
         
-        if(!combined.isNaN() && combined > 0) {
+        if(!combined.isNaN() && !(combined < 0)) {
             Double runningTotal = totals.get("combined");
             totals.put("combined", runningTotal == null ? combined : combined + runningTotal);
         }
@@ -85,10 +85,11 @@ public class RestoredEquivalenceResultModelBuilder {
         for (Entry<String, Double> sourceScore : sourceScores.entrySet()) {
             String source = sourceScore.getKey();
             Double score = sourceScore.getValue();
+            score = score.isNaN() ? 0 : score;
             
             scoreModel.put(source, score);
             
-            if(!score.isNaN() && score > 0) {
+            if(!score.isNaN() && !(score < 0)) {
                 Double sourceTotal = totals.get(source);
                 totals.put(source, sourceTotal == null ? score : score + sourceTotal);
             }
