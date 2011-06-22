@@ -90,6 +90,7 @@ public class EquivModule {
     private @Autowired SearchResolver searchResolver;
     private @Autowired ContentLister contentLister;
     private @Autowired ContentResolver contentResolver;
+    private @Autowired DatabasedMongo mongo;
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler taskScheduler;
 
@@ -180,6 +181,7 @@ public class EquivModule {
         if(Boolean.parseBoolean(updaterEnabled)) {
             taskScheduler.schedule(mainUpdateTask().withName("Content Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
         }
     }
     
