@@ -99,7 +99,7 @@ public class EquivModule {
     
     public @Bean ContentEquivalenceUpdater<Item> itemUpdater() {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
-                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(1))
+                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
         );
         EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder(itemGenerators.size());
         
