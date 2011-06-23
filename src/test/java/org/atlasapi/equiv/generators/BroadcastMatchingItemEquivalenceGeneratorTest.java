@@ -35,7 +35,10 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTes
     private final BroadcastMatchingItemEquivalenceGenerator generator = new BroadcastMatchingItemEquivalenceGenerator(resolver , ImmutableSet.of(BBC), standardMinutes(1));
     
     public void testGenerateEquivalencesForOneMatchingBroadcast() {
-        final Item item1 = episodeWithBroadcasts("subjectItem", Publisher.PA, new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
+        final Item item1 = episodeWithBroadcasts("subjectItem", Publisher.PA, 
+                new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000)),
+                new Broadcast(Channel.BBC_ONE_CAMBRIDGE.uri(), utcTime(100000), utcTime(200000)));//ignored
+        
         final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
         
         checking(new Expectations(){{
