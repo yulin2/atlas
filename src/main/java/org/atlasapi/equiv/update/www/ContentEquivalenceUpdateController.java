@@ -1,4 +1,4 @@
-package org.atlasapi.equiv.update;
+package org.atlasapi.equiv.update.www;
 
 import static com.metabroadcast.common.http.HttpStatusCode.NOT_FOUND;
 import static com.metabroadcast.common.http.HttpStatusCode.OK;
@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;

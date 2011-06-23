@@ -16,6 +16,7 @@ package org.atlasapi.equiv;
 
 import static org.atlasapi.equiv.generators.ScalingEquivalenceGenerator.scale;
 import static org.atlasapi.equiv.results.EquivalenceResultBuilder.resultBuilder;
+import static org.atlasapi.equiv.results.extractors.FilteringEquivalenceExtractor.filteringExtractor;
 import static org.atlasapi.equiv.update.ResultWritingEquivalenceUpdater.resultWriter;
 
 import java.util.Set;
@@ -28,6 +29,7 @@ import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.combining.ScalingEquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
@@ -40,13 +42,13 @@ import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.update.BasicEquivalenceUpdater;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdateController;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
-import org.atlasapi.equiv.update.FilmEquivalenceUpdateTask;
-import org.atlasapi.equiv.update.FilteringContentLister;
 import org.atlasapi.equiv.update.LookupWritingEquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
+import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
+import org.atlasapi.equiv.update.tasks.FilmEquivalenceUpdateTask;
+import org.atlasapi.equiv.update.tasks.FilteringContentLister;
+import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Film;
@@ -88,6 +90,7 @@ public class EquivModule {
     private @Autowired SearchResolver searchResolver;
     private @Autowired ContentLister contentLister;
     private @Autowired ContentResolver contentResolver;
+    private @Autowired DatabasedMongo mongo;
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler taskScheduler;
 
@@ -97,7 +100,7 @@ public class EquivModule {
     
     public @Bean ContentEquivalenceUpdater<Item> itemUpdater() {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
-                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(1))
+                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
         );
         EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder(itemGenerators.size());
         
@@ -110,7 +113,14 @@ public class EquivModule {
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder(int calculators) {
         return resultBuilder(
                 new ScalingEquivalenceCombiner<T>(AddingEquivalenceCombiner.<T>create(), 1.0/calculators), 
-                MinimumScoreEquivalenceExtractor.minimumFrom(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), 0.0));
+                    MinimumScoreEquivalenceExtractor.minimumFrom(
+                        filteringExtractor(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), new Predicate<ScoredEquivalent<T>>(){
+                            @Override
+                            public boolean apply(ScoredEquivalent<T> input) {
+                                return input.score() > 0.2;
+                            }}), 
+                        0.2)
+                );
     }
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
@@ -171,6 +181,7 @@ public class EquivModule {
         if(Boolean.parseBoolean(updaterEnabled)) {
             taskScheduler.schedule(mainUpdateTask().withName("Content Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
         }
     }
     
