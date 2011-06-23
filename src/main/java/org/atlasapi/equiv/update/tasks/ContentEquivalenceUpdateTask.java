@@ -49,6 +49,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
 
             @Override
             public boolean handle(Content content, ContentListingProgress progress) {
+                reportStatus(String.format("Processing %s %d / %d top-level content.", content.getCanonicalUri(), progress.count() - 1, progress.total()));
                 try {
                     /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
                 } catch (Exception e) {
@@ -95,7 +96,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         
         String lastId = TranslatorUtils.toString(progress, "lastId");
         String tableName = TranslatorUtils.toString(progress, "collection");
-        ContentTable table = tableName == null ? null : ContentTable.valueOf(tableName);
+        ContentTable table = tableName == null ? null : ContentTable.fromString(tableName);
         
         return new ContentListingProgress(lastId, table)
             .withCount(TranslatorUtils.toInteger(progress, "count"))
