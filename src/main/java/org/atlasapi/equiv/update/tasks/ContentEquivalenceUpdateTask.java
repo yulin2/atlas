@@ -7,6 +7,7 @@ import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_ITEMS;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentTable;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
@@ -43,7 +44,8 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         ContentListingProgress currentProgress = getProgress();
         log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Start equivalence task from %s", startProgress(currentProgress.getUri()))));
         
-        boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), ContentListingCriteria.defaultCriteria().startingAt(currentProgress), new ContentListingHandler() {
+        ContentListingCriteria criteria = ContentListingCriteria.defaultCriteria().startingAt(currentProgress).forPublisher(Publisher.PA);
+        boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), criteria, new ContentListingHandler() {
 
             @Override
             public boolean handle(Content content, ContentListingProgress progress) {
