@@ -1,4 +1,4 @@
-package org.atlasapi.equiv.update;
+package org.atlasapi.equiv.update.tasks;
 
 import java.util.Set;
 
