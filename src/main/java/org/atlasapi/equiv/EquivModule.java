@@ -27,11 +27,16 @@ import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
+import org.atlasapi.equiv.generators.SequenceItemEquivalenceScorer;
 import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
+import org.atlasapi.equiv.generators.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
+import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
 import org.atlasapi.equiv.results.combining.ScalingEquivalenceCombiner;
+import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.EquivalenceFilter;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.persistence.MongoEquivalenceResultStore;
@@ -70,6 +75,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -100,7 +106,9 @@ public class EquivModule {
     
     public @Bean ContentEquivalenceUpdater<Item> itemUpdater() {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
-                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
+                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10)),
+                new TitleMatchingItemEquivalenceScorer(),
+                new SequenceItemEquivalenceScorer()
         );
         EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder(itemGenerators.size());
         
@@ -111,16 +119,25 @@ public class EquivModule {
     }
 
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder(int calculators) {
-        return resultBuilder(
-                new ScalingEquivalenceCombiner<T>(AddingEquivalenceCombiner.<T>create(), 1.0/calculators), 
-                    MinimumScoreEquivalenceExtractor.minimumFrom(
-                        filteringExtractor(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), new Predicate<ScoredEquivalent<T>>(){
-                            @Override
-                            public boolean apply(ScoredEquivalent<T> input) {
-                                return input.score() > 0.2;
-                            }}), 
-                        0.2)
-                );
+        EquivalenceCombiner<T> combiner = new ScalingEquivalenceCombiner<T>(AddingEquivalenceCombiner.<T> create(), 1.0 / calculators);
+        
+        EquivalenceExtractor<T> extractor = PercentThresholdEquivalenceExtractor.<T> fromPercent(90);
+        extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
+            @Override
+            public boolean apply(ScoredEquivalent<T> input, T target) {
+                return input.score() > 0.2;
+            }
+        });
+        extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
+            @Override
+            public boolean apply(ScoredEquivalent<T> input, T target) {
+                T equivalent = input.equivalent();
+                return (equivalent.getSpecialization() == null || target.getSpecialization() == null || Objects.equal(equivalent.getSpecialization(), target.getSpecialization())) 
+                    && (equivalent.getMediaType() == null || target.getMediaType() == null || Objects.equal(equivalent.getMediaType(), target.getMediaType()));
+            }
+        });
+        
+        return resultBuilder(combiner, MinimumScoreEquivalenceExtractor.minimumFrom(extractor, 0.2));
     }
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {

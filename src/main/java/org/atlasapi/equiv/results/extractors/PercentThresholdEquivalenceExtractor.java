@@ -23,7 +23,7 @@ public class PercentThresholdEquivalenceExtractor<T extends Content> implements 
     }
     
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(List<ScoredEquivalent<T>> equivalents) {
+    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
         if(equivalents.isEmpty()) {
             return Maybe.nothing();
         }

@@ -16,7 +16,7 @@ public class PercentThresholdEquivalenceExtractorTest extends TestCase {
         PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>fromPercent(90);
         
         ScoredEquivalent<Item> strong = ScoredEquivalent.equivalentScore(new Item("test1","cur1",Publisher.BBC), 0.5);
-        Maybe<ScoredEquivalent<Item>> extract = extractor.extract(ImmutableList.<ScoredEquivalent<Item>>of(
+        Maybe<ScoredEquivalent<Item>> extract = extractor.extract(null, ImmutableList.<ScoredEquivalent<Item>>of(
                 strong,
                 ScoredEquivalent.equivalentScore(new Item("test2","cur2",Publisher.BBC), -0.5),
                 ScoredEquivalent.equivalentScore(new Item("test3","cur3",Publisher.BBC), -0.5),
@@ -32,7 +32,7 @@ public class PercentThresholdEquivalenceExtractorTest extends TestCase {
 
         PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>fromPercent(90);
         
-        Maybe<ScoredEquivalent<Item>> extract = extractor.extract(ImmutableList.<ScoredEquivalent<Item>>of(
+        Maybe<ScoredEquivalent<Item>> extract = extractor.extract(null, ImmutableList.<ScoredEquivalent<Item>>of(
                 ScoredEquivalent.equivalentScore(new Item("test1","cur1",Publisher.BBC), -0.5),
                 ScoredEquivalent.equivalentScore(new Item("test2","cur2",Publisher.BBC), -0.5),
                 ScoredEquivalent.equivalentScore(new Item("test3","cur3",Publisher.BBC), -0.5),
