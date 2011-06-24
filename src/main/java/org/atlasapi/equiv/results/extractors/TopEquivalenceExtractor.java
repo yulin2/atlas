@@ -17,8 +17,8 @@ public class TopEquivalenceExtractor<T extends Content> implements EquivalenceEx
     }
     
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(List<ScoredEquivalent<T>> equivalents) {
-        if(equivalents == null | equivalents.size() < 1) {
+    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
+        if(equivalents == null || equivalents.isEmpty()) {
             return Maybe.nothing();
         }
         return Maybe.just(equivalents.get(0));
