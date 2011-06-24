@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquivalenceGenerator<Item>{
 
@@ -56,7 +57,6 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
                 
             }
         }
-        
         return scale(scores.build(), broadcasts);
     }
     
@@ -64,7 +64,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         return Iterables.filter(broadcasts, new Predicate<Broadcast>() {
             @Override
             public boolean apply(Broadcast input) {
-                return !ignoredChannels.contains(input.getBroadcastOn());
+                return !ignoredChannels.contains(input.getBroadcastOn()) && input.getTransmissionTime().isBefore(new DateTime(DateTimeZones.UTC).plusWeeks(1));
             }
         });
     }
