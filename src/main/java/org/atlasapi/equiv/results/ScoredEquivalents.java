@@ -9,6 +9,6 @@ public interface ScoredEquivalents<T extends Content> {
 
     String source();
 
-    Map<Publisher, Map<T, Double>> equivalents();
+    Map<Publisher, Map<T, Score>> equivalents();
 
 }

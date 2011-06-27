@@ -27,18 +27,18 @@ public class EquivalenceResultBuilder<T extends Content> {
     private final EquivalenceCombiner<T> combiner;
     private final EquivalenceExtractor<T> extractor;
     
-    private Function<Map<T, Double>, ScoredEquivalent<T>> extractorFunction(final T target) {
-        return new Function<Map<T, Double>, ScoredEquivalent<T>>() {
+    private Function<Map<T, Score>, ScoredEquivalent<T>> extractorFunction(final T target) {
+        return new Function<Map<T, Score>, ScoredEquivalent<T>>() {
             @Override
-            public ScoredEquivalent<T> apply(Map<T, Double> input) {
+            public ScoredEquivalent<T> apply(Map<T, Score> input) {
                 Maybe<ScoredEquivalent<T>> extracted = extractor.extract(target, order(input));
                 return extracted.hasValue() ? extracted.requireValue() : null;
             }
 
-            private List<ScoredEquivalent<T>> order(Map<T, Double> input) {
-                Iterable<ScoredEquivalent<T>> scores = Iterables.transform(input.entrySet(), new Function<Entry<T, Double>, ScoredEquivalent<T>>() {
+            private List<ScoredEquivalent<T>> order(Map<T, Score> input) {
+                Iterable<ScoredEquivalent<T>> scores = Iterables.transform(input.entrySet(), new Function<Entry<T, Score>, ScoredEquivalent<T>>() {
                     @Override
-                    public ScoredEquivalent<T> apply(Entry<T, Double> input) {
+                    public ScoredEquivalent<T> apply(Entry<T, Score> input) {
                         return ScoredEquivalent.equivalentScore(input.getKey(), input.getValue());
                     }
                 });

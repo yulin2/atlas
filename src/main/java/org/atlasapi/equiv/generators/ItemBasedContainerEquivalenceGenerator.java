@@ -5,6 +5,7 @@ import java.util.Set;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
@@ -62,8 +63,11 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
         return (Container<?>) resolver.findByCanonicalUris(ImmutableList.of(parentEquivalent.getUri())).getFirstValue().requireValue();
     }
 
-    private double normalize(double score, int itemCount) {
-        return score / itemCount;
+    private Score normalize(Score score, int itemCount) {
+        if(score.isRealScore()) {
+            return Score.valueOf(score.asDouble() / itemCount);
+        }
+        return Score.NULL_SCORE;
     }
 
 }

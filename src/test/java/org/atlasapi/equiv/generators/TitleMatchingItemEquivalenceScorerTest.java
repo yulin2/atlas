@@ -4,6 +4,7 @@ import static com.google.common.collect.ImmutableSet.of;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.generators.TitleMatchingItemEquivalenceScorer.TitleType;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -48,9 +49,21 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
         score(0, scorer.generateEquivalences(itemWithTitle("Episode 1"), of(itemWithTitle("Different"))));
         
     }
+    
+    public void testSeqTitleTypes() {
+
+        TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
+        
+        score(1, scorer.generateEquivalences(itemWithTitle("Kinross"), of(itemWithTitle("2. Kinross"))));
+        score(1, scorer.generateEquivalences(itemWithTitle("Kinross"), of(itemWithTitle("2: Kinross"))));
+        score(1, scorer.generateEquivalences(itemWithTitle("Kinross"), of(itemWithTitle("2 - Kinross"))));
+        score(0, scorer.generateEquivalences(itemWithTitle("Kinross"), of(itemWithTitle("2. Different"))));
+        
+    }
 
     private void score(double expected, ScoredEquivalents<Item> scores) {
-        Iterables.getOnlyElement(scores.equivalents().get(Publisher.BBC).entrySet()).getValue().equals(expected);
+        Score value = Iterables.getOnlyElement(scores.equivalents().get(Publisher.BBC).entrySet()).getValue();
+        assertTrue(String.format("expected %s got %s", expected, value), value.equals(expected > 0 ? Score.valueOf(expected) : Score.NULL_SCORE));
     }
 
     private Item itemWithTitle(String title) {

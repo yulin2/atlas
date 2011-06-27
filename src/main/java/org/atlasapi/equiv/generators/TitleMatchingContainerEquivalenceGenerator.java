@@ -6,6 +6,7 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
@@ -42,12 +43,12 @@ public class TitleMatchingContainerEquivalenceGenerator implements ContentEquiva
         return equivalents.build();
     }
     
-    private double score(String subjectTitle, String equivalentTitle) {
+    private Score score(String subjectTitle, String equivalentTitle) {
         subjectTitle = alphaNumeric(subjectTitle);
         equivalentTitle = alphaNumeric(equivalentTitle);
         double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
         double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
-        return commonPrefix / (subjectTitle.length()/1.0) - difference;
+        return Score.valueOf(commonPrefix / (subjectTitle.length()/1.0) - difference);
     }
 
     private String alphaNumeric(String title) {
