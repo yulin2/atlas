@@ -177,13 +177,13 @@ public class EquivModule {
         ContentLister filteringLister = new FilteringContentLister(contentLister, new Predicate<Content>() {
             @Override
             public boolean apply(Content input) {
-                if(Publisher.PA.equals(input.getPublisher())) {
+                if(Publisher.PA == publisher && publisher.equals(input.getPublisher())) {
                     return !(input instanceof Film); 
                 }
-                return publisher.equals(input.getPublisher());
+                return true;
             }
         });
-        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, db).withSchedulingKey(publisher.key()+"-equivalence");
+        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, db).forPublisher(publisher);
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
