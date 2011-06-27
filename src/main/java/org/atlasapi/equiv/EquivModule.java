@@ -133,8 +133,8 @@ public class EquivModule {
             @Override
             public boolean apply(ScoredEquivalent<T> input, T target) {
                 T equivalent = input.equivalent();
-                return (equivalent.getSpecialization() == null || target.getSpecialization() == null || Objects.equal(equivalent.getSpecialization(), target.getSpecialization())) 
-                    && (equivalent.getMediaType() == null || target.getMediaType() == null || Objects.equal(equivalent.getMediaType(), target.getMediaType()));
+                return (equivalent.getSpecialization() == null || target.getSpecialization() == null || Objects.equal(equivalent.getSpecialization(), target.getSpecialization())); 
+                    //&& (equivalent.getMediaType() == null || target.getMediaType() == null || Objects.equal(equivalent.getMediaType(), target.getMediaType()));
             }
         });
         extractor = new PublisherFilteringExtractor<T>(extractor);
