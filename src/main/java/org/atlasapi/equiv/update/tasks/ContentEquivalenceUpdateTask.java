@@ -31,6 +31,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     private final ContentEquivalenceUpdater<Content> rootUpdater;
     private final AdapterLog log;
     private final DBCollection scheduling;
+    private String schedulingKey = "equivalence";
     
     public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, DatabasedMongo db) {
         this.contentStore = contentStore;
@@ -85,11 +86,11 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         TranslatorUtils.from(update, "total", progress.total());
         TranslatorUtils.from(update, "count", progress.count());
         
-        scheduling.update(where().fieldEquals(ID, "equivalence").build(), new BasicDBObject(MongoConstants.SET, update), true, false);
+        scheduling.update(where().fieldEquals(ID, schedulingKey).build(), new BasicDBObject(MongoConstants.SET, update), true, false);
     }
     
     private ContentListingProgress getProgress() {
-        DBObject progress = scheduling.findOne("equivalence");
+        DBObject progress = scheduling.findOne(schedulingKey);
         if(progress == null || TranslatorUtils.toString(progress, "lastId").equals("start")) {
             return ContentListingProgress.START;
         }
@@ -101,6 +102,11 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         return new ContentListingProgress(lastId, table)
             .withCount(TranslatorUtils.toInteger(progress, "count"))
             .withTotal(TranslatorUtils.toInteger(progress, "total"));
+    }
+
+    public ContentEquivalenceUpdateTask withSchedulingKey(String schedulingKey) {
+        this.schedulingKey = schedulingKey;
+        return this;
     }
 
 }
