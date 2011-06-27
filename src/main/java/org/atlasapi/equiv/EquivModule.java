@@ -38,6 +38,7 @@ import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.EquivalenceFilter;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.PublisherFilteringExtractor;
 import org.atlasapi.equiv.results.persistence.MongoEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
@@ -135,6 +136,7 @@ public class EquivModule {
                     && (equivalent.getMediaType() == null || target.getMediaType() == null || Objects.equal(equivalent.getMediaType(), target.getMediaType()));
             }
         });
+        extractor = new PublisherFilteringExtractor<T>(extractor);
         
         return resultBuilder(combiner, MinimumScoreEquivalenceExtractor.minimumFrom(extractor, 0.2));
     }
