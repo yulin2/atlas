@@ -1,9 +1,11 @@
 package org.atlasapi.equiv.generators;
 
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Item;
@@ -27,13 +29,18 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceGen
         }
         
         public static TitleType titleTypeOf(Item item) {
+            return titleTypeOf(item.getTitle());
+        }
+        
+        public static TitleType titleTypeOf(String title) {
             for (TitleType type : ImmutableList.copyOf(TitleType.values())) {
-                if(type.matches(item.getTitle())) {
+                if(type.matches(title)) {
                     return type;
                 }
             }
             return DEFAULT;
         }
+
 
         private boolean matches(String title) {
             return pattern.matcher(title).matches();
@@ -54,17 +61,31 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceGen
     }
 
 
-    private double score(Item subject, Item suggestion) {
-        TitleType subjectType = TitleType.titleTypeOf(subject);
-        TitleType suggestionType = TitleType.titleTypeOf(suggestion);
+    private Score score(Item subject, Item suggestion) {
         
-        String subjTitle = subject.getTitle().replaceAll("[^A-Za-z0-9]", "");
-        String suggTitle = suggestion.getTitle().replaceAll("[^A-Za-z0-9]", "");
+        String subjTitle = removeSeq(subject.getTitle());
+        String suggTitle = removeSeq(suggestion.getTitle());
+        
+        TitleType subjectType = TitleType.titleTypeOf(subject.getTitle());
+        TitleType suggestionType = TitleType.titleTypeOf(suggestion.getTitle());
+        
+        subjTitle = subjTitle.replaceAll("[^A-Za-z0-9]+", "-");
+        suggTitle = suggTitle.replaceAll("[^A-Za-z0-9]+", "-");
         
         if(subjectType == suggestionType && Objects.equal(subjTitle, suggTitle)) {
-            return 1;
+            return Score.valueOf(1.0);
         }
         
-        return 0;
+        return Score.NULL_SCORE;
+    }
+
+    private final Pattern seqTitle = Pattern.compile("(\\d+)(\\s?[.:-]{1}\\s?)(.*)");
+    
+    private String removeSeq(String title) {
+        Matcher matcher = seqTitle.matcher(title);
+        if(matcher.matches()) {
+            return matcher.group(3);
+        }
+        return title;
     }
 }

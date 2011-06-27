@@ -2,6 +2,7 @@ package org.atlasapi.equiv.results.extractors;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 
@@ -24,17 +25,16 @@ public class PercentThresholdEquivalenceExtractor<T extends Content> implements 
     
     @Override
     public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
-        if(equivalents.isEmpty()) {
-            return Maybe.nothing();
+        if (!equivalents.isEmpty() && equivalents.get(0).score().isRealScore()) {
+
+            Double total = sum(equivalents);
+
+            ScoredEquivalent<T> strongest = equivalents.get(0);
+            if (strongest.score().asDouble() / total > threshold) {
+                return Maybe.just(strongest);
+            }
         }
-        
-        Double total = sum(equivalents);
-        
-        ScoredEquivalent<T> strongest = equivalents.get(0);
-        if(strongest.score() / total > threshold) {
-            return Maybe.just(strongest);
-        }
-        
+
         return Maybe.nothing();
     }
 
@@ -42,9 +42,9 @@ public class PercentThresholdEquivalenceExtractor<T extends Content> implements 
         Double total = 0.0;
         
         for (ScoredEquivalent<T> scoredEquivalent : equivalents) {
-            double score = scoredEquivalent.score();
-            if(score > 0) {
-                total += score;
+            Score score = scoredEquivalent.score();
+            if(score.isRealScore() && score.asDouble() > 0) {
+                total += score.asDouble();
             }
         }
         

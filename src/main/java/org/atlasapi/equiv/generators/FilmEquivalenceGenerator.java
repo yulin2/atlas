@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Film;
@@ -45,7 +46,7 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
         Iterable<Film> equivalentFilms = Iterables.filter(Iterables.filter(possibleEquivalentFilms, Film.class), new EquivalentFilmPredicate(film));
         
         for (Film equivFilm : equivalentFilms) {
-            scores.addEquivalent(equivFilm, 1);
+            scores.addEquivalent(equivFilm, Score.valueOf(1.0));
         }
         
         return scores.build();

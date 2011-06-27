@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -24,22 +25,21 @@ public class SequenceItemEquivalenceScorer implements ContentEquivalenceGenerato
         return equivalents.build();
     }
 
-    private double score(Item subject, Item suggestion) {
+    private Score score(Item subject, Item suggestion) {
         
-        if(!(subject instanceof Episode && suggestion instanceof Episode)) {
-            return 0;
-        }
-        
-        Episode subEp = (Episode) subject;
-        Episode sugEp = (Episode) suggestion;
-        
-        if( Objects.equal(subEp.getSeriesNumber(), sugEp.getSeriesNumber()) &&
-            subEp.getEpisodeNumber() != null && sugEp.getEpisodeNumber() != null && Objects.equal(subEp.getEpisodeNumber(), sugEp.getEpisodeNumber())) {
-                return 1;
+        if (subject instanceof Episode && suggestion instanceof Episode) {
+
+            Episode subEp = (Episode) subject;
+            Episode sugEp = (Episode) suggestion;
+
+            if (Objects.equal(subEp.getSeriesNumber(), sugEp.getSeriesNumber()) && subEp.getEpisodeNumber() != null && sugEp.getEpisodeNumber() != null
+                    && Objects.equal(subEp.getEpisodeNumber(), sugEp.getEpisodeNumber())) {
+                return Score.valueOf(1.0);
+            }
         }
             
         
-        return 0;
+        return Score.NULL_SCORE;
     }
 
 }
