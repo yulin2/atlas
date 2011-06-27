@@ -31,6 +31,7 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     private final ContentEquivalenceUpdater<Content> rootUpdater;
     private final AdapterLog log;
     private final DBCollection scheduling;
+    private Publisher publisher = null;
     private String schedulingKey = "equivalence";
     
     public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, DatabasedMongo db) {
@@ -45,7 +46,10 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         ContentListingProgress currentProgress = getProgress();
         log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Start equivalence task from %s", startProgress(currentProgress.getUri()))));
         
-        ContentListingCriteria criteria = ContentListingCriteria.defaultCriteria().startingAt(currentProgress).forPublisher(Publisher.PA);
+        ContentListingCriteria criteria = ContentListingCriteria.defaultCriteria().startingAt(currentProgress);
+        if(publisher != null) {
+            criteria.forPublisher(publisher);
+        }
         boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), criteria, new ContentListingHandler() {
 
             @Override
@@ -104,8 +108,9 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
             .withTotal(TranslatorUtils.toInteger(progress, "total"));
     }
 
-    public ContentEquivalenceUpdateTask withSchedulingKey(String schedulingKey) {
-        this.schedulingKey = schedulingKey;
+    public ContentEquivalenceUpdateTask forPublisher(Publisher publisher) {
+        this.publisher = publisher;
+        this.schedulingKey = publisher.key()+"-equivalence";
         return this;
     }
 
