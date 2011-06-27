@@ -13,6 +13,8 @@ import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,10 +31,12 @@ public class ContentEquivalenceUpdateController {
     private final ContentEquivalenceUpdater<Content> contentUpdater;
     private final ContentResolver contentResolver;
     private final ExecutorService executor;
+    private final AdapterLog log;
 
-    public ContentEquivalenceUpdateController(ContentEquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver) {
+    public ContentEquivalenceUpdateController(ContentEquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver, AdapterLog log) {
         this.contentUpdater = contentUpdater;
         this.contentResolver = contentResolver;
+        this.log = log;
         this.executor = Executors.newFixedThreadPool(5);
     }
 
@@ -58,7 +62,11 @@ public class ContentEquivalenceUpdateController {
         return new Runnable() {
             @Override
             public void run() {
-                contentUpdater.updateEquivalences(content);
+                try{
+                    contentUpdater.updateEquivalences(content);
+                }catch (Exception e) {
+                    log.record(AdapterLogEntry.errorEntry().withSource(getClass()).withCause(e).withDescription("Equivalence Update failed for "+content.getCanonicalUri()));
+                }
             }
         };
     }

@@ -97,9 +97,10 @@ public class EquivalenceResultTranslator {
         
         for (DBObject equivDbo : TranslatorUtils.toDBObjectList(dbo, EQUIVS)) {
             String id = TranslatorUtils.toString(equivDbo, ID);
+            Double combined = TranslatorUtils.toDouble(equivDbo, COMBINED);
             totals.put(
                     new EquivalenceIdentifier(id, TranslatorUtils.toString(equivDbo, TITLE), strongs.contains(id), publisherName(equivDbo)), 
-                    TranslatorUtils.toDouble(equivDbo, COMBINED)
+                    combined == null ? Double.NaN : combined
             );
             for (DBObject scoreDbo : TranslatorUtils.toDBObjectList(equivDbo, SCORES)) {
                 Double score = TranslatorUtils.toDouble(scoreDbo, SCORE);
