@@ -21,7 +21,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container<?>> {
 
-    private static final String NAME = "Item";
+    public static final String NAME = "Item";
     private final ContentEquivalenceUpdater<Item> itemUpdater;
     private final ContentResolver resolver;
 

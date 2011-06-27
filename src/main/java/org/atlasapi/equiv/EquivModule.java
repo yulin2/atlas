@@ -33,6 +33,7 @@ import org.atlasapi.equiv.generators.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
+import org.atlasapi.equiv.results.combining.ItemScoreFilteringCombiner;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.EquivalenceFilter;
@@ -119,7 +120,7 @@ public class EquivModule {
     }
 
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder() {
-        EquivalenceCombiner<T> combiner = new NullScoreAwareAveragingCombiner<T>();
+        EquivalenceCombiner<T> combiner = new ItemScoreFilteringCombiner<T>(new NullScoreAwareAveragingCombiner<T>());
         
         EquivalenceExtractor<T> extractor = PercentThresholdEquivalenceExtractor.<T> fromPercent(90);
         extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
@@ -210,7 +211,7 @@ public class EquivModule {
     
     //Controllers...
     public @Bean ContentEquivalenceUpdateController updateController() {
-        return new ContentEquivalenceUpdateController(contentUpdater(), contentResolver);
+        return new ContentEquivalenceUpdateController(contentUpdater(), contentResolver, log);
     }
     
     public @Bean EquivalenceResultController resultController() {
