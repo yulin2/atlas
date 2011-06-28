@@ -12,7 +12,7 @@ public class BbcIonServices {
 
     public static BiMap<String, String> services = ImmutableBiMap.<String, String>builder()
     
-        .put("bbc_one",  "http://www.bbc.co.uk/services/bbcone")
+//        .put("bbc_one",  "http://www.bbc.co.uk/services/bbcone")
         .put("bbc_one_london",  "http://www.bbc.co.uk/services/bbcone/london")
         .put("bbc_one_west",  "http://www.bbc.co.uk/services/bbcone/west")
         .put("bbc_one_south_west",  "http://www.bbc.co.uk/services/bbcone/south_west")
@@ -32,7 +32,7 @@ public class BbcIonServices {
         .put("bbc_one_northern_ireland",  "http://www.bbc.co.uk/services/bbcone/ni")
         .put("bbc_one_wales",  "http://www.bbc.co.uk/services/bbcone/wales")
         
-        .put("bbc_two", "http://www.bbc.co.uk/services/bbctwo")
+//        .put("bbc_two", "http://www.bbc.co.uk/services/bbctwo")
         .put("bbc_two_england", "http://www.bbc.co.uk/services/bbctwo/england")
         .put("bbc_two_wales", "http://www.bbc.co.uk/services/bbctwo/wales_analogue")
         .put("bbc_two_wales_digital", "http://www.bbc.co.uk/services/bbctwo/wales")

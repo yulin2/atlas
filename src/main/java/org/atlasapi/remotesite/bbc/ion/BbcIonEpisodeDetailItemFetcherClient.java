@@ -4,7 +4,6 @@ import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import org.atlasapi.media.entity.Actor;
-import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
@@ -22,7 +21,6 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
-import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonContributor;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
@@ -145,18 +143,18 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         return Maybe.just(person);
     }
 
-    private Broadcast broadcastFrom(IonBroadcast ionBroadcast) {
-        String serviceUri = BbcIonServices.get(ionBroadcast.getService());
-        if(serviceUri == null) {
-            log.record(new AdapterLogEntry(WARN).withDescription("Couldn't find service URI for Ion Service " + ionBroadcast.getService()).withSource(getClass()));
-            return null;
-        } else {
-            Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
-            broadcast.withId(CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
-            broadcast.setLastUpdated(ionBroadcast.getUpdated());
-            return broadcast;
-        }
-    }
+//    private Broadcast broadcastFrom(IonBroadcast ionBroadcast) {
+//        String serviceUri = BbcIonServices.get(ionBroadcast.getService());
+//        if(serviceUri == null) {
+//            log.record(new AdapterLogEntry(WARN).withDescription("Couldn't find service URI for Ion Service " + ionBroadcast.getService()).withSource(getClass()));
+//            return null;
+//        } else {
+//            Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
+//            broadcast.withId(CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
+//            broadcast.setLastUpdated(ionBroadcast.getUpdated());
+//            return broadcast;
+//        }
+//    }
     
     private Version versionFrom(IonVersion ionVersion, String pid) {
         Version version = new Version();
@@ -166,14 +164,14 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         if(ionVersion.getDuration() != null) {
             version.setDuration(Duration.standardSeconds(ionVersion.getDuration()));
         }
-        if(ionVersion.getBroadcasts() != null) {
-            for (IonBroadcast ionBroadcast : ionVersion.getBroadcasts()) {
-                Broadcast broadcast = broadcastFrom(ionBroadcast);
-                if(broadcast != null) {
-                    version.addBroadcast(broadcast);
-                }
-            }
-        }
+//        if(ionVersion.getBroadcasts() != null) {
+//            for (IonBroadcast ionBroadcast : ionVersion.getBroadcasts()) {
+//                Broadcast broadcast = broadcastFrom(ionBroadcast);
+//                if(broadcast != null) {
+//                    version.addBroadcast(broadcast);
+//                }
+//            }
+//        }
         if(ionVersion.getOndemands() != null) {
             for (IonOndemandChange ondemand : ionVersion.getOndemands()) {
                 Maybe<Encoding> possibleEncoding = enodingCreator.createEncoding(ondemand, pid);
