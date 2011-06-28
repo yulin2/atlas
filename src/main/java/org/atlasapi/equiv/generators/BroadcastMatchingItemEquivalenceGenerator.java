@@ -114,7 +114,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     private boolean hasQualifyingBroadcast(Item item, Broadcast referenceBroadcast) {
         for (Version version : item.nativeVersions()) {
             for (Broadcast broadcast : version.getBroadcasts()) {
-                if(around(broadcast, referenceBroadcast)/* && broadcast.getBroadcastOn() != null &&  broadcast.getBroadcastOn().equals(referenceBroadcast.getBroadcastOn())*/) {
+                if(around(broadcast, referenceBroadcast) && broadcast.getBroadcastOn() != null &&  broadcast.getBroadcastOn().equals(referenceBroadcast.getBroadcastOn())) {
                     return true;
                 }
             }
