@@ -72,12 +72,12 @@ public class ChildRefUpdateTask extends ScheduledTask {
     private ContentListingProgress getProgress() {
         DBObject progress = scheduling.findOne("childref");
         if(progress == null || TranslatorUtils.toString(progress, "lastId").equals("start")) {
-            return new ContentListingProgress("http://pressassociation.com/episodes/127692420", ContentTable.CHILD_ITEMS).withCount(2007443).withTotal(4053407);
+            return ContentListingProgress.START;
         }
         
         String lastId = TranslatorUtils.toString(progress, "lastId");
         String tableName = TranslatorUtils.toString(progress, "collection");
-        ContentTable table = tableName == null ? null : ContentTable.valueOf(tableName);
+        ContentTable table = tableName == null ? null : ContentTable.fromString(tableName);
         
         return new ContentListingProgress(lastId, table)
             .withCount(TranslatorUtils.toInteger(progress, "count"))

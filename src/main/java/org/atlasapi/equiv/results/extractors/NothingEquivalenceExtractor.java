@@ -10,7 +10,7 @@ import com.metabroadcast.common.base.Maybe;
 public class NothingEquivalenceExtractor<T extends Content> implements EquivalenceExtractor<T> {
 
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(List<ScoredEquivalent<T>> equivalents) {
+    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
         return Maybe.nothing();
     }
 

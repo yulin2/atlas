@@ -27,13 +27,19 @@ import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
+import org.atlasapi.equiv.generators.SequenceItemEquivalenceScorer;
 import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
+import org.atlasapi.equiv.generators.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalent;
-import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
-import org.atlasapi.equiv.results.combining.ScalingEquivalenceCombiner;
+import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
+import org.atlasapi.equiv.results.combining.ItemScoreFilteringCombiner;
+import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
+import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.EquivalenceFilter;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.PublisherFilteringExtractor;
 import org.atlasapi.equiv.results.persistence.MongoEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
@@ -70,6 +76,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -100,9 +107,11 @@ public class EquivModule {
     
     public @Bean ContentEquivalenceUpdater<Item> itemUpdater() {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
-                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
+                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10)),
+                new TitleMatchingItemEquivalenceScorer(),
+                new SequenceItemEquivalenceScorer()
         );
-        EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder(itemGenerators.size());
+        EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder();
         
         ContentEquivalenceUpdater<Item> itemUpdater = new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder, log);
         itemUpdater = resultWriter(itemUpdater, equivalenceResultStore());
@@ -110,17 +119,27 @@ public class EquivModule {
         return itemUpdater;
     }
 
-    private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder(int calculators) {
-        return resultBuilder(
-                new ScalingEquivalenceCombiner<T>(AddingEquivalenceCombiner.<T>create(), 1.0/calculators), 
-                    MinimumScoreEquivalenceExtractor.minimumFrom(
-                        filteringExtractor(PercentThresholdEquivalenceExtractor.<T>fromPercent(90), new Predicate<ScoredEquivalent<T>>(){
-                            @Override
-                            public boolean apply(ScoredEquivalent<T> input) {
-                                return input.score() > 0.2;
-                            }}), 
-                        0.2)
-                );
+    private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder() {
+        EquivalenceCombiner<T> combiner = new ItemScoreFilteringCombiner<T>(new NullScoreAwareAveragingCombiner<T>());
+        
+        EquivalenceExtractor<T> extractor = PercentThresholdEquivalenceExtractor.<T> fromPercent(90);
+        extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
+            @Override
+            public boolean apply(ScoredEquivalent<T> input, T target) {
+                return input.score().isRealScore() && input.score().asDouble() > 0.2;
+            }
+        });
+        extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
+            @Override
+            public boolean apply(ScoredEquivalent<T> input, T target) {
+                T equivalent = input.equivalent();
+                return (equivalent.getSpecialization() == null || target.getSpecialization() == null || Objects.equal(equivalent.getSpecialization(), target.getSpecialization())); 
+                    //&& (equivalent.getMediaType() == null || target.getMediaType() == null || Objects.equal(equivalent.getMediaType(), target.getMediaType()));
+            }
+        });
+        extractor = new PublisherFilteringExtractor<T>(extractor);
+        
+        return resultBuilder(combiner, MinimumScoreEquivalenceExtractor.minimumFrom(extractor, 0.2));
     }
     
     public @Bean ContentEquivalenceUpdater<Container<?>> containerUpdater() {
@@ -138,7 +157,7 @@ public class EquivModule {
                     }
                 })
         );
-        EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder(containerGenerators.size());
+        EquivalenceResultBuilder<Container<?>> resultBuilder = standardResultBuilder();
         
         ContentEquivalenceUpdater<Container<?>> containerUpdater = new BasicEquivalenceUpdater<Container<?>>(containerGenerators, resultBuilder, log);
         containerUpdater = resultWriter(containerUpdater, equivalenceResultStore());
@@ -155,18 +174,21 @@ public class EquivModule {
         return new TransitiveLookupWriter(new MongoLookupEntryStore(db));
     }
     
-    public @Bean ContentEquivalenceUpdateTask mainUpdateTask() {
+    private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher publisher) {
         ContentLister filteringLister = new FilteringContentLister(contentLister, new Predicate<Content>() {
             @Override
             public boolean apply(Content input) {
-                return !(input instanceof Film && Publisher.PA.equals(input.getPublisher()));
+                if(Publisher.PA == publisher && publisher.equals(input.getPublisher())) {
+                    return !(input instanceof Film); 
+                }
+                return true;
             }
         });
-        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, db);
+        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, db).forPublisher(publisher);
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
-        EquivalenceResultBuilder<Film> standardResultBuilder = standardResultBuilder(1);
+        EquivalenceResultBuilder<Film> standardResultBuilder = standardResultBuilder();
         Set<ContentEquivalenceGenerator<Film>> generators = ImmutableSet.<ContentEquivalenceGenerator<Film>>of(
 //                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(1)),
                 new FilmEquivalenceGenerator(searchResolver)
@@ -179,7 +201,9 @@ public class EquivModule {
     @PostConstruct
     public void scheduleUpdater() {
         if(Boolean.parseBoolean(updaterEnabled)) {
-            taskScheduler.schedule(mainUpdateTask().withName("Content Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.PA).withName("PA Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.BBC).withName("BBC Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.C4).withName("C4 Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
         }
@@ -187,7 +211,7 @@ public class EquivModule {
     
     //Controllers...
     public @Bean ContentEquivalenceUpdateController updateController() {
-        return new ContentEquivalenceUpdateController(contentUpdater(), contentResolver);
+        return new ContentEquivalenceUpdateController(contentUpdater(), contentResolver, log);
     }
     
     public @Bean EquivalenceResultController resultController() {
