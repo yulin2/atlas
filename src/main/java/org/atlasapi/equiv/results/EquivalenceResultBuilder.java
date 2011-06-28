@@ -27,23 +27,25 @@ public class EquivalenceResultBuilder<T extends Content> {
     private final EquivalenceCombiner<T> combiner;
     private final EquivalenceExtractor<T> extractor;
     
-    private final Function<Map<T,Double>, ScoredEquivalent<T>> extractorFunction = new Function<Map<T,Double>, ScoredEquivalent<T>>() {
-        @Override
-        public ScoredEquivalent<T> apply(Map<T,Double> input) {
-            Maybe<ScoredEquivalent<T>> extracted = extractor.extract(order(input));
-            return extracted.hasValue() ? extracted.requireValue() : null;
-        }
+    private Function<Map<T, Score>, ScoredEquivalent<T>> extractorFunction(final T target) {
+        return new Function<Map<T, Score>, ScoredEquivalent<T>>() {
+            @Override
+            public ScoredEquivalent<T> apply(Map<T, Score> input) {
+                Maybe<ScoredEquivalent<T>> extracted = extractor.extract(target, order(input));
+                return extracted.hasValue() ? extracted.requireValue() : null;
+            }
 
-        private List<ScoredEquivalent<T>> order(Map<T, Double> input) {
-            Iterable<ScoredEquivalent<T>> scores = Iterables.transform(input.entrySet(), new Function<Entry<T, Double>, ScoredEquivalent<T>>() {
-                @Override
-                public ScoredEquivalent<T> apply(Entry<T, Double> input) {
-                    return ScoredEquivalent.equivalentScore(input.getKey(), input.getValue());
-                }
-            });
-            return Ordering.natural().reverse().immutableSortedCopy(scores);
-        }
-    };
+            private List<ScoredEquivalent<T>> order(Map<T, Score> input) {
+                Iterable<ScoredEquivalent<T>> scores = Iterables.transform(input.entrySet(), new Function<Entry<T, Score>, ScoredEquivalent<T>>() {
+                    @Override
+                    public ScoredEquivalent<T> apply(Entry<T, Score> input) {
+                        return ScoredEquivalent.equivalentScore(input.getKey(), input.getValue());
+                    }
+                });
+                return Ordering.natural().reverse().immutableSortedCopy(scores);
+            }
+        };
+    }
 
     public EquivalenceResultBuilder(EquivalenceCombiner<T> combiner, EquivalenceExtractor<T> marker) {
         this.combiner = combiner;
@@ -52,11 +54,11 @@ public class EquivalenceResultBuilder<T extends Content> {
 
     public EquivalenceResult<T> resultFor(T target, List<ScoredEquivalents<T>> equivalents) {
         ScoredEquivalents<T> combined = combine(equivalents);
-        return new EquivalenceResult<T>(target, equivalents, combined, extract(combined));
+        return new EquivalenceResult<T>(target, equivalents, combined, extract(target, combined));
     }
 
-    private Map<Publisher, ScoredEquivalent<T>> extract(ScoredEquivalents<T> combined) {
-        return filterValues(transformValues(combined.equivalents(), extractorFunction), notNull());
+    private Map<Publisher, ScoredEquivalent<T>> extract(T target, ScoredEquivalents<T> combined) {
+        return filterValues(transformValues(combined.equivalents(), extractorFunction(target)), notNull());
     }
     
     private ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> equivalents) {

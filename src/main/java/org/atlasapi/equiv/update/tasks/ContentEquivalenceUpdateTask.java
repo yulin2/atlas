@@ -7,6 +7,7 @@ import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_ITEMS;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentTable;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
@@ -30,6 +31,8 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     private final ContentEquivalenceUpdater<Content> rootUpdater;
     private final AdapterLog log;
     private final DBCollection scheduling;
+    private Publisher publisher = null;
+    private String schedulingKey = "equivalence";
     
     public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, DatabasedMongo db) {
         this.contentStore = contentStore;
@@ -43,10 +46,15 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         ContentListingProgress currentProgress = getProgress();
         log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Start equivalence task from %s", startProgress(currentProgress.getUri()))));
         
-        boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), ContentListingCriteria.defaultCriteria().startingAt(currentProgress), new ContentListingHandler() {
+        ContentListingCriteria criteria = ContentListingCriteria.defaultCriteria().startingAt(currentProgress);
+        if(publisher != null) {
+            criteria.forPublisher(publisher);
+        }
+        boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), criteria, new ContentListingHandler() {
 
             @Override
             public boolean handle(Content content, ContentListingProgress progress) {
+                reportStatus(String.format("Processing %s %d / %d top-level content.", content.getCanonicalUri(), progress.count() - 1, progress.total()));
                 try {
                     /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
                 } catch (Exception e) {
@@ -82,22 +90,28 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         TranslatorUtils.from(update, "total", progress.total());
         TranslatorUtils.from(update, "count", progress.count());
         
-        scheduling.update(where().fieldEquals(ID, "equivalence").build(), new BasicDBObject(MongoConstants.SET, update), true, false);
+        scheduling.update(where().fieldEquals(ID, schedulingKey).build(), new BasicDBObject(MongoConstants.SET, update), true, false);
     }
     
     private ContentListingProgress getProgress() {
-        DBObject progress = scheduling.findOne("equivalence");
+        DBObject progress = scheduling.findOne(schedulingKey);
         if(progress == null || TranslatorUtils.toString(progress, "lastId").equals("start")) {
             return ContentListingProgress.START;
         }
         
         String lastId = TranslatorUtils.toString(progress, "lastId");
         String tableName = TranslatorUtils.toString(progress, "collection");
-        ContentTable table = tableName == null ? null : ContentTable.valueOf(tableName);
+        ContentTable table = tableName == null ? null : ContentTable.fromString(tableName);
         
         return new ContentListingProgress(lastId, table)
             .withCount(TranslatorUtils.toInteger(progress, "count"))
             .withTotal(TranslatorUtils.toInteger(progress, "total"));
+    }
+
+    public ContentEquivalenceUpdateTask forPublisher(Publisher publisher) {
+        this.publisher = publisher;
+        this.schedulingKey = publisher.key()+"-equivalence";
+        return this;
     }
 
 }

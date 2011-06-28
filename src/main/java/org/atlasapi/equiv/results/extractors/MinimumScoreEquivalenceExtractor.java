@@ -21,8 +21,14 @@ public class MinimumScoreEquivalenceExtractor<T extends Content> extends Chainin
     }
 
     @Override
-    protected Maybe<ScoredEquivalent<T>> extract(List<ScoredEquivalent<T>> equivalents, Maybe<ScoredEquivalent<T>> delegateExtraction) {
-        return delegateExtraction.hasValue() && delegateExtraction.requireValue().score() > minimum ? delegateExtraction : Maybe.<ScoredEquivalent<T>>nothing();
+    protected Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, Maybe<ScoredEquivalent<T>> delegateExtraction) {
+        if(delegateExtraction.hasValue()) {
+            ScoredEquivalent<T> realExtraction = delegateExtraction.requireValue();
+            if(realExtraction.score().isRealScore() && realExtraction.score().asDouble() > minimum) {
+                return Maybe.just(realExtraction);
+            }
+        }
+        return Maybe.nothing();
     }
 
 }

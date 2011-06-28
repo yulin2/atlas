@@ -9,6 +9,7 @@ import java.util.Set;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
@@ -54,10 +55,10 @@ public class BasicEquivalenceUpdater<T extends Content> implements ContentEquiva
         return builder.resultFor(content, scores);
     }
 
-    private List<T> extractSuggestions(Map<Publisher, Map<T, Double>> equivalents) {
-        return Lists.newArrayList(Iterables.concat(Iterables.transform(equivalents.values(), new Function<Map<T, Double>, Iterable<T>>() {
+    private List<T> extractSuggestions(Map<Publisher, Map<T, Score>> equivalents) {
+        return Lists.newArrayList(Iterables.concat(Iterables.transform(equivalents.values(), new Function<Map<T, Score>, Iterable<T>>() {
             @Override
-            public Iterable<T> apply(Map<T, Double> input) {
+            public Iterable<T> apply(Map<T, Score> input) {
                 return input.keySet();
             }
         })));
