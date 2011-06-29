@@ -51,7 +51,7 @@ public class C4EpgUpdaterTest extends TestCase {
     
     private final BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, resolver,  contentWriter, log);
     
-    private final C4EpgUpdater updater = new C4EpgUpdater(c4AtomFetcher, new C4EpgEntryProcessor(contentWriter, resolver, log), trimmer, log, new DayRangeGenerator());
+    private final C4EpgUpdater updater = new C4EpgUpdater(c4AtomFetcher, new C4EpgEntryProcessor(contentWriter, resolver, log), new C4EpgBrandlessEntryProcessor(contentWriter, resolver, log), trimmer, log, new DayRangeGenerator());
     
     @Override
     public void setUp() throws Exception {
