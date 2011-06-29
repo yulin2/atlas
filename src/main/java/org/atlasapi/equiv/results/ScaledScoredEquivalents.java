@@ -57,4 +57,8 @@ public class ScaledScoredEquivalents<T extends Content> implements ScoredEquival
         }));
     }
 
+    @Override
+    public String toString() {
+        return String.format("Scaled %s", base);
+    }
 }

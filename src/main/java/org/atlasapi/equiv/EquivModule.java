@@ -64,10 +64,12 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
+import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.LookupWriter;
 import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.query.content.schedule.ManualScheduleUpdateController;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +95,7 @@ public class EquivModule {
 
 	private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.weekly(DayOfWeek.MONDAY, new LocalTime(9, 00));
     
-    private @Autowired ScheduleResolver scheduleResolver;
+    private @Autowired MongoScheduleStore scheduleResolver;
     private @Autowired SearchResolver searchResolver;
     private @Autowired ContentLister contentLister;
     private @Autowired ContentResolver contentResolver;
@@ -231,4 +233,9 @@ public class EquivModule {
         return new EquivalenceResultProbeController(equivalenceResultStore(), equivProbeStore());
     }
 
+    @Bean ManualScheduleUpdateController scheduleUpdateController() {
+        return new ManualScheduleUpdateController(scheduleResolver, contentResolver);
+    }
+    
+    
 }
