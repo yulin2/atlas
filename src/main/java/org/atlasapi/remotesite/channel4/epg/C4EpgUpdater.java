@@ -48,7 +48,8 @@ public class C4EpgUpdater implements Runnable {
             "E4", E_FOUR,
             "4M", FOUR_MUSIC
     );
-    private final static String epgUriPattern = "http://api.channel4.com/tv-listings/daily/%s/%s.atom";
+    
+    private final static String epgUriPattern = "http://api.channel4.com/pmlsd/tv-listings/daily/%s/%s.atom";
 
     private final RemoteSiteClient<Document> c4AtomFetcher;
     private final AdapterLog log;
@@ -131,7 +132,7 @@ public class C4EpgUpdater implements Runnable {
 
     private void process(Iterable<C4EpgEntry> entries, Channel channel) {
         for (C4EpgEntry entry : entries) {
-            if (entry.brandTitle() != null && entry.episodeNumber() != null && entry.seriesNumber() != null) {
+            if (entry.relatedEntry() != null) {
                 entryProcessor.process(entry, channel);
             } else {
                 brandlessEntryProcessor.process(entry, channel);
