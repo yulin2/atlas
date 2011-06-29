@@ -433,7 +433,7 @@ public class PaChannelMap {
         channelMap.put(744, Channel.BBC_RADIO_6MUSIC);
         channelMap.put(745, Channel.BBC_RADIO_5LIVESPORTSEXTRA);
         channelMap.put(875, Channel.BBC_RADIO_1XTRA);
-        channelMap.put(932, Channel.BBC_RADIO_RADIO7);
+        channelMap.put(932, Channel.BBC_RADIO_RADIO4_EXTRA);
 /*        channelMap.put(1227, Channel.PLANET_ROCK);
         channelMap.put(239, Channel.RADIO_AIRE);
         channelMap.put(240, Channel.STAR_RADIO);
