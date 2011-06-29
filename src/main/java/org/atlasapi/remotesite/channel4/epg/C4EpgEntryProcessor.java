@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import static org.atlasapi.remotesite.channel4.C4BroadcastBuilder.broadcast;
@@ -30,6 +29,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.atlasapi.remotesite.channel4.C4EpisodesExtractor;
+import org.atlasapi.remotesite.channel4.C4RelatedEntry;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
@@ -51,7 +51,7 @@ public class C4EpgEntryProcessor {
     private static final Pattern EPISODE_ATOM_PATTERN = Pattern.compile("http://\\w{3}.channel4.com/programmes/([a-z0-9\\-]+)/episode-guide/series-\\d+/episode-\\d+.atom");
 
     private static final List<Pattern> WEB_SAFE_BRAND_PATTERNS = ImmutableList.of(BRAND_ATOM_PATTERN, C40D_PATTERN, EPISODE_ATOM_PATTERN);
-
+    
     public static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
     private final ContentWriter contentWriter;
@@ -60,7 +60,7 @@ public class C4EpgEntryProcessor {
     private final AdapterLog log;
     
     private final C4SynthesizedItemUpdater c4SynthesizedItemUpdater;
-
+    
     public C4EpgEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentStore = contentStore;
@@ -105,9 +105,8 @@ public class C4EpgEntryProcessor {
         } catch (Exception e) {
             log.record(new AdapterLogEntry(WARN).withCause(e).withSource(getClass()).withDescription("Exception processing entry: " + entry.id()));
         }
-
     }
-
+    
     private void updateFromPossibleSynthesized(String webSafeBrandName, C4EpgEntry entry, Episode episode) {
         c4SynthesizedItemUpdater.findAndUpdatePossibleSynthesized("c4:"+entry.slotId(), episode, C4_PROGRAMMES_BASE+webSafeBrandName);
     }
@@ -258,13 +257,18 @@ public class C4EpgEntryProcessor {
     }
 
     private String uriFrom(C4EpgEntry entry, String brandName) {
-        checkNotNull(brandName);
-        checkNotNull(entry.seriesNumber());
-        checkNotNull(entry.episodeNumber());
-        return String.format("%s%s/episode-guide/series-%s/episode-%s", C4_PROGRAMMES_BASE, brandName, entry.seriesNumber(), entry.episodeNumber());
+        String canonical = C4AtomApi.canonicaliseEpisodeIdentifier(entry.relatedEntry().getEpisodeIdTag());
+        if (canonical == null) {
+            throw new IllegalArgumentException("Not a valid c4 episode uri " + canonical);
+        }
+        return canonical;
     }
 
     public static String webSafeBrandName(C4EpgEntry entry) {
+        C4RelatedEntry related = entry.relatedEntry();
+        if (related != null) {
+            return C4AtomApi.webSafeNameFromAnyFeedId(related.getEpisodeIdTag());
+        }
         for (String link : entry.links()) {
             for (Pattern pattern : WEB_SAFE_BRAND_PATTERNS) {
                 Matcher matcher = pattern.matcher(link);
@@ -275,5 +279,4 @@ public class C4EpgEntryProcessor {
         }
         return null;
     }
-
 }

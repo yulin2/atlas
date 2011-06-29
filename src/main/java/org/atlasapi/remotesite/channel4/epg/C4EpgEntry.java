@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 
 import org.atlasapi.remotesite.channel4.C4AtomApi;
+import org.atlasapi.remotesite.channel4.C4RelatedEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
@@ -25,6 +26,7 @@ public class C4EpgEntry {
     private Boolean subtitles;
     private Boolean audioDescription;
     private Duration duration;
+    private C4RelatedEntry relatedEntry;
 
     public static C4EpgEntry from(C4EpgEntryElement element) {
         C4EpgEntry entry = new C4EpgEntry(element.id());
@@ -37,6 +39,7 @@ public class C4EpgEntry {
                 .withAvailable(element.available())
                 .withSeriesNumber(element.seriesNumber())
                 .withEpisodeNumber(element.episodeNumber())
+                .withRelatedEntry(element.relatedEntry())
                 .withAgeRating(element.ageRating())
                 .withTxDate(element.txDate())
                 .withTxChannel(element.txChannel())
@@ -45,9 +48,14 @@ public class C4EpgEntry {
                 .withDuration(element.duration());
         return entry;
     }
-    
+
     public C4EpgEntry(String id) {
         this.id = id;
+    }
+    
+    private C4EpgEntry withRelatedEntry(C4RelatedEntry relatedEntry) {
+        this.relatedEntry = relatedEntry;
+        return this;
     }
     
     public C4EpgEntry withDuration(Duration duration) {
@@ -135,6 +143,10 @@ public class C4EpgEntry {
             return matcher.group(1);
         }
         return null;
+    }
+    
+    public C4RelatedEntry relatedEntry() {
+        return relatedEntry;
     }
 
     public String title() {
