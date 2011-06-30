@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
 import static org.hamcrest.core.AllOf.allOf;
 import junit.framework.TestCase;
 
@@ -11,38 +10,34 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
-import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
-import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class BbcIonScheduleUpdaterTest extends TestCase {
 
-    private static final String ION_FEED_URI = "uri";
+    private static final String THE_SERVICE = "the_service";
+    private static final String THE_DAY = "21010101";
+    private static final String ION_FEED_URI = String.format(BbcIonScheduleUpdateTask.SCHEDULE_PATTERN, THE_SERVICE, THE_DAY);
     
 	private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
 	private static final String ITEM_A = SLASH_PROGRAMMES_ROOT + "b00y377q";
     
     private Mockery context = new Mockery();
     
-    private final BbcIonDeserializer<IonSchedule> deserialiser = deserializerForClass(IonSchedule.class);
-    
     private final ContentWriter writer = context.mock(ContentWriter.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
-    private final DummyItemsPeopleWriter itemsPeopleWriter = new DummyItemsPeopleWriter();
     
     @SuppressWarnings("unchecked")
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
@@ -57,7 +52,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonUriSourceScheduleUpdater(ImmutableList.of(ION_FEED_URI), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).run();
     }
     
     @SuppressWarnings("unchecked")
@@ -80,7 +75,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
         }});
 
-        new BbcIonUriSourceScheduleUpdater(ImmutableList.of(ION_FEED_URI), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).run();
     }
 
     @SuppressWarnings("unchecked")
@@ -90,7 +85,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
 
         context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(allOf(
-                    uri(SLASH_PROGRAMMES_ROOT+"b00y1w9h"),
+                    uri(SLASH_PROGRAMMES_ROOT+"b00y439c"),
                     title("Episode 4"),
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y4336"))
             )));
@@ -102,11 +97,11 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
         }});
 
-        new BbcIonUriSourceScheduleUpdater(ImmutableList.of(ION_FEED_URI), resolver, writer, deserialiser, itemsPeopleWriter, log).withHttpClient(httpClient).run();
+        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).run();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {
-        return new FunctionBasedDescriptionMatcher<Item>("item with version" + versionMatcher, new Function<Item,Boolean>() {
+        return new FunctionBasedDescriptionMatcher<Item>("item with version " + versionMatcher, new Function<Item,Boolean>() {
             @Override
             public Boolean apply(Item input) {
                 return Iterables.any(input.getVersions(), new Predicate<Version>() {
@@ -120,7 +115,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     }
     
     private Matcher<Item> title(final String title) {
-        return new FunctionBasedDescriptionMatcher<Item>("item with title " + title, new Function<Item, Boolean>() {
+        return new FunctionBasedDescriptionMatcher<Item>(String.format("item with title '%s'",title), new Function<Item, Boolean>() {
             @Override
             public Boolean apply(Item item) {
                 return title.equals(item.getTitle());
