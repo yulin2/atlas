@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
-
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,27 +10,27 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
-import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
+import org.atlasapi.remotesite.HttpClients;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.metabroadcast.common.time.DateTimeZones;
 
 @Controller
 public class BbcIonScheduleController {
 
+    private final DateTimeFormatter dateFormater = ISODateTimeFormat.basicDate().withZone(DateTimeZones.UTC);
     private final ContentResolver localFetcher;
     private final ContentWriter writer;
     private final AdapterLog log;
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCIonScheduleUpdater").build());
     private final BbcItemFetcherClient fetcherClient;
-    private final BbcIonDeserializer<IonSchedule> deserialiser;
     private final ItemsPeopleWriter itemsPeopleWriter;
 
     public BbcIonScheduleController(ContentResolver localFetcher, ContentWriter writer, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
@@ -39,20 +38,27 @@ public class BbcIonScheduleController {
         this.writer = writer;
         this.itemsPeopleWriter = itemsPeopleWriter;
         this.log = log;
-        this.deserialiser = deserializerForClass(IonSchedule.class);
         this.fetcherClient = new BbcIonEpisodeDetailItemFetcherClient(log);
     }
 
     @RequestMapping("/system/bbc/ion/update/{service}/{date}")
-    public void updateDay(@PathVariable String service, @PathVariable String date, HttpServletResponse response, @RequestParam(value="detail", required=false) String detail) {
-        Preconditions.checkArgument(date.length() == 8, "the date must be 8 digits");
+    public void updateDay(@PathVariable String service, @PathVariable String date, HttpServletResponse response, @RequestParam(value="detail", required=false) String detail) throws IOException {
         
-        String scheduleUri = String.format(BbcIonScheduleUriSource.SCHEDULE_PATTERN, service, date);
-        BbcIonUriSourceScheduleUpdater updater = new BbcIonUriSourceScheduleUpdater(ImmutableList.of(scheduleUri), localFetcher, writer, deserialiser, itemsPeopleWriter, log);
-        if(!Strings.isNullOrEmpty(detail) && Boolean.parseBoolean(detail)) {
-            updater.withItemFetchClient(fetcherClient);
+        if(!BbcIonServices.services.keySet().contains(service)) {
+            response.sendError(400, "Unknown service " + service);
+            return;
         }
-        executor.execute(updater);
+        
+        try {
+            LocalDate localDate = dateFormater.parseDateTime(date).toLocalDate();
+            executor.execute(new BbcIonScheduleUpdateTask(service, localDate, HttpClients.webserviceClient(), localFetcher, writer, log)
+                .withItemFetcherClient(fetcherClient)
+                .withItemPeopleWriter(itemsPeopleWriter)
+            );
+        }catch (Exception e) {
+            response.sendError(400, "Invalid date format. Expects yyyyMMdd");
+            return;
+        }
         
         response.setStatus(HttpServletResponse.SC_OK);
     }
