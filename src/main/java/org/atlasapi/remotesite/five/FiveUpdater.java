@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.five;
 
-import java.io.StringReader;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
 import nu.xom.Element;
@@ -11,11 +12,14 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
 
+import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
+import com.metabroadcast.common.http.HttpResponseTransformer;
+import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.time.Timestamp;
@@ -28,12 +32,31 @@ public class FiveUpdater extends ScheduledTask {
     private final AdapterLog log;
     private final FiveBrandProcessor processor;
     private final Timestamper timestamper = new SystemClock();
-    private final RemoteSiteClient<HttpResponse> httpClient;
+
+    private SimpleHttpClient streamHttpClient;
 
     public FiveUpdater(ContentWriter contentWriter, AdapterLog log) {
         this.log = log;
-        this.httpClient = new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(HttpClients.webserviceClient()), 4);
-        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, httpClient);
+        this.streamHttpClient = buildFetcher(log);
+        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(HttpClients.webserviceClient()), 4));
+    }
+
+    private SimpleHttpClient buildFetcher(final AdapterLog log) {
+        final Builder parser = new Builder(new ShowProcessingNodeFactory());
+        return new SimpleHttpClientBuilder()
+            .withUserAgent(HttpClients.ATLAS_USER_AGENT)
+            .withSocketTimeout(30, TimeUnit.SECONDS)
+            .withTransformer(new HttpResponseTransformer<Void>() {
+                @Override
+                public Void transform(org.apache.http.HttpResponse response) throws HttpException, IOException {
+                    try {
+                        parser.build(response.getEntity().getContent());
+                    } catch (Exception e) {
+                        log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+                    }
+                    return null;
+                }
+            }).withRetries(3).build();
     }
 
     @Override
@@ -42,11 +65,7 @@ public class FiveUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update started from " + BASE_API_URL).withSource(getClass()));
             
-            reportStatus("Fetching " + BASE_API_URL + "/shows");
-            String show = httpClient.get(BASE_API_URL + "/shows").body();
-
-            Builder parser = new Builder(new ShowProcessingNodeFactory());
-            parser.build(new StringReader(show));
+            streamHttpClient.get(BASE_API_URL + "/shows");
             
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
@@ -58,25 +77,25 @@ public class FiveUpdater extends ScheduledTask {
     
     private class ShowProcessingNodeFactory extends NodeFactory {
 
+        int processed = 0, failed = 0;
+        
         @Override
         public Nodes finishMakingElement(Element element) {
             if (element.getLocalName().equalsIgnoreCase("show")) {
-                int processed = 0, failed = 0;
                 try {
                     processor.processShow(element);
                 }
                 catch (Exception e) {
                     log.record(new AdapterLogEntry(Severity.ERROR).withSource(FiveUpdater.class).withCause(e).withDescription("Exception when processing show"));
                     failed++;
-                } finally {
-                    reportStatus(String.format("%s processed. %s failed", ++processed, failed));
                 }
-                
-                return new Nodes();
+                reportStatus(String.format("%s processed. %s failed", ++processed, failed));
+            } else if (element.getLocalName().equalsIgnoreCase("shows")){
+                processed = 0;
+                failed = 0;
             }
-            else {
-                return super.finishMakingElement(element);
-            }
+            
+            return super.finishMakingElement(element);
         }
     }
 }
