@@ -53,7 +53,7 @@ public class C4EpgEntry {
         this.id = id;
     }
     
-    private C4EpgEntry withRelatedEntry(C4RelatedEntry relatedEntry) {
+    public C4EpgEntry withRelatedEntry(C4RelatedEntry relatedEntry) {
         this.relatedEntry = relatedEntry;
         return this;
     }
