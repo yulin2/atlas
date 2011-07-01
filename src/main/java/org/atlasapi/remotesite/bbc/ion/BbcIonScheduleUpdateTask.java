@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.DEBUG;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
@@ -23,6 +24,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.bbc.BbcAliasCompiler;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
+import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.Duration;
@@ -298,12 +300,32 @@ public class BbcIonScheduleUpdateTask implements Runnable {
     private void updateEpisodeDetails(Episode item, IonBroadcast broadcast) {
         IonEpisode episode = broadcast.getEpisode();
         if (hasEpisodeDetails(episode)) {
-            item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
+            
+            String subseriesId = episode.getSubseriesId();
+
+            if(Strings.isNullOrEmpty(subseriesId)) {
+                item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
+                return;
+            }
+            
+            if(containerClient != null) {
+                Maybe<IonContainer> subseries = containerClient.getSubseries(subseriesId);
+                if(subseries.isNothing()) {
+                    log.record(warnEntry().withSource(getClass()).withDescription("Updating item %s, couldn't fetch subseries %s", subseriesId));
+                    return;
+                }
+                IonContainer subseriesContainer = subseries.requireValue();
+                
+                item.setEpisodeNumber(Ints.saturatedCast(subseriesContainer.getPosition()));
+                item.setPartNumber(Ints.saturatedCast(episode.getPosition()));
+                
+            }
+            
         }
     }
     
     private boolean hasEpisodeDetails(IonEpisode episode) {
-        return episode != null && Strings.isNullOrEmpty(episode.getSubseriesId()) && episode.getPosition() != null;
+        return episode != null && episode.getPosition() != null;
     }
 
     private void updateItemDetails(Item item, IonBroadcast ionBroadcast) {
