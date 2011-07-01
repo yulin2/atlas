@@ -3,6 +3,11 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpResponse;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
@@ -33,6 +38,9 @@ import com.google.common.primitives.Ints;
 import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponseTransformer;
+import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.time.SystemClock;
 
 public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClient {
@@ -44,7 +52,18 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private static final String PERSON_BASE_CURIE = "bbc:person_";
 
     private final BbcIonDeserializer<IonEpisodeDetailFeed> ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonEpisodeDetailFeed>(){});
-    private final BbcProgrammeEncodingAndLocationCreator enodingCreator = new BbcProgrammeEncodingAndLocationCreator(new SystemClock());
+    private final BbcProgrammeEncodingAndLocationCreator encodingCreator = new BbcProgrammeEncodingAndLocationCreator(new SystemClock());
+    private final SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
+        .withUserAgent(HttpClients.ATLAS_USER_AGENT)
+        .withSocketTimeout(30, TimeUnit.SECONDS)
+        .withTransformer(new HttpResponseTransformer<IonEpisodeDetailFeed>() {
+
+                @Override
+                public IonEpisodeDetailFeed transform(HttpResponse response) throws HttpException, IOException {
+                    return ionDeserialiser.deserialise(new InputStreamReader(response.getEntity().getContent()));
+                }
+            }).build();
+    
     private final AdapterLog log;
     
     public BbcIonEpisodeDetailItemFetcherClient(AdapterLog log) {
@@ -53,9 +72,9 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     
     private IonEpisodeDetail getEpisodeDetail(String pid) {
         try {
-            return ionDeserialiser.deserialise(HttpClients.webserviceClient().getContentsOf(String.format(EPISODE_DETAIL_PATTERN, pid))).getBlocklist().get(0);
+            return ((IonEpisodeDetailFeed)httpClient.get(String.format(EPISODE_DETAIL_PATTERN, pid)).transform()).getBlocklist().get(0);
         } catch (HttpException e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Could get episode detail for " + pid));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Couldn't get episode detail for " + pid));
             return null;
         }
     }
@@ -91,9 +110,10 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
 
     private Item updateItemDetails(Item item, IonEpisodeDetail episode) {
         
-        item.setTitle(episode.getTitle());
+        item.setTitle(getTitle(episode));
         item.setDescription(episode.getSynopsis());
-        if (! Strings.isNullOrEmpty(episode.getId())) {
+        
+        if (!Strings.isNullOrEmpty(episode.getId())) {
             addImagesTo(episode.getMyImageBaseUrl().toString(), episode.getId(),item);
         }
 
@@ -115,6 +135,14 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
         }
 
         return item;
+    }
+
+    private String getTitle(IonEpisodeDetail episode) {
+        String title = !Strings.isNullOrEmpty(episode.getOriginalTitle()) ? episode.getOriginalTitle() : episode.getTitle();
+        if(!Strings.isNullOrEmpty(episode.getSubseriesTitle())) {
+            title = String.format("%s %s", episode.getSubseriesTitle(), title);
+        }
+        return title;
     }
 
 	static void addImagesTo(String prefix, String pid, Content item) {
@@ -174,7 +202,7 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
 //        }
         if(ionVersion.getOndemands() != null) {
             for (IonOndemandChange ondemand : ionVersion.getOndemands()) {
-                Maybe<Encoding> possibleEncoding = enodingCreator.createEncoding(ondemand, pid);
+                Maybe<Encoding> possibleEncoding = encodingCreator.createEncoding(ondemand, pid);
                 if(possibleEncoding.hasValue()) {
                     version.addManifestedAs(possibleEncoding.requireValue());
                 }
