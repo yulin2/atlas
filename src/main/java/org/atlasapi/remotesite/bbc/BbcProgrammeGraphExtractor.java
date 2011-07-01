@@ -133,6 +133,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                     }
                     
                     version.setManifestedAs(encodingsFrom(ionVersion, bbcProgrammeIdFrom(episodeUri)));
+                } else {
+                    Long duration = Long.valueOf(versionRdf.version.duration());
+                    version.setDuration(standardSeconds(duration));
+                    version.setPublishedDuration(Ints.saturatedCast(duration));
                 }
                 item.addVersion(version);
             }
