@@ -59,9 +59,16 @@ class SlashProgrammesVersionRdf {
 	static class BbcVersion {
 	    @XmlElement(namespace=PO.NS, name="pid")
 	    String pid;
-	    
+
+        @XmlElement(namespace = PO.NS, name = "duration")
+        String duration;
+
 	    String pid() {
 	        return pid;
+	    }
+	    
+	    String duration() {
+	        return duration;
 	    }
 	}
 	
