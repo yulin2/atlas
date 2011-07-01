@@ -133,4 +133,9 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
             log.record(warnEntry().withSource(getClass()).withDescription("No specialisation mapping for " + src.getMasterbrand()));
         }
     }
+
+    @Override
+    public Maybe<IonContainer> getSubseries(String subseriesId) {
+        return getIonContainer(subseriesId);
+    }
 }
