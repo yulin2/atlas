@@ -48,7 +48,9 @@ public class BbcIonScheduleUpdateTask implements Runnable {
     private final BbcIonDeserializer<IonSchedule> deserialiser = deserializerForClass(IonSchedule.class);
     
     private ItemsPeopleWriter itemsPeopleWriter;
-    private BbcItemFetcherClient fetcherClient;
+    private BbcItemFetcherClient itemClient;
+    private BbcContainerFetcherClient containerClient;
+    
     private final String serviceKey;
     private final LocalDate day;
 
@@ -62,7 +64,12 @@ public class BbcIonScheduleUpdateTask implements Runnable {
     }
     
     public BbcIonScheduleUpdateTask withItemFetcherClient(BbcItemFetcherClient client) {
-        this.fetcherClient = client;
+        this.itemClient = client;
+        return this;
+    }
+    
+    public BbcIonScheduleUpdateTask withContainerFetcherClient(BbcContainerFetcherClient containerClient) {
+        this.containerClient = containerClient;
         return this;
     }
     
@@ -88,52 +95,65 @@ public class BbcIonScheduleUpdateTask implements Runnable {
             String itemUri = SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId();
             try {
                 // find and (create and) update item
-                Identified identified = findOrCreateItem(broadcast, itemUri);
+                Identified ided = findOrCreateItem(broadcast, itemUri);
 
-                if (identified instanceof Item) {
-                    Item item = (Item) identified;
-
-                    updateItemDetails(item, broadcast);
-
-                    String canonicalUri = item.getCanonicalUri();
-                    
-                    if (item instanceof Episode) {
-                        updateEpisodeDetails((Episode) item, broadcast);
-                    } else if (hasEpisodeDetails(broadcast.getEpisode())) {
-                        log.record(new AdapterLogEntry(Severity.INFO).withDescription(
-                                String.format("Updating Episode %s, resolved %s", canonicalUri, item.getClass().getSimpleName())
-                        ).withSource(getClass()));
-                    }
-
-                    Brand brand = !Strings.isNullOrEmpty(broadcast.getBrandId()) ? getOrCreateBrand(broadcast, canonicalUri) : null;
-                    
-                    Series series = !Strings.isNullOrEmpty(broadcast.getSeriesId()) ? getOrCreateSeries(broadcast, canonicalUri) : null;
-
-                    if (brand != null) {
-                        updateBrand(brand, broadcast);
-                        item.setContainer(brand);
-                        writer.createOrUpdate(brand);
-                    }
-
-                    if (series != null) {
-                        updateSeries(series, broadcast);
-                        if (brand != null) {
-                            series.setParent(brand);
-                        } else {
-                            item.setContainer(series);
-                        }
-                        writer.createOrUpdate(series);
-                        ((Episode) item).setSeries(series);
-                    }
-
-                    writer.createOrUpdate(item);
-                    createOrUpdatePeople((Item) item);
-
+                if(!(ided instanceof Item)) {
+                    log.record(new AdapterLogEntry(Severity.WARN).withDescription(
+                            String.format("Updating item %s, got %s when looking for Item", itemUri, ided.getClass().getSimpleName())
+                    ).withSource(getClass()));
+                    return;
                 }
+                
+                Item item = (Item) ided;
+                
+                updateItemDetails(item, broadcast);
+
+                String canonicalUri = item.getCanonicalUri();
+                
+                if (item instanceof Episode) {
+                    updateEpisodeDetails((Episode) item, broadcast);
+                } else if (hasEpisodeDetails(broadcast.getEpisode())) {
+                    log.record(new AdapterLogEntry(Severity.INFO).withDescription(
+                            String.format("Updating Episode %s, resolved %s", canonicalUri, item.getClass().getSimpleName())
+                    ).withSource(getClass()));
+                }
+
+                Brand brand = !Strings.isNullOrEmpty(broadcast.getBrandId()) ? getOrCreateBrand(broadcast, canonicalUri) : null;
+                Series series = !Strings.isNullOrEmpty(broadcast.getSeriesId()) ? getOrCreateSeries(broadcast, canonicalUri) : null;
+
+                if (brand != null) {
+                    updateBrand(brand, broadcast);
+                    item.setContainer(brand);
+                    writer.createOrUpdate(brand);
+                }
+
+                if (series != null) {
+                    updateSeries(series, broadcast);
+                    updateEpisodeSeriesDetails(series, (Episode)item);
+                    if (brand != null) {
+                        series.setParent(brand);
+                    } else {
+                        item.setContainer(series);
+                    }
+                    writer.createOrUpdate(series);
+                    ((Episode) item).setSeries(series);
+                }
+
+                writer.createOrUpdate(item);
+                createOrUpdatePeople((Item) item);
+
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri + " trying to process broadcast for " + itemUri).withSource(getClass()));
             }
         }
+    }
+
+    private void updateEpisodeSeriesDetails(Series series, Episode episode) {
+        Integer seriesNumber = series.getSeriesNumber();
+        if(seriesNumber != null && seriesNumber > 0) {
+            episode.setSeriesNumber(seriesNumber);
+        }
+        episode.setSeries(series);
     }
 
     private Series getOrCreateSeries(IonBroadcast broadcast, String itemCanonicalUri) {
@@ -141,7 +161,11 @@ public class BbcIonScheduleUpdateTask implements Runnable {
         Maybe<Identified> maybeSeries = localFetcher.findByCanonicalUris(ImmutableList.of(seriesUri)).get(seriesUri);
 
         if (maybeSeries.isNothing()) {
-            return createSeries(broadcast);
+            Maybe<Series> series = Maybe.nothing();
+            if(containerClient != null) {
+                series = containerClient.createSeries(broadcast.getSeriesId());
+            }
+            return series.hasValue() ? series.requireValue() : createSeries(broadcast);
         }
         
         Identified ided = maybeSeries.requireValue();
@@ -161,7 +185,11 @@ public class BbcIonScheduleUpdateTask implements Runnable {
         Maybe<Identified> maybeIdentified = localFetcher.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
 
         if (maybeIdentified.isNothing()) {
-            return createBrandFrom(broadcast);
+            Maybe<Brand> brand = Maybe.nothing();
+            if(containerClient != null) {
+                brand = containerClient.createBrand(broadcast.getSeriesId());
+            }
+            return brand.hasValue() ? brand.requireValue() : createBrandFrom(broadcast);
         }
         
         Identified ided = maybeIdentified.requireValue();
@@ -183,18 +211,50 @@ public class BbcIonScheduleUpdateTask implements Runnable {
 
     private Identified findOrCreateItem(IonBroadcast broadcast, String itemUri) {
         Maybe<Identified> possibleIdentified = localFetcher.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
-        Identified identified = null;
-        if (!possibleIdentified.hasValue()) {
-            if(fetcherClient != null) {
-                identified = fetcherClient.createItem(broadcast.getEpisodeId());
+        if (possibleIdentified.isNothing()) {
+            if(itemClient != null) {
+                Item fetchedItem = itemClient.createItem(broadcast.getEpisodeId());
+                if(fetchedItem != null) {
+                    return fetchedItem;
+                }
             } 
-            if(identified == null) {
-                identified = createItemFrom(broadcast);
-            }
-        } else {
-            identified = possibleIdentified.requireValue();
+            return createItemFrom(broadcast);
         }
-        return identified;
+        return possibleIdentified.requireValue();
+    }
+    
+
+    private Item createItemFrom(IonBroadcast broadcast) {
+        IonEpisode ionEpisode = broadcast.getEpisode();
+        
+        Item item;
+        if (!Strings.isNullOrEmpty(broadcast.getBrandId()) || !Strings.isNullOrEmpty(broadcast.getSeriesId())) {
+            item = new Episode(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
+        } else {
+            item = new Item(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
+        }
+        
+        item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
+        item.setIsLongForm(true);
+        
+        if (!Strings.isNullOrEmpty(broadcast.getMediaType())) {
+            item.setMediaType(MediaType.valueOf(broadcast.getMediaType().toUpperCase()));
+        }
+        
+        Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(ionEpisode.getMasterbrand());
+        if(maybeMediaType.hasValue()) {
+            item.setMediaType(maybeMediaType.requireValue());
+        } 
+        
+        Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(ionEpisode.getMasterbrand());
+        if(maybeSpecialisation.hasValue()) {
+            item.setSpecialization(maybeSpecialisation.requireValue());
+        }
+        
+        if (ionEpisode.getIsFilm() != null && ionEpisode.getIsFilm()) {
+            item.setSpecialization(Specialization.FILM);
+        }
+        return item;
     }
     
     private void createOrUpdatePeople(Item item) {
@@ -235,27 +295,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
         BbcIonEpisodeDetailItemFetcherClient.addImagesTo("http://www.bbc.co.uk/iplayer/images/progbrand/", broadcast.getBrandId(), brand);
     }
 
-    private Item createItemFrom(IonBroadcast broadcast) {
-        IonEpisode ionEpisode = broadcast.getEpisode();
-        Item item;
-        if (!Strings.isNullOrEmpty(broadcast.getBrandId()) || !Strings.isNullOrEmpty(broadcast.getSeriesId())) {
-            item = new Episode(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
-        } else {
-            item = new Item(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
-        }
-        item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
-        item.setIsLongForm(true);
-        if (!Strings.isNullOrEmpty(broadcast.getMediaType())) {
-            item.setMediaType(MediaType.valueOf(broadcast.getMediaType().toUpperCase()));
-        }
-        if (ionEpisode.getIsFilm() != null && ionEpisode.getIsFilm()) {
-            item.setSpecialization(Specialization.FILM);
-        }
-        return item;
-    }
-
     private void updateEpisodeDetails(Episode item, IonBroadcast broadcast) {
-        // not sure how useful this is. there isn't mush else we can do.
         IonEpisode episode = broadcast.getEpisode();
         if (hasEpisodeDetails(episode)) {
             item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
@@ -267,7 +307,6 @@ public class BbcIonScheduleUpdateTask implements Runnable {
     }
 
     private void updateItemDetails(Item item, IonBroadcast ionBroadcast) {
-
 
         Version broadcastVersion = getBroadcastVersion(item, ionBroadcast);
         if (broadcastVersion == null) {
