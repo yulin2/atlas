@@ -21,6 +21,7 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 
+import com.google.common.base.Strings;
 import com.google.common.primitives.Ints;
 import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.base.Maybe;
@@ -119,18 +120,21 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
         dst.setDescription(src.getMediumSynopsis() == null ? src.getShortSynopsis() : src.getMediumSynopsis());
         dst.setLastUpdated(src.getUpdated());
         
-        Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(src.getMasterbrand());
-        if(maybeMediaType.hasValue()) {
-            dst.setMediaType(maybeMediaType.requireValue());
-        } else {
-            log.record(warnEntry().withSource(getClass()).withDescription("No mediaType mapping for " + src.getMasterbrand()));
-        }
-        
-        Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(src.getMasterbrand());
-        if(maybeSpecialisation.hasValue()) {
-            dst.setSpecialization(maybeSpecialisation.requireValue());
-        } else {
-            log.record(warnEntry().withSource(getClass()).withDescription("No specialisation mapping for " + src.getMasterbrand()));
+        String masterbrand = src.getMasterbrand();
+        if(!Strings.isNullOrEmpty(masterbrand)) {
+            Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(masterbrand);
+            if(maybeMediaType.hasValue()) {
+                dst.setMediaType(maybeMediaType.requireValue());
+            } else {
+                log.record(warnEntry().withSource(getClass()).withDescription("No mediaType mapping for " + masterbrand));
+            }
+            
+            Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(masterbrand);
+            if(maybeSpecialisation.hasValue()) {
+                dst.setSpecialization(maybeSpecialisation.requireValue());
+            } else {
+                log.record(warnEntry().withSource(getClass()).withDescription("No specialisation mapping for " + masterbrand));
+            }
         }
     }
 
