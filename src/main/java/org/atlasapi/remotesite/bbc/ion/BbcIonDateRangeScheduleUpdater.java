@@ -11,41 +11,43 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
-import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.ScheduledTask;
+import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.DayRangeGenerator;
+import com.metabroadcast.common.time.SystemClock;
 
 public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
     
+    public static final String SCHEDULE_PATTERN = "http://www.bbc.co.uk/iplayer/ion/schedule/service/%s/date/%s/timeslot/day/format/json";
     private static final int THREADS = 5;
 
+    private final DayRangeGenerator dayRange;
     private final ContentResolver localFetcher;
     private final ContentWriter writer;
-    private final BbcIonDeserializer<IonSchedule> deserialiser;
-    private final ItemsPeopleWriter itemsPeopleWriter;
     private final AdapterLog log;
-    private final int lookBack;
-    private final int lookAhead;
 
+    private ItemsPeopleWriter itemsPeopleWriter;
     private BbcItemFetcherClient fetcherClient;
-    private SimpleHttpClient httpClient;
+    private SimpleHttpClient httpClient = HttpClients.webserviceClient();
+    private final Clock clock;
 
-    public BbcIonDateRangeScheduleUpdater(int lookBack, int lookAhead, ContentResolver localFetcher,
-                    ContentWriter writer, BbcIonDeserializer<IonSchedule> deserialiser,
-                    ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
-        this.lookBack = lookBack;
-        this.lookAhead = lookAhead;
+    public BbcIonDateRangeScheduleUpdater(DayRangeGenerator dayRange, ContentResolver localFetcher, ContentWriter writer, AdapterLog log, Clock clock) {
+        this.dayRange = dayRange;
         this.localFetcher = localFetcher;
         this.writer = writer;
-        this.deserialiser = deserialiser;
-        this.itemsPeopleWriter = itemsPeopleWriter;
         this.log = log;
+        this.clock = clock;
+    }
+    
+    public BbcIonDateRangeScheduleUpdater(DayRangeGenerator dayRange, ContentResolver localFetcher, ContentWriter writer, AdapterLog log) {
+        this(dayRange, localFetcher, writer, log, new SystemClock());
     }
 
     public BbcIonDateRangeScheduleUpdater withItemFetchClient(BbcItemFetcherClient fetcherClient) {
@@ -57,6 +59,11 @@ public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
         this.httpClient = httpClient;
         return this;
     }
+    
+    public BbcIonDateRangeScheduleUpdater withItemsPeopleWriter(ItemsPeopleWriter itemsPeopleWriter) {
+        this.itemsPeopleWriter = itemsPeopleWriter;
+        return this;
+    }
 
     @Override
     public void runTask() {
@@ -65,13 +72,19 @@ public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
 
         ExecutorService executor = Executors.newFixedThreadPool(THREADS);
         
-        for (String uri : new BbcIonScheduleUriSource().withLookAhead(lookAhead).withLookBack(lookBack)) {
-            if (!shouldContinue()) {
-                break;
+        
+        for (String serviceKey : BbcIonServices.services.keySet()) {
+            for (LocalDate day : dayRange.generate(clock.now().toLocalDate())) {
+                
+                if (!shouldContinue()) {
+                    break;
+                }
+                reportStatus(String.format("%s - %s", serviceKey, day.toString("yyyy-MM-dd")));
+                
+                BbcIonScheduleUpdateTask updateTask = updateTaskFor(serviceKey, day);
+                executor.submit(updateTask);
+                
             }
-            reportStatus(uri);
-            BbcIonScheduleUpdateTask updateTask = new BbcIonScheduleUpdateTask(uri, this.httpClient != null ? this.httpClient : HttpClients.webserviceClient(), localFetcher, writer, deserialiser, itemsPeopleWriter, log, fetcherClient);
-            executor.submit(updateTask);
         }
         
         executor.shutdown();
@@ -84,5 +97,11 @@ public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
         
         String runTime = new Period(start, new DateTime(DateTimeZones.UTC)).toString(PeriodFormat.getDefault());
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Date Range Update finished in " + runTime + (completion ? "" : " (timed-out)")));
+    }
+
+    private BbcIonScheduleUpdateTask updateTaskFor(String serviceKey, LocalDate day) {
+        return new BbcIonScheduleUpdateTask(serviceKey, day, this.httpClient, localFetcher, writer, log)
+            .withItemFetcherClient(fetcherClient)
+            .withItemPeopleWriter(itemsPeopleWriter);
     }
 }

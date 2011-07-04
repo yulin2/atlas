@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;
@@ -54,7 +55,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     public void testCodecForTrivialResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).build()
+                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, Score.valueOf(5.0)).build()
         );
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
@@ -83,8 +84,8 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     public void testCodecForSinglePublisherResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent2, 5.0).addEquivalent(equivalent1, 5.0).build(),
-                DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, 5.0).build()
+                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, Score.valueOf(5.0)).addEquivalent(equivalent2, Score.valueOf(5.0)).addEquivalent(equivalent1, Score.valueOf(5.0)).build(),
+                DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, Score.valueOf(5.0)).build()
         );
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
@@ -109,18 +110,18 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceIdentifier id2 = new EquivalenceIdentifier(eq2Uri, equivalent2.getTitle(), false, equivalent2.getPublisher().title());
         
         assertEquals(2, restoredResult.combinedResults().size());
-        assertEquals(restoredResult.combinedResults(), ImmutableMap.of(
-                id1, 15.0, 
-                id2, 5.0
-        ));
+        assertEquals(ImmutableMap.of(
+                id1, 15.0,
+                id2, 5.0 
+        ), restoredResult.combinedResults());
     }
     
     public void testCodecForTwoPublisherResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent2, 5.0).addEquivalent(equivalent3, 5.0).addEquivalent(equivalent1, 5.0).build(),
-                DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, 5.0).addEquivalent(equivalent3, 5.0).build(),
-                DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, 5.0).build()
+                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, Score.valueOf(5.0)).addEquivalent(equivalent2, Score.valueOf(5.0)).addEquivalent(equivalent3, Score.valueOf(5.0)).addEquivalent(equivalent1, Score.valueOf(5.0)).build(),
+                DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, Score.valueOf(5.0)).addEquivalent(equivalent3, Score.valueOf(5.0)).build(),
+                DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, Score.valueOf(5.0)).build()
         );
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
@@ -152,10 +153,10 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceIdentifier id2 = new EquivalenceIdentifier(eq2Uri, equivalent2.getTitle(), false, equivalent2.getPublisher().title());
         EquivalenceIdentifier id3 = new EquivalenceIdentifier(eq3Uri, equivalent3.getTitle(), true, equivalent3.getPublisher().title());
         assertEquals(3, restoredResult.combinedResults().size());
-        assertEquals(restoredResult.combinedResults(), ImmutableMap.of(
+        assertEquals(ImmutableMap.of(
                 id1, 15.0,
                 id2, 5.0, 
                 id3, 15.0
-        ));
+        ), restoredResult.combinedResults());
     }
 }

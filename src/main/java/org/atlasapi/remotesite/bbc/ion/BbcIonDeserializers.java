@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import java.io.Reader;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -129,6 +130,11 @@ public class BbcIonDeserializers {
         @SuppressWarnings("unchecked")
         public T deserialise(String jsonString) {
             return (T) gson.fromJson(jsonString, type);
+        }
+        
+        @SuppressWarnings("unchecked")
+        public T deserialise(Reader jsonReader) {
+            return (T) gson.fromJson(jsonReader, type);
         }
     }
     
