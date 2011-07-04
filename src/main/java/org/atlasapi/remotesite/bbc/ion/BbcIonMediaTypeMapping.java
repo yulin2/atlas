@@ -8,12 +8,16 @@ import static org.atlasapi.media.entity.Specialization.TV;
 import java.util.Map;
 import java.util.Set;
 
+import org.atlasapi.feeds.radioplayer.RadioPlayerService;
+import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
 
+import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 
@@ -60,7 +64,7 @@ public class BbcIonMediaTypeMapping {
         .add("bbc_three")
         .add("bbc_two")
         .add("cbbc")
-        .add("cbeebies").build();
+        .add("cbeebies").add("bbc_webonly").add("bbc_news24").add("bbc_sport").add("bbc_news").build();
 
     private static Set<String> radioServices = ImmutableSet.<String>builder()
         .add("bbc_asian_network")
@@ -84,7 +88,15 @@ public class BbcIonMediaTypeMapping {
         .add("bbc_radio_one")
         .add("bbc_radio_three")
         .add("bbc_radio_two")
-        .add("bbc_world_service").build();
+        .add("bbc_world_service")
+        .add("bbc_radio_scotland")
+        .add("bbc_radio_wales")
+            .addAll(Iterables.transform(RadioPlayerServices.services, new Function<RadioPlayerService, String>() {
+                @Override
+                public String apply(RadioPlayerService input) {
+                    return input.getIonId();
+                }
+            })).build();
 
 
     private static Map<String, Specialization> specMap = ImmutableMap.<String, Specialization> builder()

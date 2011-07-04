@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import java.io.IOException;
@@ -15,8 +16,10 @@ import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -134,6 +137,22 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
             }
         }
 
+        String masterbrand = episode.getMasterbrand();
+        if(!Strings.isNullOrEmpty(masterbrand)) {
+            Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(masterbrand);
+            if(maybeMediaType.hasValue()) {
+                item.setMediaType(maybeMediaType.requireValue());
+            } else {
+                log.record(warnEntry().withSource(getClass()).withDescription("No mediaType mapping for " + masterbrand));
+            }
+            
+            Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(masterbrand);
+            if(maybeSpecialisation.hasValue()) {
+                item.setSpecialization(maybeSpecialisation.requireValue());
+            } else {
+                log.record(warnEntry().withSource(getClass()).withDescription("No specialisation mapping for " + masterbrand));
+            }
+        }
         return item;
     }
 
