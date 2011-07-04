@@ -9,6 +9,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDateRangeScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateBuilder;
@@ -16,7 +17,6 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
 import org.joda.time.Duration;
-import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,6 @@ import com.metabroadcast.common.time.DayRangeGenerator;
 public class BbcModule {
 
 	private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.NEVER;
-	private final static RepetitionRule HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	private final static RepetitionRule TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
 	private final static RepetitionRule SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
 	private final static RepetitionRule ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
@@ -63,6 +62,7 @@ public class BbcModule {
 	    DayRangeGenerator dayRangeGenerator = new DayRangeGenerator(DateTimeZones.UTC).withLookAhead(lookAhead).withLookBack(lookBack);
         return new BbcIonDateRangeScheduleUpdater(dayRangeGenerator, contentResolver, contentWriters, log)
             .withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+            .withContainerFetchClient(new BbcIonContainerFetcherClient(log))
             .withItemsPeopleWriter(itemsPeopleWriter);
     }
 	

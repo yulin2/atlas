@@ -52,7 +52,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
                     version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
         }});
 
-        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).run();
+        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).call();
     }
     
     @SuppressWarnings("unchecked")
@@ -75,7 +75,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
         }});
 
-        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).run();
+        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).call();
     }
 
     @SuppressWarnings("unchecked")
@@ -97,7 +97,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
             )));
         }});
 
-        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).run();
+        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY).toLocalDate(), httpClient, resolver, writer, log).call();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {
