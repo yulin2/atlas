@@ -5,6 +5,8 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.DEBUG;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
 
+import java.util.concurrent.Callable;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
@@ -36,7 +38,7 @@ import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class BbcIonScheduleUpdateTask implements Runnable {
+public class BbcIonScheduleUpdateTask implements Callable<Integer> {
 
     private static final String BBC_CURIE_BASE = "bbc:";
     private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
@@ -81,7 +83,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
     }
 
     @Override
-    public void run() {
+    public Integer call() throws Exception {
         String uri = String.format(SCHEDULE_PATTERN, serviceKey, day.toString("yyyyMMdd"));
         log.record(new AdapterLogEntry(DEBUG).withSource(getClass()).withDescription("BBC Ion Schedule update for " + uri));
         
@@ -90,8 +92,10 @@ public class BbcIonScheduleUpdateTask implements Runnable {
             schedule = deserialiser.deserialise(httpClient.getContentsOf(uri));
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri).withSource(getClass()));
-            return;
+            throw e;
         }
+        
+        int processed = 0;
         
         for (IonBroadcast broadcast : schedule.getBlocklist()) {
             String itemUri = SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId();
@@ -101,9 +105,9 @@ public class BbcIonScheduleUpdateTask implements Runnable {
 
                 if(!(ided instanceof Item)) {
                     log.record(new AdapterLogEntry(Severity.WARN).withDescription(
-                            String.format("Updating item %s, got %s when looking for Item", itemUri, ided.getClass().getSimpleName())
+                            "Updating item %s, got %s when looking for Item", itemUri, ided.getClass().getSimpleName()
                     ).withSource(getClass()));
-                    return;
+                    continue;
                 }
                 
                 Item item = (Item) ided;
@@ -143,11 +147,14 @@ public class BbcIonScheduleUpdateTask implements Runnable {
 
                 writer.createOrUpdate(item);
                 createOrUpdatePeople((Item) item);
-
+                
+                processed++;
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("BBC Ion Updater failed for " + uri + " trying to process broadcast for " + itemUri).withSource(getClass()));
             }
         }
+        
+        return processed;
     }
 
     private void updateEpisodeSeriesDetails(Series series, Episode episode) {
@@ -189,7 +196,7 @@ public class BbcIonScheduleUpdateTask implements Runnable {
         if (maybeIdentified.isNothing()) {
             Maybe<Brand> brand = Maybe.nothing();
             if(containerClient != null) {
-                brand = containerClient.createBrand(broadcast.getSeriesId());
+                brand = containerClient.createBrand(broadcast.getBrandId());
             }
             return brand.hasValue() ? brand.requireValue() : createBrandFrom(broadcast);
         }
@@ -305,6 +312,11 @@ public class BbcIonScheduleUpdateTask implements Runnable {
 
             if(Strings.isNullOrEmpty(subseriesId)) {
                 item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
+                return;
+            }
+            
+            if(item.getPartNumber() != null) {
+                //don't call out to ION because the values are already set.
                 return;
             }
             

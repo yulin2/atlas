@@ -1,7 +1,10 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.persistence.content.ContentResolver;
@@ -33,9 +36,12 @@ public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
     private final ContentWriter writer;
     private final AdapterLog log;
 
-    private ItemsPeopleWriter itemsPeopleWriter;
-    private BbcItemFetcherClient fetcherClient;
     private SimpleHttpClient httpClient = HttpClients.webserviceClient();
+
+    private BbcItemFetcherClient itemClient;
+    private BbcContainerFetcherClient containerClient;
+    private ItemsPeopleWriter itemsPeopleWriter;
+    
     private final Clock clock;
 
     public BbcIonDateRangeScheduleUpdater(DayRangeGenerator dayRange, ContentResolver localFetcher, ContentWriter writer, AdapterLog log, Clock clock) {
@@ -50,8 +56,13 @@ public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
         this(dayRange, localFetcher, writer, log, new SystemClock());
     }
 
-    public BbcIonDateRangeScheduleUpdater withItemFetchClient(BbcItemFetcherClient fetcherClient) {
-        this.fetcherClient = fetcherClient;
+    public BbcIonDateRangeScheduleUpdater withItemFetchClient(BbcItemFetcherClient itemClient) {
+        this.itemClient = itemClient;
+        return this;
+    }
+    
+    public BbcIonDateRangeScheduleUpdater withContainerFetchClient(BbcContainerFetcherClient containerClient) {
+        this.containerClient = containerClient;
         return this;
     }
 
@@ -71,37 +82,49 @@ public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Date Range Update initiated"));
 
         ExecutorService executor = Executors.newFixedThreadPool(THREADS);
+        CompletionService<Integer> completer = new ExecutorCompletionService<Integer>(executor);
         
+        int submitted = 0;
         
         for (String serviceKey : BbcIonServices.services.keySet()) {
             for (LocalDate day : dayRange.generate(clock.now().toLocalDate())) {
-                
+                completer.submit(updateTaskFor(serviceKey, day));
+                submitted++;
+            }
+        }
+        reportStatus(String.format("Submitted %s update tasks", submitted));
+        
+        int processed = 0, failed = 0, broadcasts = 0;
+        
+        for (int i = 0; i < submitted; i++) {
+            try {
                 if (!shouldContinue()) {
                     break;
                 }
-                reportStatus(String.format("%s - %s", serviceKey, day.toString("yyyy-MM-dd")));
-                
-                BbcIonScheduleUpdateTask updateTask = updateTaskFor(serviceKey, day);
-                executor.submit(updateTask);
-                
+                Future<Integer> result = completer.poll(5, TimeUnit.SECONDS);
+                if (result != null) {
+                    try {
+                        broadcasts += result.get();
+                    } catch (Exception e) {
+                        failed++;
+                    }
+                }
+                reportStatus(String.format("Processed %s / %s. %s failures. %s broadcasts processed", ++processed, submitted, failed, broadcasts));
+            } catch (InterruptedException e) {
+                log.record(AdapterLogEntry.warnEntry().withCause(e).withSource(getClass()).withDescription("BBC Ion Schedule Date Range Update interrupted waiting for results"));
             }
         }
         
         executor.shutdown();
-        boolean completion = false;
-        try {
-            completion = executor.awaitTermination(30, TimeUnit.DAYS);
-        } catch (InterruptedException e) {
-            log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("BBC Ion Schedule Date Range Update interrupted waiting for completion").withCause(e));
-        }
         
         String runTime = new Period(start, new DateTime(DateTimeZones.UTC)).toString(PeriodFormat.getDefault());
-        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Date Range Update finished in " + runTime + (completion ? "" : " (timed-out)")));
+        log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC Ion Schedule Date Range Update finished in " + runTime));
     }
 
     private BbcIonScheduleUpdateTask updateTaskFor(String serviceKey, LocalDate day) {
         return new BbcIonScheduleUpdateTask(serviceKey, day, this.httpClient, localFetcher, writer, log)
-            .withItemFetcherClient(fetcherClient)
+            .withItemFetcherClient(itemClient)
+            .withContainerFetcherClient(containerClient)
             .withItemPeopleWriter(itemsPeopleWriter);
     }
 }

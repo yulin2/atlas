@@ -98,8 +98,8 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
         
         IonContainer ionContainer = maybeIonContainer.requireValue();
         
-        if(!ionContainer.getType().equals("brand")) {
-            log.record(errorEntry().withSource(getClass()).withDescription("Expecting brand for %s, got %s ", seriesId, ionContainer.getType()));
+        if(!ionContainer.getType().equals("series")) {
+            log.record(errorEntry().withSource(getClass()).withDescription("Expecting series for %s, got %s ", seriesId, ionContainer.getType()));
             return Maybe.nothing();
         }
         
@@ -115,6 +115,7 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
     }
     
     private void setCommonFields(IonContainer src, Container<Episode> dst) {
+
         dst.setTitle(src.getTitle());
         dst.setDescription(src.getMediumSynopsis() == null ? src.getShortSynopsis() : src.getMediumSynopsis());
         dst.setLastUpdated(src.getUpdated());
