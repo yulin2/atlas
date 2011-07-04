@@ -315,12 +315,7 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
                 return;
             }
             
-            if(item.getPartNumber() != null) {
-                //don't call out to ION because the values are already set.
-                return;
-            }
-            
-            if(containerClient != null) {
+            if(item.getPartNumber() == null && containerClient != null) {
                 Maybe<IonContainer> subseries = containerClient.getSubseries(subseriesId);
                 if(subseries.isNothing()) {
                     log.record(warnEntry().withSource(getClass()).withDescription("Updating item %s, couldn't fetch subseries %s", subseriesId));
@@ -354,7 +349,11 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
         }
 
         IonEpisode episode = ionBroadcast.getEpisode();
-        item.setTitle(episode.getTitle());
+        if(Strings.isNullOrEmpty(episode.getSubseriesId())) {
+            item.setTitle(episode.getTitle());
+        } else {
+            item.setTitle(String.format("%s %s", episode.getSubseriesTitle(), episode.getTitle()));
+        }
         item.setDescription(episode.getSynopsis());
         item.setThumbnail(episode.getMyImageBaseUrl() + episode.getId() + "_150_84.jpg");
         item.setImage(episode.getMyImageBaseUrl() + episode.getId() + "_640_360.jpg");
