@@ -10,6 +10,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 
 import com.google.common.collect.ImmutableList;
@@ -18,7 +19,6 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 	
     private static final String ATOZ_BASE = "http://www.bbc.co.uk/%s/programmes/a-z/all.rdf";
-    private static final String SLASH_PROGRAMMES_BASE_URI = "http://www.bbc.co.uk/programmes/";
 
     private final RemoteSiteClient<SlashProgrammesAtoZRdf> client;
     private final BbcProgrammeAdapter fetcher;
@@ -68,7 +68,7 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
     }
 
 	private void loadAndSave(String pid) {
-		String uri = SLASH_PROGRAMMES_BASE_URI + pid;
+		String uri = BbcFeeds.slashProgrammesUriForPid(pid);
 		try {
 			fetcher.createOrUpdate(uri);
 		} catch (Exception e) {

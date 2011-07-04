@@ -30,6 +30,8 @@ public class C4AtomApi {
 	private static final String FEED_ID_PREFIX_PATTERN = "tag:www.channel4.com,\\d{4}:/programmes/";
 	
 	public static final Pattern SERIES_AND_EPISODE_NUMBER_IN_ANY_URI = Pattern.compile("series-(\\d+)/episode-(\\d+)");
+
+	public static final Pattern BRAND_SERIES_AND_EPISODE_NUMBER_IN_ANY_PROGRAMMES_URI = Pattern.compile(String.format("/programmes/(%s)/episode-guide/series-(\\d+)/episode-(\\d+)", WEB_SAFE_NAME_PATTERN));
 	
 	public static final Pattern CANONICAL_BRAND_URI_PATTERN = Pattern.compile(String.format("%s(%s)", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
 	private static final Pattern CANONICAL_EPISODE_URI_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", Pattern.quote(PROGRAMMES_BASE), WEB_SAFE_NAME_PATTERN));
@@ -61,6 +63,14 @@ public class C4AtomApi {
 		}
 	}
 
+	public static String canonicaliseEpisodeIdentifier(String uri) {
+	    Matcher matcher = BRAND_SERIES_AND_EPISODE_NUMBER_IN_ANY_PROGRAMMES_URI.matcher(uri);
+	    if (!matcher.find()) {
+	        return null;
+	    }
+	    return String.format("%s%s/episode-guide/series-%s/episode-%s", PROGRAMMES_BASE, matcher.group(1), matcher.group(2), matcher.group(3));
+	}
+	
 	public static boolean isACanonicalBrandUri(String brandUri) {
 		return CANONICAL_BRAND_URI_PATTERN.matcher(brandUri).matches();
 	}

@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.bbc;
 
-import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
-
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
@@ -17,7 +15,6 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateBuilder;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
-import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +24,8 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.DayRangeGenerator;
 
 @Configuration
 public class BbcModule {
@@ -49,12 +48,10 @@ public class BbcModule {
 //        scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
         
         scheduler.schedule(bbcIonUpdater(0, 0)
-        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
         		.withName("BBC Ion schedule update (today only)"), 
         		TEN_MINUTES);
         
         scheduler.schedule(bbcIonUpdater(7, 7)
-        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
         		.withName("BBC Ion schedule update (14 days)"),
         		ONE_HOUR);
         
@@ -63,7 +60,10 @@ public class BbcModule {
     }
 	
 	private BbcIonDateRangeScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
-        return new BbcIonDateRangeScheduleUpdater(lookBack, lookAhead, contentResolver, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
+	    DayRangeGenerator dayRangeGenerator = new DayRangeGenerator(DateTimeZones.UTC).withLookAhead(lookAhead).withLookBack(lookBack);
+        return new BbcIonDateRangeScheduleUpdater(dayRangeGenerator, contentResolver, contentWriters, log)
+            .withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+            .withItemsPeopleWriter(itemsPeopleWriter);
     }
 	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {

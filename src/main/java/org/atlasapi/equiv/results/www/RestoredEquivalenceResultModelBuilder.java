@@ -26,6 +26,10 @@ public class RestoredEquivalenceResultModelBuilder {
         boolean hasStrong = false;
         
         Map<String, Double> totals = Maps.newHashMap();
+        totals.put("combined", null);
+        for (String source : target.sourceResults().columnKeySet()) {
+            totals.put(source, null);
+        }
         
         SimpleModelList equivalences = new SimpleModelList();
         for (Entry<EquivalenceIdentifier, Double> equivalence : target.combinedResults().entrySet()) {
@@ -57,7 +61,11 @@ public class RestoredEquivalenceResultModelBuilder {
     private SimpleModel model(Map<String, Double> totals) {
         SimpleModel model = new SimpleModel();
         for (Entry<String, Double> totalScore : totals.entrySet()) {
-            model.put(totalScore.getKey(), totalScore.getValue());
+            if(totalScore.getValue() != null) {
+                model.put(totalScore.getKey(), totalScore.getValue());
+            } else {
+                model.put(totalScore.getKey(), false);
+            }
         }
         return model;
     }
@@ -75,9 +83,15 @@ public class RestoredEquivalenceResultModelBuilder {
     }
 
     private SimpleModel scores(Double combined, Map<String, Double> sourceScores, Map<String, Double> totals) {
-        SimpleModel scoreModel = new SimpleModel().put("combined", combined);
         
-        if(!combined.isNaN() && !(combined < 0)) {
+        SimpleModel scoreModel = new SimpleModel();
+        if(combined.isNaN()) {
+            scoreModel.put("combined", false);
+        } else {
+            scoreModel.put("combined", combined);
+        }
+        
+        if(combined != null && !combined.isNaN() && !(combined < 0)) {
             Double runningTotal = totals.get("combined");
             totals.put("combined", runningTotal == null ? combined : combined + runningTotal);
         }
@@ -87,9 +101,13 @@ public class RestoredEquivalenceResultModelBuilder {
             Double score = sourceScore.getValue();
             score = score.isNaN() ? 0 : score;
             
-            scoreModel.put(source, score);
+            if(score == null || score.isNaN()) {
+                scoreModel.put(source, false);
+            } else {
+                scoreModel.put(source, score);
+            }
             
-            if(!score.isNaN() && !(score < 0)) {
+            if(score != null && !score.isNaN() && score > 0) {
                 Double sourceTotal = totals.get(source);
                 totals.put(source, sourceTotal == null ? score : score + sourceTotal);
             }

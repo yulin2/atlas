@@ -4,13 +4,6 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
@@ -47,7 +40,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         MongoContentTables tables = new MongoContentTables(db);
         resolver = new LookupResolvingContentResolver(new MongoContentResolver(tables), new BasicLookupResolver(lookupStore));
         
-        contentWriters.add(new MongoContentWriter(tables, lookupStore, clock));
+        contentWriters.add(new MongoContentWriter(db, lookupStore, clock));
         programmeProcessor = new PaProgrammeProcessor(contentWriters, resolver, new DummyItemsPeopleWriter(), log);
     }
 
