@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -15,6 +16,7 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.base.Function;
@@ -86,8 +88,8 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			
 			List<T> notChosen = same.subList(1, same.size());
 			
-			if (chosen instanceof Container<?>) {
-				mergeIn(config, (Container<Item>) chosen, (List<Container<Item>>) notChosen);
+			if (chosen instanceof Container) {
+				mergeIn(config, (Container) chosen, (List<Container>) notChosen);
 			}
 			if (chosen instanceof Item) {
 				mergeIn(config, (Item) chosen, (List<Item>) notChosen);
@@ -125,6 +127,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			}
 		}
 		applyImagePrefs(config, chosen, notChosen);
+		mergeVersions(chosen, notChosen);
 	}
 
 	private <T extends Content> void applyImagePrefs(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
@@ -140,6 +143,16 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		}
 	}
 	
+    private <T extends Item> void mergeVersions(T chosen, Iterable<T> notChosen) {
+        for (T notChosenItem : notChosen) {
+            for (Version version : notChosenItem.getVersions()) {
+                // TODO When we have more granular precedence this broadcast masking can be removed
+                version.setBroadcasts(Sets.<Broadcast>newHashSet());
+                chosen.addVersion(version);
+            }
+        }
+    }
+	
 	private static final Predicate<Content> HAS_IMAGE_FIELD_SET = new Predicate<Content>() {
 		@Override
 		public boolean apply(Content content) {
@@ -147,7 +160,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		}
 	};
 	
-	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container<T> chosen, List<Container<T>> notChosen) {
+	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container chosen, List<Container> notChosen) {
 		applyImagePrefs(config, chosen, notChosen);
 	}
 	

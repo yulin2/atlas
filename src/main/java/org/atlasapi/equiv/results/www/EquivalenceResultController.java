@@ -74,7 +74,7 @@ public class EquivalenceResultController {
 
         if (ided.requireValue() instanceof Container) {
 
-            List<RestoredEquivalenceResult> results = store.forIds(Iterables.transform(((Container<?>) ided.requireValue()).getChildRefs(), new Function<ChildRef, String>() {
+            List<RestoredEquivalenceResult> results = store.forIds(Iterables.transform(((Container) ided.requireValue()).getChildRefs(), new Function<ChildRef, String>() {
                 @Override
                 public String apply(ChildRef input) {
                     return input.getUri();

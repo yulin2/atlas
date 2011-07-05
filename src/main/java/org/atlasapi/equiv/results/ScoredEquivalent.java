@@ -4,11 +4,10 @@ import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
-import com.google.common.primitives.Doubles;
 
 public final class ScoredEquivalent<T extends Content> implements Comparable<ScoredEquivalent<?>> {
 
-    public static final <T extends Content> ScoredEquivalent<T> equivalentScore(T equivalent, double score) {
+    public static final <T extends Content> ScoredEquivalent<T> equivalentScore(T equivalent, Score score) {
         return new ScoredEquivalent<T>(equivalent, score);
     }
     
@@ -22,9 +21,9 @@ public final class ScoredEquivalent<T extends Content> implements Comparable<Sco
     }
     
     private final T target;
-    private final double score;
+    private final Score score;
 
-    private ScoredEquivalent(T equivalent, double score) {
+    private ScoredEquivalent(T equivalent, Score score) {
         target = equivalent;
         this.score = score;
     }
@@ -33,7 +32,7 @@ public final class ScoredEquivalent<T extends Content> implements Comparable<Sco
         return target;
     }
 
-    public double score() {
+    public Score score() {
         return score;
     }
     
@@ -56,11 +55,11 @@ public final class ScoredEquivalent<T extends Content> implements Comparable<Sco
     
     @Override
     public String toString() {
-        return String.format("%s : %+.2f", target.getCanonicalUri(), score);
+        return String.format("%s : %s", target.getCanonicalUri(), score);
     }
 
     @Override
     public int compareTo(ScoredEquivalent<?> o) {
-        return Doubles.compare(score, o.score);
+        return Score.SCORE_ORDERING.compare(score, o.score);
     }
 }

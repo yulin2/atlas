@@ -8,9 +8,10 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
-public class RecordingContentWriter implements ContentWriter {
+public final class RecordingContentWriter implements ContentWriter {
 
 	public final List<Item> updatedItems = Lists.newArrayList();
 	public final List<Brand> updatedBrands = Lists.newArrayList();
@@ -22,13 +23,22 @@ public class RecordingContentWriter implements ContentWriter {
 	}
 
 	@Override
-	public void createOrUpdate(Container<?> container) {
+	public void createOrUpdate(Container container) {
 		if (container instanceof Brand) {
 			updatedBrands.add((Brand) container);
 		} else if (container instanceof Series) {
 			updatedSeries.add((Series) container);
 		} else {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("Unknown container type: " + container);
 		}
+	}
+	
+	@Override
+	public String toString() {
+	    return Objects.toStringHelper(this)
+	        .add("brands", updatedBrands)
+	        .add("series", updatedSeries)
+	        .add("items", updatedItems)
+	   .toString();
 	}
 }

@@ -16,9 +16,9 @@ public abstract class ChainingEquivalenceExtractor<T extends Content> implements
     }
     
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(List<ScoredEquivalent<T>> equivalents) {
-        return extract(equivalents, link.extract(equivalents));
+    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
+        return extract(target, equivalents, link.extract(target, equivalents));
     }
 
-    protected abstract Maybe<ScoredEquivalent<T>> extract(List<ScoredEquivalent<T>> equivalents, Maybe<ScoredEquivalent<T>> delegateExtraction);
+    protected abstract Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, Maybe<ScoredEquivalent<T>> delegateExtraction);
 }
