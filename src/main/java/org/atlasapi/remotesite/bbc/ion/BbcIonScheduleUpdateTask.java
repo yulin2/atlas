@@ -349,11 +349,13 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
         }
 
         IonEpisode episode = ionBroadcast.getEpisode();
-        if(Strings.isNullOrEmpty(episode.getSubseriesId())) {
-            item.setTitle(episode.getTitle());
-        } else {
-            item.setTitle(String.format("%s %s", episode.getSubseriesTitle(), episode.getTitle()));
+        
+        String title = !Strings.isNullOrEmpty(episode.getOriginalTitle()) ? episode.getOriginalTitle() : episode.getTitle();
+        if(!Strings.isNullOrEmpty(episode.getSubseriesTitle())) {
+            title = String.format("%s %s", episode.getSubseriesTitle(), title);
         }
+        item.setTitle(title);
+        
         item.setDescription(episode.getSynopsis());
         item.setThumbnail(episode.getMyImageBaseUrl() + episode.getId() + "_150_84.jpg");
         item.setImage(episode.getMyImageBaseUrl() + episode.getId() + "_640_360.jpg");
