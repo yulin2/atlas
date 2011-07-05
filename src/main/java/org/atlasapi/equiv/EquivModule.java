@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.equiv;
 
-import static org.atlasapi.equiv.generators.ScalingEquivalenceGenerator.scale;
 import static org.atlasapi.equiv.results.EquivalenceResultBuilder.resultBuilder;
 import static org.atlasapi.equiv.results.extractors.FilteringEquivalenceExtractor.filteringExtractor;
 import static org.atlasapi.equiv.update.ResultWritingEquivalenceUpdater.resultWriter;
@@ -25,12 +24,9 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
-import org.atlasapi.equiv.generators.ContentEquivalenceScorer;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
-import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
-import org.atlasapi.equiv.generators.SequenceItemEquivalenceScorer;
-import org.atlasapi.equiv.generators.TitleMatchingContainerEquivalenceGenerator;
-import org.atlasapi.equiv.generators.TitleMatchingItemEquivalenceScorer;
+import org.atlasapi.equiv.generators.ScalingScoringGenerator;
+import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
@@ -48,7 +44,11 @@ import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
 import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
+import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
+import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.update.BasicEquivalenceUpdater;
+import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.ItemEquivalenceUpdater;
 import org.atlasapi.equiv.update.LookupWritingEquivalenceUpdater;
@@ -108,7 +108,7 @@ public class EquivModule {
         return new RecentEquivalenceResultStore(new MongoEquivalenceResultStore(db));
     }
     
-    public @Bean ContentEquivalenceUpdater<Item> itemUpdater() {
+    public @Bean ItemEquivalenceUpdater basicItemUpdater() {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10)));
         
@@ -118,7 +118,11 @@ public class EquivModule {
         );
         EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder();
         
-        ContentEquivalenceUpdater<Item> itemUpdater = new ItemEquivalenceUpdater(itemGenerators, itemScorers, resultBuilder, log);
+        return new ItemEquivalenceUpdater(itemGenerators, itemScorers, resultBuilder, log);
+    }
+    
+    public @Bean ContentEquivalenceUpdater<Item> writingItemUpdater() {
+        ContentEquivalenceUpdater<Item> itemUpdater = basicItemUpdater();
         itemUpdater = resultWriter(itemUpdater, equivalenceResultStore());
         itemUpdater = new LookupWritingEquivalenceUpdater<Item>(itemUpdater, lookupWriter());
         return itemUpdater;
@@ -148,23 +152,20 @@ public class EquivModule {
     }
     
     public @Bean ContentEquivalenceUpdater<Container> containerUpdater() {
-        Set<ContentEquivalenceGenerator<Container>> containerGenerators = ImmutableSet.<ContentEquivalenceGenerator<Container>>of(
-                scale(new ItemBasedContainerEquivalenceGenerator(itemUpdater(), contentResolver), new Function<Double, Double>() {
-                    @Override
-                    public Double apply(Double input) {
-                        return Math.min(1, input * 20);
-                    }
-                }), 
-                scale(new TitleMatchingContainerEquivalenceGenerator(searchResolver), new Function<Double, Double>() {
-                    @Override
-                    public Double apply(Double input) {
-                        return input > 0 ? input / 2 : input;
-                    }
-                })
-        );
-
-        EquivalenceResultBuilder<Container> resultBuilder = standardResultBuilder();
-        ContentEquivalenceUpdater<Container> containerUpdater = new BasicEquivalenceUpdater<Container>(containerGenerators, resultBuilder, log);
+        ScalingScoringGenerator<Container> titleScoringGenerator = ScalingScoringGenerator.from(new TitleMatchingEquivalenceScoringGenerator(searchResolver), new Function<Double, Double>() {
+            @Override
+            public Double apply(Double input) {
+                return input > 0 ? input / 2 : input;
+            }
+        });
+        
+        EquivalenceResultBuilder<Container> containerResultBuilder = standardResultBuilder();
+        EquivalenceResultBuilder<Item> itemResultBuilder = standardResultBuilder();
+        
+        ContentEquivalenceUpdater<Container> containerUpdater = new ContainerEquivalenceUpdater(contentResolver, basicItemUpdater(), containerResultBuilder,itemResultBuilder, log)
+            .withEquivalenceGenerators(ImmutableSet.<ContentEquivalenceGenerator<Container>>of(titleScoringGenerator))
+            .withEquivalenceScorers(ImmutableSet.<ContentEquivalenceScorer<Container>>of(titleScoringGenerator));
+        
         containerUpdater = resultWriter(containerUpdater, equivalenceResultStore());
         containerUpdater = new LookupWritingEquivalenceUpdater<Container>(containerUpdater, lookupWriter());
         
@@ -172,7 +173,7 @@ public class EquivModule {
     }
 
     public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
-        return new RootEquivalenceUpdater(containerUpdater(), itemUpdater());
+        return new RootEquivalenceUpdater(containerUpdater(), basicItemUpdater());
     }
     
     public @Bean LookupWriter lookupWriter() {

@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
-import org.atlasapi.equiv.generators.ContentEquivalenceScorer;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 
