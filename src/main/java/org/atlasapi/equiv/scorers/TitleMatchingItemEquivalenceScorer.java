@@ -1,4 +1,4 @@
-package org.atlasapi.equiv.generators;
+package org.atlasapi.equiv.scorers;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

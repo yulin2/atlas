@@ -7,6 +7,7 @@ import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -19,11 +20,11 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.query.Selection;
 
-public class TitleMatchingContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container>, ContentEquivalenceScorer<Container> {
+public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivalenceGenerator<Container>, ContentEquivalenceScorer<Container> {
 
     private final SearchResolver searchResolver;
 
-    public TitleMatchingContainerEquivalenceGenerator(SearchResolver searchResolver) {
+    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
     }
     

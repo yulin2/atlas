@@ -1,4 +1,4 @@
-package org.atlasapi.equiv.generators;
+package org.atlasapi.equiv.scorers;
 
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
