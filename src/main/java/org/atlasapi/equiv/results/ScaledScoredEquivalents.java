@@ -3,7 +3,6 @@ package org.atlasapi.equiv.results;
 import java.util.Map;
 
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
@@ -44,17 +43,12 @@ public class ScaledScoredEquivalents<T extends Content> implements ScoredEquival
     }
 
     @Override
-    public Map<Publisher, Map<T, Score>> equivalents() {
+    public Map<T, Score> equivalents() {
         return scale(base.equivalents());
     }
 
-    private Map<Publisher, Map<T, Score>> scale(Map<Publisher, Map<T, Score>> equivalents) {
-        return ImmutableMap.copyOf(Maps.transformValues(equivalents, new Function<Map<T, Score>, Map<T, Score>>() {
-            @Override
-            public Map<T, Score> apply(Map<T, Score> input) {
-                return ImmutableMap.copyOf(Maps.transformValues(input, Score.transformerFrom(scaler)));
-            }
-        }));
+    private Map<T, Score> scale(Map<T, Score> equivalents) {
+        return ImmutableMap.copyOf(Maps.transformValues(equivalents, Score.transformerFrom(scaler)));
     }
 
     @Override

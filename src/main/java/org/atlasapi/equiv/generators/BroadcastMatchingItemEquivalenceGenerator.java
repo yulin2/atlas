@@ -1,11 +1,10 @@
 package org.atlasapi.equiv.generators;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
@@ -96,18 +95,12 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
      .build();
     
     private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
-        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), new Function<Map<Item, Score>, Map<Item, Score>>() {
+        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), Score.transformerFrom(new Function<Double, Double>() {
             @Override
-            public Map<Item, Score> apply(Map<Item, Score> input) {
-                return Maps.transformValues(input, Score.transformerFrom(new Function<Double, Double>() {
-
-                    @Override
-                    public Double apply(Double input) {
-                        return input / broadcasts;
-                    }
-                }));
+            public Double apply(Double input) {
+                return input / broadcasts;
             }
-        }));
+        })));
     }
 
     private boolean hasQualifyingBroadcast(Item item, Broadcast referenceBroadcast) {
