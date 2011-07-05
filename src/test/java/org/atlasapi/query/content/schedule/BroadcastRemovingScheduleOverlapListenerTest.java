@@ -48,7 +48,7 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
         db = MongoTestHelper.anEmptyTestDatabase();
         MongoLookupEntryStore lookupWriter = new MongoLookupEntryStore(db);
         MongoContentTables tables = new MongoContentTables(db);
-        writer = new MongoContentWriter(tables, lookupWriter , new SystemClock());
+        writer = new MongoContentWriter(db, lookupWriter , new SystemClock());
         resolver = new LookupResolvingContentResolver(new MongoContentResolver(tables), new BasicLookupResolver(lookupWriter));
         
         Version version = new Version();

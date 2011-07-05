@@ -6,6 +6,7 @@ import nu.xom.Element;
 import nu.xom.Elements;
 import nu.xom.Node;
 
+import org.atlasapi.remotesite.channel4.C4RelatedEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
@@ -15,7 +16,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgEntryElement extends Element {
 
-    private final String ATOM_NS = "http://www.w3.org/2005/Atom";
+    private static final String DC_NS = "http://purl.org/dc/elements/1.1/";
+    private static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 
     public C4EpgEntryElement(Element element) {
         super(element);
@@ -74,6 +76,15 @@ public class C4EpgEntryElement extends Element {
     public String summary() {
         return getAtomElementValue("summary");
     }
+    
+    public C4RelatedEntry relatedEntry() {
+        Elements elements = getChildElements("relation.RelatedEntryId",  DC_NS);
+        if (elements.size() == 0) {
+            return null;
+        }
+        Element element = elements.get(0);
+        return new C4RelatedEntry(element.getAttributeValue("feedId"), element.getValue());
+    }
 
     public List<String> links() {
         Elements elements = this.getChildElements("link", ATOM_NS);
@@ -85,7 +96,7 @@ public class C4EpgEntryElement extends Element {
     }
 
     private String getDublinCoreElementValue(String elementName) {
-        Elements elements = this.getChildElements(elementName, "http://purl.org/dc/elements/1.1/");
+        Elements elements = this.getChildElements(elementName, DC_NS);
         if (elements.size() == 0) {
             return null;
         }

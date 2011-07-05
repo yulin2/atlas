@@ -44,17 +44,21 @@ public class ScaledScoredEquivalents<T extends Content> implements ScoredEquival
     }
 
     @Override
-    public Map<Publisher, Map<T, Double>> equivalents() {
+    public Map<Publisher, Map<T, Score>> equivalents() {
         return scale(base.equivalents());
     }
 
-    private Map<Publisher, Map<T, Double>> scale(Map<Publisher, Map<T, Double>> equivalents) {
-        return ImmutableMap.copyOf(Maps.transformValues(equivalents, new Function<Map<T, Double>, Map<T, Double>>() {
+    private Map<Publisher, Map<T, Score>> scale(Map<Publisher, Map<T, Score>> equivalents) {
+        return ImmutableMap.copyOf(Maps.transformValues(equivalents, new Function<Map<T, Score>, Map<T, Score>>() {
             @Override
-            public Map<T, Double> apply(Map<T, Double> input) {
-                return ImmutableMap.copyOf(Maps.transformValues(input, scaler));
+            public Map<T, Score> apply(Map<T, Score> input) {
+                return ImmutableMap.copyOf(Maps.transformValues(input, Score.transformerFrom(scaler)));
             }
         }));
     }
 
+    @Override
+    public String toString() {
+        return String.format("Scaled %s", base);
+    }
 }

@@ -9,10 +9,10 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Maps;
 
 public class BbcIonServices {
-
-    public static BiMap<String, String> services = ImmutableBiMap.<String, String>builder()
     
-        .put("bbc_one",  "http://www.bbc.co.uk/services/bbcone")
+    public static BiMap<String, String> tvServices = ImmutableBiMap.<String, String>builder()
+    
+//        .put("bbc_one",  "http://www.bbc.co.uk/services/bbcone")
         .put("bbc_one_london",  "http://www.bbc.co.uk/services/bbcone/london")
         .put("bbc_one_west",  "http://www.bbc.co.uk/services/bbcone/west")
         .put("bbc_one_south_west",  "http://www.bbc.co.uk/services/bbcone/south_west")
@@ -32,7 +32,7 @@ public class BbcIonServices {
         .put("bbc_one_northern_ireland",  "http://www.bbc.co.uk/services/bbcone/ni")
         .put("bbc_one_wales",  "http://www.bbc.co.uk/services/bbcone/wales")
         
-        .put("bbc_two", "http://www.bbc.co.uk/services/bbctwo")
+//        .put("bbc_two", "http://www.bbc.co.uk/services/bbctwo")
         .put("bbc_two_england", "http://www.bbc.co.uk/services/bbctwo/england")
         .put("bbc_two_wales", "http://www.bbc.co.uk/services/bbctwo/wales_analogue")
         .put("bbc_two_wales_digital", "http://www.bbc.co.uk/services/bbctwo/wales")
@@ -46,8 +46,9 @@ public class BbcIonServices {
         .put("bbc_news24",  "http://www.bbc.co.uk/services/bbcnews")
         .put("bbc_hd",          "http://www.bbc.co.uk/services/bbchd")
         .put("cbbc",          "http://www.bbc.co.uk/services/cbbc")
-        .put("cbeebies",          "http://www.bbc.co.uk/services/cbeebies")
+        .put("cbeebies",          "http://www.bbc.co.uk/services/cbeebies").build();
         
+    public static BiMap<String, String> radioServices = ImmutableBiMap.<String, String>builder()
         .putAll(
             Maps.transformValues(
                 Maps.uniqueIndex(RadioPlayerServices.services, new Function<RadioPlayerService, String>() {
@@ -65,6 +66,8 @@ public class BbcIonServices {
             )
         ).build();
     
+    public static BiMap<String,String> services = ImmutableBiMap.<String, String>builder().putAll(tvServices).putAll(radioServices).build();
+     
     public static String get(String ionService) {
         return services.get(ionService);
     }

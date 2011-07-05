@@ -1,7 +1,5 @@
 package org.atlasapi.equiv.generators;
 
-import java.util.Set;
-
 import org.atlasapi.equiv.results.ScaledScoredEquivalents;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
@@ -32,8 +30,8 @@ public class ScalingEquivalenceGenerator<T extends Content> implements ContentEq
     }
     
     @Override
-    public ScoredEquivalents<T> generateEquivalences(T content, Set<T> suggestions) {
-        return ScaledScoredEquivalents.<T>scale(delegate.generateEquivalences(content, suggestions), scalingFunction);
+    public ScoredEquivalents<T> generate(T content) {
+        return ScaledScoredEquivalents.<T>scale(delegate.generate(content), scalingFunction);
     }
 
 }

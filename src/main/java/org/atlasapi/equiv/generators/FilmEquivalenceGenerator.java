@@ -1,11 +1,11 @@
 package org.atlasapi.equiv.generators;
 
 import java.util.List;
-import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalents;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
@@ -32,25 +32,24 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     }
     
     @Override
-    public ScoredEquivalents<Film> generateEquivalences(Film film, Set<Film> suggestions) {
+    public ScoredEquivalents<Film> generate(Film film) {
+        ScoredEquivalentsBuilder<Film> scores = DefaultScoredEquivalents.<Film> fromSource("Film");
 
-        ScoredEquivalentsBuilder<Film> scores = DefaultScoredEquivalents.<Film>fromSource("Film");
-        
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
             return scores.build();
         }
-        
+
         List<Identified> possibleEquivalentFilms = searchResolver.search(new Search(film.getTitle()), ImmutableList.of(Publisher.PREVIEW_NETWORKS), config, Selection.ALL);
-        
+
         Iterable<Film> equivalentFilms = Iterables.filter(Iterables.filter(possibleEquivalentFilms, Film.class), new EquivalentFilmPredicate(film));
-        
+
         for (Film equivFilm : equivalentFilms) {
-            scores.addEquivalent(equivFilm, 1);
+            scores.addEquivalent(equivFilm, Score.valueOf(1.0));
         }
-        
+
         return scores.build();
     }
-
+    
     private class EquivalentFilmPredicate implements Predicate<Film> {
         
         private final Film film;
@@ -70,4 +69,5 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
             return title.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
         }
     }
+
 }

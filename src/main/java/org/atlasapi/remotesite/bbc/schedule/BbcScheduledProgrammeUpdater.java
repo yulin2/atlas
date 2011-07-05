@@ -86,7 +86,6 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
         }
     }
 
-    @SuppressWarnings("unchecked")
 	private void fetchAndSaveContainerIfRequired(Item fetchedItem) {
         if (fetchedItem instanceof Episode) {
             Episode fetchedEpisode = (Episode) fetchedItem;
@@ -94,7 +93,7 @@ public class BbcScheduledProgrammeUpdater implements Runnable {
 				String containerUri = fetchedEpisode.getContainer().getUri();
 				Maybe<Identified> locallySavedContainer = localFetcher.findByCanonicalUris(ImmutableList.of(containerUri)).getFirstValue();
 				if (locallySavedContainer.isNothing()) {
-					Container<Item> fetchedContainer = (Container<Item>) fetcher.createOrUpdate(containerUri);
+					Container fetchedContainer = (Container) fetcher.createOrUpdate(containerUri);
 					if (fetchedContainer == null) {
 						log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Can't write fetched Item " + fetchedItem + " it's Brand can't be fetched"));
 						return;
