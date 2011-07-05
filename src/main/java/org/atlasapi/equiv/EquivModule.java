@@ -25,6 +25,7 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
+import org.atlasapi.equiv.generators.ContentEquivalenceScorer;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
 import org.atlasapi.equiv.generators.SequenceItemEquivalenceScorer;
@@ -49,6 +50,7 @@ import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.update.BasicEquivalenceUpdater;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.ItemEquivalenceUpdater;
 import org.atlasapi.equiv.update.LookupWritingEquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
@@ -108,13 +110,15 @@ public class EquivModule {
     
     public @Bean ContentEquivalenceUpdater<Item> itemUpdater() {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
-                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10)),
+                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10)));
+        
+        Set<ContentEquivalenceScorer<Item>> itemScorers = ImmutableSet.<ContentEquivalenceScorer<Item>>of(
                 new TitleMatchingItemEquivalenceScorer(),
                 new SequenceItemEquivalenceScorer()
         );
         EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder();
         
-        ContentEquivalenceUpdater<Item> itemUpdater = new BasicEquivalenceUpdater<Item>(itemGenerators, resultBuilder, log);
+        ContentEquivalenceUpdater<Item> itemUpdater = new ItemEquivalenceUpdater(itemGenerators, itemScorers, resultBuilder, log);
         itemUpdater = resultWriter(itemUpdater, equivalenceResultStore());
         itemUpdater = new LookupWritingEquivalenceUpdater<Item>(itemUpdater, lookupWriter());
         return itemUpdater;
