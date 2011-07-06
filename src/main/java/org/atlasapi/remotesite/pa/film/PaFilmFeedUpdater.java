@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa.film;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
@@ -8,7 +9,6 @@ import nu.xom.Element;
 import nu.xom.NodeFactory;
 import nu.xom.Nodes;
 
-import org.apache.http.HttpResponse;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -21,9 +21,12 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.url.UrlEncoding;
 
@@ -36,23 +39,24 @@ public class PaFilmFeedUpdater extends ScheduledTask {
         .withUserAgent(HttpClients.ATLAS_USER_AGENT)
         .withSocketTimeout(5, TimeUnit.MINUTES)
         .withConnectionTimeout(1, TimeUnit.MINUTES)
-        .withTransformer(new HttpResponseTransformer<Void>() {
-            
-            public Void transform(HttpResponse response) throws IOException {
-                try {
-                    FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
-                    Builder builder = new Builder(filmProcessingNodeFactory);
-                    builder.build(response.getEntity().getContent());
-                    reportStatus(String.format("Finished. Proessed %s. %s failed", filmProcessingNodeFactory.getProcessed(), filmProcessingNodeFactory.getFailed()));
-                } catch (Exception e) {
-                    log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception in PA Film updater"));
-                }
-
-                return null;
-            }
-            
-        })
     .build();
+    
+    private final HttpResponseTransformer<Void> TRANSFORMER = new HttpResponseTransformer<Void>() {
+        
+        @Override
+        public Void transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, IOException {
+            try {
+                FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
+                Builder builder = new Builder(filmProcessingNodeFactory);
+                builder.build(body);
+                reportStatus(String.format("Finished. Proessed %s. %s failed", filmProcessingNodeFactory.getProcessed(), filmProcessingNodeFactory.getFailed()));
+            } catch (Exception e) {
+                log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception in PA Film updater"));
+            }
+
+            return null;
+        }
+    };
     
     private final String feedUrl;
     private final AdapterLog log;
@@ -86,7 +90,7 @@ public class PaFilmFeedUpdater extends ScheduledTask {
         
         try {
             reportStatus("Started...");
-            client.get(requestUri);
+            client.get(new SimpleHttpRequest<Void>(requestUri, TRANSFORMER));
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withUri(requestUri).withDescription("Exception while fetching film feed"));
             throw new RuntimeException(e);
