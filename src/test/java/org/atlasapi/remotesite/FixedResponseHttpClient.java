@@ -14,18 +14,22 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
+import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.Payload;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 
 public class FixedResponseHttpClient implements SimpleHttpClient {
 
@@ -44,7 +48,16 @@ public class FixedResponseHttpClient implements SimpleHttpClient {
 		}
 		throw new HttpStatusCodeException(404, "Not found");
 	}
-
+	
+    @Override
+	public <T> T get(SimpleHttpRequest<T> request) throws HttpException, Exception {
+	    if (respondsTo.equals(request.getUrl())) {
+	        ByteArrayInputStream in = new ByteArrayInputStream(data.getBytes(Charsets.UTF_8));
+            return request.getTransformer().transform(new HttpResponsePrologue(200), in);
+	    }
+	    throw new HttpStatusCodeException(404, "Not found");
+    }
+    
 	@Override
 	public String getContentsOf(String url) throws HttpException {
 		if (respondsTo.equals(url)) {
