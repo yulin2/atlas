@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.five;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
@@ -17,9 +18,11 @@ import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
 
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
+import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.time.Timestamp;
@@ -33,6 +36,7 @@ public class FiveUpdater extends ScheduledTask {
     private final FiveBrandProcessor processor;
     private final Timestamper timestamper = new SystemClock();
 
+    private final Builder parser = new Builder(new ShowProcessingNodeFactory());
     private SimpleHttpClient streamHttpClient;
 
     public FiveUpdater(ContentWriter contentWriter, AdapterLog log) {
@@ -42,22 +46,24 @@ public class FiveUpdater extends ScheduledTask {
     }
 
     private SimpleHttpClient buildFetcher(final AdapterLog log) {
-        final Builder parser = new Builder(new ShowProcessingNodeFactory());
         return new SimpleHttpClientBuilder()
             .withUserAgent(HttpClients.ATLAS_USER_AGENT)
             .withSocketTimeout(30, TimeUnit.SECONDS)
-            .withTransformer(new HttpResponseTransformer<Void>() {
-                @Override
-                public Void transform(org.apache.http.HttpResponse response) throws HttpException, IOException {
-                    try {
-                        parser.build(response.getEntity().getContent());
-                    } catch (Exception e) {
-                        log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
-                    }
-                    return null;
-                }
-            }).withRetries(3).build();
+            .withRetries(3)
+            .build();
     }
+    
+    private final HttpResponseTransformer<Void> TRANSFORMER = new HttpResponseTransformer<Void>() {
+        @Override
+        public Void transform(HttpResponsePrologue response, InputStream in) throws HttpException, IOException {
+            try {
+                parser.build(in);
+            } catch (Exception e) {
+                log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+            }
+            return null;
+        }
+    };
 
     @Override
     public void runTask() {
@@ -65,7 +71,7 @@ public class FiveUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update started from " + BASE_API_URL).withSource(getClass()));
             
-            streamHttpClient.get(BASE_API_URL + "/shows");
+            streamHttpClient.get(new SimpleHttpRequest<Void>(BASE_API_URL + "/shows", TRANSFORMER));
             
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));

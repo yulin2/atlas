@@ -5,10 +5,10 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpResponse;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
@@ -36,14 +36,17 @@ import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
 import org.joda.time.Duration;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Ints;
 import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.time.SystemClock;
 
 public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClient {
@@ -59,15 +62,17 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     private final SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
         .withUserAgent(HttpClients.ATLAS_USER_AGENT)
         .withSocketTimeout(30, TimeUnit.SECONDS)
-        .withTransformer(new HttpResponseTransformer<IonEpisodeDetailFeed>() {
-
-                @Override
-                public IonEpisodeDetailFeed transform(HttpResponse response) throws HttpException, IOException {
-                    return ionDeserialiser.deserialise(new InputStreamReader(response.getEntity().getContent()));
-                }
-            }).build();
+        .build();
     
     private final AdapterLog log;
+    
+    private final HttpResponseTransformer<IonEpisodeDetailFeed> TRANSFORMER = new HttpResponseTransformer<IonEpisodeDetailFeed>() {
+
+        @Override
+        public IonEpisodeDetailFeed transform(HttpResponsePrologue response, InputStream in) throws HttpException, IOException {
+            return ionDeserialiser.deserialise(new InputStreamReader(in, response.getCharsetOrDefault(Charsets.UTF_8)));
+        }
+    };
     
     public BbcIonEpisodeDetailItemFetcherClient(AdapterLog log) {
         this.log = log;
@@ -75,8 +80,8 @@ public class BbcIonEpisodeDetailItemFetcherClient implements BbcItemFetcherClien
     
     private IonEpisodeDetail getEpisodeDetail(String pid) {
         try {
-            return ((IonEpisodeDetailFeed)httpClient.get(String.format(EPISODE_DETAIL_PATTERN, pid)).transform()).getBlocklist().get(0);
-        } catch (HttpException e) {
+            return httpClient.get(new SimpleHttpRequest<IonEpisodeDetailFeed>(String.format(EPISODE_DETAIL_PATTERN, pid), TRANSFORMER)).getBlocklist().get(0);
+        } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Couldn't get episode detail for " + pid));
             return null;
         }
