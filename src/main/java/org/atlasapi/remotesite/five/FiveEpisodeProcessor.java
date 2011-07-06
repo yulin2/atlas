@@ -13,11 +13,15 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.joda.time.Duration;
@@ -58,34 +62,46 @@ public class FiveEpisodeProcessor {
         this.httpClient = httpClient;
     }
     
-    public Episode processEpisode(Element element) throws Exception {
+    public Item processEpisode(Element element, Specialization specialization) throws Exception {
         
         String id = childValue(element, "id");
 
-        Episode episode = new Episode(getEpisodeUri(id), getEpisodeCurie(id), Publisher.FIVE);
+        Item item;
+        if(specialization == Specialization.FILM) {
+            item = new Film(getEpisodeUri(id), getEpisodeCurie(id), Publisher.FIVE);
+            item.setMediaType(MediaType.VIDEO);
+            item.setSpecialization(Specialization.FILM);
+        } else {
+            Episode episode = new Episode(getEpisodeUri(id), getEpisodeCurie(id), Publisher.FIVE);
+            episode.setMediaType(MediaType.VIDEO);
+            episode.setSpecialization(Specialization.TV);
+            
+            String episodeNumber = childValue(element, "episode_number");
+            if (!Strings.isNullOrEmpty(episodeNumber)) {
+                episode.setEpisodeNumber(Integer.valueOf(episodeNumber));
+            }
+            processSeries(episode, element);
+            item = episode;
+        }
+        
         Maybe<String> description = getDescription(element);
         if (description.hasValue()) {
-            episode.setDescription(description.requireValue());
+            item.setDescription(description.requireValue());
         }
 
-        episode.setGenres(getGenres(element));
+        item.setGenres(getGenres(element));
         Maybe<String> image = getImage(element);
         if (image.hasValue()) {
-            episode.setImage(image.requireValue());
+            item.setImage(image.requireValue());
         }
-        
-        String episodeNumber = childValue(element, "episode_number");
-        if (!Strings.isNullOrEmpty(episodeNumber)) {
-            episode.setEpisodeNumber(Integer.valueOf(episodeNumber));
-        }
-        
-        processSeries(episode, element);
         
         Version version = getVersion(element);
         
-        episode.addVersion(version);
+        item.setTitle(childValue(element, "title"));
         
-        return episode;
+        item.addVersion(version);
+        
+        return item;
     }
 
     private Version getVersion(Element element) throws Exception {

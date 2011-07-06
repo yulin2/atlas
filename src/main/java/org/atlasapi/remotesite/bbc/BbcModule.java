@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.bbc;
 
-import static org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.deserializerForClass;
-
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
@@ -11,15 +9,14 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDateRangeScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateBuilder;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
-import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.Duration;
-import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,12 +24,13 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.DayRangeGenerator;
 
 @Configuration
 public class BbcModule {
 
 	private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.NEVER;
-	private final static RepetitionRule HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
 	private final static RepetitionRule TEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
 	private final static RepetitionRule SEVEN_MINUTES = RepetitionRules.every(Duration.standardMinutes(10));
 	private final static RepetitionRule ONE_HOUR = RepetitionRules.every(Duration.standardHours(1));
@@ -49,12 +47,10 @@ public class BbcModule {
 //        scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
         
         scheduler.schedule(bbcIonUpdater(0, 0)
-        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
         		.withName("BBC Ion schedule update (today only)"), 
         		TEN_MINUTES);
         
         scheduler.schedule(bbcIonUpdater(7, 7)
-        		.withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
         		.withName("BBC Ion schedule update (14 days)"),
         		ONE_HOUR);
         
@@ -63,7 +59,11 @@ public class BbcModule {
     }
 	
 	private BbcIonDateRangeScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
-        return new BbcIonDateRangeScheduleUpdater(lookBack, lookAhead, contentResolver, contentWriters, deserializerForClass(IonSchedule.class), itemsPeopleWriter, log);
+	    DayRangeGenerator dayRangeGenerator = new DayRangeGenerator(DateTimeZones.UTC).withLookAhead(lookAhead).withLookBack(lookBack);
+        return new BbcIonDateRangeScheduleUpdater(dayRangeGenerator, contentResolver, contentWriters, log)
+            .withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+            .withContainerFetchClient(new BbcIonContainerFetcherClient(log))
+            .withItemsPeopleWriter(itemsPeopleWriter);
     }
 	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
