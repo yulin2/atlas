@@ -99,8 +99,8 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
         Version v = Iterables.getOnlyElement(ep.getVersions());
         assertEquals(2, v.getBroadcasts().size());
         
-        Broadcast b0 = Iterables.get(v.getBroadcasts(), 0);
-        Broadcast b1 = Iterables.get(v.getBroadcasts(), 1);
+        Broadcast b0 = Iterables.get(v.getBroadcasts(), 1);
+        Broadcast b1 = Iterables.get(v.getBroadcasts(), 0);
         
         assertEquals("c4:616", b1.getId());
         assertEquals(new DateTime(0, UTC), b1.getTransmissionTime());

@@ -60,7 +60,7 @@ public class YouTubeGDataClient implements RemoteSiteClient<VideoEntry> {
         String url = "http://gdata.youtube.com/feeds/api/videos/" + videoIdFrom(uri) + "?v=2&alt=jsonc";
         HttpResponse httpResponse = client.get(url);
         if (httpResponse.statusCode() >= 300) {
-            throw new HttpStatusCodeException(httpResponse); 
+            throw new HttpStatusCodeException(httpResponse.statusCode(), httpResponse.statusLine()); 
         }
         VideoWrapper wrapper = gson.fromJson(httpResponse.body(), VideoWrapper.class);
         if (wrapper != null && wrapper.getData() != null) {
