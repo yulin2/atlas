@@ -21,7 +21,6 @@ import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.lookup.BasicLookupResolver;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
@@ -54,9 +53,8 @@ public class QueryModule {
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
 	    KnownTypeContentResolver contentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(new MongoContentTables(db)));
-		BasicLookupResolver lookupResolver = new BasicLookupResolver(new MongoLookupEntryStore(db));
 		
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(contentResolver, lookupResolver);
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(contentResolver, new MongoLookupEntryStore(db));
 		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
 		

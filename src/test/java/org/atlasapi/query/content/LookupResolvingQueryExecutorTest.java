@@ -12,7 +12,8 @@ import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.lookup.LookupResolver;
+import org.atlasapi.persistence.lookup.InMemoryLookupEntryStore;
+import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
@@ -22,9 +23,10 @@ import com.google.common.collect.ImmutableSet;
 public class LookupResolvingQueryExecutorTest extends MockObjectTestCase {
 
     private KnownTypeContentResolver contentResolver = mock(KnownTypeContentResolver.class);
-    private LookupResolver lookupResolver = mock(LookupResolver.class);
     
-    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(contentResolver, lookupResolver);
+    private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
+    
+    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(contentResolver, lookupStore);
     
     public void testSetsSameAs() {
 
@@ -33,13 +35,10 @@ public class LookupResolvingQueryExecutorTest extends MockObjectTestCase {
         final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
         final Item equivItem = new Item("equiv", "ecurie", Publisher.ITV);
         
+        
+        lookupStore.store(lookupEntryWithEquivalents(query, LookupRef.from(queryItem), LookupRef.from(equivItem)));
+        
         checking(new Expectations(){{
-            one(lookupResolver).equivalentsFor(query); 
-                will(returnValue(ImmutableList.of(
-                    LookupRef.from(queryItem),
-                    LookupRef.from(equivItem)
-                )));
-            
             one(contentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
                 will(returnValue(ResolvedContent.builder()
                         .put(queryItem.getCanonicalUri(), queryItem)
@@ -60,4 +59,7 @@ public class LookupResolvingQueryExecutorTest extends MockObjectTestCase {
         
     }
 
+    private LookupEntry lookupEntryWithEquivalents(String id, LookupRef... equiv) {
+        return new LookupEntry(id, null, ImmutableSet.<String>of(), ImmutableSet.<LookupRef>of(), ImmutableList.copyOf(equiv), null, null);
+    }
 }
