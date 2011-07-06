@@ -41,7 +41,7 @@ public class YouTubeFeedClient implements RemoteSiteClient<VideoFeed> {
     public VideoFeed get(String uri) throws Exception {
         HttpResponse httpResponse = client.get(Urls.appendParameters(uri, FETCH_PARAMETERS));
         if (httpResponse.statusCode() >= 300) {
-            throw new HttpStatusCodeException(httpResponse); 
+            throw new HttpStatusCodeException(httpResponse.statusCode(), httpResponse.statusLine()); 
         }
         FeedWrapper wrapper = gson.fromJson(httpResponse.body(), FeedWrapper.class);
         if (wrapper != null && wrapper.getData() != null) {

@@ -3,11 +3,10 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpResponse;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.MediaType;
@@ -21,14 +20,17 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Ints;
 import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 
 public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
 
@@ -40,15 +42,17 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
     private final SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
         .withUserAgent(HttpClients.ATLAS_USER_AGENT)
         .withSocketTimeout(30, TimeUnit.SECONDS)
-        .withTransformer(new HttpResponseTransformer<IonContainerFeed>() {
-
-                @Override
-                public IonContainerFeed transform(HttpResponse response) throws HttpException, IOException {
-                    return ionDeserialiser.deserialise(new InputStreamReader(response.getEntity().getContent()));
-                }
-            }).build();
+        .build();
     
     private final AdapterLog log;
+    
+    private final HttpResponseTransformer<IonContainerFeed> ION_TRANSLATOR = new HttpResponseTransformer<IonContainerFeed>() {
+
+        @Override
+        public IonContainerFeed transform(HttpResponsePrologue response, InputStream in) throws HttpException {
+            return ionDeserialiser.deserialise(new InputStreamReader(in, response.getCharsetOrDefault(Charsets.UTF_8)));
+        }
+    };
     
     public BbcIonContainerFetcherClient(AdapterLog log) {
         this.log = log;
@@ -56,13 +60,12 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
     
     private Maybe<IonContainer> getIonContainer(String pid) {
         try {
-            return Maybe.firstElementOrNothing(((IonContainerFeed)httpClient.get(String.format(EPISODE_DETAIL_PATTERN, pid)).transform()).getBlocklist());
-        } catch (HttpException e) {
+            return Maybe.firstElementOrNothing((httpClient.get(new SimpleHttpRequest<IonContainerFeed>(String.format(EPISODE_DETAIL_PATTERN, pid), ION_TRANSLATOR))).getBlocklist());
+        } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error fetching container info for " + pid));
             return Maybe.nothing();
         }
     }
-    
     
     @Override
     public Maybe<Brand> createBrand(String brandId) {
@@ -115,7 +118,6 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
     }
     
     private void setCommonFields(IonContainer src, Container dst) {
-        
         dst.setTitle(src.getTitle());
         dst.setDescription(src.getMediumSynopsis() == null ? src.getShortSynopsis() : src.getMediumSynopsis());
         dst.setLastUpdated(src.getUpdated());
