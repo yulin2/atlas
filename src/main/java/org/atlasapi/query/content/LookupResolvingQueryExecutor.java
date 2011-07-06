@@ -10,46 +10,66 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.lookup.LookupResolver;
+import org.atlasapi.persistence.lookup.entry.LookupEntry;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
-    private final LookupResolver lookupResolver;
+    private final LookupEntryStore lookupResolver;
     private final KnownTypeContentResolver contentResolver;
 
-    public LookupResolvingQueryExecutor(KnownTypeContentResolver contentResolver, LookupResolver lookupResolver) {
+    public LookupResolvingQueryExecutor(KnownTypeContentResolver contentResolver, LookupEntryStore lookupResolver) {
         this.contentResolver = contentResolver;
         this.lookupResolver = lookupResolver;
     }
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        Map<String, List<Identified>> resolvedContent = Maps.newHashMapWithExpectedSize(Iterables.size(uris));
         
-        for (String uri : uris) {
-            List<Identified> resolvedEquivs = resolveEquivs(uri, query.getConfiguration());
-            if(!resolvedEquivs.isEmpty()) {
-                resolvedContent.put(uri, resolvedEquivs);
-            }
-        }
+        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupResolver.entriesFor(uris), LookupEntry.TO_ID);
         
-        return resolvedContent;
-    }
+        Map<String, List<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
 
-    private List<Identified> resolveEquivs(String uri, ApplicationConfiguration config) {
-        Iterable<LookupRef> equivRefs = Iterables.filter(lookupResolver.equivalentsFor(uri), enabledPublishers(config));
-        if (Iterables.isEmpty(equivRefs) || !containsRequestedUri(equivRefs, uri)) {
-            return ImmutableList.of();
+        Iterable<LookupRef> filteredRefs = Iterables.filter(Iterables.concat(lookupRefs.values()), enabledPublishers(query.getConfiguration()));
+        
+        if (Iterables.isEmpty(filteredRefs)) {
+            return ImmutableMap.of();
         }
-        return setEquivalentToFields(contentResolver.findByLookupRefs(equivRefs).getAllResolvedResults());
+        
+        
+        final ResolvedContent allResolvedResults = contentResolver.findByLookupRefs(filteredRefs);
+        
+        return Maps.transformEntries(lookup, new EntryTransformer<String, LookupEntry, List<Identified>>(){
+
+            @Override
+            public List<Identified> transformEntry(String uri, LookupEntry entry) {
+                if (!containsRequestedUri(entry.equivalents(), uri)) {
+                    return ImmutableList.of();
+                }
+                Iterable<Identified> identifieds = Iterables.filter(Lists.transform(entry.equivalents(), new Function<LookupRef, Identified>() {
+                    @Override
+                    public Identified apply(LookupRef input) {
+                        return allResolvedResults.get(input.id()).valueOrNull();
+                    }
+                }), Predicates.notNull());
+                
+                return setEquivalentToFields(ImmutableList.copyOf(identifieds));
+            }
+        });
     }
 
     private boolean containsRequestedUri(Iterable<LookupRef> equivRefs, String uri) {
