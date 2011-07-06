@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
+import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.EquivalenceResult;
@@ -14,19 +14,24 @@ import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.Score;
 import org.atlasapi.equiv.results.ScoredEquivalent;
 import org.atlasapi.equiv.results.ScoredEquivalents;
-import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.results.ScoredEquivalentsMerger;
+import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 
 public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
 
@@ -37,11 +42,13 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
 
     private final ItemEquivalenceUpdater itemUpdater;
     
-    private Iterable<ContentEquivalenceGenerator<Container>> generators;
-    private Iterable<ContentEquivalenceScorer<Container>> scorers;
+    private EquivalenceGenerators<Container> generators;
+    private EquivalenceScorers<Container> scorers;
     
     private final EquivalenceResultBuilder<Container> containerResultBuilder;
     private final EquivalenceResultBuilder<Item> itemResultBuilder;
+    
+    private final ScoredEquivalentsMerger merger = new ScoredEquivalentsMerger();
     
     public ContainerEquivalenceUpdater(ContentResolver contentResolver, ItemEquivalenceUpdater itemUpdater, 
             EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultBuilder<Item> itemResultBuilder, AdapterLog log) {
@@ -52,12 +59,12 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
                 this.log = log;
     }
 
-    public ContainerEquivalenceUpdater withEquivalenceGenerators(Iterable<ContentEquivalenceGenerator<Container>> generators) {
+    public ContainerEquivalenceUpdater withEquivalenceGenerators(EquivalenceGenerators<Container> generators) {
         this.generators = generators;
         return this;
     }
 
-    public ContentEquivalenceUpdater<Container> withEquivalenceScorers(Iterable<ContentEquivalenceScorer<Container>> scorers) {
+    public ContentEquivalenceUpdater<Container> withEquivalenceScorers(EquivalenceScorers<Container> scorers) {
         this.scorers = scorers;
         return this;
     }
@@ -83,9 +90,36 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
             }
         }
         
-        extractContainersFrom(childResults, childrenUris.size(), containerCache);
+        ScoredEquivalents<Container> strongItemContainers = extractContainersFrom(childResults, childrenUris.size(), containerCache);
         
-        return null;
+        List<ScoredEquivalents<Container>> generatedEquivalences = generators.generate(content);
+        generatedEquivalences.add(strongItemContainers);
+        
+        List<Container> extractGeneratedSuggestions = extractGeneratedSuggestions(generatedEquivalences);
+        
+        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, extractGeneratedSuggestions);
+        
+        EquivalenceResult<Container> containerResult = containerResultBuilder.resultFor(content, merger.merge(generatedEquivalences, scoredEquivalents));
+        
+        Map<Publisher, ScoredEquivalent<Container>> strongContainerEquivalences = containerResult.strongEquivalences();
+        
+        filter(strongContainerEquivalences, childResults);
+        
+        return containerResult;
+    }
+    
+    private void filter(Map<Publisher, ScoredEquivalent<Container>> strongContainerEquivalences, Set<EquivalenceResult<Item>> childResults) {
+        
+        //TODO
+    }
+    
+    private List<Container> extractGeneratedSuggestions(Iterable<ScoredEquivalents<Container>> generatedScores) {
+        return Lists.newArrayList(Iterables.concat(Iterables.transform(generatedScores, new Function<ScoredEquivalents<Container>, Iterable<Container>>() {
+            @Override
+            public Iterable<Container> apply(ScoredEquivalents<Container> input) {
+                return input.equivalents().keySet();
+            }
+        })));
     }
 
     private ScoredEquivalents<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults, int children, Map<String, Container> containerCache) {
@@ -101,20 +135,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
                 }
             }
         }
-        
-        
         return containerEquivalents.build();
-    }
-    
-    private Container resolve(ParentRef parentEquivalent, Map<String, Container> containerCache) {
-        String uri = parentEquivalent.getUri();
-        if(containerCache.containsKey(uri)) {
-            return containerCache.get(uri);
-        }
-
-        Container requireValue = (Container) contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue().requireValue();
-        
-        return requireValue;
     }
 
     private Score normalize(Score score, int itemCount) {
@@ -123,4 +144,27 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         }
         return Score.NULL_SCORE;
     }
+    
+    private Container resolve(ParentRef parentEquivalent, Map<String, Container> containerCache) {
+        
+        //TODO make this a CachingContentResolver?
+        
+        String uri = parentEquivalent.getUri();
+        if(containerCache.containsKey(uri)) {
+            return containerCache.get(uri);
+        }
+
+        Maybe<Identified> resolved = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
+        
+        if(resolved.isNothing() || !(resolved.requireValue() instanceof Container)) {
+            log.record(warnEntry().withSource(getClass()).withDescription("Couldn't resolve container" + uri));
+            return null;
+        }
+        
+        Container requireValue = (Container) resolved.requireValue();
+        containerCache.put(uri, requireValue);
+        
+        return requireValue;
+    }
+
 }

@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
+import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ScalingScoringGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
@@ -45,6 +46,7 @@ import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.update.BasicEquivalenceUpdater;
@@ -163,8 +165,8 @@ public class EquivModule {
         EquivalenceResultBuilder<Item> itemResultBuilder = standardResultBuilder();
         
         ContentEquivalenceUpdater<Container> containerUpdater = new ContainerEquivalenceUpdater(contentResolver, basicItemUpdater(), containerResultBuilder,itemResultBuilder, log)
-            .withEquivalenceGenerators(ImmutableSet.<ContentEquivalenceGenerator<Container>>of(titleScoringGenerator))
-            .withEquivalenceScorers(ImmutableSet.<ContentEquivalenceScorer<Container>>of(titleScoringGenerator));
+            .withEquivalenceGenerators(EquivalenceGenerators.from(ImmutableSet.<ContentEquivalenceGenerator<Container>>of(titleScoringGenerator),log))
+            .withEquivalenceScorers(EquivalenceScorers.from(ImmutableSet.<ContentEquivalenceScorer<Container>>of(titleScoringGenerator),log));
         
         containerUpdater = resultWriter(containerUpdater, equivalenceResultStore());
         containerUpdater = new LookupWritingEquivalenceUpdater<Container>(containerUpdater, lookupWriter());
