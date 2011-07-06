@@ -26,9 +26,9 @@ public class RestoredEquivalenceResultModelBuilder {
         boolean hasStrong = false;
         
         Map<String, Double> totals = Maps.newHashMap();
-        totals.put("combined", 0.0);
+        totals.put("combined", null);
         for (String source : target.sourceResults().columnKeySet()) {
-            totals.put(source, 0.0);
+            totals.put(source, null);
         }
         
         SimpleModelList equivalences = new SimpleModelList();
@@ -61,7 +61,11 @@ public class RestoredEquivalenceResultModelBuilder {
     private SimpleModel model(Map<String, Double> totals) {
         SimpleModel model = new SimpleModel();
         for (Entry<String, Double> totalScore : totals.entrySet()) {
-            model.put(totalScore.getKey(), totalScore.getValue());
+            if(totalScore.getValue() != null) {
+                model.put(totalScore.getKey(), totalScore.getValue());
+            } else {
+                model.put(totalScore.getKey(), false);
+            }
         }
         return model;
     }
@@ -82,7 +86,7 @@ public class RestoredEquivalenceResultModelBuilder {
         
         SimpleModel scoreModel = new SimpleModel();
         if(combined.isNaN()) {
-            scoreModel.put("combined", -1000);
+            scoreModel.put("combined", false);
         } else {
             scoreModel.put("combined", combined);
         }
@@ -97,12 +101,12 @@ public class RestoredEquivalenceResultModelBuilder {
             Double score = sourceScore.getValue();
             
             if(score == null || score.isNaN()) {
-                scoreModel.put(source, -1000);
+                scoreModel.put(source, false);
             } else {
                 scoreModel.put(source, score);
             }
             
-            if(score != null && !score.isNaN() && !(score < 0)) {
+            if(score != null && !score.isNaN() && score > 0) {
                 Double sourceTotal = totals.get(source);
                 totals.put(source, sourceTotal == null ? score : score + sourceTotal);
             }

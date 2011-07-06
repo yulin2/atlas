@@ -55,7 +55,7 @@
     <td>{if $equivalence.strong}✔{else}✘{/if}</td>
     <td><a href="?uri={$equivalence.encodedId}">{$equivalence.title} ({$equivalence.publisher})</a></td>
     <td><a href="http://atlasapi.org/3.0/content.json?uri={$equivalence.encodedId}"><img src="/images/external.png"></a></td>
-    {if $equivalence.scores['combined'] == 'N/A'}
+    {if not $equivalence.scores['combined']}
         <td>N/A</td>
     {else}
 	    <td {if $equivalence.scores['combined'] > 0} title="{print round($equivalence.scores['combined']/$result.totals['combined']*100) }%"{/if}>
@@ -63,7 +63,7 @@
 	    </td>
     {/if}
     {foreach $source in $result.sources}
-	    {if $equivalence.scores[$source] == 'N/A'}
+	    {if not $equivalence.scores[$source]}
 	        <td>N/A</td>
 	    {else}
 	        <td {if $equivalence.scores[$source] > 0} title="{print round($equivalence.scores[$source]/$result.totals[$source]*100) }%"{/if}>
@@ -81,9 +81,17 @@
 {/foreach}
 <tr>
     <td></td><td>Totals</td><td></td>
-    <td>{print round($result.totals['combined'], 5)}</td>
+    {if not $result.totals['combined']}
+        <td>N/A</t>
+    {else}
+        <td>{print round($result.totals['combined'], 5)}</td>
+    {/if}
     {foreach $source in $result.sources}
-        <td>{print round($result.totals[$source], 5)}</td>
+        {if not $result.totals[$source]}
+            <td>N/A</t>
+        {else}
+            <td>{print round($result.totals[$source], 5)}</td>
+        {/if}
     {/foreach}
     <td colspan="4"></td>
 </tr>
