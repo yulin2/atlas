@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.is;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,16 +14,13 @@ import junit.framework.TestCase;
 import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
@@ -32,11 +28,10 @@ import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.http.HttpException;
-import com.metabroadcast.common.http.HttpResponse;
+import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
@@ -162,11 +157,11 @@ public class C4BrandExtractorTest extends TestCase {
 	}
 	
 	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries1IsAssumed() throws Exception {
-	    HttpResponse response = new HttpResponse("error", 403).withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
+	    HttpResponsePrologue response = new HttpResponsePrologue(403, "error").withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
 		
 	    RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
-			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
+			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response, "403"))
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
@@ -175,11 +170,11 @@ public class C4BrandExtractorTest extends TestCase {
 	}
 	
 	public void testThatWhenTheEpisodeGuide404sSeries1IsAssumed() throws Exception {
-	   HttpResponse response = new HttpResponse("error", 404);
+	   HttpResponsePrologue response = new HttpResponsePrologue(404, "error");
 		
 	    RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
-			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
+			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response, "404"))
 			.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
@@ -188,10 +183,10 @@ public class C4BrandExtractorTest extends TestCase {
 	}
 	
 	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries3IsReturned() throws Exception {
-	    HttpResponse response = new HttpResponse("error", 403).withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
+	    HttpResponsePrologue response = new HttpResponsePrologue(403, "error").withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
         RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
             .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
-            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response))
+            .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", new HttpStatusCodeException(response, "403"))
             .respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries4Feed.build());
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
