@@ -1,13 +1,13 @@
 package org.atlasapi.equiv.generators;
 
 import java.util.List;
-import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -20,21 +20,28 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.query.Selection;
 
-public class TitleMatchingContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container> {
+public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivalenceGenerator<Container>, ContentEquivalenceScorer<Container> {
 
     private final SearchResolver searchResolver;
 
-    public TitleMatchingContainerEquivalenceGenerator(SearchResolver searchResolver) {
+    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
     }
     
     @Override
-    public ScoredEquivalents<Container> generateEquivalences(Container content, Set<Container> suggestions) {
+    public ScoredEquivalents<Container> generate(Container content) {
+        return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class));
+    }
+    
+    @Override
+    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions) {
+        return scoreSuggestions(content, suggestions);
+    }
+
+    private ScoredEquivalents<Container> scoreSuggestions(Container content, Iterable<Container> suggestions) {
         ScoredEquivalentsBuilder<Container> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
-        List<Identified> search = searchForEquivalents(content);
-        
-        for (Container found : ImmutableSet.copyOf(Iterables.concat(Iterables.filter(search, Container.class), suggestions))) {
+        for (Container found : ImmutableSet.copyOf(suggestions)) {
             if(content.getMediaType().equals(found.getMediaType())) {
                 equivalents.addEquivalent(found, score(content.getTitle(), found.getTitle()));
             }

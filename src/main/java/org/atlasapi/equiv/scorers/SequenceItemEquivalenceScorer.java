@@ -1,24 +1,23 @@
-package org.atlasapi.equiv.generators;
+package org.atlasapi.equiv.scorers;
 
-import java.util.Set;
-
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
-public class SequenceItemEquivalenceScorer implements ContentEquivalenceGenerator<Item> {
+public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<Item> {
 
     @Override
-    public ScoredEquivalents<Item> generateEquivalences(Item subject, Set<Item> suggestions) {
+    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Sequence");
         
-        for (Item suggestion : Iterables.filter(suggestions, Item.class)) {
+        for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(suggestions), Item.class)) {
             equivalents.addEquivalent(suggestion, score(subject, suggestion));
         }
         

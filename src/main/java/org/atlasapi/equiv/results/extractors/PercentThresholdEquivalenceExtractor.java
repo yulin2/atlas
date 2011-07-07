@@ -2,8 +2,8 @@ package org.atlasapi.equiv.results.extractors;
 
 import java.util.List;
 
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 
 import com.metabroadcast.common.base.Maybe;
