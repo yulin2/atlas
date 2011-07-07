@@ -3,18 +3,25 @@ package org.atlasapi.equiv.results;
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.transformValues;
+import static org.atlasapi.equiv.results.scores.ScoredEquivalent.equivalentScore;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.metabroadcast.common.base.Maybe;
 
@@ -27,22 +34,16 @@ public class EquivalenceResultBuilder<T extends Content> {
     private final EquivalenceCombiner<T> combiner;
     private final EquivalenceExtractor<T> extractor;
     
-    private Function<Map<T, Score>, ScoredEquivalent<T>> extractorFunction(final T target) {
-        return new Function<Map<T, Score>, ScoredEquivalent<T>>() {
+    private Function<Collection<ScoredEquivalent<T>>, ScoredEquivalent<T>> extractorFunction(final T target) {
+        return new Function<Collection<ScoredEquivalent<T>>, ScoredEquivalent<T>>() {
             @Override
-            public ScoredEquivalent<T> apply(Map<T, Score> input) {
+            public ScoredEquivalent<T> apply(Collection<ScoredEquivalent<T>> input) {
                 Maybe<ScoredEquivalent<T>> extracted = extractor.extract(target, order(input));
                 return extracted.hasValue() ? extracted.requireValue() : null;
             }
 
-            private List<ScoredEquivalent<T>> order(Map<T, Score> input) {
-                Iterable<ScoredEquivalent<T>> scores = Iterables.transform(input.entrySet(), new Function<Entry<T, Score>, ScoredEquivalent<T>>() {
-                    @Override
-                    public ScoredEquivalent<T> apply(Entry<T, Score> input) {
-                        return ScoredEquivalent.equivalentScore(input.getKey(), input.getValue());
-                    }
-                });
-                return Ordering.natural().reverse().immutableSortedCopy(scores);
+            private List<ScoredEquivalent<T>> order(Collection<ScoredEquivalent<T>> input) {
+                return Ordering.natural().reverse().immutableSortedCopy(input);
             }
         };
     }
@@ -58,9 +59,20 @@ public class EquivalenceResultBuilder<T extends Content> {
     }
 
     private Map<Publisher, ScoredEquivalent<T>> extract(T target, ScoredEquivalents<T> combined) {
-        return filterValues(transformValues(combined.equivalents(), extractorFunction(target)), notNull());
+        return filterValues(transformValues(publisherBin(combined.equivalents()), extractorFunction(target)), notNull());
     }
     
+    private Map<Publisher, Collection<ScoredEquivalent<T>>> publisherBin(Map<T, Score> equivalents) {
+        Multimap<Publisher, ScoredEquivalent<T>> publisherBins = LinkedListMultimap.create();
+        
+        for (Entry<T, Score> equivalentScore : equivalents.entrySet()) {
+            T key = equivalentScore.getKey();
+            publisherBins.put(key.getPublisher(), equivalentScore(key, equivalentScore.getValue()));
+        }
+        
+        return publisherBins.asMap();
+    }
+
     private ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> equivalents) {
         return !equivalents.isEmpty() ? combiner.combine(equivalents) : DefaultScoredEquivalents.<T>fromSource("empty combination").build();
     }
