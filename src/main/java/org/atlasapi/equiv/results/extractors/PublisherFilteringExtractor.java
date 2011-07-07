@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.equiv.results.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 

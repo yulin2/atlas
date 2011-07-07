@@ -10,9 +10,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalent;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
@@ -51,29 +51,29 @@ public class EquivalenceResultTranslator {
         
         BasicDBList equivList = new BasicDBList();
         
-        for (Entry<Publisher, Map<T, Score>> combinedEquivBin : result.combinedEquivalences().entrySet()) {
-            Publisher publisher = combinedEquivBin.getKey();
-            for (Entry<T, Score> combinedEquiv : combinedEquivBin.getValue().entrySet()) {
-                DBObject equivDbo = new BasicDBObject();
+        for (Entry<T, Score> combinedEquiv : result.combinedEquivalences().equivalents().entrySet()) {
+            DBObject equivDbo = new BasicDBObject();
+
+            T content = combinedEquiv.getKey();
+            
+            TranslatorUtils.from(equivDbo, ID, content.getCanonicalUri());
+            TranslatorUtils.from(equivDbo, TITLE, content.getTitle());
+            TranslatorUtils.from(equivDbo, PUBLISHER, content.getPublisher().key());
+            TranslatorUtils.from(equivDbo, COMBINED, combinedEquiv.getValue().isRealScore() ? combinedEquiv.getValue().asDouble() : null);
                 
-                TranslatorUtils.from(equivDbo, ID, combinedEquiv.getKey().getCanonicalUri());
-                TranslatorUtils.from(equivDbo, TITLE, combinedEquiv.getKey().getTitle());
-                TranslatorUtils.from(equivDbo, PUBLISHER, publisher.key());
-                TranslatorUtils.from(equivDbo, COMBINED, combinedEquiv.getValue().isRealScore() ? combinedEquiv.getValue().asDouble() : null);
+            BasicDBList scoreList = new BasicDBList();
+            for (ScoredEquivalents<T> source : result.rawScores()) {
+                Score sourceScore = source.equivalents().get(content);
                 
-                BasicDBList scoreList = new BasicDBList();
-                for (ScoredEquivalents<T> source : result.rawScores()) {
-                    Map<T, Score> publisherBin = source.equivalents().get(publisher);
-                    Score sourceScore = publisherBin != null ? publisherBin.get(combinedEquiv.getKey()) : null;
-                    BasicDBObject scoreDbo = new BasicDBObject();
-                    scoreDbo.put(SOURCE, source.source());
-                    scoreDbo.put(SCORE, sourceScore != null && sourceScore.isRealScore() ? sourceScore.asDouble() : null);
-                    scoreList.add(scoreDbo);
-                }
-                TranslatorUtils.from(equivDbo, SCORES, scoreList);
+                BasicDBObject scoreDbo = new BasicDBObject();
+                scoreDbo.put(SOURCE, source.source());
+                scoreDbo.put(SCORE, sourceScore != null && sourceScore.isRealScore() ? sourceScore.asDouble() : null);
                 
-                equivList.add(equivDbo);
+                scoreList.add(scoreDbo);
             }
+            TranslatorUtils.from(equivDbo, SCORES, scoreList);
+            
+            equivList.add(equivDbo);
         }
         TranslatorUtils.from(dbo, EQUIVS, equivList);
         

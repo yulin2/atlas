@@ -1,20 +1,19 @@
-package org.atlasapi.equiv.generators;
+package org.atlasapi.equiv.scorers;
 
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceGenerator<Item> {
+public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceScorer<Item> {
     
     public enum TitleType {
         
@@ -50,7 +49,7 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceGen
     
     
     @Override
-    public ScoredEquivalents<Item> generateEquivalences(Item subject, Set<Item> suggestions) {
+    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
         for (Item suggestion : Iterables.filter(suggestions, Item.class)) {

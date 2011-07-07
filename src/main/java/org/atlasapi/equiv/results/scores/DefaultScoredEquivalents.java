@@ -1,9 +1,8 @@
-package org.atlasapi.equiv.results;
+package org.atlasapi.equiv.results.scores;
 
 import java.util.Map;
 
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
@@ -18,7 +17,7 @@ public class DefaultScoredEquivalents<T extends Content> implements ScoredEquiva
     public static final class ScoredEquivalentsBuilder<T extends Content> {
 
         private final String source;
-        private final Map<Publisher, Map<T, Score>> equivs;
+        private final Map<T, Score> equivs;
 
         public ScoredEquivalentsBuilder(String source) {
             this.source = source;
@@ -26,13 +25,8 @@ public class DefaultScoredEquivalents<T extends Content> implements ScoredEquiva
         }
 
         public ScoredEquivalentsBuilder<T> addEquivalent(T equivalent, Score score) {
-            Map<T, Score> current = equivs.get(equivalent.getPublisher());
-            if (current == null) {
-                current = Maps.newHashMap();
-                equivs.put(equivalent.getPublisher(), current);
-            }
-            Score currentScore = current.get(equivalent);
-            current.put(equivalent, currentScore == null ? score : score.add(currentScore));
+            Score current = equivs.get(equivalent);
+            equivs.put(equivalent, current == null ? score : score.add(current));
             return this;
         }
 
@@ -41,14 +35,14 @@ public class DefaultScoredEquivalents<T extends Content> implements ScoredEquiva
         }
     }
     
-    public static <T extends Content> ScoredEquivalents<T> fromMappedEquivs(String source, Map<Publisher, Map<T, Score>> equivs) {
+    public static <T extends Content> ScoredEquivalents<T> fromMappedEquivs(String source, Map<T, Score> equivs) {
         return new DefaultScoredEquivalents<T>(source, ImmutableMap.copyOf(equivs));
     }
     
     private final String source;
-    private final Map<Publisher, Map<T, Score>> equivs;
+    private final Map<T, Score> equivs;
 
-    private DefaultScoredEquivalents(String source, Map<Publisher, Map<T, Score>> equivs) {
+    private DefaultScoredEquivalents(String source, Map<T, Score> equivs) {
         this.source = source;
         this.equivs = equivs;
     }
@@ -59,7 +53,7 @@ public class DefaultScoredEquivalents<T extends Content> implements ScoredEquiva
     }
 
     @Override
-    public Map<Publisher, Map<T, Score>> equivalents() {
+    public Map<T, Score> equivalents() {
         return equivs;
     }
 

@@ -1,12 +1,11 @@
 package org.atlasapi.equiv.generators;
 
-import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
@@ -39,10 +38,9 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
     
     @Override
-    public ScoredEquivalents<Item> generateEquivalences(Item content, Set<Item> suggestions) {
-        
+    public ScoredEquivalents<Item> generate(Item content) {
         ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
-        
+
         int broadcasts = 0;
         for (Version version : content.getVersions()) {
             for (Broadcast broadcast : channelFilter(version.getBroadcasts())) {
@@ -55,7 +53,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
                         }
                     }
                 }
-                
+
             }
         }
         return scale(scores.build(), broadcasts);
@@ -97,18 +95,12 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
      .build();
     
     private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
-        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), new Function<Map<Item, Score>, Map<Item, Score>>() {
+        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), Score.transformerFrom(new Function<Double, Double>() {
             @Override
-            public Map<Item, Score> apply(Map<Item, Score> input) {
-                return Maps.transformValues(input, Score.transformerFrom(new Function<Double, Double>() {
-
-                    @Override
-                    public Double apply(Double input) {
-                        return input / broadcasts;
-                    }
-                }));
+            public Double apply(Double input) {
+                return input / broadcasts;
             }
-        }));
+        })));
     }
 
     private boolean hasQualifyingBroadcast(Item item, Broadcast referenceBroadcast) {

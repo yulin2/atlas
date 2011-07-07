@@ -10,8 +10,8 @@ import static org.joda.time.Duration.standardMinutes;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Episode;
@@ -47,12 +47,10 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTes
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
-        ScoredEquivalents<Item> equivalents = generator.generateEquivalences(item1, ImmutableSet.<Item>of());
+        ScoredEquivalents<Item> equivalents = generator.generate(item1);
         
-        Map<Publisher, Map<Item, Score>> mappedEquivalents = equivalents.equivalents();
-        assertThat(mappedEquivalents.size(), is(1));
+        Map<Item, Score> scoreMap = equivalents.equivalents();
         
-        Map<Item, Score> scoreMap = mappedEquivalents.get(BBC);
         assertThat(scoreMap.size(), is(1));
         assertThat(scoreMap.get(item2).asDouble(), is(equalTo(1.0)));
     }
