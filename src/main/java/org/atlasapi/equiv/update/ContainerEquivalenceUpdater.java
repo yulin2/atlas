@@ -2,6 +2,7 @@ package org.atlasapi.equiv.update;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -91,10 +92,17 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         
         //generate other container equivalents.
         List<ScoredEquivalents<Container>> generatedEquivalences = generators.generate(content);
+        
+        List<Container> extractGeneratedSuggestions = extractGeneratedSuggestions(generatedEquivalences);
+        
+        //ensure default (0) item score for all containers. 
+        strongItemContainers = addZeros(extractGeneratedSuggestions, strongItemContainers);
+        
         generatedEquivalences.add(strongItemContainers);
+        extractGeneratedSuggestions.addAll(extractGeneratedSuggestions(ImmutableList.of(strongItemContainers)));
         
         //score all generated suggestions
-        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, extractGeneratedSuggestions(generatedEquivalences));
+        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, extractGeneratedSuggestions);
         
         //build container result.
         EquivalenceResult<Container> containerResult = containerResultBuilder.resultFor(content, merger.merge(generatedEquivalences, scoredEquivalents));
@@ -121,6 +129,18 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         return containerResult;
     }
     
+    private ScoredEquivalents<Container> addZeros(List<Container> extractGeneratedSuggestions, ScoredEquivalents<Container> strongItemContainers) {
+        
+        HashMap<Container, Score> current = Maps.newHashMap(strongItemContainers.equivalents());
+        for (Container container : extractGeneratedSuggestions) {
+            if(!current.containsKey(container)) {
+                current.put(container, Score.valueOf(0.0));
+            }
+        }
+        
+        return DefaultScoredEquivalents.fromMappedEquivs(strongItemContainers.source(), current);
+    }
+
     private EquivalenceResult<Container> filterNonPositiveItemScores(ScoredEquivalents<Container> itemScores, EquivalenceResult<Container> result) {
         
         final Map<Container, Score> itemSourceScores = itemScores.equivalents();
