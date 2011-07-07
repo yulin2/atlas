@@ -16,6 +16,7 @@ package org.atlasapi.equiv;
 
 import static org.atlasapi.equiv.results.EquivalenceResultBuilder.resultBuilder;
 import static org.atlasapi.equiv.results.extractors.FilteringEquivalenceExtractor.filteringExtractor;
+import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.NAME;
 
 import javax.annotation.PostConstruct;
 
@@ -31,6 +32,7 @@ import org.atlasapi.equiv.results.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.LookupWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.ResultWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
+import org.atlasapi.equiv.results.combining.ItemScoreFilteringCombiner;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.EquivalenceFilter;
@@ -137,7 +139,7 @@ public class EquivModule {
     }
 
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder() {
-        EquivalenceCombiner<T> combiner = new NullScoreAwareAveragingCombiner<T>();
+        EquivalenceCombiner<T> combiner = new ItemScoreFilteringCombiner<T>(new NullScoreAwareAveragingCombiner<T>(), NAME);
         
         EquivalenceExtractor<T> extractor = PercentThresholdEquivalenceExtractor.<T> fromPercent(90);
         extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
