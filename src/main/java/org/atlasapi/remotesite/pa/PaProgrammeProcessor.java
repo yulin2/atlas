@@ -153,7 +153,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
         String brandUri = PaHelper.getBrandUri(brandId);
-        Brand brand = new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
+        
+        Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(brandUri)).getFirstValue();
+        
+        Brand brand = possiblePrevious.hasValue() ? (Brand) possiblePrevious.requireValue() : new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         
         brand.setTitle(progData.getTitle());
         brand.setSpecialization(specialization(progData, channel));
@@ -180,7 +183,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
         String seriesUri = PaHelper.getSeriesUri(progData.getSeriesId(), progData.getSeriesNumber());
         
-        Series series = new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
+        Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(seriesUri)).getFirstValue();
+        
+        Series series = possiblePrevious.hasValue() ? (Series) possiblePrevious.requireValue() : new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
