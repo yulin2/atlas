@@ -2,8 +2,8 @@ package org.atlasapi.equiv.results.extractors;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 

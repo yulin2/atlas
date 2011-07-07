@@ -2,7 +2,7 @@ package org.atlasapi.equiv.results.extractors;
 
 import java.util.List;
 
-import org.atlasapi.equiv.results.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Predicate;
