@@ -2,9 +2,9 @@ package org.atlasapi.equiv.results.combining;
 
 import java.util.Map;
 
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.collect.ImmutableSet;

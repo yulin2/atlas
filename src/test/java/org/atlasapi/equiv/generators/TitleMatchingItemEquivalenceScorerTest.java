@@ -3,8 +3,8 @@ package org.atlasapi.equiv.generators;
 import static com.google.common.collect.ImmutableSet.of;
 import junit.framework.TestCase;
 
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer.TitleType;
 import org.atlasapi.media.entity.Item;

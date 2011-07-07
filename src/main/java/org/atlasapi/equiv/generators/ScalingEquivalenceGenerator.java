@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.generators;
 
-import org.atlasapi.equiv.results.ScaledScoredEquivalents;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Function;

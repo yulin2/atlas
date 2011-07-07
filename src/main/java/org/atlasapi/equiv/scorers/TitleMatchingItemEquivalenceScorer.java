@@ -3,10 +3,10 @@ package org.atlasapi.equiv.scorers;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;

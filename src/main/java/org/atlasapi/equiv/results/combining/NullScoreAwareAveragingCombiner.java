@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Joiner;
@@ -34,7 +34,9 @@ public class NullScoreAwareAveragingCombiner<T extends Content> implements Equiv
                 Score curRes = tempResults.get(equiv);
                 
                 if(curRes == null) {
-                    counts.put(equiv, 1);
+                    if(score.isRealScore()) {
+                        counts.put(equiv, 1);
+                    }
                     tempResults.put(equiv, score);
                 } else {
                     if(score.isRealScore()) {

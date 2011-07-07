@@ -4,7 +4,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.List;
 
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
 
