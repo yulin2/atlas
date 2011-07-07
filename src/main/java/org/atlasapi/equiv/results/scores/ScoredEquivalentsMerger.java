@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.Content;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
@@ -22,7 +23,7 @@ public class ScoredEquivalentsMerger {
         
         Map<String, ScoredEquivalents<T>> merged = Maps.newHashMap();
         
-        for (String source : Iterables.concat(left.keySet(), right.keySet())) {
+        for (String source : ImmutableSet.copyOf(Iterables.concat(left.keySet(), right.keySet()))) {
             if(!left.containsKey(source)) {
                 merged.put(source, right.get(source));
             } else if(!right.containsKey(source)) {
