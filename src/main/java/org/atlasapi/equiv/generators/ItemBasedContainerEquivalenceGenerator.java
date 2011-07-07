@@ -17,6 +17,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 
+@Deprecated
 public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container> {
 
     public static final String NAME = "Item";
