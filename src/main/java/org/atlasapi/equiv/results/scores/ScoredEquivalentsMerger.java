@@ -1,6 +1,6 @@
-package org.atlasapi.equiv.results;
+package org.atlasapi.equiv.results.scores;
 
-import static org.atlasapi.equiv.results.ScoredEquivalents.TO_SOURCE;
+import static org.atlasapi.equiv.results.scores.ScoredEquivalents.TO_SOURCE;
 
 import java.util.HashMap;
 import java.util.List;

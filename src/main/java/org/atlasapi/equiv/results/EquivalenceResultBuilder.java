@@ -3,7 +3,7 @@ package org.atlasapi.equiv.results;
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.transformValues;
-import static org.atlasapi.equiv.results.ScoredEquivalent.equivalentScore;
+import static org.atlasapi.equiv.results.scores.ScoredEquivalent.equivalentScore;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,6 +12,10 @@ import java.util.Map.Entry;
 
 import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 

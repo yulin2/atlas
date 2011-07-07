@@ -7,26 +7,32 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.equiv.generators.EquivalenceGenerators;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalent;
-import org.atlasapi.equiv.results.ScoredEquivalents;
-import org.atlasapi.equiv.results.ScoredEquivalentsMerger;
+import org.atlasapi.equiv.results.EquivalenceResultHandler;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredEquivalentsMerger;
 import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -35,27 +41,28 @@ import com.metabroadcast.common.base.Maybe;
 
 public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
 
-    public static final String NAME = "Item";
+    private static final int ITEM_SCORE_SCALER = 20;
+    private static final String NAME = "Item";
 
     private final ContentResolver contentResolver;
     private final AdapterLog log;
 
-    private final ItemEquivalenceUpdater itemUpdater;
+    private final ItemEquivalenceUpdater<Item> itemUpdater;
     
     private EquivalenceGenerators<Container> generators;
     private EquivalenceScorers<Container> scorers;
     
     private final EquivalenceResultBuilder<Container> containerResultBuilder;
-    private final EquivalenceResultBuilder<Item> itemResultBuilder;
+    private final EquivalenceResultHandler<Item> itemResultHandler;
     
     private final ScoredEquivalentsMerger merger = new ScoredEquivalentsMerger();
-    
-    public ContainerEquivalenceUpdater(ContentResolver contentResolver, ItemEquivalenceUpdater itemUpdater, 
-            EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultBuilder<Item> itemResultBuilder, AdapterLog log) {
+
+    public ContainerEquivalenceUpdater(ContentResolver contentResolver, ItemEquivalenceUpdater<Item> itemUpdater, 
+            EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, AdapterLog log) {
                 this.contentResolver = contentResolver;
                 this.itemUpdater = itemUpdater;
                 this.containerResultBuilder = containerResultBuilder;
-                this.itemResultBuilder = itemResultBuilder;
+                this.itemResultHandler = itemResultHandler;
                 this.log = log;
     }
 
@@ -64,7 +71,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         return this;
     }
 
-    public ContentEquivalenceUpdater<Container> withEquivalenceScorers(EquivalenceScorers<Container> scorers) {
+    public ContainerEquivalenceUpdater withEquivalenceScorers(EquivalenceScorers<Container> scorers) {
         this.scorers = scorers;
         return this;
     }
@@ -76,43 +83,61 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         
         List<String> childrenUris = Lists.transform(content.getChildRefs(), ChildRef.TO_URI);
         
-        Map<String, Identified> resolvedChildren = contentResolver.findByCanonicalUris(childrenUris).asResolvedMap();
+        // compute results for container children.
+        Set<EquivalenceResult<Item>> childResults = computeInitialChildResults(childrenUris, content.getCanonicalUri());
         
-        Set<EquivalenceResult<Item>> childResults = Sets.newHashSet();
-        
-        for (String childUri : childrenUris) {
-            Identified child = resolvedChildren.get(childUri);
-            if(child instanceof Item) {
-                EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences((Item)child);
-                childResults.add(itemEquivalences);
-            } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("Resolved %s child %s to null/not Item", content.getCanonicalUri(), childUri));
-            }
-        }
-        
+        //containers suggested by items
         ScoredEquivalents<Container> strongItemContainers = extractContainersFrom(childResults, childrenUris.size(), containerCache);
         
+        //generate other container equivalents.
         List<ScoredEquivalents<Container>> generatedEquivalences = generators.generate(content);
         generatedEquivalences.add(strongItemContainers);
         
-        List<Container> extractGeneratedSuggestions = extractGeneratedSuggestions(generatedEquivalences);
+        //score all generated suggestions
+        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, extractGeneratedSuggestions(generatedEquivalences));
         
-        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, extractGeneratedSuggestions);
-        
+        //build container result.
         EquivalenceResult<Container> containerResult = containerResultBuilder.resultFor(content, merger.merge(generatedEquivalences, scoredEquivalents));
         
-        Map<Publisher, ScoredEquivalent<Container>> strongContainerEquivalences = containerResult.strongEquivalences();
+        containerResult = filterNonPositiveItemScores(strongItemContainers, containerResult);
         
-        filter(strongContainerEquivalences, childResults);
+        //strongly equivalent containers;
+        Set<Container> strongContainers = ImmutableSet.copyOf(Iterables.transform(containerResult.strongEquivalences().values(), ScoredEquivalent.<Container>toEquivalent()));
+
+        ImmutableList<List<Episode>> strongContainerChildren = ImmutableList.copyOf(Iterables.transform(strongContainers, new Function<Container, List<Episode>>() {
+            @Override
+            public List<Episode> apply(Container input) {
+                ResolvedContent resolvedChildRefs = contentResolver.findByCanonicalUris(Iterables.transform(input.getChildRefs(), ChildRef.TO_URI));
+                return ImmutableList.copyOf(Iterables.filter(resolvedChildRefs.getAllResolvedResults(), Episode.class));
+            }
+        }));
+        
+        EpisodeMatchingEquivalenceResultHandler episodeMatchingHandler = new EpisodeMatchingEquivalenceResultHandler(itemResultHandler, strongContainers, strongContainerChildren);
+        
+        for (EquivalenceResult<Item> equivalenceResult : childResults) {
+            episodeMatchingHandler.handle(equivalenceResult);
+        }
         
         return containerResult;
     }
     
-    private void filter(Map<Publisher, ScoredEquivalent<Container>> strongContainerEquivalences, Set<EquivalenceResult<Item>> childResults) {
+    private EquivalenceResult<Container> filterNonPositiveItemScores(ScoredEquivalents<Container> itemScores, EquivalenceResult<Container> result) {
         
-        //TODO
+        final Map<Container, Score> itemSourceScores = itemScores.equivalents();
+        
+        Map<Publisher, ScoredEquivalent<Container>> strongEquivs = result.strongEquivalences();
+        
+        Map<Publisher, ScoredEquivalent<Container>> filterStrongs = Maps.filterValues(strongEquivs, new Predicate<ScoredEquivalent<Container>>() {
+            @Override
+            public boolean apply(ScoredEquivalent<Container> input) {
+                Score score = itemSourceScores.get(input.equivalent());
+                return score != null && score.isRealScore() && score.asDouble() > 0;
+            }
+        });
+        
+        return new EquivalenceResult<Container>(result.target(), result.rawScores(), result.combinedEquivalences(), filterStrongs);
     }
-    
+
     private List<Container> extractGeneratedSuggestions(Iterable<ScoredEquivalents<Container>> generatedScores) {
         return Lists.newArrayList(Iterables.concat(Iterables.transform(generatedScores, new Function<ScoredEquivalents<Container>, Iterable<Container>>() {
             @Override
@@ -128,21 +153,27 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         
         for (EquivalenceResult<Item> equivalenceResult : childResults) {
             for (ScoredEquivalent<Item> strongEquivalent : equivalenceResult.strongEquivalences().values()) {
+                
                 ParentRef parentEquivalent = strongEquivalent.equivalent().getContainer();
                 Container container = resolve(parentEquivalent, containerCache);
+                
                 if (container != null) {
-                    containerEquivalents.addEquivalent(container, normalize(strongEquivalent.score(), container.getChildRefs().size()));
+                    Score score = strongEquivalent.score();
+                    if(score.isRealScore()) {
+                        score = Score.valueOf(score.asDouble() / container.getChildRefs().size());
+                    }
+                    containerEquivalents.addEquivalent(container, score);
                 }
+                
             }
         }
-        return containerEquivalents.build();
-    }
-
-    private Score normalize(Score score, int itemCount) {
-        if(score.isRealScore()) {
-            return Score.valueOf(score.asDouble() / itemCount);
-        }
-        return Score.NULL_SCORE;
+        
+        return ScaledScoredEquivalents.scale(containerEquivalents.build(), new Function<Double, Double>() {
+            @Override
+            public Double apply(Double input) {
+                return Math.min(1, input * ITEM_SCORE_SCALER);
+            }
+        });
     }
     
     private Container resolve(ParentRef parentEquivalent, Map<String, Container> containerCache) {
@@ -167,4 +198,20 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         return requireValue;
     }
 
+    private Set<EquivalenceResult<Item>> computeInitialChildResults(List<String> childrenUris, String contentUri) {
+        Map<String, Identified> resolvedChildren = contentResolver.findByCanonicalUris(childrenUris).asResolvedMap();
+        
+        Set<EquivalenceResult<Item>> childResults = Sets.newHashSet();
+        
+        for (String childUri : childrenUris) {
+            Identified child = resolvedChildren.get(childUri);
+            if(child instanceof Episode) {
+                EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences((Item)child);
+                childResults.add(itemEquivalences);
+            } else {
+                log.record(warnEntry().withSource(getClass()).withDescription("Resolved %s child %s to null/not Item", contentUri, childUri));
+            }
+        }
+        return childResults;
+    }
 }

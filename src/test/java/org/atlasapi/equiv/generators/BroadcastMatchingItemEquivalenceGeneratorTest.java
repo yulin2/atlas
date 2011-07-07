@@ -10,8 +10,8 @@ import static org.joda.time.Duration.standardMinutes;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Episode;

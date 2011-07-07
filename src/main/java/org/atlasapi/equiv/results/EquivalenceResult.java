@@ -3,6 +3,8 @@ package org.atlasapi.equiv.results;
 import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
@@ -46,8 +48,8 @@ public class EquivalenceResult<T extends Content> {
         return Objects.hashCode(target(), scores);
     }
     
-    public Map<T, Score> combinedEquivalences() {
-        return this.combined.equivalents();
+    public ScoredEquivalents<T> combinedEquivalences() {
+        return this.combined;
     }
     
     public Map<Publisher, ScoredEquivalent<T>> strongEquivalences() {

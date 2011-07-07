@@ -1,4 +1,4 @@
-package org.atlasapi.equiv.results;
+package org.atlasapi.equiv.results.scores;
 
 import java.util.Map;
 

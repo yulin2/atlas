@@ -10,9 +10,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalent;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
@@ -51,7 +51,7 @@ public class EquivalenceResultTranslator {
         
         BasicDBList equivList = new BasicDBList();
         
-        for (Entry<T, Score> combinedEquiv : result.combinedEquivalences().entrySet()) {
+        for (Entry<T, Score> combinedEquiv : result.combinedEquivalences().equivalents().entrySet()) {
             DBObject equivDbo = new BasicDBObject();
 
             T content = combinedEquiv.getKey();
