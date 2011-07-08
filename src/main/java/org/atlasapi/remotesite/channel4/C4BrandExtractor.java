@@ -194,7 +194,7 @@ public class C4BrandExtractor {
         return series;
     }
 
-    private static final Pattern SERIES_LINK = Pattern.compile("^(https?://api.channel4.com/programmes/[a-z0-9\\-]+/episode-guide/series-\\d+).*(.atom.*)$");
+    private static final Pattern SERIES_LINK = Pattern.compile("^(https?://api.channel4.com/pmlsd/[a-z0-9\\-]+/episode-guide/series-\\d+).*(.atom.*)$");
 
     @SuppressWarnings("unchecked")
     private List<String> extractSeriesAtomFeedsFrom(Feed episodeGuide) {
