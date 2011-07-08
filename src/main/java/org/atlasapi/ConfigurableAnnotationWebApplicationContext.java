@@ -3,6 +3,7 @@ package org.atlasapi;
 import org.atlasapi.application.ApplicationModule;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.feeds.AtlasFeedsModule;
+import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
 import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
@@ -42,7 +43,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class, RadioPlayerModule.class, RemoteSiteHealthModule.class);
         
         if(runProcessingOnly()) {
-            builder.add(EquivModule.class, ManualScheduleRebuildModule.class);
+            builder.add(EquivModule.class, ManualScheduleRebuildModule.class, InterlinkingDeltaModule.class);
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
             builder.add(AtlasFeedsModule.class, QueryWebModule.class, ApplicationModule.class);
