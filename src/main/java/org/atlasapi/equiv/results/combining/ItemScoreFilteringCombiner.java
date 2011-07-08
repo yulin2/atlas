@@ -42,7 +42,7 @@ public class ItemScoreFilteringCombiner<T extends Content> implements Equivalenc
                     return Score.NULL_SCORE;
                 }
 
-                return itemScore;
+                return combinedScore;
             }
         }));
         
