@@ -3,8 +3,8 @@ cd ../common-persistence/ && mvn clean install -DskipTests && mvn eclipse:eclips
 cd ../common-social/ && mvn clean install -DskipTests && mvn eclipse:eclipse
 cd ../common-webapp/ && mvn clean install -DskipTests && mvn eclipse:eclipse
 cd ../atlas-model/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../atlas-feeds/ && mvn clean install -DskipTests && mvn eclipse:eclipse
 cd ../atlas-persistence/ && mvn clean install -DskipTests && mvn eclipse:eclipse
+cd ../atlas-feeds/ && mvn clean install -DskipTests && mvn eclipse:eclipse
 cd ../atlas-applications/ && mvn clean install -DskipTests && mvn eclipse:eclipse
 cd ../atlas-client/ && mvn clean install -DskipTests && mvn eclipse:eclipse
 cd ../atlas/ && mvn clean install -DskipTests && mvn eclipse:eclipse
