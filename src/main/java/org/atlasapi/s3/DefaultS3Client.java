@@ -9,6 +9,7 @@ import java.util.Date;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jets3t.service.S3ServiceException;
+import org.jets3t.service.ServiceException;
 import org.jets3t.service.acl.AccessControlList;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.model.S3Bucket;
@@ -80,7 +81,7 @@ public class DefaultS3Client implements S3Client {
                     IOUtils.closeQuietly(is);
                 }
             }
-        } catch (S3ServiceException e) {
+        } catch (ServiceException e) {
             throw new IOException(e);
         }
         
