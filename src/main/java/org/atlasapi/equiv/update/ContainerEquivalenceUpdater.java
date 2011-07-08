@@ -2,6 +2,7 @@ package org.atlasapi.equiv.update;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,13 +25,11 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -42,7 +41,7 @@ import com.metabroadcast.common.base.Maybe;
 public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
 
     private static final int ITEM_SCORE_SCALER = 20;
-    private static final String NAME = "Item";
+    public static final String NAME = "Item";
 
     private final ContentResolver contentResolver;
     private final AdapterLog log;
@@ -91,15 +90,22 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         
         //generate other container equivalents.
         List<ScoredEquivalents<Container>> generatedEquivalences = generators.generate(content);
+        
+        Set<Container> extractGeneratedSuggestions = extractGeneratedSuggestions(generatedEquivalences);
+        
+        //ensure default (0) item score for all containers. 
+        strongItemContainers = addZeros(extractGeneratedSuggestions, strongItemContainers);
+        
         generatedEquivalences.add(strongItemContainers);
+        extractGeneratedSuggestions.addAll(extractGeneratedSuggestions(ImmutableList.of(strongItemContainers)));
         
         //score all generated suggestions
-        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, extractGeneratedSuggestions(generatedEquivalences));
+        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, ImmutableList.copyOf(extractGeneratedSuggestions));
         
         //build container result.
         EquivalenceResult<Container> containerResult = containerResultBuilder.resultFor(content, merger.merge(generatedEquivalences, scoredEquivalents));
         
-        containerResult = filterNonPositiveItemScores(strongItemContainers, containerResult);
+        //containerResult = filterNonPositiveItemScores(strongItemContainers, containerResult);
         
         //strongly equivalent containers;
         Set<Container> strongContainers = ImmutableSet.copyOf(Iterables.transform(containerResult.strongEquivalences().values(), ScoredEquivalent.<Container>toEquivalent()));
@@ -121,25 +127,37 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         return containerResult;
     }
     
-    private EquivalenceResult<Container> filterNonPositiveItemScores(ScoredEquivalents<Container> itemScores, EquivalenceResult<Container> result) {
+    private ScoredEquivalents<Container> addZeros(Iterable<Container> extractGeneratedSuggestions, ScoredEquivalents<Container> strongItemContainers) {
         
-        final Map<Container, Score> itemSourceScores = itemScores.equivalents();
-        
-        Map<Publisher, ScoredEquivalent<Container>> strongEquivs = result.strongEquivalences();
-        
-        Map<Publisher, ScoredEquivalent<Container>> filterStrongs = Maps.filterValues(strongEquivs, new Predicate<ScoredEquivalent<Container>>() {
-            @Override
-            public boolean apply(ScoredEquivalent<Container> input) {
-                Score score = itemSourceScores.get(input.equivalent());
-                return score != null && score.isRealScore() && score.asDouble() > 0;
+        HashMap<Container, Score> current = Maps.newHashMap(strongItemContainers.equivalents());
+        for (Container container : extractGeneratedSuggestions) {
+            if(!current.containsKey(container)) {
+                current.put(container, Score.valueOf(0.0));
             }
-        });
+        }
         
-        return new EquivalenceResult<Container>(result.target(), result.rawScores(), result.combinedEquivalences(), filterStrongs);
+        return DefaultScoredEquivalents.fromMappedEquivs(strongItemContainers.source(), current);
     }
 
-    private List<Container> extractGeneratedSuggestions(Iterable<ScoredEquivalents<Container>> generatedScores) {
-        return Lists.newArrayList(Iterables.concat(Iterables.transform(generatedScores, new Function<ScoredEquivalents<Container>, Iterable<Container>>() {
+//    private EquivalenceResult<Container> filterNonPositiveItemScores(ScoredEquivalents<Container> itemScores, EquivalenceResult<Container> result) {
+//        
+//        final Map<Container, Score> itemSourceScores = itemScores.equivalents();
+//        
+//        Map<Publisher, ScoredEquivalent<Container>> strongEquivs = result.strongEquivalences();
+//        
+//        Map<Publisher, ScoredEquivalent<Container>> filterStrongs = Maps.filterValues(strongEquivs, new Predicate<ScoredEquivalent<Container>>() {
+//            @Override
+//            public boolean apply(ScoredEquivalent<Container> input) {
+//                Score score = itemSourceScores.get(input.equivalent());
+//                return score != null && score.isRealScore() && score.asDouble() > 0;
+//            }
+//        });
+//        
+//        return new EquivalenceResult<Container>(result.target(), result.rawScores(), result.combinedEquivalences(), filterStrongs);
+//    }
+
+    private Set<Container> extractGeneratedSuggestions(Iterable<ScoredEquivalents<Container>> generatedScores) {
+        return Sets.newHashSet(Iterables.concat(Iterables.transform(generatedScores, new Function<ScoredEquivalents<Container>, Iterable<Container>>() {
             @Override
             public Iterable<Container> apply(ScoredEquivalents<Container> input) {
                 return input.equivalents().keySet();
