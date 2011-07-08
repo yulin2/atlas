@@ -22,9 +22,9 @@ import static org.hamcrest.Matchers.startsWith;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
+import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
-import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
 
@@ -32,7 +32,7 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 /**
- * Unit test for {@link BbcSlashProgrammesEpisodeRdfClient}.
+ * Unit test for {@link BbcSlashProgrammesRdfClient}.
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
@@ -40,19 +40,14 @@ public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 	
 	private static final String URI = "http://example.com";
 	
-	private final SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
+	private static final SimpleHttpClient httpClient = new FixedResponseHttpClient(URI, xmlDocument());
 
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
-		checking(new Expectations() {{ 
-			one(httpClient).getContentsOf(URI); will(returnValue(xmlDocument()));
-		}});
-		
-		SlashProgrammesRdf description = new BbcSlashProgrammesEpisodeRdfClient(httpClient).get(URI);
+		SlashProgrammesRdf description = new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(httpClient, SlashProgrammesRdf.class).get(URI);
 		
 		SlashProgrammesContainerRef brand = description.brand();
 		assertThat(brand.uri(), is("http://www.bbc.co.uk/programmes/b006mj59"));
-		
 		
 		SlashProgrammesEpisode ep = description.episode();
 		assertThat(ep.title(), is("Episode 6"));
@@ -66,7 +61,11 @@ public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 
 	}
 
-	protected String xmlDocument() throws IOException {
-		return IOUtils.toString(new ClassPathResource("top-gear-rdf.xml").getInputStream());
+	private static String xmlDocument()  {
+		try {
+            return IOUtils.toString(new ClassPathResource("top-gear-rdf.xml").getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 	}
 }
