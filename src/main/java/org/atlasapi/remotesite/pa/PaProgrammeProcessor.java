@@ -44,6 +44,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.text.MoreStrings;
+import com.metabroadcast.common.time.Timestamp;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
@@ -72,40 +73,45 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         this.personWriter = itemsPeopleWriter;
     }
 
-    public void process(ProgData progData, Channel channel, DateTimeZone zone) {
+    @Override
+    public void process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         try {
             if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
                 return;
             }
             
-            Maybe<Brand> brand = getBrand(progData, channel);
-            if (brand.hasValue()) {
-                if (isClosedBrand(brand)) {
-                    brand.requireValue().setScheduleOnly(true);
+            Maybe<Brand> possibleBrand = getBrand(progData, channel);
+            if (possibleBrand.hasValue()) {
+                Brand brand = possibleBrand.requireValue();
+                if (isClosedBrand(possibleBrand)) {
+                    brand.setScheduleOnly(true);
                 }
-            	contentWriter.createOrUpdate(brand.requireValue());
+                brand.setLastUpdated(updatedAt.toDateTimeUTC());
+            	contentWriter.createOrUpdate(brand);
             }
             
-            Maybe<Series> series = getSeries(progData, channel, brand.hasValue());
+            Maybe<Series> series = getSeries(progData, channel, possibleBrand.hasValue());
             if (series.hasValue()) {
-            	if (brand.hasValue()) {
-            		series.requireValue().setParent(brand.requireValue());
+            	if (possibleBrand.hasValue()) {
+            		series.requireValue().setParent(possibleBrand.requireValue());
             	}
+            	series.requireValue().setLastUpdated(updatedAt.toDateTimeUTC());
             	contentWriter.createOrUpdate(series.requireValue());
             }
             
-            Maybe<? extends Item> item = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getFilmOrEpisode(progData, channel, zone, brand.hasValue() || series.hasValue());
+            Maybe<? extends Item> item = isClosedBrand(possibleBrand) ? getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone) : getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || series.hasValue());
 
             if (item.hasValue()) {
                 if (series.hasValue() && item.requireValue() instanceof Episode) {
                     Episode episode = (Episode) item.requireValue();
                     episode.setSeries(series.requireValue());
                 }
-                if (brand.hasValue()) {
-                	item.requireValue().setContainer(brand.requireValue());
+                if (possibleBrand.hasValue()) {
+                	item.requireValue().setContainer(possibleBrand.requireValue());
                 } else if (series.hasValue()) {
                 	item.requireValue().setContainer(series.requireValue());
                 }
+                item.requireValue().setLastUpdated(updatedAt.toDateTimeUTC());
                 contentWriter.createOrUpdate(item.requireValue());
                 personWriter.createOrUpdatePeople(item.requireValue());
             }

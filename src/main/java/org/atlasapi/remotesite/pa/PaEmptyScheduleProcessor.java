@@ -14,6 +14,7 @@ import org.joda.time.Duration;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.time.Timestamp;
 
 public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
     
@@ -26,9 +27,9 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
     }
 
     @Override
-    public void process(ProgData progData, Channel channel, DateTimeZone zone) {
+    public void process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         if (emptySlot(progData, channel, zone)) {
-            delegate.process(progData, channel, zone);
+            delegate.process(progData, channel, zone, updatedAt);
         }
     }
     
