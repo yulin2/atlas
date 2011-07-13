@@ -11,7 +11,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
@@ -24,6 +23,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.persistence.testing.StubContentResolver;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableSet;

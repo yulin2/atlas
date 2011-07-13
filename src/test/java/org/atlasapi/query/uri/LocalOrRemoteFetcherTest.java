@@ -15,12 +15,12 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.uri;
 
-import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.system.Fetcher;
+import org.atlasapi.persistence.testing.StubContentResolver;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 

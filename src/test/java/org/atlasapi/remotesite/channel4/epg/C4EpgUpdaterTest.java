@@ -10,7 +10,6 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 
-import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
@@ -22,6 +21,7 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.persistence.testing.StubContentResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.joda.time.DateTime;

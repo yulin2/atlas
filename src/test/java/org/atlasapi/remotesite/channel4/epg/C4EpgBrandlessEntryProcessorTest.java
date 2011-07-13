@@ -12,7 +12,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
@@ -21,6 +20,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.channel4.RecordingContentWriter;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;

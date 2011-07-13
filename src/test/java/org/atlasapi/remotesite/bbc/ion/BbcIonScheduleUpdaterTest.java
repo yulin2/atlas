@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.hamcrest.core.AllOf.allOf;
 import junit.framework.TestCase;
 
-import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -12,6 +11,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
