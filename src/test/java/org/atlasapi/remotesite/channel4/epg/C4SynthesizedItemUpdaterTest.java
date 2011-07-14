@@ -11,7 +11,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -19,6 +18,7 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.testing.StubContentResolver;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

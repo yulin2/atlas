@@ -2,17 +2,17 @@ package org.atlasapi.equiv.results.combining;
 
 import java.util.List;
 
-import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import junit.framework.TestCase;
+
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
-import junit.framework.TestCase;
 
 public class ItemScoreFilteringCombinerTest extends TestCase {
 
@@ -31,13 +31,13 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
     public void testCombine() {
 
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource(ItemBasedContainerEquivalenceGenerator.NAME).addEquivalent(equivalent1, Score.valueOf(1.0)).addEquivalent(equivalent2, Score.NULL_SCORE).addEquivalent(equivalent3, Score.valueOf(0.0)).build(),
+                DefaultScoredEquivalents.<Item>fromSource(ContainerEquivalenceUpdater.NAME).addEquivalent(equivalent1, Score.valueOf(1.0)).addEquivalent(equivalent2, Score.NULL_SCORE).addEquivalent(equivalent3, Score.valueOf(0.0)).build(),
                 DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent4, Score.NULL_SCORE).addEquivalent(equivalent2, Score.valueOf(1.0)).addEquivalent(equivalent3, Score.valueOf(1.0)).addEquivalent(equivalent1, Score.valueOf(1.0)).build(),
                 DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent4, Score.valueOf(1.0)).addEquivalent(equivalent1, Score.NULL_SCORE).build()
         );
     
         
-        ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(new NullScoreAwareAveragingCombiner<Item>());
+        ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(new NullScoreAwareAveragingCombiner<Item>(), ContainerEquivalenceUpdater.NAME);
         
         ScoredEquivalents<Item> combined = combiner.combine(scores);
         

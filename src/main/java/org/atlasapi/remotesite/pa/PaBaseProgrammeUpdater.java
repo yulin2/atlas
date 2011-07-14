@@ -32,6 +32,7 @@ import com.metabroadcast.common.concurrency.BoundedExecutor;
 import com.metabroadcast.common.health.HealthProbe;
 import com.metabroadcast.common.health.ProbeResult;
 import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.Timestamp;
 
 public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
 
@@ -108,7 +109,7 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
                     Matcher matcher = FILEDATE.matcher(filename);
                     
                     if (matcher.matches()) {
-                        File fileToProcess = dataStore.copyForProcessing(file);
+                        final File fileToProcess = dataStore.copyForProcessing(file);
                         
                         final DateTimeZone zone = getTimeZone(matcher.group(1));
                         processingFile.set(Maybe.just(filename));
@@ -129,11 +130,11 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
                                             ProgData prog = (ProgData) target;
                                             processingProgramme.set(Maybe.just(prog.getSeriesId() != null ? prog.getSeriesId() : "0" + " - " + prog.getProgId() + " - " + prog.getTitle()));
                                             processingChannel.set(Maybe.just(channel.requireValue().title()));
-                                            boundedQueue.submitTask(new ProcessProgrammeJob(prog, channel.requireValue(), zone));
+                                            Timestamp modified = Timestamp.of(fileToProcess.lastModified());
+                                            boundedQueue.submitTask(new ProcessProgrammeJob(prog, channel.requireValue(), zone, modified));
                                         } catch (Exception e) {
                                             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
                                         }
-                                        //new ProcessProgrammeJob((ProgData) target, (ChannelData) parent, zone).run();
                                     }
                                 }
                                 
@@ -172,18 +173,20 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
         private final ProgData progData;
         private final Channel channel;
         private final DateTimeZone zone;
+        private final Timestamp updatedAt;
 
-        public ProcessProgrammeJob(ProgData progData, Channel channel, DateTimeZone zone) {
+        public ProcessProgrammeJob(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
             this.progData = progData;
             this.channel = channel;
             this.zone = zone;
+            this.updatedAt = updatedAt;
         }
 
         @Override
         public void run() {
             try {
                 if (progData != null) {
-                    processor.process(progData, channel, zone);
+                    processor.process(progData, channel, zone, updatedAt);
                 }
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing programme " + progData));

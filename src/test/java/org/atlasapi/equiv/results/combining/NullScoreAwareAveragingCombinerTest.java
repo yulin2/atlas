@@ -2,16 +2,15 @@ package org.atlasapi.equiv.results.combining;
 
 import java.util.List;
 
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import junit.framework.TestCase;
+
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-
-import junit.framework.TestCase;
 
 public class NullScoreAwareAveragingCombinerTest extends TestCase {
     
@@ -38,12 +37,10 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
         
         ScoredEquivalents<Item> combined = combiner.combine(scores);
         
-        assertEquals(ImmutableMap.of(equivalent3, Score.valueOf(5.0)),combined.equivalents().get(Publisher.C4));
+        assertEquals(Score.valueOf(5.0), combined.equivalents().get(equivalent3));
         
-        assertEquals(ImmutableMap.of(
-                equivalent1, Score.valueOf(7.5),
-                equivalent2, Score.valueOf(5.0)
-        ), combined.equivalents().get(Publisher.BBC));
+        assertEquals(Score.valueOf(7.5), combined.equivalents().get(equivalent1));
+        assertEquals(Score.valueOf(5.0), combined.equivalents().get(equivalent2));
     }
     
     public void testCombineNulls() {
@@ -55,13 +52,11 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
         );
         
         ScoredEquivalents<Item> combined = combiner.combine(scores);
-        
-        assertEquals(ImmutableMap.of(equivalent3, Score.valueOf(5.0)),combined.equivalents().get(Publisher.C4));
-        
-        assertEquals(ImmutableMap.of(
-                equivalent1, Score.NULL_SCORE,
-                equivalent2, Score.valueOf(5.0)
-        ), combined.equivalents().get(Publisher.BBC));
+
+        assertEquals(Score.valueOf(5.0), combined.equivalents().get(equivalent3));
+
+        assertEquals(Score.NULL_SCORE,   combined.equivalents().get(equivalent1));
+        assertEquals(Score.valueOf(5.0), combined.equivalents().get(equivalent2));
         
     }
 

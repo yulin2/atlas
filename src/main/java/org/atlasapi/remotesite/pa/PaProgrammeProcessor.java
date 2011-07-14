@@ -19,11 +19,11 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.CastMember;
 import org.atlasapi.remotesite.pa.bindings.Category;
@@ -44,6 +44,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.text.MoreStrings;
+import com.metabroadcast.common.time.Timestamp;
 
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
@@ -55,7 +56,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final String CLOSED_CURIE = "pa:closed";
     private static final List<String> IGNORED_BRANDS = ImmutableList.of("70214", "84575");
     
-    private final ContentWriters contentWriter;
+    private final ContentWriter contentWriter;
     private final ContentResolver contentResolver;
     private final AdapterLog log;
     private final PaChannelMap channelMap = new PaChannelMap();
@@ -65,47 +66,52 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private final ItemsPeopleWriter personWriter;
 
-    public PaProgrammeProcessor(ContentWriters contentWriter, ContentResolver contentResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
+    public PaProgrammeProcessor(ContentWriter contentWriter, ContentResolver contentResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
         this.log = log;
         this.personWriter = itemsPeopleWriter;
     }
 
-    public void process(ProgData progData, Channel channel, DateTimeZone zone) {
+    @Override
+    public void process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         try {
             if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
                 return;
             }
             
-            Maybe<Brand> brand = getBrand(progData, channel);
-            if (brand.hasValue()) {
-                if (isClosedBrand(brand)) {
-                    brand.requireValue().setScheduleOnly(true);
+            Maybe<Brand> possibleBrand = getBrand(progData, channel);
+            if (possibleBrand.hasValue()) {
+                Brand brand = possibleBrand.requireValue();
+                if (isClosedBrand(possibleBrand)) {
+                    brand.setScheduleOnly(true);
                 }
-            	contentWriter.createOrUpdate(brand.requireValue());
+                brand.setLastUpdated(updatedAt.toDateTimeUTC());
+            	contentWriter.createOrUpdate(brand);
             }
             
-            Maybe<Series> series = getSeries(progData, channel, brand.hasValue());
+            Maybe<Series> series = getSeries(progData, channel, possibleBrand.hasValue());
             if (series.hasValue()) {
-            	if (brand.hasValue()) {
-            		series.requireValue().setParent(brand.requireValue());
+            	if (possibleBrand.hasValue()) {
+            		series.requireValue().setParent(possibleBrand.requireValue());
             	}
+            	series.requireValue().setLastUpdated(updatedAt.toDateTimeUTC());
             	contentWriter.createOrUpdate(series.requireValue());
             }
             
-            Maybe<? extends Item> item = isClosedBrand(brand) ? getClosedEpisode(brand.requireValue(), progData, channel, zone) : getFilmOrEpisode(progData, channel, zone, brand.hasValue() || series.hasValue());
+            Maybe<? extends Item> item = isClosedBrand(possibleBrand) ? getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt) : getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || series.hasValue(), updatedAt);
 
             if (item.hasValue()) {
                 if (series.hasValue() && item.requireValue() instanceof Episode) {
                     Episode episode = (Episode) item.requireValue();
                     episode.setSeries(series.requireValue());
                 }
-                if (brand.hasValue()) {
-                	item.requireValue().setContainer(brand.requireValue());
+                if (possibleBrand.hasValue()) {
+                	item.requireValue().setContainer(possibleBrand.requireValue());
                 } else if (series.hasValue()) {
                 	item.requireValue().setContainer(series.requireValue());
                 }
+                item.requireValue().setLastUpdated(updatedAt.toDateTimeUTC());
                 contentWriter.createOrUpdate(item.requireValue());
                 personWriter.createOrUpdatePeople(item.requireValue());
             }
@@ -119,7 +125,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return brand.hasValue() && CLOSED_BRAND.equals(brand.requireValue().getCanonicalUri());
     }
     
-    private Maybe<? extends Item> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone) {
+    private Maybe<? extends Item> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         String uri = CLOSED_EPISODE+getClosedPostfix(channel);
         Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
 
@@ -136,7 +142,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         Version version = findBestVersion(episode.getVersions());
 
-        Broadcast broadcast = broadcast(progData, channel, zone);
+        Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
 
         return Maybe.just(episode);
@@ -206,11 +212,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(series);
     }
     
-    private Maybe<? extends Item> getFilmOrEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode) {
-        return specialization(progData, channel) == Specialization.FILM ? getFilm(progData, channel, zone) : getEpisode(progData, channel, zone, isEpisode);
+    private Maybe<? extends Item> getFilmOrEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
+        return specialization(progData, channel) == Specialization.FILM ? getFilm(progData, channel, zone, updatedAt) : getEpisode(progData, channel, zone, isEpisode, updatedAt);
     }
     
-    private Maybe<Film> getFilm(ProgData progData, Channel channel, DateTimeZone zone) {
+    private Maybe<Film> getFilm(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         String filmUri = PaHelper.getFilmUri(programmeId(progData));
         Maybe<Identified> possiblePreviousData = contentResolver.findByCanonicalUris(ImmutableList.of(filmUri)).getFirstValue();
         
@@ -228,7 +234,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             film = getBasicFilm(progData);
         }
         
-        setCommonDetails(progData, channel, zone, film);
+        setCommonDetails(progData, channel, zone, film, updatedAt);
         
         if (progData.getFilmYear() != null && MoreStrings.containsOnlyAsciiDigits(progData.getFilmYear())) {
             film.setYear(Integer.parseInt(progData.getFilmYear()));
@@ -237,7 +243,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(film);
     }
     
-    private void setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode) {
+    private void setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
         if (progData.getEpisodeTitle() != null) {
             episode.setTitle(progData.getEpisodeTitle());
         } else {
@@ -284,11 +290,11 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         Version version = findBestVersion(episode.getVersions());
 
-        Broadcast broadcast = broadcast(progData, channel, zone);
+        Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
     }
 
-    private Maybe<Item> getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode) {
+    private Maybe<Item> getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {
         
         String episodeUri = PaHelper.getEpisodeUri(programmeId(progData));
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(episodeUri)).getFirstValue();
@@ -300,7 +306,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             item = getBasicEpisode(progData, isEpisode);
         }
         
-        setCommonDetails(progData, channel, zone, item);
+        setCommonDetails(progData, channel, zone, item, updatedAt);
         
         try {
             if (item instanceof Episode) {
@@ -318,7 +324,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return Maybe.just(item);
     }
 
-    private Broadcast broadcast(ProgData progData, Channel channel, DateTimeZone zone) {
+    private Broadcast broadcast(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updateAt) {
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
 
         DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
@@ -335,7 +341,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             broadcast.setLive(getBooleanValue(progData.getAttr().getLive()));
             broadcast.setSurround(getBooleanValue(progData.getAttr().getSurround()));
         }
-        
+        broadcast.setLastUpdated(updateAt.toDateTimeUTC());
         return broadcast;
     }
     

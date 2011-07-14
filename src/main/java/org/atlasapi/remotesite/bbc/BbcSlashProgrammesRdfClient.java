@@ -15,8 +15,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.InputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -25,7 +24,13 @@ import javax.xml.bind.Unmarshaller;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
+import com.metabroadcast.common.http.HttpResponseTransformer;
+import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 
 /**
  * Client to retrieve XML from Channel 4 and bind it to our object model using JAXB. 
@@ -33,28 +38,38 @@ import com.metabroadcast.common.http.SimpleHttpClient;
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author John Ayres (john@metabroadcast.com)
  */
-public class BbcSlashProgrammesEpisodeRdfClient implements RemoteSiteClient<SlashProgrammesRdf> {
+public class BbcSlashProgrammesRdfClient<T> implements RemoteSiteClient<T> {
 
 	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
 
-	public BbcSlashProgrammesEpisodeRdfClient() {
-		this(HttpClients.webserviceClient());
+	public BbcSlashProgrammesRdfClient(Class<T> clazz) {
+		this(HttpClients.webserviceClient(), clazz);
 	}
 	
-	public BbcSlashProgrammesEpisodeRdfClient(SimpleHttpClient httpClient) {
+	public BbcSlashProgrammesRdfClient(SimpleHttpClient httpClient, Class<T> clazz) {
 		this.httpClient = httpClient;
 		try {
-			context = JAXBContext.newInstance(SlashProgrammesRdf.class);
+			context = JAXBContext.newInstance(clazz);
 		} catch (JAXBException e) {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	private final HttpResponseTransformer<T> TRANSFORMER = new HttpResponseTransformer<T>() {
 
-	public SlashProgrammesRdf get(String uri) throws Exception {
-		Reader in = new StringReader(httpClient.getContentsOf(uri));
-		Unmarshaller u = context.createUnmarshaller();
-		SlashProgrammesRdf episodeDescription =(SlashProgrammesRdf) u.unmarshal(in);
-		return episodeDescription;
+        @Override
+        @SuppressWarnings("unchecked")
+        public T transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, JAXBException {
+            if (!HttpStatusCode.OK.is(prologue.statusCode())) {
+                throw new HttpStatusCodeException(prologue, "");
+            }
+            Unmarshaller u = context.createUnmarshaller();
+            return (T) u.unmarshal(body);
+        }
+    };
+
+	public T get(String uri) throws Exception {
+	    return httpClient.get(new SimpleHttpRequest<T>(uri, TRANSFORMER));
 	}
 }

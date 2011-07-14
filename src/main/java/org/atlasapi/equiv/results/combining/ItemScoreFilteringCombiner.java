@@ -3,73 +3,55 @@ package org.atlasapi.equiv.results.combining;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.equiv.generators.ItemBasedContainerEquivalenceGenerator;
-import org.atlasapi.equiv.results.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.Score;
-import org.atlasapi.equiv.results.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 
 public class ItemScoreFilteringCombiner<T extends Content> implements EquivalenceCombiner<T> {
 
     private final EquivalenceCombiner<T> delegate;
+    private final String source;
 
-    public ItemScoreFilteringCombiner(EquivalenceCombiner<T> delegate) {
+    public ItemScoreFilteringCombiner(EquivalenceCombiner<T> delegate, String source) {
         this.delegate = delegate;
+        this.source = source;
     }
     
     @Override
     public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents) {
         ScoredEquivalents<T> combined = delegate.combine(scoredEquivalents);
         
-        final ScoredEquivalents<T> itemScores = findItemScores(scoredEquivalents);
+        ScoredEquivalents<T> itemScores = findItemScores(scoredEquivalents);
         
         if(itemScores == null) {
             return combined;
-        } 
+        }
         
-        Map<Publisher, Map<T, Score>> transformedCombined = Maps.newHashMap(Maps.transformEntries(combined.equivalents(), new EntryTransformer<Publisher, Map<T, Score>, Map<T, Score>>() {
+        final Map<T, Score> itemScoreMap = itemScores.equivalents();
+        
+        Map<T, Score> transformedCombined = Maps.newHashMap(Maps.transformEntries(combined.equivalents(), new EntryTransformer<T, Score, Score>() {
             @Override
-            public Map<T, Score> transformEntry(Publisher publisher, Map<T, Score> scores) {
+            public Score transformEntry(T equiv, Score combinedScore) {
+                Score itemScore = itemScoreMap.get(equiv);
                 
-                final Map<T, Score> itemScoreBin = itemScores.equivalents().get(publisher);
-                if(itemScoreBin == null) {
-                    return setToNull(scores);
+                if (itemScore == null || itemScore == Score.NULL_SCORE || !(itemScore.asDouble() > 0.0)) {
+                    return Score.NULL_SCORE;
                 }
-                
-                return Maps.newHashMap(Maps.transformEntries(scores, new EntryTransformer<T, Score, Score>() {
-                    @Override
-                    public Score transformEntry(T equiv, Score score) {
-                        Score itemScore = itemScoreBin.get(equiv);
-                        if(itemScore == null || itemScore == Score.NULL_SCORE || !(itemScore.asDouble() > 0.0)) {
-                            return Score.NULL_SCORE;
-                        }
-                        return itemScore;
-                    }
-                }));
+
+                return combinedScore;
             }
         }));
         
         return DefaultScoredEquivalents.fromMappedEquivs(combined.source(), transformedCombined);
     }
     
-    private Map<T, Score> setToNull(Map<T, Score> scores) {
-        return Maps.newHashMap(Maps.transformValues(scores, new Function<Score, Score>() {
-
-            @Override
-            public Score apply(Score input) {
-                return Score.NULL_SCORE;
-            }
-        }));
-    }
-
     private ScoredEquivalents<T> findItemScores(List<ScoredEquivalents<T>> scoredEquivalents) {
         for (ScoredEquivalents<T> sourceEquivs : scoredEquivalents) {
-            if(sourceEquivs.source().equals(ItemBasedContainerEquivalenceGenerator.NAME)) {
+            if(sourceEquivs.source().equals(source)) {
                 return sourceEquivs;
             }
         }

@@ -8,7 +8,6 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.StubContentResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
@@ -20,6 +19,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
+import org.atlasapi.persistence.testing.StubContentResolver;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

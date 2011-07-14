@@ -37,23 +37,23 @@ import com.google.common.collect.Sets;
 
 public class BbcProgrammeAdapter  {
 
-    private final BbcSlashProgrammesEpisodeRdfClient episodeClient;
+    private final BbcSlashProgrammesRdfClient<SlashProgrammesRdf> episodeClient;
     private final ContentExtractor<BbcProgrammeSource, Item> itemExtractor;
     private final BbcBrandExtractor brandExtractor;
     
-    private final BbcSlashProgrammesVersionRdfClient versionClient;
+    private final BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf> versionClient;
 
     private final Log oldLog = LogFactory.getLog(getClass());
 
-    private final BbcSlashProgrammesClipRdfClient clipClient;
+    private final BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient;
 
 	private final ContentWriter writer;
 
     public BbcProgrammeAdapter(ContentWriter writer, AdapterLog log) {
-        this(writer, new BbcSlashProgrammesEpisodeRdfClient(), new BbcSlashProgrammesVersionRdfClient(), new BbcSlashProgrammesClipRdfClient(), new BbcProgrammeGraphExtractor(log), log);
+        this(writer, new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), new BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf>(SlashProgrammesVersionRdf.class), new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), new BbcProgrammeGraphExtractor(log), log);
     }
 
-    public BbcProgrammeAdapter(ContentWriter writer, BbcSlashProgrammesEpisodeRdfClient episodeClient, BbcSlashProgrammesVersionRdfClient versionClient, BbcSlashProgrammesClipRdfClient clipClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
+    public BbcProgrammeAdapter(ContentWriter writer, BbcSlashProgrammesRdfClient<SlashProgrammesRdf> episodeClient, BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf> versionClient, BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
         this.writer = writer;
 		this.versionClient = versionClient;
         this.episodeClient = episodeClient;

@@ -40,7 +40,7 @@ public class BbcSlashProgrammesVersionRdfClientTest extends MockObjectTestCase {
 
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
-		SlashProgrammesVersionRdf version = new BbcSlashProgrammesVersionRdfClient(httpClient).get(URI);
+		SlashProgrammesVersionRdf version = new BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf>(httpClient, SlashProgrammesVersionRdf.class).get(URI);
 		
 		assertThat(version.broadcastSlots().size(), is(22));
 		

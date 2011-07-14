@@ -19,6 +19,8 @@ import static org.atlasapi.remotesite.HttpClients.webserviceClient;
 import static org.atlasapi.remotesite.bbc.BbcUriCanonicaliser.bbcProgrammeIdFrom;
 import static org.joda.time.Duration.standardSeconds;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +60,7 @@ import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -66,6 +69,9 @@ import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
+import com.metabroadcast.common.http.HttpResponseTransformer;
+import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
 
@@ -174,10 +180,19 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         }
         return encodings;
     }
+    
+    private final HttpResponseTransformer<IonEpisodeDetailFeed> ION_TRANSLATOR = new HttpResponseTransformer<IonEpisodeDetailFeed>() {
+
+        @Override
+        public IonEpisodeDetailFeed transform(HttpResponsePrologue response, InputStream in) throws HttpException {
+            return ionDeserialiser.deserialise(new InputStreamReader(in, response.getCharsetOrDefault(Charsets.UTF_8)));
+        }
+    };
 
     private IonEpisodeDetail getEpisodeDetail(String episodeUri) {
         try {
-            List<IonEpisodeDetail> episodeDetailList = ionDeserialiser.deserialise(webserviceClient().getContentsOf(String.format(EPISODE_DETAIL_PATTERN, bbcProgrammeIdFrom(episodeUri)))).getBlocklist();
+            SimpleHttpRequest<IonEpisodeDetailFeed> request = new SimpleHttpRequest<IonEpisodeDetailFeed>(String.format(EPISODE_DETAIL_PATTERN, bbcProgrammeIdFrom(episodeUri)), ION_TRANSLATOR);
+            List<IonEpisodeDetail> episodeDetailList = webserviceClient().get(request).getBlocklist();
             if (episodeDetailList == null || episodeDetailList.isEmpty()) {
                 log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Empty episode detail for " + episodeUri));
                 return null;
@@ -185,7 +200,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                 return episodeDetailList.get(0);
             }
         } catch (HttpException e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception getting episode detail for " + episodeUri));
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception fetching episode detail for " + episodeUri));
+            return null;
+        } catch (Exception e) {
+            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception parsing episode detail for " + episodeUri));
             return null;
         }
     }
