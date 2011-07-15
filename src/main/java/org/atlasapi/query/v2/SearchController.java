@@ -33,8 +33,8 @@ public class SearchController extends BaseController {
     private static final String QUERY_PARAM = "q";
     private static final String PUBLISHER_PARAM = "publisher";
     private static final String TITLE_WEIGHTING_PARAM = "titleWeighting";
-    private static final String BROADCAST_WEIGHTING_PARAM = "q";
-    private static final String CATCHUP_WEIGHTING_PARAM = "q";
+    private static final String BROADCAST_WEIGHTING_PARAM = "broadcastWeighting";
+    private static final String CATCHUP_WEIGHTING_PARAM = "catchupWeighting";
 
     private static final float DEFAULT_TITLE_WEIGHTING = 1.0f;
     private static final float DEFAULT_BROADCAST_WEIGHTING = 0.2f;
