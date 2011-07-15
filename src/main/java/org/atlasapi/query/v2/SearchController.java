@@ -27,9 +27,10 @@ import com.metabroadcast.common.text.MoreStrings;
 
 @Controller
 public class SearchController extends BaseController {
-    
+
     private static final float DEFAULT_TITLE_WEIGHTING = 1.0f;
-    private static final float DEFAULT_CURRENTNESS_WEIGHTING = 0.0f;
+    private static final float DEFAULT_BROADCAST_WEIGHTING = 0.2f;
+    private static final float DEFAULT_CATCHUP_WEIGHTING = 0.2f;
 
     private final SearchResolver searcher;
 
@@ -40,7 +41,7 @@ public class SearchController extends BaseController {
 
     @RequestMapping("/3.0/search.*")
     public void search(@RequestParam String q, @RequestParam(required = false) String publisher, @RequestParam(value = "titleWeighting", required = false) String titleWeightingParam,
-            @RequestParam(value = "currentnessWeighting", required = false) String currentnessWeightingParam, HttpServletRequest request, HttpServletResponse response) throws IOException {
+            @RequestParam(value = "broadcastWeighting", required = false) String broadcastWeightingParam, @RequestParam(value = "catchupWeighting", required = false) String catchupWeightingParam, HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             if (Strings.isNullOrEmpty(q)) {
                 throw new IllegalArgumentException("You must specify a query parameter");
@@ -51,27 +52,26 @@ public class SearchController extends BaseController {
                 throw new IllegalArgumentException("You must specify a limit parameter");
             }
             
-            float titleWeighing = DEFAULT_TITLE_WEIGHTING;
-            if (!Strings.isNullOrEmpty(titleWeightingParam)) {
-                if (MoreStrings.containsOnlyDecimalCharacters(titleWeightingParam)) {
-                    titleWeighing = Float.parseFloat(titleWeightingParam);
-                }
-            }
-            
-            float currentnessWeighting = DEFAULT_CURRENTNESS_WEIGHTING;
-            if (!Strings.isNullOrEmpty(currentnessWeightingParam)) {
-                if (MoreStrings.containsOnlyDecimalCharacters(currentnessWeightingParam)) {
-                    currentnessWeighting = Float.parseFloat(currentnessWeightingParam);
-                }
-            }
+            float titleWeighting = getFloatParam(titleWeightingParam, DEFAULT_TITLE_WEIGHTING);
+            float broadcastWeighting = getFloatParam(broadcastWeightingParam, DEFAULT_BROADCAST_WEIGHTING);
+            float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
 
             ApplicationConfiguration appConfig = appConfig(request);
             Set<Publisher> publishers = publishers(publisher, appConfig);
-            List<Identified> content = searcher.search(new SearchQuery(q, selection, publishers, titleWeighing, currentnessWeighting), appConfig);
+            List<Identified> content = searcher.search(new SearchQuery(q, selection, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
 
             modelAndViewFor(request, response, content, AtlasModelType.CONTENT);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
+    }
+
+    private float getFloatParam(String stringValue, float defaultValue) {
+        if (!Strings.isNullOrEmpty(stringValue)) {
+            if (MoreStrings.containsOnlyDecimalCharacters(stringValue)) {
+                return Float.parseFloat(stringValue);
+            }
+        }
+        return defaultValue;
     }
 }

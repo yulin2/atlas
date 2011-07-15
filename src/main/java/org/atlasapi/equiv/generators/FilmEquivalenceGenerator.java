@@ -25,7 +25,8 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
 
     private static final ApplicationConfiguration config = new ApplicationConfiguration(ImmutableSet.of(Publisher.PREVIEW_NETWORKS), null);
     private static final float TITLE_WEIGHTING = 1.0f;
-    private static final float CURRENTNESS_WEIGHTING = 0.0f;
+    private static final float BROADCAST_WEIGHTING = 0.0f;
+    private static final float CATCHUP_WEIGHTING = 0.0f;
 
     private final SearchResolver searchResolver;
 
@@ -42,7 +43,7 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
         }
 
         List<Identified> possibleEquivalentFilms = searchResolver.search(new SearchQuery(film.getTitle(), Selection.ALL, ImmutableList.of(Publisher.PREVIEW_NETWORKS), TITLE_WEIGHTING,
-                CURRENTNESS_WEIGHTING), config);
+                BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), config);
 
         Iterable<Film> equivalentFilms = Iterables.filter(Iterables.filter(possibleEquivalentFilms, Film.class), new EquivalentFilmPredicate(film));
 
