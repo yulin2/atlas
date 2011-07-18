@@ -11,9 +11,9 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.search.ContentResolvingSearcher;
-import org.atlasapi.search.model.Search;
+import org.atlasapi.search.ContentSearcher;
+import org.atlasapi.search.model.SearchQuery;
 import org.atlasapi.search.model.SearchResults;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
@@ -23,7 +23,7 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 
 public class ContentResolvingSearchTest extends MockObjectTestCase {
-    private final FuzzySearcher fuzzySearcher = mock(FuzzySearcher.class);
+    private final ContentSearcher fuzzySearcher = mock(ContentSearcher.class);
     private final KnownTypeQueryExecutor contentResolver = mock(KnownTypeQueryExecutor.class);
     
     private final Brand brand = new Brand("brand", "brand", Publisher.BBC);
@@ -41,14 +41,15 @@ public class ContentResolvingSearchTest extends MockObjectTestCase {
     
     public void testShouldReturnSearchedForItem() {
         final String searchQuery = "test";
-        final ContentQuery query = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
+        final ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
+        final SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
         
         checking(new Expectations() {{ 
-            one(fuzzySearcher).contentSearch(searchQuery, selection, publishers); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));
-            one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), query); will(returnValue(ImmutableList.of(brand)));
+            one(fuzzySearcher).search(query); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));
+            one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), contentQuery); will(returnValue(ImmutableList.of(brand)));
         }});
-        
-        List<Identified> content = searcher.search(new Search(searchQuery), publishers, ApplicationConfiguration.DEFAULT_CONFIGURATION, selection);
+            
+        List<Identified> content = searcher.search(query, ApplicationConfiguration.DEFAULT_CONFIGURATION);
         assertFalse(content.isEmpty());
         Brand result = (Brand) Iterables.getOnlyElement(content);
         assertTrue(result.getChildRefs().isEmpty());

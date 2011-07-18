@@ -26,11 +26,11 @@ import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
-import org.atlasapi.query.content.fuzzy.FuzzySearcher;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
 import org.atlasapi.query.content.search.ContentResolvingSearcher;
 import org.atlasapi.query.content.search.DummySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
+import org.atlasapi.search.ContentSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,7 +67,7 @@ public class QueryModule {
 	
 	@Bean SearchResolver searchResolver() {
 	    if (! Strings.isNullOrEmpty(searchHost)) {
-    	    FuzzySearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
+    	    ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
     	    return new ContentResolvingSearcher(titleSearcher, queryExecutor());
 	    }
 	    
