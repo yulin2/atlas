@@ -20,6 +20,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Ordering;
 import com.metabroadcast.common.base.Maybe;
 
 public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
@@ -126,8 +127,15 @@ public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
     @Override
     public List<File> localFiles(Predicate<File> filter) {
         Predicate<File> fileFilter = filter == null ? Predicates.<File> alwaysTrue() : filter;
-        return ImmutableList.copyOf(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(filenameFilter)), fileFilter));
+        return FILE_NAME_ORDER.immutableSortedCopy(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(filenameFilter)), fileFilter));
     }
+    
+    private final Ordering<File> FILE_NAME_ORDER = new Ordering<File>() {
+        @Override
+        public int compare(File left, File right) {
+            return left.getName().compareTo(right.getName());
+        }
+    };
 
     private Maybe<File> findExistingFile(String fileName) {
         for (File file : localFolder.listFiles()) {
