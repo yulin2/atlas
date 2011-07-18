@@ -300,8 +300,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(episodeUri)).getFirstValue();
 
         Item item;
-        if (possiblePrevious.hasValue() && possiblePrevious.requireValue() instanceof Episode) {
-            item = (Episode) possiblePrevious.requireValue();
+        if (possiblePrevious.hasValue()) {
+            item = (Item) possiblePrevious.requireValue();
         } else {
             item = getBasicEpisode(progData, isEpisode);
         }
