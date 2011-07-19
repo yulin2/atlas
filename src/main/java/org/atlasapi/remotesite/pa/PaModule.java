@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
@@ -33,9 +34,9 @@ import com.metabroadcast.common.time.DayOfWeek;
 @Configuration
 @Import(PaFilmModule.class)
 public class PaModule {
-    private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
-    private final static Every REPEATED = RepetitionRules.every(Duration.standardHours(5));
-    private final static Weekly WEEKLY = RepetitionRules.weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
+    private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardHours(2)).withOffset(Duration.standardHours(1));
+    private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardHours(2));
+    private final static RepetitionRule WEEKLY = RepetitionRules.weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriters contentWriter;
@@ -54,7 +55,7 @@ public class PaModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(paFileUpdater(), REPEATED);
+        scheduler.schedule(paFileUpdater(), RECENT_FILE_DOWNLOAD);
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("PA update scheduled task installed").withSource(PaCompleteUpdater.class));
     }
     
@@ -80,7 +81,7 @@ public class PaModule {
     
     @Bean PaRecentUpdater paRecentUpdater() {
         PaRecentUpdater updater = new PaRecentUpdater(paProgrammeProcessor(), paProgrammeDataStore(), log);
-        scheduler.schedule(updater, AT_NIGHT);
+        scheduler.schedule(updater, RECENT_FILE_INGEST);
         return updater;
     }
     
