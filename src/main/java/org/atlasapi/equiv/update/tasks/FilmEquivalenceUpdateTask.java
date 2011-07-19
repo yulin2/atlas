@@ -18,6 +18,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
@@ -50,22 +51,19 @@ public class FilmEquivalenceUpdateTask  extends ScheduledTask {
         boolean finished = contentLister.listContent(ImmutableSet.of(TOP_LEVEL_ITEMS), criteria, new ContentListingHandler() {
 
             @Override
-            public boolean handle(Content content, ContentListingProgress progress) {
-                try {
-                    if (content instanceof Film) {
-                        /* EquivalenceResult<Content> result = */rootUpdater.updateEquivalences((Film) content);
-                    }
-                } catch (Exception e) {
-                    log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+content.getCanonicalUri()));
-                } 
+            public boolean handle(Iterable<? extends Content> contents, ContentListingProgress progress) {
+                for (Film film : Iterables.filter(contents, Film.class)) {
+                    try {
+                        /* EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(film);
+                    } catch (Exception e) {
+                        log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+film.getCanonicalUri()));
+                    } 
+                }
                 reportStatus(String.format("Processed %d / %d top-level content.", progress.count(), progress.total()));
+                updateProgress(progress);
                 if (shouldContinue()) {
-                    if (progress.count() % 10 == 0) {
-                        updateProgress(progress);
-                    }
                     return true;
                 } else {
-                    updateProgress(progress);
                     return false;
                 }
             }
