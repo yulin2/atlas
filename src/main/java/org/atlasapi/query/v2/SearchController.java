@@ -38,7 +38,7 @@ public class SearchController extends BaseController {
 
     private static final float DEFAULT_TITLE_WEIGHTING = 1.0f;
     private static final float DEFAULT_BROADCAST_WEIGHTING = 0.2f;
-    private static final float DEFAULT_CATCHUP_WEIGHTING = 0.2f;
+    private static final float DEFAULT_CATCHUP_WEIGHTING = 0.15f;
 
     private final SearchResolver searcher;
     private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(ApiKeyConfigurationFetcher.API_KEY_QUERY_PARAMETER, Selection.LIMIT_REQUEST_PARAM,
