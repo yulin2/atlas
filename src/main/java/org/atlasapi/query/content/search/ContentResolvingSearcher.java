@@ -11,33 +11,42 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.query.content.fuzzy.FuzzySearcher;
-import org.atlasapi.search.model.Search;
+import org.atlasapi.search.ContentSearcher;
+import org.atlasapi.search.model.SearchQuery;
 import org.atlasapi.search.model.SearchResults;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.metabroadcast.common.query.Selection;
+import com.google.common.collect.Lists;
 
 public class ContentResolvingSearcher implements SearchResolver {
-    private final FuzzySearcher fuzzySearcher;
+    private final ContentSearcher fuzzySearcher;
     private final KnownTypeQueryExecutor contentResolver;
 
-    public ContentResolvingSearcher(FuzzySearcher fuzzySearcher, KnownTypeQueryExecutor contentResolver) {
+    public ContentResolvingSearcher(ContentSearcher fuzzySearcher, KnownTypeQueryExecutor contentResolver) {
         this.fuzzySearcher = fuzzySearcher;
         this.contentResolver = contentResolver;
     }
 
     @Override
-    public List<Identified> search(Search search, Iterable<Publisher> publishers, ApplicationConfiguration appConfig, Selection selection) {
-        SearchResults searchResults = fuzzySearcher.contentSearch(search.query(), selection, publishers);
-        if (searchResults.toUris().isEmpty()) {
+    public List<Identified> search(SearchQuery query, ApplicationConfiguration appConfig) {
+        SearchResults searchResults = fuzzySearcher.search(query);
+        List<String> uris = searchResults.toUris();
+        if (uris.isEmpty()) {
             return ImmutableList.of();
         }
 
-        ContentQuery query = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>> copyOf(publishers)).withSelection(selection).build();
-        Map<String, List<Identified>> content = contentResolver.executeUriQuery(searchResults.toUris(), query.copyWithApplicationConfiguration(appConfig));
-        return ImmutableList.copyOf(Iterables.concat(content.values()));
+        ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>> copyOf(query.getIncludedPublishers()))
+                .withSelection(query.getSelection()).build();
+        Map<String, List<Identified>> content = contentResolver.executeUriQuery(uris, contentQuery.copyWithApplicationConfiguration(appConfig));
+        
+        List<Identified> hydrated = Lists.newArrayListWithExpectedSize(uris.size());
+        for (String uri : uris) {
+            List<Identified> identified = content.get(uri);
+            if (identified != null) {
+                hydrated.addAll(identified);
+            }
+        }
+        return hydrated;
     }
 
 }

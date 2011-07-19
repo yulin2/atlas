@@ -10,6 +10,7 @@ import org.atlasapi.persistence.content.listing.ContentListingHandler;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 public class FilteringContentLister implements ContentLister {
 
@@ -28,15 +29,15 @@ public class FilteringContentLister implements ContentLister {
 
     private ContentListingHandler wrapWithFilter(final ContentListingHandler handler) {
         return new ContentListingHandler() {
-            
             @Override
-            public boolean handle(Content content, ContentListingProgress progress) {
-                if(filter.apply(content)) {
-                    return handler.handle(content, progress);
+            public boolean handle(Iterable<? extends Content> contents, ContentListingProgress progress) {
+                
+                Iterable<? extends Content> filteredContent = Iterables.filter(contents, filter);
+                if(!Iterables.isEmpty(filteredContent)) {
+                    return handler.handle(filteredContent, progress);
                 }
                 return true;
             }
         };
     }
-
 }

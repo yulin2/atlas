@@ -4,12 +4,10 @@ import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.search.model.Search;
+import org.atlasapi.search.model.SearchQuery;
 
 import com.google.common.collect.ImmutableList;
-import com.metabroadcast.common.query.Selection;
 
 public class DummySearcher implements SearchResolver {
     
@@ -24,7 +22,7 @@ public class DummySearcher implements SearchResolver {
     }
 
     @Override
-    public List<Identified> search(Search arg0, Iterable<Publisher> arg1, ApplicationConfiguration appConfig, Selection arg2) {
+    public List<Identified> search(SearchQuery query, ApplicationConfiguration appConfig) {
         return ImmutableList.copyOf(respondWith);
     }
 }

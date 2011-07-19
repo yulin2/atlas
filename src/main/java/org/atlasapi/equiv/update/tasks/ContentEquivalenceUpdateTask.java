@@ -51,23 +51,21 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
             criteria.forPublisher(publisher);
         }
         boolean finished = contentStore.listContent(ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS), criteria, new ContentListingHandler() {
-
             @Override
-            public boolean handle(Content content, ContentListingProgress progress) {
-                reportStatus(String.format("Processing %s %d / %d top-level content.", content.getCanonicalUri(), progress.count() - 1, progress.total()));
-                try {
-                    /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
-                } catch (Exception e) {
-                    log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+content.getCanonicalUri()));
-                } 
-                reportStatus(String.format("Processed %d / %d top-level content.", progress.count(), progress.total()));
+            public boolean handle(Iterable<? extends Content> contents, ContentListingProgress progress) {
+                for (Content content : contents) {
+                    reportStatus(String.format("Processing %s %d / %d top-level content.", content.getCanonicalUri(), progress.count() - 1, progress.total()));
+                    try {
+                        /*EquivalenceResult<Content> result = */rootUpdater.updateEquivalences(content);
+                    } catch (Exception e) {
+                        log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+content.getCanonicalUri()));
+                    } 
+                    reportStatus(String.format("Processed %d / %d top-level content.", progress.count(), progress.total()));
+                }
+                updateProgress(progress);
                 if (shouldContinue()) {
-                    if (progress.count() % 10 == 0) {
-                        updateProgress(progress);
-                    }
                     return true;
                 } else {
-                    updateProgress(progress);
                     return false;
                 }
             }

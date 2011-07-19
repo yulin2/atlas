@@ -40,23 +40,22 @@ public class ChildRefUpdateTask extends ScheduledTask {
         ContentListingProgress progress = getProgress();
         
         contentLister.listContent(ImmutableSet.of(ContentTable.CHILD_ITEMS), ContentListingCriteria.defaultCriteria().startingAt(progress), new ContentListingHandler() {
-            
             @Override
-            public boolean handle(Content content, ContentListingProgress progress) {
-                if(content instanceof Episode) {
-                    childRefWriter.includeEpisodeInSeriesAndBrand((Episode)content);
-                } else if(content instanceof Item) {
-                    childRefWriter.includeItemInTopLevelContainer((Item)content);
-                }
-                reportStatus(progress.toString());
-                if(progress.count() % 100 == 0) {
-                    updateProgress(progress);
+            public boolean handle(Iterable<? extends Content> contents, ContentListingProgress progress) {
+                for (Content content : contents) {
+                    if(content instanceof Episode) {
+                        childRefWriter.includeEpisodeInSeriesAndBrand((Episode)content);
+                    } else if(content instanceof Item) {
+                        childRefWriter.includeItemInTopLevelContainer((Item)content);
+                    }
+                    reportStatus(progress.toString());
+                    if(progress.count() % 100 == 0) {
+                        updateProgress(progress);
+                    }
                 }
                 return true;
             }
-            
         });
-        
     }
 
     private void updateProgress(ContentListingProgress progress) {
