@@ -10,11 +10,15 @@ public final class SeriesAndEpisodeNumber {
 	private int episodeNumber;
 	
 	public SeriesAndEpisodeNumber(Episode episode) {
-		this.seriesNumber = episode.getSeriesNumber();
-		this.episodeNumber = episode.getEpisodeNumber();
+		this(episode.getSeriesNumber(), episode.getEpisodeNumber());
 	}
+	
+	public SeriesAndEpisodeNumber(int seriesNumber, int episodeNumber) {
+        this.seriesNumber = seriesNumber;
+        this.episodeNumber = episodeNumber;
+    }
 
-	@Override
+    @Override
 	public int hashCode() {
 		return Objects.hashCode(seriesNumber, episodeNumber);
 	}
@@ -27,4 +31,12 @@ public final class SeriesAndEpisodeNumber {
 		}
 		return false;
 	}
+	
+	public int getSeriesNumber() {
+        return seriesNumber;
+    }
+	
+	public int getEpisodeNumber() {
+        return episodeNumber;
+    }
 }
