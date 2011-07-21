@@ -141,7 +141,7 @@ public class C4EpgEntryProcessor {
     }
 
     private Episode updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel) {
-        if (entry.title().equals(entry.brandTitle())) {
+        if (entry.title().equals(entry.brandTitle()) && entry.seriesNumber() != null && entry.episodeNumber() != null) {
             episode.setTitle(String.format(C4EpisodesExtractor.EPISODE_TITLE_TEMPLATE, entry.seriesNumber(), entry.episodeNumber()));
         } else {
             episode.setTitle(entry.title());
