@@ -114,7 +114,11 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		return new Ordering<Content>() {
 			@Override
 			public int compare(Content o1, Content o2) {
-				return byPublisher.compare(o1.getPublisher(), o2.getPublisher());
+				int cmp = byPublisher.compare(o1.getPublisher(), o2.getPublisher());
+				if (cmp != 0) {
+				    return cmp;
+				}
+				return o1.getCanonicalUri().compareTo(o2.getCanonicalUri());
 			}
 		};
 	}
