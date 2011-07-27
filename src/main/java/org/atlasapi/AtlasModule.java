@@ -39,17 +39,17 @@ public class AtlasModule {
 	private final String dbName = Configurer.get("mongo.dbName").get();
 	private final Parameter processingConfig = Configurer.get("processing.config");
 
-	public @Bean DatabasedMongo mongo() {
-		try {
-			Mongo mongo = new Mongo(mongoHosts());
-			if(processingConfig == null || !processingConfig.toBoolean()) {
-			    mongo.slaveOk();
-			}
-			return new DatabasedMongo(mongo, dbName);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	public @Bean DatabasedMongo databasedMongo() {
+	    return new DatabasedMongo(mongo(), dbName);
 	}
+
+    public @Bean Mongo mongo() {
+        Mongo mongo = new Mongo(mongoHosts());
+        if(processingConfig == null || !processingConfig.toBoolean()) {
+            mongo.slaveOk();
+        }
+        return mongo;
+    }
 
     private List<ServerAddress> mongoHosts() {
         Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
