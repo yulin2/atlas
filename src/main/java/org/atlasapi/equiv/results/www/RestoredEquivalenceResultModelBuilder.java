@@ -99,7 +99,6 @@ public class RestoredEquivalenceResultModelBuilder {
         for (Entry<String, Double> sourceScore : sourceScores.entrySet()) {
             String source = sourceScore.getKey();
             Double score = sourceScore.getValue();
-            score = score.isNaN() ? 0 : score;
             
             if(score == null || score.isNaN()) {
                 scoreModel.put(source, false);

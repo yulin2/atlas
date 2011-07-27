@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.equiv.query.SeriesAndEpisodeNumber;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Clip;
@@ -172,10 +173,22 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		
 		String itemUri = C4AtomApi.canonicalUri(entry);
 		
-		if (itemUri == null) {
-			// fall back to hacking the uri out of the feed
-			itemUri = extarctUriFromLink(source, entry);
+		SeriesAndEpisodeNumber seriesAndEpisodeNumberFromLinks = extractSeriesAndEpisodeNumberFromLinks(source, entry);
+
+		// fill in missing data by extracting it from the feed
+		if (seriesAndEpisodeNumberFromLinks != null) {
+		    if (itemUri == null) {
+		        // fall back to hacking the uri, series and episode number out of the feed links
+		        itemUri = buildUriFromSeriesAndEpisodeNumber(source, seriesAndEpisodeNumberFromLinks);
+		    }
+		    if (seriesNumber == null) {
+                seriesNumber = seriesAndEpisodeNumberFromLinks.getSeriesNumber();
+            }
+            if (episodeNumber == null) {
+                episodeNumber = seriesAndEpisodeNumberFromLinks.getEpisodeNumber();
+            }
 		}
+		
 		if (itemUri == null) {
 		    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Unable to derive URI for c4 episode with id: " + entry.getId()).withSource(this.getClass()));
 		    return null;
@@ -224,17 +237,21 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC));
 	}
 
+	private String buildUriFromSeriesAndEpisodeNumber(Feed source, SeriesAndEpisodeNumber seriesAndEpisodeNumber) {
+		return C4AtomApi.episodeUri(C4AtomApi.webSafeNameFromAnyFeedId(source.getId()), seriesAndEpisodeNumber.getSeriesNumber(), seriesAndEpisodeNumber.getEpisodeNumber()); 
+	}
+
 	@SuppressWarnings("unchecked")
-	private String extarctUriFromLink(Feed source, Entry entry) {
-		for (Link link : (List<Link>) entry.getOtherLinks()) {
+    private SeriesAndEpisodeNumber extractSeriesAndEpisodeNumberFromLinks(Feed source, Entry entry) {
+        for (Link link : (List<Link>) entry.getOtherLinks()) {
 			Matcher matcher = C4AtomApi.SERIES_AND_EPISODE_NUMBER_IN_ANY_URI.matcher(link.getHref());
 			if (matcher.find()) {
-				return C4AtomApi.episodeUri(C4AtomApi.webSafeNameFromAnyFeedId(source.getId()), Integer.valueOf(matcher.group(1)), Integer.valueOf(matcher.group(2)));	
+				return new SeriesAndEpisodeNumber(Integer.valueOf(matcher.group(1)), Integer.valueOf(matcher.group(2)));	
 			}
 		}
-		return null;
-	}
-	
+        return null;
+    }
+    
 	private String description(Entry entry) {
 		com.sun.syndication.feed.atom.Content description = entry.getSummary();
 		if (description == null) {
