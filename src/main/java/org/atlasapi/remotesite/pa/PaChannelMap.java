@@ -581,9 +581,9 @@ public class PaChannelMap {
         channelMap.put(1597, Channel.HEART_WEST_COUNTRY);
         channelMap.put(1600, Channel.HEART_EAST_ANGLIA);
         channelMap.put(1591, Channel.RTE_CHOICE);
-        channelMap.put(1589, Channel.RTE_JUNIOR);
-        channelMap.put(502, Channel.BBC_ASIAN_NETWORK);
-        channelMap.put(424, Channel.TAY_FM);
+        channelMap.put(1589, Channel.RTE_JUNIOR); */
+        channelMap.put(502, Channel.BBC_RADIO_ASIANNETWORK);
+/*        channelMap.put(424, Channel.TAY_FM);
         channelMap.put(425, Channel.TAY_AM);
         channelMap.put(426, Channel.VICTORIA_HOSPITAL_RADIO);
         channelMap.put(427, Channel.SWANSEA);
@@ -663,11 +663,11 @@ public class PaChannelMap {
         channelMap.put(583, Channel.TOUCH_RADIO_96.2);
         channelMap.put(584, Channel.LBC_97.3);
         channelMap.put(585, Channel.LIVE_95);
-        channelMap.put(587, Channel.KINGDOM_FM);
-        channelMap.put(588, Channel.BBC_WORLD_SERVICE);
-        channelMap.put(589, Channel.MAGIC_105.4);
+        channelMap.put(587, Channel.KINGDOM_FM); */
+        channelMap.put(588, Channel.BBC_RADIO_WORLDSERVICE);
+/*        channelMap.put(589, Channel.MAGIC_105.4); */
         channelMap.put(590, Channel.MAGIC);
-        channelMap.put(591, Channel.MAGIC_1170);
+/*        channelMap.put(591, Channel.MAGIC_1170);
         channelMap.put(592, Channel.MAGIC_1548);
         channelMap.put(593, Channel.MAGIC_828);
         channelMap.put(596, Channel.LBC_NEWS_1152);
