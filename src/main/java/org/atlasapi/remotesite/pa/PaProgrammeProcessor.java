@@ -24,6 +24,7 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.pa.bindings.Attr;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.CastMember;
 import org.atlasapi.remotesite.pa.bindings.Category;
@@ -332,7 +333,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
         
         if (progData.getAttr() != null) {
-            broadcast.setRepeat(getBooleanValue(progData.getAttr().getRepeat()));
+            broadcast.setRepeat(isRepeat(channel, progData.getAttr()));
             broadcast.setSubtitled(getBooleanValue(progData.getAttr().getSubtitles()));
             broadcast.setSigned(getBooleanValue(progData.getAttr().getSignLang()));
             broadcast.setAudioDescribed(getBooleanValue(progData.getAttr().getAudioDes()));
@@ -344,7 +345,77 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         broadcast.setLastUpdated(updateAt.toDateTimeUTC());
         return broadcast;
     }
+
+    private static final Set<Channel> TERRESTRIAL_CHANNELS = ImmutableSet.<Channel>builder()
+        .add(Channel.BBC_ONE_EAST)
+        .add(Channel.BBC_ONE)
+        .add(Channel.BBC_ONE_WEST_MIDLANDS)
+        .add(Channel.BBC_ONE_EAST_MIDLANDS)
+        .add(Channel.BBC_ONE_YORKSHIRE)
+        .add(Channel.BBC_ONE_NORTH_EAST)
+        .add(Channel.BBC_ONE_NORTH_WEST)
+        .add(Channel.BBC_ONE_NORTHERN_IRELAND)
+        .add(Channel.BBC_ONE_WALES)
+        .add(Channel.BBC_ONE_SCOTLAND)
+        .add(Channel.BBC_ONE_SOUTH)
+        .add(Channel.BBC_ONE_SOUTH_WEST)
+        .add(Channel.BBC_ONE_WEST)
+        .add(Channel.BBC_ONE_SOUTH_EAST)
+        .add(Channel.BBC_TWO)
+        .add(Channel.BBC_TWO_NORTHERN_IRELAND)
+        .add(Channel.BBC_TWO_SCOTLAND)
+        .add(Channel.BBC_TWO_WALES)
+        .add(Channel.ITV1_ANGLIA)
+        .add(Channel.ITV1_BORDER_SOUTH)
+        .add(Channel.ITV1_LONDON)
+        .add(Channel.ITV1_CARLTON_CENTRAL)
+        .add(Channel.ITV1_CHANNEL)
+        .add(Channel.ITV1_GRANADA)
+        .add(Channel.ITV1_MERIDIAN)
+        .add(Channel.ITV1_TYNE_TEES)
+        .add(Channel.YTV)
+        .add(Channel.ITV1_CARLTON_WESTCOUNTRY)
+        .add(Channel.ITV1_WALES)
+        .add(Channel.ITV1_WEST)
+        .add(Channel.STV_CENTRAL)
+        .add(Channel.ULSTER)
+        .add(Channel.ITV1_BORDER_NORTH)
+        .add(Channel.CHANNEL_FOUR)
+        .add(Channel.S4C)
+        .add(Channel.FIVE)
+        .add(Channel.BBC_RADIO_RADIO1)
+        .add(Channel.BBC_RADIO_RADIO2)
+        .add(Channel.BBC_RADIO_RADIO3)
+        .add(Channel.BBC_RADIO_RADIO4)
+        .add(Channel.BBC_RADIO_RADIO7)
+        .add(Channel.BBC_RADIO_RADIO4_LW)
+        .add(Channel.BBC_RADIO_5LIVE)
+        .add(Channel.BBC_RADIO_5LIVESPORTSEXTRA)
+        .add(Channel.BBC_RADIO_6MUSIC)
+        .add(Channel.BBC_RADIO_1XTRA)
+        .add(Channel.BBC_RADIO_ASIANNETWORK)
+        .add(Channel.BBC_RADIO_WORLDSERVICE)
+        .add(Channel.BBC_THREE)
+        .add(Channel.BBC_FOUR)
+        .add(Channel.ITV2)
+        .add(Channel.ITV3)
+        .add(Channel.ITV4)
+        .add(Channel.FIVE)
+        .add(Channel.FIVE_HD)
+        .add(Channel.FIVE_USA)
+        .add(Channel.E4_HD)
+        .add(Channel.E_FOUR)
+        .add(Channel.MORE_FOUR)
+        .add(Channel.FILM_4)
+    .build();
     
+    private Boolean isRepeat(Channel channel, Attr attr) {
+        if (!TERRESTRIAL_CHANNELS.contains(channel)) {
+            return true;
+        }
+        return getBooleanValue(attr.getRepeat());
+    }
+
     private void addBroadcast(Version version, Broadcast broadcast) {
         if (! Strings.isNullOrEmpty(broadcast.getId())) {
             Set<Broadcast> broadcasts = Sets.newHashSet();
