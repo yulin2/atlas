@@ -92,6 +92,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         .add(Channel.BBC_TWO_SCOTLAND.uri())
         .add(Channel.BBC_TWO_WALES.uri())
         .add(Channel.BBC_TWO_WALES_ANALOGUE.uri())
+        .add(Channel.BBC_RADIO_RADIO4_LW.uri())
      .build();
     
     private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
