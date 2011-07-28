@@ -43,7 +43,7 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		Set<String> genres = Sets.newHashSet();
 		for (Object cat : source.getCategories()) {
             Category category = (Category) cat;
-            genres.add(category.getTerm().replaceAll(".atom", ""));
+            genres.add(category.getTerm().replaceAll(".atom", "").replaceAll("/pmlsd/", "/programmes/"));
         }
 		brand.setGenres(new C4CategoryGenreMap().mapRecognised(genres));
 		
