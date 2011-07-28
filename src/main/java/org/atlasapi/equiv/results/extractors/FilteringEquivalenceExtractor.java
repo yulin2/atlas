@@ -26,7 +26,8 @@ public class FilteringEquivalenceExtractor<T extends Content> implements Equival
     
     @Override
     public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
-        return delegate.extract(target, ImmutableList.copyOf(Iterables.filter(equivalents, filter(target, filter))));
+        ImmutableList<ScoredEquivalent<T>> filtered = ImmutableList.copyOf(Iterables.filter(equivalents, filter(target, filter)));
+        return delegate.extract(target, filtered);
     }
 
     private Predicate<ScoredEquivalent<T>> filter(final T target, final EquivalenceFilter<T> filter) {
