@@ -3,13 +3,17 @@
   <id>tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares</id>
   <title type="text">Ramsay's Kitchen Nightmares</title>
   <subtitle type="html">Gordon Ramsay attempts to transform struggling restaurants with his own menu of extremely frank and forthright advice. The heat is on - and this chef's not mincing any words...</subtitle>
-  <updated>2010-08-09T15:57:38.852Z</updated>
+  <updated>2010-11-17T17:35:38.468Z</updated>
   <author>
     <name>Channel 4 Television</name>
   </author>
-  <logo>http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_145x82.jpg</logo>
+  <logo imageSource="own">http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_200x113.jpg</logo>
   <link href="http://www.channel4.com/programmes/ramsays-kitchen-nightmares" rel="alternate" type="text/html"/>
-  <link href="http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
-  <link href="http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
-  <link href="http://api.channel4.com/programmes/ramsays-kitchen-nightmares/4od.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="4oD"/>
+  <link href="http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom?apikey=sxwmsq9k9mtkdh9ff6vxuyjs" rel="self" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom?apikey=sxwmsq9k9mtkdh9ff6vxuyjs" rel="related" type="application/atom+xml" title="Episode Guide"/>
+  <link href="http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/4od.atom?apikey=sxwmsq9k9mtkdh9ff6vxuyjs" rel="related" type="application/atom+xml" title="4oD"/>
+  <category term="http://www.channel4.com/pmlsd/tags/food.atom" scheme="tag:www.channel4.com,2010:/category/primary" label="Food"/>
+  <category term="http://www.channel4.com/pmlsd/tags/lifestyle.atom" scheme="tag:www.channel4.com,2010:/category/secondary" label="Lifestyle"/>
+  <dc:relation.presentationBrand>C4</dc:relation.presentationBrand>
+  <dc:relation.BrandFlattened>false</dc:relation.BrandFlattened>
 </feed>

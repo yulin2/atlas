@@ -95,6 +95,8 @@ public class C4BrandExtractor {
                 episode.setImage(brand.getImage());
                 episode.setThumbnail(brand.getThumbnail());
             }
+            
+            episode.setGenres(brand.getGenres());
         }
 
         populateBroadcasts(episodes, brand);
@@ -104,6 +106,7 @@ public class C4BrandExtractor {
         contentWriter.createOrUpdate(brand);
         
         for (Series series : allSeries) {
+            series.setGenres(brand.getGenres());
             contentWriter.createOrUpdate(series);
         }
 
