@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc;
 
+import static com.metabroadcast.common.time.DateTimeZones.UTC;
+
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
@@ -16,6 +18,7 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateBuilder;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonOndemandChangeUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
+import org.atlasapi.remotesite.bbc.ion.DefaultBbcIonScheduleHandler;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +27,6 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.DayRangeGenerator;
 
 @Configuration
@@ -44,7 +46,6 @@ public class BbcModule {
     @PostConstruct
     public void scheduleTasks() {
         scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
-//        scheduler.schedule(bbcHighlightsUpdater(), HIGHLIGHTS_UPDATE_TIME);
         
         scheduler.schedule(bbcIonUpdater(0, 0)
         		.withName("BBC Ion schedule update (today only)"), 
@@ -59,20 +60,20 @@ public class BbcModule {
     }
 	
 	private BbcIonDateRangeScheduleUpdater bbcIonUpdater(int lookBack, int lookAhead) {
-	    DayRangeGenerator dayRangeGenerator = new DayRangeGenerator(DateTimeZones.UTC).withLookAhead(lookAhead).withLookBack(lookBack);
-        return new BbcIonDateRangeScheduleUpdater(dayRangeGenerator, contentResolver, contentWriters, log)
-            .withItemFetchClient(new BbcIonEpisodeDetailItemFetcherClient(log))
-            .withContainerFetchClient(new BbcIonContainerFetcherClient(log))
-            .withItemsPeopleWriter(itemsPeopleWriter);
+	    return new BbcIonDateRangeScheduleUpdater(new DayRangeGenerator(UTC).withLookAhead(lookAhead).withLookBack(lookBack), defaultBbcIonScheduleHandler(), log);
     }
 	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
-	    return new BbcIonScheduleController(contentResolver, contentWriters, itemsPeopleWriter, log);
+	    return new BbcIonScheduleController(new BbcIonScheduleClient(BbcIonDateRangeScheduleUpdater.SCHEDULE_PATTERN), defaultBbcIonScheduleHandler(), log);
 	}
-
-	//	@Bean Runnable bbcHighlightsUpdater() {
-//		return new BbcIplayerHightlightsAdapter(contentWriters, log);
-//	}
+	
+    @Bean
+    DefaultBbcIonScheduleHandler defaultBbcIonScheduleHandler() {
+        return new DefaultBbcIonScheduleHandler(contentResolver, contentWriters, log)
+            .withItemFetcherClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+            .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
+            .withItemPeopleWriter(itemsPeopleWriter);
+    }
 
 	@Bean Runnable bbcFeedsUpdater() {
 		return new BbcSlashProgrammesAtoZUpdater(contentWriters, log);
