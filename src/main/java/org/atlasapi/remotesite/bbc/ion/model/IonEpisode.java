@@ -19,7 +19,7 @@ public class IonEpisode {
     private String subseriesTitle;
     private Boolean isDownloadableSd;
     private Boolean isRepeat;
-    private String actualStart;
+    private DateTime actualStart;
     private String masterbrandTitle;
     private String title;
     private Boolean isDownloadableHd;
@@ -129,7 +129,7 @@ public class IonEpisode {
         return isRepeat;
     }
 
-    public String getActualStart() {
+    public DateTime getActualStart() {
         return actualStart;
     }
 

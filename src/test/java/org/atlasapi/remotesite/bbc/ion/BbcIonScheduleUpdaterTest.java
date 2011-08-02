@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.remotesite.bbc.ion.BbcIonDateRangeScheduleUpdater.SCHEDULE_PATTERN;
+import static org.atlasapi.remotesite.bbc.BbcModule.SCHEDULE_DEFAULT_FORMAT;
 import static org.hamcrest.core.AllOf.allOf;
 import junit.framework.TestCase;
 
@@ -19,7 +19,6 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.joda.time.format.ISODateTimeFormat;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -28,9 +27,9 @@ import com.google.common.io.Resources;
 
 public class BbcIonScheduleUpdaterTest extends TestCase {
 
-    private static final String THE_SERVICE = "the_service";
-    private static final String THE_DAY = "21010101";
-    private static final String ION_FEED_URI = String.format(SCHEDULE_PATTERN, THE_SERVICE, THE_DAY);
+    private static final String SERVICE = "the_service";
+    private static final String DAY = "21010101";
+    private static final String ION_FEED_URI = String.format(SCHEDULE_DEFAULT_FORMAT, SERVICE, DAY);
     
 	private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
 	private static final String ITEM_A = SLASH_PROGRAMMES_ROOT + "b00y377q";
@@ -44,7 +43,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
 
         ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
-        BbcIonScheduleClient client = new BbcIonScheduleClient(SCHEDULE_PATTERN, FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-no-brand-no-series.json")));
+        BbcIonScheduleClient client = new BbcIonScheduleClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-no-brand-no-series.json")));
         
         context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(allOf(
@@ -54,7 +53,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
         }});
 
         BbcIonScheduleHandler handler = new DefaultBbcIonScheduleHandler(resolver, writer, log);
-        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY), client, handler, log).call();
+        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, log).call();
     }
     
     @SuppressWarnings("unchecked")
@@ -64,7 +63,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     	final String item2 = SLASH_PROGRAMMES_ROOT + "b006m86d";
     	
         ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
-        BbcIonScheduleClient client = new BbcIonScheduleClient(SCHEDULE_PATTERN, FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-no-series.json")));
+        BbcIonScheduleClient client = new BbcIonScheduleClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-no-series.json")));
 
         context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(allOf(
@@ -78,13 +77,13 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
         }});
 
         BbcIonScheduleHandler handler = new DefaultBbcIonScheduleHandler(resolver, writer, log);
-        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY), client, handler, log).call();
+        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, log).call();
     }
 
     @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
         ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
-        BbcIonScheduleClient client = new BbcIonScheduleClient(SCHEDULE_PATTERN, FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-series.json")));
+        BbcIonScheduleClient client = new BbcIonScheduleClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-series.json")));
 
         context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(allOf(
@@ -101,7 +100,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
         }});
 
         BbcIonScheduleHandler handler = new DefaultBbcIonScheduleHandler(resolver, writer, log);
-        new BbcIonScheduleUpdateTask(THE_SERVICE,ISODateTimeFormat.basicDate().parseDateTime(THE_DAY), client, handler, log).call();
+        new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, log).call();
     }
     
     private Matcher<Item> version(final Matcher<? super Version> versionMatcher) {

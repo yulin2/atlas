@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.remotesite.bbc.BbcModule.SCHEDULE_DEFAULT_FORMAT;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -54,7 +56,7 @@ public class BbcIonScheduleController {
             return;
         }
         
-        executor.submit(new BbcIonScheduleUpdateTask(service, localDate, scheduleClient, handler, log));
+        executor.submit(new BbcIonScheduleUpdateTask(String.format(SCHEDULE_DEFAULT_FORMAT, service, localDate), scheduleClient, handler, log));
 
         response.setStatus(HttpServletResponse.SC_OK);
     }

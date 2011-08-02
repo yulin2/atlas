@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static com.metabroadcast.common.time.DateTimeZones.UTC;
-
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
@@ -14,37 +12,28 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.bbc.BbcIonScheduleClient;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
 
+import com.google.common.base.Supplier;
 import com.metabroadcast.common.scheduling.ScheduledTask;
-import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
-import com.metabroadcast.common.time.DayRangeGenerator;
-import com.metabroadcast.common.time.SystemClock;
 
-public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
+public class BbcIonScheduleUpdater extends ScheduledTask {
 
-    public static final String SCHEDULE_PATTERN = "http://www.bbc.co.uk/iplayer/ion/schedule/service/%s/date/%s/timeslot/day/format/json";
     private static final int THREADS = 5;
 
-    private final DayRangeGenerator dayRange;
+    private final Supplier<Iterable<String>> urlSupplier;
+    private final BbcIonScheduleClient scheduleClient;
     private final BbcIonScheduleHandler handler;
     private final AdapterLog log;
 
-    private BbcIonScheduleClient scheduleClient = new BbcIonScheduleClient(SCHEDULE_PATTERN);
-    private final Clock clock;
 
-    public BbcIonDateRangeScheduleUpdater(DayRangeGenerator dayRange, BbcIonScheduleHandler handler, AdapterLog log, Clock clock) {
-        this.dayRange = dayRange;
+    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, BbcIonScheduleClient client, BbcIonScheduleHandler handler, AdapterLog log) {
+        this.urlSupplier = urlSupplier;
+        this.scheduleClient = client;
         this.handler = handler;
         this.log = log;
-        this.clock = clock;
-    }
-
-    public BbcIonDateRangeScheduleUpdater(DayRangeGenerator dayRange, BbcIonScheduleHandler handler, AdapterLog log) {
-        this(dayRange, handler, log, new SystemClock());
     }
 
     @Override
@@ -57,12 +46,11 @@ public class BbcIonDateRangeScheduleUpdater extends ScheduledTask {
 
         int submitted = 0;
 
-        for (String serviceKey : BbcIonServices.services.keySet()) {
-            for (LocalDate day : dayRange.generate(clock.now().toLocalDate())) {
-                completer.submit(new BbcIonScheduleUpdateTask(serviceKey, day.toDateTimeAtStartOfDay(UTC), scheduleClient, handler, log));
-                submitted++;
-            }
+        for (String url : urlSupplier.get()) {
+            completer.submit(new BbcIonScheduleUpdateTask(url, scheduleClient, handler, log));
+            submitted++;
         }
+
         reportStatus(String.format("Submitted %s update tasks", submitted));
 
         int processed = 0, failed = 0, broadcasts = 0;
