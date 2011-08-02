@@ -50,7 +50,9 @@ public class BbcIonOndemandChangeTaskBuilder {
                     Item item = (Item) resolvedItem.get(uri).requireValue();
                     itemUpdater.updateItemDetails(item, change);
                     writer.createOrUpdate(item);
-                }
+                }/* else {
+                    log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("No item %s for on-demand change", uri));
+                }*/
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Unable to process ondemand changes for item " + uri));
             }
