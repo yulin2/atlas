@@ -57,8 +57,10 @@ public class BroadcastTrimmer {
                             // interval/channel
                             if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
                                 if (broadcast.getId() != null && !acceptableIds.contains(broadcast.getId())) {
-                                    broadcast.setIsActivelyPublished(false);
-                                    changed = true;
+                                    if(!Boolean.FALSE.equals(broadcast.isActivelyPublished())) {
+                                        broadcast.setIsActivelyPublished(false);
+                                        changed = true;
+                                    }
                                 }
                             }
                         }
