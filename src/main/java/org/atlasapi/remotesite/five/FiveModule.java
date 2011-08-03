@@ -2,10 +2,10 @@ package org.atlasapi.remotesite.five;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.ContentWriters;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +20,7 @@ public class FiveModule {
 private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0));
     
     private @Autowired SimpleScheduler scheduler;
-    private @Autowired ContentWriters contentWriter;
+    private @Autowired ContentWriter contentWriter;
     private @Autowired AdapterLog log;
     
     @PostConstruct

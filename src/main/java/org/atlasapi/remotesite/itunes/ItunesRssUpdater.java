@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.xml.SimpleXmlNavigator;
 import org.jdom.Element;
@@ -21,9 +21,9 @@ public class ItunesRssUpdater implements Runnable {
     private final SimpleHttpClient client;
     private final SiteSpecificAdapter<Brand> brandAdapter;
     private final AdapterLog log;
-    private final ContentWriters contentWriter;
+    private final ContentWriter contentWriter;
 
-    public ItunesRssUpdater(Iterable<String> feedUris, SimpleHttpClient client, ContentWriters contentWriter, SiteSpecificAdapter<Brand> brandAdapter, AdapterLog log) {
+    public ItunesRssUpdater(Iterable<String> feedUris, SimpleHttpClient client, ContentWriter contentWriter, SiteSpecificAdapter<Brand> brandAdapter, AdapterLog log) {
         this.feedUris = feedUris;
         this.client = client;
         this.contentWriter = contentWriter;

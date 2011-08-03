@@ -10,12 +10,12 @@ import nu.xom.Builder;
 import nu.xom.Document;
 
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.C4EpgElementFactory;
@@ -47,7 +47,7 @@ public class C4Module {
 	private @Value("${c4.apiKey}") String c4ApiKey;
 
 	private @Autowired ContentResolver contentResolver;
-	private @Autowired ContentWriters contentWriter;
+	private @Autowired ContentWriter contentWriter;
 	private @Autowired AdapterLog log;
 	private @Autowired ScheduleResolver scheduleResolver;
 	

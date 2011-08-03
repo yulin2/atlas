@@ -7,11 +7,11 @@ import static org.joda.time.Duration.standardMinutes;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
@@ -44,7 +44,7 @@ public class BbcModule {
 	public final static String SCHEDULE_DEFAULT_FORMAT = "http://www.bbc.co.uk/iplayer/ion/schedule/service/%s/date/%s/timeslot/day/format/json";
 
     private @Autowired ContentResolver contentResolver;
-	private @Autowired ContentWriters contentWriters;
+	private @Autowired ContentWriter contentWriters;
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
 	private @Autowired ItemsPeopleWriter itemsPeopleWriter;
