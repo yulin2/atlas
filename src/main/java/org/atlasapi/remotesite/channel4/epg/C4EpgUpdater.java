@@ -32,7 +32,8 @@ import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -41,7 +42,7 @@ import com.metabroadcast.common.time.DayRangeGenerator;
 
 public class C4EpgUpdater implements Runnable {
 
-    private final static Map<String, Channel> CHANNEL_MAP = ImmutableMap.of(
+    private final static BiMap<String, Channel> CHANNEL_MAP = ImmutableBiMap.of(
             "C4", CHANNEL_FOUR,
             "M4", MORE_FOUR,
             "F4", FILM_4,
@@ -104,15 +105,15 @@ public class C4EpgUpdater implements Runnable {
     private void trim(LocalDate scheduleDay, Channel channel, Iterable<C4EpgEntry> entries) {
         DateTime scheduleStart = scheduleDay.toDateTime(new LocalTime(6,0,0), DateTimeZones.LONDON);
         Interval scheduleInterval = new Interval(scheduleStart, scheduleStart.plusDays(1));
-        trimmer.trimBroadcasts(scheduleInterval, channel, broacastIdsFrom(entries));
+        trimmer.trimBroadcasts(scheduleInterval, channel, broacastIdsFrom(entries, channel));
     }
 
-    private Collection<String> broacastIdsFrom(Iterable<C4EpgEntry> entries) {
+    private Collection<String> broacastIdsFrom(Iterable<C4EpgEntry> entries, final Channel channel) {
         return ImmutableSet.copyOf(Iterables.filter(Iterables.transform(entries, new Function<C4EpgEntry, String>() {
             @Override
             public String apply(C4EpgEntry entry) {
                 String slotId = entry.slotId();
-                return slotId == null ? null : "c4:"+slotId;
+                return slotId == null ? null : String.format("%s:%s", CHANNEL_MAP.inverse().get(channel).toLowerCase(),slotId);
             }
         }), notNull()));
     }
