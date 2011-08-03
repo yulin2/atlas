@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
@@ -141,16 +142,20 @@ public class C4EpgEntryProcessor {
     }
 
     private Episode updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel) {
-        if (entry.title().equals(entry.brandTitle()) && entry.seriesNumber() != null && entry.episodeNumber() != null) {
-            episode.setTitle(String.format(C4EpisodesExtractor.EPISODE_TITLE_TEMPLATE, entry.seriesNumber(), entry.episodeNumber()));
-        } else {
-            episode.setTitle(entry.title());
+        if(episode.getTitle() == null) {
+            if (entry.title().equals(entry.brandTitle()) && entry.seriesNumber() != null && entry.episodeNumber() != null) {
+                episode.setTitle(String.format(C4EpisodesExtractor.EPISODE_TITLE_TEMPLATE, entry.seriesNumber(), entry.episodeNumber()));
+            } else {
+                episode.setTitle(entry.title());
+            }
         }
 
         episode.setSeriesNumber(entry.seriesNumber());
         episode.setEpisodeNumber(entry.episodeNumber());
 
-        episode.setDescription(entry.summary());
+        if(episode.getDescription() == null) {
+            episode.setDescription(entry.summary());
+        }
 
         updateVersion(episode, entry, channel);
 
@@ -167,7 +172,10 @@ public class C4EpgEntryProcessor {
 
     public static void updateVersion(Episode episode, C4EpgEntry entry, Channel channel) {
         Version version = Iterables.getFirst(episode.nativeVersions(), new Version());
-        version.setDuration(entry.duration());
+        
+        if(version.getDuration() == null) {
+            version.setDuration(entry.duration());
+        }
         
         version.setBroadcasts(updateBroadcasts(version.getBroadcasts(), entry, channel));
 
@@ -235,7 +243,7 @@ public class C4EpgEntryProcessor {
     static Policy policyFrom(C4EpgEntry entry) {
         Policy policy = new Policy();
         policy.setLastUpdated(entry.updated());
-
+        policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
         policy.setAvailableCountries(entry.media().availableCountries());
 
         Matcher matcher = AVAILABILTY_RANGE_PATTERN.matcher(entry.available());
