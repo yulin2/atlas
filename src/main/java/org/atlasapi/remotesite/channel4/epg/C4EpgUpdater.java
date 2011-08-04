@@ -6,6 +6,7 @@ import static org.atlasapi.media.entity.Channel.E_FOUR;
 import static org.atlasapi.media.entity.Channel.FILM_4;
 import static org.atlasapi.media.entity.Channel.FOUR_MUSIC;
 import static org.atlasapi.media.entity.Channel.MORE_FOUR;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
@@ -37,10 +38,12 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.DayRange;
 import com.metabroadcast.common.time.DayRangeGenerator;
 
-public class C4EpgUpdater implements Runnable {
+public class C4EpgUpdater extends ScheduledTask {
 
     private final static BiMap<String, Channel> CHANNEL_MAP = ImmutableBiMap.of(
             "C4", CHANNEL_FOUR,
@@ -71,35 +74,47 @@ public class C4EpgUpdater implements Runnable {
         this.entryProcessor = entryProcessor;
         this.brandlessEntryProcessor = brandlessEntryProcessor;
     }
+    
 
     @Override
-    public void run() {
+    protected void runTask() {
         DateTime start = new DateTime(DateTimeZones.UTC);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("C4 EPG Update initiated"));
-
+        
+        DayRange dayRange = rangeGenerator.generate(new LocalDate(DateTimeZones.UTC));
+        
+        int total = Iterables.size(dayRange) * CHANNEL_MAP.entrySet().size();
+        int processed = 0;
+        int failures = 0;
+        int broadcasts = 0;
+        
         for (Map.Entry<String, Channel> channelEntry : CHANNEL_MAP.entrySet()) {
-            for (LocalDate scheduleDay : rangeGenerator.generate(new LocalDate(DateTimeZones.UTC))) {
-                updateChannelDay(channelEntry, scheduleDay);
+            for (LocalDate scheduleDay : dayRange) {
+                reportStatus(String.format("Processed %s/%s. %s failures. %s broadcasts processed", processed++, total, failures, broadcasts));
+                
+                String uri = uriFor(channelEntry.getKey(), scheduleDay);
+                log.record(new AdapterLogEntry(Severity.DEBUG).withDescription("Updating from " + uri).withSource(getClass()));
+                
+                Document scheduleDocument = getSchedule(uri);
+                if(scheduleDocument == null) {
+                    failures++;
+                    continue;
+                }
+
+                try {
+                    List<C4EpgEntry> entries = getEntries(scheduleDocument);
+                    trim(scheduleDay, channelEntry.getValue(), entries);
+                    broadcasts += process(entries, channelEntry.getValue());
+                } catch (Exception e) {
+                    log.record(new AdapterLogEntry(ERROR).withCause(e).withSource(getClass()).withDescription("Exception updating from " + uri));
+                    failures++;
+                }
             }
         }
-
+        
+        reportStatus(String.format("Processed %s/%s. %s failures. %s broadcasts processed", processed++, total, failures, broadcasts));
         String runTime = new Period(start, new DateTime(DateTimeZones.UTC)).toString(PeriodFormat.getDefault());
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("C4 EPG Update finished in " + runTime));
-    }
-
-    public void updateChannelDay(Map.Entry<String, Channel> channelEntry, LocalDate scheduleDay) {
-        String uri = uriFor(channelEntry.getKey(), scheduleDay);
-        log.record(new AdapterLogEntry(Severity.DEBUG).withDescription("Updating from " + uri).withSource(getClass()));
-        Document scheduleDocument = getSchedule(uri);
-        if(scheduleDocument != null) {
-            try {
-                List<C4EpgEntry> entries = getEntries(scheduleDocument);
-                trim(scheduleDay, channelEntry.getValue(), entries);
-                process(entries, channelEntry.getValue());
-            } catch (Exception e) {
-                log.record(new AdapterLogEntry(ERROR).withCause(e).withSource(getClass()).withDescription("Exception updating from " + uri));
-            }
-        }
     }
 
     private void trim(LocalDate scheduleDay, Channel channel, Iterable<C4EpgEntry> entries) {
@@ -131,14 +146,21 @@ public class C4EpgUpdater implements Runnable {
         return String.format(epgUriPattern, scheduleDay.toString("yyyy/MM/dd"), channelKey);
     }
 
-    private void process(Iterable<C4EpgEntry> entries, Channel channel) {
+    private int process(Iterable<C4EpgEntry> entries, Channel channel) {
+        int broadcasts = 0;
         for (C4EpgEntry entry : entries) {
-            if (entry.relatedEntry() != null) {
-                entryProcessor.process(entry, channel);
-            } else {
-                brandlessEntryProcessor.process(entry, channel);
+            try {
+                if (entry.relatedEntry() != null) {
+                    entryProcessor.process(entry, channel);
+                } else {
+                    brandlessEntryProcessor.process(entry, channel);
+                }
+                broadcasts++;
+            } catch (Exception e) {
+                log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing entry %s" + entry.id()));
             }
         }
+        return broadcasts;
     }
 
     private List<C4EpgEntry> getEntries(Document scheduleDocument) {
@@ -153,4 +175,5 @@ public class C4EpgUpdater implements Runnable {
         
         return entries;
     }
+
 }
