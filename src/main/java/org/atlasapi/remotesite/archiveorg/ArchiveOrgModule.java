@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.archiveorg;
 
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.remotesite.ContentWriters;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class ArchiveOrgModule {
     private final static Daily AT_NIGHT = RepetitionRules.daily(new LocalTime(5, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
-    private @Autowired ContentWriters contentWriter;
+    private @Autowired ContentWriter contentWriter;
     private @Autowired AdapterLog log;
     
     private @Autowired ArchiveOrgItemAdapter archiveOrgItemAdapter;
