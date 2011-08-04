@@ -1,12 +1,17 @@
 package org.atlasapi.remotesite.channel4;
 
-import java.io.StringReader;
+import static com.metabroadcast.common.http.SimpleHttpRequest.httpRequestFrom;
+
+import java.io.InputStream;
 
 import nu.xom.Builder;
 import nu.xom.Document;
 
 import org.atlasapi.persistence.system.RemoteSiteClient;
 
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
+import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class XmlClient implements RemoteSiteClient<Document> {
@@ -25,7 +30,12 @@ public class XmlClient implements RemoteSiteClient<Document> {
 
     @Override
     public Document get(String uri) throws Exception {
-        return builder.build(new StringReader(client.getContentsOf(uri)));
+        return client.get(httpRequestFrom(uri, new HttpResponseTransformer<Document>() {
+            @Override
+            public Document transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
+                return builder.build(body);
+            }
+        }));
     }
 
 }
