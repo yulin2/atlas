@@ -22,7 +22,7 @@ public class C4SynthesizedItemUpdater {
         this.merger = new C4SynthesizedItemMerger();
     }
 
-    public void findAndUpdatePossibleSynthesized(String broadcastId, Episode canonicalEpisode, String brandUri) {
+    public void findAndUpdateFromPossibleSynthesized(String broadcastId, Episode canonicalEpisode, String brandUri) {
         if (broadcastId == null) {
             return;
         }
@@ -34,8 +34,10 @@ public class C4SynthesizedItemUpdater {
         if(maybeSynthEpisode.hasValue()) {
             Episode synthEpisode = (Episode) maybeSynthEpisode.requireValue();
             
+            //merge synthesized details into canonical item
             merger.merge(synthEpisode, canonicalEpisode);
             
+            //remove details from the synthesized item leaving just a stub.
             synthEpisode.setVersions(ImmutableSet.<Version>of());
             contentWriter.createOrUpdate(synthEpisode);
         }

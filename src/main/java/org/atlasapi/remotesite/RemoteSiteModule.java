@@ -69,8 +69,4 @@ public class RemoteSiteModule {
 		 dispatcher.setAdapters(adapters);
 		 return dispatcher;
 	}
-	
-	public @Bean ContentWriters contentWriters() {
-		return new ContentWriters();
-	}
 }

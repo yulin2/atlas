@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.tvblob;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.remotesite.ContentWriters;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +19,7 @@ public class TVBlobModule {
 	private static final LocalTime TWO_AM = new LocalTime(2, 0, 0);
 	
 	private @Autowired SimpleScheduler scheduler;
-	private @Autowired ContentWriters writer;
+	private @Autowired ContentWriter writer;
 	private @Autowired ContentResolver contentResolver;
 	
 	@PostConstruct

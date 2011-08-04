@@ -67,15 +67,11 @@ public class AtlasFetchModule {
 	
 		@Primary
 		public @Bean ContentWriter contentWriter() {		
-			
-			ContentWriter writer = persistence.contentWriter();
-			
-			remote.contentWriters().add(writer);
-			return writer;
+			return persistence.contentWriter();
 		}
 		
 		public @PostConstruct void passWriterToReader() {
-			reader.savingFetcher().setStore(contentWriter());
+		    reader.savingFetcher().setStore(contentWriter());
 		}
 
 	}
