@@ -288,7 +288,7 @@ public class C4BrandExtractor {
                     } else {
                         version = episode.getVersions().iterator().next();
                     }
-                    synthesizedItemUpdater.findAndUpdatePossibleSynthesized(broadcast.getId(), episode, brand.getCanonicalUri());
+                    synthesizedItemUpdater.findAndUpdateFromPossibleSynthesized(broadcast.getId(), episode, brand.getCanonicalUri());
 
                     boolean found = false;
                     for (Broadcast currentBroadcast : version.getBroadcasts()) {

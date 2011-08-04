@@ -48,7 +48,7 @@ public class C4SynthesizedItemUpdaterTest extends TestCase {
         
         Episode canonEpisode = canonEpisode();
         
-        updater.findAndUpdatePossibleSynthesized("c4:1234", canonEpisode, "brand-name");
+        updater.findAndUpdateFromPossibleSynthesized("c4:1234", canonEpisode, "brand-name");
         
         context.assertIsSatisfied();
         

@@ -109,7 +109,7 @@ public class C4EpgEntryProcessor {
     }
     
     private void updateFromPossibleSynthesized(String webSafeBrandName, C4EpgEntry entry, Episode episode) {
-        c4SynthesizedItemUpdater.findAndUpdatePossibleSynthesized("c4:"+entry.slotId(), episode, C4_PROGRAMMES_BASE+webSafeBrandName);
+        c4SynthesizedItemUpdater.findAndUpdateFromPossibleSynthesized("c4:"+entry.slotId(), episode, C4_PROGRAMMES_BASE+webSafeBrandName);
     }
 
     private Brand updateBrand(String brandName, Episode episode, C4EpgEntry entry) {
