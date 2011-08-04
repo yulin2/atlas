@@ -47,7 +47,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 
 @Configuration
-@Import({AtlasFetchModule.WriterModule.class, AtlasFetchModule.ReaderModule.class})
+@Import({AtlasFetchModule.WriterModule.class})
 public class AtlasFetchModule {
 	
 	public @Bean SimpleScheduler scheduler() {
@@ -63,7 +63,6 @@ public class AtlasFetchModule {
 	
 		private @Autowired ContentPersistenceModule persistence;
 		private @Autowired RemoteSiteModule remote;
-		private @Autowired ReaderModule reader;
 	
 		@Primary
 		public @Bean ContentWriter contentWriter() {		
@@ -71,17 +70,8 @@ public class AtlasFetchModule {
 		}
 		
 		public @PostConstruct void passWriterToReader() {
-		    reader.savingFetcher().setStore(contentWriter());
+		    savingFetcher().setStore(contentWriter());
 		}
-
-	}
-	
-	@Configuration
-	public static class ReaderModule {
-	
-		private @Autowired ContentPersistenceModule persistence;
-		
-		private @Autowired RemoteSiteModule remote;
 		
 		public @Bean CanonicalisingFetcher remoteSiteContentResolver() {
 			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentResolver(), savingFetcher());
