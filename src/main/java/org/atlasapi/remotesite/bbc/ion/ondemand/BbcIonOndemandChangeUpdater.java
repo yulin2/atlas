@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.bbc.ion;
+package org.atlasapi.remotesite.bbc.ion.ondemand;
 
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
