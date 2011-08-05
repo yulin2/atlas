@@ -11,6 +11,7 @@ import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
 import org.atlasapi.remotesite.itv.ItvModule;
+import org.atlasapi.remotesite.itv.interlinking.ItvInterlinkingModule;
 import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.seesaw.SeesawModule;
@@ -41,6 +42,7 @@ public class RemoteSiteModuleConfigurer {
   //      .put("youtube", YouTubeModule.class)
         .put("tvblob",  TVBlobModule.class)
         .put("preview", PreviewNetworksModule.class)
+        .put("itvinterlinking", ItvInterlinkingModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
