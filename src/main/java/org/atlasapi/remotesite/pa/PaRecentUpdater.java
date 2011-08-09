@@ -19,7 +19,7 @@ public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable 
     }
     
     @Override
-    public void run() {
+    public void runTask() {
         final Long since = new DateTime(DateTimeZones.UTC).minusDays(2).getMillis();
         this.processFiles(fileManager.localFiles(new Predicate<File>() {
             @Override

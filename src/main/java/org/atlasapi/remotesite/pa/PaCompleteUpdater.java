@@ -17,7 +17,7 @@ public class PaCompleteUpdater extends PaBaseProgrammeUpdater implements Runnabl
     }
     
     @Override
-    public void run() {
+    public void runTask() {
         this.processFiles(fileManager.localFiles(Predicates.<File>alwaysTrue()));
     }
     
