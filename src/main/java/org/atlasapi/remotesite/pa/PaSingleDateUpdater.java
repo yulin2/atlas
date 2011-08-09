@@ -21,7 +21,7 @@ public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     }
 
     @Override
-    public void run() {
+    public void runTask() {
         processFiles(fileManager.localFiles(new Predicate<File>() {
             @Override
             public boolean apply(File input) {

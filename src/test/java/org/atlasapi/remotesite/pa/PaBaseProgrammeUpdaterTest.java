@@ -124,7 +124,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         }
 
         @Override
-        public void run() {
+        public void runTask() {
             this.processFiles(ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())));
         }
     }

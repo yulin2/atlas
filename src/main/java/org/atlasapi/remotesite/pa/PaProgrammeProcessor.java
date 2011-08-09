@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
@@ -167,7 +168,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         brand.setTitle(progData.getTitle());
         brand.setSpecialization(specialization(progData, channel));
-        brand.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
+        setGenres(progData, brand);
 
         if (progData.getPictures() != null) {
             for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
@@ -196,7 +197,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
-        series.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
+        setGenres(progData, series);
         
         if (progData.getPictures() != null) {
             for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
@@ -262,7 +263,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         episode.setMediaType(channelMap.isRadioChannel(channel) ? MediaType.AUDIO : MediaType.VIDEO);
         episode.setSpecialization(specialization(progData, channel));
-        episode.setGenres(genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS))));
+        setGenres(progData, episode);
         
         if (progData.getCountry() != null) {
             episode.setCountriesOfOrigin(countryMap.parseCountries(progData.getCountry()));
@@ -293,6 +294,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
+    }
+
+    private void setGenres(ProgData progData, Content content) {
+        Set<String> extractedGenres = genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS)));
+        extractedGenres.remove("http://pressassociation.com/genres/BE00");
+        if(!extractedGenres.isEmpty()) {
+            content.setGenres(extractedGenres);
+        }
     }
 
     private Maybe<Item> getEpisode(ProgData progData, Channel channel, DateTimeZone zone, boolean isEpisode, Timestamp updatedAt) {

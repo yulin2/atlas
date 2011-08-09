@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.pa;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,25 +27,27 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.xml.sax.XMLReader;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.concurrency.BoundedExecutor;
 import com.metabroadcast.common.health.HealthProbe;
 import com.metabroadcast.common.health.ProbeResult;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.Timestamp;
 
-public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
+public abstract class PaBaseProgrammeUpdater extends ScheduledTask implements HealthProbe {
 
     private static final String NOT_CURRENTLY_RUNNING = "not currently running";
 
     private static final Pattern FILEDATE = Pattern.compile("^.*/(\\d+)_.*$");
     
     private final AdapterLog log;
-    private boolean isRunning = false;
 
     private final PaProgDataProcessor processor;
-    private final ExecutorService executor = Executors.newFixedThreadPool(25);
+    private final ExecutorService executor = Executors.newFixedThreadPool(1);
     private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 50);
     private final PaChannelMap channelMap = new PaChannelMap();
     private List<Channel> supportedChannels = ImmutableList.of();
@@ -75,13 +78,6 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
         
         return false;
     }
-
-    public boolean isRunning() {
-        return isRunning;
-    }
-    
-    @Override
-    public abstract void run();
     
     @PreDestroy
     public void shutdown() {
@@ -89,11 +85,6 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
     }
     
     protected void processFiles(Iterable<File> files) {
-        if (isRunning) {
-            throw new IllegalStateException("Already running");
-        }
-
-        isRunning = true;
         try {
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
             Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -138,12 +129,10 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
                                     }
                                 }
                                 
-                                if (processedCount % 1000 == 0) {
-                                    log.record(new AdapterLogEntry(Severity.INFO).withSource(PaBaseProgrammeUpdater.class).withDescription("Processed "+processed+" programmes from "+filename));
-                                }
+                                reportStatus(String.format("%s: %s processed", filename, processedCount));
                             }
                         });
-
+//                        reader.parse(new InputSource(new FileInputStream(fileToProcess)));
                         reader.parse(fileToProcess.toURI().toString());
                     }
                 } catch (Exception e) {
@@ -153,7 +142,6 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class));
         } finally {
-            isRunning = false;
             processed.set(0);
             processingFile.set(Maybe.<String>nothing());
             processingProgramme.set(Maybe.<String>nothing());
@@ -168,6 +156,8 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
         return DateTimeZone.forOffsetMillis(zone.getOffset(timezoneDateTime));
     }
     
+    private final Set<String> currentlyProcessing = Sets.newHashSet();
+        
     class ProcessProgrammeJob implements Runnable {
         
         private final ProgData progData;
@@ -185,8 +175,18 @@ public abstract class PaBaseProgrammeUpdater implements Runnable, HealthProbe {
         @Override
         public void run() {
             try {
+                synchronized (currentlyProcessing) {
+                    while(currentlyProcessing.contains(progData.getSeriesId()) || currentlyProcessing.contains(progData.getProgId())) {
+                        currentlyProcessing.wait();
+                    }
+                    currentlyProcessing.add(Strings.isNullOrEmpty(progData.getSeriesId()) ? progData.getProgId() : progData.getSeriesId());
+                }
                 if (progData != null) {
                     processor.process(progData, channel, zone, updatedAt);
+                }
+                synchronized (currentlyProcessing) {
+                    currentlyProcessing.remove(Strings.isNullOrEmpty(progData.getSeriesId()) ? progData.getProgId() : progData.getSeriesId());
+                    currentlyProcessing.notifyAll();
                 }
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaBaseProgrammeUpdater.class).withDescription("Error processing programme " + progData));
