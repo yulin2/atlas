@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.worldservice;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.atlasapi.genres.AtlasGenre;
 
@@ -48,11 +49,12 @@ public enum WsGenre {
         return this.atlasGenre;
     }
     
-    public static Maybe<WsGenre> genreForCode(String code) {
+    public static Set<String> genresForCode(String code) {
         try {
-            return Maybe.just(WsGenre.valueOf(code));
+            WsGenre genre = WsGenre.valueOf(code);
+            return ImmutableSet.of(genre.uri(), genre.atlasGenre().getUri());
         } catch (Exception e) {
-            return Maybe.nothing();
+            return ImmutableSet.of();
         }
     }
 
