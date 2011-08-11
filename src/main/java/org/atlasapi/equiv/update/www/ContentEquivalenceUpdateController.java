@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -29,12 +30,15 @@ public class ContentEquivalenceUpdateController {
     private final Splitter commaSplitter = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final ContentEquivalenceUpdater<Content> contentUpdater;
+    private final ContentEquivalenceUpdater<Film> filmUpdater;
     private final ContentResolver contentResolver;
     private final ExecutorService executor;
     private final AdapterLog log;
 
-    public ContentEquivalenceUpdateController(ContentEquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver, AdapterLog log) {
+
+    public ContentEquivalenceUpdateController(ContentEquivalenceUpdater<Content> contentUpdater, ContentEquivalenceUpdater<Film> filmUpdater, ContentResolver contentResolver, AdapterLog log) {
         this.contentUpdater = contentUpdater;
+        this.filmUpdater = filmUpdater;
         this.contentResolver = contentResolver;
         this.log = log;
         this.executor = Executors.newFixedThreadPool(5);
@@ -63,7 +67,11 @@ public class ContentEquivalenceUpdateController {
             @Override
             public void run() {
                 try{
-                    contentUpdater.updateEquivalences(content);
+                    if (content instanceof Film) {
+                        filmUpdater.updateEquivalences((Film) content);
+                    } else {
+                        contentUpdater.updateEquivalences(content);
+                    }
                 }catch (Exception e) {
                     log.record(AdapterLogEntry.errorEntry().withSource(getClass()).withCause(e).withDescription("Equivalence Update failed for "+content.getCanonicalUri()));
                 }

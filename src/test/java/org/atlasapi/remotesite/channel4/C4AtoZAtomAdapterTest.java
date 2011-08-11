@@ -59,15 +59,12 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 		
 		checking(new Expectations() {{
 			one(itemClient).get("http://api.channel4.com/programmes/atoz/a.atom"); will(returnValue(atoza.build()));
-			one(itemClient).get("http://api.channel4.com/programmes/atoz/a/page-2.atom"); will(returnValue(atoza2.build()));
-			
-			one(writer).createOrUpdate(brand101);
-			one(writer).createOrUpdate(brand202);
-
-			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(brand101));
-			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(brand202));
 			allowing(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(true));
+			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition"); //will(returnValue(brand101));
+
+			one(itemClient).get("http://api.channel4.com/programmes/atoz/a/page-2.atom"); will(returnValue(atoza2.build()));
 			allowing(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(true));
+			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); //will(returnValue(brand202));
 		}});
 		
 		adapter.loadAndSaveByLetter("a");

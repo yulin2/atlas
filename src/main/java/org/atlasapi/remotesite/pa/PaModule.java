@@ -3,12 +3,12 @@ package org.atlasapi.remotesite.pa;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.ContentWriters;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.film.PaFilmModule;
@@ -24,9 +24,6 @@ import org.springframework.context.annotation.Import;
 
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
-import com.metabroadcast.common.scheduling.RepetitionRules.Every;
-import com.metabroadcast.common.scheduling.RepetitionRules.Weekly;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.security.UsernameAndPassword;
 import com.metabroadcast.common.time.DayOfWeek;
@@ -39,7 +36,7 @@ public class PaModule {
     private final static RepetitionRule WEEKLY = RepetitionRules.weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
-    private @Autowired ContentWriters contentWriter;
+    private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired AdapterLog log;
     private @Autowired ScheduleResolver scheduleResolver;

@@ -201,6 +201,10 @@ public class EquivModule {
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
+        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, db);
+    }
+    
+    public @Bean ContentEquivalenceUpdater<Film> filmUpdater() {
         EquivalenceGenerators<Film> generators = EquivalenceGenerators.from(ImmutableSet.<ContentEquivalenceGenerator<Film>>of(
                 new FilmEquivalenceGenerator(searchResolver)
         ),log);
@@ -208,7 +212,7 @@ public class EquivModule {
         EquivalenceResultBuilder<Film> resultBuilder = standardResultBuilder();
         
         ContentEquivalenceUpdater<Film> updater = new ItemEquivalenceUpdater<Film>(generators, scorers, resultBuilder);
-        return new FilmEquivalenceUpdateTask(contentLister, writingContentUpdater(updater), log, db);
+        return writingContentUpdater(updater);
     }
     
     @PostConstruct
@@ -217,6 +221,7 @@ public class EquivModule {
             taskScheduler.schedule(publisherUpdateTask(Publisher.PA).withName("PA Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC).withName("BBC Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(Publisher.C4).withName("C4 Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.ITV).withName("ITV Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
         }
@@ -224,7 +229,7 @@ public class EquivModule {
     
     //Controllers...
     public @Bean ContentEquivalenceUpdateController updateController() {
-        return new ContentEquivalenceUpdateController(contentUpdater(), contentResolver, log);
+        return new ContentEquivalenceUpdateController(contentUpdater(), filmUpdater(), contentResolver, log);
     }
     
     public @Bean EquivalenceResultController resultController() {

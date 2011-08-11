@@ -349,6 +349,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final Set<Channel> TERRESTRIAL_CHANNELS = ImmutableSet.<Channel>builder()
         .add(Channel.BBC_ONE_EAST)
         .add(Channel.BBC_ONE)
+        .add(Channel.BBC_HD)
         .add(Channel.BBC_ONE_WEST_MIDLANDS)
         .add(Channel.BBC_ONE_EAST_MIDLANDS)
         .add(Channel.BBC_ONE_YORKSHIRE)
@@ -373,6 +374,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         .add(Channel.ITV1_GRANADA)
         .add(Channel.ITV1_MERIDIAN)
         .add(Channel.ITV1_TYNE_TEES)
+        .add(Channel.ITV1_HD)
+        .add(Channel.ITV2_HD)
+        .add(Channel.ITV3_HD)
+        .add(Channel.ITV4_HD)
         .add(Channel.YTV)
         .add(Channel.ITV1_CARLTON_WESTCOUNTRY)
         .add(Channel.ITV1_WALES)
@@ -407,6 +412,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         .add(Channel.E_FOUR)
         .add(Channel.MORE_FOUR)
         .add(Channel.FILM_4)
+        .add(Channel.STV_HD)
+        .add(Channel.Channel_4_HD)
+        .add(Channel.FILM4_HD)
     .build();
     
     private Boolean isRepeat(Channel channel, Attr attr) {

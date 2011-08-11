@@ -43,13 +43,10 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
         
         assertEquals(ImmutableMap.of(
                 equivalent1, Score.valueOf(1.0),
-                equivalent2, Score.NULL_SCORE
-        ),combined.equivalents().get(Publisher.BBC));
-        
-        assertEquals(ImmutableMap.of(
+                equivalent2, Score.NULL_SCORE,
                 equivalent3, Score.NULL_SCORE,
                 equivalent4, Score.NULL_SCORE
-        ),combined.equivalents().get(Publisher.C4));
+        ),combined.equivalents());
         
     }
 

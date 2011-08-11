@@ -95,6 +95,8 @@ public class C4BrandExtractor {
                 episode.setImage(brand.getImage());
                 episode.setThumbnail(brand.getThumbnail());
             }
+            
+            episode.setGenres(brand.getGenres());
         }
 
         populateBroadcasts(episodes, brand);
@@ -104,6 +106,7 @@ public class C4BrandExtractor {
         contentWriter.createOrUpdate(brand);
         
         for (Series series : allSeries) {
+            series.setGenres(brand.getGenres());
             contentWriter.createOrUpdate(series);
         }
 
@@ -285,7 +288,7 @@ public class C4BrandExtractor {
                     } else {
                         version = episode.getVersions().iterator().next();
                     }
-                    synthesizedItemUpdater.findAndUpdatePossibleSynthesized(broadcast.getId(), episode, brand.getCanonicalUri());
+                    synthesizedItemUpdater.findAndUpdateFromPossibleSynthesized(broadcast.getId(), episode, brand.getCanonicalUri());
 
                     boolean found = false;
                     for (Broadcast currentBroadcast : version.getBroadcasts()) {
