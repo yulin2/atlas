@@ -658,15 +658,15 @@ public class PaChannelMap {
 /*        channelMap.put(576, Channel.GALAXY_102);
         channelMap.put(577, Channel.GALAXY_105);
         channelMap.put(578, Channel.GALAXY_102.2);
-        channelMap.put(580, Channel.102.2_SMOOTH_RADIO);
-        channelMap.put(582, Channel.KISS_100);
-        channelMap.put(583, Channel.TOUCH_RADIO_96.2);
+        channelMap.put(580, Channel.102.2_SMOOTH_RADIO);*/
+        channelMap.put(582, Channel.KISS_RADIO);
+        /*channelMap.put(583, Channel.TOUCH_RADIO_96.2);
         channelMap.put(584, Channel.LBC_97.3);
         channelMap.put(585, Channel.LIVE_95);
         channelMap.put(587, Channel.KINGDOM_FM); */
         channelMap.put(588, Channel.BBC_RADIO_WORLDSERVICE);
 /*        channelMap.put(589, Channel.MAGIC_105.4); */
-        channelMap.put(590, Channel.MAGIC);
+        channelMap.put(590, Channel.MAGIC_RADIO);
 /*        channelMap.put(591, Channel.MAGIC_1170);
         channelMap.put(592, Channel.MAGIC_1548);
         channelMap.put(593, Channel.MAGIC_828);

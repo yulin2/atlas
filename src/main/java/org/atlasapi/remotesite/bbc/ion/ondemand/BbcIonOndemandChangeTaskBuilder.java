@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.bbc.ion;
+package org.atlasapi.remotesite.bbc.ion.ondemand;
 
 import java.util.concurrent.Callable;
 
@@ -9,13 +9,12 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 
 import com.google.common.collect.ImmutableList;
 
 public class BbcIonOndemandChangeTaskBuilder {
-
-    public final static String SLASH_PROGRAMMES_BASE = "http://www.bbc.co.uk/programmes/";
 
     private final ContentResolver resolver;
     private final ContentWriter writer;
@@ -43,7 +42,7 @@ public class BbcIonOndemandChangeTaskBuilder {
 
         @Override
         public Void call() {
-            String uri = SLASH_PROGRAMMES_BASE + change.getEpisodeId();
+            String uri = BbcFeeds.slashProgrammesUriForPid(change.getEpisodeId());
             try {
                 ResolvedContent resolvedItem = resolver.findByCanonicalUris(ImmutableList.of(uri));
                 if (resolvedItem.resolved(uri)) {

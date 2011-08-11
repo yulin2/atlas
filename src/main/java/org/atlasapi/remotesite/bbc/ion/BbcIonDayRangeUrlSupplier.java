@@ -1,9 +1,8 @@
-package org.atlasapi.remotesite.bbc;
+package org.atlasapi.remotesite.bbc.ion;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
 
-import org.atlasapi.remotesite.bbc.ion.BbcIonServices;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;

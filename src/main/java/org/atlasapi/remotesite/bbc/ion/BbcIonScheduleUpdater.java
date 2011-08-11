@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.bbc.BbcIonScheduleClient;
+import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
@@ -24,12 +24,12 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
     private static final int THREADS = 5;
 
     private final Supplier<Iterable<String>> urlSupplier;
-    private final BbcIonScheduleClient scheduleClient;
+    private final BbcIonFeedClient<IonSchedule> scheduleClient;
     private final BbcIonScheduleHandler handler;
     private final AdapterLog log;
 
 
-    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, BbcIonScheduleClient client, BbcIonScheduleHandler handler, AdapterLog log) {
+    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, BbcIonFeedClient<IonSchedule> client, BbcIonScheduleHandler handler, AdapterLog log) {
         this.urlSupplier = urlSupplier;
         this.scheduleClient = client;
         this.handler = handler;

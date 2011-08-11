@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.bbc.ion;
+package org.atlasapi.remotesite.bbc.ion.ondemand;
 
 import java.util.Set;
 
@@ -7,6 +7,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeEncodingAndLocationCreator;
 import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
@@ -31,7 +32,7 @@ public class BbcIonOndemandItemUpdater {
 
     public void updateItemDetails(Item item, IonOndemandChange change) {
         boolean revoked = "revoked".equals(change.getRevocationStatus());
-        Maybe<Version> version = version(item.getVersions(), BbcIonOndemandChangeTaskBuilder.SLASH_PROGRAMMES_BASE + change.getVersionId());
+        Maybe<Version> version = version(item.getVersions(), BbcFeeds.slashProgrammesUriForPid(change.getVersionId()));
 
         if (version.hasValue()) {
             processVersion(change, revoked, version.requireValue());
@@ -39,10 +40,10 @@ public class BbcIonOndemandItemUpdater {
     }
 
     private void processVersion(IonOndemandChange change, boolean revoked, Version version) {
-        Maybe<Encoding> encoding = encoding(version.getManifestedAs(), BbcIonOndemandChangeTaskBuilder.SLASH_PROGRAMMES_BASE + change.getId());
+        Maybe<Encoding> encoding = encoding(version.getManifestedAs(), BbcFeeds.slashProgrammesUriForPid(change.getId()));
         if (encoding.hasValue()) {
             Maybe<Location> location = location(encoding.requireValue().getAvailableAt(),
-                    BbcProgrammeGraphExtractor.iplayerPageFrom(BbcIonOndemandChangeTaskBuilder.SLASH_PROGRAMMES_BASE + change.getEpisodeId()));
+                    BbcProgrammeGraphExtractor.iplayerPageFrom(BbcFeeds.slashProgrammesUriForPid(change.getEpisodeId())));
             if (location.hasValue()) {
                 if (!revoked) {
                     updateAvailability(location.requireValue(), change, true);
