@@ -31,8 +31,8 @@ public class ItvInterlinkingModule {
     @PostConstruct
     public void setup() {
         scheduler.schedule(itvInterlinkingTodayUpdater().withName("ITV Interlinking today updater"), RepetitionRules.NEVER);
-        scheduler.schedule(itvInterlinkingUpdater().withName("ITV Interlinking 7 day updater"), RepetitionRules.daily(new LocalTime(1, 30)));
-        scheduler.schedule(itvInterlinkingUpdater().withName("ITV Interlinking 30 day updater"), RepetitionRules.NEVER);
+        scheduler.schedule(itvInterlinkingSevenDayUpdater().withName("ITV Interlinking 7 day updater"), RepetitionRules.daily(new LocalTime(1, 30)));
+        scheduler.schedule(itvInterlinkingThirtyDayUpdater().withName("ITV Interlinking 30 day updater"), RepetitionRules.NEVER);
     }
     
     @Bean
@@ -46,7 +46,7 @@ public class ItvInterlinkingModule {
     }
     
     @Bean
-    public ItvInterlinkingUpdater itvInterlinkingUpdater() {
+    public ItvInterlinkingUpdater itvInterlinkingThirtyDayUpdater() {
         return new ItvInterlinkingUpdater(itvInterlinkingSingleFileUpdater(), log, 30);
     }
     
