@@ -71,17 +71,17 @@ public class C4BroadcastBuilder {
         checkState(atomId != null, "Can't build broadcast without Atom ID");
         checkArgument(ID_PATTERN.matcher(atomId).matches());
         
-        Broadcast broadcast = new Broadcast(channelUri, start, duration).withId(idFrom(atomId));
-        broadcast.addAlias(aliasFrom(atomId));
+        Broadcast broadcast = new Broadcast(channelUri, start, duration).withId(idFrom(channelUri, atomId));
+        broadcast.addAlias(aliasFrom(channelUri, atomId));
         return broadcast;
     }
 
-    private String aliasFrom(String id) {
+    public static String aliasFrom(String channelUri, String id) {
         int slashIndex = id.lastIndexOf("/")+1;
         return id.substring(0, slashIndex) + CHANNEL_MAP.get(channelUri) + id.substring(slashIndex);
     }
     
-    private String idFrom(String atomId) {
+    public static String idFrom(String channelUri, String atomId) {
         Matcher matcher = C4AtomApi.SLOT_PATTERN.matcher(atomId);
         if(matcher.matches()) {
             return CHANNEL_MAP.get(channelUri).toLowerCase() + ":" + matcher.group(1);

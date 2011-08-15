@@ -16,6 +16,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.channel4.C4BroadcastBuilder;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
@@ -103,7 +104,7 @@ public class C4EpgBrandlessEntryProcessor {
             for (Version version : episode.getVersions()) {
                 Set<Broadcast> broadcasts = Sets.newHashSet();
                 for (Broadcast broadcast : version.getBroadcasts()) {
-                    if(broadcast.getId() != null && broadcast.getId().equals("c4:"+entry.slotId())) {
+                    if(broadcast.getId() != null && broadcast.getId().equals(C4BroadcastBuilder.idFrom(channel.uri(), entry.id()))) {
                         broadcasts.add(createBroadcast(entry, channel));
                         found = true;
                     } else {
@@ -129,8 +130,8 @@ public class C4EpgBrandlessEntryProcessor {
     }
 
     private Broadcast createBroadcast(C4EpgEntry entry, Channel channel) {
-        Broadcast entryBroadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId("c4:"+entry.slotId());
-        entryBroadcast.addAlias(entry.id());
+        Broadcast entryBroadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId(C4BroadcastBuilder.idFrom(channel.uri(), entry.slotId()));
+        entryBroadcast.addAlias(C4BroadcastBuilder.aliasFrom(channel.uri(), entry.id()));
         entryBroadcast.setIsActivelyPublished(true);
         entryBroadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime());
         return entryBroadcast;
