@@ -5,6 +5,7 @@ import javax.annotation.PostConstruct;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,12 +31,18 @@ public class ItvInterlinkingModule {
     @PostConstruct
     public void setup() {
         scheduler.schedule(itvInterlinkingTodayUpdater().withName("ITV Interlinking today updater"), RepetitionRules.NEVER);
+        scheduler.schedule(itvInterlinkingUpdater().withName("ITV Interlinking 7 day updater"), RepetitionRules.daily(new LocalTime(1, 30)));
         scheduler.schedule(itvInterlinkingUpdater().withName("ITV Interlinking 30 day updater"), RepetitionRules.NEVER);
     }
     
     @Bean
     public ItvInterlinkingTodayUpdater itvInterlinkingTodayUpdater() {
         return new ItvInterlinkingTodayUpdater(itvInterlinkingSingleFileUpdater(), log);
+    }
+    
+    @Bean 
+    public ItvInterlinkingUpdater itvInterlinkingSevenDayUpdater() {
+        return new ItvInterlinkingUpdater(itvInterlinkingSingleFileUpdater(), log, 7);
     }
     
     @Bean
