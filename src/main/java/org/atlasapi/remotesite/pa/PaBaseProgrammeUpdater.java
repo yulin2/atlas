@@ -47,7 +47,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask implements He
     private final AdapterLog log;
 
     private final PaProgDataProcessor processor;
-    private final ExecutorService executor = Executors.newFixedThreadPool(1);
+    private final ExecutorService executor = Executors.newFixedThreadPool(25);
     private final BoundedExecutor boundedQueue = new BoundedExecutor(executor, 50);
     private final PaChannelMap channelMap = new PaChannelMap();
     private List<Channel> supportedChannels = ImmutableList.of();
