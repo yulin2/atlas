@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.intl.Countries;
 
 public class ItvInterlinkingContentExtractor {
     
@@ -205,6 +206,8 @@ public class ItvInterlinkingContentExtractor {
         DateTime availabilityEnd = dateFormatter.parseDateTime(requireElemValue(contentElem, "availability_end", INTERLINKING_NS));
         policy.setAvailabilityEnd(availabilityEnd);
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
+        policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
+        
         location.setPolicy(policy);
         encoding.addAvailableAt(location);
         version.addManifestedAs(encoding);
