@@ -246,17 +246,20 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private void setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
-        if (progData.getEpisodeTitle() != null) {
-            episode.setTitle(progData.getEpisodeTitle());
-        } else {
-            episode.setTitle(progData.getTitle());
-        }
+        
+        if (!channel.uri().contains("wales")) {
+            if (progData.getEpisodeTitle() != null) {
+                episode.setTitle(progData.getEpisodeTitle());
+            } else {
+                episode.setTitle(progData.getTitle());
+            }
 
-        if (progData.getBillings() != null) {
-            for (Billing billing : progData.getBillings().getBilling()) {
-                if (billing.getType().equals("synopsis")) {
-                    episode.setDescription(billing.getvalue());
-                    break;
+            if (progData.getBillings() != null) {
+                for (Billing billing : progData.getBillings().getBilling()) {
+                    if (billing.getType().equals("synopsis")) {
+                        episode.setDescription(billing.getvalue());
+                        break;
+                    }
                 }
             }
         }
