@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.pa;
 import java.io.File;
 
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.remotesite.pa.PaChannelProcessJob.PaChannelProcessJobBuilder;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.joda.time.DateTime;
 
@@ -14,8 +13,8 @@ public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable 
     
     private final PaProgrammeDataStore fileManager;
 
-    public PaRecentUpdater(PaChannelProcessJobBuilder jobBuilder, PaProgrammeDataStore fileManager, AdapterLog log) {
-        super(jobBuilder, fileManager, log);
+    public PaRecentUpdater(PaChannelProcessor channelProcessor, PaProgrammeDataStore fileManager, AdapterLog log) {
+        super(channelProcessor, fileManager, log);
         this.fileManager = fileManager;
     }
     

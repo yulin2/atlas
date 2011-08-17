@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.remotesite.pa.PaChannelProcessJob.PaChannelProcessJobBuilder;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,13 +23,13 @@ import com.metabroadcast.common.base.Maybe;
 public class PaSingleDateUpdatingController {
     
     private final ExecutorService executor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("paSingleDateUpdater").build());
-    private final PaChannelProcessJobBuilder jobBuilder;
+    private final PaChannelProcessor channelProcessor;
     private final AdapterLog log;
     private final PaProgrammeDataStore fileManager;
     private final ScheduleResolver scheduleResolver;
 
-    public PaSingleDateUpdatingController(PaChannelProcessJobBuilder jobBuilder, ScheduleResolver scheduleResolver, AdapterLog log, PaProgrammeDataStore fileManager) {
-        this.jobBuilder = jobBuilder;
+    public PaSingleDateUpdatingController(PaChannelProcessor channelProcessor, ScheduleResolver scheduleResolver, AdapterLog log, PaProgrammeDataStore fileManager) {
+        this.channelProcessor = channelProcessor;
         this.scheduleResolver = scheduleResolver;
         this.log = log;
         this.fileManager = fileManager;
@@ -43,7 +42,7 @@ public class PaSingleDateUpdatingController {
 
     @RequestMapping("/system/update/pa/{dateString}")
     public void runUpdate(@PathVariable String dateString, HttpServletResponse response) {
-        PaSingleDateUpdater updater = new PaSingleDateUpdater(jobBuilder, log, fileManager, dateString);
+        PaSingleDateUpdater updater = new PaSingleDateUpdater(channelProcessor, log, fileManager, dateString);
         executor.execute(updater);
         response.setStatus(200);
     }
@@ -53,7 +52,7 @@ public class PaSingleDateUpdatingController {
         Maybe<Channel> channel = Channel.fromKey(channelString);
         if (channel.hasValue()) {
 //            PaProgDataProcessor processor = Boolean.parseBoolean(fillGaps) ? new PaEmptyScheduleProcessor(this.processor, scheduleResolver) : this.processor;
-            PaSingleDateUpdater updater = new PaSingleDateUpdater(jobBuilder, log, fileManager, dateString);
+            PaSingleDateUpdater updater = new PaSingleDateUpdater(channelProcessor, log, fileManager, dateString);
             updater.supportChannels(ImmutableList.of(channel.requireValue()));
             executor.execute(updater);
             response.setStatus(HttpServletResponse.SC_OK);

@@ -21,7 +21,6 @@ import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
-import org.atlasapi.remotesite.pa.PaChannelProcessJob.PaChannelProcessJobBuilder;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 
 import com.google.common.collect.ImmutableList;
@@ -114,7 +113,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
 
         public TestFileUpdater(PaProgDataProcessor processor, AdapterLog log) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessJobBuilder(processor, null, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
         }
 
         @Override

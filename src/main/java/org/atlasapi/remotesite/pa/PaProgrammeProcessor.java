@@ -247,6 +247,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private void setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
         
+        //currently Welsh channels have Welsh titles/descriptions 
+        // which flip the English ones, resulting in many writes.
         if (!channel.uri().contains("wales")) {
             if (progData.getEpisodeTitle() != null) {
                 episode.setTitle(progData.getEpisodeTitle());
