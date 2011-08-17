@@ -6,11 +6,9 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -23,10 +21,12 @@ import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.remotesite.pa.PaChannelProcessJob.PaChannelProcessJobBuilder;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.TimeMachine;
@@ -57,13 +57,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         updater.run();
         Identified content = null;
 
-        // lazy
-        for (int i = 0; i < 10; i++) {
-            Thread.sleep(500);
-            content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
-            if (content != null)
-                continue;
-        }
+        content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
 
         assertNotNull(content);
         assertTrue(content instanceof Brand);
@@ -120,7 +114,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     static class TestFileUpdater extends PaBaseProgrammeUpdater {
 
         public TestFileUpdater(PaProgDataProcessor processor, AdapterLog log) {
-            super(processor, new DefaultPaProgrammeDataStore("/data/pa", null), log, null);
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessJobBuilder(processor, null, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
         }
 
         @Override

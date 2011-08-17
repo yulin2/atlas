@@ -24,4 +24,8 @@ public class PaHelper {
     public static String getFilmCurie(String id) {
         return "pa:f-" + id;
     }
+    
+    public static String getBroadcastId(String slotId) {
+        return "pa:" + slotId;
+    }
 }

@@ -51,7 +51,7 @@ import com.metabroadcast.common.time.Timestamp;
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
-    private static final String BROADCAST_ID_PREFIX = "pa:";
+    public static final String BROADCAST_ID_PREFIX = "pa:";
     private static final String YES = "yes";
     private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
     private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
@@ -342,7 +342,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         DateTime transmissionTime = getTransmissionTime(progData.getDate(), progData.getTime(), zone);
         
-        Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(BROADCAST_ID_PREFIX+progData.getShowingId());
+        Broadcast broadcast = new Broadcast(channel.uri(), transmissionTime, duration).withId(PaHelper.getBroadcastId(progData.getShowingId()));
         
         if (progData.getAttr() != null) {
             broadcast.setRepeat(isRepeat(channel, progData.getAttr()));

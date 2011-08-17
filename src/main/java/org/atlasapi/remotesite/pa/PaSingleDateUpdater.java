@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.pa;
 import java.io.File;
 
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.pa.PaChannelProcessJob.PaChannelProcessJobBuilder;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 
@@ -14,8 +15,8 @@ public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     private final String dateString;
     private final PaProgrammeDataStore fileManager;
 
-    public PaSingleDateUpdater(PaProgDataProcessor processor, AdapterLog log, PaProgrammeDataStore fileManager, String dateString) {
-        super(processor, fileManager, log, dateString);
+    public PaSingleDateUpdater(PaChannelProcessJobBuilder jobBuilder, AdapterLog log, PaProgrammeDataStore fileManager, String dateString) {
+        super(jobBuilder, fileManager, log);
         this.fileManager = fileManager;
         this.dateString = dateString;
     }
