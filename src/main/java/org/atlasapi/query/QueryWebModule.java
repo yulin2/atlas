@@ -3,6 +3,8 @@ package org.atlasapi.query;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
+import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -42,8 +44,13 @@ public class QueryWebModule {
     }
     
     @Bean ScheduleOverlapListener scheduleOverlapListener() {
-        BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(contentResolver, contentWriter);
-        return new ThreadedScheduleOverlapListener(broadcastRemovingListener, log);
+        return new ScheduleOverlapListener() {
+            @Override
+            public void itemRemovedFromSchedule(Item item, Broadcast broadcast) {
+            }
+        };
+//        BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(contentResolver, contentWriter);
+//        return new ThreadedScheduleOverlapListener(broadcastRemovingListener, log);
     }
     
     @Bean ScheduleController schedulerController() {
