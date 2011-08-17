@@ -188,7 +188,7 @@ public class PaChannelMap {
         channelMap.put(187, Channel.TCM);
         channelMap.put(188, Channel.NICKELODEON);
         channelMap.put(703, Channel.NICKELODEON_REPLAY);
-        channelMap.put(1607, Channel.NICKELODEON_REPLAY);
+//        channelMap.put(1607, Channel.NICKELODEON_REPLAY);
         channelMap.put(192, Channel.CNBC);
         channelMap.put(195, Channel.NICK_JR);
         channelMap.put(215, Channel.BOOMERANG);
