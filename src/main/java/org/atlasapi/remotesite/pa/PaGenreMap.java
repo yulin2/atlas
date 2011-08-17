@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.pa;
 
-import java.util.Set;
-
 import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.genres.GenreMap;
 

@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.pa;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
@@ -9,6 +10,8 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.pa.PaChannelProcessJob.PaChannelProcessJobBuilder;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.film.PaFilmModule;
@@ -71,15 +74,21 @@ public class PaModule {
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
-        PaCompleteUpdater updater = new PaCompleteUpdater(processor, paProgrammeDataStore(), log);
+        PaChannelProcessJobBuilder jobBuilder = new PaChannelProcessJobBuilder(processor, broadcastTrimmer(), log);
+        PaCompleteUpdater updater = new PaCompleteUpdater(jobBuilder, paProgrammeDataStore(), log);
         scheduler.schedule(updater, WEEKLY);
         return updater;
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        PaRecentUpdater updater = new PaRecentUpdater(paProgrammeProcessor(), paProgrammeDataStore(), log);
+        PaChannelProcessJobBuilder jobBuilder = new PaChannelProcessJobBuilder(paProgrammeProcessor(), broadcastTrimmer(), log);
+        PaRecentUpdater updater = new PaRecentUpdater(jobBuilder, paProgrammeDataStore(), log);
         scheduler.schedule(updater, RECENT_FILE_INGEST);
         return updater;
+    }
+    
+    @Bean BroadcastTrimmer broadcastTrimmer() {
+        return new BroadcastTrimmer(Publisher.PA, scheduleResolver, contentResolver, contentWriter, log);
     }
     
     @Bean PaFileUpdater paFileUpdater() {
@@ -87,6 +96,7 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        return new PaSingleDateUpdatingController(paProgrammeProcessor(), scheduleResolver, log, paProgrammeDataStore());
+        PaChannelProcessJobBuilder jobBuilder = new PaChannelProcessJobBuilder(paProgrammeProcessor(), broadcastTrimmer(), log);
+        return new PaSingleDateUpdatingController(jobBuilder, scheduleResolver, log, paProgrammeDataStore());
     }
 }
