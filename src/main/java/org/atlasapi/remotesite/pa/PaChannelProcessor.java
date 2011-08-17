@@ -14,55 +14,34 @@ import org.joda.time.Interval;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 
-public class PaChannelProcessJob implements Runnable {
+public class PaChannelProcessor {
 
-    public static class PaChannelProcessJobBuilder {
-        
-        private final PaProgDataProcessor processor;
-        private final BroadcastTrimmer trimmer;
-        private final AdapterLog log;
-
-        public PaChannelProcessJobBuilder(PaProgDataProcessor processor, BroadcastTrimmer trimmer, AdapterLog log) {
-            this.processor = processor;
-            this.trimmer = trimmer;
-            this.log = log;
-        }
-        
-        public PaChannelProcessJob buildFor(Set<String> currentlyProcessing, PaChannelData data) {
-            return new PaChannelProcessJob(processor, trimmer, log, currentlyProcessing, data);
-        }
-        
-    }
-    
     private final PaProgDataProcessor processor;
-    private final Set<String> currentlyProcessing;
-    private final PaChannelData channelData;
     private final BroadcastTrimmer trimmer;
     private final AdapterLog log;
 
-    public PaChannelProcessJob(PaProgDataProcessor processor, BroadcastTrimmer trimmer, AdapterLog log, Set<String> currentlyProcessing, PaChannelData channelData) {
+    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, AdapterLog log) {
         this.processor = processor;
-        this.currentlyProcessing = currentlyProcessing;
         this.trimmer = trimmer;
         this.log = log;
-        this.channelData = channelData;
     }
 
-    @Override
-    public void run() {
+    public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
+        int processed = 0;
         Channel channel = channelData.channel();
         try {
             Set<String> acceptableBroadcastIds = Sets.newHashSet();
             for (ProgData programme : channelData.programmes()) {
                 String programmeLock = lockIdentifier(programme);
-                lock(programmeLock);
+                lock(currentlyProcessing, programmeLock);
                 try {
                     processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
                     acceptableBroadcastIds.add(PaHelper.getBroadcastId(programme.getShowingId()));
+                    processed++;
                 } catch (Exception e) {
                     log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));
                 } finally {
-                    unlock(programmeLock);
+                    unlock(currentlyProcessing, programmeLock);
                 }
             }
             if (trimmer != null) {
@@ -71,15 +50,17 @@ public class PaChannelProcessJob implements Runnable {
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s", channel.key()));
         }
+        return processed;
     }
 
-    private void unlock(String programmeLock) {
+    private void unlock(Set<String> currentlyProcessing, String programmeLock) {
         synchronized (currentlyProcessing) {
             currentlyProcessing.remove(programmeLock);
+            currentlyProcessing.notifyAll();
         }
     }
 
-    private void lock(String programmeLock) throws InterruptedException {
+    private void lock(Set<String> currentlyProcessing, String programmeLock) throws InterruptedException {
         synchronized (currentlyProcessing) {
             while (currentlyProcessing.contains(programmeLock)) {
                 currentlyProcessing.wait();

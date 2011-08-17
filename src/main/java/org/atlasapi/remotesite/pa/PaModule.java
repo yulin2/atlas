@@ -11,7 +11,6 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
-import org.atlasapi.remotesite.pa.PaChannelProcessJob.PaChannelProcessJobBuilder;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.film.PaFilmModule;
@@ -79,8 +78,8 @@ public class PaModule {
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        PaChannelProcessJobBuilder jobBuilder = new PaChannelProcessJobBuilder(paProgrammeProcessor(), broadcastTrimmer(), log);
-        PaRecentUpdater updater = new PaRecentUpdater(jobBuilder, paProgrammeDataStore(), log);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), log);
+        PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), log);
         scheduler.schedule(updater, RECENT_FILE_INGEST);
         return updater;
     }
@@ -94,7 +93,7 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        PaChannelProcessJobBuilder jobBuilder = new PaChannelProcessJobBuilder(paProgrammeProcessor(), broadcastTrimmer(), log);
-        return new PaSingleDateUpdatingController(jobBuilder, scheduleResolver, log, paProgrammeDataStore());
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), log);
+        return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, log, paProgrammeDataStore());
     }
 }
