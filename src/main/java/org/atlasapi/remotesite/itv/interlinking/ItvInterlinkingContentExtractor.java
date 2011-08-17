@@ -8,6 +8,7 @@ import java.util.Set;
 
 import nu.xom.Element;
 
+import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
@@ -199,6 +200,7 @@ public class ItvInterlinkingContentExtractor {
         
         Encoding encoding = new Encoding();
         Location location = new Location();
+        location.setTransportType(TransportType.LINK);
         
         Policy policy = new Policy();
         DateTime availabilityStart = dateFormatter.parseDateTime(requireElemValue(contentElem, "availability_start", INTERLINKING_NS));
