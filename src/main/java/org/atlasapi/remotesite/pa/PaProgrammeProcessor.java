@@ -1,5 +1,8 @@
 package org.atlasapi.remotesite.pa;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
+
 import java.util.List;
 import java.util.Set;
 
@@ -317,6 +320,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Item item;
         if (possiblePrevious.hasValue()) {
             item = (Item) possiblePrevious.requireValue();
+            if (!(item instanceof Episode) && isEpisode) {
+                log.record(warnEntry().withSource(getClass()).withDescription("%s resolved as %s being ingested as Episode", episodeUri, item.getClass().getSimpleName()));
+                item = convertItemToEpisode(item);
+            } else if(item instanceof Episode && !isEpisode) {
+                log.record(errorEntry().withSource(getClass()).withDescription("%s resolved as %s being ingested as Item", episodeUri, item.getClass().getSimpleName()));
+            }
         } else {
             item = getBasicEpisode(progData, isEpisode);
         }
@@ -337,6 +346,32 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
         
         return Maybe.just(item);
+    }
+
+    private Item convertItemToEpisode(Item item) {
+        Episode episode = new Episode(item.getCanonicalUri(), item.getCurie(),item.getPublisher());
+        episode.setAliases(item.getAliases());
+        episode.setBlackAndWhite(item.isBlackAndWhite());
+        episode.setClips(item.getClips());
+        episode.setParentRef(item.getContainer());
+        episode.setCountriesOfOrigin(item.getCountriesOfOrigin());
+        episode.setDescription(item.getDescription());
+        episode.setFirstSeen(item.getFirstSeen());
+        episode.setGenres(item.getGenres());
+        episode.setImage(item.getImage());
+        episode.setIsLongForm(item.getIsLongForm());
+        episode.setLastFetched(item.getLastFetched());
+        episode.setLastUpdated(item.getLastUpdated());
+        episode.setMediaType(item.getMediaType());
+        episode.setPeople(item.getPeople());
+        episode.setScheduleOnly(item.isScheduleOnly());
+        episode.setSpecialization(item.getSpecialization());
+        episode.setTags(item.getTags());
+        episode.setThisOrChildLastUpdated(item.getThisOrChildLastUpdated());
+        episode.setThumbnail(item.getThumbnail());
+        episode.setTitle(item.getTitle());
+        episode.setVersions(item.getVersions());
+        return episode;
     }
 
     private Broadcast broadcast(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updateAt) {
