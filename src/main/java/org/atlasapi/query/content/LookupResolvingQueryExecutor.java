@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
@@ -42,7 +41,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         
         ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupResolver.entriesFor(uris), LookupEntry.TO_ID);
         
-        Map<String, List<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
+        Map<String, Set<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
 
         Iterable<LookupRef> filteredRefs = Iterables.filter(Iterables.concat(lookupRefs.values()), enabledPublishers(query.getConfiguration()));
         
@@ -60,7 +59,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 if (!containsRequestedUri(entry.equivalents(), uri)) {
                     return ImmutableList.of();
                 }
-                Iterable<Identified> identifieds = Iterables.filter(Lists.transform(entry.equivalents(), new Function<LookupRef, Identified>() {
+                Iterable<Identified> identifieds = Iterables.filter(Iterables.transform(entry.equivalents(), new Function<LookupRef, Identified>() {
                     @Override
                     public Identified apply(LookupRef input) {
                         return allResolvedResults.get(input.id()).valueOrNull();
