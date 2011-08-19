@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static com.google.common.base.Predicates.notNull;
 import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
 import static org.atlasapi.media.entity.Channel.E_FOUR;
 import static org.atlasapi.media.entity.Channel.FILM_4;
@@ -10,7 +9,6 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +23,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
@@ -32,10 +31,10 @@ import org.joda.time.LocalTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
 
-import com.google.common.base.Function;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -123,14 +122,22 @@ public class C4EpgUpdater extends ScheduledTask {
         trimmer.trimBroadcasts(scheduleInterval, channel, broacastIdsFrom(entries, channel));
     }
 
-    private Collection<String> broacastIdsFrom(Iterable<C4EpgEntry> entries, final Channel channel) {
-        return ImmutableSet.copyOf(Iterables.filter(Iterables.transform(entries, new Function<C4EpgEntry, String>() {
-            @Override
-            public String apply(C4EpgEntry entry) {
-                String slotId = entry.slotId();
-                return slotId == null ? null : String.format("%s:%s", CHANNEL_MAP.inverse().get(channel).toLowerCase(),slotId);
+    private Map<String, String> broacastIdsFrom(Iterable<C4EpgEntry> entries, final Channel channel) {
+        Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
+        for (C4EpgEntry entry : entries) {
+            if (entry.slotId() != null) {
+                String broadcastId = String.format("%s:%s", CHANNEL_MAP.inverse().get(channel).toLowerCase(), entry.slotId());
+                if (entry.relatedEntry() != null) {
+                    String itemUri = C4AtomApi.canonicaliseEpisodeIdentifier(entry.relatedEntry().getEpisodeIdTag());
+                    if (itemUri != null) {
+                        acceptableBroadcastIds.put(broadcastId, itemUri);
+                    }
+                } else {
+                    
+                }
             }
-        }), notNull()));
+        }
+        return acceptableBroadcastIds.build();
     }
 
     private Document getSchedule(String uri) {

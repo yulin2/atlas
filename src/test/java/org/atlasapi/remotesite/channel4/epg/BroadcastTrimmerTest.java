@@ -28,6 +28,7 @@ import org.jmock.Mockery;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -59,7 +60,46 @@ public class BroadcastTrimmerTest extends TestCase {
         BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
         
         Interval scheduleInterval = new Interval(100, 200);
-        trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableSet.of("c4:1234"));
+        trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableMap.of("c4:1234", item.getCanonicalUri()));
+        
+    }
+    
+    public void testTrimsBroadcastsOfWrongItems() {
+        Item item1 = new Item("testUri1", "testCurie", Publisher.C4);
+        Version version = new Version();
+        Broadcast remove = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(50), new DateTime(103)).withId("c4:2234");
+        remove.setIsActivelyPublished(true);
+        version.setBroadcasts(ImmutableSet.of(remove));
+        item1.addVersion(version);
+        
+        Item item2 = new Item("testUri2", "testCurie", Publisher.C4);
+        version = new Version();
+        Broadcast keep = new Broadcast(Channel.CHANNEL_FOUR.uri(), new DateTime(150), new DateTime(153)).withId("c4:1234");
+        remove.setIsActivelyPublished(true);
+        version.setBroadcasts(ImmutableSet.of(keep));
+        item2.addVersion(version);
+
+        Map<Channel, List<Item>> channelMap = Maps.newHashMap();
+        channelMap.put(Channel.CHANNEL_FOUR, Lists.newArrayList(item1, item2));
+        final Schedule schedule = Schedule.fromChannelMap(channelMap, new Interval(50, 200));
+
+        ContentResolver resolver = new StubContentResolver().respondTo(item1).respondTo(item2);
+
+        context.checking(new Expectations() {{
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
+            will(returnValue(schedule));
+            one(contentWriter).createOrUpdate(with(trimmedItem()));
+        }});
+        
+
+        AdapterLog log = new NullAdapterLog();
+        
+        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
+        
+        Interval scheduleInterval = new Interval(50, 200);
+        trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableMap.of("c4:1234", item2.getCanonicalUri()));
+        
+        assertTrue(Iterables.getOnlyElement(Iterables.getOnlyElement(item2.getVersions()).getBroadcasts()).isActivelyPublished());
         
     }
 
@@ -73,10 +113,12 @@ public class BroadcastTrimmerTest extends TestCase {
             @Override
             public boolean matchesSafely(Item item) {
                 Set<Broadcast> broadcasts = Iterables.getOnlyElement(item.getVersions()).getBroadcasts();
-                if(broadcasts.size() != 3) {
-                    return false;
+                for (Broadcast broadcast : broadcasts) {
+                    if(!check(broadcast)) {
+                        return false;
+                    }
                 }
-                return check(Iterables.get(broadcasts, 0)) && check(Iterables.get(broadcasts, 1)) && check(Iterables.get(broadcasts, 2));
+                return true;
             }
 
             private boolean check(Broadcast broadcast) {
