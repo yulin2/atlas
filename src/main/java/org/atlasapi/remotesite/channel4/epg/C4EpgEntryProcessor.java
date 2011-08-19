@@ -78,7 +78,7 @@ public class C4EpgEntryProcessor {
                 throw new IllegalStateException("Couldn't get web-safe brand name for " + entry.id());
             }
 
-            String itemUri = uriFrom(entry, webSafeBrandName);
+            String itemUri = uriFrom(entry);
 
             Episode episode = null;
             Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
@@ -264,7 +264,7 @@ public class C4EpgEntryProcessor {
         return broadcast;
     }
 
-    private String uriFrom(C4EpgEntry entry, String brandName) {
+    private String uriFrom(C4EpgEntry entry) {
         String canonical = C4AtomApi.canonicaliseEpisodeIdentifier(entry.relatedEntry().getEpisodeIdTag());
         if (canonical == null) {
             throw new IllegalArgumentException("Not a valid c4 episode uri " + canonical);

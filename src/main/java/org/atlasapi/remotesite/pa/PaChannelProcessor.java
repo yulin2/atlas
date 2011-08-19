@@ -12,7 +12,8 @@ import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.joda.time.Interval;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 
 public class PaChannelProcessor {
 
@@ -30,13 +31,13 @@ public class PaChannelProcessor {
         int processed = 0;
         Channel channel = channelData.channel();
         try {
-            Set<String> acceptableBroadcastIds = Sets.newHashSet();
+            Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
             for (ProgData programme : channelData.programmes()) {
                 String programmeLock = lockIdentifier(programme);
                 lock(currentlyProcessing, programmeLock);
                 try {
                     processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
-                    acceptableBroadcastIds.add(PaHelper.getBroadcastId(programme.getShowingId()));
+                    acceptableBroadcastIds.put(PaHelper.getBroadcastId(programme.getShowingId()), progUri(programme));
                     processed++;
                 } catch (Exception e) {
                     log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));
@@ -45,12 +46,16 @@ public class PaChannelProcessor {
                 }
             }
             if (trimmer != null) {
-                trimmer.trimBroadcasts(new Interval(channelData.day(), channelData.day().plusDays(1)), channel, acceptableBroadcastIds);
+                trimmer.trimBroadcasts(new Interval(channelData.day(), channelData.day().plusDays(1)), channel, acceptableBroadcastIds.build());
             }
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s", channel.key()));
         }
         return processed;
+    }
+
+    private String progUri(ProgData programme) {
+        return Strings.isNullOrEmpty(programme.getRtFilmnumber()) ? PaHelper.getEpisodeUri(programme.getProgId()) : PaHelper.getFilmUri(programme.getRtFilmnumber());
     }
 
     private void unlock(Set<String> currentlyProcessing, String programmeLock) {

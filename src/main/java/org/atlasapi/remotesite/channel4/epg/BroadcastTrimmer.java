@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import java.util.Collection;
+import java.util.Map;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
@@ -38,7 +38,7 @@ public class BroadcastTrimmer {
         this.log = log;
     }
 
-    public void trimBroadcasts(Interval scheduleInterval, Channel channel, Collection<String> acceptableIds) {
+    public void trimBroadcasts(Interval scheduleInterval, Channel channel, Map<String, String> acceptableIds) {
         try {
             //Get items currently broadcast in the interval
             Schedule schedule = scheduleResolver.schedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher));
@@ -53,10 +53,9 @@ public class BroadcastTrimmer {
                     boolean changed = false;
                     for (Version version : item.nativeVersions()) {
                         for (Broadcast broadcast : version.getBroadcasts()) {
-                            // double-check the broadcast is in the valid
-                            // interval/channel
+                            // double-check the broadcast is in the valid interval/channel
                             if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
-                                if (broadcast.getId() != null && !acceptableIds.contains(broadcast.getId())) {
+                                if (broadcast.getId() != null && !itemEmbeddedInScheduleUri.equals(acceptableIds.get(broadcast.getId()))) {
                                     if(!Boolean.FALSE.equals(broadcast.isActivelyPublished())) {
                                         broadcast.setIsActivelyPublished(false);
                                         changed = true;
