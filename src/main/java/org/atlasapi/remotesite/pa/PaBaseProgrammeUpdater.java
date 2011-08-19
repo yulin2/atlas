@@ -5,13 +5,13 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +86,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     
     protected void processFiles(Iterable<File> files) {
         try {
-            final CompletionService<Integer> completion = new ExecutorCompletionService<Integer>(executor, new ArrayBlockingQueue<Future<Integer>>(50));
+            final CompletionService<Integer> completion = new ExecutorCompletionService<Integer>(executor);
             AtomicInteger submitted = new AtomicInteger(0);
             
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
@@ -99,7 +99,11 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
             reportStatus(String.format("Submitting jobs for %s files", Iterables.size(files)));
             
+            int filesProcessed = 0;
             for (File file : files) {
+                if(!shouldContinue()) {
+                    break;
+                }
                 try {
                     final String filename = file.toURI().toString();
                     Matcher matcher = FILEDATE.matcher(filename);
@@ -112,6 +116,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                         unmarshaller.setListener(channelDataProcessingListener(completion, submitted, lastModified, fileDate));
                         
                         reader.parse(fileToProcess.toURI().toString());
+                        reportStatus(String.format("%s/%s files. %s jobs submitted", ++filesProcessed, Iterables.size(files), submitted.get()));
                     }
                 } catch (Exception e) {
                     log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing file " + file.toString()));
@@ -119,14 +124,22 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             }
             
             int programmesProcessed = 0;
-            for (int i = 0; i < submitted.get(); i++) {
-                Future<Integer> processed = completion.take();
-                try {
-                    programmesProcessed += processed.get();
-                } catch (Exception e) {
-                    log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing PA updater results"));
+            for (int i = 0; i < submitted.get();) {
+                Future<Integer> processed = completion.poll(5, TimeUnit.SECONDS);
+                if(processed != null) {
+                    i++;
+                    try {
+                        if (!processed.isCancelled()) {
+                            programmesProcessed += processed.get();
+                        }
+                    } catch (Exception e) {
+                        log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing PA updater results"));
+                    }
+                    reportStatus(String.format("%s files. Processed %s/%s jobs. %s programmes processed", Iterables.size(files), i, submitted.get(), programmesProcessed));
                 }
-                reportStatus(String.format("%s files. Processed %s/%s jobs. %s programmes processed", Iterables.size(files), i+1, submitted.get(), programmesProcessed));
+                if(!shouldContinue()) {
+                    break;
+                }
             }
             
         } catch (Exception e) {
@@ -145,7 +158,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                     ChannelData channelData = (ChannelData) target;
                     
                     Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
-                    if (channel.hasValue() && isSupported(channel.requireValue())) {
+                    if (channel.hasValue() && isSupported(channel.requireValue()) && shouldContinue()) {
                         try {
                             final PaChannelData data = new PaChannelData(
                                     channel.requireValue(),
@@ -161,8 +174,8 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                                 }
                             });
                             submitted.incrementAndGet();
-                        } catch (Exception e) {
-                            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception submit PA channel update job"));
+                        } catch (Throwable e) {
+                            log.record(errorEntry().withCause(new Exception(e)).withSource(getClass()).withDescription("Exception submit PA channel update job"));
                         }
                     }
                 }
