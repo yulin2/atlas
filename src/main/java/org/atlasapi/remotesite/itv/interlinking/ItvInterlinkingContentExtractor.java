@@ -8,6 +8,7 @@ import java.util.Set;
 
 import nu.xom.Element;
 
+import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
@@ -35,6 +36,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.intl.Countries;
 
 public class ItvInterlinkingContentExtractor {
     
@@ -198,6 +200,7 @@ public class ItvInterlinkingContentExtractor {
         
         Encoding encoding = new Encoding();
         Location location = new Location();
+        location.setTransportType(TransportType.LINK);
         
         Policy policy = new Policy();
         DateTime availabilityStart = dateFormatter.parseDateTime(requireElemValue(contentElem, "availability_start", INTERLINKING_NS));
@@ -205,6 +208,8 @@ public class ItvInterlinkingContentExtractor {
         DateTime availabilityEnd = dateFormatter.parseDateTime(requireElemValue(contentElem, "availability_end", INTERLINKING_NS));
         policy.setAvailabilityEnd(availabilityEnd);
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
+        policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
+        
         location.setPolicy(policy);
         encoding.addAvailableAt(location);
         version.addManifestedAs(encoding);

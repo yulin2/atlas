@@ -11,13 +11,13 @@ public class PaCompleteUpdater extends PaBaseProgrammeUpdater implements Runnabl
     
     private final PaProgrammeDataStore fileManager;
 
-    public PaCompleteUpdater(PaProgDataProcessor processor, PaProgrammeDataStore fileManager, AdapterLog log) {
-        super(processor, fileManager, log, "complete");
+    public PaCompleteUpdater(PaChannelProcessor processor, PaProgrammeDataStore fileManager, AdapterLog log) {
+        super(processor, fileManager, log);
         this.fileManager = fileManager;
     }
     
     @Override
-    public void run() {
+    public void runTask() {
         this.processFiles(fileManager.localFiles(Predicates.<File>alwaysTrue()));
     }
     

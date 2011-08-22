@@ -13,13 +13,13 @@ public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable 
     
     private final PaProgrammeDataStore fileManager;
 
-    public PaRecentUpdater(PaProgDataProcessor processor, PaProgrammeDataStore fileManager, AdapterLog log) {
-        super(processor, fileManager, log, "recent");
+    public PaRecentUpdater(PaChannelProcessor channelProcessor, PaProgrammeDataStore fileManager, AdapterLog log) {
+        super(channelProcessor, fileManager, log);
         this.fileManager = fileManager;
     }
     
     @Override
-    public void run() {
+    public void runTask() {
         final Long since = new DateTime(DateTimeZones.UTC).minusDays(2).getMillis();
         this.processFiles(fileManager.localFiles(new Predicate<File>() {
             @Override

@@ -14,14 +14,14 @@ public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     private final String dateString;
     private final PaProgrammeDataStore fileManager;
 
-    public PaSingleDateUpdater(PaProgDataProcessor processor, AdapterLog log, PaProgrammeDataStore fileManager, String dateString) {
-        super(processor, fileManager, log, dateString);
+    public PaSingleDateUpdater(PaChannelProcessor channelProcessor, AdapterLog log, PaProgrammeDataStore fileManager, String dateString) {
+        super(channelProcessor, fileManager, log);
         this.fileManager = fileManager;
         this.dateString = dateString;
     }
 
     @Override
-    public void run() {
+    public void runTask() {
         processFiles(fileManager.localFiles(new Predicate<File>() {
             @Override
             public boolean apply(File input) {
