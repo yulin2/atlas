@@ -71,8 +71,8 @@ public class PaModule {
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
-        PaChannelProcessJobBuilder jobBuilder = new PaChannelProcessJobBuilder(processor, broadcastTrimmer(), log);
-        PaCompleteUpdater updater = new PaCompleteUpdater(jobBuilder, paProgrammeDataStore(), log);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), log);
+	PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), log);
         scheduler.schedule(updater, COMPLETE_INGEST);
         return updater;
     }
