@@ -18,7 +18,6 @@ import org.atlasapi.remotesite.pa.film.PaFilmModule;
 import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 import org.joda.time.Duration;
-import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -29,14 +28,13 @@ import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.security.UsernameAndPassword;
-import com.metabroadcast.common.time.DayOfWeek;
 
 @Configuration
 @Import(PaFilmModule.class)
 public class PaModule {
     private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardHours(2)).withOffset(Duration.standardHours(1));
     private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardHours(2));
-    private final static RepetitionRule WEEKLY = RepetitionRules.weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
+    private final static RepetitionRule COMPLETE_INGEST = RepetitionRules.NEVER;//weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
@@ -76,7 +74,7 @@ public class PaModule {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
         PaChannelProcessJobBuilder jobBuilder = new PaChannelProcessJobBuilder(processor, broadcastTrimmer(), log);
         PaCompleteUpdater updater = new PaCompleteUpdater(jobBuilder, paProgrammeDataStore(), log);
-        scheduler.schedule(updater, WEEKLY);
+        scheduler.schedule(updater, COMPLETE_INGEST);
         return updater;
     }
     
