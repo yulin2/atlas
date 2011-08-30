@@ -22,6 +22,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.testing.StubContentResolver;
+import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.joda.time.DateTime;
@@ -44,6 +45,7 @@ public class C4EpgUpdaterTest extends TestCase {
     private final RemoteSiteClient<Document> c4AtomFetcher = context.mock(RemoteSiteClient.class);
     private final ContentWriter contentWriter = context.mock(ContentWriter.class);
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
+    private final C4BrandUpdater brandUpdater = context.mock(C4BrandUpdater.class);
     private final DateTime day = new DateTime();
     
     private final AdapterLog log = new NullAdapterLog();
@@ -51,7 +53,7 @@ public class C4EpgUpdaterTest extends TestCase {
     
     private final BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, resolver,  contentWriter, log);
     
-    private final C4EpgUpdater updater = new C4EpgUpdater(c4AtomFetcher, new C4EpgEntryProcessor(contentWriter, resolver, log), new C4EpgBrandlessEntryProcessor(contentWriter, resolver, log), trimmer, log, new DayRangeGenerator());
+    private final C4EpgUpdater updater = new C4EpgUpdater(c4AtomFetcher, new C4EpgEntryProcessor(contentWriter, resolver, brandUpdater, log), new C4EpgBrandlessEntryProcessor(contentWriter, resolver, brandUpdater, log), trimmer, log, new DayRangeGenerator());
     
     @Override
     public void setUp() throws Exception {
@@ -68,7 +70,9 @@ public class C4EpgUpdaterTest extends TestCase {
                 will(returnValue(c4EpgFeed));
             allowing(c4AtomFetcher).get(with(any(String.class)));
                 will(returnValue(new Document(new Element("feed"))));
+            allowing(brandUpdater).createOrUpdateBrand(with(any(String.class))); will(throwException(new RuntimeException()));
             allowing(contentWriter).createOrUpdate(with(any(Container.class)));
+            allowing(contentWriter).createOrUpdate(with(any(Item.class)));
             allowing(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(any(Iterable.class)), with(any(Iterable.class))); will(returnValue(schedule));
         }});
         

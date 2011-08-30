@@ -1,8 +1,10 @@
 package org.atlasapi.remotesite.channel4;
 
+import org.atlasapi.media.entity.Brand;
+
 public interface C4BrandUpdater {
 	
-	void createOrUpdateBrand(String uri);
+	Brand createOrUpdateBrand(String uri);
 
 	boolean canFetch(String uri);
 

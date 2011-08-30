@@ -29,6 +29,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.channel4.C4AtomApi;
+import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.C4EpisodesExtractor;
 import org.atlasapi.remotesite.channel4.C4RelatedEntry;
 import org.joda.time.DateTime;
@@ -61,10 +62,12 @@ public class C4EpgEntryProcessor {
     private final AdapterLog log;
     
     private final C4SynthesizedItemUpdater c4SynthesizedItemUpdater;
+    private final C4BrandUpdater brandUpdater;
     
-    public C4EpgEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, AdapterLog log) {
+    public C4EpgEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentStore = contentStore;
+        this.brandUpdater = brandUpdater;
         this.log = log;
         this.c4SynthesizedItemUpdater = new C4SynthesizedItemUpdater(contentStore, contentWriter);
     }
@@ -117,10 +120,15 @@ public class C4EpgEntryProcessor {
         Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableSet.of(brandUri)).get(brandUri);
         
         if(resolved.isNothing()) {
-            Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4);
-            brand.setTitle(entry.brandTitle());
-            brand.addAlias(TAG_ALIAS_BASE+brandName);
-            return brand;
+            try {
+                return brandUpdater.createOrUpdateBrand(brandUri);
+            } catch (Exception e) {
+                Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4);
+                brand.setTitle(entry.brandTitle());
+                brand.addAlias(TAG_ALIAS_BASE+brandName);
+                brand.setLastUpdated(entry.updated());
+                return brand;
+            }
         } else {
             return (Brand) resolved.requireValue();
         }
@@ -135,6 +143,7 @@ public class C4EpgEntryProcessor {
             series = new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri), C4);
             series.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s", brandName, episode.getSeriesNumber()));
             series.withSeriesNumber(episode.getSeriesNumber());
+            series.setLastUpdated(brand.getLastUpdated());
         }
         series.setParent(brand);
         contentWriter.createOrUpdate(series);

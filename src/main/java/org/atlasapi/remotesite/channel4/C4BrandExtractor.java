@@ -69,7 +69,7 @@ public class C4BrandExtractor {
         broadcastExtractor = new C4EpisodeBroadcastExtractor(log);
     }
 
-    public void write(Feed source) {
+    public Brand write(Feed source) {
         Brand brand = basicDetailsExtractor.extract(source);
         
         List<Series> allSeries = Lists.newArrayList();
@@ -115,6 +115,8 @@ public class C4BrandExtractor {
 			episode.setContainer(brand);
 			contentWriter.createOrUpdate(episode);
         }
+        
+        return brand;
     }
 
 	private boolean equivalentTitles(Brand brand, Episode episode) {

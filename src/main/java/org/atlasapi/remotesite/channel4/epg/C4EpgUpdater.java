@@ -61,9 +61,9 @@ public class C4EpgUpdater extends ScheduledTask {
     private final C4EpgBrandlessEntryProcessor brandlessEntryProcessor;
     private final BroadcastTrimmer trimmer;
 
-    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, ContentWriter writer, ContentResolver store, BroadcastTrimmer trimmer, AdapterLog log) {
-        this(fetcher, new C4EpgEntryProcessor(writer, store, log), new C4EpgBrandlessEntryProcessor(writer, store, log), trimmer, log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
-    }
+//    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, ContentWriter writer, ContentResolver store, BroadcastTrimmer trimmer, AdapterLog log) {
+//        this(fetcher, new C4EpgEntryProcessor(writer, store, log), new C4EpgBrandlessEntryProcessor(writer, store, log), trimmer, log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
+//    }
 
     public C4EpgUpdater(RemoteSiteClient<Document> fetcher, C4EpgEntryProcessor entryProcessor, C4EpgBrandlessEntryProcessor brandlessEntryProcessor, BroadcastTrimmer trimmer, AdapterLog log, DayRangeGenerator generator) {
         this.c4AtomFetcher = fetcher;

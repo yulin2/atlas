@@ -16,6 +16,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.C4BroadcastBuilder;
 import org.joda.time.DateTime;
 
@@ -34,11 +35,13 @@ public class C4EpgBrandlessEntryProcessor {
 
     private final ContentWriter contentWriter;
     private final ContentResolver contentStore;
+    private final C4BrandUpdater brandUpdater;
     private final AdapterLog log;
 
-    public C4EpgBrandlessEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, AdapterLog log) {
+    public C4EpgBrandlessEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentStore = contentStore;
+        this.brandUpdater = brandUpdater;
         this.log = log;
     }
 
@@ -71,11 +74,15 @@ public class C4EpgBrandlessEntryProcessor {
      * matched up 
      */
     private void writeBrandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
-        Brand brand = new Brand(REAL_PROGRAMME_BASE + synthBrandName, "c4:"+synthBrandName, C4);
-        brand.addAlias(REAL_TAG_BASE + synthBrandName);
-        brand.setTitle(entry.title());
-        brand.setLastUpdated(entry.updated());
-        
+        Brand brand = null;
+        try {
+            brand = brandUpdater.createOrUpdateBrand(REAL_PROGRAMME_BASE + synthBrandName);
+        } catch (Exception e) {
+            brand = new Brand(REAL_PROGRAMME_BASE + synthBrandName, "c4:"+synthBrandName, C4);
+            brand.addAlias(REAL_TAG_BASE + synthBrandName);
+            brand.setTitle(entry.title());
+            brand.setLastUpdated(entry.updated());
+        }
         contentWriter.createOrUpdate(brand);
         
         Episode episode = episodeFrom(entry, synthBrandName, channel);
@@ -130,7 +137,7 @@ public class C4EpgBrandlessEntryProcessor {
     }
 
     private Broadcast createBroadcast(C4EpgEntry entry, Channel channel) {
-        Broadcast entryBroadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId(C4BroadcastBuilder.idFrom(channel.uri(), entry.slotId()));
+        Broadcast entryBroadcast = new Broadcast(channel.uri(), entry.txDate(), entry.duration()).withId(C4BroadcastBuilder.idFrom(channel.uri(), entry.id()));
         entryBroadcast.addAlias(C4BroadcastBuilder.aliasFrom(channel.uri(), entry.id()));
         entryBroadcast.setIsActivelyPublished(true);
         entryBroadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime());
