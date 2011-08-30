@@ -133,7 +133,8 @@ public class C4EpgUpdater extends ScheduledTask {
                         acceptableBroadcastIds.put(broadcastId, itemUri);
                     }
                 } else {
-                    
+                    String itemUri = C4EpgBrandlessEntryProcessor.episodeUriFrom(entry);
+                    acceptableBroadcastIds.put(broadcastId, itemUri);
                 }
             }
         }

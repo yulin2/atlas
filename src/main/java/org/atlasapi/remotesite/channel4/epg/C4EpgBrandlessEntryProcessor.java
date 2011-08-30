@@ -45,9 +45,7 @@ public class C4EpgBrandlessEntryProcessor {
     public void process(C4EpgEntry entry, Channel channel) {
         try{
             
-            String realBrandName = C4EpgEntryProcessor.webSafeBrandName(entry);
-            
-            String brandName = realBrandName != null ? realBrandName : brandName(entry.title());
+            String brandName = brandNameFrom(entry);
             
             //try to get container for the item.
             String brandUri = REAL_PROGRAMME_BASE + brandName;
@@ -65,6 +63,32 @@ public class C4EpgBrandlessEntryProcessor {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception processing brandless entry " + entry.id()));
         }
     }
+    
+    public static String brandNameFrom(C4EpgEntry entry) {
+        String realBrandName = C4EpgEntryProcessor.webSafeBrandName(entry);
+        return realBrandName != null ? realBrandName : brandName(entry.title());
+    }
+
+    private static String brandName(String title) {
+        return title.replaceAll("[^ a-zA-Z0-9]", "").replaceAll("\\s+", "-").toLowerCase();
+    }
+
+    private Episode episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel) {
+        String slotId = entry.slotId();
+        Episode episode = new Episode(episodeUriFrom(entry), "c4:"+synthBrandName +"-"+slotId, C4);
+        episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
+        episode.setTitle(entry.title());
+        episode.setDescription(entry.summary());
+        episode.setLastUpdated(entry.updated());
+        
+        C4EpgEntryProcessor.updateVersion(episode, entry, channel);
+        
+        return episode;
+    }
+
+    public static String episodeUriFrom(C4EpgEntry entry) {
+        return SYNTH_PROGRAMME_BASE + brandNameFrom(entry) + "/" + entry.slotId();
+    }
 
     /**
      * Give synthesized brands 'real' uris so that when/if they appear in the /programmes feed they are
@@ -81,19 +105,6 @@ public class C4EpgBrandlessEntryProcessor {
         Episode episode = episodeFrom(entry, synthBrandName, channel);
         episode.setContainer(brand);
         contentWriter.createOrUpdate(episode);
-    }
-
-    private Episode episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel) {
-        String slotId = entry.slotId();
-        Episode episode = new Episode(SYNTH_PROGRAMME_BASE + synthBrandName + "/" + slotId, "c4:"+synthBrandName +"-"+slotId, C4);
-        episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
-        episode.setTitle(entry.title());
-        episode.setDescription(entry.summary());
-        episode.setLastUpdated(entry.updated());
-        
-        C4EpgEntryProcessor.updateVersion(episode, entry, channel);
-        
-        return episode;
     }
 
     private Episode extractRelevantEpisode(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
@@ -135,9 +146,5 @@ public class C4EpgBrandlessEntryProcessor {
         entryBroadcast.setIsActivelyPublished(true);
         entryBroadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime());
         return entryBroadcast;
-    }
-
-    private String brandName(String title) {
-        return title.replaceAll("[^ a-zA-Z0-9]", "").replaceAll("\\s+", "-").toLowerCase();
     }
 }
