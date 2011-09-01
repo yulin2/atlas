@@ -118,8 +118,8 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
             }
         }));
         
-        EpisodeMatchingEquivalenceResultHandler episodeMatchingHandler = new EpisodeMatchingEquivalenceResultHandler(itemResultHandler, strongContainers, strongContainerChildren);
-        
+        EquivalenceResultHandler<Item> episodeMatchingHandler = new EpisodeFilteringEquivalenceResultHandler(new EpisodeMatchingEquivalenceResultHandler(itemResultHandler, strongContainerChildren), strongContainers) ;
+
         for (EquivalenceResult<Item> equivalenceResult : childResults) {
             episodeMatchingHandler.handle(equivalenceResult);
         }
