@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.generators;
 
+import static com.google.common.collect.Iterables.filter;
+
 import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -13,12 +15,9 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
-import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 
 public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Film> {
@@ -45,33 +44,48 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
         List<Identified> possibleEquivalentFilms = searchResolver.search(new SearchQuery(film.getTitle(), Selection.ALL, ImmutableList.of(Publisher.PREVIEW_NETWORKS), TITLE_WEIGHTING,
                 BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), config);
 
-        Iterable<Film> equivalentFilms = Iterables.filter(Iterables.filter(possibleEquivalentFilms, Film.class), new EquivalentFilmPredicate(film));
+        Iterable<Film> foundFilms = filter(possibleEquivalentFilms, Film.class);
 
-        for (Film equivFilm : equivalentFilms) {
-            scores.addEquivalent(equivFilm, Score.valueOf(1.0));
+        for (Film equivFilm : foundFilms) {
+            if(sameYear(film, equivFilm)) {
+                scores.addEquivalent(equivFilm, Score.valueOf(titleMatch(film, equivFilm)));
+            } else {
+                scores.addEquivalent(equivFilm, Score.valueOf(0.0));
+            }
         }
 
         return scores.build();
     }
 
-    private class EquivalentFilmPredicate implements Predicate<Film> {
-
-        private final Film film;
-
-        public EquivalentFilmPredicate(Film film) {
-            this.film = Preconditions.checkNotNull(film);
-            Preconditions.checkArgument(!Strings.isNullOrEmpty(film.getTitle()));
-            Preconditions.checkArgument(film.getYear() != null);
-        }
-
-        @Override
-        public boolean apply(Film input) {
-            return trim(film.getTitle()).equals(trim(input.getTitle())) && film.getYear().equals(input.getYear());
-        }
-
-        private String trim(String title) {
-            return title.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-        }
+    private double titleMatch(Film film, Film equivFilm) {
+        return match(removeThe(alphaNumeric(film.getTitle())), removeThe(alphaNumeric(equivFilm.getTitle())));
     }
 
+    public double match(String subjectTitle, String equivalentTitle) {
+        double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
+        double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
+        return commonPrefix / (subjectTitle.length() / 1.0) - difference;
+    }
+    
+    private String removeThe(String title) {
+        if(title.startsWith("the")) {
+            return title.substring(3);
+        }
+        return title;
+    }
+
+    private String alphaNumeric(String title) {
+        return title.replaceAll("[^\\d\\w]", "").toLowerCase();
+    }
+
+    private double commonPrefixLength(String t1, String t2) {
+        int i = 0;
+        for (; i < Math.min(t1.length(), t2.length()) && t1.charAt(i) == t2.charAt(i); i++) {
+        }
+        return i;
+    }
+
+    private boolean sameYear(Film film, Film equivFilm) {
+        return film.getYear().equals(equivFilm.getYear());
+    }
 }
