@@ -43,7 +43,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
 
         int broadcasts = 0;
         for (Version version : content.getVersions()) {
-            for (Broadcast broadcast : channelFilter(version.getBroadcasts())) {
+            for (Broadcast broadcast : activelyPublished(channelFilter(version.getBroadcasts()))) {
                 broadcasts++;
                 Schedule schedule = scheduleAround(broadcast, Sets.difference(supportedPublishers, ImmutableSet.of(content.getPublisher())));
                 for (ScheduleChannel channel : schedule.scheduleChannels()) {
@@ -59,6 +59,15 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         return scale(scores.build(), broadcasts);
     }
     
+    private Iterable<Broadcast> activelyPublished(Iterable<Broadcast> channelFilter) {
+        return Iterables.filter(channelFilter, new Predicate<Broadcast>() {
+            @Override
+            public boolean apply(Broadcast input) {
+                return input.isActivelyPublished();
+            }
+        });
+    }
+
     private Iterable<Broadcast> channelFilter(Set<Broadcast> broadcasts) {
         return Iterables.filter(broadcasts, new Predicate<Broadcast>() {
             @Override
