@@ -251,23 +251,27 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private void setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
         
         //currently Welsh channels have Welsh titles/descriptions 
-        // which flip the English ones, resulting in many writes.
-        if (!channel.uri().contains("wales")) {
+        // which flip the English ones, resulting in many writes. We'll only take the Welsh title if we don't
+    	// already have a title from another channel
+        if (episode.getTitle() == null || !channel.uri().contains("wales")) {
             if (progData.getEpisodeTitle() != null) {
                 episode.setTitle(progData.getEpisodeTitle());
             } else {
                 episode.setTitle(progData.getTitle());
             }
+        }
 
-            if (progData.getBillings() != null) {
-                for (Billing billing : progData.getBillings().getBilling()) {
-                    if (billing.getType().equals("synopsis")) {
-                        episode.setDescription(billing.getvalue());
-                        break;
-                    }
+        if (progData.getBillings() != null) {
+            for (Billing billing : progData.getBillings().getBilling()) {
+                if (billing.getType().equals("synopsis")) {
+                	if(episode.getDescription() == null || !channel.uri().contains("wales")) {
+	                    episode.setDescription(billing.getvalue());
+	                    break;
+                	}
                 }
             }
         }
+
 
         episode.setMediaType(channelMap.isRadioChannel(channel) ? MediaType.AUDIO : MediaType.VIDEO);
         episode.setSpecialization(specialization(progData, channel));
