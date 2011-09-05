@@ -98,7 +98,7 @@ public class EquivModule {
 	private @Autowired DatabasedMongo db;
 	private @Value("${equiv.updater.enabled}") String updaterEnabled;
 
-	private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.weekly(DayOfWeek.MONDAY, new LocalTime(9, 00));
+	private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
     
     private @Autowired MongoScheduleStore scheduleResolver;
     private @Autowired SearchResolver searchResolver;
