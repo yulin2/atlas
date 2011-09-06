@@ -59,6 +59,7 @@ import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.FilmEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.FilteringContentLister;
+import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
 import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -90,12 +91,10 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import com.metabroadcast.common.time.DayOfWeek;
 
 @Configuration
 public class EquivModule {
 
-	private @Autowired DatabasedMongo db;
 	private @Value("${equiv.updater.enabled}") String updaterEnabled;
 
 	private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
@@ -104,7 +103,8 @@ public class EquivModule {
     private @Autowired SearchResolver searchResolver;
     private @Autowired ContentLister contentLister;
     private @Autowired ContentResolver contentResolver;
-    private @Autowired DatabasedMongo mongo;
+    private @Autowired DatabasedMongo db;
+
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler taskScheduler;
 
@@ -187,17 +187,14 @@ public class EquivModule {
         return new TransitiveLookupWriter(new MongoLookupEntryStore(db));
     }
     
-    private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher publisher) {
+    private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
         ContentLister filteringLister = new FilteringContentLister(contentLister, new Predicate<Content>() {
             @Override
             public boolean apply(Content input) {
-                if(Publisher.PA == publisher && publisher.equals(input.getPublisher())) {
-                    return !(input instanceof Film); 
-                }
-                return true;
+                return !(Publisher.PA.equals(input.getPublisher()) && input instanceof Film);
             }
         });
-        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, db).forPublisher(publisher);
+        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, new MongoScheduleTaskProgressStore(db)).forPublishers(publishers);
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
@@ -218,12 +215,13 @@ public class EquivModule {
     @PostConstruct
     public void scheduleUpdater() {
         if(Boolean.parseBoolean(updaterEnabled)) {
-            taskScheduler.schedule(publisherUpdateTask(Publisher.PA).withName("PA Equivalence Updater"), EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(publisherUpdateTask(Publisher.BBC).withName("BBC Equivalence Updater"), EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(publisherUpdateTask(Publisher.C4).withName("C4 Equivalence Updater"), EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(publisherUpdateTask(Publisher.ITV).withName("ITV Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.PA, Publisher.BBC, Publisher.C4, Publisher.ITV).withName("PA/BBC/C4/ITV Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.PA).withName("PA Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
+//            taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
         }
     }
     
