@@ -28,7 +28,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 
-public class FilmEquivalenceUpdateTask  extends ScheduledTask {
+public class FilmEquivalenceUpdateTask extends ScheduledTask {
 
     private final ContentLister contentLister;
     private final ContentEquivalenceUpdater<Film> rootUpdater;
