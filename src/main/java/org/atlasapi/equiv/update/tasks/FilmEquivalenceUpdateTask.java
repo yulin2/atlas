@@ -28,7 +28,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
 
-public class FilmEquivalenceUpdateTask  extends ScheduledTask {
+public class FilmEquivalenceUpdateTask extends ScheduledTask {
 
     private final ContentLister contentLister;
     private final ContentEquivalenceUpdater<Film> rootUpdater;
@@ -97,7 +97,7 @@ public class FilmEquivalenceUpdateTask  extends ScheduledTask {
         
         String lastId = TranslatorUtils.toString(progress, "lastId");
         String tableName = TranslatorUtils.toString(progress, "collection");
-        ContentTable table = tableName == null ? null : ContentTable.valueOf(tableName);
+        ContentTable table = tableName == null ? null : ContentTable.fromString(tableName);
         
         return new ContentListingProgress(lastId, table)
             .withCount(TranslatorUtils.toInteger(progress, "count"))
