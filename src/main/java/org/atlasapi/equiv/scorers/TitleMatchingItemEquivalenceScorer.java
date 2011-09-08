@@ -54,17 +54,17 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
     public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
-        desc.startStage("Title Scoring");
+        desc.startStage("Title scoring");
         
         if(!Strings.isNullOrEmpty(subject.getTitle())) {
             for (Item suggestion : Iterables.filter(suggestions, Item.class)) {
                 Score score;
                 if(Strings.isNullOrEmpty(suggestion.getTitle())) {
                     score = Score.NULL_SCORE;
-                    desc.appendText("%s (no title) scored: %s", suggestion.getCanonicalUri(), score);
+                    desc.appendText("No Title (%s) scored: %s", suggestion.getCanonicalUri(), score);
                 } else {
                     score = score(subject, suggestion);
-                    desc.appendText("%s (%s) scored: %s", suggestion.getCanonicalUri(), suggestion.getTitle(), score);
+                    desc.appendText("%s (%s) scored: %s", suggestion.getTitle(), suggestion.getCanonicalUri(), score);
                 }
                 equivalents.addEquivalent(suggestion, score);
             }

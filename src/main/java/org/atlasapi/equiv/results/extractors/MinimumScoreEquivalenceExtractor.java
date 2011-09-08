@@ -20,7 +20,7 @@ public class MinimumScoreEquivalenceExtractor<T extends Content> extends Filteri
             public boolean apply(ScoredEquivalent<T> input, T target, ResultDescription desc) {
                 boolean result = input.score().isRealScore() && input.score().asDouble() > minimum;
                 if(!result) {
-                    desc.appendText("%s removed", input.equivalent());
+                    desc.appendText("%s (%s) removed", input.equivalent().getTitle(), input.equivalent().getCanonicalUri());
                 }
                 return result;
             }

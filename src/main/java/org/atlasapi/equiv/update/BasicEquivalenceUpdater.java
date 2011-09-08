@@ -51,7 +51,7 @@ public class BasicEquivalenceUpdater<T extends Content> implements ContentEquiva
             }
         }
         
-        return builder.resultFor(content, scores);
+        return builder.resultFor(content, scores, new DefaultDescription());
     }
     
 }

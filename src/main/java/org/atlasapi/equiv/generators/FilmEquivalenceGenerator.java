@@ -19,6 +19,7 @@ import org.atlasapi.search.model.SearchQuery;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 
 public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Film> {
@@ -37,24 +38,34 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     @Override
     public ScoredEquivalents<Film> generate(Film film, ResultDescription desc) {
         ScoredEquivalentsBuilder<Film> scores = DefaultScoredEquivalents.<Film> fromSource("Film");
+        
+        desc.startStage("Film equivalence generator");
 
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
+            desc.appendText("Can't continue: year '%s', title '%'", film.getYear(), film.getTitle()).finishStage();
             return scores.build();
+        } else {
+            desc.appendText("Using year %s, title %s", film.getYear(), film.getTitle());
         }
 
         List<Identified> possibleEquivalentFilms = searchResolver.search(new SearchQuery(film.getTitle(), Selection.ALL, ImmutableList.of(Publisher.PREVIEW_NETWORKS), TITLE_WEIGHTING,
                 BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), config);
 
         Iterable<Film> foundFilms = filter(possibleEquivalentFilms, Film.class);
+        desc.appendText("Found %s films through title search", Iterables.size(foundFilms));
 
         for (Film equivFilm : foundFilms) {
             if(sameYear(film, equivFilm)) {
-                scores.addEquivalent(equivFilm, Score.valueOf(titleMatch(film, equivFilm)));
+                Score score = Score.valueOf(titleMatch(film, equivFilm));
+                desc.appendText("%s (%s) scored %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), score);
+                scores.addEquivalent(equivFilm, score);
             } else {
+                desc.appendText("%s (%s) ignored. Wrong year %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), equivFilm.getYear());
                 scores.addEquivalent(equivFilm, Score.valueOf(0.0));
             }
         }
-
+        
+        desc.finishStage();
         return scores.build();
     }
 

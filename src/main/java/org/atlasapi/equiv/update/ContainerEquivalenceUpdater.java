@@ -5,6 +5,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.equiv.generators.EquivalenceGenerators;
@@ -12,6 +13,7 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.description.DefaultDescription;
+import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
@@ -84,13 +86,15 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         
         List<String> childrenUris = Lists.transform(content.getChildRefs(), ChildRef.TO_URI);
         
+        ReadableDescription desc = new DefaultDescription();
+
         // compute results for container children.
+        desc.startStage("Computing initial child results");
         Set<EquivalenceResult<Item>> childResults = computeInitialChildResults(childrenUris, content.getCanonicalUri());
+        desc.appendText("%s child results", childResults.size()).finishStage();
         
         //containers suggested by items
-        ScoredEquivalents<Container> strongItemContainers = extractContainersFrom(childResults, childrenUris.size(), containerCache);
-        
-        ResultDescription desc = new DefaultDescription();
+        ScoredEquivalents<Container> strongItemContainers = extractContainersFrom(childResults, childrenUris.size(), containerCache, desc);
         
         //generate other container equivalents.
         List<ScoredEquivalents<Container>> generatedEquivalences = generators.generate(content, desc);
@@ -107,7 +111,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, ImmutableList.copyOf(extractGeneratedSuggestions), desc);
         
         //build container result.
-        EquivalenceResult<Container> containerResult = containerResultBuilder.resultFor(content, merger.merge(generatedEquivalences, scoredEquivalents));
+        EquivalenceResult<Container> containerResult = containerResultBuilder.resultFor(content, merger.merge(generatedEquivalences, scoredEquivalents), desc);
         
         //containerResult = filterNonPositiveItemScores(strongItemContainers, containerResult);
         
@@ -152,8 +156,9 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         })));
     }
 
-    private ScoredEquivalents<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults, int children, Map<String, Container> containerCache) {
+    private ScoredEquivalents<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults, int children, Map<String, Container> containerCache, ResultDescription desc) {
 
+        desc.startStage("Extracting containers from child results");
         ScoredEquivalentsBuilder<Container> containerEquivalents = DefaultScoredEquivalents.fromSource(ITEM_UPDATER);
         
         for (EquivalenceResult<Item> equivalenceResult : childResults) {
@@ -173,12 +178,19 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
             }
         }
         
-        return ScaledScoredEquivalents.scale(containerEquivalents.build(), new Function<Double, Double>() {
+        ScaledScoredEquivalents<Container> scaled = ScaledScoredEquivalents.scale(containerEquivalents.build(), new Function<Double, Double>() {
             @Override
             public Double apply(Double input) {
                 return Math.min(1, input * ITEM_SCORE_SCALER);
             }
         });
+        
+        for (Entry<Container, Score> result : scaled.equivalents().entrySet()) {
+            desc.appendText("%s (%s) scored %s", result.getKey().getTitle(), result.getKey().getCanonicalUri(), result.getValue());
+        }
+        desc.finishStage();
+        
+        return scaled;
     }
     
     private Container resolve(ParentRef parentEquivalent, Map<String, Container> containerCache) {
