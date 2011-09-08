@@ -2,6 +2,7 @@ package org.atlasapi.equiv.results.extractors;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 
@@ -16,9 +17,9 @@ public abstract class ChainingEquivalenceExtractor<T extends Content> implements
     }
     
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
-        return extract(target, equivalents, link.extract(target, equivalents));
+    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, ResultDescription desc) {
+        return extract(target, equivalents, link.extract(target, equivalents, desc), desc);
     }
 
-    protected abstract Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, Maybe<ScoredEquivalent<T>> delegateExtraction);
+    protected abstract Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, Maybe<ScoredEquivalent<T>> delegateExtraction, ResultDescription desc);
 }

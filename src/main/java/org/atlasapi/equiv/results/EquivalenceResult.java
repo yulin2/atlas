@@ -3,6 +3,7 @@ package org.atlasapi.equiv.results;
 import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
@@ -18,12 +19,14 @@ public class EquivalenceResult<T extends Content> {
     private final List<ScoredEquivalents<T>> scores;
     private final ScoredEquivalents<T> combined;
     private final Map<Publisher, ScoredEquivalent<T>> strong;
+    private final ReadableDescription desc;
 
-    public EquivalenceResult(T target, List<ScoredEquivalents<T>> scores, ScoredEquivalents<T> combined, Map<Publisher, ScoredEquivalent<T>> strong) {
+    public EquivalenceResult(T target, List<ScoredEquivalents<T>> scores, ScoredEquivalents<T> combined, Map<Publisher, ScoredEquivalent<T>> strong, ReadableDescription desc) {
         this.target = target;
         this.scores = ImmutableList.copyOf(scores);
         this.combined = combined;
         this.strong = ImmutableMap.copyOf(strong);
+        this.desc = desc;
     }
 
     @Override
@@ -62,6 +65,10 @@ public class EquivalenceResult<T extends Content> {
 
     public List<ScoredEquivalents<T>> rawScores() {
         return scores;
+    }
+
+    public ReadableDescription description() {
+        return desc;
     }
 
     public EquivalenceResult<T> rebuildWith(EquivalenceResultBuilder<T> builder) {

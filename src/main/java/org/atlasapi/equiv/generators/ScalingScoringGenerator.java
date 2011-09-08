@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.generators;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ScalingEquivalenceScorer;
@@ -23,13 +24,13 @@ public class ScalingScoringGenerator<T extends Content> implements ContentEquiva
 
 
     @Override
-    public ScoredEquivalents<T> score(T content, Iterable<T> suggestions) {
-        return scorer.score(content, suggestions);
+    public ScoredEquivalents<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {
+        return scorer.score(content, suggestions, desc);
     }
 
     @Override
-    public ScoredEquivalents<T> generate(T content) {
-        return generator.generate(content);
+    public ScoredEquivalents<T> generate(T content, ResultDescription desc) {
+        return generator.generate(content, desc);
     }
     
 }

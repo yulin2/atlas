@@ -5,6 +5,7 @@ import static com.google.common.collect.Iterables.filter;
 import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
@@ -34,7 +35,7 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     }
 
     @Override
-    public ScoredEquivalents<Film> generate(Film film) {
+    public ScoredEquivalents<Film> generate(Film film, ResultDescription desc) {
         ScoredEquivalentsBuilder<Film> scores = DefaultScoredEquivalents.<Film> fromSource("Film");
 
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -35,7 +36,7 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
                 DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, Score.valueOf(5.0)).addEquivalent(equivalent1, Score.NULL_SCORE).build()
         );
         
-        ScoredEquivalents<Item> combined = combiner.combine(scores);
+        ScoredEquivalents<Item> combined = combiner.combine(scores, new DefaultDescription());
         
         assertEquals(Score.valueOf(5.0), combined.equivalents().get(equivalent3));
         
@@ -51,7 +52,7 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
                 DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, Score.NULL_SCORE).build()
         );
         
-        ScoredEquivalents<Item> combined = combiner.combine(scores);
+        ScoredEquivalents<Item> combined = combiner.combine(scores, new DefaultDescription());
 
         assertEquals(Score.valueOf(5.0), combined.equivalents().get(equivalent3));
 

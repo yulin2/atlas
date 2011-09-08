@@ -2,6 +2,7 @@ package org.atlasapi.equiv.generators;
 
 import java.util.Set;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -38,9 +39,8 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
     
     @Override
-    public ScoredEquivalents<Item> generate(Item content) {
+    public ScoredEquivalents<Item> generate(Item content, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
-
         int broadcasts = 0;
         for (Version version : content.getVersions()) {
             for (Broadcast broadcast : activelyPublished(channelFilter(version.getBroadcasts()))) {

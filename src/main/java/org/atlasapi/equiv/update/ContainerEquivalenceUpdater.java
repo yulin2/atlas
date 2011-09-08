@@ -11,6 +11,8 @@ import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.EquivalenceResultHandler;
+import org.atlasapi.equiv.results.description.DefaultDescription;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
@@ -41,7 +43,7 @@ import com.metabroadcast.common.base.Maybe;
 public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
 
     private static final int ITEM_SCORE_SCALER = 20;
-    public static final String NAME = "Item";
+    public static final String ITEM_UPDATER = "Item";
 
     private final ContentResolver contentResolver;
     private final AdapterLog log;
@@ -88,8 +90,10 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         //containers suggested by items
         ScoredEquivalents<Container> strongItemContainers = extractContainersFrom(childResults, childrenUris.size(), containerCache);
         
+        ResultDescription desc = new DefaultDescription();
+        
         //generate other container equivalents.
-        List<ScoredEquivalents<Container>> generatedEquivalences = generators.generate(content);
+        List<ScoredEquivalents<Container>> generatedEquivalences = generators.generate(content, desc);
         
         Set<Container> extractGeneratedSuggestions = extractGeneratedSuggestions(generatedEquivalences);
         
@@ -100,7 +104,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         extractGeneratedSuggestions.addAll(extractGeneratedSuggestions(ImmutableList.of(strongItemContainers)));
         
         //score all generated suggestions
-        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, ImmutableList.copyOf(extractGeneratedSuggestions));
+        List<ScoredEquivalents<Container>> scoredEquivalents = scorers.score(content, ImmutableList.copyOf(extractGeneratedSuggestions), desc);
         
         //build container result.
         EquivalenceResult<Container> containerResult = containerResultBuilder.resultFor(content, merger.merge(generatedEquivalences, scoredEquivalents));
@@ -139,23 +143,6 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         return DefaultScoredEquivalents.fromMappedEquivs(strongItemContainers.source(), current);
     }
 
-//    private EquivalenceResult<Container> filterNonPositiveItemScores(ScoredEquivalents<Container> itemScores, EquivalenceResult<Container> result) {
-//        
-//        final Map<Container, Score> itemSourceScores = itemScores.equivalents();
-//        
-//        Map<Publisher, ScoredEquivalent<Container>> strongEquivs = result.strongEquivalences();
-//        
-//        Map<Publisher, ScoredEquivalent<Container>> filterStrongs = Maps.filterValues(strongEquivs, new Predicate<ScoredEquivalent<Container>>() {
-//            @Override
-//            public boolean apply(ScoredEquivalent<Container> input) {
-//                Score score = itemSourceScores.get(input.equivalent());
-//                return score != null && score.isRealScore() && score.asDouble() > 0;
-//            }
-//        });
-//        
-//        return new EquivalenceResult<Container>(result.target(), result.rawScores(), result.combinedEquivalences(), filterStrongs);
-//    }
-
     private Set<Container> extractGeneratedSuggestions(Iterable<ScoredEquivalents<Container>> generatedScores) {
         return Sets.newHashSet(Iterables.concat(Iterables.transform(generatedScores, new Function<ScoredEquivalents<Container>, Iterable<Container>>() {
             @Override
@@ -167,7 +154,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
 
     private ScoredEquivalents<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults, int children, Map<String, Container> containerCache) {
 
-        ScoredEquivalentsBuilder<Container> containerEquivalents = DefaultScoredEquivalents.fromSource(NAME);
+        ScoredEquivalentsBuilder<Container> containerEquivalents = DefaultScoredEquivalents.fromSource(ITEM_UPDATER);
         
         for (EquivalenceResult<Item> equivalenceResult : childResults) {
             for (ScoredEquivalent<Item> strongEquivalent : equivalenceResult.strongEquivalences().values()) {
@@ -195,9 +182,11 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
     }
     
     private Container resolve(ParentRef parentEquivalent, Map<String, Container> containerCache) {
+        if(parentEquivalent == null) {
+            return null;
+        }
         
         //TODO make this a CachingContentResolver?
-        
         String uri = parentEquivalent.getUri();
         if(containerCache.containsKey(uri)) {
             return containerCache.get(uri);
@@ -223,11 +212,11 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         
         for (String childUri : childrenUris) {
             Identified child = resolvedChildren.get(childUri);
-            if(child instanceof Episode) {
+            if(child instanceof Item) {
                 EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences((Item)child);
                 childResults.add(itemEquivalences);
             } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("Resolved %s child %s to null/not Item", contentUri, childUri));
+                log.record(warnEntry().withSource(getClass()).withDescription("Resolved %s child %s to %s not Item", contentUri, childUri, child.getClass().getSimpleName()));
             }
         }
         return childResults;

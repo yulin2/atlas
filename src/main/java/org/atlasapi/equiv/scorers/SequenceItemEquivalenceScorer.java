@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.scorers;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -14,7 +15,7 @@ import com.google.common.collect.Iterables;
 public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<Item> {
 
     @Override
-    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions) {
+    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Sequence");
         
         for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(suggestions), Item.class)) {

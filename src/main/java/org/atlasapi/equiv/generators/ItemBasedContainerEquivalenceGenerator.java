@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.generators;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
@@ -30,7 +31,7 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
     }
     
     @Override
-    public ScoredEquivalents<Container> generate(Container container) {
+    public ScoredEquivalents<Container> generate(Container container, ResultDescription desc) {
         
         ScoredEquivalentsBuilder<Container> containerEquivalents = DefaultScoredEquivalents.fromSource(NAME);
         
