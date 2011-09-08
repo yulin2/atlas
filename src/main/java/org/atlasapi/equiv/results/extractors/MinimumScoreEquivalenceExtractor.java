@@ -1,34 +1,31 @@
 package org.atlasapi.equiv.results.extractors;
 
-import java.util.List;
-
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 
-import com.metabroadcast.common.base.Maybe;
-
-public class MinimumScoreEquivalenceExtractor<T extends Content> extends ChainingEquivalenceExtractor<T> {
+public class MinimumScoreEquivalenceExtractor<T extends Content> extends FilteringEquivalenceExtractor<T> {
     
-    public static <T extends Content> MinimumScoreEquivalenceExtractor<T> minimumFrom(EquivalenceExtractor<T> link, double minimum) {
-        return new MinimumScoreEquivalenceExtractor<T>(link, minimum);
-    }
-
     private final double minimum;
 
-    public MinimumScoreEquivalenceExtractor(EquivalenceExtractor<T> link, double minimum) {
-        super(link);
-        this.minimum = minimum;
-    }
-
     @Override
-    protected Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, Maybe<ScoredEquivalent<T>> delegateExtraction) {
-        if(delegateExtraction.hasValue()) {
-            ScoredEquivalent<T> realExtraction = delegateExtraction.requireValue();
-            if(realExtraction.score().isRealScore() && realExtraction.score().asDouble() > minimum) {
-                return Maybe.just(realExtraction);
+    protected String name() {
+        return String.format("%s minimum filter", minimum);
+    }
+    
+    public MinimumScoreEquivalenceExtractor(EquivalenceExtractor<T> link, final double minimum) {
+        super(link, 
+        new EquivalenceFilter<T>() {
+            @Override
+            public boolean apply(ScoredEquivalent<T> input, T target, ResultDescription desc) {
+                boolean result = input.score().isRealScore() && input.score().asDouble() > minimum;
+                if(!result) {
+                    desc.appendText("%s removed");
+                }
+                return result;
             }
-        }
-        return Maybe.nothing();
+        });
+        this.minimum = minimum;
     }
 
 }

@@ -15,8 +15,8 @@ permissions and limitations under the License. */
 package org.atlasapi.equiv;
 
 import static org.atlasapi.equiv.results.EquivalenceResultBuilder.resultBuilder;
-import static org.atlasapi.equiv.results.extractors.FilteringEquivalenceExtractor.filteringExtractor;
-import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.NAME;
+import static org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor.extractorMoreThanPercent;
+import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.ITEM_UPDATER;
 
 import javax.annotation.PostConstruct;
 
@@ -35,16 +35,14 @@ import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
 import org.atlasapi.equiv.results.combining.ItemScoreFilteringCombiner;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
-import org.atlasapi.equiv.results.extractors.EquivalenceFilter;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
-import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PublisherFilteringExtractor;
+import org.atlasapi.equiv.results.extractors.SpecializationMatchingEquivalenceExtractor;
 import org.atlasapi.equiv.results.persistence.MongoEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
 import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
@@ -83,7 +81,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -139,26 +136,14 @@ public class EquivModule {
     }
 
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder() {
-        EquivalenceCombiner<T> combiner = new ItemScoreFilteringCombiner<T>(new NullScoreAwareAveragingCombiner<T>(), NAME);
+        EquivalenceCombiner<T> combiner = new ItemScoreFilteringCombiner<T>(new NullScoreAwareAveragingCombiner<T>(), ITEM_UPDATER);
         
-        EquivalenceExtractor<T> extractor = PercentThresholdEquivalenceExtractor.<T> fromPercent(90);
-        extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
-            @Override
-            public boolean apply(ScoredEquivalent<T> input, T target) {
-                return input.score().isRealScore() && input.score().asDouble() > 0.2;
-            }
-        });
-        extractor = filteringExtractor(extractor, new EquivalenceFilter<T>() {
-            @Override
-            public boolean apply(ScoredEquivalent<T> input, T target) {
-                T equivalent = input.equivalent();
-                return (equivalent.getSpecialization() == null || target.getSpecialization() == null || Objects.equal(equivalent.getSpecialization(), target.getSpecialization())); 
-                    //&& (equivalent.getMediaType() == null || target.getMediaType() == null || Objects.equal(equivalent.getMediaType(), target.getMediaType()));
-            }
-        });
+        EquivalenceExtractor<T> extractor = extractorMoreThanPercent(90);
+        extractor = new MinimumScoreEquivalenceExtractor<T>(extractor, 0.2);
+        extractor = new SpecializationMatchingEquivalenceExtractor<T>(extractor);
         extractor = new PublisherFilteringExtractor<T>(extractor);
         
-        return resultBuilder(combiner, MinimumScoreEquivalenceExtractor.minimumFrom(extractor, 0.2));
+        return resultBuilder(combiner, extractor);
     }
     
     public @Bean ContainerEquivalenceUpdater containerUpdater() {

@@ -3,6 +3,7 @@ package org.atlasapi.equiv.scorers;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -10,6 +11,7 @@ import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivale
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
@@ -49,11 +51,25 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
     
     
     @Override
-    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions) {
+    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
-        for (Item suggestion : Iterables.filter(suggestions, Item.class)) {
-            equivalents.addEquivalent(suggestion, score(subject, suggestion));
+        desc.startStage("Title Scoring");
+        
+        if(!Strings.isNullOrEmpty(subject.getTitle())) {
+            for (Item suggestion : Iterables.filter(suggestions, Item.class)) {
+                Score score;
+                if(Strings.isNullOrEmpty(suggestion.getTitle())) {
+                    score = Score.NULL_SCORE;
+                    desc.appendText("%s (no title) scored: %s", suggestion.getCanonicalUri(), score);
+                } else {
+                    score = score(subject, suggestion);
+                    desc.appendText("%s (%s) scored: %s", suggestion.getCanonicalUri(), suggestion.getTitle(), score);
+                }
+                equivalents.addEquivalent(suggestion, score);
+            }
+        } else {
+            desc.appendText("Item has no title").finishStage();
         }
         
         return equivalents.build();
@@ -61,6 +77,10 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
 
 
     private Score score(Item subject, Item suggestion) {
+        
+        if(Strings.isNullOrEmpty(suggestion.getTitle())) {
+            return Score.NULL_SCORE;
+        }
         
         String subjTitle = removeSeq(subject.getTitle());
         String suggTitle = removeSeq(suggestion.getTitle());

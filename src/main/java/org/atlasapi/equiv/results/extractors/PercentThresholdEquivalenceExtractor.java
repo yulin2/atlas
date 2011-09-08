@@ -2,6 +2,7 @@ package org.atlasapi.equiv.results.extractors;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
@@ -13,7 +14,7 @@ import com.metabroadcast.common.base.Maybe;
  */
 public class PercentThresholdEquivalenceExtractor<T extends Content> implements EquivalenceExtractor<T> {
     
-    public static <T extends Content> PercentThresholdEquivalenceExtractor<T> fromPercent(int percent) {
+    public static <T extends Content> PercentThresholdEquivalenceExtractor<T> extractorMoreThanPercent(int percent) {
         return new PercentThresholdEquivalenceExtractor<T>(percent/100.0);
     }
 
@@ -23,18 +24,26 @@ public class PercentThresholdEquivalenceExtractor<T extends Content> implements 
         this.threshold = threshold;
     }
     
+    private static final String NAME = "Percent Extractor";
+    
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
-        if (!equivalents.isEmpty() && equivalents.get(0).score().isRealScore()) {
-
-            Double total = sum(equivalents);
-
-            ScoredEquivalent<T> strongest = equivalents.get(0);
-            if (strongest.score().asDouble() / total > threshold) {
-                return Maybe.just(strongest);
-            }
+    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, ResultDescription desc) {
+        desc.startStage(NAME);
+        
+        if (equivalents.isEmpty()) {
+            desc.appendText("no equivalents").finishStage();
+            return Maybe.nothing();
         }
+        
+        Double total = sum(equivalents);
 
+        ScoredEquivalent<T> strongest = equivalents.get(0);
+        if (strongest.score().isRealScore() && strongest.score().asDouble() / total > threshold) {
+            desc.appendText("%s extracted. %s / %s > %s", strongest.equivalent().getCanonicalUri(), strongest.score(), total, threshold).finishStage();
+            return Maybe.just(strongest);
+        }
+        
+        desc.appendText("%s not extracted. %s / %s < %s", strongest.equivalent().getCanonicalUri(), strongest.score(), total, threshold).finishStage();
         return Maybe.nothing();
     }
 

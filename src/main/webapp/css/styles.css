@@ -32,7 +32,7 @@ li {
 	list-style-type:none;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
 	font-weight:100;
 }
 
@@ -54,7 +54,7 @@ nav {
 	margin-top: 5px;
 }
 
-nav h3 {
+nav h4 {
 	margin-left: 0;
 	display: inline;
 }
@@ -196,4 +196,17 @@ textarea {
 
 .probe form p label {
     vertical-align: top;
+}
+
+#desc ul {
+padding-left: 24px;
+}
+#desc > ul {
+padding-left: 48px!important;
+}
+#desc ul li{
+    list-style-type: circle;
+}
+#equiv h3, #equiv p {
+    margin-left:12px;
 }

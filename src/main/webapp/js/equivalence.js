@@ -47,3 +47,7 @@ $("input.resultProbeUpdate").live('click', function(){
     });
     return false;
 });
+
+printDesc = function(desc) {
+    console.log(desc)
+}

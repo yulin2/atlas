@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.atlasapi.equiv.results.combining.EquivalenceCombiner;
+import org.atlasapi.equiv.results.description.DefaultDescription;
+import org.atlasapi.equiv.results.description.ReadableDescription;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
@@ -34,11 +37,11 @@ public class EquivalenceResultBuilder<T extends Content> {
     private final EquivalenceCombiner<T> combiner;
     private final EquivalenceExtractor<T> extractor;
     
-    private Function<Collection<ScoredEquivalent<T>>, ScoredEquivalent<T>> extractorFunction(final T target) {
+    private Function<Collection<ScoredEquivalent<T>>, ScoredEquivalent<T>> extractorFunction(final T target, final ResultDescription desc) {
         return new Function<Collection<ScoredEquivalent<T>>, ScoredEquivalent<T>>() {
             @Override
             public ScoredEquivalent<T> apply(Collection<ScoredEquivalent<T>> input) {
-                Maybe<ScoredEquivalent<T>> extracted = extractor.extract(target, order(input));
+                Maybe<ScoredEquivalent<T>> extracted = extractor.extract(target, order(input), desc);
                 return extracted.hasValue() ? extracted.requireValue() : null;
             }
 
@@ -48,18 +51,19 @@ public class EquivalenceResultBuilder<T extends Content> {
         };
     }
 
-    public EquivalenceResultBuilder(EquivalenceCombiner<T> combiner, EquivalenceExtractor<T> marker) {
+    public EquivalenceResultBuilder(EquivalenceCombiner<T> combiner, EquivalenceExtractor<T> extractor) {
         this.combiner = combiner;
-        this.extractor = marker;
+        this.extractor = extractor;
     }
 
     public EquivalenceResult<T> resultFor(T target, List<ScoredEquivalents<T>> equivalents) {
-        ScoredEquivalents<T> combined = combine(equivalents);
-        return new EquivalenceResult<T>(target, equivalents, combined, extract(target, combined));
+        ReadableDescription desc = new DefaultDescription();
+        ScoredEquivalents<T> combined = combine(equivalents, desc);
+        return new EquivalenceResult<T>(target, equivalents, combined, extract(target, combined, desc), desc);
     }
 
-    private Map<Publisher, ScoredEquivalent<T>> extract(T target, ScoredEquivalents<T> combined) {
-        return filterValues(transformValues(publisherBin(combined.equivalents()), extractorFunction(target)), notNull());
+    private Map<Publisher, ScoredEquivalent<T>> extract(T target, ScoredEquivalents<T> combined, ResultDescription desc) {
+        return filterValues(transformValues(publisherBin(combined.equivalents()), extractorFunction(target, desc)), notNull());
     }
     
     private Map<Publisher, Collection<ScoredEquivalent<T>>> publisherBin(Map<T, Score> equivalents) {
@@ -73,7 +77,7 @@ public class EquivalenceResultBuilder<T extends Content> {
         return publisherBins.asMap();
     }
 
-    private ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> equivalents) {
-        return !equivalents.isEmpty() ? combiner.combine(equivalents) : DefaultScoredEquivalents.<T>fromSource("empty combination").build();
+    private ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> equivalents, ResultDescription desc) {
+        return !equivalents.isEmpty() ? combiner.combine(equivalents, desc) : DefaultScoredEquivalents.<T>fromSource("empty combination").build();
     }
 }

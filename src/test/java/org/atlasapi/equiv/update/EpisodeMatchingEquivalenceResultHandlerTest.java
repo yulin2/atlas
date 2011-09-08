@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultHandler;
+import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
@@ -44,7 +45,7 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
                 Publisher.BBC, ScoredEquivalent.<Item>equivalentScore(strongEpisode, score)
         );
         
-        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong);
+        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong, new DefaultDescription());
         
         EquivalenceResultHandler<Item> delegate = new EquivalenceResultHandler<Item>() {
             @Override
@@ -90,7 +91,7 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
                 Publisher.C4, ScoredEquivalent.<Item>equivalentScore(goodEquivalent, score)
         );
         
-        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong);
+        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong, new DefaultDescription());
         
         EquivalenceResultHandler<Item> delegate = new EquivalenceResultHandler<Item>() {
             @Override

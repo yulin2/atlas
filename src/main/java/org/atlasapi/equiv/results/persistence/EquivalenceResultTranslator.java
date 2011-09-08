@@ -5,6 +5,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.media.entity.Identified.TO_URI;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -79,6 +80,8 @@ public class EquivalenceResultTranslator {
         
         TranslatorUtils.fromDateTime(dbo, TIMESTAMP, new DateTime(DateTimeZones.UTC));
         
+        dbo.put("desc", result.description().parts());
+        
         return dbo;
     }
 
@@ -108,7 +111,8 @@ public class EquivalenceResultTranslator {
             }
         }
         
-        return new RestoredEquivalenceResult(targetId, targetTitle, results, totals, TranslatorUtils.toDateTime(dbo, TIMESTAMP));
+        @SuppressWarnings("unchecked") List<Object> description = (List<Object>)dbo.get("desc");
+        return new RestoredEquivalenceResult(targetId, targetTitle, results, totals, TranslatorUtils.toDateTime(dbo, TIMESTAMP), description);
     }
     
     private String publisherName(DBObject equivDbo) {

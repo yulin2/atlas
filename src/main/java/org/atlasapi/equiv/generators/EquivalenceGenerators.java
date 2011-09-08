@@ -4,6 +4,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -24,13 +25,13 @@ public class EquivalenceGenerators<T extends Content> {
         this.log = log;
     }
     
-    public List<ScoredEquivalents<T>> generate(T content) {
+    public List<ScoredEquivalents<T>> generate(T content, ResultDescription desc) {
         
         List<ScoredEquivalents<T>> generatedScores = Lists.newArrayList();
         
         for (ContentEquivalenceGenerator<T> generator : generators) {
             try {
-                generatedScores.add(generator.generate(content));
+                generatedScores.add(generator.generate(content, desc));
             } catch (Exception e) {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription(
                         "Exception running generator %s for %s %s", generator.getClass().getSimpleName(), content.getClass().getSimpleName(), content.getCanonicalUri()

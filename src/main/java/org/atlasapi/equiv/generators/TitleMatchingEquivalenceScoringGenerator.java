@@ -3,6 +3,7 @@ package org.atlasapi.equiv.generators;
 import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
@@ -33,12 +34,12 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     @Override
-    public ScoredEquivalents<Container> generate(Container content) {
+    public ScoredEquivalents<Container> generate(Container content, ResultDescription desc) {
         return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class));
     }
 
     @Override
-    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions) {
+    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
         return scoreSuggestions(content, suggestions);
     }
 

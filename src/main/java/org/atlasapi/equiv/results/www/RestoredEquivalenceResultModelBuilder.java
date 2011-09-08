@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.results.www;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,6 +10,9 @@ import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbe;
 import org.eclipse.jetty.util.UrlEncoded;
 
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;
@@ -54,8 +59,27 @@ public class RestoredEquivalenceResultModelBuilder {
         model.put("hasStrong", hasStrong);
         model.put("equivalences", equivalences);
         model.putStrings("sources", target.sourceResults().columnKeySet());
-        
+
+        if (target.description() != null) {
+            model.put("desc", modelDesc(target.description()));
+        }
         return model;
+    }
+
+    private Collection<SimpleModel> modelDesc(List<Object> description) {
+        return Lists.transform(description, new Function<Object, SimpleModel>() {
+            @Override
+            public SimpleModel apply(Object input) {
+                boolean isList = input instanceof List;
+                SimpleModel model = new SimpleModel().put("type", isList ? "list" : "string");
+                if (isList) {
+                    model.mergeIn(ImmutableMap.of("value", modelDesc((List<Object>) input)));
+                } else {
+                    model.put("value", (String) input);
+                }
+                return model;
+            }
+        });
     }
 
     private SimpleModel model(Map<String, Double> totals) {

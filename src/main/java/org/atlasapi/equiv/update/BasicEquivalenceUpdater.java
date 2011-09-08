@@ -8,6 +8,8 @@ import java.util.Set;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.description.DefaultDescription;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -33,10 +35,11 @@ public class BasicEquivalenceUpdater<T extends Content> implements ContentEquiva
         
         Set<T> suggestions = Sets.newHashSet();
         List<ScoredEquivalents<T>> scores = Lists.newArrayList();
+        ResultDescription desc = new DefaultDescription();
         
         for (ContentEquivalenceGenerator<T> calculator : calculators) {
             try {
-                ScoredEquivalents<T> scoredEquivalents = calculator.generate(content);
+                ScoredEquivalents<T> scoredEquivalents = calculator.generate(content, desc);
                 suggestions.addAll(scoredEquivalents.equivalents().keySet());
                 scores.add(scoredEquivalents);
             }catch (Exception e) {

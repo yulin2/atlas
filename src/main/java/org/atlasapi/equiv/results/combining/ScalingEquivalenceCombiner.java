@@ -2,6 +2,7 @@ package org.atlasapi.equiv.results.combining;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
@@ -21,8 +22,8 @@ public class ScalingEquivalenceCombiner<T extends Content> implements Equivalenc
     }
     
     @Override
-    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents) {
-        return  ScaledScoredEquivalents.scale(delegate.combine(scoredEquivalents), scaler);
+    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents, ResultDescription desc) {
+        return ScaledScoredEquivalents.scale(delegate.combine(scoredEquivalents, desc), scaler);
     }
 
 }
