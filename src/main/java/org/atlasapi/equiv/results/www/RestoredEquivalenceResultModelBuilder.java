@@ -73,7 +73,7 @@ public class RestoredEquivalenceResultModelBuilder {
                 boolean isList = input instanceof List;
                 SimpleModel model = new SimpleModel().put("type", isList ? "list" : "string");
                 if (isList) {
-                    model.mergeIn(ImmutableMap.of("value", modelDesc((List<Object>) input)));
+                    model.put("value", modelDesc((List<Object>)input));
                 } else {
                     model.put("value", (String) input);
                 }

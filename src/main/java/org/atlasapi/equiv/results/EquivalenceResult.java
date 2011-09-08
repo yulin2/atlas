@@ -72,7 +72,7 @@ public class EquivalenceResult<T extends Content> {
     }
 
     public EquivalenceResult<T> rebuildWith(EquivalenceResultBuilder<T> builder) {
-        return builder.resultFor(target, scores);
+        return builder.resultFor(target, scores, desc);
     }
     
     

@@ -6,7 +6,7 @@ import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.description.DefaultDescription;
-import org.atlasapi.equiv.results.description.ResultDescription;
+import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.results.scores.ScoredEquivalentsMerger;
 import org.atlasapi.equiv.scorers.EquivalenceScorers;
@@ -33,7 +33,7 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
     @Override
     public EquivalenceResult<T> updateEquivalences(T content) {
         
-        ResultDescription desc = new DefaultDescription();
+        ReadableDescription desc = new DefaultDescription();
         
         List<ScoredEquivalents<T>> generatedScores = generators.generate(content, desc);
         
@@ -41,7 +41,7 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
         
         List<ScoredEquivalents<T>> scoredScores = scorers.score(content, generatedSuggestions, desc);
         
-        return resultBuilder.resultFor(content, ImmutableList.copyOf(merger.merge(generatedScores, scoredScores)));
+        return resultBuilder.resultFor(content, ImmutableList.copyOf(merger.merge(generatedScores, scoredScores)), desc);
     }
 
     private List<T> extractGeneratedSuggestions(Iterable<ScoredEquivalents<T>> generatedScores) {

@@ -28,6 +28,8 @@ public class EquivalenceScorers<T extends Content> {
     public List<ScoredEquivalents<T>> score(T content, List<T> generatedSuggestions, ResultDescription desc) {
         List<ScoredEquivalents<T>> scoredScores = Lists.newArrayList();
 
+        desc.startStage("Scoring equivalences");
+        
         for (ContentEquivalenceScorer<T> scorer : scorers) {
             
             try {
@@ -39,6 +41,8 @@ public class EquivalenceScorers<T extends Content> {
             }
             
         }
+        
+        desc.finishStage();
         
         return scoredScores;
     }

@@ -26,8 +26,9 @@ public class EquivalenceGenerators<T extends Content> {
     }
     
     public List<ScoredEquivalents<T>> generate(T content, ResultDescription desc) {
-        
         List<ScoredEquivalents<T>> generatedScores = Lists.newArrayList();
+        
+        desc.startStage("Generating equivalences");
         
         for (ContentEquivalenceGenerator<T> generator : generators) {
             try {
@@ -39,6 +40,9 @@ public class EquivalenceGenerators<T extends Content> {
             }
             
         }
+        
+        desc.finishStage();
+        
         return generatedScores;
     }
     

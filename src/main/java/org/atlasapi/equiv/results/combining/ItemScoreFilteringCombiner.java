@@ -50,11 +50,11 @@ public class ItemScoreFilteringCombiner<T extends Content> implements Equivalenc
                     return combinedScore;
                 }
                 
-                desc.appendText("%s removed, %s score %s", equiv.getCanonicalUri(), source, itemScore);
+                desc.appendText("%s score set to null, %s score %s", equiv.getCanonicalUri(), source, itemScore);
                 return Score.NULL_SCORE;
             }
         }));
-        
+        desc.finishStage();
         return DefaultScoredEquivalents.fromMappedEquivs(combined.source(), transformedCombined);
     }
     
