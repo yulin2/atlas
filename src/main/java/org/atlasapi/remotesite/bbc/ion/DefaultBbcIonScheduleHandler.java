@@ -7,6 +7,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
@@ -204,32 +205,36 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
         IonEpisode ionEpisode = broadcast.getEpisode();
 
         Item item;
-        if (!Strings.isNullOrEmpty(broadcast.getBrandId()) || !Strings.isNullOrEmpty(broadcast.getSeriesId())) {
-            item = new Episode(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
+        if(ionEpisode.getIsFilm() != null && ionEpisode.getIsFilm()) {
+            item = new Film(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
+            item.setSpecialization(Specialization.FILM);
+            item.setMediaType(MediaType.VIDEO);
         } else {
-            item = new Item(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
+            
+            if (!Strings.isNullOrEmpty(broadcast.getBrandId()) || !Strings.isNullOrEmpty(broadcast.getSeriesId())) {
+                item = new Episode(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
+            } else {
+                item = new Item(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
+            }
+            
+            Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(ionEpisode.getMasterbrand());
+            if (maybeSpecialisation.hasValue()) {
+                item.setSpecialization(maybeSpecialisation.requireValue());
+            }
+
+            if (!Strings.isNullOrEmpty(broadcast.getMediaType())) {
+                item.setMediaType(MediaType.valueOf(broadcast.getMediaType().toUpperCase()));
+            } else {
+                Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(ionEpisode.getMasterbrand());
+                if (maybeMediaType.hasValue()) {
+                    item.setMediaType(maybeMediaType.requireValue());
+                }
+            }
         }
 
         item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
         item.setIsLongForm(true);
-
-        if (!Strings.isNullOrEmpty(broadcast.getMediaType())) {
-            item.setMediaType(MediaType.valueOf(broadcast.getMediaType().toUpperCase()));
-        }
-
-        Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(ionEpisode.getMasterbrand());
-        if (maybeMediaType.hasValue()) {
-            item.setMediaType(maybeMediaType.requireValue());
-        }
-
-        Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(ionEpisode.getMasterbrand());
-        if (maybeSpecialisation.hasValue()) {
-            item.setSpecialization(maybeSpecialisation.requireValue());
-        }
-
-        if (ionEpisode.getIsFilm() != null && ionEpisode.getIsFilm()) {
-            item.setSpecialization(Specialization.FILM);
-        }
+        
         return item;
     }
 
