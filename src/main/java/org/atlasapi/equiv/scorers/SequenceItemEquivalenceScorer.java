@@ -24,6 +24,8 @@ public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<I
             equivalents.addEquivalent(suggestion, score(subject, suggestion, desc));
         }
         
+        desc.finishStage();
+        
         return equivalents.build();
     }
 
