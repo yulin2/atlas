@@ -32,6 +32,7 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
@@ -308,13 +309,16 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         
         Maybe<Integer> seriesNumber = seriesNumber(episode);
         
-		Item item = (brand == null && episode.series() == null) ? new Item(episodeUri, curie, Publisher.BBC) : new Episode(episodeUri, curie, Publisher.BBC);
-
-		if (brand != null) {
-			String brandUri = brand.uri();
-			((Episode) item).setContainer(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(brandUri), Publisher.BBC));
-		}
-		
+        Item item;
+        if (episode.episode().isFilmFormat()) {
+            item = new Film(episodeUri, curie, Publisher.BBC);
+        } else if (brand == null && episode.series() == null) {
+            item = new Item(episodeUri, curie, Publisher.BBC);
+        } else {
+            item = new Episode(episodeUri, curie, Publisher.BBC);
+            String brandUri = brand.uri();
+            ((Episode) item).setContainer(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(brandUri), Publisher.BBC));
+        }
 
         SlashProgrammesEpisode slashProgrammesEpisode = episode.episode();
         
