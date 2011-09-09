@@ -419,6 +419,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         .add(Channel.BBC_TWO_NORTHERN_IRELAND)
         .add(Channel.BBC_TWO_SCOTLAND)
         .add(Channel.BBC_TWO_WALES)
+        .add(Channel.CBBC)
+        .add(Channel.CBEEBIES)
         .add(Channel.ITV1_ANGLIA)
         .add(Channel.ITV1_BORDER_SOUTH)
         .add(Channel.ITV1_LONDON)
