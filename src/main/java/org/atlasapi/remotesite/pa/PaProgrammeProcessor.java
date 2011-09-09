@@ -206,6 +206,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             }
         }
         
+        try {
+            series.withSeriesNumber(Integer.parseInt(progData.getSeriesNumber()));
+        } catch (NumberFormatException e) {
+            log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse episode_total %s", progData.getEpisodeTotal()));
+        }
+    
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
         setGenres(progData, series);
