@@ -198,6 +198,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         Series series = possiblePrevious.hasValue() ? (Series) possiblePrevious.requireValue() : new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         
+        if(!Strings.isNullOrEmpty(progData.getEpisodeTotal())) {
+            try {
+                series.setTotalEpisodes(Integer.parseInt(progData.getEpisodeTotal()));
+            } catch (NumberFormatException e) {
+                log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse episode_total %s", progData.getEpisodeTotal()));
+            }
+        }
+        
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
         setGenres(progData, series);
