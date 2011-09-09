@@ -43,7 +43,7 @@ public final class ScoredEquivalent<T extends Content> implements Comparable<Sco
         }
         if(that instanceof ScoredEquivalent) {
             ScoredEquivalent<?> other = (ScoredEquivalent<?>) that;
-            return target.equals(other.target) && score == other.score;
+            return target.equals(other.target) && score.equals(other.score);
         }
         return false;
     }

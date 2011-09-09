@@ -1,8 +1,6 @@
 package org.atlasapi.equiv.results;
 
-import static com.google.common.base.Predicates.notNull;
-import static com.google.common.collect.Maps.filterValues;
-import static com.google.common.collect.Maps.transformEntries;
+import static com.google.common.collect.Ordering.natural;
 import static org.atlasapi.equiv.results.scores.ScoredEquivalent.equivalentScore;
 
 import java.util.Collection;
@@ -22,10 +20,9 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
 import com.metabroadcast.common.base.Maybe;
 
 public class EquivalenceResultBuilder<T extends Content> {
@@ -37,23 +34,6 @@ public class EquivalenceResultBuilder<T extends Content> {
     private final EquivalenceCombiner<T> combiner;
     private final EquivalenceExtractor<T> extractor;
     
-    private EntryTransformer<Publisher, Collection<ScoredEquivalent<T>>, ScoredEquivalent<T>> extractorFunction(final T target, final ResultDescription desc) {
-        return new EntryTransformer<Publisher, Collection<ScoredEquivalent<T>>, ScoredEquivalent<T>>() {
-
-            private List<ScoredEquivalent<T>> order(Collection<ScoredEquivalent<T>> input) {
-                return Ordering.natural().reverse().immutableSortedCopy(input);
-            }
-
-            @Override
-            public ScoredEquivalent<T> transformEntry(Publisher key, Collection<ScoredEquivalent<T>> input) {
-                desc.startStage(String.format("Publisher: %s", key));
-                Maybe<ScoredEquivalent<T>> extracted = extractor.extract(target, order(input), desc);
-                desc.finishStage();
-                return extracted.hasValue() ? extracted.requireValue() : null;
-            }
-        };
-    }
-
     public EquivalenceResultBuilder(EquivalenceCombiner<T> combiner, EquivalenceExtractor<T> extractor) {
         this.combiner = combiner;
         this.extractor = extractor;
@@ -71,7 +51,23 @@ public class EquivalenceResultBuilder<T extends Content> {
     }
 
     private Map<Publisher, ScoredEquivalent<T>> extract(T target, ScoredEquivalents<T> combined, ResultDescription desc) {
-        return ImmutableMap.copyOf(filterValues(transformEntries(publisherBin(combined.equivalents()), extractorFunction(target, desc)), notNull()));
+        Map<Publisher, Collection<ScoredEquivalent<T>>> publisherBins = publisherBin(combined.equivalents());
+        
+        Builder<Publisher, ScoredEquivalent<T>> builder = ImmutableMap.builder();
+        
+        for (Entry<Publisher, Collection<ScoredEquivalent<T>>> publisherBin : publisherBins.entrySet()) {
+            desc.startStage(String.format("Publisher: %s", publisherBin.getKey()));
+            
+            Maybe<ScoredEquivalent<T>> extracted = extractor.extract(target, natural().reverse().immutableSortedCopy(publisherBin.getValue()), desc);
+            
+            if(extracted.hasValue()) {
+                builder.put(publisherBin.getKey(), extracted.requireValue());
+            }
+            
+            desc.finishStage();
+        }
+        
+        return builder.build();
     }
     
     private Map<Publisher, Collection<ScoredEquivalent<T>>> publisherBin(Map<T, Score> equivalents) {
