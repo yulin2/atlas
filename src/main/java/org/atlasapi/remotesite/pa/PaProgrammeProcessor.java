@@ -200,7 +200,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         if(!Strings.isNullOrEmpty(progData.getEpisodeTotal())) {
             try {
-                series.setTotalEpisodes(Integer.parseInt(progData.getEpisodeTotal()));
+                series.setTotalEpisodes(Integer.parseInt(progData.getEpisodeTotal().trim()));
             } catch (NumberFormatException e) {
                 log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse episode_total %s", progData.getEpisodeTotal()));
             }
@@ -208,9 +208,9 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         if(!Strings.isNullOrEmpty(progData.getSeriesNumber())) {
             try {
-                series.withSeriesNumber(Integer.parseInt(progData.getSeriesNumber()));
+                series.withSeriesNumber(Integer.parseInt(progData.getSeriesNumber().trim()));
             } catch (NumberFormatException e) {
-                log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse episode_total %s", progData.getEpisodeTotal()));
+                log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse series_number %s", progData.getSeriesNumber()));
             }
         }
     
