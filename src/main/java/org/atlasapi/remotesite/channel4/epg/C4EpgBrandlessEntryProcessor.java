@@ -136,14 +136,6 @@ public class C4EpgBrandlessEntryProcessor {
             }
         }
         
-        //Try to locate an item with the same description.
-        for (Episode episode : subItems) {
-            if(episode.getDescription().equals(entry.summary())) {
-                //Known from above that this is a new broadcast so just add.
-                C4EpgEntryProcessor.updateVersion(episode, entry, channel);
-                return episode;
-            }
-        }
         return episodeFrom(entry, synthbrandName, channel);
     }
 
