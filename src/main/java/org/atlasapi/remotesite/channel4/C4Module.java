@@ -17,7 +17,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.C4EpgBrandlessEntryProcessor;
 import org.atlasapi.remotesite.channel4.epg.C4EpgElementFactory;
 import org.atlasapi.remotesite.channel4.epg.C4EpgEntryProcessor;
@@ -67,7 +67,7 @@ public class C4Module {
     }
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, scheduleResolver, contentResolver, contentWriter, log);
+	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, contentWriter, log);
         return new C4EpgUpdater(
                 c4EpgAtomClient(), 
                 new C4EpgEntryProcessor(contentWriter, contentResolver, c4BrandFetcher(), log), 

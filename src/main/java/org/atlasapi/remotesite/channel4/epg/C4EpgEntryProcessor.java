@@ -21,6 +21,8 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ScheduleEntry;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -72,7 +74,7 @@ public class C4EpgEntryProcessor {
         this.c4SynthesizedItemUpdater = new C4SynthesizedItemUpdater(contentStore, contentWriter);
     }
 
-    public void process(C4EpgEntry entry, Channel channel) {
+    public ItemRefAndBroadcast process(C4EpgEntry entry, Channel channel) {
         try {
 
             String webSafeBrandName = webSafeBrandName(entry);
@@ -94,7 +96,7 @@ public class C4EpgEntryProcessor {
             //look for a synthesized equivalent of this item and copy any broadcast/locations and remove its versions.
             updateFromPossibleSynthesized(webSafeBrandName, entry, episode);
 
-            updateEpisodeDetails(episode, entry, channel);
+            Broadcast newBroadcast = updateEpisodeDetails(episode, entry, channel);
             
             Brand brand = updateBrand(webSafeBrandName, episode, entry);
             contentWriter.createOrUpdate(brand);
@@ -105,9 +107,12 @@ public class C4EpgEntryProcessor {
 
             episode.setContainer(brand);
             contentWriter.createOrUpdate(episode);
+            
+            return new ScheduleEntry.ItemRefAndBroadcast(episode, newBroadcast);
 
         } catch (Exception e) {
             log.record(new AdapterLogEntry(WARN).withCause(e).withSource(getClass()).withDescription("Exception processing entry: " + entry.id()));
+            return null;
         }
     }
     
@@ -150,7 +155,7 @@ public class C4EpgEntryProcessor {
         episode.setSeries(series);
     }
 
-    private Episode updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel) {
+    private Broadcast updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel) {
         if(episode.getTitle() == null) {
             if (entry.title().equals(entry.brandTitle()) && entry.seriesNumber() != null && entry.episodeNumber() != null) {
                 episode.setTitle(String.format(C4EpisodesExtractor.EPISODE_TITLE_TEMPLATE, entry.seriesNumber(), entry.episodeNumber()));
@@ -166,7 +171,7 @@ public class C4EpgEntryProcessor {
             episode.setDescription(entry.summary());
         }
 
-        updateVersion(episode, entry, channel);
+        Broadcast broadcast = updateVersion(episode, entry, channel);
 
         if (entry.media() != null && !Strings.isNullOrEmpty(entry.media().thumbnail())) {
             C4AtomApi.addImages(episode, entry.media().thumbnail());
@@ -176,18 +181,29 @@ public class C4EpgEntryProcessor {
         episode.setMediaType(MediaType.VIDEO);
         episode.setLastUpdated(entry.updated());
 
-        return episode;
+        return broadcast;
     }
 
-    public static void updateVersion(Episode episode, C4EpgEntry entry, Channel channel) {
+    public static Broadcast updateVersion(Episode episode, C4EpgEntry entry, Channel channel) {
         Version version = Iterables.getFirst(episode.nativeVersions(), new Version());
         
         if(version.getDuration() == null) {
             version.setDuration(entry.duration());
         }
         
-        version.setBroadcasts(updateBroadcasts(version.getBroadcasts(), entry, channel));
+        Broadcast newBroadcast = broadcastFrom(entry, channel);
+        version.setBroadcasts(updateBroadcasts(version.getBroadcasts(), newBroadcast));
 
+        updateLocation(entry, version);
+        
+        if (!episode.getVersions().contains(version)) {
+            episode.addVersion(version);
+        }
+        
+        return newBroadcast;
+    }
+
+    public static void updateLocation(C4EpgEntry entry, Version version) {
         // Don't add/update locations unless this is the first time we've seen the item because
         // we cannot determine the availability start without reading the /4od feed.
         if (version.getManifestedAs().isEmpty()) {
@@ -203,15 +219,14 @@ public class C4EpgEntryProcessor {
         		}
         	}
         }
-        
-        if (!episode.getVersions().contains(version)) {
-            episode.addVersion(version);
-        }
     }
 
-    private static Set<Broadcast> updateBroadcasts(Set<Broadcast> currentBroadcasts, C4EpgEntry entry, Channel channel) {
-        Broadcast entryBroadcast = broadcastFrom(entry, channel);
-        
+    private static Set<Broadcast> updateBroadcasts(Set<Broadcast> currentBroadcasts, Broadcast newBroadcast) {
+        Broadcast entryBroadcast = newBroadcast;
+        return replaceBroadcast(currentBroadcasts, entryBroadcast);
+    }
+
+    public static Set<Broadcast> replaceBroadcast(Set<Broadcast> currentBroadcasts, Broadcast entryBroadcast) {
         Set<Broadcast> broadcasts = Sets.newHashSet(entryBroadcast);
         for (Broadcast broadcast : currentBroadcasts) {
             if (!entryBroadcast.getId().equals(broadcast.getId())){

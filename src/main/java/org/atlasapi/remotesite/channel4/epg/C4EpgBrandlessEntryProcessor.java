@@ -10,7 +10,9 @@ import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.ScheduleEntry;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -45,7 +47,7 @@ public class C4EpgBrandlessEntryProcessor {
         this.log = log;
     }
 
-    public void process(C4EpgEntry entry, Channel channel) {
+    public ItemRefAndBroadcast process(C4EpgEntry entry, Channel channel) {
         try{
             
             String brandName = brandNameFrom(entry);
@@ -55,16 +57,19 @@ public class C4EpgBrandlessEntryProcessor {
             Maybe<Identified> maybeBrand = contentStore.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
             
             if(!maybeBrand.hasValue()) {
-                writeBrandFromEntry(entry, brandName, channel);
+                return writeBrandFromEntry(entry, brandName, channel);
             } else {
                 Brand brand = (Brand) maybeBrand.requireValue();
-                Episode episode = extractRelevantEpisode(entry, brand, brandName, channel);
-                episode.setContainer(brand);
-                contentWriter.createOrUpdate(episode);
+                return updateEpisodeInBrand(entry, channel, brandName, brand);
             }
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception processing brandless entry " + entry.id()));
+            return null;
         }
+    }
+
+    public ItemRefAndBroadcast updateEpisodeInBrand(C4EpgEntry entry, Channel channel, String brandName, Brand brand) {
+        return extractRelevantEpisode(entry, brand, brandName, channel);
     }
     
     public static String brandNameFrom(C4EpgEntry entry) {
@@ -76,7 +81,7 @@ public class C4EpgBrandlessEntryProcessor {
         return title.replaceAll("[^ a-zA-Z0-9]", "").replaceAll("\\s+", "-").toLowerCase();
     }
 
-    private Episode episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel) {
+    private ItemRefAndBroadcast episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel, Brand brand) {
         String slotId = entry.slotId();
         Episode episode = new Episode(episodeUriFrom(entry), "c4:"+synthBrandName +"-"+slotId, C4);
         episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
@@ -84,9 +89,13 @@ public class C4EpgBrandlessEntryProcessor {
         episode.setDescription(entry.summary());
         episode.setLastUpdated(entry.updated());
         
-        C4EpgEntryProcessor.updateVersion(episode, entry, channel);
+        episode.setContainer(brand);
         
-        return episode;
+        C4EpgEntryProcessor.updateVersion(episode, entry, channel);
+
+        contentWriter.createOrUpdate(episode);
+        
+        return new ItemRefAndBroadcast(episode, C4EpgEntryProcessor.updateVersion(episode, entry, channel));
     }
 
     public static String episodeUriFrom(C4EpgEntry entry) {
@@ -96,8 +105,9 @@ public class C4EpgBrandlessEntryProcessor {
     /**
      * Give synthesized brands 'real' uris so that when/if they appear in the /programmes feed they are
      * matched up 
+     * @return 
      */
-    private void writeBrandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
+    private ItemRefAndBroadcast writeBrandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
         Brand brand = null;
         try {
             brand = brandUpdater.createOrUpdateBrand(REAL_PROGRAMME_BASE + synthBrandName);
@@ -109,21 +119,21 @@ public class C4EpgBrandlessEntryProcessor {
         }
         contentWriter.createOrUpdate(brand);
         
-        Episode episode = episodeFrom(entry, synthBrandName, channel);
-        episode.setContainer(brand);
-        contentWriter.createOrUpdate(episode);
+        return episodeFrom(entry, synthBrandName, channel, brand);
     }
 
-    private Episode extractRelevantEpisode(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
+    private ItemRefAndBroadcast extractRelevantEpisode(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
         boolean found = false;
         //look for an episode with a broadcast with this entry's id, replace if found.
         Iterable<Episode> subItems = Iterables.filter(contentStore.findByCanonicalUris(Iterables.transform(brand.getChildRefs(), ChildRef.TO_URI)).getAllResolvedResults(), Episode.class);
 		for (Episode episode : subItems) {
             for (Version version : episode.getVersions()) {
                 Set<Broadcast> broadcasts = Sets.newHashSet();
+                Broadcast newBroadcast = null;
                 for (Broadcast broadcast : version.getBroadcasts()) {
                     if(broadcast.getId() != null && broadcast.getId().equals(C4BroadcastBuilder.idFrom(channel.uri(), entry.id()))) {
-                        broadcasts.add(createBroadcast(entry, channel));
+                        newBroadcast = createBroadcast(entry, channel);
+                        broadcasts.add(newBroadcast);
                         found = true;
                     } else {
                         broadcasts.add(broadcast);
@@ -131,12 +141,13 @@ public class C4EpgBrandlessEntryProcessor {
                 }
                 if(found) {
                     version.setBroadcasts(broadcasts);
-                    return episode;
+                    contentWriter.createOrUpdate(episode);
+                    return new ScheduleEntry.ItemRefAndBroadcast(episode, newBroadcast);
                 }
             }
         }
         
-        return episodeFrom(entry, synthbrandName, channel);
+        return episodeFrom(entry, synthbrandName, channel, brand);
     }
 
     private Broadcast createBroadcast(C4EpgEntry entry, Channel channel) {
