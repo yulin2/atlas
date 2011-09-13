@@ -67,7 +67,6 @@ public class C4EpgUpdater extends ScheduledTask {
         this.entryProcessor = entryProcessor;
         this.brandlessEntryProcessor = brandlessEntryProcessor;
     }
-    
 
     @Override
     protected void runTask() {
