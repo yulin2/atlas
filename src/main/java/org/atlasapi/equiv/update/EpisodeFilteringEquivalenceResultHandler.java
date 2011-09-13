@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultHandler;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
@@ -30,13 +31,15 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
     @Override
     public void handle(EquivalenceResult<Item> result) {
 
-        Map<Publisher, ScoredEquivalent<Item>> strongEquivalences = Maps.newHashMap(filter(result.strongEquivalences()));
-
-        delegate.handle(new EquivalenceResult<Item>(result.target(), result.rawScores(), result.combinedEquivalences(), strongEquivalences));
+        ResultDescription desc = result.description().startStage(String.format("Episode parent filter: %s", strongContainers));
+        Map<Publisher, ScoredEquivalent<Item>> strongEquivalences = Maps.newHashMap(filter(result.strongEquivalences(), desc));
+        desc.finishStage();
+        
+        delegate.handle(new EquivalenceResult<Item>(result.target(), result.rawScores(), result.combinedEquivalences(), strongEquivalences, result.description()));
 
     }
 
-    private Map<Publisher, ScoredEquivalent<Item>> filter(Map<Publisher, ScoredEquivalent<Item>> strongItems) {
+    private Map<Publisher, ScoredEquivalent<Item>> filter(Map<Publisher, ScoredEquivalent<Item>> strongItems, final ResultDescription desc) {
 
         final ImmutableSet<String> containerRefs = ImmutableSet.copyOf(Iterables.transform(strongContainers, Identified.TO_URI));
 
@@ -44,6 +47,7 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
             @Override
             public ScoredEquivalent<Item> apply(ScoredEquivalent<Item> input) {
                 if (!containerRefs.contains(input.equivalent().getContainer().getUri())) {
+                    desc.appendText("%s removed. Unacceptable container: %s", input, input.equivalent().getContainer().getUri());
                     return null;
                 }
                 return input;

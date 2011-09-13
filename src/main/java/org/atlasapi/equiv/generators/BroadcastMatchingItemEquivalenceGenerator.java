@@ -2,10 +2,11 @@ package org.atlasapi.equiv.generators;
 
 import java.util.Set;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
@@ -18,10 +19,9 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.time.DateTimeZones;
 
@@ -36,47 +36,56 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         this.supportedPublishers = supportedPublishers;
         this.flexibility = flexibility;
     }
-    
+
     @Override
-    public ScoredEquivalents<Item> generate(Item content) {
+    public ScoredEquivalents<Item> generate(Item content, ResultDescription desc) {
+
         ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
+        desc.startStage("Broadcast-matching generator");
 
-        int broadcasts = 0;
+        Set<Publisher> validPublishers = Sets.difference(supportedPublishers, ImmutableSet.of(content.getPublisher()));
+
+        int processedBroadcasts = 0;
+        int totalBroadcasts = 0;
+
         for (Version version : content.getVersions()) {
-            for (Broadcast broadcast : activelyPublished(channelFilter(version.getBroadcasts()))) {
-                broadcasts++;
-                Schedule schedule = scheduleAround(broadcast, Sets.difference(supportedPublishers, ImmutableSet.of(content.getPublisher())));
-                for (ScheduleChannel channel : schedule.scheduleChannels()) {
-                    for (Item scheduleItem : channel.items()) {
-                        if(scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
-                            scores.addEquivalent((Item) scheduleItem, Score.valueOf(1.0));
-                        }
-                    }
+            for (Broadcast broadcast : version.getBroadcasts()) {
+                totalBroadcasts++;
+                if (broadcast.isActivelyPublished() && !onIgnoredChannel(broadcast) && isWithinWeek(broadcast)) {
+                    processedBroadcasts++;
+                    findMatchesForBroadcast(scores, broadcast, validPublishers);
                 }
-
             }
         }
-        return scale(scores.build(), broadcasts);
-    }
-    
-    private Iterable<Broadcast> activelyPublished(Iterable<Broadcast> channelFilter) {
-        return Iterables.filter(channelFilter, new Predicate<Broadcast>() {
-            @Override
-            public boolean apply(Broadcast input) {
-                return input.isActivelyPublished();
-            }
-        });
+
+        desc.appendText("Processed %s of %s broadcasts", processedBroadcasts, totalBroadcasts);
+
+        ScoredEquivalents<Item> scaledScores = scale(scores.build(), processedBroadcasts, desc);
+
+        desc.finishStage();
+
+        return scaledScores;
     }
 
-    private Iterable<Broadcast> channelFilter(Set<Broadcast> broadcasts) {
-        return Iterables.filter(broadcasts, new Predicate<Broadcast>() {
-            @Override
-            public boolean apply(Broadcast input) {
-                return !ignoredChannels.contains(input.getBroadcastOn()) && input.getTransmissionTime().isBefore(new DateTime(DateTimeZones.UTC).plusWeeks(1));
+    public void findMatchesForBroadcast(ScoredEquivalentsBuilder<Item> scores, Broadcast broadcast, Set<Publisher> validPublishers) {
+        Schedule schedule = scheduleAround(broadcast, validPublishers);
+        for (ScheduleChannel channel : schedule.scheduleChannels()) {
+            for (Item scheduleItem : channel.items()) {
+                if (scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
+                    scores.addEquivalent((Item) scheduleItem, Score.valueOf(1.0));
+                }
             }
-        });
+        }
     }
-    
+
+    private boolean isWithinWeek(Broadcast broadcast) {
+        return broadcast.getTransmissionTime().isBefore(new DateTime(DateTimeZones.UTC).plusWeeks(1));
+    }
+
+    private boolean onIgnoredChannel(Broadcast broadcast) {
+        return ignoredChannels.contains(broadcast.getBroadcastOn());
+    }
+
     private static final Set<String> ignoredChannels = ImmutableSet.<String>builder()
         .add(Channel.BBC_ONE_NORTHERN_IRELAND.uri())
         .add(Channel.BBC_ONE_CAMBRIDGE.uri())
@@ -103,20 +112,26 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         .add(Channel.BBC_TWO_WALES_ANALOGUE.uri())
         .add(Channel.BBC_RADIO_RADIO4_LW.uri())
      .build();
-    
-    private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts) {
-        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformValues(scores.equivalents(), Score.transformerFrom(new Function<Double, Double>() {
+
+    private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts, final ResultDescription desc) {
+        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformEntries(scores.equivalents(), new EntryTransformer<Item, Score, Score>() {
             @Override
-            public Double apply(Double input) {
-                return input / broadcasts;
+            public Score transformEntry(Item key, Score value) {
+                desc.appendText("%s matched %s broadcasts", key.getCanonicalUri(), value);
+                return value.transform(new Function<Double, Double>() {
+                    @Override
+                    public Double apply(Double input) {
+                        return input / broadcasts;
+                    }
+                });
             }
-        })));
+        }));
     }
 
     private boolean hasQualifyingBroadcast(Item item, Broadcast referenceBroadcast) {
         for (Version version : item.nativeVersions()) {
             for (Broadcast broadcast : version.getBroadcasts()) {
-                if(around(broadcast, referenceBroadcast) && broadcast.getBroadcastOn() != null &&  broadcast.getBroadcastOn().equals(referenceBroadcast.getBroadcastOn())) {
+                if (around(broadcast, referenceBroadcast) && broadcast.getBroadcastOn() != null && broadcast.getBroadcastOn().equals(referenceBroadcast.getBroadcastOn())) {
                     return true;
                 }
             }
@@ -125,8 +140,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
 
     private boolean around(Broadcast broadcast, Broadcast referenceBroadcast) {
-        return around(broadcast.getTransmissionTime(), referenceBroadcast.getTransmissionTime())
-            && around(broadcast.getTransmissionEndTime(), referenceBroadcast.getTransmissionEndTime());
+        return around(broadcast.getTransmissionTime(), referenceBroadcast.getTransmissionTime()) && around(broadcast.getTransmissionEndTime(), referenceBroadcast.getTransmissionEndTime());
     }
 
     private boolean around(DateTime transmissionTime, DateTime transmissionTime2) {
@@ -137,7 +151,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         DateTime start = broadcast.getTransmissionTime().minus(flexibility);
         DateTime end = broadcast.getTransmissionEndTime().plus(flexibility);
         Channel channel = Channel.fromUri(broadcast.getBroadcastOn()).requireValue();
-        
+
         return resolver.schedule(start, end, ImmutableSet.of(channel), publishers);
     }
 }

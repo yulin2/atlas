@@ -3,6 +3,7 @@ package org.atlasapi.equiv.generators;
 import static com.google.common.collect.ImmutableSet.of;
 import junit.framework.TestCase;
 
+import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
@@ -39,26 +40,28 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
 
         TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
         
-        score(1.0, scorer.score(itemWithTitle("09/10/2011"), of(itemWithTitle("09/10/2011"))));
+        DefaultDescription desc = new DefaultDescription();
+        score(1.0, scorer.score(itemWithTitle("09/10/2011"), of(itemWithTitle("09/10/2011")), desc));
         
-        score(0, scorer.score(itemWithTitle("19/10/2011"), of(itemWithTitle("09/10/2011"))));
-        score(0, scorer.score(itemWithTitle("Countdown"), of(itemWithTitle("Out of Time"))));
-        score(0, scorer.score(itemWithTitle("Episode: 3"), of(itemWithTitle("Episode 5"))));
+        score(0, scorer.score(itemWithTitle("19/10/2011"), of(itemWithTitle("09/10/2011")), desc));
+        score(0, scorer.score(itemWithTitle("Countdown"), of(itemWithTitle("Out of Time")), desc));
+        score(0, scorer.score(itemWithTitle("Episode: 3"), of(itemWithTitle("Episode 5")), desc));
         
-        score(0, scorer.score(itemWithTitle("19/10/2011"), of(itemWithTitle("Different"))));
-        score(0, scorer.score(itemWithTitle("Episode 1"), of(itemWithTitle("19/10/2011"))));
-        score(0, scorer.score(itemWithTitle("Episode 1"), of(itemWithTitle("Different"))));
+        score(0, scorer.score(itemWithTitle("19/10/2011"), of(itemWithTitle("Different")), desc));
+        score(0, scorer.score(itemWithTitle("Episode 1"), of(itemWithTitle("19/10/2011")), desc));
+        score(0, scorer.score(itemWithTitle("Episode 1"), of(itemWithTitle("Different")), desc));
         
     }
     
     public void testSeqTitleTypes() {
 
+        DefaultDescription desc = new DefaultDescription();
         TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
         
-        score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2. Kinross"))));
-        score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2: Kinross"))));
-        score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2 - Kinross"))));
-        score(0, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2. Different"))));
+        score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2. Kinross")), desc));
+        score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2: Kinross")), desc));
+        score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2 - Kinross")), desc));
+        score(0, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2. Different")), desc));
         
     }
 

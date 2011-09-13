@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.scorers;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -14,17 +15,21 @@ import com.google.common.collect.Iterables;
 public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<Item> {
 
     @Override
-    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions) {
+    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Sequence");
         
+        desc.startStage("Sequence scoring").appendText("%s suggestions", Iterables.size(suggestions));
+        
         for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(suggestions), Item.class)) {
-            equivalents.addEquivalent(suggestion, score(subject, suggestion));
+            equivalents.addEquivalent(suggestion, score(subject, suggestion, desc));
         }
+        
+        desc.finishStage();
         
         return equivalents.build();
     }
 
-    private Score score(Item subject, Item suggestion) {
+    private Score score(Item subject, Item suggestion, ResultDescription desc) {
         
         if (subject instanceof Episode && suggestion instanceof Episode) {
 
@@ -33,7 +38,9 @@ public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<I
 
             if (Objects.equal(subEp.getSeriesNumber(), sugEp.getSeriesNumber()) && subEp.getEpisodeNumber() != null && sugEp.getEpisodeNumber() != null
                     && Objects.equal(subEp.getEpisodeNumber(), sugEp.getEpisodeNumber())) {
-                return Score.valueOf(1.0);
+                Score score = Score.valueOf(1.0);
+                desc.appendText("%s (%s) S: %s, E: %s scored %s", sugEp.getTitle(), sugEp.getCanonicalUri(), sugEp.getSeriesNumber(), sugEp.getEpisodeNumber(), score);
+                return score;
             }
         }
             

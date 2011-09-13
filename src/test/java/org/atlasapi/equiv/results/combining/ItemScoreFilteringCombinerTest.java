@@ -4,6 +4,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -31,15 +32,15 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
     public void testCombine() {
 
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource(ContainerEquivalenceUpdater.NAME).addEquivalent(equivalent1, Score.valueOf(1.0)).addEquivalent(equivalent2, Score.NULL_SCORE).addEquivalent(equivalent3, Score.valueOf(0.0)).build(),
+                DefaultScoredEquivalents.<Item>fromSource(ContainerEquivalenceUpdater.ITEM_UPDATER).addEquivalent(equivalent1, Score.valueOf(1.0)).addEquivalent(equivalent2, Score.NULL_SCORE).addEquivalent(equivalent3, Score.valueOf(0.0)).build(),
                 DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent4, Score.NULL_SCORE).addEquivalent(equivalent2, Score.valueOf(1.0)).addEquivalent(equivalent3, Score.valueOf(1.0)).addEquivalent(equivalent1, Score.valueOf(1.0)).build(),
                 DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent4, Score.valueOf(1.0)).addEquivalent(equivalent1, Score.NULL_SCORE).build()
         );
     
         
-        ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(new NullScoreAwareAveragingCombiner<Item>(), ContainerEquivalenceUpdater.NAME);
+        ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(new NullScoreAwareAveragingCombiner<Item>(), ContainerEquivalenceUpdater.ITEM_UPDATER);
         
-        ScoredEquivalents<Item> combined = combiner.combine(scores);
+        ScoredEquivalents<Item> combined = combiner.combine(scores, new DefaultDescription());
         
         assertEquals(ImmutableMap.of(
                 equivalent1, Score.valueOf(1.0),

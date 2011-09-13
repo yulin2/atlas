@@ -10,6 +10,7 @@ import static org.joda.time.Duration.standardMinutes;
 import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Broadcast;
@@ -47,7 +48,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTes
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
-        ScoredEquivalents<Item> equivalents = generator.generate(item1);
+        ScoredEquivalents<Item> equivalents = generator.generate(item1, new DefaultDescription());
         
         Map<Item, Score> scoreMap = equivalents.equivalents();
         

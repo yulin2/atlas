@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultHandler;
+import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
@@ -20,8 +23,6 @@ import org.atlasapi.media.entity.Publisher;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
-import junit.framework.TestCase;
 
 public class EpisodeFilteringEquivalenceResultHandlerTest extends TestCase {
 
@@ -47,7 +48,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest extends TestCase {
                 Publisher.BBC,ScoredEquivalent.<Item>equivalentScore(goodEquiv, score)
         );
         
-        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong);
+        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong, new DefaultDescription());
         
         EquivalenceResultHandler<Item> delegate = new EquivalenceResultHandler<Item>() {
             @Override

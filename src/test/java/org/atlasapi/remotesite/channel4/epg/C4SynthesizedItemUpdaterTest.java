@@ -48,7 +48,7 @@ public class C4SynthesizedItemUpdaterTest extends TestCase {
         
         Episode canonEpisode = canonEpisode();
         
-        updater.findAndUpdateFromPossibleSynthesized("c4:1234", canonEpisode, "brand-name");
+        updater.findAndUpdateFromPossibleSynthesized("c4:1234", canonEpisode, "http://www.channel4.com/programmes/brand-name");
         
         context.assertIsSatisfied();
         
@@ -89,7 +89,7 @@ public class C4SynthesizedItemUpdaterTest extends TestCase {
 
             @Override
             public boolean matchesSafely(Episode synthEpisode) {
-                if(!synthEpisode.getCanonicalUri().equals("synthUri")) {
+                if(!synthEpisode.getCanonicalUri().equals("http://www.channel4.com/programmes/brand-name/synthesized/1234")) {
                     return false;
                 }
                 return synthEpisode.getVersions().isEmpty();

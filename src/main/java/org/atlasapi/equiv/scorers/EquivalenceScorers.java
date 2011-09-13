@@ -4,6 +4,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -24,13 +25,15 @@ public class EquivalenceScorers<T extends Content> {
         this.log = log;
     }
     
-    public List<ScoredEquivalents<T>> score(T content, List<T> generatedSuggestions) {
+    public List<ScoredEquivalents<T>> score(T content, List<T> generatedSuggestions, ResultDescription desc) {
         List<ScoredEquivalents<T>> scoredScores = Lists.newArrayList();
 
+        desc.startStage("Scoring equivalences");
+        
         for (ContentEquivalenceScorer<T> scorer : scorers) {
             
             try {
-                scoredScores.add(scorer.score(content, generatedSuggestions));
+                scoredScores.add(scorer.score(content, generatedSuggestions, desc));
             } catch (Exception e) {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription(
                         "Exception running scorer %s for %s %s", scorer.getClass().getSimpleName(), content.getClass().getSimpleName(), content.getCanonicalUri()
@@ -38,6 +41,8 @@ public class EquivalenceScorers<T extends Content> {
             }
             
         }
+        
+        desc.finishStage();
         
         return scoredScores;
     }

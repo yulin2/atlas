@@ -19,6 +19,7 @@ import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 
@@ -46,7 +47,7 @@ public class ContentResolvingSearchTest extends MockObjectTestCase {
         
         checking(new Expectations() {{ 
             one(fuzzySearcher).search(query); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));
-            one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), contentQuery); will(returnValue(ImmutableList.of(brand)));
+            one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), contentQuery); will(returnValue(ImmutableMap.of(brand.getCanonicalUri(), ImmutableList.of(brand))));
         }});
             
         List<Identified> content = searcher.search(query, ApplicationConfiguration.DEFAULT_CONFIGURATION);

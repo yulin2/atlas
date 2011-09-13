@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +34,7 @@ import org.xml.sax.XMLReader;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.base.Maybe;
@@ -87,7 +87,6 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     protected void processFiles(Iterable<File> files) {
         try {
             final CompletionService<Integer> completion = new ExecutorCompletionService<Integer>(executor);
-            AtomicInteger submitted = new AtomicInteger(0);
             
             JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
             Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -99,6 +98,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
             reportStatus(String.format("Submitting jobs for %s files", Iterables.size(files)));
             
+            List<Future<Integer>> submitted = Lists.newArrayList();
             int filesProcessed = 0;
             for (File file : files) {
                 if(!shouldContinue()) {
@@ -116,15 +116,21 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                         unmarshaller.setListener(channelDataProcessingListener(completion, submitted, lastModified, fileDate));
                         
                         reader.parse(fileToProcess.toURI().toString());
-                        reportStatus(String.format("%s/%s files. %s jobs submitted", ++filesProcessed, Iterables.size(files), submitted.get()));
+                        reportStatus(String.format("%s/%s files. %s jobs submitted", ++filesProcessed, Iterables.size(files), submitted.size()));
                     }
                 } catch (Exception e) {
                     log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing file " + file.toString()));
                 }
             }
             
+            if (!shouldContinue()) {
+                cancelTasks(submitted);
+                return;
+            }
+            
             int programmesProcessed = 0;
-            for (int i = 0; i < submitted.get();) {
+            int submitCount = submitted.size();
+            for (int i = 0; i < submitCount && shouldContinue();) {
                 Future<Integer> processed = completion.poll(5, TimeUnit.SECONDS);
                 if(processed != null) {
                     i++;
@@ -135,11 +141,13 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                     } catch (Exception e) {
                         log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing PA updater results"));
                     }
-                    reportStatus(String.format("%s files. Processed %s/%s jobs. %s programmes processed", Iterables.size(files), i, submitted.get(), programmesProcessed));
+                    reportStatus(String.format("%s files. Processed %s/%s jobs. %s programmes processed", Iterables.size(files), i, submitCount, programmesProcessed));
                 }
-                if(!shouldContinue()) {
-                    break;
-                }
+            }
+            
+            if (!shouldContinue()) {
+                cancelTasks(submitted);
+                return;
             }
             
         } catch (Exception e) {
@@ -147,7 +155,15 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         }
     }
 
-    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final AtomicInteger submitted, final Timestamp lastModified, final String fileDate) {
+    private void cancelTasks(List<Future<Integer>> submitted) {
+        reportStatus("Cancelling jobs");
+        for (Future<Integer> future : submitted) {
+            future.cancel(false);
+        }
+        reportStatus("Jobs cancelled");
+    }
+
+    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final Timestamp lastModified, final String fileDate) {
         return new Unmarshaller.Listener() {
             public void beforeUnmarshal(Object target, Object parent) {
             }
@@ -167,13 +183,13 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                                     getTimeZone(fileDate), 
                                     lastModified
                             );
-                            completion.submit(new Callable<Integer>() {
+                            Future<Integer> future = completion.submit(new Callable<Integer>() {
                                 @Override
                                 public Integer call() {
                                     return processor.process(data, currentlyProcessing);
                                 }
                             });
-                            submitted.incrementAndGet();
+                            submitted.add(future);
                         } catch (Throwable e) {
                             log.record(errorEntry().withCause(new Exception(e)).withSource(getClass()).withDescription("Exception submit PA channel update job"));
                         }

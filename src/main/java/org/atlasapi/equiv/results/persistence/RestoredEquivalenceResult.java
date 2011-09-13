@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.results.persistence;
 
+import java.util.List;
 import java.util.Map;
 
 import org.joda.time.DateTime;
@@ -14,13 +15,15 @@ public class RestoredEquivalenceResult {
     private final Table<String, String, Double> results;
     private final Map<EquivalenceIdentifier, Double> totals;
     private final DateTime resultTime;
+    private final List<Object> desc;
 
-    public RestoredEquivalenceResult(String targetId, String targetTitle, Table<String, String, Double> results, Map<EquivalenceIdentifier, Double> totals, DateTime resultTime) {
+    public RestoredEquivalenceResult(String targetId, String targetTitle, Table<String, String, Double> results, Map<EquivalenceIdentifier, Double> totals, DateTime resultTime, List<Object> desc) {
         this.id = targetId;
         this.title = targetTitle;
         this.results = results;
         this.totals = totals;
         this.resultTime = resultTime;
+        this.desc = desc;
     }
 
     public String id() {
@@ -41,6 +44,10 @@ public class RestoredEquivalenceResult {
 
     public DateTime resultTime() {
         return resultTime;
+    }
+
+    public List<Object> description() {
+        return desc;
     }
     
     @Override
@@ -64,4 +71,5 @@ public class RestoredEquivalenceResult {
     public int hashCode() {
         return Objects.hashCode(id, title, results, totals, resultTime);
     }
+
 }

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -53,13 +54,13 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 		return BRAND_PAGE_PATTERN.matcher(uri).matches();
 	}
 
-	public void createOrUpdateBrand(String uri) {
+	public Brand createOrUpdateBrand(String uri) {
 		if (!canFetch(uri)) {
 			throw new IllegalArgumentException("Cannot fetch C4 uri: " + uri + " as it is not in the expected format: " + BRAND_PAGE_PATTERN.toString());
 		}
 		try {
 			log.info("Fetching C4 brand " + uri);
-			extractor.write(feedClient.get(atomUrl(uri)));
+			return extractor.write(feedClient.get(atomUrl(uri)));
 		} catch (HttpStatusCodeException e) {
 			if (HttpServletResponse.SC_NOT_FOUND == e.getStatusCode()) {
 				// ignore

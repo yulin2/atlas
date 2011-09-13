@@ -2,13 +2,14 @@ package org.atlasapi.equiv.results.combining;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 
 public abstract class FoldingEquivalenceCombiner<T extends Content> implements EquivalenceCombiner<T> {
 
     @Override
-    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents) {
+    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents, ResultDescription desc) {
         if(scoredEquivalents == null || scoredEquivalents.isEmpty()) {
             return null;
         }

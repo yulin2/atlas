@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
+import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
@@ -30,6 +31,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     public final Item equivalent1 = target("equivalent1", "Equivalent1", Publisher.BBC);
     public final Item equivalent2 = target("equivalent2", "Equivalent2", Publisher.BBC);
     public final Item equivalent3 = target("equivalent3", "Equivalent3", Publisher.C4);
+    private static final DefaultDescription desc = new DefaultDescription();
     
     private Item target(String name, String title, Publisher publisher) {
         Item target = new Item(name+"Uri", name+"Curie", publisher);
@@ -40,7 +42,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     public void testCodecForEmptyResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of();
-        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
+        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
         RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
@@ -58,7 +60,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
                 DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, Score.valueOf(5.0)).build()
         );
         
-        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
+        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
         RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
@@ -88,7 +90,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
                 DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, Score.valueOf(5.0)).build()
         );
         
-        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
+        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
         RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
@@ -124,7 +126,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
                 DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, Score.valueOf(5.0)).build()
         );
         
-        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores);
+        EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
         RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);

@@ -198,6 +198,22 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         Series series = possiblePrevious.hasValue() ? (Series) possiblePrevious.requireValue() : new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
         
+        if(progData.getEpisodeTotal() != null && progData.getEpisodeTotal().trim().length() > 0) {
+            try {
+                series.setTotalEpisodes(Integer.parseInt(progData.getEpisodeTotal().trim()));
+            } catch (NumberFormatException e) {
+                log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse episode_total %s", progData.getEpisodeTotal().trim()));
+            }
+        }
+        
+        if(progData.getSeriesNumber() != null && progData.getSeriesNumber().trim().length() > 0) {
+            try {
+                series.withSeriesNumber(Integer.parseInt(progData.getSeriesNumber().trim()));
+            } catch (NumberFormatException e) {
+                log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Couldn't parse series_number %s", progData.getSeriesNumber().trim()));
+            }
+        }
+    
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
         setGenres(progData, series);
@@ -419,6 +435,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         .add(Channel.BBC_TWO_NORTHERN_IRELAND)
         .add(Channel.BBC_TWO_SCOTLAND)
         .add(Channel.BBC_TWO_WALES)
+        .add(Channel.CBBC)
+        .add(Channel.CBEEBIES)
         .add(Channel.ITV1_ANGLIA)
         .add(Channel.ITV1_BORDER_SOUTH)
         .add(Channel.ITV1_LONDON)

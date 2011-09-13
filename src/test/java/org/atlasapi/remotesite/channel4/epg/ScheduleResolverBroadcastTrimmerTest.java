@@ -34,7 +34,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class BroadcastTrimmerTest extends TestCase {
+public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
     private final Mockery context = new Mockery();
     
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
@@ -57,7 +57,7 @@ public class BroadcastTrimmerTest extends TestCase {
         
         AdapterLog log = new NullAdapterLog();
         
-        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
         
         Interval scheduleInterval = new Interval(100, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableMap.of("c4:1234", item.getCanonicalUri()));
@@ -94,7 +94,7 @@ public class BroadcastTrimmerTest extends TestCase {
 
         AdapterLog log = new NullAdapterLog();
         
-        BroadcastTrimmer trimmer = new BroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
         
         Interval scheduleInterval = new Interval(50, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL_FOUR, ImmutableMap.of("c4:1234", item2.getCanonicalUri()));

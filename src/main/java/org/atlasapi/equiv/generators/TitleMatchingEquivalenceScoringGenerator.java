@@ -3,6 +3,7 @@ package org.atlasapi.equiv.generators;
 import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
@@ -33,22 +34,29 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     @Override
-    public ScoredEquivalents<Container> generate(Container content) {
-        return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class));
+    public ScoredEquivalents<Container> generate(Container content, ResultDescription desc) {
+        desc.startStage("Title-matching generator");
+        ScoredEquivalents<Container> scores = scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
+        desc.finishStage();
+        return scores;
     }
 
     @Override
-    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions) {
-        return scoreSuggestions(content, suggestions);
+    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
+        desc.startStage("Title-matching scorer");
+        ScoredEquivalents<Container> scores = scoreSuggestions(content, suggestions, desc);
+        desc.finishStage();
+        return scores;
     }
 
-    private ScoredEquivalents<Container> scoreSuggestions(Container content, Iterable<Container> suggestions) {
+    private ScoredEquivalents<Container> scoreSuggestions(Container content, Iterable<Container> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Container> equivalents = DefaultScoredEquivalents.fromSource("Title");
-
+        desc.appendText("Scoring %s suggestions", Iterables.size(suggestions));
+        
         for (Container found : ImmutableSet.copyOf(suggestions)) {
-            if (content.getMediaType().equals(found.getMediaType())) {
-                equivalents.addEquivalent(found, score(content.getTitle(), found.getTitle()));
-            }
+            Score score = score(content.getTitle(), found.getTitle());
+            desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
+            equivalents.addEquivalent(found, score);
         }
 
         return equivalents.build();

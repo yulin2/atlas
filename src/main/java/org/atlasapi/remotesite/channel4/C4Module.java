@@ -17,8 +17,10 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.epg.C4EpgBrandlessEntryProcessor;
 import org.atlasapi.remotesite.channel4.epg.C4EpgElementFactory;
+import org.atlasapi.remotesite.channel4.epg.C4EpgEntryProcessor;
 import org.atlasapi.remotesite.channel4.epg.C4EpgUpdater;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.joda.time.Duration;
@@ -34,6 +36,7 @@ import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.time.DayRangeGenerator;
 import com.sun.syndication.feed.atom.Feed;
 
 @Configuration
@@ -64,8 +67,14 @@ public class C4Module {
     }
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    BroadcastTrimmer trimmer = new BroadcastTrimmer(C4, scheduleResolver, contentResolver, contentWriter, log);
-        return new C4EpgUpdater(c4EpgAtomClient(), contentWriter, contentResolver, trimmer, log);
+	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, contentWriter, log);
+        return new C4EpgUpdater(
+                c4EpgAtomClient(), 
+                new C4EpgEntryProcessor(contentWriter, contentResolver, c4BrandFetcher(), log), 
+                new C4EpgBrandlessEntryProcessor(contentWriter, contentResolver, c4BrandFetcher(), log), 
+                trimmer,
+                log,
+                new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }
 	
 	@Bean public RemoteSiteClient<Document> c4EpgAtomClient() {

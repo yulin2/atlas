@@ -16,6 +16,7 @@ import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.seesaw.SeesawModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
+import org.atlasapi.remotesite.worldservice.WorldServicesModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -43,6 +44,7 @@ public class RemoteSiteModuleConfigurer {
         .put("tvblob",  TVBlobModule.class)
         .put("preview", PreviewNetworksModule.class)
         .put("itvinterlinking", ItvInterlinkingModule.class)
+        .put("worldservice", WorldServicesModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {

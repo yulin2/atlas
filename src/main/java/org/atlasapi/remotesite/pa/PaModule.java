@@ -11,6 +11,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.film.PaFilmModule;
@@ -72,7 +73,7 @@ public class PaModule {
     @Bean PaCompleteUpdater paCompleteUpdater() {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
         PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), log);
-	PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), log);
+        PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), log);
         scheduler.schedule(updater, COMPLETE_INGEST);
         return updater;
     }
@@ -85,7 +86,7 @@ public class PaModule {
     }
     
     @Bean BroadcastTrimmer broadcastTrimmer() {
-        return new BroadcastTrimmer(Publisher.PA, scheduleResolver, contentResolver, contentWriter, log);
+        return new ScheduleResolverBroadcastTrimmer(Publisher.PA, scheduleResolver, contentResolver, contentWriter, log);
     }
     
     @Bean PaFileUpdater paFileUpdater() {

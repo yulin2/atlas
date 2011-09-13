@@ -23,6 +23,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.testing.StubContentResolver;
+import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.C4RelatedEntry;
 import org.atlasapi.remotesite.channel4.RecordingContentWriter;
 import org.joda.time.DateTime;
@@ -38,6 +39,19 @@ public class C4EpgEntryProcessorTest extends TestCase {
     
     private final AdapterLog log = new SystemOutAdapterLog();
     
+    private final C4BrandUpdater brandUpdater = new C4BrandUpdater() {
+        
+        @Override
+        public Brand createOrUpdateBrand(String uri) {
+            throw new RuntimeException();
+        }
+        
+        @Override
+        public boolean canFetch(String uri) {
+            return false;
+        }
+    };
+    
     //Item, series and brand don't exist so all are made.
     public void testProcessNewItemSeriesBrand() {
         
@@ -45,7 +59,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
 
     	RecordingContentWriter writer = new RecordingContentWriter();
     	
-    	C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
+    	C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, brandUpdater, log);
         processor.process(buildEntry(), CHANNEL_FOUR);
         
         Brand brand = Iterables.getOnlyElement(writer.updatedBrands);
@@ -101,7 +115,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
             .respondTo(previouslyWrittenSeries)
             .respondTo(previouslyWrittenBrand);
         
-        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
+        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, brandUpdater, log);
         
         processor.process(buildEntry(), CHANNEL_FOUR);
         
@@ -170,7 +184,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         // hasn't seen the item, series or episode before but has seen the brand
         StubContentResolver resolver = new StubContentResolver().respondTo(previouslySavedBrand);
     
-        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, log);
+        C4EpgEntryProcessor processor = new C4EpgEntryProcessor(writer, resolver, brandUpdater, log);
         
         processor.process(buildEntry(), CHANNEL_FOUR);
         

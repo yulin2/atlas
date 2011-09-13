@@ -2,6 +2,7 @@ package org.atlasapi.equiv.results.extractors;
 
 import java.util.List;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 
@@ -17,7 +18,7 @@ public class TopEquivalenceExtractor<T extends Content> implements EquivalenceEx
     }
     
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents) {
+    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, ResultDescription desc) {
         if(equivalents == null || equivalents.isEmpty()) {
             return Maybe.nothing();
         }

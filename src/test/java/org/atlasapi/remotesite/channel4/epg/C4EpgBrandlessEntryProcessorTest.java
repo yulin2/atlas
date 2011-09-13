@@ -21,6 +21,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.testing.StubContentResolver;
+import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.RecordingContentWriter;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -33,13 +34,26 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
 
     private final AdapterLog log = new SystemOutAdapterLog();
     
+    private final C4BrandUpdater brandUpdater = new C4BrandUpdater() {
+        
+        @Override
+        public Brand createOrUpdateBrand(String uri) {
+            throw new RuntimeException();
+        }
+        
+        @Override
+        public boolean canFetch(String uri) {
+            return false;
+        }
+    };
+    
     @SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testProcessNewItem() {
     	ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
     	
     	final RecordingContentWriter writer = new RecordingContentWriter();
     	
-        C4EpgBrandlessEntryProcessor processor = new C4EpgBrandlessEntryProcessor(writer, resolver, log);
+        C4EpgBrandlessEntryProcessor processor = new C4EpgBrandlessEntryProcessor(writer, resolver, brandUpdater, log);
         processor.process(buildEntry().withLinks(ImmutableList.<String>of()), CHANNEL_FOUR);
         
         Brand brand = Iterables.getOnlyElement(writer.updatedBrands);
@@ -91,7 +105,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
     	
     	ContentResolver resolver = new StubContentResolver().respondTo(realBrand()).respondTo(episode);
         
-        C4EpgBrandlessEntryProcessor processor = new C4EpgBrandlessEntryProcessor(writer, resolver, log);
+        C4EpgBrandlessEntryProcessor processor = new C4EpgBrandlessEntryProcessor(writer, resolver, brandUpdater, log);
         
         processor.process(buildEntry().withLinks(ImmutableList.<String>of("http://api.channel4.com/programmes/gilmore-girls.atom")), CHANNEL_FOUR);
         

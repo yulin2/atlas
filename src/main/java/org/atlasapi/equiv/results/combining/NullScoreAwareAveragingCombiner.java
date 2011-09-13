@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -17,7 +18,9 @@ import com.google.common.collect.Maps.EntryTransformer;
 public class NullScoreAwareAveragingCombiner<T extends Content> implements EquivalenceCombiner<T> {
 
     @Override
-    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents) {
+    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents, ResultDescription desc) {
+        
+        desc.startStage("Null-score-aware combining");
         
         Map<T,Score> tempResults = Maps.newHashMap();
         final Map<T, Integer> counts = Maps.newHashMap();
@@ -61,6 +64,7 @@ public class NullScoreAwareAveragingCombiner<T extends Content> implements Equiv
             }
         });
         
+        desc.finishStage();
         return DefaultScoredEquivalents.fromMappedEquivs(Joiner.on("/").join(source), scaledScores);
     }
 
