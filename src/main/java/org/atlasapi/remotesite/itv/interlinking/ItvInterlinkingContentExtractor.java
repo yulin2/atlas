@@ -218,6 +218,6 @@ public class ItvInterlinkingContentExtractor {
     }
     
     private String getCurie(String id) {
-        return id.substring("http://itv.com/".length()).replace("/", "-");
+        return "itv:" + id.substring("http://itv.com/".length()).replace("/", "-");
     }
 }
