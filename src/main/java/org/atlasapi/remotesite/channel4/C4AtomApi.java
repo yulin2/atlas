@@ -42,8 +42,8 @@ public class C4AtomApi {
 	private static final Pattern SERIES_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
 	private static final Pattern EPISODE_PAGE_ID_PATTERN = Pattern.compile(String.format("%s%s/episode-guide/series-\\d+/episode-\\d+", FEED_ID_PREFIX_PATTERN, WEB_SAFE_NAME_PATTERN));
 
-	private static final String API_BASE_URL = "http://api.channel4.com/programmes/";
-	private static final String ATOZ_BASE_URL = "http://api.channel4.com/programmes/atoz/";
+	private static final String API_BASE_URL = "http://api.channel4.com/pmlsd/";
+	private static final String ATOZ_BASE_URL = "http://api.channel4.com/pmlsd/atoz/";
 
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("(http.+?)\\d+x\\d+(\\.[a-zA-Z]+)");
 	
