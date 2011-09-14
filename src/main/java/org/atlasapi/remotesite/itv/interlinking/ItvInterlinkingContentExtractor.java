@@ -37,6 +37,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.text.MoreStrings;
 
 public class ItvInterlinkingContentExtractor {
     
@@ -67,7 +68,7 @@ public class ItvInterlinkingContentExtractor {
         }
         Maybe<String> keywords = getElemValue(contentElem, "keywords", MEDIA_NS);
         if (keywords.hasValue()) {
-            brand.setTags(ImmutableSet.copyOf(keywordSplitter.split(keywords.requireValue())));
+            brand.setTags(ImmutableSet.copyOf(Iterables.transform(keywordSplitter.split(keywords.requireValue()), MoreStrings.TO_LOWER)));
         }
         
         Maybe<String> image = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
@@ -126,7 +127,7 @@ public class ItvInterlinkingContentExtractor {
         Set<String> tags = Sets.newHashSet();
         Maybe<String> keywords = getElemValue(contentElem, "keywords", MEDIA_NS);
         if (keywords.hasValue()) {
-            Iterables.addAll(tags, keywordSplitter.split(keywords.requireValue()));
+            Iterables.addAll(tags, Iterables.transform(keywordSplitter.split(keywords.requireValue()), MoreStrings.TO_LOWER));
         }
         
         Maybe<String> image = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
