@@ -70,9 +70,10 @@ public class ItvInterlinkingContentExtractor {
             brand.setTags(ImmutableSet.copyOf(keywordSplitter.split(keywords.requireValue())));
         }
         
-        Maybe<String> thumbnail = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
-        if (thumbnail.hasValue()) {
-            brand.setThumbnail(thumbnail.requireValue());
+        Maybe<String> image = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
+        if (image.hasValue()) {
+            brand.setImage(image.requireValue());
+            brand.setThumbnail(getThumbnail(image.requireValue()));
         }
         
         return new InterlinkingEntry<Brand>(brand, id);
@@ -128,7 +129,7 @@ public class ItvInterlinkingContentExtractor {
             Iterables.addAll(tags, keywordSplitter.split(keywords.requireValue()));
         }
         
-        Maybe<String> thumbnail = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
+        Maybe<String> image = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
         
         Maybe<String> parentId = getElemValue(contentElem, "parent_id", INTERLINKING_NS);
         
@@ -160,8 +161,9 @@ public class ItvInterlinkingContentExtractor {
             item.setDescription(description.requireValue());
         }
         item.setTags(tags);
-        if (thumbnail.hasValue()) {
-            item.setThumbnail(thumbnail.requireValue());
+        if (image.hasValue()) {
+            item.setImage(image.requireValue());
+            item.setThumbnail(getThumbnail(image.requireValue()));
         }
         
         if (parentId.hasValue()) {
@@ -186,6 +188,10 @@ public class ItvInterlinkingContentExtractor {
         broadcast.withId(id);
         
         return new InterlinkingEntry<Broadcast>(broadcast, id, parentId);
+    }
+    
+    private String getThumbnail(String imageUrl) {
+        return imageUrl.substring(0, imageUrl.lastIndexOf("?w=")) + "?w=172";
     }
     
     public InterlinkingEntry<Version> getOnDemand(Element ondemandElem) {
@@ -216,7 +222,7 @@ public class ItvInterlinkingContentExtractor {
         
         return new InterlinkingEntry<Version>(version, id, parentId);
     }
-    
+
     private String getCurie(String id) {
         return "itv:" + id.substring("http://itv.com/".length()).replace("/", "-");
     }
