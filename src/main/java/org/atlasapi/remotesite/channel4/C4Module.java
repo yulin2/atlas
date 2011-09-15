@@ -17,11 +17,11 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.C4EpgBrandlessEntryProcessor;
 import org.atlasapi.remotesite.channel4.epg.C4EpgElementFactory;
 import org.atlasapi.remotesite.channel4.epg.C4EpgEntryProcessor;
 import org.atlasapi.remotesite.channel4.epg.C4EpgUpdater;
+import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
@@ -70,8 +70,8 @@ public class C4Module {
 	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, contentWriter, log);
         return new C4EpgUpdater(
                 c4EpgAtomClient(), 
-                new C4EpgEntryProcessor(contentWriter, contentResolver, c4BrandFetcher(), log), 
-                new C4EpgBrandlessEntryProcessor(contentWriter, contentResolver, c4BrandFetcher(), log), 
+                new C4EpgEntryProcessor(lastUpdatedCheckingContentWriter(), contentResolver, c4BrandFetcher(), log), 
+                new C4EpgBrandlessEntryProcessor(lastUpdatedCheckingContentWriter(), contentResolver, c4BrandFetcher(), log), 
                 trimmer,
                 log,
                 new DayRangeGenerator().withLookAhead(7).withLookBack(7));
@@ -99,6 +99,10 @@ public class C4Module {
 	}
 
 	protected /*@Bean*/ C4AtomBackedBrandUpdater c4BrandFetcher() {
-		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, contentWriter, log);
+		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedCheckingContentWriter(), log);
+	}
+	
+	private ContentWriter lastUpdatedCheckingContentWriter() {
+	    return new LastUpdatedCheckingContentWriter(log, contentWriter);
 	}
 }
