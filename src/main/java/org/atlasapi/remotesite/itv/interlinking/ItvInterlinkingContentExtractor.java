@@ -37,6 +37,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.text.MoreStrings;
 
 public class ItvInterlinkingContentExtractor {
     
@@ -67,12 +68,13 @@ public class ItvInterlinkingContentExtractor {
         }
         Maybe<String> keywords = getElemValue(contentElem, "keywords", MEDIA_NS);
         if (keywords.hasValue()) {
-            brand.setTags(ImmutableSet.copyOf(keywordSplitter.split(keywords.requireValue())));
+            brand.setTags(ImmutableSet.copyOf(Iterables.transform(keywordSplitter.split(keywords.requireValue()), MoreStrings.TO_LOWER)));
         }
         
-        Maybe<String> thumbnail = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
-        if (thumbnail.hasValue()) {
-            brand.setThumbnail(thumbnail.requireValue());
+        Maybe<String> image = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
+        if (image.hasValue()) {
+            brand.setImage(image.requireValue());
+            brand.setThumbnail(getThumbnail(image.requireValue()));
         }
         
         return new InterlinkingEntry<Brand>(brand, id);
@@ -125,10 +127,10 @@ public class ItvInterlinkingContentExtractor {
         Set<String> tags = Sets.newHashSet();
         Maybe<String> keywords = getElemValue(contentElem, "keywords", MEDIA_NS);
         if (keywords.hasValue()) {
-            Iterables.addAll(tags, keywordSplitter.split(keywords.requireValue()));
+            Iterables.addAll(tags, Iterables.transform(keywordSplitter.split(keywords.requireValue()), MoreStrings.TO_LOWER));
         }
         
-        Maybe<String> thumbnail = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
+        Maybe<String> image = getAttrValue(contentElem, "thumbnail", MEDIA_NS, "url");
         
         Maybe<String> parentId = getElemValue(contentElem, "parent_id", INTERLINKING_NS);
         
@@ -160,8 +162,9 @@ public class ItvInterlinkingContentExtractor {
             item.setDescription(description.requireValue());
         }
         item.setTags(tags);
-        if (thumbnail.hasValue()) {
-            item.setThumbnail(thumbnail.requireValue());
+        if (image.hasValue()) {
+            item.setImage(image.requireValue());
+            item.setThumbnail(getThumbnail(image.requireValue()));
         }
         
         if (parentId.hasValue()) {
@@ -186,6 +189,10 @@ public class ItvInterlinkingContentExtractor {
         broadcast.withId(id);
         
         return new InterlinkingEntry<Broadcast>(broadcast, id, parentId);
+    }
+    
+    private String getThumbnail(String imageUrl) {
+        return imageUrl.substring(0, imageUrl.lastIndexOf("?w=")) + "?w=172";
     }
     
     public InterlinkingEntry<Version> getOnDemand(Element ondemandElem) {
@@ -216,8 +223,8 @@ public class ItvInterlinkingContentExtractor {
         
         return new InterlinkingEntry<Version>(version, id, parentId);
     }
-    
+
     private String getCurie(String id) {
-        return id.substring("http://itv.com/".length()).replace("/", "-");
+        return "itv:" + id.substring("http://itv.com/".length()).replace("/", "-");
     }
 }
