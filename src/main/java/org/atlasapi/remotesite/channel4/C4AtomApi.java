@@ -1,10 +1,17 @@
 package org.atlasapi.remotesite.channel4;
 
+import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
+import static org.atlasapi.media.entity.Channel.E_FOUR;
+import static org.atlasapi.media.entity.Channel.FILM_4;
+import static org.atlasapi.media.entity.Channel.FOUR_MUSIC;
+import static org.atlasapi.media.entity.Channel.MORE_FOUR;
+
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Described;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -13,6 +20,8 @@ import org.joda.time.Duration;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sun.syndication.feed.atom.Entry;
@@ -225,4 +234,12 @@ public class C4AtomApi {
 		}
 		return null;
 	}
+	
+	public final static BiMap<String, Channel> C4_CHANNEL_MAP = ImmutableBiMap.of(
+            "C4", CHANNEL_FOUR,
+            "M4", MORE_FOUR,
+            "F4", FILM_4,
+            "E4", E_FOUR,
+            "4M", FOUR_MUSIC
+    );
 }
