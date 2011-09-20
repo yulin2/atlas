@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
@@ -90,8 +91,8 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
     }
 
     private boolean equal(Policy prevPolicy, Policy policy) {
-        return Objects.equal(prevPolicy.getAvailabilityStart(), policy.getAvailabilityStart())
-            && Objects.equal(prevPolicy.getAvailabilityEnd(), policy.getAvailabilityEnd())
+        return Objects.equal(prevPolicy.getAvailabilityStart().toDateTime(DateTimeZone.UTC), policy.getAvailabilityStart().toDateTime(DateTimeZone.UTC))
+            && Objects.equal(prevPolicy.getAvailabilityEnd().toDateTime(DateTimeZone.UTC), policy.getAvailabilityEnd().toDateTime(DateTimeZone.UTC))
             && Objects.equal(prevPolicy.getAvailableCountries(), policy.getAvailableCountries());
     }
 
@@ -109,14 +110,14 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
         })), new Function<Location, String>() {
             @Override
             public String apply(Location input) {
-                return null;
+                return input.getUri();
             }
         });
     }
 
     private boolean equal(Broadcast prevBroadcast, Broadcast broadcast) {
-        return Objects.equal(prevBroadcast.getTransmissionTime(),broadcast.getTransmissionTime())
-            && Objects.equal(prevBroadcast.getTransmissionEndTime(), broadcast.getTransmissionEndTime())
+        return Objects.equal(prevBroadcast.getTransmissionTime().toDateTime(DateTimeZone.UTC),broadcast.getTransmissionTime().toDateTime(DateTimeZone.UTC))
+            && Objects.equal(prevBroadcast.getTransmissionEndTime().toDateTime(DateTimeZone.UTC), broadcast.getTransmissionEndTime().toDateTime(DateTimeZone.UTC))
             && Objects.equal(prevBroadcast.getBroadcastDuration(), broadcast.getBroadcastDuration());
     }
 
@@ -137,8 +138,7 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
     }
 
     private boolean equal(Item prevItem, Item item) {
-        return Objects.equal(item.getAliases(), prevItem.getAliases())
-            && Objects.equal(item.getDescription(), prevItem.getDescription())
+        return Objects.equal(item.getDescription(), prevItem.getDescription())
             && Objects.equal(item.getGenres(), prevItem.getGenres())
             && Objects.equal(item.getImage(), prevItem.getImage())
             && Objects.equal(item.getThumbnail(), prevItem.getThumbnail())
