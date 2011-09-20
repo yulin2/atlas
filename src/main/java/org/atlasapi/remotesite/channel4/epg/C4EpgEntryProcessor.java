@@ -36,13 +36,15 @@ import org.atlasapi.remotesite.channel4.C4EpisodesExtractor;
 import org.atlasapi.remotesite.channel4.C4RelatedEntry;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.time.DateTimeZones;
+import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.SystemClock;
 
 public class C4EpgEntryProcessor {
 
@@ -65,13 +67,20 @@ public class C4EpgEntryProcessor {
     
     private final C4SynthesizedItemUpdater c4SynthesizedItemUpdater;
     private final C4BrandUpdater brandUpdater;
+
+    private final Clock clock;
     
-    public C4EpgEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log) {
+    public C4EpgEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log, Clock clock) {
         this.contentWriter = contentWriter;
         this.contentStore = contentStore;
         this.brandUpdater = brandUpdater;
         this.log = log;
+        this.clock = clock;
         this.c4SynthesizedItemUpdater = new C4SynthesizedItemUpdater(contentStore, contentWriter);
+    }
+    
+    public C4EpgEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log) {
+        this(contentWriter, contentStore, brandUpdater, log, new SystemClock());
     }
 
     public ItemRefAndBroadcast process(C4EpgEntry entry, Channel channel) {
@@ -95,8 +104,10 @@ public class C4EpgEntryProcessor {
             }
             //look for a synthesized equivalent of this item and copy any broadcast/locations and remove its versions.
             updateFromPossibleSynthesized(webSafeBrandName, entry, episode);
+            
+            DateTime now = clock.now();
 
-            Broadcast newBroadcast = updateEpisodeDetails(episode, entry, channel);
+            Broadcast newBroadcast = updateEpisodeDetails(episode, entry, channel, now);
             
             Brand brand = updateBrand(webSafeBrandName, episode, entry);
             contentWriter.createOrUpdate(brand);
@@ -155,46 +166,73 @@ public class C4EpgEntryProcessor {
         episode.setSeries(series);
     }
 
-    private Broadcast updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel) {
+    private Broadcast updateEpisodeDetails(Episode episode, C4EpgEntry entry, Channel channel, DateTime now) {
+        
+        boolean changed = false;
+        
         if(episode.getTitle() == null) {
             if (entry.title().equals(entry.brandTitle()) && entry.seriesNumber() != null && entry.episodeNumber() != null) {
                 episode.setTitle(String.format(C4EpisodesExtractor.EPISODE_TITLE_TEMPLATE, entry.seriesNumber(), entry.episodeNumber()));
             } else {
                 episode.setTitle(entry.title());
             }
+            changed = true;
         }
 
-        episode.setSeriesNumber(entry.seriesNumber());
-        episode.setEpisodeNumber(entry.episodeNumber());
+        if(!Objects.equal(episode.getSeriesNumber(), entry.seriesNumber())) {
+            episode.setSeriesNumber(entry.seriesNumber());
+            changed = true;
+        }
+        if(!Objects.equal(episode.getEpisodeNumber(), entry.episodeNumber())) {
+            episode.setEpisodeNumber(entry.episodeNumber());
+            changed = true;
+        }
 
         if(episode.getDescription() == null) {
             episode.setDescription(entry.summary());
+            changed = true;
         }
-
-        Broadcast broadcast = updateVersion(episode, entry, channel);
 
         if (entry.media() != null && !Strings.isNullOrEmpty(entry.media().thumbnail())) {
+            String img = episode.getImage();
+            String thm = episode.getThumbnail();
             C4AtomApi.addImages(episode, entry.media().thumbnail());
+            changed |= !Objects.equal(img, episode.getImage()) || !Objects.equal(thm, episode.getThumbnail());
         }
 
+        if(changed || episode.getLastUpdated() != null) {
+            episode.setLastUpdated(now);
+        }
+        
         episode.setIsLongForm(true);
         episode.setMediaType(MediaType.VIDEO);
-        episode.setLastUpdated(entry.updated());
+
+        Broadcast broadcast = updateVersion(episode, entry, channel, now);
 
         return broadcast;
     }
 
-    public static Broadcast updateVersion(Episode episode, C4EpgEntry entry, Channel channel) {
+    public static Broadcast updateVersion(Episode episode, C4EpgEntry entry, Channel channel, DateTime now) {
         Version version = Iterables.getFirst(episode.nativeVersions(), new Version());
         
         if(version.getDuration() == null) {
             version.setDuration(entry.duration());
         }
         
-        Broadcast newBroadcast = broadcastFrom(entry, channel);
-        version.setBroadcasts(updateBroadcasts(version.getBroadcasts(), newBroadcast));
+        Broadcast newBroadcast = broadcastFrom(entry, channel, now);
+        Set<Broadcast> broadcasts = Sets.newHashSet(newBroadcast);
+        for (Broadcast broadcast : version.getBroadcasts()) {
+            if (!newBroadcast.getId().equals(broadcast.getId())){
+                broadcasts.add(broadcast);
+            } else {
+                if(changed(newBroadcast, broadcast)) {
+                    newBroadcast.setLastUpdated(now);
+                }
+            }
+        }
+        version.setBroadcasts(broadcasts);
 
-        updateLocation(entry, version);
+        updateLocation(entry, version, now);
         
         if (!episode.getVersions().contains(version)) {
             episode.addVersion(version);
@@ -203,86 +241,93 @@ public class C4EpgEntryProcessor {
         return newBroadcast;
     }
 
-    public static void updateLocation(C4EpgEntry entry, Version version) {
+    private static boolean changed(Broadcast newBroadcast, Broadcast broadcast) {
+        return !Objects.equal(newBroadcast.getTransmissionTime(),broadcast.getTransmissionTime())
+            || !Objects.equal(newBroadcast.getTransmissionEndTime(), broadcast.getTransmissionEndTime())
+            || !Objects.equal(newBroadcast.getBroadcastDuration(), broadcast.getBroadcastDuration());
+    }
+
+    public static void updateLocation(C4EpgEntry entry, Version version, DateTime now) {
         // Don't add/update locations unless this is the first time we've seen the item because
         // we cannot determine the availability start without reading the /4od feed.
         if (version.getManifestedAs().isEmpty()) {
         	Encoding encoding = Iterables.getFirst(version.getManifestedAs(), new Encoding());
-        	updateEncoding(version, encoding, entry);
+        	updateEncoding(version, encoding, entry, now);
         	if (!encoding.getAvailableAt().isEmpty() && !version.getManifestedAs().contains(encoding)) {
         		version.addManifestedAs(encoding);
         	}
-        } else {
+        } /*else {
         	for (Encoding encoding : version.getManifestedAs()) {
         		for (Location location : encoding.getAvailableAt()) {
         			location.setLastUpdated(entry.updated());
         		}
         	}
-        }
+        }*/
     }
-
-    private static Set<Broadcast> updateBroadcasts(Set<Broadcast> currentBroadcasts, Broadcast newBroadcast) {
-        Broadcast entryBroadcast = newBroadcast;
-        return replaceBroadcast(currentBroadcasts, entryBroadcast);
-    }
-
-    public static Set<Broadcast> replaceBroadcast(Set<Broadcast> currentBroadcasts, Broadcast entryBroadcast) {
-        Set<Broadcast> broadcasts = Sets.newHashSet(entryBroadcast);
-        for (Broadcast broadcast : currentBroadcasts) {
-            if (!entryBroadcast.getId().equals(broadcast.getId())){
-                broadcasts.add(broadcast);
-            }
-        }
-        
-        return broadcasts;
-    }
-
-    private static void updateEncoding(Version version, Encoding encoding, C4EpgEntry entry) {
+    
+    private static void updateEncoding(Version version, Encoding encoding, C4EpgEntry entry, DateTime now) {
 
         if (entry.media() != null && entry.media().player() != null) {
             
             //try to find and update Location with same uri.
             for (Location location : encoding.getAvailableAt()) {
                 if(entry.media().player().equals(location.getUri())) {
-                    updateLocation(location, entry);
+                    updateLocation(location, entry, now);
                     return;
                 }
             }
             
             //otherwise create a new one.
             Location newLocation = new Location();
-            updateLocation(newLocation, entry);
+            updateLocation(newLocation, entry, now);
             encoding.addAvailableAt(newLocation);
         }
 
     }
 
-    static void updateLocation(Location location, C4EpgEntry entry) {
+    static void updateLocation(Location location, C4EpgEntry entry, DateTime now) {
         location.setUri(entry.media().player());
         location.setTransportType(TransportType.LINK);
-        location.setPolicy(policyFrom(entry));
-		location.setLastUpdated(entry.updated());
+        location.setPolicy(policyFrom(location.getPolicy() == null ? new Policy() : location.getPolicy(), entry, now));
+        
+        if(location.getLastUpdated() == null || now.equals(location.getPolicy().getLastUpdated())) {
+            location.setLastUpdated(now);
+        }
     }
 
-    static Policy policyFrom(C4EpgEntry entry) {
-        Policy policy = new Policy();
-        policy.setLastUpdated(entry.updated());
+    static Policy policyFrom(Policy policy, C4EpgEntry entry, DateTime now) {
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
-        policy.setAvailableCountries(entry.media().availableCountries());
+        
+        boolean changed = false;
+
+        if(!Objects.equal(policy.getAvailableCountries(), entry.media().availableCountries())) {
+            policy.setAvailableCountries(entry.media().availableCountries());
+            changed = true;
+        }
 
         Matcher matcher = AVAILABILTY_RANGE_PATTERN.matcher(entry.available());
         if (matcher.matches()) {
-        	policy.setAvailabilityStart(new DateTime(matcher.group(1)));
-            policy.setAvailabilityEnd(new DateTime(matcher.group(2)));
+            DateTime availabilityStart = new DateTime(matcher.group(1));
+            if(!Objects.equal(policy.getAvailabilityStart(), availabilityStart)) {
+                policy.setAvailabilityStart(availabilityStart);
+                changed = true;
+            }
+            DateTime availabilityEnd = new DateTime(matcher.group(2));
+            if(!Objects.equal(policy.getAvailabilityEnd(), availabilityEnd)) {
+                policy.setAvailabilityEnd(availabilityEnd);
+                changed = true;
+            }
         }
-
+        
+        if(changed || policy.getLastUpdated() == null) {
+            policy.setLastUpdated(entry.updated());
+        }
         return policy;
     }
 
-    private static Broadcast broadcastFrom(C4EpgEntry entry, Channel channel) {
+    private static Broadcast broadcastFrom(C4EpgEntry entry, Channel channel, DateTime now) {
         Broadcast broadcast = broadcast().withChannel(channel.uri()).withTransmissionStart(entry.txDate()).withDuration(entry.duration()).withAtomId(entry.id()).build();
 
-        broadcast.setLastUpdated(entry.updated() != null ? entry.updated() : new DateTime(DateTimeZones.UTC));
         broadcast.setIsActivelyPublished(true);
 
         return broadcast;
