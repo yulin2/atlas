@@ -99,6 +99,6 @@ public class C4Module {
 	}
 
 	protected /*@Bean*/ C4AtomBackedBrandUpdater c4BrandFetcher() {
-		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, contentWriter, log);
+		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, new LastUpdatedSettingContentWriter(contentResolver, contentWriter), log);
 	}
 }
