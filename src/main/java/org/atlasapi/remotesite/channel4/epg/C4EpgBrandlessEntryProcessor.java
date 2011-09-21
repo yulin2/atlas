@@ -22,10 +22,13 @@ import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.atlasapi.remotesite.channel4.C4BroadcastBuilder;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.SystemClock;
 
 public class C4EpgBrandlessEntryProcessor {
     
@@ -39,12 +42,18 @@ public class C4EpgBrandlessEntryProcessor {
     private final ContentResolver contentStore;
     private final C4BrandUpdater brandUpdater;
     private final AdapterLog log;
+    private final Clock clock;
 
-    public C4EpgBrandlessEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log) {
+    public C4EpgBrandlessEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log, Clock clock) {
         this.contentWriter = contentWriter;
         this.contentStore = contentStore;
         this.brandUpdater = brandUpdater;
         this.log = log;
+        this.clock = clock;
+    }
+    
+    public C4EpgBrandlessEntryProcessor(ContentWriter contentWriter, ContentResolver contentStore, C4BrandUpdater brandUpdater, AdapterLog log) {
+        this(contentWriter, contentStore, brandUpdater, log, new SystemClock());
     }
 
     public ItemRefAndBroadcast process(C4EpgEntry entry, Channel channel) {
@@ -56,11 +65,13 @@ public class C4EpgBrandlessEntryProcessor {
             String brandUri = REAL_PROGRAMME_BASE + brandName;
             Maybe<Identified> maybeBrand = contentStore.findByCanonicalUris(ImmutableList.of(brandUri)).get(brandUri);
             
+            DateTime now = clock.now();
+            
             if(!maybeBrand.hasValue()) {
-                return writeBrandFromEntry(entry, brandName, channel);
+                return writeBrandFromEntry(entry, brandName, channel,now);
             } else {
                 Brand brand = (Brand) maybeBrand.requireValue();
-                return updateEpisodeInBrand(entry, channel, brandName, brand);
+                return updateEpisodeInBrand(entry, channel, brandName, brand,now);
             }
         } catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withCause(e).withDescription("Exception processing brandless entry " + entry.id()));
@@ -68,8 +79,8 @@ public class C4EpgBrandlessEntryProcessor {
         }
     }
 
-    public ItemRefAndBroadcast updateEpisodeInBrand(C4EpgEntry entry, Channel channel, String brandName, Brand brand) {
-        return extractRelevantEpisode(entry, brand, brandName, channel);
+    public ItemRefAndBroadcast updateEpisodeInBrand(C4EpgEntry entry, Channel channel, String brandName, Brand brand, DateTime now) {
+        return extractRelevantEpisode(entry, brand, brandName, channel, now);
     }
     
     public static String brandNameFrom(C4EpgEntry entry) {
@@ -81,21 +92,33 @@ public class C4EpgBrandlessEntryProcessor {
         return title.replaceAll("[^ a-zA-Z0-9]", "").replaceAll("\\s+", "-").toLowerCase();
     }
 
-    private ItemRefAndBroadcast episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel, Brand brand) {
+    private ItemRefAndBroadcast episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel, Brand brand, DateTime now) {
+        
         String slotId = entry.slotId();
         Episode episode = new Episode(episodeUriFrom(entry), "c4:"+synthBrandName +"-"+slotId, C4);
         episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
-        episode.setTitle(entry.title());
-        episode.setDescription(entry.summary());
-        episode.setLastUpdated(entry.updated());
-        
-        episode.setContainer(brand);
-        
-        C4EpgEntryProcessor.updateVersion(episode, entry, channel);
 
+        boolean changed = false;
+        
+        if(!Objects.equal(episode.getTitle(), entry.title())) {
+            episode.setTitle(entry.title());
+            changed = true;
+        }
+        if(!Objects.equal(episode.getDescription(), entry.summary())) {
+            episode.setDescription(entry.summary());
+            changed = true;
+        }
+        
+        if(changed || episode.getLastUpdated() == null) {
+            episode.setLastUpdated(now);
+        }
+        
+        Broadcast broadcast = C4EpgEntryProcessor.updateVersion(episode, entry, channel, now);
+
+        episode.setContainer(brand);
         contentWriter.createOrUpdate(episode);
         
-        return new ItemRefAndBroadcast(episode, C4EpgEntryProcessor.updateVersion(episode, entry, channel));
+        return new ItemRefAndBroadcast(episode, broadcast);
     }
 
     public static String episodeUriFrom(C4EpgEntry entry) {
@@ -107,7 +130,7 @@ public class C4EpgBrandlessEntryProcessor {
      * matched up 
      * @return 
      */
-    private ItemRefAndBroadcast writeBrandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel) {
+    private ItemRefAndBroadcast writeBrandFromEntry(C4EpgEntry entry, String synthBrandName, Channel channel, DateTime now) {
         Brand brand = null;
         try {
             brand = brandUpdater.createOrUpdateBrand(REAL_PROGRAMME_BASE + synthBrandName);
@@ -119,10 +142,10 @@ public class C4EpgBrandlessEntryProcessor {
         }
         contentWriter.createOrUpdate(brand);
         
-        return episodeFrom(entry, synthBrandName, channel, brand);
+        return episodeFrom(entry, synthBrandName, channel, brand, now);
     }
 
-    private ItemRefAndBroadcast extractRelevantEpisode(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel) {
+    private ItemRefAndBroadcast extractRelevantEpisode(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel, DateTime now) {
         boolean found = false;
         //look for an episode with a broadcast with this entry's id, replace if found.
         Iterable<Episode> subItems = Iterables.filter(contentStore.findByCanonicalUris(Iterables.transform(brand.getChildRefs(), ChildRef.TO_URI)).getAllResolvedResults(), Episode.class);
@@ -148,7 +171,7 @@ public class C4EpgBrandlessEntryProcessor {
             }
         }
         
-        return episodeFrom(entry, synthbrandName, channel, brand);
+        return episodeFrom(entry, synthbrandName, channel, brand, now);
     }
 
     private Broadcast createBroadcast(C4EpgEntry entry, Channel channel) {
