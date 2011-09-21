@@ -107,6 +107,7 @@ public class C4BrandExtractor {
         
         for (Series series : allSeries) {
             series.setGenres(brand.getGenres());
+            series.setParent(brand);
             contentWriter.createOrUpdate(series);
         }
 
