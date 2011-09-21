@@ -1,13 +1,9 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
-import static org.atlasapi.media.entity.Channel.E_FOUR;
-import static org.atlasapi.media.entity.Channel.FILM_4;
-import static org.atlasapi.media.entity.Channel.FOUR_MUSIC;
-import static org.atlasapi.media.entity.Channel.MORE_FOUR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
+import static org.atlasapi.remotesite.channel4.C4AtomApi.C4_CHANNEL_MAP;
 
 import java.util.List;
 import java.util.Map;
@@ -29,8 +25,6 @@ import org.joda.time.LocalTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -42,14 +36,6 @@ import com.metabroadcast.common.time.DayRangeGenerator;
 
 public class C4EpgUpdater extends ScheduledTask {
 
-    private final static BiMap<String, Channel> CHANNEL_MAP = ImmutableBiMap.of(
-            "C4", CHANNEL_FOUR,
-            "M4", MORE_FOUR,
-            "F4", FILM_4,
-            "E4", E_FOUR,
-            "4M", FOUR_MUSIC
-    );
-    
     private final static String epgUriPattern = "http://api.channel4.com/pmlsd/tv-listings/daily/%s/%s.atom";
 
     private final RemoteSiteClient<Document> c4AtomFetcher;
@@ -75,12 +61,12 @@ public class C4EpgUpdater extends ScheduledTask {
         
         DayRange dayRange = rangeGenerator.generate(new LocalDate(DateTimeZones.UTC));
         
-        int total = Iterables.size(dayRange) * CHANNEL_MAP.entrySet().size();
+        int total = Iterables.size(dayRange) * C4_CHANNEL_MAP.entrySet().size();
         int processed = 0;
         int failures = 0;
         int broadcasts = 0;
         
-        for (Map.Entry<String, Channel> channelEntry : CHANNEL_MAP.entrySet()) {
+        for (Map.Entry<String, Channel> channelEntry : C4_CHANNEL_MAP.entrySet()) {
             for (LocalDate scheduleDay : dayRange) {
                 reportStatus(String.format("Processed %s/%s. %s failures. %s broadcasts processed", processed++, total, failures, broadcasts));
                 

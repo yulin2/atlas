@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.jdom.Element;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Preconditions;
@@ -19,7 +20,9 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Brand> {
 
-	@Override
+	private static final String PRESENTATION_BRAND = "relation.presentationBrand";
+
+    @Override
 	public Brand extract(Feed source) {
 		
 		Preconditions.checkArgument(C4AtomApi.isABrandFeed(source), "Not a brand feed");
@@ -47,12 +50,28 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
         }
 		brand.setGenres(new C4CategoryGenreMap().mapRecognised(genres));
 		
+		String presentationBrand = getPresentationBrand(source);
+		if(presentationBrand != null) {
+		    brand.setPresentationChannel(C4AtomApi.C4_CHANNEL_MAP.get(presentationBrand));
+		}
+		
 		C4AtomApi.addImages(brand, source.getLogo());
 		
 		return brand;
 	}
+	
+	@SuppressWarnings("unchecked")
+    private String getPresentationBrand(Feed source) {
+	    Iterable<Element> markup = (Iterable<Element>) source.getForeignMarkup();
+        for (Element element : markup) {
+            if (PRESENTATION_BRAND.equals(element.getName())) {
+                return element.getValue();
+            }
+        }
+        return null;
+    }
 
-	private String brandUriFrom(Feed source) {
+    private String brandUriFrom(Feed source) {
 		if (source.getAlternateLinks().isEmpty()) {
 			return null;
 		}
