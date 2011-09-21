@@ -164,7 +164,7 @@ public class C4EpgBrandlessEntryProcessor {
                 }
                 if(found) {
                     version.setBroadcasts(broadcasts);
-                    C4EpgEntryProcessor.updateLocation(entry, version);
+                    C4EpgEntryProcessor.updateLocation(entry, version, now);
                     contentWriter.createOrUpdate(episode);
                     return new ScheduleEntry.ItemRefAndBroadcast(episode, newBroadcast);
                 }
