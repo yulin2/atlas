@@ -109,11 +109,11 @@ public class C4EpgEntryProcessor {
 
             Broadcast newBroadcast = updateEpisodeDetails(episode, entry, channel, now);
             
-            Brand brand = updateBrand(webSafeBrandName, episode, entry);
+            Brand brand = updateBrand(webSafeBrandName, episode, entry, now);
             contentWriter.createOrUpdate(brand);
 
             if(episode.getSeriesNumber() != null) {
-                updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode, brand);
+                updateSeries(C4AtomApi.seriesUriFor(webSafeBrandName, entry.seriesNumber()), webSafeBrandName, episode, brand, now);
             }
 
             episode.setContainer(brand);
@@ -131,18 +131,20 @@ public class C4EpgEntryProcessor {
         c4SynthesizedItemUpdater.findAndUpdateFromPossibleSynthesized("c4:"+entry.slotId(), episode, C4_PROGRAMMES_BASE+webSafeBrandName);
     }
 
-    private Brand updateBrand(String brandName, Episode episode, C4EpgEntry entry) {
+    private Brand updateBrand(String brandName, Episode episode, C4EpgEntry entry, DateTime now) {
         String brandUri = C4_PROGRAMMES_BASE + brandName;
         Maybe<Identified> resolved = contentStore.findByCanonicalUris(ImmutableSet.of(brandUri)).get(brandUri);
         
         if(resolved.isNothing()) {
             try {
-                return brandUpdater.createOrUpdateBrand(brandUri);
+                Brand brand = brandUpdater.createOrUpdateBrand(brandUri);
+                brand.setLastUpdated(now);
+                return brand;
             } catch (Exception e) {
                 Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), C4);
                 brand.setTitle(entry.brandTitle());
                 brand.addAlias(TAG_ALIAS_BASE+brandName);
-                brand.setLastUpdated(entry.updated());
+                brand.setLastUpdated(now);
                 return brand;
             }
         } else {
@@ -150,7 +152,7 @@ public class C4EpgEntryProcessor {
         }
     }
 
-    private void updateSeries(String seriesUri, String brandName, Episode episode, Brand brand) {
+    private void updateSeries(String seriesUri, String brandName, Episode episode, Brand brand, DateTime now) {
         Maybe<Identified> maybeSeries = contentStore.findByCanonicalUris(ImmutableSet.of(seriesUri)).get(seriesUri);
         Series series = null;
         if (maybeSeries.hasValue()) {
@@ -159,7 +161,7 @@ public class C4EpgEntryProcessor {
             series = new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(seriesUri), C4);
             series.addAlias(String.format(TAG_ALIAS_BASE+"%s/episode-guide/series-%s", brandName, episode.getSeriesNumber()));
             series.withSeriesNumber(episode.getSeriesNumber());
-            series.setLastUpdated(brand.getLastUpdated());
+            series.setLastUpdated(now);
         }
         series.setParent(brand);
         contentWriter.createOrUpdate(series);
