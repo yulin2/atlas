@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.05 27/04/2011 mrj -->
+<!-- listings Radio Times DTD v2.06 05/09/2011 mrj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
@@ -42,7 +42,7 @@ channel_number: the channel_number of the current channel for this provider
 
 
 <!-- the data for a TV programme -->
-<!ELEMENT prog_data (showing_id, prog_id, series_id?, rt_filmnumber?, date, time, duration, group?, title, episode_title?, episode_number?, episode_total?, series_number?, category*, rt_category?, film_year?, genre?, certificate?,country?,colour?,warning?,subtitles?,dubbing?,star_rating?, cast_member*, staff_member*, billings?, videoplus, attr, rovi_genre? ,rovi_description?, pictures?)>
+<!ELEMENT prog_data (showing_id, prog_id, series_id?, series_synopsis?, series_version?, rt_filmnumber?, date, time, duration, group?, title, episode_title?, programme_version?, episode_number?, episode_total?, series_number?, category*, rt_category?, film_year?, genre?, certificate?,country?,colour?,warning?,subtitles?,dubbing?,star_rating?, cast_member*, staff_member*, billings?, videoplus, attr, rovi_genre? ,rovi_description?, pictures?)>
 
 <!-- The id of a showing of a programme on a particular channel. If the time of a showing changes, the showing_id remains the same -->
 <!ELEMENT showing_id (#PCDATA)>
@@ -52,6 +52,13 @@ channel_number: the channel_number of the current channel for this provider
 
 <!-- The id of a series. E.g. all episodes of Friends have the same series_id -->
 <!ELEMENT series_id (#PCDATA)>
+
+<!-- String containing synopsis of series -->
+<!ELEMENT series_synopsis (#PCDATA)>
+
+<!-- String to help clarify exactly which series this is in cases where there are other series or programmes with the same title -->
+<!ELEMENT series_version (#PCDATA)>
+
 
 <!-- programme broadcast date in the form DD/MM/YYYYY, where YYYY indicates the year, MM indicates the month and DD indicates the day -->
 <!ELEMENT date (#PCDATA)>
@@ -73,6 +80,9 @@ channel_number: the channel_number of the current channel for this provider
 
 <!-- episode title -->
 <!ELEMENT episode_title (#PCDATA)>
+
+<!-- String to help clarify exactly which programme this is in cases where there are other programmes or series with the same title -->
+<!ELEMENT programme_version (#PCDATA)>
 
 <!-- episode number -->
 <!ELEMENT episode_number (#PCDATA)>
