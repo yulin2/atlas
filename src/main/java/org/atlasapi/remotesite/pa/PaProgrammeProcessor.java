@@ -171,6 +171,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Brand brand = possiblePrevious.hasValue() ? (Brand) possiblePrevious.requireValue() : new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         
         brand.setTitle(progData.getTitle());
+        brand.setDescription(progData.getSeriesSynopsis());
         brand.setSpecialization(specialization(progData, channel));
         setGenres(progData, brand);
 
