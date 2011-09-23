@@ -42,7 +42,7 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
         desc.startStage("Film equivalence generator");
 
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
-            desc.appendText("Can't continue: year '%s', title '%'", film.getYear(), film.getTitle()).finishStage();
+            desc.appendText("Can't continue: year '%s', title '%s'", film.getYear(), film.getTitle()).finishStage();
             return scores.build();
         } else {
             desc.appendText("Using year %s, title %s", film.getYear(), film.getTitle());
