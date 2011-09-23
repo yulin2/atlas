@@ -2,8 +2,6 @@ package org.atlasapi.remotesite.channel4;
 
 import static org.atlasapi.media.entity.Publisher.C4;
 
-import java.util.concurrent.TimeUnit;
-
 import javax.annotation.PostConstruct;
 
 import nu.xom.Builder;
@@ -31,7 +29,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
-import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
@@ -78,24 +75,19 @@ public class C4Module {
     }
 	
 	@Bean public RemoteSiteClient<Document> c4EpgAtomClient() {
-	    SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
-            .withUserAgent(HttpClients.ATLAS_USER_AGENT)
-            .withSocketTimeout(30, TimeUnit.SECONDS)
-            .withRetries(3)
-        .build();
-        return new RequestLimitingRemoteSiteClient<Document>(new ApiKeyAwareClient<Document>(c4ApiKey, new XmlClient(httpClient, new Builder(new C4EpgElementFactory()))), 2);
+        return new ApiKeyAwareClient<Document>(c4ApiKey, new XmlClient(requestLimitedHttpClient(), new Builder(new C4EpgElementFactory())));
 	}
 
     @Bean C4AtoZAtomContentLoader c4AtozUpdater() {
 		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), log);
 	}
-//	
-//	@Bean C4HighlightsAdapter c4HighlightsUpdater() {
-//		return new C4HighlightsAdapter(contentWriter, log);
-//	}
-//	
+
 	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {
-	    return new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
+	    return new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient(requestLimitedHttpClient()));
+	}
+	
+	protected @Bean SimpleHttpClient requestLimitedHttpClient() {
+	    return new RequestLimitingSimpleHttpClient(HttpClients.webserviceClient(), 4);
 	}
 
 	protected /*@Bean*/ C4AtomBackedBrandUpdater c4BrandFetcher() {
