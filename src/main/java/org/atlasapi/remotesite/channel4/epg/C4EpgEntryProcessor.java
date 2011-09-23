@@ -227,7 +227,7 @@ public class C4EpgEntryProcessor {
             if (!newBroadcast.getId().equals(broadcast.getId())){
                 broadcasts.add(broadcast);
             } else {
-                if(changed(newBroadcast, broadcast)) {
+                if(changed(newBroadcast, broadcast) || newBroadcast.getLastUpdated() == null) {
                     newBroadcast.setLastUpdated(now);
                 }
             }
