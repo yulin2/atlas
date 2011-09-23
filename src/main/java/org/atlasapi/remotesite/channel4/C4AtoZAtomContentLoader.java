@@ -17,7 +17,7 @@ import com.sun.syndication.feed.atom.Link;
 
 public class C4AtoZAtomContentLoader implements Runnable {
 	
-    private static final Pattern PAGE_PATTERN = Pattern.compile("(http://api.channel4.com/programmes/atoz/.+/page-\\d+.atom).*");
+    private static final Pattern PAGE_PATTERN = Pattern.compile("(http://api.channel4.com/pmlsd/atoz/.+/page-\\d+.atom).*");
     
     private final RemoteSiteClient<Feed> feedClient;
     private final C4BrandUpdater brandUpdater;
