@@ -14,11 +14,17 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.support.atom;
 
-import java.io.StringReader;
+import static com.metabroadcast.common.http.SimpleHttpRequest.httpRequestFrom;
+
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 
+import com.metabroadcast.common.http.HttpException;
+import com.metabroadcast.common.http.HttpResponsePrologue;
+import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.io.WireFeedInput;
@@ -37,6 +43,11 @@ public class AtomClient implements RemoteSiteClient<Feed> {
 
 	@Override
 	public Feed get(String uri) throws Exception {
-		return (Feed) new WireFeedInput().build(new StringReader(client.getContentsOf(uri)));
+	    return client.get(httpRequestFrom(uri, new HttpResponseTransformer<Feed>() {
+            @Override
+            public Feed transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
+                return (Feed) new WireFeedInput().build(new InputStreamReader(body));
+            }
+        }));
 	}
 }
