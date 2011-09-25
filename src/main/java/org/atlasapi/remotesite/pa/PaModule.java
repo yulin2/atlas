@@ -50,6 +50,7 @@ public class PaModule {
     private @Value("${pa.filesPath}") String localFilesPath;
     private @Value("${s3.access}") String s3access;
     private @Value("${s3.secret}") String s3secret;
+    private @Value("${pa.s3.bucket}") String s3bucket;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -62,7 +63,7 @@ public class PaModule {
     }
     
     @Bean PaProgrammeDataStore paProgrammeDataStore() {
-        S3Client s3client = new DefaultS3Client(s3access, s3secret, "pa-data");
+        S3Client s3client = new DefaultS3Client(s3access, s3secret, s3bucket);
         return new DefaultPaProgrammeDataStore(localFilesPath, s3client);
     }
     
