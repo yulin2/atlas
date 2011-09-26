@@ -424,6 +424,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             broadcast.setWidescreen(getBooleanValue(progData.getAttr().getWidescreen()));
             broadcast.setLive(getBooleanValue(progData.getAttr().getLive()));
             broadcast.setSurround(getBooleanValue(progData.getAttr().getSurround()));
+            broadcast.setPremiere(getBooleanValue(progData.getAttr().getPremiere()));
+            broadcast.setNewSeries(getBooleanValue(progData.getAttr().getNewSeries()));
         }
         broadcast.setLastUpdated(updateAt.toDateTimeUTC());
         return broadcast;
