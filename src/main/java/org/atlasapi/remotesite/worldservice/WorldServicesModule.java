@@ -1,10 +1,13 @@
 package org.atlasapi.remotesite.worldservice;
 
+import static org.atlasapi.remotesite.worldservice.WsProgrammeUpdate.worldServiceBuilder;
+
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.worldservice.WsProgrammeUpdate.WsProgrammeUpdateBuilder;
 import org.jets3t.service.security.AWSCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,14 +32,18 @@ public class WorldServicesModule {
     @Bean public WsDataStore wsDataStore() {
         return new S3WsDataStore(new AWSCredentials(s3access, s3secret), s3bucket, log);
     }
+
+    @Bean protected WsProgrammeUpdateBuilder worldServiceUpdateBuilder() {
+        return worldServiceBuilder(wsDataStore(), new DefaultWsSeriesHandler(resolver, writer, log), new DefaultWsProgrammeHandler(resolver, writer, log), log);
+    }
     
-    @Bean public WsProgrammeUpdater wsProgrammeUpdater() {
-        return new WsProgrammeUpdater(wsDataStore(), new DefaultWsSeriesHandler(resolver, writer, log), new DefaultWsProgrammeHandler(resolver, writer, log), log);
+    @Bean public WsUpdateController worldServiceUpdateController() {
+        return new WsUpdateController(worldServiceUpdateBuilder());
     }
     
     @PostConstruct
     public void schedule() {
-        scheduler.schedule(wsProgrammeUpdater(), RepetitionRules.NEVER);
+        scheduler.schedule(worldServiceUpdateBuilder().updateLatest(), RepetitionRules.NEVER);
     }
     
 }
