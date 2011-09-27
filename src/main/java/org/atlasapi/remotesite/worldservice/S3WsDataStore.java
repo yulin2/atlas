@@ -1,9 +1,8 @@
 package org.atlasapi.remotesite.worldservice;
 
-import static com.google.common.base.Predicates.notNull;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,7 +20,6 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.metabroadcast.common.base.Maybe;
@@ -48,7 +46,7 @@ public class S3WsDataStore implements WsDataStore {
     }
 
     @Override
-    public Maybe<WsData> latestData() {
+    public Maybe<WsDataSet> latestData() {
         try {
             RestS3Service service = new RestS3Service(creds);
             return dataForPattern(service, listSortedObjects(service, ""), "\\d{8}");
@@ -59,7 +57,7 @@ public class S3WsDataStore implements WsDataStore {
     }
 
     @Override
-    public Maybe<WsData> dataForDay(DateTime day) {
+    public Maybe<WsDataSet> dataForDay(DateTime day) {
         try {
             String folder = dateFormat.print(day);
             RestS3Service service = new RestS3Service(creds);
@@ -70,45 +68,27 @@ public class S3WsDataStore implements WsDataStore {
         }
     }
     
-    public Maybe<WsData> dataForPattern(final S3Service service, ImmutableList<S3Object> objects, String pattern) {
+    public Maybe<WsDataSet> dataForPattern(final S3Service service, ImmutableList<S3Object> objects, String pattern) {
         Map<String, WsDataFile> patterns = patternFileMap(pattern);
         
-        Map<WsDataFile, S3Object> mostRecent = matchObjectsToFiles(objects, patterns);
+        Map<WsDataFile, S3Object> matchedFileObjects = matchObjectsToFiles(objects, patterns);
         
-        if(complete(mostRecent) || !sameDay(mostRecent.values())) {
-            return Maybe.nothing();
-        }
-        
-        Map<WsDataFile, S3Object> fullObjects = getFullObjects(service, mostRecent);
-        
-        if(complete(mostRecent)) {
+        if(!complete(matchedFileObjects) || !sameDay(matchedFileObjects.values())) {
             return Maybe.nothing();
         }
 
-        return Maybe.<WsData>just(new S3WsData(fullObjects));
+        return Maybe.<WsDataSet>just(new S3WsDataSet(service, matchedFileObjects));
     }
 
     public boolean complete(Map<WsDataFile, S3Object> mostRecent) {
-        return mostRecent.size() != WsDataFile.values().length;
-    }
-    
-    public Map<WsDataFile, S3Object> getFullObjects(final S3Service service, Map<WsDataFile, S3Object> mostRecent) {
-        return ImmutableMap.copyOf(Maps.filterValues(Maps.transformValues(mostRecent, new Function<S3Object, S3Object>() {
-            @Override
-            public S3Object apply(S3Object input) {
-                try {
-                    return service.getObject(input.getBucketName(), input.getKey());
-                } catch (Exception e) {
-                    log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Couldn't get full object for %s", input.getKey()));
-                    return null;
-                }
-            }
-        }), notNull()));
+        return mostRecent.size() == WsDataFile.values().length;
     }
 
     public Map<WsDataFile, S3Object> matchObjectsToFiles(ImmutableList<S3Object> objects, Map<String, WsDataFile> patterns) {
+        
         Map<WsDataFile, S3Object> mostRecent = Maps.newHashMap();
         int reached = 0;
+        
         for (Entry<String, WsDataFile> filePattern : patterns.entrySet()) {
             for (S3Object object : objects.subList(reached, objects.size())) {
                 reached++;
@@ -118,6 +98,7 @@ public class S3WsDataStore implements WsDataStore {
                 }
             }
         }
+        
         return mostRecent;
     }
 
@@ -148,46 +129,67 @@ public class S3WsDataStore implements WsDataStore {
         return true;
     }
     
-    public class S3WsData implements WsData {
+    private class S3WsDataSource extends WsDataSource {
 
+        private S3Object object;
+
+        public S3WsDataSource(WsDataFile file, S3Object s3Object) throws Exception {
+            super(file, new GZIPInputStream(s3Object.getDataInputStream()));
+            this.object = s3Object;
+        }
+
+        @Override
+        public void close() throws IOException {
+            object.closeDataInputStream();
+            super.close();
+        }
+    }
+    
+    private class S3WsDataSet implements WsDataSet {
 
         private final Map<WsDataFile, S3Object> fullObjects;
+        private final S3Service service;
 
-        public S3WsData(Map<WsDataFile, S3Object> fullObjects) {
+        public S3WsDataSet(S3Service service, Map<WsDataFile, S3Object> fullObjects) {
+            this.service = service;
             this.fullObjects = fullObjects;
         }
         
-        public InputStream inputStreamFor(WsDataFile file) {
+        public WsDataSource inputStreamFor(WsDataFile file) {
             try {
-                return new GZIPInputStream(fullObjects.get(file).getDataInputStream());
+                return new S3WsDataSource(file, getFullObject(fullObjects.get(file)));
             } catch (Exception e) {
                 log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Couldn't get full object for %s", file.filename()));
                 return null;
             }
         }
 
+        private S3Object getFullObject(S3Object s3Object) throws S3ServiceException {
+            return service.getObject(s3Object.getBucketName(), s3Object.getKey());
+        }
+
         @Override
-        public InputStream getAudioItem() {
+        public WsDataSource getAudioItem() {
             return inputStreamFor(WsDataFile.AUDIO_ITEM);
         }
 
         @Override
-        public InputStream getAudioItemProgLink() {
+        public WsDataSource getAudioItemProgLink() {
             return inputStreamFor(WsDataFile.AUDIO_ITEM_PROG_LINK);
         }
 
         @Override
-        public InputStream getGenre() {
+        public WsDataSource getGenre() {
             return inputStreamFor(WsDataFile.GENRE);
         }
 
         @Override
-        public InputStream getProgramme() {
+        public WsDataSource getProgramme() {
             return inputStreamFor(WsDataFile.PROGRAMME);
         }
 
         @Override
-        public InputStream getSeries() {
+        public WsDataSource getSeries() {
             return inputStreamFor(WsDataFile.SERIES);
         }
         
