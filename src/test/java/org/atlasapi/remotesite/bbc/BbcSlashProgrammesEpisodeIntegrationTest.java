@@ -15,13 +15,13 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         
         BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, new SystemOutAdapterLog());
         
-        Content programme = (Content) adapter.createOrUpdate("http://www.bbc.co.uk/programmes/b011f3pk");
+        Content programme = (Content) adapter.createOrUpdate("http://www.bbc.co.uk/programmes/b015d4pt");
         assertNotNull(programme);
         
         assertNotNull(programme.getClips());
         assertFalse(programme.getClips().isEmpty());
-        assertTrue(programme.getImage().contains("b00w4hjy"));
-        assertTrue(programme.getThumbnail().contains("b00w4hjy"));
+        assertTrue(programme.getImage().contains("b015d4pt"));
+        assertTrue(programme.getThumbnail().contains("b015d4pt"));
         
         for (Clip clip: programme.getClips()) {
             assertNotNull(clip.getCanonicalUri());

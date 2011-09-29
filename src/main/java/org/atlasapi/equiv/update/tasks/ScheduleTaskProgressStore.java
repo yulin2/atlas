@@ -1,9 +1,11 @@
 package org.atlasapi.equiv.update.tasks;
 
+import org.atlasapi.persistence.content.listing.ContentListingProgress;
+
 public interface ScheduleTaskProgressStore {
 
-    PublisherListingProgress progressForTask(String taskName);
+    ContentListingProgress progressForTask(String taskName);
     
-    void storeProgress(String taskName, PublisherListingProgress progress);
+    void storeProgress(String taskName, ContentListingProgress progress);
     
 }
