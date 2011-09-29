@@ -1,26 +1,25 @@
 package org.atlasapi.equiv.update.tasks;
 
-import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_CONTAINERS;
-import static org.atlasapi.persistence.content.ContentTable.TOP_LEVEL_ITEMS;
+import static org.atlasapi.persistence.content.ContentCategory.CONTAINER;
+import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
+import static org.atlasapi.persistence.content.listing.ContentListingProgress.progressFrom;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentTable;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
-import org.atlasapi.persistence.content.listing.ContentListingHandler;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
@@ -32,7 +31,6 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     private List<Publisher> publishers = ImmutableList.of();
     private String schedulingKey = "equivalence";
     private final ScheduleTaskProgressStore progressStore;
-    private final ImmutableSet<ContentTable> topLevelTables = ImmutableSet.of(TOP_LEVEL_CONTAINERS, TOP_LEVEL_ITEMS);
     
     public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, ScheduleTaskProgressStore progressStore) {
         this.contentStore = contentStore;
@@ -43,38 +41,33 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     
     @Override
     protected void runTask() {
-        PublisherListingProgress currentProgress = progressStore.progressForTask(schedulingKey);
-        Publisher currentPublisher = currentProgress.getPublisher();
-        log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Started: %s from %s", schedulingKey, startProgress(currentProgress.getUri()))));
+        ContentListingProgress currentProgress = progressStore.progressForTask(schedulingKey);
+        log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription("Started: %s from %s", schedulingKey, startProgress(currentProgress)));
         
-        int startPublisherIndex = currentPublisher == null ? 0 : publishers.indexOf(currentPublisher);
-        for (final Publisher publisher : publishers.subList(startPublisherIndex, publishers.size())){
-            
-            progressStore.storeProgress(schedulingKey, new PublisherListingProgress(currentProgress, publisher));
-            
-            ContentListingCriteria criteria = defaultCriteria().startingAt(currentProgress).forPublisher(publisher);
-            boolean finished = contentStore.listContent(topLevelTables, criteria, new ContentListingHandler() {
-                @Override
-                public boolean handle(Iterable<? extends Content> contents, ContentListingProgress progress) {
-                    int processed = 100;
-                    for (Content content : contents) {
-                        updateEquivalence(content); 
-                        reportStatus(String.format("Processed %d / %d %s top-level content. %s", progress.count() - --processed, progress.total(), publisher.name(), content.getCanonicalUri()));
-                    }
-                    progressStore.storeProgress(schedulingKey, new PublisherListingProgress(progress, publisher));
-                    return shouldContinue();
-                }
-            });
-            
-            if(finished) {
-                currentProgress = new PublisherListingProgress(ContentListingProgress.START, null);
-            } else {
-                log.record(infoEntry().withSource(getClass()).withDescription("Interrupted: %s", schedulingKey));
-                return;
+        ContentListingCriteria criteria = defaultCriteria().forPublishers(publishers).forContent(CONTAINER, TOP_LEVEL_ITEM).startingAt(currentProgress).build();
+        Iterator<Content> contents = contentStore.listContent(criteria);
+
+        int processed = 0;
+        boolean shouldContinue = shouldContinue();
+        Content content = null;
+        
+        while (shouldContinue && contents.hasNext()) {
+            content = contents.next();
+            reportStatus(String.format("Processed %d. Processing %s", processed, content.getCanonicalUri()));
+            updateEquivalence(content);
+            if(++processed % 100 == 0) {
+                progressStore.storeProgress(schedulingKey, progressFrom(content));
             }
+            shouldContinue = shouldContinue();
         }
         
-        progressStore.storeProgress(schedulingKey, new PublisherListingProgress(ContentListingProgress.START, null));
+        if(shouldContinue) {
+            progressStore.storeProgress(schedulingKey, ContentListingProgress.START);
+        } else {
+            if(content != null) {
+                progressStore.storeProgress(schedulingKey, progressFrom(content));
+            }
+        }
         log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
     }
     
@@ -86,8 +79,8 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         }
     }
 
-    private String startProgress(String uri) {
-        return uri == null ? "start" : uri;
+    private String startProgress(ContentListingProgress progress) {
+        return progress == null ? "start" : String.format("%s %s %s", progress.getCategory(), progress.getPublisher(), progress.getUri());
     }
     
     public ContentEquivalenceUpdateTask forPublishers(Publisher... publishers) {

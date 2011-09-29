@@ -183,7 +183,7 @@ public class EquivModule {
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
-        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, db);
+        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, new MongoScheduleTaskProgressStore(db));
     }
     
     public @Bean ContentEquivalenceUpdater<Film> filmUpdater() {
