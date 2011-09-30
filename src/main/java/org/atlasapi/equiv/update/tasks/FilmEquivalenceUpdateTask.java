@@ -3,10 +3,7 @@ package org.atlasapi.equiv.update.tasks;
 import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 import static org.atlasapi.persistence.content.listing.ContentListingProgress.progressFrom;
-<<<<<<< HEAD
 import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
-=======
->>>>>>> new content lister
 
 import java.util.Iterator;
 
