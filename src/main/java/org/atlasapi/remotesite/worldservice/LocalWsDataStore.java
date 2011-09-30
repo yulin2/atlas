@@ -7,11 +7,11 @@ import static org.atlasapi.remotesite.worldservice.WsDataFile.AUDIO_ITEM_PROG_LI
 import static org.atlasapi.remotesite.worldservice.WsDataFile.GENRE;
 import static org.atlasapi.remotesite.worldservice.WsDataFile.PROGRAMME;
 import static org.atlasapi.remotesite.worldservice.WsDataFile.SERIES;
+import static org.atlasapi.remotesite.worldservice.WsDataSource.sourceForFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
-import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
 import org.joda.time.DateTime;
@@ -46,23 +46,23 @@ public class LocalWsDataStore implements WsDataStore {
     }
     
     @Override
-    public Maybe<WsData> latestData() {
+    public Maybe<WsDataSet> latestData() {
         return dataForFile(Ordering.natural().max(ImmutableSet.copyOf(dataDir.listFiles(dayFilter))));
     }
 
     @Override
-    public Maybe<WsData> dataForDay(DateTime day) {
+    public Maybe<WsDataSet> dataForDay(DateTime day) {
         return dataForFile(new File(dataDir, dayFormat.print(day)));
     }
 
-    private Maybe<WsData> dataForFile(File file) {
+    private Maybe<WsDataSet> dataForFile(File file) {
         if(file == null || !file.isDirectory()) {
             return Maybe.nothing();
         }
-        return Maybe.<WsData>just(new FileBackedWsData(file));
+        return Maybe.<WsDataSet>just(new FileBackedWsData(file));
     }
 
-    private static class FileBackedWsData implements WsData {
+    private static class FileBackedWsData implements WsDataSet {
 
         private final File parent;
 
@@ -70,36 +70,36 @@ public class LocalWsDataStore implements WsDataStore {
             this.parent = checkNotNull(parent);
         }
         
-        private InputStream getFileStream(WsDataFile file) {
+        private WsDataSource getFileStream(WsDataFile file) {
             try {
-                return new GZIPInputStream(new FileInputStream(new File(parent, file.filename()+".gz")));
+                return sourceForFile(file, new GZIPInputStream(new FileInputStream(new File(parent, file.filename()+".gz"))));
             } catch (Exception e) {
                 return null;
             }
         }
 
         @Override
-        public InputStream getAudioItem() {
+        public WsDataSource getAudioItem() {
             return getFileStream(AUDIO_ITEM);
         }
 
         @Override
-        public InputStream getAudioItemProgLink() {
+        public WsDataSource getAudioItemProgLink() {
             return getFileStream(AUDIO_ITEM_PROG_LINK);
         }
 
         @Override
-        public InputStream getGenre() {
+        public WsDataSource getGenre() {
             return getFileStream(GENRE);
         }
 
         @Override
-        public InputStream getProgramme() {
+        public WsDataSource getProgramme() {
             return getFileStream(PROGRAMME);
         }
 
         @Override
-        public InputStream getSeries() {
+        public WsDataSource getSeries() {
             return getFileStream(SERIES);
         }
 

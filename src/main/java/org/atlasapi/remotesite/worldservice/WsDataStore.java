@@ -7,8 +7,8 @@ import com.metabroadcast.common.base.Maybe;
 
 public interface WsDataStore {
 
-    Maybe<WsData> latestData();
+    Maybe<WsDataSet> latestData();
     
-    Maybe<WsData> dataForDay(DateTime day);
+    Maybe<WsDataSet> dataForDay(DateTime day);
     
 }

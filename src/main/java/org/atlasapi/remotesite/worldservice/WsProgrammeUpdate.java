@@ -1,14 +1,19 @@
 package org.atlasapi.remotesite.worldservice;
 
+import static com.google.common.base.Charsets.ISO_8859_1;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
+import static org.atlasapi.remotesite.worldservice.WsDataFile.AUDIO_ITEM;
+import static org.atlasapi.remotesite.worldservice.WsDataFile.AUDIO_ITEM_PROG_LINK;
+import static org.atlasapi.remotesite.worldservice.WsDataFile.PROGRAMME;
+import static org.atlasapi.remotesite.worldservice.WsDataFile.SERIES;
 import static org.atlasapi.remotesite.worldservice.model.WsAudioItem.wsAudioItemBuilder;
 import static org.atlasapi.remotesite.worldservice.model.WsAudioItemProgLink.wsAudioItemProgLinkBuilder;
 import static org.atlasapi.remotesite.worldservice.model.WsProgramme.wsProgrammeBuilder;
 import static org.atlasapi.remotesite.worldservice.model.WsSeries.wsSeriesBuilder;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
@@ -23,8 +28,8 @@ import org.atlasapi.remotesite.worldservice.model.WsAudioItem;
 import org.atlasapi.remotesite.worldservice.model.WsAudioItemProgLink;
 import org.atlasapi.remotesite.worldservice.model.WsProgramme;
 import org.atlasapi.remotesite.worldservice.model.WsSeries;
+import org.joda.time.DateTime;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -32,34 +37,67 @@ import com.google.common.io.Closeables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
-public class WsProgrammeUpdater extends ScheduledTask {
+public class WsProgrammeUpdate extends ScheduledTask {
 
+    public static WsProgrammeUpdateBuilder worldServiceBuilder(WsDataStore wsDataStore, WsSeriesHandler seriesHandler, WsProgrammeHandler programmeHandler, AdapterLog log) {
+        return new WsProgrammeUpdateBuilder(wsDataStore, seriesHandler, programmeHandler, log);
+    }
+    
+    public static class WsProgrammeUpdateBuilder {
+
+        private final WsDataStore wsDataStore;
+        private final WsSeriesHandler seriesHandler;
+        private final WsProgrammeHandler programmeHandler;
+        private final AdapterLog log;
+
+        public WsProgrammeUpdateBuilder(WsDataStore wsDataStore, WsSeriesHandler seriesHandler, WsProgrammeHandler programmeHandler, AdapterLog log) {
+            this.wsDataStore = wsDataStore;
+            this.seriesHandler = seriesHandler;
+            this.programmeHandler = programmeHandler;
+            this.log = log;
+        }
+        
+        public WsProgrammeUpdate updateLatest() {
+            return new WsProgrammeUpdate(wsDataStore, seriesHandler, programmeHandler, log, null);
+        }
+        
+        public WsProgrammeUpdate updateForDate(DateTime date) {
+            return new WsProgrammeUpdate(wsDataStore, seriesHandler, programmeHandler, log, date);
+        }
+        
+    }
+    
     private final WsDataStore wsDataStore;
     private final AdapterLog log;
     private final WsSeriesHandler seriesHandler;
     private final WsProgrammeHandler programmeHandler;
+    private final DateTime date;
 
-    public WsProgrammeUpdater(WsDataStore wsDataStore, WsSeriesHandler seriesHandler, WsProgrammeHandler programmeHandler, AdapterLog log) {
+    private WsProgrammeUpdate(WsDataStore wsDataStore, WsSeriesHandler seriesHandler, WsProgrammeHandler programmeHandler, AdapterLog log, DateTime date) {
         this.wsDataStore = wsDataStore;
         this.seriesHandler = seriesHandler;
         this.programmeHandler = programmeHandler;
         this.log = log;
+        this.date = date;
     }
 
     @Override
     protected void runTask() {
-        Maybe<WsData> latestData = wsDataStore.latestData();
+        log.record(infoEntry().withSource(getClass()).withDescription("%s data set update started", dataSetName()));
+        
+        Maybe<WsDataSet> latestData = date != null ? wsDataStore.dataForDay(date) : wsDataStore.latestData();
         
         if(latestData.isNothing()) {
             log.record(warnEntry().withDescription("Couldn't get WS data"));
             return;
         }
         
-        WsData data = latestData.requireValue();
+        WsDataSet data = latestData.requireValue();
         
         try {
             processSeries(data.getSeries());
             
+            //Creates a map from Item id to locations.
             Multimap<String, WsAudioItem> progIdAudioItem = processAudioProg(data.getAudioItem(), data.getAudioItemProgLink());
             
             if (progIdAudioItem != null) {
@@ -68,13 +106,20 @@ public class WsProgrammeUpdater extends ScheduledTask {
         }catch (Exception e) {
             log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("WS Updater failed"));
         }
+        
+        log.record(infoEntry().withSource(getClass()).withDescription("%s data set update finished", dataSetName()));
     }
 
-    private void processProgrammes(InputStream programme, final Multimap<String, WsAudioItem> progIdAudioItem) throws IOException {
-        
-        final Progress progress = new Progress("Programmes.xml");
+    private String dataSetName() {
+        return date == null ? "Latest" : date.toString("dd/MM/yyyy");
+    }
+
+    private void processProgrammes(WsDataSource programmes, final Multimap<String, WsAudioItem> progIdAudioItem) throws IOException {
         
         Builder builder = new Builder(new NodeFactory(){
+            
+            final Progress progress = new Progress(PROGRAMME.filename());
+            
             @Override
             public Nodes finishMakingElement(Element elem) {
                 if(elem.getLocalName().equals("row")) {
@@ -91,24 +136,16 @@ public class WsProgrammeUpdater extends ScheduledTask {
                 return super.finishMakingElement(elem);
             }
         });
-        
-        boolean swallow = true;
-        try {
-            builder.build(new InputStreamReader(programme, Charsets.ISO_8859_1));
-            swallow = false;
-        } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing WS Programme.xml"));
-        } finally {
-            Closeables.close(programme, swallow);
-        }
-        
+
+        buildFromInput(programmes, builder);
     }
 
-    private void processSeries(InputStream series) throws IOException {
-
-        final Progress progress = new Progress("Series.xml");
+    private void processSeries(WsDataSource seriesSource) throws IOException {
         
         Builder builder = new Builder(new NodeFactory() {
+            
+            final Progress progress = new Progress(SERIES.filename());
+            
             @Override
             public Nodes finishMakingElement(Element elem) {
                 if(elem.getLocalName().equals("row")) {
@@ -125,25 +162,48 @@ public class WsProgrammeUpdater extends ScheduledTask {
             }
         });
         
+        buildFromInput(seriesSource, builder);
+    }
+
+    private Multimap<String, WsAudioItem> processAudioProg(WsDataSource audioItem, WsDataSource audioItemProgLink) throws IOException {
         
-        boolean swallow = true;
-        try {
-            builder.build(new InputStreamReader(series, Charsets.ISO_8859_1));
-            swallow = false;
-        }catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing WS Series.xml"));
-        } finally {
-            Closeables.close(series, swallow);
+        final Map<String, String> audioIdToProgId = processAudioItemLinks(audioItemProgLink);
+        
+        if(audioIdToProgId == null) {
+            return null;
         }
         
-    }
-    
-
-    private Multimap<String, WsAudioItem> processAudioProg(InputStream audioItem, InputStream audioItemProgLink) throws IOException {
+        final Multimap<String, WsAudioItem> audioItemMap = LinkedListMultimap.create();
         
+        final Progress audioItemProgress = new Progress(AUDIO_ITEM.filename());
+        
+        Builder builder = new Builder(new NodeFactory(){
+            @Override
+            public Nodes finishMakingElement(Element elem) {
+                if(elem.getLocalName().equals("row")) {
+                    try {
+                        WsAudioItem audioItem = wsAudioItemFrom(elem);
+                        audioItemMap.put(audioIdToProgId.get(audioItem.getAudioItemId()), audioItem);
+                        audioItemProgress.addProcessed();
+                    } catch (Exception e) {
+                        log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing WS AudioItemProgLink.xml"));
+                        audioItemProgress.addFailed();
+                    }
+                    reportStatus(audioItemProgress.toString());
+                }
+                return super.finishMakingElement(elem);
+            }
+        });
+        
+        buildFromInput(audioItem, builder);
+        
+        return audioItemMap;
+    }
+
+    private Map<String, String> processAudioItemLinks(WsDataSource audioItemProgLink) throws IOException {
         final Map<String, String> audioIdToProgId= Maps.newHashMap();
         
-        final Progress linkProgress = new Progress("AudioItemProgLink.xml");
+        final Progress linkProgress = new Progress(AUDIO_ITEM_PROG_LINK.filename());
         
         Builder builder = new Builder(new NodeFactory() {
             @Override
@@ -162,53 +222,23 @@ public class WsProgrammeUpdater extends ScheduledTask {
                 return super.finishMakingElement(elem);
             }
         });
-        boolean swallow = true;
-        try {
-            builder.build(new InputStreamReader(audioItemProgLink, Charsets.ISO_8859_1));
-            swallow = false;
-        } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing WS AudioItemProgLink.xml"));
-            return null;
-        } finally {
-            Closeables.close(audioItemProgLink, swallow);
-        }
         
-        final Multimap<String, WsAudioItem> audioItemMap = LinkedListMultimap.create();
-        
-        final Progress audioItemProgress = new Progress("AudioItem.xml");
-        
-        builder = new Builder(new NodeFactory(){
-            @Override
-            public Nodes finishMakingElement(Element elem) {
-                if(elem.getLocalName().equals("row")) {
-                    try {
-                        WsAudioItem audioItem = wsAudioItemFrom(elem);
-                        audioItemMap.put(audioIdToProgId.get(audioItem.getAudioItemId()), audioItem);
-                        audioItemProgress.addProcessed();
-                    } catch (Exception e) {
-                        log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing WS AudioItemProgLink.xml"));
-                        audioItemProgress.addFailed();
-                    }
-                    reportStatus(audioItemProgress.toString());
-                }
-                return super.finishMakingElement(elem);
-            }
-        });
-        
-        swallow = true;
-        try {
-            builder.build(new InputStreamReader(audioItem, Charsets.ISO_8859_1));
-            swallow = false;
-        } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing WS AudioItem.xml"));
-            return null;
-        }finally {
-            Closeables.close(audioItem, swallow);
-        }
-        
-        return audioItemMap;
+        buildFromInput(audioItemProgLink, builder);
+
+        return audioIdToProgId;
     }
     
+    private void buildFromInput(WsDataSource source, Builder builder) throws IOException {
+        boolean swallow = true;
+        try {
+            builder.build(new InputStreamReader(source.data(), ISO_8859_1));
+            swallow = false;
+        }catch (Exception e) {
+            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing: %s", source.file()));
+        } finally {
+            Closeables.close(source, swallow);
+        }
+    }
     
     private WsProgramme wsProgrammeFrom(Element elem) {
         return wsProgrammeBuilder()
