@@ -1,3 +1,4 @@
+
 package org.atlasapi.equiv.update.tasks;
 
 import static org.atlasapi.persistence.content.ContentCategory.CONTAINER;
@@ -63,12 +64,15 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
         
         if(shouldContinue) {
             progressStore.storeProgress(schedulingKey, ContentListingProgress.START);
+            reportStatus(String.format("Processed %d", processed));
+            log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
         } else {
             if(content != null) {
                 progressStore.storeProgress(schedulingKey, progressFrom(content));
+                log.record(infoEntry().withSource(getClass()).withDescription("Stopped: %s at %s", schedulingKey, content.getCanonicalUri()));
+                reportStatus(String.format("Stopped. Processed %d", processed));
             }
         }
-        log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
     }
     
     public void updateEquivalence(Content content) {
