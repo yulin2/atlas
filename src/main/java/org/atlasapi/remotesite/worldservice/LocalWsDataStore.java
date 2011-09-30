@@ -79,6 +79,11 @@ public class LocalWsDataStore implements WsDataStore {
         }
 
         @Override
+        public String getName() {
+            return parent.getName();
+        }
+        
+        @Override
         public WsDataSource getAudioItem() {
             return getFileStream(AUDIO_ITEM);
         }

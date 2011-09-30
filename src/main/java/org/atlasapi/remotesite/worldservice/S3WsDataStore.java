@@ -20,6 +20,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.metabroadcast.common.base.Maybe;
@@ -47,23 +48,21 @@ public class S3WsDataStore implements WsDataStore {
 
     @Override
     public Maybe<WsDataSet> latestData() {
-        try {
-            RestS3Service service = new RestS3Service(creds);
-            return dataForPattern(service, listSortedObjects(service, ""), "\\d{8}");
-        } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Couldn't get latest WS data"));
-            return Maybe.nothing();
-        }
+        return dataSetForPrefixPattern("", "\\d{8}");
     }
-
+    
     @Override
     public Maybe<WsDataSet> dataForDay(DateTime day) {
+        String folder = dateFormat.print(day);
+        return dataSetForPrefixPattern(folder, folder);
+    }
+
+    private Maybe<WsDataSet> dataSetForPrefixPattern(String prefix, String pattern) {
         try {
-            String folder = dateFormat.print(day);
             RestS3Service service = new RestS3Service(creds);
-            return dataForPattern(service, listSortedObjects(service, folder), folder);
+            return dataForPattern(service, listSortedObjects(service, prefix), pattern);
         } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Couldn't get WS data for %s", day));
+            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error getting WS data"));
             return Maybe.nothing();
         }
     }
@@ -77,7 +76,11 @@ public class S3WsDataStore implements WsDataStore {
             return Maybe.nothing();
         }
 
-        return Maybe.<WsDataSet>just(new S3WsDataSet(service, matchedFileObjects));
+        return Maybe.<WsDataSet>just(new S3WsDataSet(service, getName(Iterables.getLast(matchedFileObjects.values())), matchedFileObjects));
+    }
+
+    private String getName(S3Object last) {
+        return last.getName().substring(0, 8);
     }
 
     public boolean complete(Map<WsDataFile, S3Object> mostRecent) {
@@ -149,9 +152,11 @@ public class S3WsDataStore implements WsDataStore {
 
         private final Map<WsDataFile, S3Object> fullObjects;
         private final S3Service service;
+        private final String setName;
 
-        public S3WsDataSet(S3Service service, Map<WsDataFile, S3Object> fullObjects) {
+        public S3WsDataSet(S3Service service, String setName, Map<WsDataFile, S3Object> fullObjects) {
             this.service = service;
+            this.setName = setName;
             this.fullObjects = fullObjects;
         }
         
@@ -191,6 +196,11 @@ public class S3WsDataStore implements WsDataStore {
         @Override
         public WsDataSource getSeries() {
             return inputStreamFor(WsDataFile.SERIES);
+        }
+
+        @Override
+        public String getName() {
+            return setName;
         }
         
     }
