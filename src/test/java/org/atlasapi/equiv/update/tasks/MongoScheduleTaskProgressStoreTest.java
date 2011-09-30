@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.update.tasks;
 
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentTable;
+import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 
 import com.metabroadcast.common.persistence.MongoTestHelper;
@@ -15,32 +15,26 @@ public class MongoScheduleTaskProgressStoreTest extends TestCase {
 
     public void testSavingProgress() {
 
-        PublisherListingProgress progress = new PublisherListingProgress(new ContentListingProgress("one", ContentTable.CHILD_ITEMS), Publisher.BBC);
-        progress.withCount(5).withTotal(6);
+        ContentListingProgress progress = new ContentListingProgress(ContentCategory.CHILD_ITEM, Publisher.BBC, "one");
         
         store.storeProgress(taskName, progress);
         
-        PublisherListingProgress restored = store.progressForTask(taskName);
+        ContentListingProgress restored = store.progressForTask(taskName);
         
         assertEquals(progress.getUri(), restored.getUri());
-        assertEquals(progress.getTable(), restored.getTable());
-        assertEquals(progress.count(), restored.count());
-        assertEquals(progress.total(), restored.total());
+        assertEquals(progress.getCategory(), restored.getCategory());
         assertEquals(progress.getPublisher(), restored.getPublisher());
         
-        progress = new PublisherListingProgress(new ContentListingProgress(null, null), null);
+        progress = new ContentListingProgress(null, null, null);
         
         store.storeProgress(taskName, progress);
         
         restored = store.progressForTask(taskName);
         
         assertEquals("start", restored.getUri());
-        assertEquals(progress.getTable(), restored.getTable());
-        assertEquals(progress.count(), restored.count());
-        assertEquals(progress.total(), restored.total());
+        assertEquals(progress.getCategory(), restored.getCategory());
         assertEquals(progress.getPublisher(), restored.getPublisher());
         
     }
-    
     
 }
