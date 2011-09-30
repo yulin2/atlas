@@ -88,11 +88,13 @@ public class WsProgrammeUpdate extends ScheduledTask {
         Maybe<WsDataSet> latestData = date != null ? wsDataStore.dataForDay(date) : wsDataStore.latestData();
         
         if(latestData.isNothing()) {
-            log.record(warnEntry().withDescription("Couldn't get WS data"));
+            log.record(warnEntry().withSource(getClass()).withDescription("Couldn't get %s WS data", dataSetName()));
             return;
         }
         
         WsDataSet data = latestData.requireValue();
+        
+        log.record(infoEntry().withSource(getClass()).withDescription("Got WS data set for %s", data.getName()));
         
         try {
             processSeries(data.getSeries());
