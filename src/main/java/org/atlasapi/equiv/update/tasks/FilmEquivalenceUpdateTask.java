@@ -3,6 +3,7 @@ package org.atlasapi.equiv.update.tasks;
 import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 import static org.atlasapi.persistence.content.listing.ContentListingProgress.progressFrom;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 
 import java.util.Iterator;
 
@@ -21,7 +22,7 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public class FilmEquivalenceUpdateTask extends ScheduledTask {
 
-    private static final String schedulingKey = "filmEquivalence";
+    private static final String schedulingKey = "film-equivalence";
     private final ContentLister contentLister;
     private final ContentEquivalenceUpdater<Film> rootUpdater;
     private final AdapterLog log;
@@ -43,16 +44,18 @@ public class FilmEquivalenceUpdateTask extends ScheduledTask {
         Iterator<Film> films = Iterators.filter(contentLister.listContent(criteria), Film.class);
         
         int processed = 0;
+        int failures = 0;
         boolean shouldContinue = shouldContinue();
         Film film = null;
         
         while (shouldContinue && films.hasNext()) {
             film = films.next();
-            reportStatus(String.format("Processed %d. Processing %s", processed, film.getCanonicalUri()));
+            reportStatus(String.format("Processed %d. %d failures. Processing %s", processed, failures, film.getCanonicalUri()));
             try {
                 rootUpdater.updateEquivalences(film);
             } catch (Exception e) {
                 log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+film.getCanonicalUri()));
+                failures++;
             }
             if(++processed % 100 == 0) {
                 progressStore.storeProgress(schedulingKey, progressFrom(film));
@@ -62,13 +65,15 @@ public class FilmEquivalenceUpdateTask extends ScheduledTask {
         
         if(shouldContinue) {
             progressStore.storeProgress(schedulingKey, ContentListingProgress.START);
+            reportStatus(String.format("Finshed. Processed %d. %d failures.", processed, failures));
+            log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
         } else {
             if(film != null) {
                 progressStore.storeProgress(schedulingKey, progressFrom(film));
+                log.record(infoEntry().withSource(getClass()).withDescription("Stopped: %s at %s", schedulingKey, film.getCanonicalUri()));
+                reportStatus(String.format("Stopped. Processed %d. %d failures.", processed, failures));
             }
         }
-
-        log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription(String.format("Finished film equivalence task")));
     }
 
     private String startProgress(ContentListingProgress progress) {

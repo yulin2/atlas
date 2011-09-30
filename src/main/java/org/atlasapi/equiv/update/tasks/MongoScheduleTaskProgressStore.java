@@ -40,6 +40,10 @@ public class MongoScheduleTaskProgressStore implements ScheduleTaskProgressStore
     private ContentListingProgress fromDbo(DBObject progress) {
         String lastId = TranslatorUtils.toString(progress, LAST_ID);
         
+        if(START.equals(lastId)) {
+            return ContentListingProgress.START;
+        }
+        
         String tableName = TranslatorUtils.toString(progress, CATEGORY);
         ContentCategory category = tableName == null ? null : ContentCategory.valueOf(tableName);
         
