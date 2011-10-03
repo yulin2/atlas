@@ -6,6 +6,7 @@ import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.joda.time.DateTime;
@@ -27,9 +28,12 @@ public class PaEmptyScheduleProcessor implements PaProgDataProcessor {
     }
 
     @Override
-    public void process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+    public ItemRefAndBroadcast process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         if (emptySlot(progData, channel, zone)) {
-            delegate.process(progData, channel, zone, updatedAt);
+            return delegate.process(progData, channel, zone, updatedAt);
+        }
+        else {
+        	return null;
         }
     }
     
