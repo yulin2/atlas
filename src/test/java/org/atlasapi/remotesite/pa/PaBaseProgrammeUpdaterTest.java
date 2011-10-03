@@ -1,6 +1,11 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
@@ -52,7 +57,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     }
 
     public void testShouldCreateCorrectPaData() throws Exception {
-        TestFileUpdater updater = new TestFileUpdater(programmeProcessor, log);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, log);
         updater.run();
         Identified content = null;
 
@@ -105,15 +110,56 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 //            assertEquals(crewMember.name(), ((Person) content).name());
 //        }
     }
-
+    
+    public void testGroupAndOrderFilesByDay() throws Exception {
+    	File file1 = new File(new URI("file:/data/pa/TV/201101010145_20110102_tvdata.xml"));
+    	File file2 = new File(new URI("file:/data/pa/TV/20110101_tvdata.xml"));
+    	File file3 = new File(new URI("file:/data/pa/TV/201101040130_20110101_tvdata.xml"));
+    	File file4 = new File(new URI("file:/data/pa/TV/201101050145_20110101_tvdata.xml"));
+    	File file5 = new File(new URI("file:/data/pa/TV/20110102_tvdata.xml"));
+    	File file6 = new File(new URI("file:/data/pa/TV/201101010200_20110102_tvdata.xml"));
+    	File file7 = new File(new URI("file:/data/pa/TV/20110103_tvdata.xml"));
+    	File file8 = new File(new URI("file:/data/pa/TV/201101011930_20110102_tvdata.xml"));
+    	
+    	List<File> files = new ArrayList<File>();
+    	files.add(file1);
+    	files.add(file2);
+    	files.add(file3);
+    	files.add(file4);
+    	files.add(file5);
+    	files.add(file6);
+    	files.add(file7);
+    	files.add(file8);
+    	
+    	PaSingleDateUpdater updater = new PaSingleDateUpdater(null, null, null, null);
+    	Set<Queue<File>> groupedFiles = updater.groupAndOrderFilesByDay(files);
+    	assertEquals(3, groupedFiles.size());
+    	
+    	for(Queue<File> filesForDay : groupedFiles) {
+	    	if(filesForDay.size() == 3) {
+		    	assertEquals("file:/data/pa/TV/20110101_tvdata.xml", filesForDay.remove().toURI().toString());
+		    	assertEquals("file:/data/pa/TV/201101040130_20110101_tvdata.xml", filesForDay.remove().toURI().toString());
+		    	assertEquals("file:/data/pa/TV/201101050145_20110101_tvdata.xml", filesForDay.remove().toURI().toString());
+	    	} else if(filesForDay.size() == 4) {
+	    		assertEquals("file:/data/pa/TV/20110102_tvdata.xml", filesForDay.remove().toURI().toString());
+		    	assertEquals("file:/data/pa/TV/201101010145_20110102_tvdata.xml", filesForDay.remove().toURI().toString());
+		    	assertEquals("file:/data/pa/TV/201101010200_20110102_tvdata.xml", filesForDay.remove().toURI().toString());
+		    	assertEquals("file:/data/pa/TV/201101011930_20110102_tvdata.xml", filesForDay.remove().toURI().toString());
+	    	} else if(filesForDay.size() == 1) {
+	    		assertEquals("file:/data/pa/TV/20110103_tvdata.xml", filesForDay.remove().toURI().toString());
+	    	} else throw new IllegalStateException("Wasn't expecting this many files for any day");
+    	}
+    	
+    }
+    
     private Item loadItemAtPosition(Brand brand, int index) {
         return (Item) resolver.findByCanonicalUris(ImmutableList.of(brand.getChildRefs().get(index).getUri())).getFirstValue().requireValue();
     }
 
-    static class TestFileUpdater extends PaBaseProgrammeUpdater {
+    static class TestPaProgrammeUpdater extends PaBaseProgrammeUpdater {
 
-        public TestFileUpdater(PaProgDataProcessor processor, AdapterLog log) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
+        public TestPaProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log) {
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, null, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
         }
 
         @Override
@@ -121,4 +167,5 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
             this.processFiles(ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())));
         }
     }
+   
 }
