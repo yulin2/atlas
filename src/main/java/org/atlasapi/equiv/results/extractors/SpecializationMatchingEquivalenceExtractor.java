@@ -20,7 +20,7 @@ public class SpecializationMatchingEquivalenceExtractor<T extends Content> exten
                 T equivalent = input.equivalent();
                 boolean passes = (equivalent.getSpecialization() == null || target.getSpecialization() == null || Objects.equal(equivalent.getSpecialization(), target.getSpecialization()));
                 if(!passes) {
-                    desc.appendText("%s removed. %s != %s", equivalent.getSpecialization(), target.getSpecialization());
+                    desc.appendText("%s removed. %s != %s", input.equivalent().getCanonicalUri(), equivalent.getSpecialization(), target.getSpecialization());
                 }
                 return passes; 
             }
