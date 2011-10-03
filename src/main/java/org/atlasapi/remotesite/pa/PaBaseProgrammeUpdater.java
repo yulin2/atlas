@@ -99,13 +99,13 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     protected void processFiles(Iterable<File> files) {
     	
         try {
-
         	// Files for different days can be processed in parallel. However, files for a given
         	// day must be processed sequentially, the full file followed by its deltas, in order. 
         	// Therefore we produce a list of lists of files,
         	// one per day, and we can process the head of each list in parallel.
         	
         	Set<Queue<File>> groupedFiles = groupAndOrderFilesByDay(files);
+
         	boolean finished = false;
         	int filesProcessed = 0;
         	while (shouldContinue() && !finished) {
@@ -145,6 +145,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		reader.setContentHandler(unmarshaller.getUnmarshallerHandler());
 		
 		List<Future<Integer>> submitted = Lists.newArrayList();
+
 		for (File file : files) {
 		    if(!shouldContinue()) {
 		        break;
