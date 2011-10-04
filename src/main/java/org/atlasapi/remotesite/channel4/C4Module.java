@@ -64,11 +64,11 @@ public class C4Module {
     }
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, contentWriter, log);
+	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter(), log);
         return new C4EpgUpdater(
                 c4EpgAtomClient(), 
-                new C4EpgEntryProcessor(lastUpdatedCheckingContentWriter(), contentResolver, c4BrandFetcher(), log), 
-                new C4EpgBrandlessEntryProcessor(lastUpdatedCheckingContentWriter(), contentResolver, c4BrandFetcher(), log), 
+                new C4EpgEntryProcessor(lastUpdatedSettingContentWriter(), contentResolver, c4BrandFetcher(), log), 
+                new C4EpgBrandlessEntryProcessor(lastUpdatedSettingContentWriter(), contentResolver, c4BrandFetcher(), log), 
                 trimmer,
                 log,
                 new DayRangeGenerator().withLookAhead(7).withLookBack(7));
@@ -91,10 +91,11 @@ public class C4Module {
 	}
 
 	protected /*@Bean*/ C4AtomBackedBrandUpdater c4BrandFetcher() {
-		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, new LastUpdatedSettingContentWriter(contentResolver, lastUpdatedCheckingContentWriter()), log);
+		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter(), log);
 	}
 	
-	private ContentWriter lastUpdatedCheckingContentWriter() {
-	    return new LastUpdatedCheckingContentWriter(log, contentWriter);
+	@Bean public ContentWriter lastUpdatedSettingContentWriter() {
+		return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
 	}
+	
 }

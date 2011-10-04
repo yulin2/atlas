@@ -8,7 +8,6 @@ import org.atlasapi.search.model.SearchResultsError;
 
 import com.google.common.base.Joiner;
 import com.google.gson.Gson;
-import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.http.SimpleHttpClient;
@@ -28,16 +27,21 @@ public class RemoteFuzzySearcher implements ContentSearcher {
 
     @Override
     public SearchResults search(SearchQuery query) {
+        String queryString = remoteHost + String.format("/titles?title=%s&%s&publishers=%s&titleWeighting=%s&broadcastWeighting=%s&catchupWeighting=%s",
+                    UrlEncoding.encode(query.getTerm()), 
+                    query.getSelection().asQueryParameters(), 
+                    CSV.join(query.getIncludedPublishers()), 
+                    query.getTitleWeighting(), 
+                    query.getBroadcastWeighting(), 
+                    query.getCatchupWeighting());
         try {
-            HttpResponse response = client.get(remoteHost + "/titles?title=" + UrlEncoding.encode(query.getTerm()) + "&" + query.getSelection().asQueryParameters() + "&publishers="
-                    + CSV.join(query.getIncludedPublishers()) + "&titleWeighting=" + query.getTitleWeighting() + "&broadcastWeighting=" + query.getBroadcastWeighting() + "&catchupWeighting="
-                    + query.getCatchupWeighting());
+            HttpResponse response = client.get(queryString);
             if (HttpStatusCode.OK.is(response.statusCode())) {
                 return gson.fromJson(response.body(), SearchResults.class);
             }
             throw new RemoteFuzzySearcherException(gson.fromJson(response.body(), SearchResultsError.class));
-        } catch (HttpException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException("Query: " + queryString, e);
         }
     }
 
