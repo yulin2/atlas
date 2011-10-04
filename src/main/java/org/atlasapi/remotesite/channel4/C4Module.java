@@ -26,6 +26,7 @@ import org.atlasapi.remotesite.support.atom.AtomClient;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,8 +50,8 @@ public class C4Module {
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
 
-	private @Autowired ContentResolver contentResolver;
-	private @Autowired ContentWriter contentWriter;
+	private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
+	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
 	private @Autowired AdapterLog log;
 	private @Autowired ScheduleResolver scheduleResolver;
 	
@@ -98,12 +99,11 @@ public class C4Module {
 	    return new RequestLimitingRemoteSiteClient<Feed>(new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient()), 4);
 	}
 
-	protected /*@Bean*/ C4AtomBackedBrandUpdater c4BrandFetcher() {
+	protected @Bean C4AtomBackedBrandUpdater c4BrandFetcher() {
 		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter(), log);
 	}
-	
-	@Bean public ContentWriter lastUpdatedSettingContentWriter() {
-		return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
-	}
-	
+	   
+    @Bean protected LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
+        return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
+    }
 }
