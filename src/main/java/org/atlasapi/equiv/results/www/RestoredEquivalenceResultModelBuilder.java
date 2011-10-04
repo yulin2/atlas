@@ -11,7 +11,6 @@ import org.atlasapi.equiv.results.probe.EquivalenceResultProbe;
 import org.eclipse.jetty.util.UrlEncoded;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.model.SimpleModel;

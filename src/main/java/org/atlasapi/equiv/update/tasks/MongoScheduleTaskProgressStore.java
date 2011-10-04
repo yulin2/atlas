@@ -7,7 +7,7 @@ import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.UPSERT;
 
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentTable;
+import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -19,12 +19,11 @@ import com.mongodb.DBObject;
 public class MongoScheduleTaskProgressStore implements ScheduleTaskProgressStore {
     
     private static final String SCHEDULING_COLLECTION_NAME = "scheduling";
-    private static final String COUNT = "count";
-    private static final String TOTAL = "total";
+    
     private static final String START = "start";
     private static final String PUBLISHER = "publisher";
     private static final String LAST_ID = "lastId";
-    private static final String COLLECTION = "collection";
+    private static final String CATEGORY = "category";
     
     private final DBCollection collection;
 
@@ -33,35 +32,35 @@ public class MongoScheduleTaskProgressStore implements ScheduleTaskProgressStore
     }
 
     @Override
-    public PublisherListingProgress progressForTask(String taskName) {
+    public ContentListingProgress progressForTask(String taskName) {
         DBObject existing = collection.findOne(taskName);
-        return existing != null ? fromDbo(existing) : new PublisherListingProgress(ContentListingProgress.START, null);
+        return existing != null ? fromDbo(existing) : ContentListingProgress.START;
     }
 
-    private PublisherListingProgress fromDbo(DBObject progress) {
+    private ContentListingProgress fromDbo(DBObject progress) {
         String lastId = TranslatorUtils.toString(progress, LAST_ID);
-        String tableName = TranslatorUtils.toString(progress, COLLECTION);
-        ContentTable table = tableName == null ? null : ContentTable.fromString(tableName);
+        
+        if(START.equals(lastId)) {
+            return ContentListingProgress.START;
+        }
+        
+        String tableName = TranslatorUtils.toString(progress, CATEGORY);
+        ContentCategory category = tableName == null ? null : ContentCategory.valueOf(tableName);
         
         String pubKey = TranslatorUtils.toString(progress, PUBLISHER);
         Publisher publisher = pubKey == null ? null : Publisher.fromKey(pubKey).valueOrNull();
         
-        return (PublisherListingProgress) new PublisherListingProgress(lastId, table, publisher)
-                .withCount(TranslatorUtils.toInteger(progress, COUNT))
-                .withTotal(TranslatorUtils.toInteger(progress, TOTAL));
+        return new ContentListingProgress(category, publisher, lastId);
     }
 
     @Override
-    public void storeProgress(String taskName, PublisherListingProgress progress) {
-        MongoUpdateBuilder update = update()
-            .setField(LAST_ID, progress.getUri() == null ? START : progress.getUri())
-            .setField(TOTAL, progress.total())
-            .setField(COUNT, progress.count());
+    public void storeProgress(String taskName, ContentListingProgress progress) {
+        MongoUpdateBuilder update = update().setField(LAST_ID, progress.getUri() == null ? START : progress.getUri());
         
-        if(progress.getTable() != null) {
-            update.setField(COLLECTION, progress.getTable().toString());
+        if(progress.getCategory() != null) {
+            update.setField(CATEGORY, progress.getCategory().toString());
         } else {
-            update.unsetField(COLLECTION);
+            update.unsetField(CATEGORY);
         }
         
         if(progress.getPublisher() != null) {

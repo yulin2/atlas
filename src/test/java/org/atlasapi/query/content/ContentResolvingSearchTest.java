@@ -53,7 +53,7 @@ public class ContentResolvingSearchTest extends MockObjectTestCase {
         List<Identified> content = searcher.search(query, ApplicationConfiguration.DEFAULT_CONFIGURATION);
         assertFalse(content.isEmpty());
         Brand result = (Brand) Iterables.getOnlyElement(content);
-        assertTrue(result.getChildRefs().isEmpty());
+        assertFalse(result.getChildRefs().isEmpty());
         assertTrue(result.getClips().isEmpty());
     }
 }

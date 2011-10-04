@@ -77,6 +77,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 				                            "<clips/>" +
 				                            "<play:genres/>" +
 				                            "<play:sameAs/>" +
+				                            "<scheduleOnly>false</scheduleOnly>"  +
 				                            "<play:tags/>" +
                                				"<title>Blue Peter</title>" +
                                				"<play:broadcasts>" +
@@ -105,7 +106,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
 		Playlist list = new Playlist();
 
-		list.add(ContentIdentifier.identifierFrom("http://www.bbc.co.uk/bluepeter", "Item"));
+		list.add(ContentIdentifier.identifierFrom("http://www.bbc.co.uk/bluepeter", "item"));
 		
 		ContentQueryResult result = new ContentQueryResult();
 		result.setContents(ImmutableList.<Description>of(list));
@@ -115,8 +116,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 
 		assertThat(response.getResponseAsString(), containsString("<play:item>" +
+                                            		        "<type>item</type>" +
 															"<uri>http://www.bbc.co.uk/bluepeter</uri>" +
-															"<type>Item</type>" +
 													  "</play:item>"));
 	}
 }

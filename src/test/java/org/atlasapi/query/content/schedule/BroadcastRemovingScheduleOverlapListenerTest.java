@@ -12,7 +12,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.joda.time.DateTime;
@@ -46,9 +45,8 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
         
         db = MongoTestHelper.anEmptyTestDatabase();
         MongoLookupEntryStore lookupWriter = new MongoLookupEntryStore(db);
-        MongoContentTables tables = new MongoContentTables(db);
         writer = new MongoContentWriter(db, lookupWriter , new SystemClock());
-        resolver = new LookupResolvingContentResolver(new MongoContentResolver(tables), lookupWriter);
+        resolver = new LookupResolvingContentResolver(new MongoContentResolver(db), lookupWriter);
         
         Version version = new Version();
         version.addBroadcast(broadcast1);
