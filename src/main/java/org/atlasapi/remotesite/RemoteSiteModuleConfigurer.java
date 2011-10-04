@@ -14,6 +14,7 @@ import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.itv.interlinking.ItvInterlinkingModule;
 import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
+import org.atlasapi.remotesite.redux.ReduxModule;
 import org.atlasapi.remotesite.seesaw.SeesawModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
@@ -45,6 +46,7 @@ public class RemoteSiteModuleConfigurer {
         .put("preview", PreviewNetworksModule.class)
         .put("itvinterlinking", ItvInterlinkingModule.class)
         .put("worldservice", WorldServicesModule.class)
+        .put("redux", ReduxModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
