@@ -41,6 +41,7 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -170,6 +171,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Brand brand = possiblePrevious.hasValue() ? (Brand) possiblePrevious.requireValue() : new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         
         brand.setTitle(progData.getTitle());
+        brand.setDescription(progData.getSeriesSynopsis());
         brand.setSpecialization(specialization(progData, channel));
         setGenres(progData, brand);
 
@@ -324,8 +326,15 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         addBroadcast(version, broadcast);
     }
 
+    public static Function<Category, String> TO_GENRE_URIS = new Function<Category, String>() {
+        @Override
+        public String apply(Category from) {
+            return "http://pressassociation.com/genres/" + from.getCategoryCode();
+        }
+    };
+    
     private void setGenres(ProgData progData, Content content) {
-        Set<String> extractedGenres = genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), Category.TO_GENRE_URIS)));
+        Set<String> extractedGenres = genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), TO_GENRE_URIS)));
         extractedGenres.remove("http://pressassociation.com/genres/BE00");
         if(!extractedGenres.isEmpty()) {
             content.setGenres(extractedGenres);
