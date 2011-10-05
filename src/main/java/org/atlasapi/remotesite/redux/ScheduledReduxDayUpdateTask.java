@@ -66,7 +66,7 @@ public class ScheduledReduxDayUpdateTask extends ScheduledTask {
                 Future<UpdateProgress> result = completer.poll(5, TimeUnit.SECONDS);
                 if(result != null) {
                     i++;
-                    progress = progress.add(process(result));
+                    progress = progress.reduce(process(result));
                     reportStatus(String.format("Processed %s/%s tasks. %s", i, submitted.size(), progress));
                 }
             } catch (InterruptedException e) {

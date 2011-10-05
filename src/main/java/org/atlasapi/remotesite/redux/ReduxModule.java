@@ -41,6 +41,7 @@ public class ReduxModule {
     @PostConstruct
     public void scheduleTasks() {
         taskScheduler.schedule(new ScheduledReduxDayUpdateTask(reduxClient(), reduxProgrammeHandler(), log).withName("Redux Day"), RepetitionRules.NEVER);
+        taskScheduler.schedule(new ReduxLatestUpdateTasks.MaximumReduxLatestUpdateTask(1000, reduxClient(), reduxProgrammeHandler(), log).withName("Redux Latest updater"), RepetitionRules.NEVER);
     }
     
     public @Bean ReduxUpdateController updateController() {
