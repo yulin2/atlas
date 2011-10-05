@@ -1,23 +1,28 @@
 package org.atlasapi.remotesite.redux;
 
-public class UpdateProgress {
-
+public final class UpdateProgress implements Reducible<UpdateProgress>{
+    
+    public static final UpdateProgress START = new UpdateProgress(0,0);
+    public static final UpdateProgress SUCCESS = new UpdateProgress(1, 0);
+    public static final UpdateProgress FAILURE = new UpdateProgress(0, 1);
+    
     private final int processed;
     private final int failures;
     
-    public static final UpdateProgress START = new UpdateProgress(0,0);
 
     public UpdateProgress(int processed, int failures) {
         this.processed = processed;
         this.failures = failures;
     }
     
-    public UpdateProgress add(UpdateProgress update) {
-        if(update == null || START.equals(update)) {
+    @Override
+    public UpdateProgress reduce(UpdateProgress other) {
+        if(other == null || START.equals(other)) {
             return this;
         }
-        return new UpdateProgress(processed + update.processed, failures + update.failures);
+        return new UpdateProgress(processed + other.processed, failures + other.failures);
     }
+    
 
     public int getFailures() {
         return failures;
