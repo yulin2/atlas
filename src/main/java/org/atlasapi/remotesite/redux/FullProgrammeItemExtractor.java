@@ -36,7 +36,7 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
     private static final DateTimeFormatter ISO_FORMAT = ISODateTimeFormat.dateTimeNoMillis();
     private static final String IMAGE_SUFFIX = "image-640.jpg";
     private static final String THUMBNAIL_SUFFIX = "image-74.jpg";
-    private static final String CANONICAL_URI_BASE = "http://g.bbcredux.com";
+    public static final String CANONICAL_URI_BASE = "http://g.bbcredux.com";
     private static final String CURIE_BASE = "redux:";
     private static final String LOCATION_URI_FORMAT = "http://devapi.bbcredux.com/programme/%s/media/%s";
     

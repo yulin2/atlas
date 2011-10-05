@@ -8,12 +8,6 @@ public class PaginatedBaseProgrammes {
     private int last;
     private List<BaseReduxProgramme> results;
     
-    public PaginatedBaseProgrammes(List<BaseReduxProgramme> results, int first, int last) {
-        this.results = results;
-        this.first = first;
-        this.last = last;
-    }
-    
     public int getFirst() {
         return first;
     }
