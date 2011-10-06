@@ -74,9 +74,28 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     }
 
     public double match(String subjectTitle, String equivalentTitle) {
-        double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
-        double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
-        return commonPrefix / (subjectTitle.length() / 1.0) - difference;
+        if(subjectTitle.length() <= equivalentTitle.length()) {
+            return matchTitles(subjectTitle, equivalentTitle);
+        } else {
+            return matchTitles(equivalentTitle, subjectTitle);
+        }
+    }
+
+    private double matchTitles(String shorter, String longer) {
+        int commonPrefix = commonPrefixLength(shorter, longer);
+        
+        if(commonPrefix == 0) {
+            return 0.0;
+        }
+        if(commonPrefix == longer.length()) {
+            return 1.0;
+        }
+        
+        int difference = longer.length() - commonPrefix;
+
+        double scaler = - 0.1 / Math.max(shorter.length()-1,1);
+
+        return Math.max((difference - 1) * scaler + 0.1, 0);
     }
     
     private String removeThe(String title) {
@@ -90,7 +109,7 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
         return title.replaceAll("[^\\d\\w]", "").toLowerCase();
     }
 
-    private double commonPrefixLength(String t1, String t2) {
+    private int commonPrefixLength(String t1, String t2) {
         int i = 0;
         for (; i < Math.min(t1.length(), t2.length()) && t1.charAt(i) == t2.charAt(i); i++) {
         }
