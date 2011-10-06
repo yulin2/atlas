@@ -37,47 +37,56 @@ public class FilmEquivalenceUpdateTask extends ScheduledTask {
     
     @Override
     protected void runTask() {
-        ContentListingProgress currentProgress = progressStore.progressForTask(schedulingKey);
-        log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription("Start equivalence task from %s", startProgress(currentProgress)));
-        
-        ContentListingCriteria criteria = defaultCriteria().forContent(TOP_LEVEL_ITEM).forPublisher(Publisher.PA).startingAt(currentProgress).build();
-        Iterator<Film> films = Iterators.filter(contentLister.listContent(criteria), Film.class);
-        
-        int processed = 0;
-        int failures = 0;
-        boolean shouldContinue = shouldContinue();
-        Film film = null;
-        
-        while (shouldContinue && films.hasNext()) {
-            film = films.next();
-            reportStatus(String.format("Processed %d. %d failures. Processing %s", processed, failures, film.getCanonicalUri()));
-            try {
-                rootUpdater.updateEquivalences(film);
-            } catch (Exception e) {
-                log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+film.getCanonicalUri()));
-                failures++;
+        try {
+            ContentListingProgress currentProgress = progressStore.progressForTask(schedulingKey);
+            log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription("Start equivalence task from %s", startProgress(currentProgress)));
+            
+            ContentListingCriteria criteria = defaultCriteria().forContent(TOP_LEVEL_ITEM).forPublisher(Publisher.PA).startingAt(currentProgress).build();
+            Iterator<Film> films = Iterators.filter(contentLister.listContent(criteria), Film.class);
+            
+            int processed = 0;
+            int failures = 0;
+            boolean shouldContinue = shouldContinue();
+            Film film = null;
+            
+            while (shouldContinue && films.hasNext()) {
+                try {
+                    film = films.next();
+                    reportStatus(String.format("Processed %d. %d failures. Processing %s", processed, failures, film.getCanonicalUri()));
+                    
+                    rootUpdater.updateEquivalences(film);
+                    
+                    if (++processed % 100 == 0) {
+                        progressStore.storeProgress(schedulingKey, progressFrom(film));
+                    }
+                    shouldContinue = shouldContinue();
+                } catch (Exception e) {
+                    log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+film.getCanonicalUri()));
+                    failures++;
+                }
             }
-            if(++processed % 100 == 0) {
-                progressStore.storeProgress(schedulingKey, progressFrom(film));
+            
+            if(shouldContinue) {
+                progressStore.storeProgress(schedulingKey, ContentListingProgress.START);
+                reportStatus(String.format("Finshed. Processed %d. %d failures.", processed, failures));
+                log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
+            } else {
+                if(film != null) {
+                    progressStore.storeProgress(schedulingKey, progressFrom(film));
+                    log.record(infoEntry().withSource(getClass()).withDescription("Stopped: %s at %s", schedulingKey, film.getCanonicalUri()));
+                    reportStatus(String.format("Stopped. Processed %d. %d failures.", processed, failures));
+                }
             }
-            shouldContinue = shouldContinue();
-        }
-        
-        if(shouldContinue) {
-            progressStore.storeProgress(schedulingKey, ContentListingProgress.START);
-            reportStatus(String.format("Finshed. Processed %d. %d failures.", processed, failures));
-            log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
-        } else {
-            if(film != null) {
-                progressStore.storeProgress(schedulingKey, progressFrom(film));
-                log.record(infoEntry().withSource(getClass()).withDescription("Stopped: %s at %s", schedulingKey, film.getCanonicalUri()));
-                reportStatus(String.format("Stopped. Processed %d. %d failures.", processed, failures));
-            }
+        } catch (Exception e) {
+            log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception running task " + schedulingKey));
         }
     }
 
     private String startProgress(ContentListingProgress progress) {
-        return progress == null ? "start" : String.format("%s %s %s", progress.getCategory(), progress.getPublisher(), progress.getUri());
+        if (progress == null || ContentListingProgress.START.equals(progress)) {
+            return "start";
+        }
+        return String.format("%s %s %s", progress.getCategory(), progress.getPublisher(), progress.getUri());
     }
 
 }
