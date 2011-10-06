@@ -49,6 +49,7 @@ public class RemoteSiteModuleConfigurer {
         .put("worldservice", WorldServicesModule.class)
         .put("lakeview", LakeviewModule.class)
         .put("redux", ReduxModule.class)
+        .put("lakeview", LakeviewModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
