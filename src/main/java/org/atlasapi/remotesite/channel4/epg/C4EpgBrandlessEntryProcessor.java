@@ -95,8 +95,16 @@ public class C4EpgBrandlessEntryProcessor {
     private ItemRefAndBroadcast episodeFrom(C4EpgEntry entry, String synthBrandName, Channel channel, Brand brand, DateTime now) {
         
         String slotId = entry.slotId();
-        Episode episode = new Episode(episodeUriFrom(entry), "c4:"+synthBrandName +"-"+slotId, C4);
-        episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
+        Maybe<Identified> possibleEpisode = contentStore.findByCanonicalUris(ImmutableList.of(synthesizedEpisodeUriFrom(entry))).get(synthesizedEpisodeUriFrom(entry));
+        
+        Episode episode = null;
+        if(possibleEpisode.hasValue()) {
+            episode = new Episode(synthesizedEpisodeUriFrom(entry), "c4:"+synthBrandName +"-"+slotId, C4);
+            episode.addAlias(SYNTH_TAG_BASE+synthBrandName+"/"+slotId);
+        } else {
+            episode = new Episode(synthesizedBrandlessEpisodeUriFrom(entry), "c4:"+slotId, C4);
+            episode.addAlias(SYNTH_TAG_BASE+slotId);
+        }
 
         boolean changed = false;
         
@@ -121,8 +129,12 @@ public class C4EpgBrandlessEntryProcessor {
         return new ItemRefAndBroadcast(episode, broadcast);
     }
 
-    public static String episodeUriFrom(C4EpgEntry entry) {
+    @Deprecated
+    private static String synthesizedEpisodeUriFrom(C4EpgEntry entry) {
         return SYNTH_PROGRAMME_BASE + brandNameFrom(entry) + "/" + entry.slotId();
+    }
+    private static String synthesizedBrandlessEpisodeUriFrom(C4EpgEntry entry) {
+        return SYNTH_PROGRAMME_BASE + entry.slotId();
     }
 
     /**
