@@ -83,6 +83,7 @@ public class C4EpgUpdater extends ScheduledTask {
                     List<C4EpgEntry> entries = getEntries(scheduleDocument);
                     List<ItemRefAndBroadcast> processedItems = process(entries, channelEntry.getValue());
                     trim(scheduleDay, channelEntry.getValue(), processedItems);
+                    broadcasts += processedItems.size();
                 } catch (Exception e) {
                     log.record(new AdapterLogEntry(ERROR).withCause(e).withSource(getClass()).withDescription("Exception updating from " + uri));
                     failures++;
