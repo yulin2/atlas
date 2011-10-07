@@ -118,7 +118,8 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
     private boolean equal(Broadcast prevBroadcast, Broadcast broadcast) {
         return Objects.equal(prevBroadcast.getTransmissionTime().toDateTime(DateTimeZone.UTC),broadcast.getTransmissionTime().toDateTime(DateTimeZone.UTC))
             && Objects.equal(prevBroadcast.getTransmissionEndTime().toDateTime(DateTimeZone.UTC), broadcast.getTransmissionEndTime().toDateTime(DateTimeZone.UTC))
-            && Objects.equal(prevBroadcast.getBroadcastDuration(), broadcast.getBroadcastDuration());
+            && Objects.equal(prevBroadcast.getBroadcastDuration(), broadcast.getBroadcastDuration())
+            && Objects.equal(prevBroadcast.isActivelyPublished(), broadcast.isActivelyPublished());
     }
 
     private ImmutableMap<String, Broadcast> previousBroadcasts(Set<Version> prevVersions) {
