@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.worldservice;
 
 import static org.atlasapi.remotesite.worldservice.WsProgrammeUpdate.worldServiceBuilder;
 
+import java.io.File;
+
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
@@ -28,9 +30,10 @@ public class WorldServicesModule {
     private @Value("${s3.access}") String s3access;
     private @Value("${s3.secret}") String s3secret;
     private @Value("${s3.worldservice.bucket}") String s3bucket;
+    private @Value("${worldservice.filesPath}") String wsFile;
     
     @Bean public WsDataStore wsDataStore() {
-        return new S3WsDataStore(new AWSCredentials(s3access, s3secret), s3bucket, log);
+        return new GzipWsDataStore(new CopyingWsDataStore(new S3WsDataStore(new AWSCredentials(s3access, s3secret), s3bucket, log), new LocalWsDataStore(new File(wsFile)), log)) ;
     }
 
     @Bean protected WsProgrammeUpdateBuilder worldServiceUpdateBuilder() {
