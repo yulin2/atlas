@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
@@ -46,13 +47,16 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
     public void createOrUpdate(Item item) {
         Maybe<Identified> previously = resolver.findByCanonicalUris(ImmutableList.of(item.getCanonicalUri())).get(item.getCanonicalUri());
         
+        DateTime now = clock.now();
         if(previously.hasValue() && previously.requireValue() instanceof Item) {
             Item prevItem = (Item) previously.requireValue();
-            DateTime now = clock.now();
             if(!equal(prevItem, item)){
                 item.setLastUpdated(now);
             }
             setUpdatedVersions(prevItem.getVersions(), item.getVersions(), now);
+        }
+        else {
+        	setUpdatedVersions(Sets.<Version>newHashSet(), item.getVersions(), now);
         }
         
         if(item.getLastUpdated() == null) {
