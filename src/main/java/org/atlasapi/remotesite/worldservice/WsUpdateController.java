@@ -15,12 +15,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.metabroadcast.common.time.DateTimeZones;
+
 @Controller
 public class WsUpdateController {
 
     private final WsProgrammeUpdateBuilder updateBuilder;
     private final ExecutorService executor;
-    private final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyyMMdd");
+    private final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyyMMdd").withZone(DateTimeZones.UTC);
 
     public WsUpdateController(WsProgrammeUpdateBuilder updateBuilder) {
         this.updateBuilder = updateBuilder;

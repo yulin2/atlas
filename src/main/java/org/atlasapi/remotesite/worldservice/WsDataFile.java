@@ -9,11 +9,11 @@ import com.metabroadcast.common.base.Maybe;
 
 public enum WsDataFile {
 
-    AUDIO_ITEM("AudioItem.xml"),
-    AUDIO_ITEM_PROG_LINK("AudioItemProgLink.xml"),
-    GENRE("Genre.xml"),
-    PROGRAMME("Programme.xml"),
-    SERIES("Series.xml");
+    AUDIO_ITEM("AudioItem"),
+    AUDIO_ITEM_PROG_LINK("AudioItemProgLink"),
+    GENRE("Genre"),
+    PROGRAMME("Programme"),
+    SERIES("Series");
  
     private final String filename;
 
@@ -21,8 +21,8 @@ public enum WsDataFile {
         this.filename = filename;
     }
     
-    public String filename() {
-        return filename;
+    public String filename(String suffix) {
+        return filename + suffix;
     }
     
     @Override

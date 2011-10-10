@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.zip.GZIPInputStream;
 
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.jets3t.service.S3Service;
@@ -24,6 +23,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class S3WsDataStore implements WsDataStore {
     
@@ -37,7 +37,7 @@ public class S3WsDataStore implements WsDataStore {
             return o1.getName().compareTo(o2.getName());
         }
     });
-    public static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyyMMdd");
+    public static final DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyyMMdd").withZone(DateTimeZones.UTC);
     
 
     public S3WsDataStore(AWSCredentials credentials, String bucketname, AdapterLog log) {
@@ -109,7 +109,7 @@ public class S3WsDataStore implements WsDataStore {
         Map<String, WsDataFile> patterns = Maps.uniqueIndex(ImmutableList.copyOf(WsDataFile.values()).reverse(), new Function<WsDataFile, String>() {
             @Override
             public String apply(WsDataFile input) {
-                return String.format("%s/%s.gz", pattern, input.filename());
+                return String.format("%s/%s", pattern, input.filename(".xml.gz"));
             }
         });
         return patterns;
@@ -137,7 +137,7 @@ public class S3WsDataStore implements WsDataStore {
         private S3Object object;
 
         public S3WsDataSource(WsDataFile file, S3Object s3Object) throws Exception {
-            super(file, new GZIPInputStream(s3Object.getDataInputStream()));
+            super(file, s3Object.getDataInputStream());
             this.object = s3Object;
         }
 
@@ -159,48 +159,24 @@ public class S3WsDataStore implements WsDataStore {
             this.setName = setName;
             this.fullObjects = fullObjects;
         }
-        
-        public WsDataSource inputStreamFor(WsDataFile file) {
-            try {
-                return new S3WsDataSource(file, getFullObject(fullObjects.get(file)));
-            } catch (Exception e) {
-                log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Couldn't get full object for %s", file.filename()));
-                return null;
-            }
-        }
 
         private S3Object getFullObject(S3Object s3Object) throws S3ServiceException {
             return service.getObject(s3Object.getBucketName(), s3Object.getKey());
         }
 
         @Override
-        public WsDataSource getAudioItem() {
-            return inputStreamFor(WsDataFile.AUDIO_ITEM);
+        public WsDataSource getDataForFile(WsDataFile file) {
+            try {
+                return new S3WsDataSource(file, getFullObject(fullObjects.get(file)));
+            } catch (Exception e) {
+                log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Couldn't get full object for %s", file.filename("")));
+                return null;
+            }
         }
 
         @Override
-        public WsDataSource getAudioItemProgLink() {
-            return inputStreamFor(WsDataFile.AUDIO_ITEM_PROG_LINK);
-        }
-
-        @Override
-        public WsDataSource getGenre() {
-            return inputStreamFor(WsDataFile.GENRE);
-        }
-
-        @Override
-        public WsDataSource getProgramme() {
-            return inputStreamFor(WsDataFile.PROGRAMME);
-        }
-
-        @Override
-        public WsDataSource getSeries() {
-            return inputStreamFor(WsDataFile.SERIES);
-        }
-
-        @Override
-        public String getName() {
-            return setName;
+        public DateTime getVersion() {
+            return dateFormat.parseDateTime(setName);
         }
         
     }
