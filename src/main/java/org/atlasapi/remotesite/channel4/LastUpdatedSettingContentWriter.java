@@ -55,8 +55,7 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
             }
             setUpdatedVersions(prevItem.getVersions(), item.getVersions(), now);
         }
-        else
-        {
+        else {
         	setUpdatedVersions(Sets.<Version>newHashSet(), item.getVersions(), now);
         }
         
