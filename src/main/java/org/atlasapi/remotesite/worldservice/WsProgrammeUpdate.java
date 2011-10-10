@@ -94,16 +94,16 @@ public class WsProgrammeUpdate extends ScheduledTask {
         
         WsDataSet data = latestData.requireValue();
         
-        log.record(infoEntry().withSource(getClass()).withDescription("Got WS data set for %s", data.getName()));
+        log.record(infoEntry().withSource(getClass()).withDescription("Got WS data set for %s", data.getVersion().toString("yyyyMMdd")));
         
         try {
-            processSeries(data.getSeries());
+            processSeries(data.getDataForFile(WsDataFile.SERIES));
             
             //Creates a map from Item id to locations.
-            Multimap<String, WsAudioItem> progIdAudioItem = processAudioProg(data.getAudioItem(), data.getAudioItemProgLink());
+            Multimap<String, WsAudioItem> progIdAudioItem = processAudioProg(data.getDataForFile(WsDataFile.AUDIO_ITEM), data.getDataForFile(WsDataFile.AUDIO_ITEM_PROG_LINK));
             
             if (progIdAudioItem != null) {
-                processProgrammes(data.getProgramme(), progIdAudioItem);
+                processProgrammes(data.getDataForFile(WsDataFile.PROGRAMME), progIdAudioItem);
             }
         }catch (Exception e) {
             log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("WS Updater failed"));
@@ -120,7 +120,7 @@ public class WsProgrammeUpdate extends ScheduledTask {
         
         Builder builder = new Builder(new NodeFactory(){
             
-            final Progress progress = new Progress(PROGRAMME.filename());
+            final Progress progress = new Progress(PROGRAMME.filename(""));
             
             @Override
             public Nodes finishMakingElement(Element elem) {
@@ -146,7 +146,7 @@ public class WsProgrammeUpdate extends ScheduledTask {
         
         Builder builder = new Builder(new NodeFactory() {
             
-            final Progress progress = new Progress(SERIES.filename());
+            final Progress progress = new Progress(SERIES.filename(""));
             
             @Override
             public Nodes finishMakingElement(Element elem) {
@@ -177,7 +177,7 @@ public class WsProgrammeUpdate extends ScheduledTask {
         
         final Multimap<String, WsAudioItem> audioItemMap = LinkedListMultimap.create();
         
-        final Progress audioItemProgress = new Progress(AUDIO_ITEM.filename());
+        final Progress audioItemProgress = new Progress(AUDIO_ITEM.filename(""));
         
         Builder builder = new Builder(new NodeFactory(){
             @Override
@@ -205,7 +205,7 @@ public class WsProgrammeUpdate extends ScheduledTask {
     private Map<String, String> processAudioItemLinks(WsDataSource audioItemProgLink) throws IOException {
         final Map<String, String> audioIdToProgId= Maps.newHashMap();
         
-        final Progress linkProgress = new Progress(AUDIO_ITEM_PROG_LINK.filename());
+        final Progress linkProgress = new Progress(AUDIO_ITEM_PROG_LINK.filename(""));
         
         Builder builder = new Builder(new NodeFactory() {
             @Override

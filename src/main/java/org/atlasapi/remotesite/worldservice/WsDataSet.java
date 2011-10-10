@@ -1,18 +1,12 @@
 package org.atlasapi.remotesite.worldservice;
 
+import org.joda.time.DateTime;
+
 
 public interface WsDataSet {
     
-    String getName();
+    DateTime getVersion();
     
-    WsDataSource getAudioItem();
+    WsDataSource getDataForFile(WsDataFile file);
     
-    WsDataSource getAudioItemProgLink();
-    
-    WsDataSource getGenre();
-    
-    WsDataSource getProgramme();
-    
-    WsDataSource getSeries();
-
 }
