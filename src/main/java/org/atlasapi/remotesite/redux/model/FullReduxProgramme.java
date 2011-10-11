@@ -16,6 +16,10 @@ public class FullReduxProgramme extends BaseReduxProgramme {
             this.prog = new FullReduxProgramme();
         }
 
+        public FullReduxProgramme build() {
+            return prog;
+        }
+        
         @Override
         protected FullReduxProgramme getProg() {
             return prog;
@@ -65,7 +69,7 @@ public class FullReduxProgramme extends BaseReduxProgramme {
             getProg().media = media;
             return this;
         }
-
+        
     }
 
     private String type;
