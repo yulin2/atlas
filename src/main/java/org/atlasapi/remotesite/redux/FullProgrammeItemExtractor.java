@@ -31,14 +31,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
+import com.metabroadcast.common.time.DateTimeZones;
 
 public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxProgramme, Item>{
 
-    private static final DateTimeFormatter ISO_FORMAT = ISODateTimeFormat.dateTimeNoMillis();
+    private static final DateTimeFormatter ISO_FORMAT = ISODateTimeFormat.dateTimeNoMillis().withZone(DateTimeZones.UTC);
     private static final String IMAGE_SUFFIX = "image-640.jpg";
     private static final String THUMBNAIL_SUFFIX = "image-74.jpg";
     public static final String CANONICAL_URI_BASE = "http://g.bbcredux.com";
-    private static final String CURIE_BASE = "redux:";
+    public static final String CURIE_BASE = "redux:";
     private static final String LOCATION_URI_FORMAT = "http://devapi.bbcredux.com/programme/%s/media/%s";
     
     private final AdapterLog log;
@@ -148,6 +149,7 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
             broadcast.setSubtitled(source.getSubtitles());
             broadcast.setHighDefinition(source.getHd());
             broadcast.setAudioDescribed(source.getAd());
+            broadcast.setRepeat(source.getRepeat());
             
             return broadcast;
         }
@@ -171,7 +173,7 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
         
         int suffixStart = depiction.indexOf(IMAGE_SUFFIX);
         if (suffixStart > 0 && suffixStart + IMAGE_SUFFIX.length() == depiction.length()) {
-            return depiction.substring(suffixStart) + THUMBNAIL_SUFFIX;
+            return depiction.substring(0, suffixStart) + THUMBNAIL_SUFFIX;
         }
         return null;
     }
