@@ -6,6 +6,15 @@ public class ReduxMedia {
     private String uri;
     private String title;
     private String ext;
+    
+    public ReduxMedia() { }
+
+    public ReduxMedia(String type, String uri, String title, String ext) {
+        this.type = type;
+        this.uri = uri;
+        this.title = title;
+        this.ext = ext;
+    }
 
     public String getType() {
         return type;
