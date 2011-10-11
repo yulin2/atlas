@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.redux;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.media.TransportSubType;
@@ -92,8 +93,8 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
     private Set<Encoding> encodingsFrom(FullReduxProgramme source, Broadcast broadcast) {
         Builder<Encoding> encodings = ImmutableSet.<Encoding>builder();
         
-        for (ReduxMedia media : source.getMedia().values()) {
-            Encoding encoding = encodingFrom(media, source.getDiskref(), source.getKey(), broadcast.getTransmissionEndTime());
+        for (Entry<String, ReduxMedia> media : source.getMedia().entrySet()) {
+            Encoding encoding = encodingFrom(media.getValue(), source.getDiskref(), media.getKey(), broadcast.getTransmissionEndTime());
             if (encoding != null) {
                 encodings.add(encoding);
             }
