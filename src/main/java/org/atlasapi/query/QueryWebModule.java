@@ -12,14 +12,15 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.query.content.schedule.BroadcastRemovingScheduleOverlapListener;
+import org.atlasapi.persistence.topic.TopicContentLister;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
-import org.atlasapi.query.content.schedule.ThreadedScheduleOverlapListener;
 import org.atlasapi.query.v2.PeopleController;
 import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
+import org.atlasapi.query.v2.TopicController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,9 @@ public class QueryWebModule {
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
     private @Autowired PeopleResolver peopleResolver;
+    private @Autowired TopicStore topicStore;
+    private @Autowired TopicContentLister topicContentLister;
+    
     @Autowired
     private KnownTypeQueryExecutor queryExecutor;
     @Autowired
@@ -65,8 +69,12 @@ public class QueryWebModule {
     @Bean SearchController searchController() {
         return new SearchController(searchResolver, configFetcher, log, atlasModelOutputter());
     }
+    
+    @Bean TopicController topicController() {
+        return new TopicController(topicStore, topicContentLister, configFetcher, log, atlasModelOutputter());
+    }
 
     @Bean AtlasModelWriter atlasModelOutputter() {
-        return new DispatchingAtlasModelWriter();
+        return new DispatchingAtlasModelWriter(topicStore);
     }
 }
