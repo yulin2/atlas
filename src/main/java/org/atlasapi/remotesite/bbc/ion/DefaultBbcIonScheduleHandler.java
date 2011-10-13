@@ -111,6 +111,7 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
                         series.setParent(brand);
                     } else {
                         item.setContainer(series);
+                        series.setParentRef(null);
                     }
                     writer.createOrUpdate(series);
                     ((Episode) item).setSeries(series);
