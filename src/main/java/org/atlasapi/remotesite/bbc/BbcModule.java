@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -53,6 +54,7 @@ public class BbcModule {
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
 	private @Autowired ItemsPeopleWriter itemsPeopleWriter;
+	private @Autowired DatabasedMongo mongo;
 	
     @PostConstruct
     public void scheduleTasks() {
@@ -96,7 +98,7 @@ public class BbcModule {
     }
 
 	@Bean Runnable bbcFeedsUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(contentWriters, log);
+		return new BbcSlashProgrammesAtoZUpdater(contentWriters, new ProgressStore(mongo), log);
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
