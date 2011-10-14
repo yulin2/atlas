@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf      = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs     = "http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl      = "http://www.w3.org/2002/07/owl#"
+         xmlns:foaf     = "http://xmlns.com/foaf/0.1/"
+         xmlns:po       = "http://purl.org/ontology/po/"
+         xmlns:mo       = "http://purl.org/ontology/mo/"
+         xmlns:skos     = "http://www.w3.org/2008/05/skos#"
+         xmlns:time     = "http://www.w3.org/2006/time#"
+         xmlns:dc       = "http://purl.org/dc/elements/1.1/"
+         xmlns:dcterms  = "http://purl.org/dc/terms/"
+         xmlns:wgs84_pos= "http://www.w3.org/2003/01/geo/wgs84_pos#"
+         xmlns:timeline = "http://purl.org/NET/c4dm/timeline.owl#"
+         xmlns:event    = "http://purl.org/NET/c4dm/event.owl#">
+
+<rdf:Description rdf:about="/programmes/topics/brighton#place">
+  <rdf:type rdf:resource="http://purl.org/ontology/po/Place"/>
+  <owl:sameAs rdf:resource="http://dbpedia.org/resource/Brighton"/>
+  <rdfs:label>Brighton</rdfs:label>
+  <skos:prefLabel>Brighton</skos:prefLabel>
+</rdf:Description>
+
+<po:Episode rdf:about="/programmes/b007932d#programme">
+    <po:category rdf:resource="/programmes/topics/brighton#place"/>
+</po:Episode>
+<po:Episode rdf:about="/programmes/b0144pvg#programme">
+    <po:category rdf:resource="/programmes/topics/brighton#place"/>
+</po:Episode>
+<po:Episode rdf:about="/programmes/b00nqbth#programme">
+    <po:category rdf:resource="/programmes/topics/brighton#place"/>
+</po:Episode>
+<po:Episode rdf:about="/programmes/b00n510n#programme">
+    <po:category rdf:resource="/programmes/topics/brighton#place"/>
+</po:Episode>
+<po:Episode rdf:about="/programmes/b00ly6br#programme">
+    <po:category rdf:resource="/programmes/topics/brighton#place"/>
+</po:Episode>
+<po:Episode rdf:about="/programmes/w0btv708#programme">
+    <po:category rdf:resource="/programmes/topics/brighton#place"/>
+</po:Episode>
+
+
+</rdf:RDF>

@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.StringUtils;
+import org.atlasapi.media.vocabulary.OWL;
 import org.atlasapi.media.vocabulary.PO;
 import org.atlasapi.media.vocabulary.RDF;
 
@@ -40,7 +41,7 @@ import com.hp.hpl.jena.vocabulary.DC;
 @XmlRootElement(name="RDF", namespace=RDF.NS)
 class SlashProgrammesRdf {
 
-	@XmlElement(namespace=PO.NS, name="Episode")
+    @XmlElement(namespace=PO.NS, name="Episode")
 	private SlashProgrammesEpisode episode;
 	
 	@XmlElement(namespace=PO.NS, name="Clip")
@@ -51,6 +52,41 @@ class SlashProgrammesRdf {
 	
 	@XmlElement(namespace=PO.NS, name="Series")
 	private SlashProgrammesSeriesContainer series;
+	
+	@XmlElement(namespace=RDF.NS, name="Description")
+	private SlashProgrammesDescription description;
+	
+    static class SlashProgrammesDescription {
+        
+        @XmlElement(namespace=OWL.NS, name="sameAs")
+        private Set<SlashProgrammesSameAs> sameAs;
+
+        public Set<SlashProgrammesSameAs> getSameAs() {
+            return sameAs;
+        }
+
+        public SlashProgrammesDescription withSameAs(Set<SlashProgrammesSameAs> sameAs) {
+            this.sameAs = sameAs;
+            return this;
+        }
+        
+    }
+
+    static class SlashProgrammesSameAs {
+        
+        @XmlAttribute(name = "resource", namespace = RDF.NS)
+        private String resourceUri;
+
+        public String resourceUri() {
+            return resourceUri;
+        }
+
+        public SlashProgrammesSameAs withResourceUri(String uri) {
+            resourceUri = uri;
+            return this;
+        }
+        
+    }
 	
 	static class SlashProgrammesEpisode extends SlashProgrammesBase {
 		
@@ -123,6 +159,15 @@ class SlashProgrammesRdf {
 		@XmlElement(namespace=PO.NS, name="genre")
 		protected Set<SlashProgrammesGenre> genres;
 		
+		@XmlElement(namespace=PO.NS, name="subject")
+		protected Set<SlashProgrammesTopic> subjects;
+		
+	    @XmlElement(namespace=PO.NS, name="place")
+	    protected Set<SlashProgrammesTopic> places;
+	      
+	    @XmlElement(namespace=PO.NS, name="person")
+	    protected Set<SlashProgrammesTopic> people;
+		
 		@XmlElement(namespace=PO.NS, name="format")
 		protected SlashProgrammesFormat format;
 		
@@ -176,6 +221,18 @@ class SlashProgrammesRdf {
 		public SlashProgrammesMasterbrand getMasterbrand() {
 			return masterbrand;
 		}
+		
+        public Set<SlashProgrammesTopic> subjects() {
+            return this.subjects;
+        }
+
+        public Set<SlashProgrammesTopic> people() {
+            return this.people;
+        }
+
+        public Set<SlashProgrammesTopic> places() {
+            return this.places;
+        }
 	}
 	
 	static class SlashProgrammesSeriesContainer extends SlashProgrammesBase {
@@ -288,6 +345,21 @@ class SlashProgrammesRdf {
 		}
 	}
 	
+    static class SlashProgrammesTopic {
+
+        @XmlAttribute(name = "resource", namespace = RDF.NS)
+        private String resourceUri;
+
+        public String resourceUri() {
+            return resourceUri;
+        }
+
+        public SlashProgrammesTopic withResourceUri(String uri) {
+            resourceUri = uri;
+            return this;
+        }
+    }
+    
 	static class SlashProgrammesMasterbrand {
 		
 		@XmlAttribute(name="resource", namespace=RDF.NS)
@@ -390,4 +462,12 @@ class SlashProgrammesRdf {
 		return this;
 	}
 
+	public SlashProgrammesRdf withDescription(SlashProgrammesDescription desc) {
+	    this.description = desc;
+	    return this;
+	}
+	
+	public SlashProgrammesDescription description() {
+	    return this.description;
+	}
 }
