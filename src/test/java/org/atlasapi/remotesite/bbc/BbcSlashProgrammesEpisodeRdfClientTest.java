@@ -17,6 +17,8 @@ package org.atlasapi.remotesite.bbc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isOneOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
@@ -40,11 +43,15 @@ public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 	
 	private static final String URI = "http://example.com";
 	
-	private static final SimpleHttpClient httpClient = new FixedResponseHttpClient(URI, xmlDocument());
+	private static final SimpleHttpClient topGearHttpClient = new FixedResponseHttpClient(URI, topGearXmlDocument());
+	private static final SimpleHttpClient brightonHttpClient = new FixedResponseHttpClient(URI, brightonXmlDocument());
 
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
-		SlashProgrammesRdf description = new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(httpClient, SlashProgrammesRdf.class).get(URI);
+		SlashProgrammesRdf description = new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(topGearHttpClient, SlashProgrammesRdf.class).get(URI);
+		
+		SlashProgrammesDescription desc = description.description();
+		assertThat(desc, is(notNullValue()));
 		
 		SlashProgrammesContainerRef brand = description.brand();
 		assertThat(brand.uri(), is("http://www.bbc.co.uk/programmes/b006mj59"));
@@ -61,11 +68,44 @@ public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
 
 	}
 
-	private static String xmlDocument()  {
+	private static String topGearXmlDocument()  {
 		try {
             return IOUtils.toString(new ClassPathResource("top-gear-rdf.xml").getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 	}
+	
+    public void testBindsRetrievedXmlDocumentToObjectModelWithPersonPlaceAndThing() throws Exception {
+
+        SlashProgrammesRdf description = new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(brightonHttpClient, SlashProgrammesRdf.class).get(URI);
+
+        SlashProgrammesDescription desc = description.description();
+        assertThat(desc, is(notNullValue()));
+
+        SlashProgrammesContainerRef brand = description.brand();
+        assertThat(brand.uri(), is("http://www.bbc.co.uk/programmes/b006qjds"));
+
+        SlashProgrammesEpisode ep = description.episode();
+        assertThat(ep.title(), is("Bus trip from Brighton to Eastbourne"));
+        assertThat(ep.description(), startsWith("Sandi Toksvig takes a bus"));
+        assertThat(ep.genres().size(), is(1));
+        assertThat(Iterables.getOnlyElement(ep.genres()).resourceUri(), is("/programmes/genres/factual/travel#genre"));
+
+        assertThat(ep.versions().size(), is(1));
+        assertThat(ep.versions().get(0).resourceUri(), is("/programmes/b0144nxy#programme"));
+        
+        assertThat(Iterables.getOnlyElement(ep.subjects()).resourceUri(), is("/programmes/topics/public_transport#subject"));
+        assertThat(Iterables.getOnlyElement(ep.people()).resourceUri(), is("/programmes/topics/sandi_toksvig#person"));
+        assertThat(Iterables.get(ep.places(), 0).resourceUri(), isOneOf("/programmes/topics/brighton#place","/programmes/topics/eastbourne#place"));
+
+    }
+
+    private static String brightonXmlDocument() {
+        try {
+            return IOUtils.toString(new ClassPathResource("brighton-to-eastbourne-rdf.xml").getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

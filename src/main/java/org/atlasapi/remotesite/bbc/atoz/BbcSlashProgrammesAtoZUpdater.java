@@ -10,6 +10,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
 
@@ -26,8 +27,8 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 	
 	private final AdapterLog log;
     
-    public BbcSlashProgrammesAtoZUpdater(ContentWriter writer, AdapterLog log) {
-        this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(writer, log), log);
+    public BbcSlashProgrammesAtoZUpdater(ContentWriter writer, TopicStore topicStore, AdapterLog log) {
+        this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(writer, topicStore, log), log);
     }
 
     public BbcSlashProgrammesAtoZUpdater(RemoteSiteClient<SlashProgrammesAtoZRdf> client, BbcProgrammeAdapter fetcher, AdapterLog log) {

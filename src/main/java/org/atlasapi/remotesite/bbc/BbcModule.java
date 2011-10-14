@@ -17,6 +17,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
@@ -64,6 +65,7 @@ public class BbcModule {
 
     private @Autowired ContentResolver contentResolver;
 	private @Autowired ContentWriter contentWriters;
+	private @Autowired TopicStore topicStore;
 	private @Autowired AdapterLog log;
 	private @Autowired SimpleScheduler scheduler;
 	private @Autowired ItemsPeopleWriter itemsPeopleWriter;
@@ -127,7 +129,7 @@ public class BbcModule {
     }
 
 	@Bean Runnable bbcFeedsUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(contentWriters, log);
+		return new BbcSlashProgrammesAtoZUpdater(contentWriters, topicStore, log);
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
