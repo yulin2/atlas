@@ -14,13 +14,13 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
 
@@ -63,7 +63,7 @@ public class TopicController extends BaseController {
         Topic topic = topicForUri.requireValue();
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(!query.getConfiguration().getIncludedPublishers().contains(topic.getPublisher())) {
+        if(Sets.intersection(query.getConfiguration().getIncludedPublishers(),topic.getPublishers()).isEmpty()) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
             return;
         }
@@ -87,7 +87,7 @@ public class TopicController extends BaseController {
         Topic topic = topicForUri.requireValue();
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(!query.getConfiguration().getIncludedPublishers().contains(topic.getPublisher())) {
+        if(Sets.intersection(query.getConfiguration().getIncludedPublishers(),topic.getPublishers()).isEmpty()) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
             return;
         }
