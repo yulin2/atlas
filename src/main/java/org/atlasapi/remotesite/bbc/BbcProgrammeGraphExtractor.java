@@ -38,9 +38,11 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
@@ -54,6 +56,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcProgrammeSource.ClipAndVersion;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesTopic;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
@@ -341,19 +344,30 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     private Item item(String episodeUri, SlashProgrammesRdf episode) {
         String curie = BbcUriCanonicaliser.curieFor(episodeUri);
 
-        SlashProgrammesContainerRef brand = episode.brand();
         
         Maybe<Integer> seriesNumber = seriesNumber(episode);
         
         Item item;
         if (episode.episode().isFilmFormat()) {
             item = new Film(episodeUri, curie, Publisher.BBC);
-        } else if (brand == null && episode.series() == null) {
+        } else if (episode.brand() == null && episode.series() == null) {
             item = new Item(episodeUri, curie, Publisher.BBC);
         } else {
             item = new Episode(episodeUri, curie, Publisher.BBC);
-            String brandUri = brand.uri();
-            ((Episode) item).setContainer(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(brandUri), Publisher.BBC));
+
+            SlashProgrammesSeriesContainer series = episode.series();
+            String seriesUri = series.uri();
+            if(series != null && seriesUri != null) {
+                ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
+                //This will get over written below if there's a brand.
+                ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
+            } 
+            
+            SlashProgrammesContainerRef brand = episode.brand();
+            if(brand != null && brand.uri() != null) {
+                String brandUri = brand.uri();
+                ((Episode) item).setContainer(new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(brandUri), Publisher.BBC));
+            }
         }
 
         SlashProgrammesEpisode slashProgrammesEpisode = episode.episode();
