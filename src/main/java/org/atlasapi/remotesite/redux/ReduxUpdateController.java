@@ -37,14 +37,14 @@ public class ReduxUpdateController {
     }
     
     @RequestMapping(value="/system/update/redux/day/{date}", method=RequestMethod.POST)
-    public void updateDay(HttpServletResponse response, @PathVariable String date){
+    public void updateDay(HttpServletResponse response, @PathVariable("date") String date){
         
         executor.submit(taskBuilder.updateFor(isoParser.parseDateTime(date).toLocalDate()));
         
     }
     
-    @RequestMapping(value="/system/update/redux/diskref/{}", method=RequestMethod.POST)
-    public void updateDiskref(HttpServletResponse response, @PathVariable final String diskRef) {
+    @RequestMapping(value="/system/update/redux/diskref/{dr}", method=RequestMethod.POST)
+    public void updateDiskref(HttpServletResponse response, @PathVariable("dr") final String diskRef) {
         
         executor.submit(new Runnable() {
             @Override
