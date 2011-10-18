@@ -254,7 +254,85 @@ public class PerPublisherCurieExpander implements CurieExpander {
 				}
 				return null;
 			}	
-		};
+		},
+		
+		WS_B {
+
+		    private final Pattern WS_CURIE_PATTERN = Pattern.compile("ws-b:(\\d+)");
+		    
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = WS_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://wsarchive.bbc.co.uk/brands/%s", matcher.group(1));
+                }
+                return null;
+            }
+
+            private final Pattern WS_FULL_PATTERN = Pattern.compile("http://wsarchive.bbc.co.uk/brands/(\\d+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = WS_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("ws-b:%s", matcher.group(1));
+                }
+                return null;
+            }
+		    
+		},
+		
+        WS_E {
+
+            private final Pattern WS_CURIE_PATTERN = Pattern.compile("ws-e:(\\d+)");
+
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = WS_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://wsarchive.bbc.co.uk/episodes/%s", matcher.group(1));
+                }
+                return null;
+            }
+
+            private final Pattern WS_FULL_PATTERN = Pattern.compile("http://wsarchive.bbc.co.uk/episodes/(\\d+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = WS_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("ws-e:%s", matcher.group(1));
+                }
+                return null;
+            }
+
+        },
+        
+        REDUX {
+
+            private final Pattern REDUX_CURIE_PATTERN = Pattern.compile("redux:(\\d+)");
+
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = REDUX_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://g.bbcredux.com/programme/%s", matcher.group(1));
+                }
+                return null;
+            }
+
+            private final Pattern REDUX_FULL_PATTERN = Pattern.compile("http://g.bbcredux.com/programme/(\\d+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = REDUX_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("redux:%s", matcher.group(1));
+                }
+                return null;
+            }
+            
+        };
 		
 		public abstract String expand(String curie);
 		public abstract String compact(String url);
@@ -284,7 +362,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 		}
 		CurieAlgorithm algorithm;
 		try {
-			algorithm = CurieAlgorithm.valueOf(prefix.toUpperCase());
+			algorithm = CurieAlgorithm.valueOf(prefix.toUpperCase().replace("-", "_"));
 		} catch (IllegalArgumentException e) {
 			// no matching algorithm
 			return Maybe.nothing();
