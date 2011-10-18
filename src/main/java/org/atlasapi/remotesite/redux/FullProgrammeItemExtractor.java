@@ -92,6 +92,10 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
     }
 
     private Set<Encoding> encodingsFrom(FullReduxProgramme source, Broadcast broadcast) {
+        if (source.getMedia() == null) {
+            throw new IllegalArgumentException(String.format("Disk ref %s has no media", source.getDiskref()));
+        }
+        
         Builder<Encoding> encodings = ImmutableSet.<Encoding>builder();
         
         for (Entry<String, ReduxMedia> media : source.getMedia().entrySet()) {
