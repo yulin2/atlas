@@ -103,6 +103,10 @@ public class BbcModule {
 		return new BbcSlashProgrammesAtoZUpdater(contentWriters,  new ProgressStore(mongo), topicStore, log);
 	}
 	
+	@Bean BbcSlashProgrammesController bbcFeedsController() {
+	    return new BbcSlashProgrammesController(contentWriters, topicStore, log);
+	}
+	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
 	    return new BbcIonOndemandChangeUpdater(bbcIonOndemandChangeUpdateBuilder(), log);
 	}

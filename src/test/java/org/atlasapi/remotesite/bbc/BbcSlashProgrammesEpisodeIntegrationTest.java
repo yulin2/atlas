@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
@@ -15,7 +16,6 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
@@ -34,10 +34,9 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
             oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic("one", "dbpedia", "http://dbpedia.org/resource/Religion")));
             oneOf(topicStore).write(with(topicMatcher("one","dbpedia", "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
             oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic("two", "dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah")));
-            oneOf(topicStore).write(with(topicMatcher("two","dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.PERSON)));
+            oneOf(topicStore).write(with(topicMatcher("two","dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
             oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic("three", "dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks")));
             oneOf(topicStore).write(with(topicMatcher("three","dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
-            
         }});
 
         Content programme = (Content) adapter.createOrUpdate("http://www.bbc.co.uk/programmes/b015d4pt");
@@ -55,6 +54,8 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         }
         
         assertEquals(ImmutableSet.of("one","two","three"), ImmutableSet.copyOf(programme.getTopics()));
+        
+        context.assertIsSatisfied();
     }
     
     private Matcher<Topic> topicMatcher(final String uri, final String ns, final String value, final String title, final Type type) {
@@ -71,6 +72,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
                 topic.getNamespace().equals(ns) &&
                 topic.getValue().equals(value) &&
                 topic.getTitle().equals(title) &&
+                topic.getPublishers().equals(ImmutableSet.of(Publisher.BBC)) &&
                 topic.getType().equals(type);
             }
         };
