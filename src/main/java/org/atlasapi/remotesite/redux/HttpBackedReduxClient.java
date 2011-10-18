@@ -9,6 +9,7 @@ import java.util.List;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.channel4.RequestLimitingSimpleHttpClient;
 import org.atlasapi.remotesite.redux.model.BaseReduxProgramme;
 import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
 import org.atlasapi.remotesite.redux.model.PaginatedBaseProgrammes;
@@ -45,7 +46,7 @@ public class HttpBackedReduxClient implements ReduxClient {
         private UsernameAndPassword credentials;
         private String basePath = "/";
         private AdapterLog log = new NullAdapterLog();
-        //private int maxRequests = 0;
+        private int maxRequests = 0;
 
         public Builder(HostSpecifier host) {
             this.host = host;
@@ -66,17 +67,17 @@ public class HttpBackedReduxClient implements ReduxClient {
             return this;
         }
         
-//        public Builder withMaxRequestsPerSecond(int maxRequests) {
-//            this.maxRequests  = maxRequests;
-//            return this;
-//        }
+        public Builder withMaxRequestsPerSecond(int maxRequests) {
+            this.maxRequests  = maxRequests;
+            return this;
+        }
         
         public HttpBackedReduxClient build() {
             SimpleHttpClient baseClient = new SimpleHttpClientBuilder()
                 .withUserAgent(HttpClients.ATLAS_USER_AGENT)
                 .withPreemptiveBasicAuth(credentials)
                 .withAcceptHeader(MimeType.APPLICATION_JSON).build();
-            //baseClient = maxRequests > 0 ? new RequestLimitingSimpleHttpClient(baseClient, maxRequests) : baseClient;
+            baseClient = maxRequests > 0 ? new RequestLimitingSimpleHttpClient(baseClient, maxRequests) : baseClient;
             return new HttpBackedReduxClient(baseClient, "http://" + host.toString() + basePath, log);
         }
     }
