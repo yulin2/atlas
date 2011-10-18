@@ -34,7 +34,7 @@ public class ReduxModule {
         try {
             return reduxClientForHost(HostSpecifier.from(reduxHost))
                     .withCredentials(new UsernameAndPassword(reduxUsername, reduxPassword))
-                    .withLog(log).withMaxRequestsPerSecond(5).build();
+                    .withLog(log).build();
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

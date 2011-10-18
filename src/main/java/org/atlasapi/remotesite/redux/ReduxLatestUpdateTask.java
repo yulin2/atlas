@@ -3,9 +3,7 @@ package org.atlasapi.remotesite.redux;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.redux.ReduxDiskrefUpdateTask.Builder;
@@ -32,7 +30,7 @@ public abstract class ReduxLatestUpdateTask extends ProducerConsumerScheduledTas
     }
     
     public ReduxLatestUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-        this(client, handler, log, new ThreadPoolExecutor(0, 20, 1, TimeUnit.MINUTES, new SynchronousQueue<Runnable>(), new ThreadFactoryBuilder().setNameFormat("Redux Latest Thread %d").build(), new ThreadPoolExecutor.CallerRunsPolicy()));
+        this(client, handler, log, Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setNameFormat("Redux Latest Thread %d").build()));
     }
     
     public ReduxLatestUpdateTask fromOffset(int offset) {
