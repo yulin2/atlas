@@ -176,6 +176,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                 topic.setTitle(titleFrom(topicUri.getValue()));
                 topic.setType(typeFrom(topicUri.getKey().resourceUri()));
                 item.addTopic(topic);
+                topicStore.write(topic);
             }
         }
 
@@ -183,7 +184,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     }
 
     private Type typeFrom(String resourceUri) {
-        String type = resourceUri.substring(resourceUri.indexOf("#"));
+        String type = resourceUri.substring(resourceUri.indexOf("#")+1);
         for (Type topicType : Topic.Type.values()) {
             if(topicType.key().equals(type)) {
                 return topicType;
