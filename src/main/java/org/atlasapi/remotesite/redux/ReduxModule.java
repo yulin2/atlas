@@ -32,9 +32,7 @@ public class ReduxModule {
     
     protected @Bean ReduxClient reduxClient() {
         try {
-            return reduxClientForHost(HostSpecifier.from(reduxHost))
-                    .withCredentials(new UsernameAndPassword(reduxUsername, reduxPassword))
-                    .withLog(log).withMaxRequestsPerSecond(5).build();
+            return reduxClientForHost(HostSpecifier.from(reduxHost)).withCredentials(new UsernameAndPassword(reduxUsername, reduxPassword)).withLog(log).build();
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
