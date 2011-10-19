@@ -9,6 +9,8 @@ import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
 import org.atlasapi.remotesite.itv.ItvMercuryBrandAdapter;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.metabroadcast.common.base.Maybe;
 
 /**
@@ -332,6 +334,38 @@ public class PerPublisherCurieExpander implements CurieExpander {
                 return null;
             }
             
+        }, 
+        
+        PA {
+            
+            private final Pattern PA_CURIE_PATTERN = Pattern.compile("pa:(b|s|f|e)-([\\d-]+)");
+            
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = PA_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://pressassociation.com/%s/%s", shortLongTypeMap.get(matcher.group(1)), matcher.group(2));
+                }
+                return null;
+            }
+            
+            private final BiMap<String,String> shortLongTypeMap = ImmutableBiMap.<String,String>builder()
+                    .put("b", "brands")
+                    .put("s", "series")
+                    .put("f", "films")
+                    .put("e", "episodes")
+                    .build();
+
+            private final Pattern PA_FULL_PATTERN = Pattern.compile("http://pressassociation.com/(brands|series|films|episodes)/([\\d-]+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = PA_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("pa:%s-%s", shortLongTypeMap.inverse().get(matcher.group(1)), matcher.group(2));
+                }
+                return null;
+            }
         };
 		
 		public abstract String expand(String curie);
