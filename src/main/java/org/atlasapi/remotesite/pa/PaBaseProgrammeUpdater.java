@@ -107,6 +107,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         	
         	Set<Queue<File>> groupedFiles = groupAndOrderFilesByDay(files);
         	boolean finished = false;
+        	int filesProcessed = 0;
         	while (shouldContinue() && !finished) {
         		Builder<File> batch = ImmutableSet.builder();
         		for(Queue<File> day : groupedFiles) {
@@ -115,8 +116,11 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         			}
         		}
         		Set<File> thisBatch = batch.build();
+        		
         		if(!thisBatch.isEmpty()) {
+        			reportStatus(String.format("%s/%s files processed. %s files in current batch", filesProcessed, Iterables.size(files), thisBatch.size()));
         			processBatch(thisBatch);
+        			filesProcessed += thisBatch.size();
         		}
         		else {
         			finished = true;
@@ -139,11 +143,8 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		factory.setNamespaceAware(true);
 		XMLReader reader = factory.newSAXParser().getXMLReader();
 		reader.setContentHandler(unmarshaller.getUnmarshallerHandler());
-
-		reportStatus(String.format("Submitting jobs for %s files", Iterables.size(files)));
 		
 		List<Future<Integer>> submitted = Lists.newArrayList();
-		int filesProcessed = 0;
 		for (File file : files) {
 		    if(!shouldContinue()) {
 		        break;
@@ -160,7 +161,6 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, lastModified, fileDate, filename));
 		            
 		            reader.parse(fileToProcess.toURI().toString());
-		            reportStatus(String.format("%s/%s files. %s jobs submitted", ++filesProcessed, Iterables.size(files), submitted.size()));
 		        }
 		    } catch (Exception e) {
 		        log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing file " + file.toString()));
