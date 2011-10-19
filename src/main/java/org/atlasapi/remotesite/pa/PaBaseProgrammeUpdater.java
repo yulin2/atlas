@@ -99,26 +99,29 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     protected void processFiles(Iterable<File> files) {
     	
         try {
+
         	// Files for different days can be processed in parallel. However, files for a given
         	// day must be processed sequentially, the full file followed by its deltas, in order. 
         	// Therefore we produce a list of lists of files,
         	// one per day, and we can process the head of each list in parallel.
         	
         	Set<Queue<File>> groupedFiles = groupAndOrderFilesByDay(files);
-        	boolean batchHasFiles = false;
-        	do {
-        		batchHasFiles = false;
+        	boolean finished = false;
+        	while (shouldContinue() && !finished) {
         		Builder<File> batch = ImmutableSet.builder();
         		for(Queue<File> day : groupedFiles) {
         			if(!day.isEmpty()) {
-        				batchHasFiles = true;
         				batch.add(day.remove());
         			}
         		}
-        		if(batchHasFiles) {
-        			processBatch(batch.build());
+        		Set<File> thisBatch = batch.build();
+        		if(!thisBatch.isEmpty()) {
+        			processBatch(thisBatch);
         		}
-        	} while(batchHasFiles && shouldContinue());
+        		else {
+        			finished = true;
+        		}
+        	}
             
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception running PA updater"));
@@ -154,7 +157,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		            final Timestamp lastModified = Timestamp.of(fileToProcess.lastModified());
 		            final String fileDate = matcher.group(1);
 
-		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, lastModified, fileDate));
+		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, lastModified, fileDate, filename));
 		            
 		            reader.parse(fileToProcess.toURI().toString());
 		            reportStatus(String.format("%s/%s files. %s jobs submitted", ++filesProcessed, Iterables.size(files), submitted.size()));
@@ -242,7 +245,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         reportStatus("Jobs cancelled");
     }
 
-    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final Timestamp lastModified, final String fileDate) {
+    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final Timestamp lastModified, final String fileDate, final String filename) {
         return new Unmarshaller.Listener() {
             public void beforeUnmarshal(Object target, Object parent) {
             }
@@ -270,7 +273,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                             });
                             submitted.add(future);
                         } catch (Throwable e) {
-                            log.record(errorEntry().withCause(new Exception(e)).withSource(getClass()).withDescription("Exception submit PA channel update job"));
+                            log.record(errorEntry().withCause(new Exception(e)).withSource(getClass()).withDescription("Exception submit PA channel update job in file " + filename));
                         }
                     }
                 }
