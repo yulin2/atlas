@@ -389,7 +389,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private Item convertItemToEpisode(Item item) {
         Episode episode = new Episode(item.getCanonicalUri(), item.getCurie(),item.getPublisher());
         episode.setAliases(item.getAliases());
-        episode.setBlackAndWhite(item.isBlackAndWhite());
+        episode.setBlackAndWhite(item.getBlackAndWhite());
         episode.setClips(item.getClips());
         episode.setParentRef(item.getContainer());
         episode.setCountriesOfOrigin(item.getCountriesOfOrigin());
