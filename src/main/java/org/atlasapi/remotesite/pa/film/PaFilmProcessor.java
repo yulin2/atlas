@@ -64,6 +64,11 @@ public class PaFilmProcessor {
         else {
             film = new Film(PaHelper.getFilmUri(id), PaHelper.getFilmCurie(id), Publisher.PA);
             
+            Element imdbElem = filmElement.getFirstChildElement("imdb_ref");
+            if (imdbElem != null) {
+                film.addAlias(imdbElem.getValue());
+            }
+            
             film.setSpecialization(Specialization.FILM);
             film.setTitle(filmElement.getFirstChildElement("title").getValue());
             String year = filmElement.getFirstChildElement("year").getValue();
