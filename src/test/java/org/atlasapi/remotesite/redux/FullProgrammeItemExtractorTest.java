@@ -61,11 +61,11 @@ public class FullProgrammeItemExtractorTest extends TestCase {
         assertEquals(new DateTime(2011, 10, 11, 16, 15, 00, 000,DateTimeZones.UTC), broadcast.getTransmissionEndTime());
         assertEquals(programme.getDuration(), broadcast.getBroadcastDuration().toString());
         assertEquals(Channel.BBC_ONE_HD.uri(), broadcast.getBroadcastOn());
-        assertTrue(broadcast.isSubtitled());
-        assertFalse(broadcast.isSigned());
-        assertFalse(broadcast.isHighDefinition());
-        assertFalse(broadcast.isRepeat());
-        assertFalse(broadcast.isAudioDescribed());
+        assertTrue(broadcast.getSubtitled());
+        assertFalse(broadcast.getSigned());
+        assertFalse(broadcast.getHighDefinition());
+        assertFalse(broadcast.getRepeat());
+        assertFalse(broadcast.getAudioDescribed());
         
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
         assertEquals(MimeType.VIDEO_MP4, encoding.getVideoCoding());
