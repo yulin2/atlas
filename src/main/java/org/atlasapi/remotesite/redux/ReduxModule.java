@@ -44,7 +44,7 @@ public class ReduxModule {
         taskScheduler.schedule(new ReduxLatestUpdateTasks.FullReduxLatestUpdateTask(reduxClient(), reduxProgrammeHandler(), log).withName("Redux Complete Latest updater"), RepetitionRules.NEVER);
     }
     
-    public @Bean ReduxUpdateController updateController() {
+    public @Bean ReduxUpdateController reduxUpdateController() {
         return new ReduxUpdateController(reduxClient(), reduxProgrammeHandler(), log);
     }
 
