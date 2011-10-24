@@ -319,6 +319,15 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         
     }
 
+    /**
+     * The PA do not supply timezone information with times. Instead all times for a file are consistently either GMT or BST,
+     * based on the timezone of the listings_date. For example, for listings_date of the Saturday of the switch from BST to 
+     * GMT, all times will be GMT+1h, even those after 0200. So 0500 London time on the Sunday is really in GMT, but a 
+     * programme starting at 0500 in London will be listed as starting it 0600 (GMT+1)/
+     * 
+     * @param date
+     * @return
+     */
     protected static DateTimeZone getTimeZone(String date) {
         String timezoneDateString = date + "-11:00";
         DateTime timezoneDateTime = DATE_FORMAT.parseDateTime(timezoneDateString);

@@ -8,13 +8,20 @@ import static org.atlasapi.media.entity.Channel.MORE_FOUR;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.atlasapi.equiv.query.SeriesAndEpisodeNumber;
+import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.Platform;
 import org.jdom.Element;
 import org.jdom.Namespace;
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
 
 import com.google.common.base.Preconditions;
@@ -24,6 +31,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.metabroadcast.common.intl.Country;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
@@ -53,6 +61,12 @@ public class C4AtomApi {
 
 	private static final String API_BASE_URL = "http://api.channel4.com/pmlsd/";
 	private static final String ATOZ_BASE_URL = "http://api.channel4.com/pmlsd/atoz/";
+	
+	public static final String DC_EPISODE_NUMBER = "dc:relation.EpisodeNumber";
+	public static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
+	public static final String DC_TERMS_AVAILABLE = "dcterms:available";
+	public static final String DC_TX_DATE = "dc:date.TXDate";
+
 
 	private static final Pattern IMAGE_PATTERN = Pattern.compile("(http.+?)\\d+x\\d+(\\.[a-zA-Z]+)");
 	
@@ -60,7 +74,8 @@ public class C4AtomApi {
 	private static final String THUMBNAIL_SIZE = "200x113";
 	
     public static final Pattern SLOT_PATTERN = Pattern.compile("tag:.*,\\d{4}:slot/(\\d+)");
-	
+	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
+
 	
 	public static void addImages(Described content, String anImage) {
 		if (! Strings.isNullOrEmpty(anImage)) {
@@ -242,4 +257,42 @@ public class C4AtomApi {
             "E4", E_FOUR,
             "4M", FOUR_MUSIC
     );
+	
+	public static Location locationFrom(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated, Platform platform) {
+		Location location = new Location();
+		location.setUri(uri);
+		
+		if(locationId != null) { 
+			location.addAlias(locationId);
+		}
+		location.setTransportType(TransportType.LINK);
+		location.setLastUpdated(lastUpdated);
+		
+		// The feed only contains available content
+		location.setAvailable(true);
+		
+		String availability = lookup.get(DC_TERMS_AVAILABLE);
+		
+		if (availability != null) {
+			Matcher matcher = AVAILABILTY_RANGE_PATTERN.matcher(availability);
+			if (!matcher.matches()) {
+				throw new IllegalStateException("Availability range format not recognised, was " + availability);
+			}
+			String txDate = lookup.get(DC_TX_DATE);
+            Policy policy = new Policy()
+				.withAvailabilityStart(new DateTime(Strings.isNullOrEmpty(txDate) ? matcher.group(1) : txDate))
+				.withAvailabilityEnd(new DateTime(matcher.group(2)));
+				
+			if (availableCountries != null) {
+				policy.setAvailableCountries(availableCountries);
+			}
+			
+			if(platform != null) {
+				policy.setPlatform(platform);
+			}
+			
+			location.setPolicy(policy);
+		}
+		return location;
+	}
 }
