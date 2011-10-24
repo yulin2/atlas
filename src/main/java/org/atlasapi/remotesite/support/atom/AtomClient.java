@@ -45,12 +45,12 @@ public class AtomClient implements RemoteSiteClient<Feed> {
 	}
 
 	@Override
-	public Feed get(String uri) throws Exception {
+	public Feed get(final String uri) throws Exception {
 	    return client.get(httpRequestFrom(uri, new HttpResponseTransformer<Feed>() {
             @Override
             public Feed transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
             	if(prologue.statusCode() != HttpServletResponse.SC_OK) {
-            		throw new HttpStatusCodeException(prologue, "Cannot transform response as non-200 response received");
+            		throw new HttpStatusCodeException(prologue, String.format("Cannot transform response for %s as http status %d was returned", uri, prologue.statusCode()));
             	}
                 return (Feed) new WireFeedInput().build(new InputStreamReader(body));
             }
