@@ -212,15 +212,15 @@ public class EquivModule {
     }
     
     //Controllers...
-    public @Bean ContentEquivalenceUpdateController updateController() {
+    public @Bean ContentEquivalenceUpdateController contentEquivalenceUpdateController() {
         return new ContentEquivalenceUpdateController(contentUpdater(), filmUpdater(), contentResolver, log);
     }
     
-    public @Bean EquivalenceResultController resultController() {
+    public @Bean EquivalenceResultController resultEquivalenceResultController() {
         return new EquivalenceResultController(equivalenceResultStore(), equivProbeStore(), contentResolver);
     }
     
-    public @Bean RecentResultController recentController() {
+    public @Bean RecentResultController recentEquivalenceResultController() {
         return new RecentResultController(equivalenceResultStore());
     }
     
