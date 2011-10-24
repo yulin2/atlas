@@ -20,7 +20,7 @@ public class C4ClipExtractorTest extends MockObjectTestCase {
 	
 	public void testExtractingClips() throws Exception {
 		
-		List<Clip> clips = new C4EpisodesExtractor(new NullAdapterLog()).includeOnDemands().extractClips(fourOdFeed.build());
+		List<Clip> clips = new C4EpisodesExtractor(null, new NullAdapterLog()).includeOnDemands().extractClips(fourOdFeed.build());
 		assertEquals(5, clips.size());
 		
 		for (Clip clip: clips) {
