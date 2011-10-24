@@ -28,6 +28,11 @@ public class EpisodeMatchingEquivalenceResultHandler implements EquivalenceResul
     
     @Override
     public void handle(EquivalenceResult<Item> result) {
+        if (!(result.target() instanceof Episode)) {
+            delegate.handle(result);
+            return;
+        }
+        
         Episode target = (Episode) result.target();
         
         ResultDescription desc = result.description().startStage("Episode sequence stitching");
