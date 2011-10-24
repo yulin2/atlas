@@ -40,8 +40,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 	private final RemoteSiteClient<Feed> feedClient;
 	private final C4BrandExtractor extractor;
 	
-	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, AdapterLog log) {
-		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, contentStore, log));
+	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
+		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, contentStore, lakeviewFetcher, log));
 	}
 	
 	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> feedClient, C4BrandExtractor extractor) {
