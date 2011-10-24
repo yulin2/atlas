@@ -46,6 +46,7 @@ import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
@@ -129,14 +130,16 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 				}
 			}
 			
-			Version version = versionFor(entry, episode, mediaGroup, lookup);
+			Location lakeviewLocation = null;
+			if(lakeviewFetcher != null) {
+				lakeviewLocation = lakeviewFetcher.lakeviewLocationFor(episode);
+			}
+			Version version = versionFor(entry, episode, mediaGroup, lookup, lakeviewLocation);
 		
 			if (version != null) {
 				episode.addVersion(version);
 			}
 			items.add(episode);
-			Location lakeviewLocation = lakeviewFetcher.lakeviewLocationFor(episode);
-			System.out.println(lakeviewLocation != null ? lakeviewLocation.getCanonicalUri() : null);
 		}
 		return items;
 	}
@@ -220,7 +223,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		return episode;
 	}
 
-	public Version versionFor(Entry entry, Item episode, Element mediaGroup, Map<String, String> lookup) {
+	public Version versionFor(Entry entry, Item episode, Element mediaGroup, Map<String, String> lookup, Location lakeviewLocation) {
 		Set<Country> availableCountries = null;
 		if (mediaGroup != null) {
 			Element restriction = mediaGroup.getChild("restriction", C4AtomApi.NS_MEDIA_RSS);
@@ -234,7 +237,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		if (uri == null) {
 			uri = C4AtomApi.clipUri(entry);
 		}
-		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC));
+		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC), lakeviewLocation);
 	}
     
 	private String buildUriFromSeriesAndEpisodeNumber(Feed source, SeriesAndEpisodeNumber seriesAndEpisodeNumber) {
@@ -288,7 +291,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
     }
 
 
-	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
+	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated, Location lakeviewLocation) {
 		Version version = new Version();
 		Duration duration = C4AtomApi.durationFrom(lookup);
 		
@@ -316,6 +319,9 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			    encoding.addAvailableAt(embedLocation);
 			}
 			
+			if(lakeviewLocation != null) {
+				encoding.addAvailableAt(lakeviewLocation);
+			}
 			version.addManifestedAs(encoding);
 		}
 				
