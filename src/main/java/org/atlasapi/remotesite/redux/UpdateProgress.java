@@ -32,6 +32,10 @@ public final class UpdateProgress implements Reducible<UpdateProgress>{
         return processed;
     }
     
+    public boolean hasFailures() {
+        return failures > 0;
+    }
+    
     @Override
     public boolean equals(Object that) {
         if (this == that) {

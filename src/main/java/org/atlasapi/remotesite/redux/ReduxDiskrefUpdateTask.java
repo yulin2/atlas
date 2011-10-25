@@ -4,42 +4,42 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.concurrent.Callable;
 
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
-
-import com.metabroadcast.common.base.Maybe;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
 
 public class ReduxDiskrefUpdateTask implements Callable<UpdateProgress>{
 
-    public static final Builder diskRefUpdateTaskBuilder(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-        return new Builder(client, handler, log);
+    public static final Builder diskRefUpdateTaskBuilder(ContentWriter writer,  SiteSpecificAdapter<Item> handler, AdapterLog log) {
+        return new Builder(writer, handler, log);
     }
     
     public static final class Builder {
         
-        private final ReduxClient client;
+        private final ContentWriter writer;
         private final AdapterLog log;
-        private final ReduxProgrammeHandler handler;
+        private final SiteSpecificAdapter<Item> handler;
 
-        public Builder(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-            this.client = client;
+        public Builder(ContentWriter writer,  SiteSpecificAdapter<Item> handler, AdapterLog log) {
+            this.writer = writer;
             this.handler = handler;
             this.log = log;
         }
         
         public ReduxDiskrefUpdateTask updateFor(String diskRef) {
-            return new ReduxDiskrefUpdateTask(client, handler, log, diskRef);
+            return new ReduxDiskrefUpdateTask(writer, handler, log, diskRef);
         }
         
     }
     
-    private final ReduxClient client;
-    private final ReduxProgrammeHandler handler;
+    private final ContentWriter writer;
+    private final SiteSpecificAdapter<Item> handler;
     private final String diskRef;
     private final AdapterLog log;
 
-    public ReduxDiskrefUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log, String diskRef) {
-        this.client = client;
+    public ReduxDiskrefUpdateTask(ContentWriter writer, SiteSpecificAdapter<Item> handler, AdapterLog log, String diskRef) {
+        this.writer = writer;
         this.handler = handler;
         this.log = log;
         this.diskRef = diskRef;
@@ -48,11 +48,7 @@ public class ReduxDiskrefUpdateTask implements Callable<UpdateProgress>{
     @Override
     public UpdateProgress call() throws Exception {
         try {
-            Maybe<FullReduxProgramme> possibleProgramme = client.programmeFor(diskRef);
-            if (possibleProgramme.isNothing()) {
-                return UpdateProgress.FAILURE;
-            }
-            handler.handle(possibleProgramme.requireValue());
+            writer.createOrUpdate(handler.fetch(FullProgrammeItemExtractor.REDUX_PROGRAMME_URI_BASE + diskRef));
             return UpdateProgress.SUCCESS;
         } catch (Exception e) {
             log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Exception updating diskref %s", diskRef));

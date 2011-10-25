@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.redux;
 
 import static org.atlasapi.remotesite.redux.HttpBackedReduxClient.reduxClientForHost;
+import static org.atlasapi.remotesite.redux.ReduxLatestUpdateTasks.completeReduxLatestTask;
+import static org.atlasapi.remotesite.redux.ReduxLatestUpdateTasks.maximumReduxLatestTask;
 
 import java.text.ParseException;
 
@@ -40,16 +42,18 @@ public class ReduxModule {
     
     @PostConstruct
     public void scheduleTasks() {
-        taskScheduler.schedule(new ReduxLatestUpdateTasks.MaximumReduxLatestUpdateTask(1000, reduxClient(), reduxProgrammeHandler(), log).withName("Redux Latest 1000 updater"), RepetitionRules.NEVER);
-        taskScheduler.schedule(new ReduxLatestUpdateTasks.FullReduxLatestUpdateTask(reduxClient(), reduxProgrammeHandler(), log).withName("Redux Complete Latest updater"), RepetitionRules.NEVER);
-    }
-    
-    public @Bean ReduxUpdateController reduxUpdateController() {
-        return new ReduxUpdateController(reduxClient(), reduxProgrammeHandler(), log);
+        taskScheduler.schedule(maximumReduxLatestTask(1000, reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Latest 1000 updater"), RepetitionRules.NEVER);
+        taskScheduler.schedule(completeReduxLatestTask(reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Complete Latest updater"), RepetitionRules.NEVER);
     }
 
-    protected @Bean ReduxProgrammeHandler reduxProgrammeHandler() {
-        return new DefaultReduxProgrammeHandler(writer, new FullProgrammeItemExtractor(log));
+    @Bean
+    public ReduxUpdateController reduxUpdateController() {
+        return new ReduxUpdateController(reduxClient(), writer, reduxProgrammeAdapter(), log);
     }
-    
+
+    @Bean
+    protected DefaultReduxProgrammeAdapter reduxProgrammeAdapter() {
+        return new DefaultReduxProgrammeAdapter(reduxClient(), new FullProgrammeItemExtractor(log));
+    }
+
 }

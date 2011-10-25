@@ -46,7 +46,7 @@ public class FullProgrammeItemExtractorTest extends TestCase {
         FullReduxProgramme programme = programmeBuilder.build();
         Item item = extractor.extract(programme);
         
-        assertEquals(FullProgrammeItemExtractor.CANONICAL_URI_BASE+programme.getCanonical(), item.getCanonicalUri());
+        assertEquals(FullProgrammeItemExtractor.REDUX_URI_BASE+programme.getCanonical(), item.getCanonicalUri());
         assertEquals(FullProgrammeItemExtractor.CURIE_BASE+programme.getDiskref(), item.getCurie());
         assertEquals(programme.getTitle(), item.getTitle());
         assertEquals(programme.getDescription(), item.getDescription());
