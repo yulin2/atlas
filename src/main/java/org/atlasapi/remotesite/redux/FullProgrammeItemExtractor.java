@@ -35,11 +35,13 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxProgramme, Item>{
 
+    public static final String REDUX_URI_BASE = "http://g.bbcredux.com";
+    public static final String CURIE_BASE = "redux:";
+    public static final String REDUX_PROGRAMME_URI_BASE = "http://g.bbcredux.com/programme/";
+    
     private static final DateTimeFormatter ISO_FORMAT = ISODateTimeFormat.dateTimeNoMillis().withZone(DateTimeZones.UTC);
     private static final String IMAGE_SUFFIX = "image-640.jpg";
     private static final String THUMBNAIL_SUFFIX = "image-74.jpg";
-    public static final String CANONICAL_URI_BASE = "http://g.bbcredux.com";
-    public static final String CURIE_BASE = "redux:";
     private static final String LOCATION_URI_FORMAT = "http://devapi.bbcredux.com/programme/%s/media/%s";
     
     private final AdapterLog log;
@@ -54,9 +56,9 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
         checkNotNull(Strings.emptyToNull(source.getCanonical()), "Non-empty 'canonical' field required");
         checkNotNull(Strings.emptyToNull(source.getDiskref()), "Non empty 'diskref' field required");
         
-        Item item = new Item(CANONICAL_URI_BASE + source.getCanonical(), CURIE_BASE + source.getDiskref(), Publisher.BBC_REDUX);
+        Item item = new Item(REDUX_URI_BASE + source.getCanonical(), CURIE_BASE + source.getDiskref(), Publisher.BBC_REDUX);
         if(!Strings.isNullOrEmpty(source.getUri())) {
-            item.addAlias(CANONICAL_URI_BASE + source.getUri());
+            item.addAlias(REDUX_URI_BASE + source.getUri());
         }
         
         item.setTitle(source.getTitle());

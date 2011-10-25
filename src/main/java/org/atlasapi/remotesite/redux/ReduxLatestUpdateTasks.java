@@ -1,98 +1,144 @@
 package org.atlasapi.remotesite.redux;
 
-import java.util.concurrent.ExecutorService;
+import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.redux.model.BaseReduxProgramme;
 import org.atlasapi.remotesite.redux.model.PaginatedBaseProgrammes;
 
+import com.google.common.base.Function;
+import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterators;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.query.Selection;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public final class ReduxLatestUpdateTasks {
+    
+    private static final int SELECTION_LIMIT = 25;
+    private static final Executor sharedExecutor = new ThreadPoolExecutor(0, 20, 1, TimeUnit.MINUTES, new SynchronousQueue<Runnable>(), new ThreadFactoryBuilder().setNameFormat("Redux Latest Thread %d").build(), new ThreadPoolExecutor.CallerRunsPolicy());
+    
+    public static final ScheduledTask firstBatchOnlyReduxLatestTask(ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log) {
+        return taskFor(new BaseReduxLatestTaskProducer(client, writer, adapter, log) {
+            
+            @Override
+            protected boolean finished(PaginatedBaseProgrammes lastBatch) {
+                return true;
+            }
+        });
+    }
 
+    public static final ScheduledTask untilFoundReduxLatestTask(ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log, final ContentResolver resolver) {
+        return taskFor(new BaseReduxLatestTaskProducer(client, writer, adapter, log) {
+            
+            @Override
+            protected boolean finished(PaginatedBaseProgrammes lastBatch) {
+                BaseReduxProgramme first = lastBatch.getResults().get(0);
+                String firstUri = FullProgrammeItemExtractor.REDUX_URI_BASE + first.getCanonical();
+                Maybe<Identified> possibleContent = resolver.findByCanonicalUris(ImmutableList.of(firstUri)).get(firstUri);
+                return possibleContent.hasValue();
+            }
+        });
+    }
+    
+    public static final ScheduledTask completeReduxLatestTask(ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log) {
+        return taskFor(new BaseReduxLatestTaskProducer(client, writer, adapter, log) {
+            
+            @Override
+            protected boolean finished(PaginatedBaseProgrammes lastBatch) {
+                return lastBatch.getResults().size() <= SELECTION_LIMIT;
+            }
+        });
+    }
+    
+    public static final ScheduledTask maximumReduxLatestTask(final int maximum, ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log) {
+        return taskFor(new BaseReduxLatestTaskProducer(client, writer, adapter, log) {
+            
+            private int seen = 0;
+            private int max = maximum;
+            
+            @Override
+            protected boolean finished(PaginatedBaseProgrammes lastBatch) {
+                seen += lastBatch.getResults().size();
+                return seen >= max;
+            }
+            
+        });
+    }
+    
+    private static ResultProcessingScheduledTask<UpdateProgress> taskFor(Iterable<Callable<UpdateProgress>> taskProducer) {
+        ResultProcessor<? super UpdateProgress, ?> taskProcessor = new ResultProcessor<UpdateProgress, Void>() {
+            @Override
+            public Void process(UpdateProgress input) {
+                return null;
+            }
+        };
+        return new ResultProcessingScheduledTask<UpdateProgress>(taskProducer, taskProcessor , sharedExecutor);
+    }
+
+    private static abstract class BaseReduxLatestTaskProducer implements Iterable<Callable<UpdateProgress>> {
+        
+        private final ReduxClient client;
+        private final ReduxDiskrefUpdateTask.Builder taskBuilder;
+
+        public BaseReduxLatestTaskProducer(ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log) {
+            this.client = client;
+            this.taskBuilder = ReduxDiskrefUpdateTask.diskRefUpdateTaskBuilder(writer, adapter, log);
+        }
+        
+        @Override
+        public Iterator<Callable<UpdateProgress>> iterator() {
+            return new AbstractIterator<Callable<UpdateProgress>>() {
+
+                private PaginatedBaseProgrammes lastBatch;
+                private Iterator<Callable<UpdateProgress>> currentBatch = Iterators.emptyIterator();
+                private Selection currentSelection = Selection.ALL;
+                
+                @Override
+                protected Callable<UpdateProgress> computeNext() {
+                    while(!currentBatch.hasNext()) {
+                        if(lastBatch != null && finished(lastBatch)) {
+                            return endOfData();
+                        } else {
+                            lastBatch = client.latest(currentSelection);
+                            if (lastBatch != null) {
+                                currentBatch = transformedIterator(lastBatch);
+                                currentSelection = new Selection(lastBatch.getLast() + SELECTION_LIMIT);
+                            } else {
+                                return endOfData();
+                            }
+                        }
+                    }
+                    return currentBatch.next();
+                }
+
+            };
+        }
+        
+        private Iterator<Callable<UpdateProgress>> transformedIterator(PaginatedBaseProgrammes latestBatch) {
+            return Iterators.transform(latestBatch.getResults().iterator(), new Function<BaseReduxProgramme, Callable<UpdateProgress>>() {
+                @Override
+                public Callable<UpdateProgress> apply(BaseReduxProgramme programme) {
+                    return taskBuilder.updateFor(programme.getDiskref());
+                }
+            });
+        }
+        
+        protected abstract boolean finished(PaginatedBaseProgrammes lastBatch);
+        
+    }
+    
     private ReduxLatestUpdateTasks(){};
-    
-    public static final class TillFoundReduxLatestUpdateTask extends ReduxLatestUpdateTask {
-
-        private final ContentResolver resolver;
-
-        public TillFoundReduxLatestUpdateTask(ContentResolver resolver, ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-            super(client, handler, log);
-            this.resolver = resolver;
-        }
-
-        public TillFoundReduxLatestUpdateTask(ContentResolver resolver, ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log, ExecutorService executor) {
-            super(client, handler, log, executor);
-            this.resolver = resolver;
-        }
-
-        @Override
-        protected boolean finished(PaginatedBaseProgrammes programmes) {
-            BaseReduxProgramme first = programmes.getResults().get(0);
-            String firstUri = FullProgrammeItemExtractor.CANONICAL_URI_BASE + first.getCanonical();
-            Maybe<Identified> possibleContent = resolver.findByCanonicalUris(ImmutableList.of(firstUri)).get(firstUri);
-            return possibleContent.hasValue();
-        }
-
-    }
-    
-    public static final class FullReduxLatestUpdateTask extends ReduxLatestUpdateTask {
-
-        public FullReduxLatestUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-            super(client, handler, log);
-        }
-
-        public FullReduxLatestUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log, ExecutorService executor) {
-            super(client, handler, log, executor);
-        }
-
-        @Override
-        protected boolean finished(PaginatedBaseProgrammes programmes) {
-            return programmes.getResults().size() <= limit();
-        }
-
-    }
-
-    public static final class FirstPageReduxLatestUpdateTask extends ReduxLatestUpdateTask {
-
-        public FirstPageReduxLatestUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log, ExecutorService executor) {
-            super(client, handler, log, executor);
-        }
-
-        public FirstPageReduxLatestUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-            super(client, handler, log);
-        }
-
-        @Override
-        protected boolean finished(PaginatedBaseProgrammes programmes) {
-            return false;
-        }
-
-    }
-    
-    public static final class MaximumReduxLatestUpdateTask extends ReduxLatestUpdateTask {
-
-        public MaximumReduxLatestUpdateTask(int max, ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log, ExecutorService executor) {
-            super(client, handler, log, executor);
-            this.max = max;
-        }
-
-        public MaximumReduxLatestUpdateTask(int max, ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-            super(client, handler, log);
-            this.max = max;
-        }
-        
-        private int seen = 0;
-        private int max = 1000;
-        
-        @Override
-        protected boolean finished(PaginatedBaseProgrammes programmes) {
-            seen += programmes.getResults().size();
-            return seen >= max;
-        }
-        
-    }
 }
