@@ -13,7 +13,10 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.redux.ReduxDayUpdateTask.Builder;
 import org.joda.time.LocalDate;
 
@@ -31,14 +34,14 @@ public class ScheduledReduxDayUpdateTask extends ScheduledTask {
 
     private final Builder taskBuilder;
 
-    public ScheduledReduxDayUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log, ExecutorService executor) {
+    public ScheduledReduxDayUpdateTask(ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log, ExecutorService executor) {
         this.log = log;
         this.executor = executor;
-        this.taskBuilder = ReduxDayUpdateTask.dayUpdateTaskBuilder(client, handler, log);
+        this.taskBuilder = ReduxDayUpdateTask.dayUpdateTaskBuilder(client, writer, adapter, log);
     }
     
-    public ScheduledReduxDayUpdateTask(ReduxClient client, ReduxProgrammeHandler handler, AdapterLog log) {
-        this(client, handler, log, new ThreadPoolExecutor(0, 10, 1, TimeUnit.MINUTES, new LinkedBlockingDeque<Runnable>(), new ThreadFactoryBuilder().setNameFormat("Redux Updater %d").build()));
+    public ScheduledReduxDayUpdateTask(ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log) {
+        this(client, writer, adapter, log, new ThreadPoolExecutor(0, 10, 1, TimeUnit.MINUTES, new LinkedBlockingDeque<Runnable>(), new ThreadFactoryBuilder().setNameFormat("Redux Updater %d").build()));
     }
     
     @Override
