@@ -53,7 +53,7 @@ public class ReduxDayUpdateTask implements Callable<UpdateProgress> {
     }
 
     @Override
-    public UpdateProgress call() {
+    public UpdateProgress call() throws Exception {
         int processed = 0;
         int failed = 0;
         for (BaseReduxProgramme programme : client.programmesForDay(date)) {
