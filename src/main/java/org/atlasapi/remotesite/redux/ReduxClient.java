@@ -7,15 +7,15 @@ import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
 import org.atlasapi.remotesite.redux.model.PaginatedBaseProgrammes;
 import org.joda.time.LocalDate;
 
-import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.query.Selection;
 
 public interface ReduxClient {
 
-    List<BaseReduxProgramme> programmesForDay(LocalDate date);
+    List<BaseReduxProgramme> programmesForDay(LocalDate date) throws HttpException, Exception;
     
-    Maybe<FullReduxProgramme> programmeFor(String diskRef);
+    FullReduxProgramme programmeFor(String diskRef) throws HttpException, Exception;
     
-    PaginatedBaseProgrammes latest(Selection selection);
+    PaginatedBaseProgrammes latest(Selection selection) throws HttpException, Exception;
     
 }

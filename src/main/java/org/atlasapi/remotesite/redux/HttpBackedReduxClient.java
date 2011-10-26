@@ -1,13 +1,9 @@
 package org.atlasapi.remotesite.redux;
 
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.redux.model.BaseReduxProgramme;
 import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
@@ -21,7 +17,6 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
@@ -44,7 +39,6 @@ public class HttpBackedReduxClient implements ReduxClient {
         private HostSpecifier host;
         private UsernameAndPassword credentials;
         private String basePath = "/";
-        private AdapterLog log = new NullAdapterLog();
 
         public Builder(HostSpecifier host) {
             this.host = host;
@@ -60,16 +54,11 @@ public class HttpBackedReduxClient implements ReduxClient {
             return this;
         }
         
-        public Builder withLog(AdapterLog log) {
-            this.log  = log;
-            return this;
-        }
-        
         public HttpBackedReduxClient build() {
             return new HttpBackedReduxClient(new SimpleHttpClientBuilder()
                 .withUserAgent(HttpClients.ATLAS_USER_AGENT)
                 .withPreemptiveBasicAuth(credentials)
-                .withAcceptHeader(MimeType.APPLICATION_JSON).build(), "http://" + host.toString() + basePath, log);
+                .withAcceptHeader(MimeType.APPLICATION_JSON).build(), "http://" + host.toString() + basePath);
         }
     }
     
@@ -77,23 +66,16 @@ public class HttpBackedReduxClient implements ReduxClient {
     private final String requestBase;
     
     private final Gson gson;
-    private final AdapterLog log;
     
-    public HttpBackedReduxClient(SimpleHttpClient httpClient, String requestBase, AdapterLog log) {
+    public HttpBackedReduxClient(SimpleHttpClient httpClient, String requestBase) {
         this.httpClient = httpClient;
         this.requestBase = requestBase;
-        this.log = log;
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
     }
     
     @Override
-    public Maybe<FullReduxProgramme> programmeFor(final String diskRef) {
-        try {
-            return Maybe.fromPossibleNullValue(getAsType(String.format("%sprogramme/%s", requestBase, diskRef), TypeToken.get(FullReduxProgramme.class)));
-        } catch (Exception e) {
-            log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception fetching diskref %s", diskRef));
-            return Maybe.nothing();
-        }
+    public FullReduxProgramme programmeFor(final String diskRef) throws HttpException, Exception {
+        return getAsType(String.format("%sprogramme/%s", requestBase, diskRef), TypeToken.get(FullReduxProgramme.class));
     }
 
     private <T> T getAsType(final String url, final TypeToken<T> type) throws HttpException, Exception {
@@ -111,25 +93,15 @@ public class HttpBackedReduxClient implements ReduxClient {
     }
 
     @Override
-    public List<BaseReduxProgramme> programmesForDay(LocalDate date) {
+    public List<BaseReduxProgramme> programmesForDay(LocalDate date) throws HttpException, Exception {
         String formattedDate = date.toString(ISODateTimeFormat.date());
-        try {
-            List<BaseReduxProgramme> programmes = getAsType(String.format("%sday/%s",requestBase, formattedDate), new TypeToken<List<BaseReduxProgramme>>(){});
-            return programmes == null ? ImmutableList.<BaseReduxProgramme>of() : ImmutableList.copyOf(programmes);
-        }catch (Exception e) {
-            log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception fetching programmes for %s", formattedDate));
-            return ImmutableList.<BaseReduxProgramme>of();
-        }
+        List<BaseReduxProgramme> programmes = getAsType(String.format("%sday/%s", requestBase, formattedDate), new TypeToken<List<BaseReduxProgramme>>() {});
+        return ImmutableList.copyOf(programmes);
     }
 
     @Override
-    public PaginatedBaseProgrammes latest(Selection selection) {
-        try {
-            return getAsType(selection.appendToUrl(requestBase + "latest"), TypeToken.get(PaginatedBaseProgrammes.class));
-        } catch (Exception e) {
-            log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception fetching latest programmes for %s", selection.toString()));
-            return null;
-        }
+    public PaginatedBaseProgrammes latest(Selection selection) throws HttpException, Exception {
+        return getAsType(selection.appendToUrl(requestBase + "latest"), TypeToken.get(PaginatedBaseProgrammes.class));
     }
-
+    
 }

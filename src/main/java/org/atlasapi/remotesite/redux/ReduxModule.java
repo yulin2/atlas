@@ -34,7 +34,7 @@ public class ReduxModule {
     
     protected @Bean ReduxClient reduxClient() {
         try {
-            return reduxClientForHost(HostSpecifier.from(reduxHost)).withCredentials(new UsernameAndPassword(reduxUsername, reduxPassword)).withLog(log).build();
+            return reduxClientForHost(HostSpecifier.from(reduxHost)).withCredentials(new UsernameAndPassword(reduxUsername, reduxPassword)).build();
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -43,6 +43,7 @@ public class ReduxModule {
     @PostConstruct
     public void scheduleTasks() {
         taskScheduler.schedule(maximumReduxLatestTask(1000, reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Latest 1000 updater"), RepetitionRules.NEVER);
+        taskScheduler.schedule(ReduxLatestUpdateTasks.firstBatchOnlyReduxLatestTask(reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Latest First Batch updater"), RepetitionRules.NEVER);
         taskScheduler.schedule(completeReduxLatestTask(reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Complete Latest updater"), RepetitionRules.NEVER);
     }
 

@@ -15,34 +15,36 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 //TODO: split this into more cohesive parts
-public final class ResultProcessingScheduledTask<T> extends ScheduledTask {
+public final class ResultProcessingScheduledTask<T, R extends Reducible<R>> extends ScheduledTask {
 
-    private String producerStatus = "";
-    private String processorStatus = "";
+    private final ProgressReporter<R> reporter;
 
     private final Executor executor;
     private final Iterable<Callable<T>> producer;
-    private final ResultProcessor<? super T, ?> consumer;
+    private final ResultProcessor<? super T, R> consumer;
 
-    public ResultProcessingScheduledTask(Iterable<Callable<T>> taskProducer, ResultProcessor<? super T, ?> taskProcessor, Executor executor) {
+    public ResultProcessingScheduledTask(Iterable<Callable<T>> taskProducer, ResultProcessor<? super T, R> taskProcessor, Executor executor) {
         this.producer = taskProducer;
         this.consumer = taskProcessor;
         this.executor = executor;
+        this.reporter = new ProgressReporter<R>();
     }
 
     @Override
     protected final void runTask() {
+        
         final CompletionService<T> completer = new ExecutorCompletionService<T>(executor);
         final Semaphore available = new Semaphore(0);
         final List<Future<T>> tasks = Lists.newArrayList();
         final AtomicBoolean producing = new AtomicBoolean(true);
 
+        reporter.reset();
+        
         Thread processor = new Thread(new Runnable() {
             @Override
             public void run() {
-                UpdateProgress progress = UpdateProgress.START;
-                progress = processorTasks(completer, available, producing, progress);
-                processorRemainingTasks(completer, available, progress);
+                processorTasks(completer, available, producing);
+                processorRemainingTasks(completer, available);
             }
         }, this.getName() + " Result Processor");
         processor.start();
@@ -55,8 +57,7 @@ public final class ResultProcessingScheduledTask<T> extends ScheduledTask {
         }
     }
 
-    private UpdateProgress produceTasks(CompletionService<T> completer, Semaphore available, List<Future<T>> tasks, AtomicBoolean producing) {
-        UpdateProgress progress = UpdateProgress.START;
+    private void produceTasks(CompletionService<T> completer, Semaphore available, List<Future<T>> tasks, AtomicBoolean producing) {
         Iterator<Callable<T>> taskIterator = producer.iterator();
 
         while (true) {
@@ -65,84 +66,120 @@ public final class ResultProcessingScheduledTask<T> extends ScheduledTask {
                 if (!taskIterator.hasNext() || !shouldContinue()) {
                     producing.set(false);
                     available.release();
-                    progress = progress.reduce(UpdateProgress.SUCCESS);
+                    reporter.addSubmission();
                     break;
                 }
                 available.release();
-                progress = progress.reduce(UpdateProgress.SUCCESS);
+                reporter.addSubmission();
             } catch (RejectedExecutionException rje) {
-                progress = progress.reduce(UpdateProgress.FAILURE);
+                reporter.addRejection();
             }
-            updateProducerStatus("Submitting tasks.", progress);
+            reporter.setProducerStatus("Submitting tasks.");
         }
 
         if (!shouldContinue()) {
-            cancelTasks(tasks, progress);
+            cancelTasks(tasks);
         } else {
-            updateProducerStatus("Finished submitting tasks.", progress);
+            reporter.setProducerStatus("Finished submitting tasks.");
         }
-        return progress;
     }
 
-    private void processorRemainingTasks(CompletionService<T> completer, Semaphore available, UpdateProgress progress) {
+    private void processorTasks(CompletionService<T> results, Semaphore available, AtomicBoolean stillProducing) {
+        while (stillProducing.get()) {
+            try {
+                available.acquire();
+                processResult(results.take());
+            } catch (InterruptedException ie) {
+                return;
+            }
+        }
+    }
+    
+    private void processorRemainingTasks(CompletionService<T> completer, Semaphore available) {
         while (available.tryAcquire()) {
             try {
-                progress = processResult(completer.take(), progress);
+                processResult(completer.take());
             } catch (InterruptedException e) {
                 return;
             }
         }
     }
 
-    private UpdateProgress processorTasks(CompletionService<T> results, Semaphore available, AtomicBoolean stillProducing, UpdateProgress progress) {
-        while (stillProducing.get()) {
-            try {
-                available.acquire();
-                progress = processResult(results.take(), progress);
-            } catch (InterruptedException ie) {
-                return progress;
-            }
-        }
-        return progress;
-    }
-
-    private UpdateProgress processResult(Future<T> result, UpdateProgress consumeProgress) throws InterruptedException {
+    private void processResult(Future<T> result) throws InterruptedException {
         if (!result.isCancelled()) {
             try {
-                return updateProcessorStatus(consumeProgress.reduce(UpdateProgress.SUCCESS), consumer.process(result.get()));
+                reporter.setProcessorStatus(consumer.process(result.get()));
             } catch (Exception e) {
-                return updateProcessorStatus(consumeProgress.reduce(UpdateProgress.FAILURE), null);
+                reporter.addException();
             }
         }
-        return consumeProgress;
     }
 
-    protected void cancelTasks(List<Future<T>> tasks, UpdateProgress progress) {
-        updateProducerStatus("Cancelling submitted tasks.", progress);
+    protected void cancelTasks(List<Future<T>> tasks) {
+        reporter.setProducerStatus("Cancelling submitted tasks.");
         int cancelled = 0;
         for (Future<T> task : tasks) {
             if (task.cancel(false)) {
                 cancelled++;
             }
         }
-        updateProducerStatus("Cancelled " + cancelled + " submitted tasks.", progress);
+        reporter.setProducerStatus("Cancelled " + cancelled + " submitted tasks.");
     }
-
-    protected final void updateProducerStatus(String prefix, UpdateProgress progress) {
-        this.producerStatus = prefix + progress.toString(" %s tasks submitted" + (progress.hasFailures() ? ", %s rejected" : ""));
-        updateStatus();
+    
+    @Override
+    public String getCurrentStatusMessage() {
+        return reporter.toString();
     }
-
-    protected final UpdateProgress updateProcessorStatus(UpdateProgress progress, Object result) {
-        this.processorStatus = progress.toString("%s tasks processed" + (progress.hasFailures() ? ", %s failed. " : ". "));
-        if (result != null) {
-            processorStatus += result.toString();
+    
+    private static class ProgressReporter<R extends Reducible<R>> {
+        
+        private String producerStatus;
+        private UpdateProgress submissions;
+        
+        private int exceptions;
+        private R processorStatus;
+        
+        public ProgressReporter() {
+            reset();
         }
-        updateStatus();
-        return progress;
-    }
-
-    private void updateStatus() {
-        reportStatus(String.format("%s. %s", producerStatus, processorStatus));
+        
+        public void reset() {
+            producerStatus = null;
+            submissions = UpdateProgress.START;
+            processorStatus = null;
+            exceptions = 0;
+        }
+        
+        @Override
+        public String toString() {
+            if(producerStatus != null) {
+                return producerStatus + 
+                       submissions.toString(" %s tasks submitted" + (submissions.hasFailures() ? ", %s rejected. " : ". ")) + 
+                       (processorStatus != null ? processorStatus.toString() : "") + 
+                       (exceptions > 0 ? String.format(". %s exceptions", exceptions) : "");
+            }
+            return null;
+        }
+        
+        public void addSubmission() {
+            this.submissions = submissions.reduce(UpdateProgress.SUCCESS);
+        }
+        
+        public void addRejection() {
+            this.submissions = submissions.reduce(UpdateProgress.FAILURE);
+        }
+        
+        public void setProducerStatus(String status) {
+            this.producerStatus = status;
+        }
+        
+        public void addException() {
+            exceptions++;
+        }
+        
+        public void setProcessorStatus(R o) {
+            this.processorStatus = (processorStatus == null) ? o : processorStatus.reduce(o);
+        }
+        
     }
 }
