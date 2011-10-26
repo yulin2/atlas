@@ -9,8 +9,6 @@ import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
 
-import com.metabroadcast.common.base.Maybe;
-
 public class DefaultReduxProgrammeAdapter implements SiteSpecificAdapter<Item> {
     
     private final ReduxClient reduxClient;
@@ -29,11 +27,13 @@ public class DefaultReduxProgrammeAdapter implements SiteSpecificAdapter<Item> {
         if(!matcher.matches()) {
             throw new IllegalArgumentException("Redux adapter can't fetch " + uri);
         }
-        Maybe<FullReduxProgramme> possibleReduxProgramme = reduxClient.programmeFor(matcher.group(1));
-        if(possibleReduxProgramme.isNothing()) {
-            throw new FetchException("Couldn't fetch programme data for " + uri);
+        
+        try {
+            FullReduxProgramme reduxProgramme = reduxClient.programmeFor(matcher.group(1));
+            return contentExtractor.extract(reduxProgramme);
+        } catch (Exception e) {
+            throw new FetchException("Couldn't fetch programme data for " + uri, e);
         }
-        return contentExtractor.extract(possibleReduxProgramme.requireValue());
     }
 
     @Override

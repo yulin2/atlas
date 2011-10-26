@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.redux;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
+
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
@@ -78,23 +80,25 @@ public final class ReduxLatestUpdateTasks {
         });
     }
     
-    private static ResultProcessingScheduledTask<UpdateProgress> taskFor(Iterable<Callable<UpdateProgress>> taskProducer) {
-        ResultProcessor<? super UpdateProgress, ?> taskProcessor = new ResultProcessor<UpdateProgress, Void>() {
+    private static ResultProcessingScheduledTask<UpdateProgress,UpdateProgress> taskFor(Iterable<Callable<UpdateProgress>> taskProducer) {
+        ResultProcessor<? super UpdateProgress,UpdateProgress> taskProcessor = new ResultProcessor<UpdateProgress, UpdateProgress>() {
             @Override
-            public Void process(UpdateProgress input) {
-                return null;
+            public UpdateProgress process(UpdateProgress input) {
+                return input;
             }
         };
-        return new ResultProcessingScheduledTask<UpdateProgress>(taskProducer, taskProcessor , sharedExecutor);
+        return new ResultProcessingScheduledTask<UpdateProgress,UpdateProgress>(taskProducer, taskProcessor , sharedExecutor);
     }
 
     private static abstract class BaseReduxLatestTaskProducer implements Iterable<Callable<UpdateProgress>> {
         
         private final ReduxClient client;
         private final ReduxDiskrefUpdateTask.Builder taskBuilder;
+        private final AdapterLog log;
 
         public BaseReduxLatestTaskProducer(ReduxClient client, ContentWriter writer, SiteSpecificAdapter<Item> adapter, AdapterLog log) {
             this.client = client;
+            this.log = log;
             this.taskBuilder = ReduxDiskrefUpdateTask.diskRefUpdateTaskBuilder(writer, adapter, log);
         }
         
@@ -112,7 +116,7 @@ public final class ReduxLatestUpdateTasks {
                         if(lastBatch != null && finished(lastBatch)) {
                             return endOfData();
                         } else {
-                            lastBatch = client.latest(currentSelection);
+                            lastBatch = batchForSelection(currentSelection);
                             if (lastBatch != null) {
                                 currentBatch = transformedIterator(lastBatch);
                                 currentSelection = new Selection(lastBatch.getLast() + SELECTION_LIMIT);
@@ -123,8 +127,16 @@ public final class ReduxLatestUpdateTasks {
                     }
                     return currentBatch.next();
                 }
-
             };
+        }
+        
+        private PaginatedBaseProgrammes batchForSelection(Selection selection) {
+            try {
+                return client.latest(selection);
+            } catch (Exception e) {
+                log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Couldn't get Latest for %s", selection));
+                return null;
+            }
         }
         
         private Iterator<Callable<UpdateProgress>> transformedIterator(PaginatedBaseProgrammes latestBatch) {
