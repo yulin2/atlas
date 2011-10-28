@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -30,10 +31,10 @@ public class BbcIonScheduleController {
     
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCIonScheduleUpdater").build());
 
-    private final BbcIonFeedClient<IonSchedule> scheduleClient;
+    private final RemoteSiteClient<IonSchedule> scheduleClient;
 
 
-    public BbcIonScheduleController(BbcIonFeedClient<IonSchedule> scheduleClient, BbcIonScheduleHandler handler, AdapterLog log) {
+    public BbcIonScheduleController(RemoteSiteClient<IonSchedule> scheduleClient, BbcIonScheduleHandler handler, AdapterLog log) {
         this.scheduleClient = scheduleClient;
         this.handler = handler;
         this.log = log;

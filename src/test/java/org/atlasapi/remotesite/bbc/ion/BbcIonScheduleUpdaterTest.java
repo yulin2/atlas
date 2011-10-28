@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.remotesite.bbc.BbcModule.SCHEDULE_DEFAULT_FORMAT;
+import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.hamcrest.core.AllOf.allOf;
 import junit.framework.TestCase;
 
@@ -12,6 +13,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
+import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
@@ -43,7 +45,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
 
         ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
-        BbcIonFeedClient<IonSchedule> client = new BbcIonFeedClient<IonSchedule>(IonSchedule.class, FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-no-brand-no-series.json")));
+        RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-no-brand-no-series.json")),IonSchedule.class);
         
         context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(allOf(
@@ -63,7 +65,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     	final String item2 = SLASH_PROGRAMMES_ROOT + "b006m86d";
     	
         ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
-        BbcIonFeedClient<IonSchedule> client = new BbcIonFeedClient<IonSchedule>(IonSchedule.class, FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-no-series.json")));
+        RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-no-series.json")), IonSchedule.class);
 
         context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(allOf(
@@ -83,7 +85,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
         ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
-        BbcIonFeedClient<IonSchedule> client = new BbcIonFeedClient<IonSchedule>(IonSchedule.class, FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-series.json")));
+        RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-series.json")), IonSchedule.class);
 
         context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(allOf(
