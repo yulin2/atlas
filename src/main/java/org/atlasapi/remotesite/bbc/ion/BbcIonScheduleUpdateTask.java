@@ -6,16 +6,17 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import java.util.concurrent.Callable;
 
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 
 public class BbcIonScheduleUpdateTask implements Callable<Integer> {
     
     private final String scheduleUrl;
-    private final BbcIonFeedClient<IonSchedule> scheduleClient;
+    private final RemoteSiteClient<IonSchedule> scheduleClient;
     private final BbcIonScheduleHandler handler;
     private final AdapterLog log;
 
-    public BbcIonScheduleUpdateTask(String scheduleUrl, BbcIonFeedClient<IonSchedule> scheduleClient, BbcIonScheduleHandler handler, AdapterLog log){
+    public BbcIonScheduleUpdateTask(String scheduleUrl, RemoteSiteClient<IonSchedule> scheduleClient, BbcIonScheduleHandler handler, AdapterLog log){
         this.scheduleUrl = scheduleUrl;
         this.scheduleClient = scheduleClient;
         this.handler = handler;
@@ -28,7 +29,7 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
         
         IonSchedule schedule;
         try {
-            schedule = scheduleClient.getFeed(scheduleUrl);
+            schedule = scheduleClient.get(scheduleUrl);
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("couldn't fetch schedule: %s", scheduleUrl));
             throw e;

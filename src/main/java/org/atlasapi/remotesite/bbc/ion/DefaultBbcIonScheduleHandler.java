@@ -7,13 +7,10 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -21,16 +18,13 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.bbc.BbcAliasCompiler;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
-import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
-import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 
 public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
@@ -41,8 +35,11 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final AdapterLog log;
+    private final BbcIonEpisodeItemContentExtractor itemExtractor;
     
-    private BbcItemFetcherClient itemClient;
+    private final BbcIonItemMerger merger = new BbcIonItemMerger();
+    
+    private SiteSpecificAdapter<Item> itemClient;
     private BbcContainerFetcherClient containerClient;
     private ItemsPeopleWriter itemsPeopleWriter;
     
@@ -50,9 +47,10 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
+        this.itemExtractor = new BbcIonEpisodeItemContentExtractor(log);
     }
 
-    public DefaultBbcIonScheduleHandler withItemFetcherClient(BbcItemFetcherClient client) {
+    public DefaultBbcIonScheduleHandler withItemFetcherClient(SiteSpecificAdapter<Item> client) {
         this.itemClient = client;
         return this;
     }
@@ -74,26 +72,17 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
         for (IonBroadcast broadcast : schedule.getBlocklist()) {
             String itemUri = SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId();
             try {
-                // find and (create and) update item
-                Identified ided = findOrCreateItem(broadcast, itemUri);
-
-                if (!(ided instanceof Item)) {
-                    log.record(new AdapterLogEntry(Severity.WARN).withDescription("Updating item %s, got %s when looking for Item", itemUri, ided.getClass().getSimpleName()).withSource(getClass()));
+                
+                Item item = resolveOrFetchItem(broadcast, itemUri);
+                
+                if(item == null) {
                     continue;
                 }
-
-                Item item = (Item) ided;
-
-                updateItemDetails(item, broadcast);
+                
+                //ensure broadcast is included.
+                addBroadcastToItem(item, broadcast);
 
                 String canonicalUri = item.getCanonicalUri();
-
-                if (item instanceof Episode) {
-                    updateEpisodeDetails((Episode) item, broadcast);
-                } else if (hasEpisodeDetails(broadcast.getEpisode())) {
-                    log.record(new AdapterLogEntry(Severity.INFO).withDescription(String.format("Updating Episode %s, resolved %s", canonicalUri, item.getClass().getSimpleName())).withSource(
-                            getClass()));
-                }
 
                 Brand brand = !Strings.isNullOrEmpty(broadcast.getBrandId()) ? getOrCreateBrand(broadcast, canonicalUri) : null;
                 Series series = !Strings.isNullOrEmpty(broadcast.getSeriesId()) ? getOrCreateSeries(broadcast, canonicalUri) : null;
@@ -129,6 +118,41 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
 
         return processed;
     }
+
+    private Item resolveOrFetchItem(IonBroadcast broadcast, String itemUri) {
+        //Get basic item from latest remote data.
+        Item item = itemExtractor.extract(broadcast.getEpisode()); 
+
+        // look for existing item, merge into latest remote data, else fetch complete.
+        Maybe<Identified> possibleIdentified = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
+        if (possibleIdentified.hasValue()) {
+            Identified ided = possibleIdentified.requireValue();
+            if (!(ided instanceof Item)) {
+                log.record(new AdapterLogEntry(Severity.WARN).withDescription("Updating %s, expecting Item, got %s", itemUri, ided.getClass().getSimpleName()).withSource(getClass()));
+                return null;
+            }
+            item = merger.merge(item, (Item)ided);
+        } else if (itemClient != null) {
+            try {
+                Item fetchedItem = itemClient.fetch(itemUri);
+                item = fetchedItem != null ? fetchedItem : item;
+            } catch (Exception e) {
+                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to fetch ", itemUri));
+            }
+        }
+        return item;
+    }
+
+//    private void merge(Item fetchedItem, Item existing) {
+//        //merge into fetched item to ensure type is up to date, need to be careful not to overwrite new data then.
+//        fetchedItem.addAliases(existing.getAliases());
+//        fetchedItem.setGenres(Iterables.concat(fetchedItem.getGenres(), existing.getGenres()));
+//        fetchedItem.setTags(ImmutableSet.copyOf(Iterables.concat(fetchedItem.getTags(), existing.getTags())));
+//        fetchedItem.setFirstSeen(existing.getFirstSeen());
+//        fetchedItem.setPeople(existing.getPeople());
+//        fetchedItem.setClips(Iterables.concat(fetchedItem.getClips(),existing.getClips()));
+//        fetchedItem.setVersions(ImmutableSet.copyOf(Iterables.concat(fetchedItem.getVersions(), existing.getVersions())));
+//    }
 
     private void updateEpisodeSeriesDetails(Series series, Episode episode) {
         Integer seriesNumber = series.getSeriesNumber();
@@ -188,57 +212,6 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
         return null;
     }
 
-    private Identified findOrCreateItem(IonBroadcast broadcast, String itemUri) {
-        Maybe<Identified> possibleIdentified = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
-        if (possibleIdentified.isNothing()) {
-            if (itemClient != null) {
-                Item fetchedItem = itemClient.createItem(broadcast.getEpisodeId());
-                if (fetchedItem != null) {
-                    return fetchedItem;
-                }
-            }
-            return createItemFrom(broadcast);
-        }
-        return possibleIdentified.requireValue();
-    }
-
-    private Item createItemFrom(IonBroadcast broadcast) {
-        IonEpisode ionEpisode = broadcast.getEpisode();
-
-        Item item;
-        if(ionEpisode.getIsFilm() != null && ionEpisode.getIsFilm()) {
-            item = new Film(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
-            item.setSpecialization(Specialization.FILM);
-            item.setMediaType(MediaType.VIDEO);
-        } else {
-            
-            if (!Strings.isNullOrEmpty(broadcast.getBrandId()) || !Strings.isNullOrEmpty(broadcast.getSeriesId())) {
-                item = new Episode(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
-            } else {
-                item = new Item(SLASH_PROGRAMMES_ROOT + broadcast.getEpisodeId(), BBC_CURIE_BASE + ionEpisode.getId(), Publisher.BBC);
-            }
-            
-            Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(ionEpisode.getMasterbrand());
-            if (maybeSpecialisation.hasValue()) {
-                item.setSpecialization(maybeSpecialisation.requireValue());
-            }
-
-            if (!Strings.isNullOrEmpty(broadcast.getMediaType())) {
-                item.setMediaType(MediaType.valueOf(broadcast.getMediaType().toUpperCase()));
-            } else {
-                Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(ionEpisode.getMasterbrand());
-                if (maybeMediaType.hasValue()) {
-                    item.setMediaType(maybeMediaType.requireValue());
-                }
-            }
-        }
-
-        item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
-        item.setIsLongForm(true);
-        
-        return item;
-    }
-
     private void createOrUpdatePeople(Item item) {
         if (itemsPeopleWriter != null) {
             itemsPeopleWriter.createOrUpdatePeople(item);
@@ -274,42 +247,10 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
 
     private void updateBrand(Brand brand, IonBroadcast broadcast) {
         brand.setTitle(broadcast.getEpisode().getBrandTitle());
-        BbcIonEpisodeDetailItemFetcherClient.addImagesTo("http://www.bbc.co.uk/iplayer/images/progbrand/", broadcast.getBrandId(), brand);
+        BbcImageUrlCreator.addImagesTo("http://www.bbc.co.uk/iplayer/images/progbrand/", broadcast.getBrandId(), brand);
     }
 
-    private void updateEpisodeDetails(Episode item, IonBroadcast broadcast) {
-        IonEpisode episode = broadcast.getEpisode();
-        if (hasEpisodeDetails(episode)) {
-
-            String subseriesId = episode.getSubseriesId();
-
-            if (Strings.isNullOrEmpty(subseriesId)) {
-                item.setEpisodeNumber(Ints.saturatedCast(episode.getPosition()));
-                return;
-            }
-
-            if (item.getPartNumber() == null && containerClient != null) {
-                Maybe<IonContainer> subseries = containerClient.getSubseries(subseriesId);
-                if (subseries.isNothing()) {
-                    log.record(warnEntry().withSource(getClass()).withDescription("Updating item %s, couldn't fetch subseries %s", subseriesId));
-                    return;
-                }
-                IonContainer subseriesContainer = subseries.requireValue();
-
-                item.setEpisodeNumber(Ints.saturatedCast(subseriesContainer.getPosition()));
-                item.setPartNumber(Ints.saturatedCast(episode.getPosition()));
-
-            }
-
-        }
-    }
-
-    private boolean hasEpisodeDetails(IonEpisode episode) {
-        return episode != null && episode.getPosition() != null;
-    }
-
-    private void updateItemDetails(Item item, IonBroadcast ionBroadcast) {
-
+    private void addBroadcastToItem(Item item, IonBroadcast ionBroadcast) {
         Version broadcastVersion = getBroadcastVersion(item, ionBroadcast);
         if (broadcastVersion == null) {
             broadcastVersion = versionFrom(ionBroadcast);
@@ -320,19 +261,6 @@ public class DefaultBbcIonScheduleHandler implements BbcIonScheduleHandler {
         if (broadcast != null) {
             broadcastVersion.addBroadcast(broadcast);
         }
-
-        IonEpisode episode = ionBroadcast.getEpisode();
-
-        String title = !Strings.isNullOrEmpty(episode.getOriginalTitle()) ? episode.getOriginalTitle() : episode.getTitle();
-        if (!Strings.isNullOrEmpty(episode.getSubseriesTitle())) {
-            title = String.format("%s %s", episode.getSubseriesTitle(), title);
-        }
-        item.setTitle(title);
-
-        item.setDescription(episode.getSynopsis());
-        item.setThumbnail(episode.getMyImageBaseUrl() + episode.getId() + "_150_84.jpg");
-        item.setImage(episode.getMyImageBaseUrl() + episode.getId() + "_640_360.jpg");
-
     }
 
     private Version versionFrom(IonBroadcast ionBroadcast) {
