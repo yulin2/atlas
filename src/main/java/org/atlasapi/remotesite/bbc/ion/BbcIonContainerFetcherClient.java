@@ -35,7 +35,7 @@ import com.metabroadcast.common.http.SimpleHttpRequest;
 public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
 
     private static final String CURIE_BASE = "bbc:";
-    private static final String EPISODE_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/container/container/%s/format/json";
+    public static final String CONTAINER_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/container/container/%s/format/json";
 
     private final BbcIonDeserializer<IonContainerFeed> ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonContainerFeed>(){});
     
@@ -60,7 +60,7 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
     
     private Maybe<IonContainer> getIonContainer(String pid) {
         try {
-            return Maybe.firstElementOrNothing((httpClient.get(new SimpleHttpRequest<IonContainerFeed>(String.format(EPISODE_DETAIL_PATTERN, pid), ION_TRANSLATOR))).getBlocklist());
+            return Maybe.firstElementOrNothing((httpClient.get(new SimpleHttpRequest<IonContainerFeed>(String.format(CONTAINER_DETAIL_PATTERN, pid), ION_TRANSLATOR))).getBlocklist());
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error fetching container info for " + pid));
             return Maybe.nothing();
