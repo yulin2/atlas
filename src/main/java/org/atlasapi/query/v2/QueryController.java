@@ -69,17 +69,35 @@ public class QueryController extends BaseController {
 			if (!Selection.ALL.equals(filter.getSelection())) {
 				throw new IllegalArgumentException("Cannot specifiy a limit or offset here");
 			}
-			String commaSeperatedUris = request.getParameter("uri");
-			if (commaSeperatedUris == null) {
-				throw new IllegalArgumentException("No uris specified");
+			List<String> uris = getUriList(request);
+			if(!uris.isEmpty()) {
+			    modelAndViewFor(request, response, ImmutableList.copyOf(Iterables.concat(executor.executeUriQuery(uris, filter).values())), AtlasModelType.CONTENT);
+			} else {
+			    List<String> ids = getIdList(request);
+			    if(!ids.isEmpty()) {
+			        modelAndViewFor(request, response, ImmutableList.copyOf(Iterables.concat(executor.executeIdQuery(ids, filter).values())), AtlasModelType.CONTENT);
+			    } else {
+			        throw new IllegalArgumentException("Must specify content uri or id");
+			    }
 			}
-			List<String> uris = ImmutableList.copyOf(URI_SPLITTER.split(commaSeperatedUris));
-			if (Iterables.isEmpty(uris)) {
-				throw new IllegalArgumentException("No uris specified");
-			}
-			modelAndViewFor(request, response, ImmutableList.copyOf(Iterables.concat(executor.executeUriQuery(uris, filter).values())), AtlasModelType.CONTENT);
+			
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}
 	}
+
+    private List<String> getUriList(HttpServletRequest request) {
+        return split(request.getParameter("uri"));
+    }
+
+    private List<String> getIdList(HttpServletRequest request) {
+        return split(request.getParameter("id"));
+    }
+
+    private ImmutableList<String> split(String parameter) {
+        if(parameter == null) {
+            return ImmutableList.of();
+        }
+        return ImmutableList.copyOf(URI_SPLITTER.split(parameter));
+    }
 }

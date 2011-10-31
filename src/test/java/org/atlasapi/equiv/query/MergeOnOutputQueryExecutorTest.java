@@ -5,7 +5,6 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
@@ -16,7 +15,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 public class MergeOnOutputQueryExecutorTest extends TestCase {
@@ -38,6 +36,13 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		brand3.addEquivalentTo(brand1);
 		item1.addEquivalentTo(item2);
 		item2.addClip(clip1);
+		
+		brand1.setId("one");
+		brand2.setId("two");
+		brand3.setId("three");
+		item1.setId("eyeone");
+		item2.setId("eyetwo");
+		clip1.setId("clipone");
 	}
 	
 	public void testMergingBrands() throws Exception {
@@ -74,6 +79,15 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
                 }
 				return result;
 			}
+
+            @Override
+            public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, ContentQuery query) {
+                Map<String, List<Identified>> result = Maps.newHashMap();
+                for (Content content : respondWith) {
+                    result.put(content.getId(), ImmutableList.<Identified>of(content));
+                }
+                return result;
+            }
 		};
 	}
 }

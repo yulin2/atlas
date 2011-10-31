@@ -59,7 +59,7 @@ public class LookupResolvingQueryExecutorTest extends MockObjectTestCase {
         
     }
 
-    private LookupEntry lookupEntryWithEquivalents(String id, LookupRef... equiv) {
-        return new LookupEntry(id, null, ImmutableSet.<String>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.copyOf(equiv), null, null);
+    private LookupEntry lookupEntryWithEquivalents(String uri, LookupRef... equiv) {
+        return new LookupEntry(uri, null, null, ImmutableSet.<String>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.copyOf(equiv), null, null);
     }
 }
