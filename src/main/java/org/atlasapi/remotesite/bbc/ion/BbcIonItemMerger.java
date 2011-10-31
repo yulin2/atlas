@@ -76,7 +76,9 @@ public class BbcIonItemMerger {
     
     private void mergeVersions(Version fetchedVersion, Version existingVersion) {
         Integer intDuration = ifNotNull(fetchedVersion.getDuration(), existingVersion.getDuration());
-        existingVersion.setDuration(intDuration != null ? Duration.standardSeconds(intDuration) : null);
+        if(intDuration != null) {
+            existingVersion.setDuration(Duration.standardSeconds(intDuration));
+        }
         existingVersion.setBroadcasts(ImmutableSet.copyOf(Iterables.concat(fetchedVersion.getBroadcasts(), existingVersion.getBroadcasts())));
         existingVersion.setPublishedDuration(ifNotNull(fetchedVersion.getPublishedDuration(), existingVersion.getPublishedDuration()));
         existingVersion.setRestriction(ifNotNull(fetchedVersion.getRestriction(), existingVersion.getRestriction()));
