@@ -29,9 +29,7 @@ import com.sun.syndication.feed.atom.Feed;
 
 public class C4LakeviewOnDemandFetcher {
 
-	private static final String MEDIA_PLAYER = "media:player";
 	private static final String DC_RELATED_ENTRY_ID = "dc:relation.RelatedEntryId";
-	private static final String FEED_PREFIX = "http://ios.channel4.com/pmlsd/";
 	
 	private static final Pattern RELATED_ENTRY_PATTERN = Pattern.compile("^tag:.*(channel4.com,2009:)(.*)");
 	private static final Pattern BRAND_PATTERN = Pattern.compile("^http://www.channel4.com/programmes/(.*?)/episode-guide.*");
@@ -39,10 +37,19 @@ public class C4LakeviewOnDemandFetcher {
 	private RemoteSiteClient<Feed> atomClient;
 	private final AdapterLog log;
 	private Map<String, Map<String, Location>> locations;
+	private String apiRoot;
 	
-	public C4LakeviewOnDemandFetcher(RemoteSiteClient<Feed> atomClient, AdapterLog log) {
+	/**
+	 * Caching lakeview ondemand fetcher
+	 * 
+	 * @param atomClient
+	 * @param apiRoot		API root, e.g. http://www.channel4.com/pmlsd/ . Must include trailing forwardslash.
+	 * @param log
+	 */
+	public C4LakeviewOnDemandFetcher(RemoteSiteClient<Feed> atomClient, String apiRoot, AdapterLog log) {
 		this.atomClient = atomClient;
 		this.log = log;
+		this.apiRoot = apiRoot;
 		this.locations = new MapMaker().expireAfterWrite(30, TimeUnit.MINUTES).makeComputingMap(new Function<String, Map<String, Location> >() {
 			@Override
 			public Map<String, Location> apply(String brandUri) {
@@ -63,7 +70,7 @@ public class C4LakeviewOnDemandFetcher {
 	
 	private Map<String, Location> getBrandLocations(String brandName) {
 		try {
-			String uri = String.format("http://ios.channel4.com/pmlsd/%s/4od.atom", brandName);
+			String uri = String.format("%s%s/4od.atom", apiRoot, brandName);
 			return extractLocations(atomClient.get(uri));
 		} catch (HttpStatusCodeException e) {
 			if (HttpServletResponse.SC_NOT_FOUND == e.getStatusCode()) {
