@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.feeds.lakeview.LakeviewModule;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgModule;
 import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.channel4.C4Module;
@@ -46,6 +47,7 @@ public class RemoteSiteModuleConfigurer {
         .put("preview", PreviewNetworksModule.class)
         .put("itvinterlinking", ItvInterlinkingModule.class)
         .put("worldservice", WorldServicesModule.class)
+        .put("lakeview", LakeviewModule.class)
         .put("redux", ReduxModule.class)
     .build();
 
