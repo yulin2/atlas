@@ -2,9 +2,14 @@ package org.atlasapi.remotesite.pa;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
+import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
@@ -19,16 +24,19 @@ public class PaChannelProcessor {
 
     private final PaProgDataProcessor processor;
     private final BroadcastTrimmer trimmer;
+    private final ScheduleWriter scheduleWriter;
     private final AdapterLog log;
 
-    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, AdapterLog log) {
+    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, AdapterLog log) {
         this.processor = processor;
         this.trimmer = trimmer;
+        this.scheduleWriter = scheduleWriter;
         this.log = log;
     }
 
     public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
         int processed = 0;
+        Set<ItemRefAndBroadcast> broadcasts = new HashSet<ItemRefAndBroadcast>();
         Channel channel = channelData.channel();
         try {
             Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
@@ -36,8 +44,11 @@ public class PaChannelProcessor {
                 String programmeLock = lockIdentifier(programme);
                 lock(currentlyProcessing, programmeLock);
                 try {
-                    processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
-                    acceptableBroadcastIds.put(PaHelper.getBroadcastId(programme.getShowingId()), progUri(programme));
+                    ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
+                    if(itemAndBroadcast != null) {
+	                    broadcasts.add(itemAndBroadcast);
+	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getId(), progUri(programme));
+                    }
                     processed++;
                 } catch (Exception e) {
                     log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));
@@ -48,6 +59,8 @@ public class PaChannelProcessor {
             if (trimmer != null) {
                 trimmer.trimBroadcasts(new Interval(channelData.day(), channelData.day().plusDays(1)), channel, acceptableBroadcastIds.build());
             }
+            scheduleWriter.replaceScheduleBlock(Publisher.PA, channel, broadcasts);
+            
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s", channel.key()));
         }
