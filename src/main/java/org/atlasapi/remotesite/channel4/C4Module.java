@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.channel4;
 
 import static org.atlasapi.media.entity.Publisher.C4;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.PostConstruct;
 
 import nu.xom.Builder;
@@ -30,6 +32,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.http.SimpleHttpClientBuilder;
+import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
@@ -46,6 +50,8 @@ public class C4Module {
 
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
+	private @Value("${c4.lakeviewavailability.key}") String lakeviewAvailabilityFeedKey;
+	private @Value("${c4.lakeviewavailability.apiroot") String lakeviewApiRoot;
 
 	private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
 	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
@@ -82,6 +88,10 @@ public class C4Module {
     @Bean C4AtoZAtomContentLoader c4AtozUpdater() {
 		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), log);
 	}
+    
+    @Bean C4LakeviewOnDemandFetcher c4LakeviewOnDemandFetcher() {
+    	return new C4LakeviewOnDemandFetcher(c4XBoxAtomFetcher(), lakeviewApiRoot, log); 
+    }
 
 	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {
 	    return new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient(requestLimitedHttpClient()));
@@ -92,9 +102,24 @@ public class C4Module {
 	}
 
 	protected @Bean C4AtomBackedBrandUpdater c4BrandFetcher() {
-		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter(), log);
+		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter(), c4LakeviewOnDemandFetcher(), log);
 	}
-	   
+	
+	protected @Bean RemoteSiteClient<Feed> c4XBoxAtomFetcher() {
+	    return new AtomClient(requestLimitedAuthHeaderSettingHttpClient());
+	}
+	
+	protected @Bean SimpleHttpClient requestLimitedAuthHeaderSettingHttpClient() {
+	    return new RequestLimitingSimpleHttpClient(new SimpleHttpClientBuilder()
+        .withUserAgent("C4oD_iPad")
+        .withSocketTimeout(50, TimeUnit.SECONDS)
+        .withConnectionTimeout(10, TimeUnit.SECONDS)
+        .withAcceptHeader(MimeType.TEXT_HTML)
+        .withRetries(3)
+        .withHeader("X-C4-API-Key", lakeviewAvailabilityFeedKey)
+    .build(), 4);
+	}
+	
     @Bean protected LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
         return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
     }

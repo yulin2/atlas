@@ -24,7 +24,7 @@ public class C4SeriesExtractorTest extends TestCase {
 	
 	public void testParsingASeries() throws Exception {
 		
-		SeriesAndEpisodes seriesAndEpisodes = new C4SeriesExtractor(null, new NullAdapterLog()).extract(seriesFeed.build());
+		SeriesAndEpisodes seriesAndEpisodes = new C4SeriesExtractor(null, null, new NullAdapterLog()).extract(seriesFeed.build());
 		Series series = seriesAndEpisodes.getSeries();
 		
 		assertThat(series.getCanonicalUri(), is("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3"));

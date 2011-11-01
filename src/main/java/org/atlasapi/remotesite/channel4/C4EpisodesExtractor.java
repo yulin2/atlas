@@ -46,6 +46,7 @@ import org.joda.time.Duration;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
@@ -58,8 +59,6 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
     
 	public static final String DC_AGE_RATING = "dc:relation.AgeRating";
 	public static final String DC_GUIDANCE = "dc:relation.Guidance";
-	public static final String DC_TERMS_AVAILABLE = "dcterms:available";
-	public static final String DC_TX_DATE = "dc:date.TXDate";
 	public static final String DC_START_TIME = "dc:relation.TXStartTime";
 	public static final String DC_TX_CHANNEL = "dc:relation.TXChannel";
 	public static final String EPISODE_TITLE_TEMPLATE = "Series %s Episode %s";
@@ -67,8 +66,6 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	public static final String DC_SERIES_NUMBER = "dc:relation.SeriesNumber";
 	private static final Pattern CLIP_ID_PATTERN = Pattern.compile("tag:www\\.channel4\\.com,\\d+:clip\\/(.+)");
 	private static final String EMBED_CODE = "<object id='flashObj' width='480' height='290' classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000' codebase='http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,47,0'><param name='movie' value='http://c.brightcove.com/services/viewer/federated_f9/86700592001?isVid=1&amp;isUI=1&amp;publisherID=1213940598' /><param name='bgcolor' value='#000000' /><param name='flashVars' value='videoId=%VIDEOID%&amp;playerID=86700592001&amp;domain=embed&amp;' /><param name='base' value='http://admin.brightcove.com' /><param name='seamlesstabbing' value='false' /><param name='allowFullScreen' value='true' /><param name='swLiveConnect' value='true' /><param name='allowScriptAccess' value='always' /><embed src='http://c.brightcove.com/services/viewer/federated_f9/86700592001?isVid=1&amp;isUI=1&amp;publisherID=1213940598' bgcolor='#000000' flashVars='videoId=%VIDEOID%&amp;playerID=86700592001&amp;domain=embed&amp;' base='http://admin.brightcove.com' name='flashObj' width='480' height='290' seamlesstabbing='false' type='application/x-shockwave-flash' allowFullScreen='true' swLiveConnect='true' allowScriptAccess='always' pluginspage='http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash'></embed></object>";
-
-	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
 	public static Map<String, String> CHANNEL_LOOKUP = ImmutableMap.<String, String>builder()
 		.put("C4", "http://www.channel4.com")
@@ -79,9 +76,11 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 	
 	
 	private final AdapterLog log;
+	private C4LakeviewOnDemandFetcher lakeviewFetcher;
 	
-	public C4EpisodesExtractor(AdapterLog log) {
+	public C4EpisodesExtractor(C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
         this.log = log;
+        this.lakeviewFetcher = lakeviewFetcher;
 	}
 	
 	private boolean include4odInfo = false;
@@ -131,7 +130,11 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 				}
 			}
 			
-			Version version = versionFor(entry, episode, mediaGroup, lookup);
+			Location lakeviewLocation = null;
+			if(lakeviewFetcher != null) {
+				lakeviewLocation = lakeviewFetcher.lakeviewLocationFor(episode);
+			}
+			Version version = versionFor(entry, episode, mediaGroup, lookup, lakeviewLocation);
 		
 			if (version != null) {
 				episode.addVersion(version);
@@ -220,7 +223,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		return episode;
 	}
 
-	public Version versionFor(Entry entry, Item episode, Element mediaGroup, Map<String, String> lookup) {
+	public Version versionFor(Entry entry, Item episode, Element mediaGroup, Map<String, String> lookup, Location lakeviewLocation) {
 		Set<Country> availableCountries = null;
 		if (mediaGroup != null) {
 			Element restriction = mediaGroup.getChild("restriction", C4AtomApi.NS_MEDIA_RSS);
@@ -234,9 +237,9 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		if (uri == null) {
 			uri = C4AtomApi.clipUri(entry);
 		}
-		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC));
+		return version(uri, entry.getId(), lookup, availableCountries, new DateTime(entry.getUpdated(), DateTimeZones.UTC), lakeviewLocation);
 	}
-
+    
 	private String buildUriFromSeriesAndEpisodeNumber(Feed source, SeriesAndEpisodeNumber seriesAndEpisodeNumber) {
 		return C4AtomApi.episodeUri(C4AtomApi.webSafeNameFromAnyFeedId(source.getId()), seriesAndEpisodeNumber.getSeriesNumber(), seriesAndEpisodeNumber.getEpisodeNumber()); 
 	}
@@ -251,7 +254,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		}
         return null;
     }
-    
+	
 	private String description(Entry entry) {
 		com.sun.syndication.feed.atom.Content description = entry.getSummary();
 		if (description == null) {
@@ -268,35 +271,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
         return title.getValue();
     }
 	
-	private Location location(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
-		Location location = new Location();
-		location.setUri(uri);
-		location.addAlias(locationId);
-		location.setTransportType(TransportType.LINK);
-		location.setLastUpdated(lastUpdated);
-		
-		// The feed only contains available content
-		location.setAvailable(true);
-		
-		String availability = lookup.get(DC_TERMS_AVAILABLE);
-		
-		if (availability != null) {
-			Matcher matcher = AVAILABILTY_RANGE_PATTERN.matcher(availability);
-			if (!matcher.matches()) {
-				throw new IllegalStateException("Availability range format not recognised, was " + availability);
-			}
-			String txDate = lookup.get(DC_TX_DATE);
-            Policy policy = new Policy()
-				.withAvailabilityStart(new DateTime(Strings.isNullOrEmpty(txDate) ? matcher.group(1) : txDate))
-				.withAvailabilityEnd(new DateTime(matcher.group(2)));
-				
-			if (availableCountries != null) {
-				policy.setAvailableCountries(availableCountries);
-			}
-			location.setPolicy(policy);
-		}
-		return location;
-	}
+	
 	
 	private Location embedLocation(String embedId, Location linkLocation) {
         Location location = new Location();
@@ -316,7 +291,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
     }
 
 
-	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated) {
+	private Version version(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated, Location lakeviewLocation) {
 		Version version = new Version();
 		Duration duration = C4AtomApi.durationFrom(lookup);
 		
@@ -335,7 +310,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		
 		if (include4odInfo) {
 			Encoding encoding = new Encoding();
-			Location location = location(uri, locationId, lookup, availableCountries, lastUpdated);
+			Location location = C4AtomApi.locationFrom(uri, locationId, lookup, availableCountries, lastUpdated, null);
             encoding.addAvailableAt(location);
 			
 			Matcher matcher = CLIP_ID_PATTERN.matcher(locationId);
@@ -344,10 +319,12 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 			    encoding.addAvailableAt(embedLocation);
 			}
 			
+			if(lakeviewLocation != null) {
+				encoding.addAvailableAt(lakeviewLocation);
+			}
 			version.addManifestedAs(encoding);
 		}
 				
 		return version.getBroadcasts().isEmpty() && version.getManifestedAs().isEmpty() ? null : version;
 	}
-	
 }

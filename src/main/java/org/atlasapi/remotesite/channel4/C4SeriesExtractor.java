@@ -25,8 +25,8 @@ public class C4SeriesExtractor implements ContentExtractor<Feed, SeriesAndEpisod
 	private static final Pattern SERIES_ID = Pattern.compile("series-(\\d+)");
 	private final C4EpisodesExtractor episodesExtractor; 
 	
-	public C4SeriesExtractor(ContentResolver contentResolver, AdapterLog log) {
-		this.episodesExtractor = new C4EpisodesExtractor(log);
+	public C4SeriesExtractor(ContentResolver contentResolver, C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
+		this.episodesExtractor = new C4EpisodesExtractor(lakeviewFetcher, log);
 	}
 	
 	@Override

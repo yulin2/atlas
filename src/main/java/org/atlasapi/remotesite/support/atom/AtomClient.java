@@ -19,12 +19,15 @@ import static com.metabroadcast.common.http.SimpleHttpRequest.httpRequestFrom;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
+import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.io.WireFeedInput;
@@ -42,10 +45,13 @@ public class AtomClient implements RemoteSiteClient<Feed> {
 	}
 
 	@Override
-	public Feed get(String uri) throws Exception {
+	public Feed get(final String uri) throws Exception {
 	    return client.get(httpRequestFrom(uri, new HttpResponseTransformer<Feed>() {
             @Override
             public Feed transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
+            	if(prologue.statusCode() != HttpServletResponse.SC_OK) {
+            		throw new HttpStatusCodeException(prologue, String.format("Cannot transform response for %s as http status %d was returned", uri, prologue.statusCode()));
+            	}
                 return (Feed) new WireFeedInput().build(new InputStreamReader(body));
             }
         }));

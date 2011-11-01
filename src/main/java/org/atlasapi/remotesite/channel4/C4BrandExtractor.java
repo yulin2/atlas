@@ -56,14 +56,14 @@ public class C4BrandExtractor {
 
 	private final ContentWriter contentWriter;
 
-    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentWriter, AdapterLog log) {
+    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentWriter, C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
         feedClient = atomClient;
 		this.contentWriter = contentWriter;
         this.log = log;
-        fourOditemExtrator = new C4EpisodesExtractor(log).includeOnDemands();
-        flattenedBrandExtrator = new C4EpisodesExtractor(log);
-        seriesExtractor = new C4SeriesExtractor(contentResolver, log);
-        clipExtractor = new C4ClipExtractor(atomClient, new C4EpisodesExtractor(log).includeOnDemands());
+        fourOditemExtrator = new C4EpisodesExtractor(lakeviewFetcher, log).includeOnDemands();
+        flattenedBrandExtrator = new C4EpisodesExtractor(lakeviewFetcher, log);
+        seriesExtractor = new C4SeriesExtractor(contentResolver, lakeviewFetcher, log);
+        clipExtractor = new C4ClipExtractor(atomClient, new C4EpisodesExtractor(lakeviewFetcher, log).includeOnDemands());
         versionMerger = new C4PreviousVersionDataMerger(contentResolver);
         synthesizedItemUpdater = new C4SynthesizedItemUpdater(contentResolver, contentWriter);
         broadcastExtractor = new C4EpisodeBroadcastExtractor(log);
