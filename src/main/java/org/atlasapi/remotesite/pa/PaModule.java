@@ -7,6 +7,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
+import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -32,8 +33,8 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 @Configuration
 @Import(PaFilmModule.class)
 public class PaModule {
-    private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardHours(2)).withOffset(Duration.standardHours(1));
-    private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardHours(2));
+    private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardMinutes(30)).withOffset(Duration.standardMinutes(15));
+    private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardMinutes(30));
     private final static RepetitionRule COMPLETE_INGEST = RepetitionRules.NEVER;//weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
@@ -42,6 +43,7 @@ public class PaModule {
     private @Autowired AdapterLog log;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ItemsPeopleWriter peopleWriter;
+    private @Autowired ScheduleWriter scheduleWriter;
     
     private @Value("${pa.ftp.username}") String ftpUsername;
     private @Value("${pa.ftp.password}") String ftpPassword;
@@ -50,6 +52,7 @@ public class PaModule {
     private @Value("${pa.filesPath}") String localFilesPath;
     private @Value("${s3.access}") String s3access;
     private @Value("${s3.secret}") String s3secret;
+    private @Value("${pa.s3.bucket}") String s3bucket;
     
     @PostConstruct
     public void startBackgroundTasks() {
@@ -62,7 +65,7 @@ public class PaModule {
     }
     
     @Bean PaProgrammeDataStore paProgrammeDataStore() {
-        S3Client s3client = new DefaultS3Client(s3access, s3secret, "pa-data");
+        S3Client s3client = new DefaultS3Client(s3access, s3secret, s3bucket);
         return new DefaultPaProgrammeDataStore(localFilesPath, s3client);
     }
     
@@ -72,14 +75,14 @@ public class PaModule {
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), log);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), scheduleWriter, log);
         PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), log);
         scheduler.schedule(updater, COMPLETE_INGEST);
         return updater;
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), log);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, log);
         PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), log);
         scheduler.schedule(updater, RECENT_FILE_INGEST);
         return updater;
@@ -94,7 +97,7 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), log);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, log);
         return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, log, paProgrammeDataStore());
     }
 }

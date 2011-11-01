@@ -9,6 +9,8 @@ import org.atlasapi.remotesite.channel4.C4HighlightsAdapter;
 import org.atlasapi.remotesite.itv.ItvMercuryBrandAdapter;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.metabroadcast.common.base.Maybe;
 
 /**
@@ -254,7 +256,117 @@ public class PerPublisherCurieExpander implements CurieExpander {
 				}
 				return null;
 			}	
-		};
+		},
+		
+		WS_B {
+
+		    private final Pattern WS_CURIE_PATTERN = Pattern.compile("ws-b:(\\d+)");
+		    
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = WS_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://wsarchive.bbc.co.uk/brands/%s", matcher.group(1));
+                }
+                return null;
+            }
+
+            private final Pattern WS_FULL_PATTERN = Pattern.compile("http://wsarchive.bbc.co.uk/brands/(\\d+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = WS_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("ws-b:%s", matcher.group(1));
+                }
+                return null;
+            }
+		    
+		},
+		
+        WS_E {
+
+            private final Pattern WS_CURIE_PATTERN = Pattern.compile("ws-e:(\\d+)");
+
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = WS_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://wsarchive.bbc.co.uk/episodes/%s", matcher.group(1));
+                }
+                return null;
+            }
+
+            private final Pattern WS_FULL_PATTERN = Pattern.compile("http://wsarchive.bbc.co.uk/episodes/(\\d+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = WS_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("ws-e:%s", matcher.group(1));
+                }
+                return null;
+            }
+
+        },
+        
+        REDUX {
+
+            private final Pattern REDUX_CURIE_PATTERN = Pattern.compile("redux:(\\d+)");
+
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = REDUX_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://g.bbcredux.com/programme/%s", matcher.group(1));
+                }
+                return null;
+            }
+
+            private final Pattern REDUX_FULL_PATTERN = Pattern.compile("http://g.bbcredux.com/programme/(\\d+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = REDUX_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("redux:%s", matcher.group(1));
+                }
+                return null;
+            }
+            
+        }, 
+        
+        PA {
+            
+            private final Pattern PA_CURIE_PATTERN = Pattern.compile("pa:(b|s|f|e)-([\\d-]+)");
+            
+            @Override
+            public String expand(String curie) {
+                Matcher matcher = PA_CURIE_PATTERN.matcher(curie);
+                if (matcher.matches()) {
+                    return String.format("http://pressassociation.com/%s/%s", shortLongTypeMap.get(matcher.group(1)), matcher.group(2));
+                }
+                return null;
+            }
+            
+            private final BiMap<String,String> shortLongTypeMap = ImmutableBiMap.<String,String>builder()
+                    .put("b", "brands")
+                    .put("s", "series")
+                    .put("f", "films")
+                    .put("e", "episodes")
+                    .build();
+
+            private final Pattern PA_FULL_PATTERN = Pattern.compile("http://pressassociation.com/(brands|series|films|episodes)/([\\d-]+)");
+
+            @Override
+            public String compact(String url) {
+                Matcher matcher = PA_FULL_PATTERN.matcher(url);
+                if (matcher.matches()) {
+                    return String.format("pa:%s-%s", shortLongTypeMap.inverse().get(matcher.group(1)), matcher.group(2));
+                }
+                return null;
+            }
+        };
 		
 		public abstract String expand(String curie);
 		public abstract String compact(String url);
@@ -284,7 +396,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 		}
 		CurieAlgorithm algorithm;
 		try {
-			algorithm = CurieAlgorithm.valueOf(prefix.toUpperCase());
+			algorithm = CurieAlgorithm.valueOf(prefix.toUpperCase().replace("-", "_"));
 		} catch (IllegalArgumentException e) {
 			// no matching algorithm
 			return Maybe.nothing();
