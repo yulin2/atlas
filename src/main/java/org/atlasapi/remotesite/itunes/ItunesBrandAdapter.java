@@ -80,15 +80,15 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
     }
     
     private void mergeItems(Brand to, Brand from) {
-        for (Episode item : from.getContents()) {
-            Maybe<Item> existingItem = findExistingItem(to, item);
-            if (existingItem.hasValue()) {
-                addLocations(existingItem.requireValue(), item);
-            }
-            else {
-                to.addContents(item);
-            }
-        }
+//        for (Episode item : from.getContents()) {
+//            Maybe<Item> existingItem = findExistingItem(to, item);
+//            if (existingItem.hasValue()) {
+//                addLocations(existingItem.requireValue(), item);
+//            }
+//            else {
+//                to.addContents(item);
+//            }
+//        }
     }
     
     private void addLocations(Item to, Item from) {
@@ -113,11 +113,11 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
     
     
     private Maybe<Item> findExistingItem(Brand brand, Item targetItem) {
-        for (Item item : brand.getContents()) {
-            if (targetItem.getCurie().equals(item.getCurie())) {
-                return Maybe.just(item);
-            }
-        }
+//        for (Item item : brand.getContents()) {
+//            if (targetItem.getCurie().equals(item.getCurie())) {
+//                return Maybe.just(item);
+//            }
+//        }
         return Maybe.nothing();
     }
 
@@ -128,7 +128,7 @@ public class ItunesBrandAdapter implements SiteSpecificAdapter<Brand> {
             List<Episode> episodes = episodeFinder.findEpisodes(brandId, region, series);
             
             setGenres(brand.requireValue().getGenres(), series.values(), episodes);
-            brand.requireValue().setContents(episodes);
+            //brand.requireValue().setContents(episodes);
         }
         return brand;
     }

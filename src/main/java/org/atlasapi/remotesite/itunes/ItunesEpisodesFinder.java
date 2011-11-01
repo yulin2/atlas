@@ -66,7 +66,7 @@ public class ItunesEpisodesFinder {
                                 if (series.getSeriesNumber() != null) {
                                     episode.setSeriesNumber(series.getSeriesNumber());
                                 }
-                                series.addContents(ImmutableList.of(episode));
+                                //series.addContents(ImmutableList.of(episode));
                             }
                         }
                     }
