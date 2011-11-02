@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.pa.film;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
@@ -92,7 +94,9 @@ public class PaFilmFeedUpdater extends ScheduledTask {
             reportStatus("Started...");
             client.get(new SimpleHttpRequest<Void>(requestUri, TRANSFORMER));
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withUri(requestUri).withDescription("Exception while fetching film feed"));
+            AdapterLogEntry errorRecord = errorEntry().withCause(e).withSource(getClass()).withUri(requestUri).withDescription("Exception while fetching film feed");
+            log.record(errorRecord);
+            reportStatus("Failed: " + errorRecord.id());
             throw new RuntimeException(e);
         } 
     }

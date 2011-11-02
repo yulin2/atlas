@@ -28,6 +28,7 @@ import org.joda.time.Duration;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.text.MoreStrings;
@@ -55,36 +56,39 @@ public class PaFilmProcessor {
         if (existingFilm != null) {
             if (existingFilm instanceof Film) {
                 film = (Film) existingFilm;
-            }
-            else {
+            } else {
                 film = new Film();
                 Item.copyTo((Item) existingFilm, film);
             }
-        }
-        else {
+        } else {
             film = new Film(PaHelper.getFilmUri(id), PaHelper.getFilmCurie(id), Publisher.PA);
-            
-            film.setSpecialization(Specialization.FILM);
-            film.setTitle(filmElement.getFirstChildElement("title").getValue());
-            String year = filmElement.getFirstChildElement("year").getValue();
-            if (!Strings.isNullOrEmpty(year) && MoreStrings.containsOnlyAsciiDigits(year)) {
-                film.setYear(Integer.parseInt(year));
-            }
-            
-            Version version = new Version();
-            version.setProvider(Publisher.PA);
-            Element certificateElement = filmElement.getFirstChildElement("certificate");
-            if (certificateElement != null && !Strings.isNullOrEmpty(certificateElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
-                version.setRestriction(Restriction.from(Integer.parseInt(certificateElement.getValue())));
-            }
-            
-            Element durationElement = filmElement.getFirstChildElement("running_time");
-            if (durationElement != null && !Strings.isNullOrEmpty(durationElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(durationElement.getValue())) {
-                version.setDuration(Duration.standardMinutes(Long.parseLong(durationElement.getValue())));
-            }
-            
-            film.addVersion(version);
         }
+        
+        Element imdbElem = filmElement.getFirstChildElement("imdb_ref");
+        if (imdbElem != null) {
+            film.addAlias(normalize(imdbElem.getValue()));
+        }
+
+        film.setSpecialization(Specialization.FILM);
+        film.setTitle(filmElement.getFirstChildElement("title").getValue());
+        String year = filmElement.getFirstChildElement("year").getValue();
+        if (!Strings.isNullOrEmpty(year) && MoreStrings.containsOnlyAsciiDigits(year)) {
+            film.setYear(Integer.parseInt(year));
+        }
+
+        Version version = new Version();
+        version.setProvider(Publisher.PA);
+        Element certificateElement = filmElement.getFirstChildElement("certificate");
+        if (certificateElement != null && !Strings.isNullOrEmpty(certificateElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
+            version.setRestriction(Restriction.from(Integer.parseInt(certificateElement.getValue())));
+        }
+
+        Element durationElement = filmElement.getFirstChildElement("running_time");
+        if (durationElement != null && !Strings.isNullOrEmpty(durationElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(durationElement.getValue())) {
+            version.setDuration(Duration.standardMinutes(Long.parseLong(durationElement.getValue())));
+        }
+
+        film.setVersions(ImmutableSet.of(version));
         
         Element countriesElement = filmElement.getFirstChildElement("country_of_origin");
         if (countriesElement != null && !Strings.isNullOrEmpty(countriesElement.getValue())) {
@@ -105,6 +109,11 @@ public class PaFilmProcessor {
         peopleWriter.createOrUpdatePeople(film);
     }
     
+    private String normalize(String imdbRef) {
+        String httpRef = imdbRef.replace("www.", "http://");
+        return httpRef.substring(0, httpRef.length()-1);
+    }
+
     private List<CrewMember> getOtherPublisherPeople(Film film) {
         Builder<CrewMember> builder = ImmutableList.builder();
         for (CrewMember crewMember : film.getPeople()) {
