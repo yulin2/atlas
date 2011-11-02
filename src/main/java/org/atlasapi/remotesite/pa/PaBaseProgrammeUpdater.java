@@ -106,6 +106,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         	// one per day, and we can process the head of each list in parallel.
         	
         	Set<Queue<File>> groupedFiles = groupAndOrderFilesByDay(files);
+
         	boolean finished = false;
         	int filesProcessed = 0;
         	while (shouldContinue() && !finished) {
@@ -145,6 +146,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		reader.setContentHandler(unmarshaller.getUnmarshallerHandler());
 		
 		List<Future<Integer>> submitted = Lists.newArrayList();
+
 		for (File file : files) {
 		    if(!shouldContinue()) {
 		        break;
