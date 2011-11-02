@@ -3,6 +3,7 @@ package org.atlasapi.equiv.generators;
 import static com.google.common.collect.Iterables.filter;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.ResultDescription;
@@ -16,13 +17,17 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
 public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Film> {
+    
+    private static final Pattern IMDB_REF = Pattern.compile("http://imdb.com/title/[\\d\\w]+");
 
     private static final ApplicationConfiguration config = new ApplicationConfiguration(ImmutableSet.of(Publisher.PREVIEW_NETWORKS), null);
     private static final float TITLE_WEIGHTING = 1.0f;
@@ -30,9 +35,11 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     private static final float CATCHUP_WEIGHTING = 0.0f;
 
     private final SearchResolver searchResolver;
+    private final FilmTitleMatcher titleMatcher;
 
     public FilmEquivalenceGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
+        this.titleMatcher = new FilmTitleMatcher();
     }
 
     @Override
@@ -48,17 +55,28 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
             desc.appendText("Using year %s, title %s", film.getYear(), film.getTitle());
         }
 
-        List<Identified> possibleEquivalentFilms = searchResolver.search(new SearchQuery(film.getTitle(), Selection.ALL, ImmutableList.of(Publisher.PREVIEW_NETWORKS), TITLE_WEIGHTING,
-                BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), config);
+        Maybe<String> imdbRef = getImdbRef(film);
+        if (imdbRef.hasValue()) {
+            desc.appendText("Using IMDB ref %s", imdbRef.requireValue());
+        }
+
+        List<Identified> possibleEquivalentFilms = searchResolver.search(searchQueryFor(film), config);
 
         Iterable<Film> foundFilms = filter(possibleEquivalentFilms, Film.class);
         desc.appendText("Found %s films through title search", Iterables.size(foundFilms));
 
         for (Film equivFilm : foundFilms) {
-            if(sameYear(film, equivFilm)) {
-                Score score = Score.valueOf(titleMatch(film, equivFilm));
+            
+            Maybe<String> equivImdbRef = getImdbRef(equivFilm);
+            if(imdbRef.hasValue() && equivImdbRef.hasValue() && Objects.equal(imdbRef.requireValue(), equivImdbRef.requireValue())) {
+                desc.appendText("%s (%s) scored 1.0 (IMDB match)", equivFilm.getTitle(), equivFilm.getCanonicalUri());
+                scores.addEquivalent(equivFilm, Score.valueOf(1.0));
+                
+            } else if(sameYear(film, equivFilm)) {
+                Score score = Score.valueOf(titleMatcher.titleMatch(film, equivFilm));
                 desc.appendText("%s (%s) scored %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), score);
                 scores.addEquivalent(equivFilm, score);
+                
             } else {
                 desc.appendText("%s (%s) ignored. Wrong year %s", equivFilm.getTitle(), equivFilm.getCanonicalUri(), equivFilm.getYear());
                 scores.addEquivalent(equivFilm, Score.valueOf(0.0));
@@ -69,51 +87,18 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
         return scores.build();
     }
 
-    private double titleMatch(Film film, Film equivFilm) {
-        return match(removeThe(alphaNumeric(film.getTitle())), removeThe(alphaNumeric(equivFilm.getTitle())));
+    private Maybe<String> getImdbRef(Film film) {
+        for (String alias : film.getAliases()) {
+            if(IMDB_REF.matcher(alias).matches()) {
+                return Maybe.just(alias);
+            }
+        }
+        return Maybe.nothing();
     }
 
-    public double match(String subjectTitle, String equivalentTitle) {
-        if(subjectTitle.length() <= equivalentTitle.length()) {
-            return matchTitles(subjectTitle, equivalentTitle);
-        } else {
-            return matchTitles(equivalentTitle, subjectTitle);
-        }
-    }
-
-    private double matchTitles(String shorter, String longer) {
-        int commonPrefix = commonPrefixLength(shorter, longer);
-        
-        if(commonPrefix == 0) {
-            return 0.0;
-        }
-        if(commonPrefix == longer.length()) {
-            return 1.0;
-        }
-        
-        int difference = longer.length() - commonPrefix;
-
-        double scaler = - 0.1 / Math.max(shorter.length()-1,1);
-
-        return Math.max((difference - 1) * scaler + 0.1, 0);
-    }
-    
-    private String removeThe(String title) {
-        if(title.startsWith("the")) {
-            return title.substring(3);
-        }
-        return title;
-    }
-
-    private String alphaNumeric(String title) {
-        return title.replaceAll("[^\\d\\w]", "").toLowerCase();
-    }
-
-    private int commonPrefixLength(String t1, String t2) {
-        int i = 0;
-        for (; i < Math.min(t1.length(), t2.length()) && t1.charAt(i) == t2.charAt(i); i++) {
-        }
-        return i;
+    private SearchQuery searchQueryFor(Film film) {
+        return new SearchQuery(film.getTitle(), Selection.ALL, ImmutableList.of(Publisher.PREVIEW_NETWORKS), TITLE_WEIGHTING,
+                BROADCAST_WEIGHTING, CATCHUP_WEIGHTING);
     }
 
     private boolean sameYear(Film film, Film equivFilm) {

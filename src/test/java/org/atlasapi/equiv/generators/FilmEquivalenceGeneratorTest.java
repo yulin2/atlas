@@ -1,49 +1,84 @@
 package org.atlasapi.equiv.generators;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import junit.framework.TestCase;
 
-public class FilmEquivalenceGeneratorTest extends TestCase {
+import java.util.Map;
 
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.results.description.DefaultDescription;
+import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.search.model.SearchQuery;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+import org.jmock.Expectations;
+import org.jmock.integration.junit3.MockObjectTestCase;
 
-    private final FilmEquivalenceGenerator generator = new FilmEquivalenceGenerator(null);
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
-    public void testPerfectMatch() {
-        assertThat(generator.match("equal", "equal"), is(1.0));
+public class FilmEquivalenceGeneratorTest extends MockObjectTestCase {
+
+    private final SearchResolver resolver = mock(SearchResolver.class);
+    private final FilmEquivalenceGenerator generator = new FilmEquivalenceGenerator(resolver);
+    
+    private final Film subjectFilm = aFilm(Publisher.PA, "Test Film Title", 2000, "http://imdb.com/title/tt0409345");
+
+    public void testFilmWithSameTitleAndYearWithScores1() {
+        checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Test Film Title", 2000), Score.valueOf(1.0));
+    }
+
+    public void testFilmWithImdbMatchScores1NoMatterTitleAndYear() {
+        checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Wrong Title", 2010, "http://imdb.com/title/tt0409345"), Score.valueOf(1.0));
     }
     
-    public void testDifferentMatch() {
-        assertThat(generator.match("equal", "different"), is(0.0));
+    public void testFilmWithSameTitleDifferentYearScores0() {
+        checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Test Film Title", 2001, "http://imdb.com/title/wrong"), Score.valueOf(0.0));
+    }
+
+    public void testFilmWithDifferentTitleSameYearScores0() {
+        checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Another Film Title", 2000, "http://imdb.com/title/wrong"), Score.valueOf(0.0));
+    }
+
+    private void checkScore(final Film anotherFilm, Score score) {
+        checking(new Expectations(){{
+            oneOf(resolver).search(with(searchQueryFor(subjectFilm.getTitle())), with(any(ApplicationConfiguration.class)));
+                will(returnValue(ImmutableList.<Identified> of(anotherFilm)));
+        }});
+        
+        ScoredEquivalents<Film> scoredEquivalents = generator.generate(subjectFilm , new DefaultDescription());
+        Map<Film, Score> equivalentsScores = scoredEquivalents.equivalents();
+        assertThat(equivalentsScores.get(anotherFilm), is(equalTo(score)));
+    }
+
+    private Film aFilm(Publisher publisher, String title, int year, String... aliases) {
+        Film film = new Film(title+" Uri", title+" Curie", publisher);
+        film.setYear(year);
+        film.setTitle(title);
+        film.setAliases(ImmutableSet.copyOf(aliases));
+        return film;
     }
     
-    public void testShortDifferentMatch() {
-        assertThat(generator.match("e", "d"), is(0.0));
-    }
-    
-    public void testOneLetterMore() {
-        assertThat(generator.match("downweighthis", "downweighthiss"), is(closeTo(0.1, 0.0000001)));
-    }
-    
-    public void testShortOneLetterMore() {
-        assertThat(generator.match("ds", "d"), is(closeTo(0.1, 0.0000001)));
-    }
+    private Matcher<SearchQuery> searchQueryFor(final String term) {
+        return new TypeSafeMatcher<SearchQuery>() {
 
-    public void testSymmetry() {
-        assertEquals(generator.match("downweighthiss", "downweighthis"),generator.match("downweighthis", "downweighthiss"));
-    }
+            @Override
+            public void describeTo(Description desc) {
+                desc.appendText("search query with term " + term);
+            }
 
-    public void testDoubleLength() {
-        assertThat(generator.match("equals", "equalsequals"),is(closeTo(0.0, 0.0000001)));
-    }
-
-    public void testDoubleLengthSymmetry() {
-        assertThat(generator.match("equalsequals", "equals"),is(closeTo(0.0, 0.0000001)));
-    }
-
-    public void testMoreThanDoubleIsntNegative() {
-        assertThat(generator.match("equal", "equalequals"),is(closeTo(0.0, 0.0000001)));
+            @Override
+            public boolean matchesSafely(SearchQuery query) {
+                return query.getTerm().equals(term);
+            }
+        };
     }
     
 }
