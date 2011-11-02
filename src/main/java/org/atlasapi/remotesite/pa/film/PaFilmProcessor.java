@@ -110,7 +110,8 @@ public class PaFilmProcessor {
     }
     
     private String normalize(String imdbRef) {
-        return imdbRef.replace("www.", "http://");
+        String httpRef = imdbRef.replace("www.", "http://");
+        return httpRef.substring(0, httpRef.length()-1);
     }
 
     private List<CrewMember> getOtherPublisherPeople(Film film) {
