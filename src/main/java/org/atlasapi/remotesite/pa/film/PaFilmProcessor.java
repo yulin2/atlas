@@ -66,7 +66,7 @@ public class PaFilmProcessor {
         
         Element imdbElem = filmElement.getFirstChildElement("imdb_ref");
         if (imdbElem != null) {
-            film.addAlias(imdbElem.getValue());
+            film.addAlias(normalize(imdbElem.getValue()));
         }
 
         film.setSpecialization(Specialization.FILM);
@@ -109,6 +109,10 @@ public class PaFilmProcessor {
         peopleWriter.createOrUpdatePeople(film);
     }
     
+    private String normalize(String imdbRef) {
+        return imdbRef.replace("www.", "http://");
+    }
+
     private List<CrewMember> getOtherPublisherPeople(Film film) {
         Builder<CrewMember> builder = ImmutableList.builder();
         for (CrewMember crewMember : film.getPeople()) {
