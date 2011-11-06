@@ -51,7 +51,7 @@ public class C4Module {
 	private @Autowired SimpleScheduler scheduler;
 	private @Value("${c4.apiKey}") String c4ApiKey;
 	private @Value("${c4.lakeviewavailability.key}") String lakeviewAvailabilityFeedKey;
-	private @Value("${c4.lakeviewavailability.apiroot") String lakeviewApiRoot;
+	private @Value("${c4.lakeviewavailability.apiroot}") String lakeviewApiRoot;
 
 	private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
 	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
