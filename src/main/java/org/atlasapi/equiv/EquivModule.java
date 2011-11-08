@@ -176,6 +176,7 @@ public class EquivModule {
         ContentLister filteringLister = new FilteringContentLister(contentLister, new Predicate<Content>() {
             @Override
             public boolean apply(Content input) {
+                //Ignore PA Films.
                 return !(Publisher.PA.equals(input.getPublisher()) && input instanceof Film);
             }
         });
@@ -200,7 +201,7 @@ public class EquivModule {
     @PostConstruct
     public void scheduleUpdater() {
         if(Boolean.parseBoolean(updaterEnabled)) {
-            taskScheduler.schedule(publisherUpdateTask(Publisher.PA, Publisher.BBC, Publisher.C4, Publisher.ITV).withName("PA/BBC/C4/ITV Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(Publisher.BBC, Publisher.C4, Publisher.ITV).withName("BBC/C4/ITV Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(Publisher.PA).withName("PA Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(Publisher.C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
