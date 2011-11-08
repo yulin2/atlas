@@ -29,7 +29,7 @@ position:absolute;}
         #cboxTitle{position:absolute; bottom:-25px; left:0; text-align:center; width:100%; font-weight:bold; color:#7C7C7C;}
         #cboxCurrent{position:absolute; bottom:-25px; left:58px; font-weight:bold; color:#7C7C7C;}
         
-        #cboxClose{background:url(../static/images/close.png) center center no-repeat; width:32px; height:26px;
+        #cboxClose{background:url(/static/images/close.png) center center no-repeat; width:32px; height:26px;
 				border: solid #ccc;
 				border-width: 0 0 1px 1px;
 				padding-top: 4px;
