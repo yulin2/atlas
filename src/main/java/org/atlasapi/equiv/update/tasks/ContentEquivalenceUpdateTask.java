@@ -20,6 +20,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -42,47 +43,51 @@ public class ContentEquivalenceUpdateTask extends ScheduledTask {
     
     @Override
     protected void runTask() {
+
+        ContentListingProgress currentProgress = progressStore.progressForTask(schedulingKey);
+        log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription("Started: %s from %s", schedulingKey, startProgress(currentProgress)));
+
+        ContentListingCriteria criteria = defaultCriteria().forPublishers(publishers).forContent(CONTAINER, TOP_LEVEL_ITEM).startingAt(currentProgress).build();
+        Iterator<Content> contents = contentStore.listContent(criteria);
+
+        int processed = 0;
+        boolean shouldContinue = shouldContinue();
+        Content content = null;
+
         try {
-            
-            ContentListingProgress currentProgress = progressStore.progressForTask(schedulingKey);
-            log.record(AdapterLogEntry.infoEntry().withSource(getClass()).withDescription("Started: %s from %s", schedulingKey, startProgress(currentProgress)));
-            
-            ContentListingCriteria criteria = defaultCriteria().forPublishers(publishers).forContent(CONTAINER, TOP_LEVEL_ITEM).startingAt(currentProgress).build();
-            Iterator<Content> contents = contentStore.listContent(criteria);
-    
-            int processed = 0;
-            boolean shouldContinue = shouldContinue();
-            Content content = null;
-            
             while (shouldContinue && contents.hasNext()) {
                 try {
                     content = contents.next();
                     reportStatus(String.format("Processed %d. Processing %s", processed, content.getCanonicalUri()));
-    
+
                     rootUpdater.updateEquivalences(content);
-                    
-                    if(++processed % 100 == 0) {
+
+                    if (++processed % 100 == 0) {
                         progressStore.storeProgress(schedulingKey, progressFrom(content));
                     }
                     shouldContinue = shouldContinue();
                 } catch (Exception e) {
-                    log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for "+content.getCanonicalUri()));
-                }
-            }
-            
-            if(shouldContinue) {
-                progressStore.storeProgress(schedulingKey, ContentListingProgress.START);
-                reportStatus(String.format("Processed %d", processed));
-                log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
-            } else {
-                if(content != null) {
-                    progressStore.storeProgress(schedulingKey, progressFrom(content));
-                    log.record(infoEntry().withSource(getClass()).withDescription("Stopped: %s at %s", schedulingKey, content.getCanonicalUri()));
-                    reportStatus(String.format("Stopped. Processed %d", processed));
+                    log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception updating equivalence for " + content.getCanonicalUri()));
                 }
             }
         } catch (Exception e) {
             log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Exception running task " + schedulingKey));
+            Throwables.propagate(e);
+        } finally {
+            reportStatus(String.format("Processed %d", processed));
+            persistProgress(shouldContinue, content);
+        }
+    }
+
+    private void persistProgress(boolean shouldContinue, Content content) {
+        if (shouldContinue) {
+            progressStore.storeProgress(schedulingKey, ContentListingProgress.START);
+            log.record(infoEntry().withSource(getClass()).withDescription("Finished: %s", schedulingKey));
+        } else {
+            if (content != null) {
+                progressStore.storeProgress(schedulingKey, progressFrom(content));
+                log.record(infoEntry().withSource(getClass()).withDescription("Stopped: %s at %s", schedulingKey, content.getCanonicalUri()));
+            }
         }
     }
 
