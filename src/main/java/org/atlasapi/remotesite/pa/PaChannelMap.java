@@ -408,6 +408,25 @@ public class PaChannelMap {
         channelMap.put(1533, Channel.LIVING_PLUS2);
         channelMap.put(658, Channel.S4C2);
         
+        channelMap.put(1578, Channel.SKY_LIVING_LOVES);
+        channelMap.put(1627, Channel.ITV1_GRANADA_PLUS1);
+        channelMap.put(1621, Channel.ITV1_UTV_PLUS1);
+        channelMap.put(1623, Channel.ITV1_CENTRAL_PLUS1);
+        channelMap.put(1625, Channel.ITV1_WEST_PLUS1);
+        channelMap.put(1624, Channel.ITV1_SOUTH_EAST_PLUS1);
+        channelMap.put(1622, Channel.ITV1_LONDON_PLUS1);
+        channelMap.put(1626, Channel.ITV1_YORKSHIRE_TYNE_TEES_PLUS1);
+        channelMap.put(965, Channel.Q);
+        channelMap.put(123, Channel.TVE_INTERNACIONAL);
+        channelMap.put(1226, Channel.MOVIES_24);
+        channelMap.put(203, Channel.SIMPLY_SHOPPING);
+        channelMap.put(1459, Channel.SUPER_CASINO);
+        channelMap.put(1526, Channel.MOVIES_24_PLUS);
+        channelMap.put(1540, Channel.BET_PLUS1);
+        channelMap.put(58, Channel.BET_INTERNATIONAL);
+        channelMap.put(1556, Channel.BBC_SPORT_INTERACTIVE_BBC_TWO);
+        channelMap.put(1557, Channel.BBC_SPORT_INTERACTIVE_BBC_THREE);
+        
         channelMap.put(8, Channel.BBC_RADIO_RADIO3);
         channelMap.put(33, Channel.BBC_RADIO_RADIO4);
         channelMap.put(34, Channel.BBC_RADIO_RADIO4_LW);
