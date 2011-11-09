@@ -426,6 +426,7 @@ public class PaChannelMap {
         channelMap.put(58, Channel.BET_INTERNATIONAL);
         channelMap.put(1556, Channel.BBC_SPORT_INTERACTIVE_BBC_TWO);
         channelMap.put(1557, Channel.BBC_SPORT_INTERACTIVE_BBC_THREE);
+        channelMap.put(1660, Channel.PBS);
         
         channelMap.put(8, Channel.BBC_RADIO_RADIO3);
         channelMap.put(33, Channel.BBC_RADIO_RADIO4);
