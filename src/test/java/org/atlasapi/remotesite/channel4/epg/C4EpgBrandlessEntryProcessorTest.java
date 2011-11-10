@@ -67,7 +67,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
         assertThat(contents.size(), is(equalTo(1)));
         
         Episode episode = getOnlyElement(contents);
-        assertThat(episode.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/synthesized/robin-williams-weapons-of-self/606")));
+        assertThat(episode.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/synthesized/606")));
         assertThat(episode.getTitle(), is(equalTo("Robin Williams: Weapons of Self...")));
         assertThat(episode.getEpisodeNumber(), is(equalTo(null)));
         assertThat(episode.getSeriesNumber(), is(equalTo(null)));
