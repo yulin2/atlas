@@ -8,8 +8,8 @@
     <name>Channel 4 Television</name>
   </author>
   <logo>http://www.channel4.com/assets/programmes/images/dispatches/9d40ee7d-da11-4703-8364-582edc9f6bcd_200x113.jpg</logo>
-  <link href="http://api.channel4.com/programmes/dispatches.atom?apikey=API_KEY" rel="up" type="application/atom+xml"/>
-  <link href="http://api.channel4.com/programmes/dispatches/episode-guide.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/pmlsd/dispatches.atom?apikey=API_KEY" rel="up" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
   <link href="http://www.channel4.com/programmes/dispatches/episode-guide" rel="alternate" type="text/html"/>
   <dc:relation.BrandFlattened>true</dc:relation.BrandFlattened>
   <entry>
@@ -25,10 +25,10 @@ In parts of Africa, branding a child a witch is now outlawed, but in Britain thi
 
 Dispatches reveals just what goes on behind closed doors in these African churches, exposing the pastors who exploit the religious beliefs of the most vulnerable.</summary>
     <updated>2010-08-13T13:55:01.099Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-67/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3109015" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-67/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-67/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-67/episode-1/3c087168-a793-4717-9804-e71214101fb5_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -44,9 +44,9 @@ The painstaking work of Lancashire's Serious and Organised Crime Unit culminated
 
 Operation Greengage exposed the trade in illegal weapons in one northern town. In Gun Nation, Dispatches examines the shocking proliferation of guns on Britain's streets.</summary>
     <updated>2010-08-13T13:55:01.100Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-66/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-66/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-66/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-66/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-66/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-66/episode-1/436be2b3-b2ef-48c7-9daa-97c5ee08cfd5_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -68,7 +68,7 @@ Samura goes in search of what is driving homophobia in Africa, finding Muslims a
 
 Dispatches shows that homosexuality is not an African freedom, revealing a major, but little reported, human rights issue, in a continent where millions of gay people live in constant fear of rejection by their communities, of physical and verbal abuse, and even imprisonment.</summary>
     <updated>2010-08-13T13:55:01.100Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-65/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-65/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-65/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-65/episode-1/81dc85ad-2045-49a8-9a21-247d601e673d_200x113.jpg" height="113" width="200"/>
@@ -90,7 +90,7 @@ A studio of 800 people vote for or against these cuts: cuts which would potentia
 
 &lt;b&gt;Online, you can track your suggestions for savings and see which are the most popular.  If you are following the debate on twitter, use #chopornot. (Click the Chop or Not link to the left of this paragraph to find out more).&lt;/b&gt;</summary>
     <updated>2010-08-13T13:55:01.101Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-64/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-64/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-64/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3105953" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -116,7 +116,7 @@ Featuring high-powered contributors such as President Obama's banking advisor Pa
 
 With the Eurozone crisis fuelling fears of another banking crash, this programme is an urgent and shocking call to action.</summary>
     <updated>2010-08-13T13:55:01.102Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-63/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-63/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-63/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-63/episode-1/4e8553e1-e2bf-4c29-9f53-f50c74d7d4ca_200x113.jpg" height="113" width="200"/>
@@ -135,7 +135,7 @@ His disturbing investigation uncovers a lack of resources, inadequate staff supp
 
 The programme also raises questions about what is actually being done to protect some of Britain's most vulnerable children.</summary>
     <updated>2010-08-13T13:55:01.102Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-62/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-62/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-62/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-62/episode-1/b9b536d9-bf97-4474-929d-f22f670beb0c_200x113.jpg" height="113" width="200"/>
@@ -152,10 +152,10 @@ Dispatches follows four girls aged 11 to 13 as they struggle to come to terms wi
 
 From the multi-BAFTA-winning True Vision team, this is an intimate and deeply moving portrayal of the tragic impact of child abuse in a post-apartheid South Africa still coming to terms with its difficult and violent past.</summary>
     <updated>2010-08-13T13:55:01.103Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-61/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-61/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-61/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3082230" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-61/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-61/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-61/episode-1/2d281da7-ce67-46f0-9c2c-ad97aecc9bdd_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -173,7 +173,7 @@ The programme looks at the debates, how the leaders have been styled and their p
 
 Ben examines how the parties are financing their campaigns, considers the voting postcode lottery and reports on the work of two teams of foreign election observers as they travel the country to assess just how democratic our elections are.</summary>
     <updated>2010-08-13T13:55:01.104Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-60/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-60/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-60/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-60/episode-1/2dc9de47-3237-4be7-b427-41ee8e6dc717_200x113.jpg" height="113" width="200"/>
@@ -190,9 +190,9 @@ In 2009, 36,000 participants in the London Marathon raised a phenomenal £47 mil
 
 In the course of his investigation, Ben discovers who the lucky recipients are of some of the money distributed by the London Marathon race organisers. He also talks to leading charities about the amount they pay to take part, the competition for places, and asks why hundreds of desperate charities are left without a place in Britain's biggest fundraising event.</summary>
     <updated>2010-08-13T13:55:01.104Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-58/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-58/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-58/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-58/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-58/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-58/episode-1/989fcfe0-368f-48d1-a7c7-3564b0637178_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -216,9 +216,9 @@ Most suggested that our US company's clients could get privileged access into th
 
 Those politicians featured in undercover filming are Geoff Hoon, Stephen Byers, Patricia Hewitt, Baroness Sally Morgan, Margaret Moran and Sir John Butterfill.</summary>
     <updated>2010-08-13T13:55:01.105Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-57/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-57/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-57/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-57/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-57/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-57/episode-1/4c6838e0-e234-4e7b-9c36-20048177a8cb_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -234,7 +234,7 @@ After the ceasefire, BAFTA-winning filmmaker Jezza Neumann arrived in Gaza to fo
 
 Surrounded by the remnants of the demolished Gaza Strip and increasingly isolated by the blockade that prevents anyone from rebuilding their homes and their lives, Children of Gaza is a shocking, touching and uniquely intimate reflection on extraordinary courage in the face of great adversity.</summary>
     <updated>2010-08-13T13:55:01.106Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-56/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-56/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-56/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3076167" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -258,7 +258,7 @@ The programme reveals how these ministerial hopefuls plan to put their policies 
 
 The country seems to want change. But has David Cameron, whose only experience outside politics has been in public relations, done no more than just tinker with the presentation of old Tory attitudes and added some more diverse candidates to the old mix?</summary>
     <updated>2010-08-13T13:55:01.106Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-55/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-55/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-55/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-55/episode-1/b76aeba6-f200-4f31-b657-751a39a12fa9_200x113.jpg" height="113" width="200"/>
@@ -273,9 +273,9 @@ The country seems to want change. But has David Cameron, whose only experience o
 
 Using undercover recordings, investigative journalist Andrew Gilligan reveals the group's ambitions to create a worldwide 'Islamic social and political order,' and the concerns of a mainstream party that they are being 'infiltrated'; and talks to the Muslims who want to stop it.</summary>
     <updated>2010-08-13T13:55:01.107Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-54/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-54/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-54/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-54/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-54/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-54/episode-1/1342ad94-601a-4923-9030-e2c584463a78_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -302,10 +302,10 @@ Sitting in on a maths lesson, Riley is shocked that many of the children struggl
 
 &lt;b&gt;You can play the maths quiz online by clicking on the link in the left hand side of this page.&lt;/b&gt;</summary>
     <updated>2010-08-13T13:55:01.107Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-53/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-53/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-53/episode-2" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3057301" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-53/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-53/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-53/episode-2/7c41583c-c717-4da7-8ad5-e201c08ea517_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -328,7 +328,7 @@ In a provocative nationwide exercise, Dispatches examines the standard of primar
 
 &lt;b&gt;You can play a shortened version of the maths test by clicking the 'maths quiz' link in the left-hand column of this page.&lt;/b&gt;</summary>
     <updated>2010-08-13T13:55:01.108Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-53/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-53/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-53/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3057300" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -352,9 +352,9 @@ Joining just before the busy Christmas period, when an industrial truce has been
 
 With over four million pounds a year being paid in compensation to customers for lost post and a recent dip in Royal Mail's delivery performance, Dispatches asks if the organisation is fit for purpose.</summary>
     <updated>2010-08-13T13:55:01.109Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-51/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-51/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-51/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-51/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-51/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-51/episode-1/1850f056-1bc6-4963-af09-efc437658e43_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -372,7 +372,7 @@ Dispatches goes inside the enemy camp in northern Afghanistan as award-winning A
 
 Quraishi spent almost two weeks with the Central Group of fighters, known to be among the most dangerous and fanatical factions involved in the war, with Chechens, Arabs and other foreign fighters in their ranks and with close links to Al Qaeda and Osama bin Laden. He captures their leisure time, training and planning and accompanies them on an operation targeting the Afghan army.</summary>
     <updated>2010-08-13T13:55:01.111Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-50/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-50/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-50/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3111511" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -394,10 +394,10 @@ Twins Hussain and Hussan, aged 11, live in a shanty town, balanced precariously 
 
 Dispatches provides a deeply moving portrait of the lives of India's real slumdogs, blighted by substance abuse, hardship and heartache, yet proof of the infinite resilience of children, and forced to reach adulthood long before they should.</summary>
     <updated>2010-08-13T13:55:01.117Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-46/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-46/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-46/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3049095" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-46/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-46/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-46/episode-1/4349179a-e868-45de-81c0-3604582f8fd1_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -413,9 +413,9 @@ In this update, she returns to the issue, examining whether there has been any i
 
 Fiona's father has Alzheimer's and her mother died after developing an aggressive, early-onset form of the disease. Fiona continues to face her own dilemma about how best to care for her father as his condition deteriorates.</summary>
     <updated>2010-08-13T13:55:01.118Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-47/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-47/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-47/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-47/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-47/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-47/episode-1/070d6ec1-eb6e-4831-96ff-168f2d4ff05d_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -435,9 +435,9 @@ The programme asks why the Government has resisted calls to impose interest rate
 
 In the run-up to Christmas, the impact of these high interest rate charges can be financially devastating for some families. Dispatches visits areas of the country where whole streets, and sometimes virtually entire estates, are in hoc to such lenders.</summary>
     <updated>2010-08-13T13:55:01.119Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-44/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-44/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-44/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-44/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-44/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-44/episode-1/5568661f-d3f9-43d1-9638-2f5f35fd0d69_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -454,9 +454,9 @@ Reporter Antony Barnett examines the relationship between Russia's richest men a
 
 &lt;b&gt;Who Knows Who&lt;/b&gt; (Channel4.com) maps the relationships between the Russian oligarchs and the British peers and business contacts. Click on the left-hand links of the individuals to see how the rich and powerful are linked.</summary>
     <updated>2010-08-13T13:55:01.120Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-6/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-6" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-6.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-6/episode-6.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-6/1e9071b6-93b6-48df-9c2c-956c455ee118_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -478,9 +478,9 @@ Gary Foxcroft of Lancaster-based charity Stepping Stones Nigeria also returns to
 
 Two-and-a-half-year-old Ellin is one such child. She was found at the side of the road, her body having been severely burnt with boiling water. Nwanakwo Udo Edet, around eight years old, wasn't so fortunate. He had acid poured over him after being labelled a wizard and later died.</summary>
     <updated>2010-08-13T13:55:01.122Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-43/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-43/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-43/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-43/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-43/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-43/episode-1/e51be50d-ded4-48f7-853d-66aac7ba9203_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -502,7 +502,7 @@ The pro-Israel lobby aims to shape the debate about Britain's relationship with 
 
 Oborne examines how the lobby operates from within parliament and the tactics it employs behind the scenes when engaging with print and broadcast media.</summary>
     <updated>2010-08-13T13:55:01.123Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-42/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-42/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-42/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-42/episode-1/7d3a3403-84d0-4e46-ad9e-14a9b5089bbe_200x113.jpg" height="113" width="200"/>
@@ -527,9 +527,9 @@ She also tests the regulators' rules on 'healthy' branding by baking a cake that
 
 Moore examines the recent shifts in cereal marketing which enable manufacturers to stay ahead of the regulators. With advertising of sugary children's foods banned during kids TV programming, Moore discovers that their marketing has moved to prime-time TV and the internet.</summary>
     <updated>2010-08-13T13:55:01.123Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-5.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-6/episode-5.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-5" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-5.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-6/episode-5.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-5/b7faf507-37b1-4338-9a33-803566c31fd7_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -551,9 +551,9 @@ The programme examines the evolution of this training and asks whether the requi
 
 And when Climate Camp returned to the capital in summer 2009, Dispatches was there to find out if lessons had been learnt from the events of G20.</summary>
     <updated>2010-08-13T13:55:01.124Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-39/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-39/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-39/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-39/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-39/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-39/episode-1/2119169e-95f1-4bf8-bffa-7dab16b09186_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -567,9 +567,9 @@ And when Climate Camp returned to the capital in summer 2009, Dispatches was the
 
 Dispatches also reveals the extent to which public sector pensions are under threat, and how far private pensions have failed to deliver in the recession. The programme asks whether the government has failed to protect pensions, and examines their ideas for tackling the crisis in the future.</summary>
     <updated>2010-08-13T13:55:01.125Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-3/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-6" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-6.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-3/episode-6.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-6/a984caaf-92f6-468b-a385-60a74cef467c_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -587,9 +587,9 @@ Dispatches travels around the world in 82 days to look at what is on offer durin
 
 Thomson examines whether taxpayers are getting value for their money from their elected representatives, with politicians desperate to regain trust after the expenses scandal in May 2009.</summary>
     <updated>2010-08-13T13:55:01.126Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-38/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-38/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-38/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-38/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-38/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-38/episode-1/2e1484ad-4674-45b3-b86c-1b3e7b6c1b92_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -605,9 +605,9 @@ Critics have always attacked them for providing policing on the cheap and a poli
 
 Filming with PCSOs at work on the streets of Lancashire, Dispatches investigates whether PCSOs have proven to be a policing success story or an expensive mistake.</summary>
     <updated>2010-08-13T13:55:01.127Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-37/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-37/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-37/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-37/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-37/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-37/episode-1/20765365-4de5-4001-b952-f1a187df9369_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -624,9 +624,9 @@ From company directors to university graduates, this film follows the experience
 
 Dispatches highlights the practical realities of trying to find work, even when armed with a degree or a glowing CV.</summary>
     <updated>2010-08-13T13:55:01.128Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-5.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-3/episode-5.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-5" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-5.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-3/episode-5.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-5/5dae391f-b5bc-4c76-8ba3-9b56a5e971ce_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -642,10 +642,10 @@ To answer that question, Cherie joins police patrols on Britain's toughest stree
 
 The Street Weapons Commission Report - published in 2008 - set out a series of practical recommendations about what could be done to tackle the problem of street weapons in the UK. But one year on, the problem hasn't gone away and Cherie feels passionately that more must be done.</summary>
     <updated>2010-08-13T13:55:01.129Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-34/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-34/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-34/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2933702" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-34/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-34/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-34/episode-1/1b19724c-296d-4fa9-9a0c-b0f2adea3ae8_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -661,7 +661,7 @@ According to opposition politicians in Zimbabwe, those businessmen include well-
 
 However, working undercover in Zimbabwe, Dispatches reporter Aidan Hartley discovers that Mugabe has maintained his grip on the police, army and central bank, enabling him and his allies to continue carrying out violence and corruption on a vast scale.</summary>
     <updated>2010-08-13T13:55:01.130Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-32/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-32/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-32/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-32/episode-1/607caee8-91db-4af4-a2a7-f1544672a2a8_200x113.jpg" height="113" width="200"/>
@@ -680,9 +680,9 @@ Reporter Tom Randall gets a job as a debt collector inside one of the UK's faste
 
 In this multi-billion pound industry the stakes are high; Dispatches reveals the lengths that collectors will go to to recover their debts.</summary>
     <updated>2010-08-13T13:55:01.130Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-33/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-33/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-33/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-33/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-33/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-33/episode-1/b1a830a2-20f8-41c4-9701-69524827dc8b_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -696,9 +696,9 @@ In this multi-billion pound industry the stakes are high; Dispatches reveals the
 
 The death of Baby Peter in 2007 focussed attention on the failures of social services but as Dispatches demonstrates, the failures in child protection reach beyond the realms of just social work departments to include police forces, health services and -  as one mother claims - even the family court system.</summary>
     <updated>2010-08-13T13:55:01.131Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-31/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-31/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-31/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-31/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-31/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-31/episode-1/e9263daa-8514-495d-b71a-4e1718bde066_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -714,10 +714,10 @@ Featuring footage of the attacks and interviews with senior police officers and 
 
 Award: Bafta; current affairs. 2010</summary>
     <updated>2010-08-13T13:55:01.132Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-30/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-30/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-30/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2972589" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-30/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-30/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-30/episode-1/dispatches-s30e1-20090623115042_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -733,9 +733,9 @@ Using data collected from various sources, including the crown courts, barrister
 
 While knife crimes and street weapons dominate the agenda on violent crime, Dispatches hears from youth workers, police officers and academics who believe this devastating type of attack requires more attention.</summary>
     <updated>2010-08-13T13:55:01.133Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-3/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-4" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-3/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-4/dispatches-s3e4-20090616104834_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -751,9 +751,9 @@ Directed by Emmy and Bafta award-winning film-maker Tom Roberts, this programme 
 
 The film examines the reaction of the US forces - which initially declared the operation a success and denied any civilian deaths - and looks at how, despite evidence to the contrary, the US army remains robust in denying any wrongdoing.</summary>
     <updated>2010-08-13T13:55:01.134Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-26/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-26/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-26/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-26/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-26/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-26/episode-1/69ee5a5b-ea3f-4607-93ac-1b16bba96470_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -767,9 +767,9 @@ The film examines the reaction of the US forces - which initially declared the o
 
 As Prime Minister, Gordon Brown has presided over the biggest recession in 75 years. Rawnsley examines the key moments, showing how Brown as Prime Minister inherited the economic problems of his own 10 years as chancellor. The programme charts the roller coaster journey of Brown's fortunes from the moment the credit crunch began.</summary>
     <updated>2010-08-13T13:55:01.136Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-25/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-25/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-25/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-25/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-25/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-25/episode-1/dispatches-s25e1-20090602105418_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -783,10 +783,10 @@ As Prime Minister, Gordon Brown has presided over the biggest recession in 75 ye
 
 Filmed covertly over the course of a year by two Burmese cameramen, who risked an instant 30 year jail sentence if caught, Orphans of Burma's Cyclone exposes the official intransigence of one of the world's most brutal and secretive regimes and, for the first time, reveals what day-to-day life is like for the ordinary people of Burma.</summary>
     <updated>2010-08-13T13:55:01.137Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-18/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-18/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-18/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2935401" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-18/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-18/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-18/episode-1/dispatches-s18e1-20090522121328_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -800,9 +800,9 @@ Filmed covertly over the course of a year by two Burmese cameramen, who risked a
 
 To establish the exact figures, Moore works with an expert to break down the complex pay packets of former leading bankers. She shows the extraordinary number of ways bankers were remunerated, from a variety of incentives and huge pension pots, to funds for 'extras' such as dentist bills. Moore reveals how much these former bosses have been paid; and how some have been awarded millions more than has been previously made public.</summary>
     <updated>2010-08-13T13:55:01.138Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-3.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-3/episode-3.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-3" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-3/episode-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-3/dispatches-s3e3-20090512125921_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -816,9 +816,9 @@ To establish the exact figures, Moore works with an expert to break down the com
 
 Reporter Rageh Omaar examines each stage of state provision for the 25,000 children who enter the care system every year, from adoption and fostering to residential care homes. Why do so many babies have to wait for adoption? Why are so many kids shunted from foster parent to foster parent? And why has residential care become a refuge of last resort, and a potential school for failure and crime?</summary>
     <updated>2010-08-13T13:55:01.139Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-14/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-14/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-14/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-14/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-14/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches-adoption/series-1/episode-1/dispatches-adoption-s1e1-20090415182430_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -836,9 +836,9 @@ Despite the collapse of Northern Rock a year before, the government, the regulat
 
 Nationalising key banks, and then underwriting the banks' bad loans, prevented meltdown, but at a terrible cost that will haunt us for years to come. Dispatches reveals the mistakes that lead to the current crisis and asks: what will it take to lift the UK out of the biggest recession in living memory?</summary>
     <updated>2010-08-13T13:55:01.140Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-13/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-13/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-13/episode-2" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-13/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-13/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-13/episode-2/dispatches-s13e2-20090420114213_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -856,9 +856,9 @@ Talking to the key players in government, Wall Street and the City, Hutton unvei
 
 Is it really true that no one saw it coming? Or could the recession have been prevented?</summary>
     <updated>2010-08-13T13:55:01.141Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-13/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-13/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-13/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-13/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-13/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-13/episode-1/dispatches-s13e1-20090414153855_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -874,10 +874,10 @@ As well as a series of apparent inconsistencies and hard-to-explain expense clai
 
 The programme also shows the damage that has been caused by protracted delays in releasing MPs full expenses, and asks how harmful these claims may be to the reputation of Parliament and its members.</summary>
     <updated>2010-08-13T13:55:01.142Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-12/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-12/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-12/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2924749" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-12/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-12/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-12/episode-1/dispatches-s12e1-20090414152808_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -891,10 +891,10 @@ The programme also shows the damage that has been caused by protracted delays in
 
 In an unprecedented series of interviews, senior military commanders - including Air Chief Marshal Sir Jock Stirrup, chief of the defence staff, and General Sir Richard Dannatt, chief of the general staff - reveal what they think of the successes, failures and lessons learned during Britain's three-year intervention into Helmand province.</summary>
     <updated>2010-08-13T13:55:01.143Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-6/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-4" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2925167" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-6/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-4/dispatches-s6e4-20090414174421_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -910,9 +910,9 @@ After a shaky start and a spate of high-profile resignations - including that of
 
 Reporter Antony Barnett examines some of Boris' big ideas - including building a new international airport, introducing a cycle-hire scheme to the capital, getting rid of bendy buses, protecting the capital's skyline, cutting down on public waste and making his mayoralty more open and accountable. All very well, but are they coherent and achievable?</summary>
     <updated>2010-08-13T13:55:01.144Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-7/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-7/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-7/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-7/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-7/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-7/episode-1/dispatches-s7e1-20090320105447_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -932,9 +932,9 @@ Dispatches also reveals the results of a specially commissioned YouGov survey of
 
 Senior nurses speak frankly about how lack of regular staff and a heavy dependence on inexperienced agency nurses could put patients' lives in danger.</summary>
     <updated>2010-08-13T13:55:01.145Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-11/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-11/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-11/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-11/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-11/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-11/episode-1/dispatches-s11e1-20090320111058_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -950,10 +950,10 @@ Sharmeen investigates how the Taliban are recruiting increasingly younger fighte
 
 Sharmeen also interviews a Taliban commander responsible for child recruitment, who reveals that children as young as five are now being used by the Taliban.</summary>
     <updated>2010-08-13T13:55:01.146Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-9/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-9/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-9/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3090892" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-9/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-9/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-9/episode-1/dispatches-s9e1-20090309110528_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -969,9 +969,9 @@ Jane investigates a variety of controversial public projects that have had milli
 
 Dispatches also highlights the findings of a report that details the escalation in government public sector spending and sets out what needs to be done to stop the waste. Public spending wastage is reported to have cost every household nearly £50,000 over the past 11 years.</summary>
     <updated>2010-08-13T13:55:01.147Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-5/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-5/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-5/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-5/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-5/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-5/episode-1/dispatches-s5e1-20090320111643_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -989,9 +989,9 @@ Thomson also examines claims that the Palace are not averse to media manipulatio
 
 As Prince William is unlikely to be crowned King anytime soon, Dispatches looks at how he might occupy himself until his coronation - if he might follow the examples of either Edward or Andrew, or if there are princely lessons to be learnt from his uncles.</summary>
     <updated>2010-08-13T13:55:01.148Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-4/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-4/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-4/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-4/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-4/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-4/episode-1/dispatches-s4e1-20090320111840_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1007,9 +1007,9 @@ Lord Jones analyses each of Gordon Brown's pledges to help people back into work
 
 Travelling across the UK, Lord Jones meets people who have recently lost their jobs in construction, car-manufacturing, retail, IT and property development to find out whether the government measures are helping them back into work. And Dispatches reveals exclusive research on the nature of job vacancies available, and examines just how successful Job Centres are at placing people in work.</summary>
     <updated>2010-08-13T13:55:01.149Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-3/episode-2.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-2" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-3/episode-2.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-2/dispatches-s3e2_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1023,9 +1023,9 @@ Travelling across the UK, Lord Jones meets people who have recently lost their j
 
 The programme looks at the challenges facing older job seekers and how the mandatory retirement age, introduced in 2006, has forced tens of thousands out of their positions, against their will. Dispatches also features the results of two exclusive YouGov surveys on attitudes towards older workers and the effects forced retirement can have on those still wanting to work.</summary>
     <updated>2010-08-13T13:55:01.150Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-10/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-10/episode-4.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-10/episode-4" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-10/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-10/episode-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-4/episode-4/dispatches-s4e4_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1039,10 +1039,10 @@ The programme looks at the challenges facing older job seekers and how the manda
 
 The long-running conflict is largely ignored by the rest of the world, but last November Congo briefly hit the headlines as rebel troops seized control of a large area of Eastern Congo. The Dispatches team were the only journalists to reach the town of Kanyabayonga. Children describe how they ran and hid in dense forest to avoid the fighting. In the panic many were separated from their parents. They spent up to three weeks with little food, no clean water and no shelter - and as a result many became ill and died.</summary>
     <updated>2010-08-13T13:55:01.151Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-6/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2925166" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-6/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-6/episode-1/dispatches-s6e1-20090304151359_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1060,10 +1060,10 @@ Featuring images that haven't before been aired on mainstream television, Jon al
 
 To what extent does the choice of news outlet affect opinion of the conflict?</summary>
     <updated>2010-08-13T13:55:01.152Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-6/episode-3.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-6/episode-3.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-6/episode-3" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2926706" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-6/episode-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-6/episode-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/unseen-gaza/series-1/episode-3/unseen-gaza-s1e3_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1077,9 +1077,9 @@ To what extent does the choice of news outlet affect opinion of the conflict?</s
 
 Dispatches also follows two families in Leeds as they try to reduce their weekly shopping bill - one by choosing supermarket value brands and the other by shopping at local independent stores. Are supermarkets really cheaper? And what will each family choose to eat?</summary>
     <updated>2010-08-13T13:55:01.153Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-3/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-3/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-3/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-3/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-3/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-3/episode-1/dispatches-s3e1_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1100,9 +1100,9 @@ The number of people suffering from dementia, the majority with Alzheimer's, is 
 
 Fiona's father has been recently diagnosed with Alzheimer's and her mother died after developing an aggressive, early-onset form of the disease. As Fiona faces her own dilemma about the care of her father, she talks to families around the country about the difficulties they have faced in obtaining help, from both the NHS and local authorities.</summary>
     <updated>2010-08-13T13:55:01.154Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-2/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-2/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-2/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-2/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-2/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-2/episode-1/dispatches-s2e1-20090320112226_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1120,9 +1120,9 @@ But while the crises in classrooms appear to be escalating for many schools, Bri
 
 Through early intervention methods such as parental outreach, target-setting for badly behaved children and 'nurture groups', these schools go beyond punitive measures, to address why children are acting out - helping the individual child to get back on track, and the rest of the class to get on with their work.</summary>
     <updated>2010-08-13T13:55:01.155Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-1/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-1/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-1/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-1/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-1/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-1/episode-1/dispatches-s1e1_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1138,7 +1138,7 @@ Oborne begins his investigation when he accompanies Foreign Secretary David Mili
 
 He also asks whether there is a future for the Iraqis in the area who worked for the British army, and finds out whether government promises to help them have been broken.</summary>
     <updated>2010-08-13T13:55:01.156Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-21/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-21/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-21/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2933649" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1154,10 +1154,10 @@ He also asks whether there is a future for the Iraqis in the area who worked for
 
 This Dispatches special follows the work of one Englishman, Gary Foxcroft, who has devoted his life to helping these desperate and vulnerable children. Gary's charity, Stepping Stones Nigeria, raises funds to help Sam Itauma who, five years ago, rescued four children accused of witchcraft. He now struggles to care for over 150 in a makeshift shelter and school called CRARN (Child Rights and Rehabilitation Network).</summary>
     <updated>2010-08-13T13:55:01.156Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-8/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-8/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-8/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3008630" rel="alternate" type="text/html" title="4oD"/>
-    <link href="http://api.channel4.com/programmes/dispatches/video/series-8/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/video/series-8/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-8/episode-1/dispatches-s8e1-20090305175645_200x113.jpg" height="113" width="200"/>
     </media:content>
@@ -1171,7 +1171,7 @@ This Dispatches special follows the work of one Englishman, Gary Foxcroft, who h
 
 It's estimated that around 350,000 children in the UK have parents with a serious drug problem - with 10 babies being born to heroin-addicted mothers every day. Yet in contrast to the billions of pounds spent on helping the users themselves, there is a serious lack of specialist help for their children - many of whom are at serious risk.</summary>
     <updated>2010-08-13T13:55:01.157Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-35/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-35/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-35/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-35/episode-1/c492db4c-3e2f-408e-a13e-e5228a15aabf_200x113.jpg" height="113" width="200"/>
@@ -1186,7 +1186,7 @@ It's estimated that around 350,000 children in the UK have parents with a seriou
 
 And as we get poorer, Dispatches discovers we are becoming more vulnerable to those who prey on our need for quick money to pay our bills, keep our homes and even feed our children. The programme also finds the key groups who Tony Blair won over - the aspiring middle classes and solid working class voters - are now deeply disillusioned.</summary>
     <updated>2010-08-13T13:55:01.158Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-10/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-10/episode-6.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-10/episode-6" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-10/episode-6/5733346f-6ea6-44b0-9707-1fa5130b2288_200x113.jpg" height="113" width="200"/>
@@ -1199,7 +1199,7 @@ And as we get poorer, Dispatches discovers we are becoming more vulnerable to th
     <title type="text">Cameron's Money Men</title>
     <summary type="html">Originally broadcast in 2008, Antony Barnett investigates the funding of the Tories under Cameron and examines how the party is using its newfound resources to ensure its leader becomes the next Prime Minister.</summary>
     <updated>2010-08-13T13:55:01.159Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-59/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-59/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-59/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3057145" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1215,7 +1215,7 @@ And as we get poorer, Dispatches discovers we are becoming more vulnerable to th
 
 The health benefits of the occasional glass of red wine are widely-acknowledged but Dispatches reveals how a great deal of the wine we consume is enhanced, sweetened or flavoured, creating a drink that one critic describes as no better than, 'an alcoholic cola'.</summary>
     <updated>2010-08-13T13:55:01.160Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-29/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-29/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-29/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-29/episode-1/dispatches-s29e1-20090619175231_200x113.jpg" height="113" width="200"/>
@@ -1228,7 +1228,7 @@ The health benefits of the occasional glass of red wine are widely-acknowledged 
     <title type="text">Undercover Mosque: The Return</title>
     <summary type="html">A year-and-a-half after the critically acclaimed film Undercover Mosque was first screened, Dispatches goes undercover again to see whether extremist beliefs continue to be promoted in certain key British Muslim institutions. The film also investigates the role of the Saudi Arabian religious establishment in spreading a hard-line, fundamentalist Islamic ideology in the UK - the very ideology the Government claims to be tackling.</summary>
     <updated>2010-08-13T13:55:01.161Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-24/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-24/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-24/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2921253" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1242,7 +1242,7 @@ The health benefits of the occasional glass of red wine are widely-acknowledged 
     <title type="text">Gordon Brown: Where Did It All Go Wrong?</title>
     <summary type="html">Andrew Rawnsley assesses Gordon Brown's first year as prime minister. Includes interviews with cabinet ministers, politicians, his intimates and his opponents.</summary>
     <updated>2010-08-13T13:55:01.162Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-237/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-237/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-237/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2921254" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1260,7 +1260,7 @@ At the risk to its makers of imprisonment and deportation, this Dispatches film 
 
 Along the way, Tash finds the nomadic way of life being forcefully wiped out as native Tibetans are stripped of their land and livestock and resettled in concrete camps. He meets victims of arbitrary arrests, detention, torture and 'disappearances' and uncovers evidence of enforced sterilisations on ethnic Tibetan women. His film reveals the regime of terror that dominates daily life in Tibet and makes freedom of expression impossible.</summary>
     <updated>2010-08-13T13:55:01.163Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-20/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-20/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-20/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2931525" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1278,7 +1278,7 @@ While the coalition forces herald its burgeoning democracy, Snow ties together r
 
 Filmed in 2008, deploying regional video journalists and specialist cameramen into areas few Western journalists could ever contemplate, Jon Snow's Hidden Iraq ventures behind the rhetoric to uncover what life on the ground is really like for Iraqis.</summary>
     <updated>2010-08-13T13:55:01.164Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-23/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-23/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-23/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2928385" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1294,7 +1294,7 @@ Filmed in 2008, deploying regional video journalists and specialist cameramen in
 
 Reporter Antony Barnett reports on the increasing numbers of new homes being built on flood plains and examines mounting concerns about the vulnerability of Britain's dams and energy installations. Which British towns are most at risk from flooding, and how much will homeowners have to pay to keep flood waters at bay?</summary>
     <updated>2010-08-13T13:55:01.164Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-16/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-16/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-16/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2926052" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1310,7 +1310,7 @@ Reporter Antony Barnett reports on the increasing numbers of new homes being bui
 
 Reporter Deborah Davies investigates the medical advancements that are impacting on pre-term infant survival. At what point does foetal movement stop being a reflex and start being what could be a reaction to pain? Leading experts in both the fields of foetal development and nervous systems debate the current timescales.</summary>
     <updated>2010-08-13T13:55:01.165Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-15/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-15/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-15/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3073877" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1328,7 +1328,7 @@ It is estimated that 70,000 children are kidnapped in China every year and trade
 
 Beautiful, haunting and deeply tragic, this film takes us into the heart of modern China - a place where girl babies are being sold for as little as £200, detectives specialise in finding kidnapped children and child traffickers buy and sell human lives. The film provides an intimate portrait of the crisis that this stringent government policy has created among China's poorest people.</summary>
     <updated>2010-08-13T13:55:01.167Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-22/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-22/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-22/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2921464" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1344,7 +1344,7 @@ Beautiful, haunting and deeply tragic, this film takes us into the heart of mode
 
 Reporter Deborah Davies asks whether the Iraqi government, infiltrated by Shia militia to the shocking extent exposed by Saddam's execution, has any real determination, or ability, to bring about an end to the bloodletting.</summary>
     <updated>2010-08-13T13:55:01.168Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-28/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-28/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-28/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-28/episode-1/dispatches-s28e1-20090619154632_200x113.jpg" height="113" width="200"/>
@@ -1361,7 +1361,7 @@ The investigation examines how such extreme messages are influenced by the relig
 
 Undercover Mosque also features interviews with moderate British Muslim figures who are speaking out against the influence of Saudi Arabia's extreme brand of Islam, which they claim  is seeking to overturn Islamic traditions of diversity and peaceful co-existence.</summary>
     <updated>2010-08-13T13:55:01.169Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-19/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-19/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-19/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-21/episode-1/dispatches-s21e1-20090529113105_200x113.jpg" height="113" width="200"/>
@@ -1376,7 +1376,7 @@ Undercover Mosque also features interviews with moderate British Muslim figures 
 
 Journalist Evan Williams, who is banned from entering the country after reporting on Burma for more than 10 years, goes undercover to investigate the mass ethnic cleansing, forced labour and vicious clamping down of political opposition that characterise the dictatorship.</summary>
     <updated>2010-08-13T13:55:01.170Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-17/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-17/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-17/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-17/episode-1/dispatches-s17e1-20090520173429_200x113.jpg" height="113" width="200"/>
@@ -1389,7 +1389,7 @@ Journalist Evan Williams, who is banned from entering the country after reportin
     <title type="text">Re-Opening The Post</title>
     <summary type="html">Fourteen months after the original Royal Mail undercover investigation, Dispatches returns to secretly film and establish whether the service, as they claim, has dramatically improved. Has Chief Exec Adam Crozier taken control of untrained staff, outdated machinery, ineffective managers and poor industrial relations as he promised?</summary>
     <updated>2010-08-13T13:55:01.171Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-49/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-49/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-49/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-49/episode-1/762c4299-1b17-4387-81c0-11a56865165e_200x113.jpg" height="113" width="200"/>
@@ -1406,7 +1406,7 @@ Fear spread among parents who were unsure what immunisation choices to make in l
 
 But what was going on behind the scenes? Dispatches investigates the facts that parents weren't told about the MMR scare.</summary>
     <updated>2010-08-13T13:55:01.171Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-52/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-52/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-52/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-52/episode-1/aebcd1c2-879a-4d3c-a26a-11d631493a64_200x113.jpg" height="113" width="200"/>
@@ -1421,7 +1421,7 @@ But what was going on behind the scenes? Dispatches investigates the facts that 
 
 Dispatches reporter Simon Barnes goes undercover inside the Royal Mail to reveal a damning catalogue of skiving workers, ineffective managers and gangs of criminals stealing millions of pounds from the post.</summary>
     <updated>2010-08-13T13:55:01.172Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-48/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-48/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-48/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-48/episode-1/17b950a4-6576-4ef8-9739-e15eb76276be_200x113.jpg" height="113" width="200"/>
@@ -1438,7 +1438,7 @@ From the BNP's electoral inroads in this year's local elections to their annual 
 
 Award: Bafta; current affairs (2003).</summary>
     <updated>2010-08-13T13:55:01.172Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-41/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-41/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-41/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-41/episode-1/34565f76-4abf-4f0d-a481-31f2f7b5eff2_200x113.jpg" height="113" width="200"/>
@@ -1453,7 +1453,7 @@ Award: Bafta; current affairs (2003).</summary>
 
 Presented by award-winning journalist Maggie O'Kane, this eye opening documentary exposes the scandal that makes Britain's street workers the most physically brutalised, and least protected, group in society.</summary>
     <updated>2010-08-13T13:55:01.175Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-40/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-40/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-40/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-40/episode-1/8e3475f1-a27a-4a77-be21-70439bc911fa_200x113.jpg" height="113" width="200"/>
@@ -1468,7 +1468,7 @@ Presented by award-winning journalist Maggie O'Kane, this eye opening documentar
 
 This award-winning film, filmed in late 2000 and early 2001, is a devastating portrait of a country savaged by war and religious extremism, where journalists are no longer welcome, and where the rest of the world seems as distant as another planet.</summary>
     <updated>2010-08-13T13:55:01.178Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-27/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-27/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-27/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#2933745" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
@@ -1482,7 +1482,7 @@ This award-winning film, filmed in late 2000 and early 2001, is a devastating po
     <title type="text">The Torture Trail</title>
     <summary type="html">Dispatches infiltrates the most secretive arms fair in the world and reveals how weapons that can be used for torture are sold by British companies throughout the world. This disturbing investigation reveals the businessmen who profit from this trade and the politicians who allow it to occur, and speaks to some of its victims.</summary>
     <updated>2010-08-13T13:55:01.180Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-36/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-36/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-36/episode-1" rel="alternate" type="text/html"/>
     <media:content>
       <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-36/episode-1/5aa60ebc-a9d1-4844-9642-8e68a6484509_200x113.jpg" height="113" width="200"/>
@@ -1495,7 +1495,7 @@ This award-winning film, filmed in late 2000 and early 2001, is a devastating po
     <title type="text">Gordon Brown's Missing Billions</title>
     <summary type="html">In an edition from 2005, economist Andrew Dilnot looks at where Gordon Brown's policies have gone wrong, and examines the consequences for all of us. Brown's misjudgements, Dilnot warns, are something we will all ultimately have to pay for.</summary>
     <updated>2010-08-13T13:55:01.181Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-45/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/dispatches/episode-guide/series-45/episode-1.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-45/episode-1" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/dispatches/4od#3012007" rel="alternate" type="text/html" title="4oD"/>
     <media:content>
