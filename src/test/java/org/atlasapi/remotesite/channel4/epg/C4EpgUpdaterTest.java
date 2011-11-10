@@ -38,6 +38,7 @@ import com.google.common.io.Resources;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.DayRangeGenerator;
 
+//TODO: extract a SiteSpecificAdapter or similar from C4EpgUpdater which handles a single channel day feed.
 public class C4EpgUpdaterTest extends TestCase {
     
     private final Mockery context = new Mockery();
@@ -81,7 +82,7 @@ public class C4EpgUpdaterTest extends TestCase {
                     with(CHANNEL_FOUR),
                     (Map<String,String>)with(allOf(
                             hasKey("c4:25939874"),hasValue("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1/episode-51"),
-                            hasKey("c4:25955760"),hasValue("http://www.channel4.com/programmes/synthesized/supernanny-us/25955760")
+                            hasKey("c4:25955760"),hasValue("http://www.channel4.com/programmes/synthesized/25955760")
                     ))
             );
             allowing(trimmer).trimBroadcasts(with(new Interval(day, day.plusDays(1))), with(isIn(ImmutableSet.of(MORE_FOUR, E_FOUR, FILM_4, FOUR_MUSIC))), with(any(Map.class)));
@@ -90,6 +91,5 @@ public class C4EpgUpdaterTest extends TestCase {
         updater.run();
         
         context.assertIsSatisfied();
-        
     }
 }

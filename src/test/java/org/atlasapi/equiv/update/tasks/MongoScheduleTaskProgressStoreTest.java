@@ -31,9 +31,9 @@ public class MongoScheduleTaskProgressStoreTest extends TestCase {
         
         restored = store.progressForTask(taskName);
         
-        assertEquals(null, restored.getUri());
-        assertEquals(progress.getCategory(), restored.getCategory());
-        assertEquals(progress.getPublisher(), restored.getPublisher());
+        assertNull(restored.getUri());
+        assertNull(restored.getCategory());
+        assertNull(restored.getPublisher());
         
     }
     
