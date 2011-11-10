@@ -33,7 +33,7 @@ public class LookupResolvingQueryExecutorTest extends MockObjectTestCase {
         final String query = "query";
         
         final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
-        final Item equivItem = new Item("equiv", "ecurie", Publisher.ITV);
+        final Item equivItem = new Item("equiv", "ecurie", Publisher.YOUTUBE);
         
         
         lookupStore.store(lookupEntryWithEquivalents(query, LookupRef.from(queryItem), LookupRef.from(equivItem)));
