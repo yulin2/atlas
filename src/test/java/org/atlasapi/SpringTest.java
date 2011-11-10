@@ -20,21 +20,27 @@ import junit.framework.TestCase;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
 
+import com.metabroadcast.common.properties.Configurer;
+
 /**
- * Test that we can load beans from the Spring configuration - checks that the config is wired correctly.
+ * Test that we can load beans from the Spring configuration - checks that the
+ * config is wired correctly.
+ * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 public class SpringTest extends TestCase {
 
-	public void testCanCreateQueryController() throws Exception {
-	    ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
-		applicationContext.setConfigLocation(null);
-		applicationContext.refresh();
-		applicationContext.getBean(QueryController.class);
-	}
-	
-	public void testCanCreatProcessing() throws Exception {
-	    System.setProperty("processing.config", "true");
+    public void testCanCreateQueryController() throws Exception {
+        System.setProperty(Configurer.PLATFORM_VARIABLE, "dev");
+        Configurer.load();
+        ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
+        applicationContext.setConfigLocation(null);
+        applicationContext.refresh();
+        applicationContext.getBean(QueryController.class);
+    }
+
+    public void testCanCreatProcessing() throws Exception {
+        System.setProperty("processing.config", "true");
         ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
         applicationContext.setConfigLocation(null);
         applicationContext.refresh();
