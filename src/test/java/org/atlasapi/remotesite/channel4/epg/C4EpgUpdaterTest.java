@@ -50,7 +50,7 @@ public class C4EpgUpdaterTest extends TestCase {
     private final RemoteSiteClient<Document> c4AtomFetcher = context.mock(RemoteSiteClient.class);
     private final ContentWriter contentWriter = context.mock(ContentWriter.class);
     private final C4BrandUpdater brandUpdater = context.mock(C4BrandUpdater.class);
-    private final DateTime day = new DateTime().withTime(6, 0, 0, 0);
+    private final DateTime day = new DateTime(DateTimeZones.LONDON).withTime(6, 0, 0, 0);
     
     private final AdapterLog log = new NullAdapterLog();
     private final ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
