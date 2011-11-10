@@ -28,18 +28,28 @@ It's worth noting that we don't current have a formal release process and everyt
 
 So, to get everything built and ready:
 
+    mkdir /data                                      # Required for feed processing
     git clone http://github.com/atlasapi/atlas.git
     cd atlas
     mvn clean install
     
 This will download all the dependencies, compile the code and run the tests (make sure mongo's setup). To actually run the project locally:
 
-    mvn jetty:run
+    mvn jetty:run -Dprocessing.config=true -Dupdaters.bbc.enabled=true -Djetty.port=8282 # Atlas processing
+    mvn jetty:run                                                                        # Atlas front-end
     
-This will startup Atlas locally using the lovely [Jetty](http://jetty.codehaus.org/jetty/) and you'll be able to go to:
+This will startup Atlas locally using the lovely [Jetty](http://jetty.codehaus.org/jetty/).
 
-    http://localhost:8080/2.0/brands.json?uri=http://www.bbc.co.uk/programmes/b006m86d
-    
-If you have an empty database then this will go off to the BBC, grab the metadata for Eastenders, store it and return it to you.
+Go to
+
+    http://localhost:8282/system/scheduler
+
+and run "BBC Ion schedule update (today only)" to ingest the BBC schedule for today. When that completes, run "BBC Mongo Schedule repopulator" to generate the schedule. 
+
+Then go to
+
+    http://localhost:8080/3.0/schedule.json?from=now.minus.3h&to=now.plus.10h&channel=bbcone&publisher=bbc.co.uk 
+
+for some of today's BBC One schedule. You may need to modify the 'from' and 'to' parameters, depending on the time of day.
 
 Enjoy!
