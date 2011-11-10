@@ -51,12 +51,12 @@ public class C4BrandExtractorTest extends TestCase {
 
 	
 	private final RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
-		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
-		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/4od.atom", rknFourOdFeed.build())
-		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom", rknEpsiodeGuideFeed.build())
-		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries3Feed.build())
-		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4.atom", rknSeries4Feed.build())
-		.respondTo("http://api.channel4.com/programmes/ramsays-kitchen-nightmares/epg.atom", rknEpgFeed.build());
+		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
+		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/4od.atom", rknFourOdFeed.build())
+		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", rknEpsiodeGuideFeed.build())
+		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries3Feed.build())
+		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-4.atom", rknSeries4Feed.build())
+		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/epg.atom", rknEpgFeed.build());
 	
 	private final static AdapterLog nullLog = new NullAdapterLog();
 	private final StubContentResolver contentResolver = new StubContentResolver();
