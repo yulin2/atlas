@@ -1,39 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:base="http://www.channel4.com">
   <id>tag:www.channel4.com,2009:/programmes/dispatches</id>
   <title type="text">Dispatches</title>
-  <subtitle type="html">Dispatches goes undercover in some African churches in the UK, where evangelical pastors perpetuate a strong belief in witchcraft</subtitle>
-  <updated>2010-08-13T14:07:59.239Z</updated>
+  <subtitle type="html">Dispatches is Channel 4's award winning investigative current affairs programme</subtitle>
+  <updated>2011-03-21T15:02:42.651Z</updated>
   <author>
     <name>Channel 4 Television</name>
   </author>
-  <logo>http://www.channel4.com/assets/programmes/images/dispatches/9d40ee7d-da11-4703-8364-582edc9f6bcd_145x82.jpg</logo>
-  <link href="http://www.channel4.com/programmes/dispatches" rel="alternate" type="text/html"/>
-  <link href="http://api.channel4.com/programmes/dispatches.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
-  <link href="http://api.channel4.com/programmes/dispatches/episode-guide.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Episode Guide"/>
-  <link href="http://api.channel4.com/programmes/dispatches/4od.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="4oD"/>
-  <link href="http://api.channel4.com/programmes/dispatches/video.atom?apikey=API_KEY" rel="related" type="application/atom+xml" title="Clips"/>
+  <logo imageSource="own">http://www.channel4.com/assets/programmes/images/dispatches/53d84f5a-3e5c-421a-951a-305feaf83c95_200x113.jpg</logo>
+  <link href="http://www.channel4.com/programmes/dispatches" rel="alternate" type="text/html" />
+  <link href="http://www.channel4.com/pmlsd/dispatches.atom" rel="self" type="application/atom+xml" />
+  <link href="http://www.channel4.com/pmlsd/dispatches/episode-guide.atom" rel="related" type="application/atom+xml" title="Episode Guide" />
+  <link href="http://www.channel4.com/pmlsd/dispatches/4od.atom" rel="related" type="application/atom+xml" title="4oD" />
+  <link href="http://www.channel4.com/pmlsd/dispatches/video.atom" rel="related" type="application/atom+xml" title="Clips" />
+  <category term="http://www.channel4.com/pmlsd/tags/news-current-affairs-and-politics.atom" scheme="tag:www.channel4.com,2010:/category/primary" label="News, Current Affairs and Politics" />
+  <dc:relation.BrandFlattened>true</dc:relation.BrandFlattened>
+  <dc:relation.presentationBrand>C4</dc:relation.presentationBrand>
   <entry>
-    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-67/episode-1</id>
-    <title type="text">Britain's Witch Children</title>
-    <summary type="html">Dispatches goes undercover in some African churches in the UK, where evangelical pastors perpetuate a strong belief in witchcraft. They preach that some people are possessed by evil spirits, and that these spirits bring bad luck into the lives of others.
+    <id>tag:www.channel4.com,2009:/programmes/dispatches/episode-guide/series-105/episode-1</id>
+    <title type="text">Britain's Sex Gangs</title>
+    <summary type="html">Research suggests that thousands of children are potentially being sexually exploited by street grooming gangs. This may only be the tip of the iceberg, as experts believe many crimes of this nature go unreported. 
 
-The only way to rid the possessed from the witchcraft spell and lift their curse is to 'deliver' them: a kind of exorcism that can be very traumatic. Some pastors charge significant sums of money to perform these deliverances. 
+Journalist Tazeen Ahmad investigates street grooming and hears from community leaders who say enough is enough and demand action on the issue. She meets victims of grooming and their parents, whose lives have been torn apart. 
 
-Often it is children who are denounced as witches by these pastors, and this labelling can lead to the physical and emotional abuse of those children at the hands of their families. In extreme cases it has led to the deaths of some children. 
+She hears how girls as young as 12 have been targeted by these gangs and so terrorised and brainwashed that they keep their ordeal secret for years. 
 
-In parts of Africa, branding a child a witch is now outlawed, but in Britain this practise is perfectly legal, despite the fact it can have horrific consequences. 
-
-Dispatches reveals just what goes on behind closed doors in these African churches, exposing the pastors who exploit the religious beliefs of the most vulnerable.</summary>
-    <updated>2010-08-13T14:07:59.240Z</updated>
-    <link href="http://api.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1.atom?apikey=API_KEY" rel="related" type="application/atom+xml"/>
-    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-67/episode-1" rel="alternate" type="text/html"/>
-    <link href="http://www.channel4.com/programmes/dispatches/4od#3109015" rel="alternate" type="text/html" title="4oD"/>
+In a particularly shocking encounter she talks to two young men who explain in detail how grooming by gangs is perpetrated, why virgins are more highly prized and how the commerce of this type of brutal sexual exploitation unfolds.</summary>
+    <updated>2011-11-07T18:22:14.656Z</updated>
+    <link href="http://www.channel4.com/programmes/dispatches/episode-guide/series-105/episode-1" rel="alternate" type="text/html" />
+    <link href="http://www.channel4.com/programmes/dispatches/4od#3256728" rel="related" type="text/html" title="4oD" />
+    <link href="http://www.channel4.com/pmlsd/dispatches/episode-guide/series-105/episode-1.atom" rel="self" type="application/atom+xml" />
     <media:content>
-      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-67/episode-1/3c087168-a793-4717-9804-e71214101fb5_200x113.jpg" height="113" width="200"/>
+      <media:thumbnail url="http://www.channel4.com/assets/programmes/images/dispatches/series-105/episode-1/e502d652-e476-4db3-ba81-fd6ba8768c6f_200x113.jpg" height="113" width="200" imageSource="own" />
     </media:content>
-    <dc:date.Last>2010-07-26T19:00:00.000Z</dc:date.Last>
-    <dc:relation.LastChannel>C4</dc:relation.LastChannel>
+    <dc:date.Next>2011-11-18T03:10:00.000Z</dc:date.Next>
+    <dc:relation.NextChannel>C4</dc:relation.NextChannel>
   </entry>
-
 </feed>
