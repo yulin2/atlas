@@ -17,7 +17,6 @@ import org.atlasapi.remotesite.itv.interlinking.ItvInterlinkingModule;
 import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.redux.ReduxModule;
-import org.atlasapi.remotesite.seesaw.SeesawModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
 
@@ -42,7 +41,6 @@ public class RemoteSiteModuleConfigurer {
  //       .put("itunes",  ItunesModule.class)
  //       .put("msn",     MsnVideoModule.class)
         .put("pa",      PaModule.class)
-        .put("seesaw",  SeesawModule.class)
   //      .put("youtube", YouTubeModule.class)
         .put("tvblob",  TVBlobModule.class)
         .put("preview", PreviewNetworksModule.class)
