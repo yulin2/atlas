@@ -58,11 +58,11 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
 		checking(new Expectations() {{
-			one(itemClient).get("http://api.channel4.com/programmes/atoz/a.atom"); will(returnValue(atoza.build()));
+			one(itemClient).get("http://api.channel4.com/pmlsd/atoz/a.atom"); will(returnValue(atoza.build()));
 			allowing(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(true));
 			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition"); //will(returnValue(brand101));
 
-			one(itemClient).get("http://api.channel4.com/programmes/atoz/a/page-2.atom"); will(returnValue(atoza2.build()));
+			one(itemClient).get("http://api.channel4.com/pmlsd/atoz/a/page-2.atom"); will(returnValue(atoza2.build()));
 			allowing(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); will(returnValue(true));
 			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition-part-2"); //will(returnValue(brand202));
 		}});
