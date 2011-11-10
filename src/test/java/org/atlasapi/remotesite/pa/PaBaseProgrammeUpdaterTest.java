@@ -22,6 +22,7 @@ import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.content.people.DummyItemsPeopleWriter;
+import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
@@ -42,6 +43,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     private AdapterLog log = new SystemOutAdapterLog();
     private ContentResolver resolver;
     private ContentWriter contentWriter;
+	private MongoScheduleStore scheduleWriter;
 
     @Override
     protected void setUp() throws Exception {
@@ -52,10 +54,11 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         
         contentWriter = new MongoContentWriter(db, lookupStore, clock);
         programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, new DummyItemsPeopleWriter(), log);
+        scheduleWriter = new MongoScheduleStore(db, resolver);
     }
 
     public void testShouldCreateCorrectPaData() throws Exception {
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, log);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, log, scheduleWriter);
         updater.run();
         Identified content = null;
 
@@ -156,8 +159,8 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
     static class TestPaProgrammeUpdater extends PaBaseProgrammeUpdater {
 
-        public TestPaProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, null, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
+        public TestPaProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log, MongoScheduleStore scheduleWriter) {
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, scheduleWriter, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
         }
 
         @Override
