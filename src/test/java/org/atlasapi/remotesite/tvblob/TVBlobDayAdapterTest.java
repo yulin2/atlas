@@ -4,6 +4,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
@@ -17,7 +18,7 @@ public class TVBlobDayAdapterTest extends MockObjectTestCase {
 
     public void testShouldRetrieveToday() throws Exception {
         checking(new Expectations() {{
-            allowing(resolver).findByCanonicalUris(with(Expectations.<Iterable<String>>anything())); will(returnValue(null));
+            allowing(resolver).findByCanonicalUris(with(Expectations.<Iterable<String>>anything())); will(returnValue(ResolvedContent.builder().build()));
             allowing(writer).createOrUpdate((Episode) with(anything()));
             allowing(writer).createOrUpdate((Brand) with(anything()));
         }});
