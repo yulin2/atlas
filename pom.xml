@@ -364,11 +364,6 @@
             <artifactId>jackson-core-asl</artifactId>
             <version>1.5.7</version>
         </dependency>
-        <dependency>
-            <groupId>com.metabroadcast.george</groupId>
-            <artifactId>george-client</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
     </dependencies>
     <properties>
         <atlas.version>${project.version}</atlas.version>
