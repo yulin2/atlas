@@ -8,8 +8,8 @@
     <name>Channel 4 Television</name>
   </author>
   <logo>http://www.channel4.com/assets/programmes/images/ramsays-kitchen-nightmares/ramsays-kitchen-nightmares_200x113.jpg</logo>
-  <link href="http://api.channel4.com/programmes/ramsays-kitchen-nightmares.atom?apikey=API_KEY" rel="up" type="application/atom+xml"/>
-  <link href="http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom?apikey=API_KEY" rel="up" type="application/atom+xml"/>
+  <link href="http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom?apikey=API_KEY" rel="self" type="application/atom+xml"/>
   <link href="http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide" rel="alternate" type="text/html"/>
   <dc:relation.BrandFlattened>false</dc:relation.BrandFlattened>
   <entry>
@@ -17,7 +17,7 @@
     <title type="text">Ramsay's Kitchen Nightmares</title>
     <summary type="html">Multi Michelin-starred chef Gordon Ramsay is sharpening his knives - and his tongue - for another assault on some of the country's scariest restaurant kitchens, in the third series of the BAFTA-winning and Emmy-nominated Ramsay's Kitchen Nightmares.</summary>
     <updated>2010-08-10T10:40:13.837Z</updated>
-    <link href="http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom?apikey=API_KEY" rel="related" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#series-3" rel="related" type="text/html" title="4oD"/>
     <media:content>
@@ -30,7 +30,7 @@
     <title type="text">Ramsay's Kitchen Nightmares</title>
     <summary type="html">Multi Michelin-starred chef Gordon Ramsay is back with his trademark mix of tough talking and inspirational leadership for another foray into some of the country's scariest kitchens in the fourth series of the BAFTA and International Emmy award-winning series.</summary>
     <updated>2010-08-10T10:40:13.837Z</updated>
-    <link href="http://api.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml"/>
+    <link href="http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-4.atom?apikey=API_KEY" rel="related" type="application/atom+xml"/>
     <link href="http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-4" rel="alternate" type="text/html"/>
     <link href="http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#series-4" rel="related" type="text/html" title="4oD"/>
     <media:content>
