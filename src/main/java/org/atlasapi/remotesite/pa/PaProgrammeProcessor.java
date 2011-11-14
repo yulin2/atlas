@@ -506,10 +506,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     .build();
     
     private Boolean isRepeat(Channel channel, Attr attr) {
-        if (!TERRESTRIAL_CHANNELS.contains(channel)) {
-            return true;
+        // If the broadcast is on a 'terrestrial' channel only inspect repeat flag
+        if (TERRESTRIAL_CHANNELS.contains(channel)) {
+            return getBooleanValue(attr.getRepeat());
         }
-        return getBooleanValue(attr.getRepeat());
+        // check new episode flag, will be set to yes only if definitely new content 
+        // so only then can we assert it's NOT a repeat. Return null (don't know) otherwise.
+        return Boolean.TRUE.equals(getBooleanValue(attr.getNewEpisode())) ? Boolean.FALSE : null;
     }
 
     private void addBroadcast(Version version, Broadcast broadcast) {
