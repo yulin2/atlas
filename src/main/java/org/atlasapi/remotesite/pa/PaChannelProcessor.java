@@ -5,7 +5,6 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
@@ -47,7 +46,7 @@ public class PaChannelProcessor {
                     ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
                     if(itemAndBroadcast != null) {
 	                    broadcasts.add(itemAndBroadcast);
-	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getId(), progUri(programme));
+	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getId(),itemAndBroadcast.getItemUri());
                     }
                     processed++;
                 } catch (Exception e) {
@@ -65,10 +64,6 @@ public class PaChannelProcessor {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s", channel.key()));
         }
         return processed;
-    }
-
-    private String progUri(ProgData programme) {
-        return Strings.isNullOrEmpty(programme.getRtFilmnumber()) ? PaHelper.getEpisodeUri(programme.getProgId()) : PaHelper.getFilmUri(programme.getRtFilmnumber());
     }
 
     private void unlock(Set<String> currentlyProcessing, String programmeLock) {

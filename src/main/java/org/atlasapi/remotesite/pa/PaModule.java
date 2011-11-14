@@ -56,7 +56,9 @@ public class PaModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(paFileUpdater(), RECENT_FILE_DOWNLOAD);
+        scheduler.schedule(paFileUpdater().withName("PA File Updater"), RECENT_FILE_DOWNLOAD);
+        scheduler.schedule(paCompleteUpdater().withName("PA Complete Updater"), COMPLETE_INGEST);
+        scheduler.schedule(paRecentUpdater().withName("PA Recent Updater"), RECENT_FILE_INGEST);
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("PA update scheduled task installed").withSource(PaCompleteUpdater.class));
     }
     
@@ -77,14 +79,12 @@ public class PaModule {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
         PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), scheduleWriter, log);
         PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), log);
-        scheduler.schedule(updater, COMPLETE_INGEST);
         return updater;
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
         PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, log);
         PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), log);
-        scheduler.schedule(updater, RECENT_FILE_INGEST);
         return updater;
     }
     
