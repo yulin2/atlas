@@ -29,7 +29,6 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.ParsingException;
-import nu.xom.Serializer;
 import nu.xom.ValidityException;
 
 import org.atlasapi.media.entity.Publisher;
@@ -39,10 +38,10 @@ import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.simple.PublisherDetails;
+import org.atlasapi.media.entity.simple.RelatedLink;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -167,9 +166,9 @@ public class JaxbXmlTranslatorTest extends TestCase {
         Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
         
         assertThat(itemElem, hasChildElem(allOf(of(
-                localName(is("keyphrases")),
+                localName(is("key_phrases")),
                 hasChildElem(allOf(of(
-                        localName(is("keyphrase")),
+                        localName(is("key_phrase")),
                         hasChildElem(allOf(of(
                                 localName(is("phrase")),
                                 value(is(phrase.getPhrase()))
@@ -177,6 +176,38 @@ public class JaxbXmlTranslatorTest extends TestCase {
                         hasChildElem(allOf(of(
                                 localName(is("weighting")),
                                 value(is(phrase.getWeighting().toString()))
+                        )))
+                )))
+        ))));
+    }
+    
+    public void testCanOutputSimeItemObjectModelItemWithRelatedLinksAsXml() throws Exception {
+        RelatedLink link = new RelatedLink();
+        link.setType("facebook");
+        link.setUrl("http://www.facebook.com/relatedlink");
+        link.setTitle("Related Link");
+        
+        Item item = item().withRelatedLinks(ImmutableSet.of(link)).build();
+        
+        Document outputDoc = serializeToXml(new ContentQueryResult(item));
+
+        Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
+        
+        assertThat(itemElem, hasChildElem(allOf(of(
+                localName(is("related_links")),
+                hasChildElem(allOf(of(
+                        localName(is("related_link")),
+                        hasChildElem(allOf(of(
+                                localName(is("url")),
+                                value(is(link.getUrl()))
+                        ))),
+                        hasChildElem(allOf(of(
+                                localName(is("title")),
+                                value(is(link.getTitle()))
+                        ))),
+                        hasChildElem(allOf(of(
+                                localName(is("type")),
+                                value(is(link.getType()))
                         )))
                 )))
         ))));
@@ -193,11 +224,6 @@ public class JaxbXmlTranslatorTest extends TestCase {
         
         Element listElem = outputDoc.getRootElement().getChildElements().get(0);
         assertThat(listElem, allOf(of(localName(is("playlist")), namespacePrefix(is("play")))));
-        
-        Serializer serializer = new Serializer(System.out, Charsets.UTF_8.toString());
-        serializer.setLineSeparator("\n");
-        serializer.setIndent(4);
-        serializer.write(new Document(outputDoc));
         
         assertThat(listElem, hasChildElem(allOf(of(
                 localName(is("content")),
@@ -284,4 +310,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
         };
     }
     
+//    Serializer serializer = new Serializer(System.out, Charsets.UTF_8.toString());
+//    serializer.setLineSeparator("\n");
+//    serializer.setIndent(4);
+//    serializer.write(new Document(outputDoc));
 }
