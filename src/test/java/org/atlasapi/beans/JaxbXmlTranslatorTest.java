@@ -32,10 +32,13 @@ import nu.xom.ParsingException;
 import nu.xom.Serializer;
 import nu.xom.ValidityException;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
+import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.entity.simple.Playlist;
+import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
@@ -53,6 +56,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
+    private final JaxbXmlTranslator translator = new JaxbXmlTranslator();
 
 	@Override
 	public void setUp() throws Exception {
@@ -153,6 +157,30 @@ public class JaxbXmlTranslatorTest extends TestCase {
         
         //TODO: locations, broadcasts, people, blackAndWhite, countriesOfOrigin, year
 	}
+	
+    public void testCanOutputSimeItemObjectModelItemWithKeyPhrasesAsXml() throws Exception {
+        KeyPhrase phrase = new KeyPhrase("phrase",new PublisherDetails(Publisher.BBC.key()),1.0);
+        Item item = item().withKeyPhrases(ImmutableSet.of(phrase)).build();
+
+        Document outputDoc = serializeToXml(new ContentQueryResult(item));
+
+        Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
+        
+        assertThat(itemElem, hasChildElem(allOf(of(
+                localName(is("keyphrases")),
+                hasChildElem(allOf(of(
+                        localName(is("keyphrase")),
+                        hasChildElem(allOf(of(
+                                localName(is("phrase")),
+                                value(is(phrase.getPhrase()))
+                        ))),
+                        hasChildElem(allOf(of(
+                                localName(is("weighting")),
+                                value(is(phrase.getWeighting().toString()))
+                        )))
+                )))
+        ))));
+    }
 
 
 	public void testCanOutputSimpleListObjectModelPlaylistFieldsAsXml() throws Exception {
@@ -183,7 +211,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 	}
 
     private Document serializeToXml(ContentQueryResult result) throws IOException, ParsingException, ValidityException {
-        new JaxbXmlTranslator().writeTo(request, response, ImmutableSet.<Object>of(result), AtlasModelType.CONTENT);
+        translator.writeTo(request, response, ImmutableSet.<Object>of(result), AtlasModelType.CONTENT);
         
         String output = response.getResponseAsString();
 
