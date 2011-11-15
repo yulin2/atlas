@@ -203,7 +203,8 @@ person_id: A unique id for this person
 	repeat: the programme a repeat.
 	bw: the programme broadcast in Black and White.
 	premiere: this a broadcast premiere.
-  new_series: this is the first episode of a news series of this programme.
+    new_episode: this is the first showing of this programme on this channel.
+    new_series: this is the first episode of a news series of this programme.
 	last_in_series: this is the last in a series of showings of this programme.
 	surround: the programme is being broadcast in surround sound.
 	widescreen: the programme being shown in widescreen format.
@@ -229,6 +230,7 @@ person_id: A unique id for this person
 	repeat (yes | no) "no"
 	bw (yes | no) "no"
 	premiere (yes | no) "no"
+	new_episode (yes | no) "no"
 	new_series (yes | no) "no"
 	last_in_series (yes | no) "no"
 	surround (yes | no) "no"
