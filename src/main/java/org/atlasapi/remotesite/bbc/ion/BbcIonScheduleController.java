@@ -26,15 +26,14 @@ public class BbcIonScheduleController {
 
     private final DateTimeFormatter dateFormater = ISODateTimeFormat.basicDate().withZone(DateTimeZones.UTC);
     
-    private final BbcIonScheduleHandler handler;
+    private final BbcIonBroadcastHandler handler;
     private final AdapterLog log;
     
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCIonScheduleUpdater").build());
 
     private final RemoteSiteClient<IonSchedule> scheduleClient;
 
-
-    public BbcIonScheduleController(RemoteSiteClient<IonSchedule> scheduleClient, BbcIonScheduleHandler handler, AdapterLog log) {
+    public BbcIonScheduleController(RemoteSiteClient<IonSchedule> scheduleClient, BbcIonBroadcastHandler handler, AdapterLog log) {
         this.scheduleClient = scheduleClient;
         this.handler = handler;
         this.log = log;
