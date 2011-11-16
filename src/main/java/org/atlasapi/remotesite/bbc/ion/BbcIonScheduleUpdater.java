@@ -26,11 +26,11 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
 
     private final Supplier<Iterable<String>> urlSupplier;
     private final RemoteSiteClient<IonSchedule> scheduleClient;
-    private final BbcIonScheduleHandler handler;
+    private final BbcIonBroadcastHandler handler;
     private final AdapterLog log;
 
 
-    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, RemoteSiteClient<IonSchedule> client, BbcIonScheduleHandler handler, AdapterLog log) {
+    public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, RemoteSiteClient<IonSchedule> client, BbcIonBroadcastHandler handler, AdapterLog log) {
         this.urlSupplier = urlSupplier;
         this.scheduleClient = client;
         this.handler = handler;
