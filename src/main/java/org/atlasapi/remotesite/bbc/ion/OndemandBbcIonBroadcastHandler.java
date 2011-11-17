@@ -16,7 +16,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
-import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
@@ -26,48 +25,40 @@ import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.intl.Countries;
 
-public class OndemandBbcIonScheduleHandler implements BbcIonScheduleHandler {
+public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final AdapterLog log;
 
-    public OndemandBbcIonScheduleHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public OndemandBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
     }
 
     @Override
-    public int handle(IonSchedule schedule) {
-        int broadcasts = 0;
-
-        for (IonBroadcast broadcast : schedule.getBlocklist()) {
-            try {
-                if (handle(broadcast)) {
-                    broadcasts++;
-                }
-            } catch (Exception e) {
-                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to process ondemand for %s", broadcast.getEpisodeId()));
-            }
+    public void handle(IonBroadcast broadcast) {
+        try {
+            tryHandle(broadcast);
+        } catch (Exception e) {
+            log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to process ondemand for %s", broadcast.getEpisodeId()));
         }
-        return broadcasts;
     }
 
-    private boolean handle(IonBroadcast broadcast) {
+    private void tryHandle(IonBroadcast broadcast) {
 
         String itemId = broadcast.getEpisodeId();
 
         Item item = resolve(BbcFeeds.slashProgrammesUriForPid(itemId));
         if (item == null) {
-            log.record(warnEntry().withSource(getClass()).withDescription("No item %s", broadcast.getEpisodeId()));
-            return false;
+            return;
         }
 
         Version version = findVersion(item, BbcFeeds.slashProgrammesUriForPid(broadcast.getVersionId()));
         if (version == null) {
             log.record(warnEntry().withSource(getClass()).withDescription("No version %s for %s", broadcast.getVersionId(), broadcast.getEpisodeId()));
-            return false;
+            return;
         }
 
         String iplayerId = iplayerId(itemId);
@@ -101,8 +92,6 @@ public class OndemandBbcIonScheduleHandler implements BbcIonScheduleHandler {
         }
 
         writer.createOrUpdate(item);
-
-        return true;
     }
 
     private void updateLocation(Location location, DateTime actualStart, DateTime availableUntil, String itemId) {
@@ -136,7 +125,6 @@ public class OndemandBbcIonScheduleHandler implements BbcIonScheduleHandler {
                 return version;
             }
         }
-        log.record(warnEntry().withSource(getClass()).withDescription("No version %s for %s", versionId, item.getCanonicalUri()));
         return null;
     }
 

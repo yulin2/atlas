@@ -22,13 +22,18 @@ public class BbcFeeds {
 	}
 
 	public static String slashProgrammesUriForPid(String pid) {
-	    if (!PID_FINDER.matcher(pid).matches()) {
+	    if (!isBbcPid(pid)) {
 	        throw new IllegalArgumentException("PID " + pid + " did not match the BBC PID pattern " + PID_FINDER);
 	    }
 		return SLASH_PROGRAMMES_BASE + pid;
 	}
 
+    public static boolean isBbcPid(String pid) {
+        return PID_FINDER.matcher(pid).matches();
+    }
+
     public static boolean isACanonicalSlashProgrammesUri(String uri) {
         return SLASH_PROGRAMMES_URL_PATTERN.matcher(uri).matches();
     }
+    
 }
