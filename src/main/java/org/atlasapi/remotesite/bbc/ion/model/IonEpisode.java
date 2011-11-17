@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
+import com.google.common.base.Strings;
+
 public class IonEpisode {
 
     private String mySeriesUrl;
@@ -396,6 +398,13 @@ public class IonEpisode {
         public String getTitle() {
             return title;
         }
+    }
+    
+    public boolean hasSeries() {
+        return !Strings.isNullOrEmpty(getSeriesId());
+    }
 
+    public boolean hasBrand() {
+        return !Strings.isNullOrEmpty(getBrandId());
     }
 }

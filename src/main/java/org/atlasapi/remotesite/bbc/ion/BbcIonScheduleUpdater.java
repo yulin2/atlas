@@ -67,6 +67,7 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
                         broadcasts += result.get();
                     } catch (Exception e) {
                         failed++;
+                        log.record(AdapterLogEntry.warnEntry().withCause(e).withSource(getClass()).withDescription("Schedule update failed"));
                     }
                 }
                 reportStatus(String.format("Processed %s / %s. %s failures. %s broadcasts processed", ++processed, submitted, failed, broadcasts));

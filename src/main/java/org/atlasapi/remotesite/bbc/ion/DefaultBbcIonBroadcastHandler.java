@@ -172,8 +172,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             return (Series) ided;
         }
 
-        log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription(
-                String.format("Updating item %s, got %s when resolving for Series %s", itemUri, ided.getClass().getSimpleName(), seriesUri)));
+        log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Updating item %s, got %s when resolving for Series %s", itemUri, ided.getClass().getSimpleName(), seriesUri));
         return null;
     }
 
