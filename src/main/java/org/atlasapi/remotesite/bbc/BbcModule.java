@@ -2,6 +2,9 @@ package org.atlasapi.remotesite.bbc;
 
 import static com.metabroadcast.common.scheduling.RepetitionRules.every;
 import static com.metabroadcast.common.time.DateTimeZones.UTC;
+import static org.atlasapi.http.HttpBackedRemoteSiteClient.httpRemoteSiteClient;
+import static org.atlasapi.http.HttpResponseTransformers.gsonResponseTransformer;
+import static org.atlasapi.http.HttpResponseTransformers.htmlNavigatorTransformer;
 import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.joda.time.Duration.standardMinutes;
 
@@ -15,6 +18,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDayRangeUrlSupplier;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemAdapter;
@@ -24,6 +28,7 @@ import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.DefaultBbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient;
 import org.atlasapi.remotesite.bbc.ion.OndemandBbcIonBroadcastHandler;
+import org.atlasapi.remotesite.bbc.ion.SocialDataFetchingIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
@@ -38,7 +43,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -85,7 +93,12 @@ public class BbcModule {
     
     private BbcIonScheduleUpdater bbcIonSocialDataUpdater() {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 7, 7);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), null, log);
+        SimpleHttpClient httpClient = HttpClients.webserviceClient();
+        BbcRelatedLinksAdapter linksAdapter = new BbcRelatedLinksAdapter(httpRemoteSiteClient(httpClient,
+                gsonResponseTransformer(new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES), SlashProgrammesContainer.class)));
+        BbcHashTagAdapter hashTagAdapter = new BbcHashTagAdapter(httpRemoteSiteClient(httpClient, htmlNavigatorTransformer()));
+        BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linksAdapter, hashTagAdapter, contentResolver, contentWriters, log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), handler, log);
     }
 	
 	private BbcIonDayRangeUrlSupplier dayRangeUrlSupplier(String urlPattern, int ahead, int back) {
