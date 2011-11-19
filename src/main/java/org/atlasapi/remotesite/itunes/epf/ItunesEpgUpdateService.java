@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.itunes.epf.ArtistTable.ArtistTableRow;
 
@@ -15,6 +17,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSetMultimap.Builder;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.google.common.io.CharStreams;
@@ -28,11 +31,13 @@ public class ItunesEpgUpdateService extends AbstractExecutionThreadService {
     private File artists;
     private final ContentWriter writer;
     private final File artistCollection;
+    private final File collections;
 
     
-    public ItunesEpgUpdateService(File artists, File artistCollection, ContentWriter writer) {
+    public ItunesEpgUpdateService(File artists, File artistCollection, File collections, ContentWriter writer) {
         this.artists = artists;
         this.artistCollection = artistCollection;
+        this.collections = collections;
         this.writer = writer;
     }
 
@@ -48,6 +53,7 @@ public class ItunesEpgUpdateService extends AbstractExecutionThreadService {
             
             @Override
             public boolean process(ArtistTableRow row) {
+                //TODO:filter by row type.
                 System.out.println(row);
                 Brand extractedBrand = extract(row);
                 writer.createOrUpdate(extractedBrand);
@@ -62,16 +68,19 @@ public class ItunesEpgUpdateService extends AbstractExecutionThreadService {
             }
         });
 
-        LineProcessor<SetMultimap<Brand,String>> lineProcessor = new LineProcessor<SetMultimap<Brand,String>>() {
+        LineProcessor<SetMultimap<String, Brand>> lineProcessor = new LineProcessor<SetMultimap<String,Brand>>() {
 
-            Builder<Brand, String> results = ImmutableSetMultimap.<Brand,String>builder();
+            // A collection can have multiple participant artists according to
+            // spec. Unlikely for a TV show but to be safe allowing mapping of
+            // series id to multiple parent brands.
+            Builder<String, Brand> results = ImmutableSetMultimap.<String, Brand>builder();
             
             private boolean isComment(String line) {
                 return line.startsWith("#");
             }
 
             @Override
-            public SetMultimap<Brand,String> getResult() {
+            public SetMultimap<String, Brand> getResult() {
                 return results.build();
             }
 
@@ -89,7 +98,7 @@ public class ItunesEpgUpdateService extends AbstractExecutionThreadService {
                 String artistId = lineParts.get(1);
                 Brand brand = extractedBrands.get(artistId);
                 if(brand != null) {
-                    results.put(brand, artistId);
+                    results.put(artistId, brand);
                 }
                 return true;
             }
@@ -102,8 +111,59 @@ public class ItunesEpgUpdateService extends AbstractExecutionThreadService {
             }
         }, lineProcessor);
         
-        SetMultimap<Brand, String> brandCollectionIdMap = lineProcessor.getResult();
+        final SetMultimap<String, Brand> collectionIdBrandMap = lineProcessor.getResult();
         
+        LineProcessor<SetMultimap<Brand, Series>> collectionProcessor = new LineProcessor<SetMultimap<Brand, Series>>() {
+
+            Builder<Brand, Series> results = ImmutableSetMultimap.<Brand, Series>builder();
+            
+            private boolean isComment(String line) {
+                return line.startsWith("#");
+            }
+
+            @Override
+            public SetMultimap<Brand, Series> getResult() {
+                return results.build();
+            }
+
+            private final char FIELD_SEPARATOR = (char) 1;
+            private Splitter splitter = Splitter.on(FIELD_SEPARATOR);
+            
+            @Override
+            public boolean processLine(String line) throws IOException {
+                if(isComment(line)) {
+                    return true;
+                }
+                
+                ImmutableList<String> lineParts = ImmutableList.copyOf(splitter.split(line.trim()));
+                
+                String collectionId = lineParts.get(1);
+                if(collectionIdBrandMap.containsKey(collectionId)) {
+                    Set<Brand> collectionParents = collectionIdBrandMap.get(collectionId);
+                    if (collectionParents.size() == 1) {
+                        Brand parent = Iterables.getOnlyElement(collectionParents);
+                        Series series = extractSeries(lineParts);
+                        results.put(parent, series);
+                        writer.createOrUpdate(series);
+                    } else {
+                        //TODO: warn of collection with multiple brands
+                    }
+                }
+                
+                return true;
+            }
+
+            private Series extractSeries(ImmutableList<String> lineParts) {
+                return null; //TODO complete this method;
+            }
+        };
+
+        CharStreams.readLines(new InputSupplier<Reader>() {
+            @Override
+            public Reader getInput() throws IOException {
+                return Files.newReader(collections, Charsets.UTF_8);
+            }
+        }, collectionProcessor);
     }
     
 
