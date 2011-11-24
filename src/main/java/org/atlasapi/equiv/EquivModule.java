@@ -87,6 +87,7 @@ import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
@@ -180,11 +181,15 @@ public class EquivModule {
                 return !(Publisher.PA.equals(input.getPublisher()) && input instanceof Film);
             }
         });
-        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, new MongoScheduleTaskProgressStore(db)).forPublishers(publishers);
+        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, progressStore()).forPublishers(publishers);
+    }
+
+    public @Bean MongoScheduleTaskProgressStore progressStore() {
+        return new MongoScheduleTaskProgressStore(db);
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
-        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, new MongoScheduleTaskProgressStore(db));
+        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, progressStore());
     }
     
     public @Bean ContentEquivalenceUpdater<Film> filmUpdater() {
@@ -208,8 +213,16 @@ public class EquivModule {
             taskScheduler.schedule(publisherUpdateTask(Publisher.ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
-//            taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().withName("BBC Child Ref Update"), RepetitionRules.NEVER);
         }
+    }
+
+    protected @Bean ChildRefUpdateController childRefUpdateController() {
+        return new ChildRefUpdateController(childRefUpdateTask(), contentResolver);
+    }
+    
+    protected @Bean ChildRefUpdateTask childRefUpdateTask() {
+        return new ChildRefUpdateTask(contentLister, contentResolver, db, progressStore(), log, Publisher.BBC);
     }
     
     //Controllers...
