@@ -67,7 +67,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
-import org.atlasapi.persistence.content.mongo.ChildRefWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.LookupWriter;
@@ -88,6 +87,7 @@ import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
+import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
@@ -213,8 +213,16 @@ public class EquivModule {
             taskScheduler.schedule(publisherUpdateTask(Publisher.ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(new ChildRefUpdateTask(contentLister, new ChildRefWriter(db), progressStore(), log, Publisher.BBC).withName("BBC Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().withName("BBC Child Ref Update"), RepetitionRules.NEVER);
         }
+    }
+
+    protected @Bean ChildRefUpdateController childRefUpdateController() {
+        return new ChildRefUpdateController(childRefUpdateTask(), contentResolver);
+    }
+    
+    protected @Bean ChildRefUpdateTask childRefUpdateTask() {
+        return new ChildRefUpdateTask(contentLister, contentResolver, db, progressStore(), log, Publisher.BBC);
     }
     
     //Controllers...
