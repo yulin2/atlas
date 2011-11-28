@@ -5,6 +5,7 @@ import static com.metabroadcast.common.time.DateTimeZones.UTC;
 import static org.atlasapi.http.HttpBackedRemoteSiteClient.httpRemoteSiteClient;
 import static org.atlasapi.http.HttpResponseTransformers.gsonResponseTransformer;
 import static org.atlasapi.http.HttpResponseTransformers.htmlNavigatorTransformer;
+import static org.atlasapi.remotesite.bbc.BbcSlashProgrammesRdfClient.slashProgrammesClient;
 import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.joda.time.Duration.standardMinutes;
 
@@ -96,10 +97,18 @@ public class BbcModule {
     private BbcIonScheduleUpdater bbcIonSocialDataUpdater() {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 7, 7);
         SimpleHttpClient httpClient = HttpClients.webserviceClient();
+        
         BbcRelatedLinksAdapter linksAdapter = new BbcRelatedLinksAdapter(httpRemoteSiteClient(httpClient,
                 gsonResponseTransformer(new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES), SlashProgrammesContainer.class)));
         BbcHashTagAdapter hashTagAdapter = new BbcHashTagAdapter(httpRemoteSiteClient(httpClient, htmlNavigatorTransformer()));
-        BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linksAdapter, hashTagAdapter, contentResolver, contentWriters, log);
+        BbcSlashProgrammesTopicsAdapter topicsAdapter = new BbcSlashProgrammesTopicsAdapter(
+                slashProgrammesClient(httpClient, SlashProgrammesRdf.class),
+                new BbcSlashProgrammesTopicAdapter(
+                        slashProgrammesClient(httpClient, SlashProgrammesRdf.class),
+                        new BbcSlashProgrammesRdfTopicExtractor(topicStore, log)
+                ));
+        
+        BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linksAdapter, hashTagAdapter, topicsAdapter, contentResolver, contentWriters, log);
         return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), handler, log);
     }
 	

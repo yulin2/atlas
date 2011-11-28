@@ -60,9 +60,16 @@ class SlashProgrammesRdf {
         
         @XmlElement(namespace=OWL.NS, name="sameAs")
         private Set<SlashProgrammesSameAs> sameAs;
+        
+        @XmlElement(namespace=RDF.NS, name="type")
+        private Set<SlashProgrammesType> type;
 
         public Set<SlashProgrammesSameAs> getSameAs() {
             return sameAs;
+        }
+        
+        public Set<SlashProgrammesType> getType() {
+            return type;
         }
 
         public SlashProgrammesDescription withSameAs(Set<SlashProgrammesSameAs> sameAs) {
@@ -70,8 +77,29 @@ class SlashProgrammesRdf {
             return this;
         }
         
+        public SlashProgrammesDescription withTypes(Set<SlashProgrammesType> types) {
+            this.type = types;
+            return this;
+        }
+        
     }
 
+    static class SlashProgrammesType {
+        
+        @XmlAttribute(name = "resource", namespace = RDF.NS)
+        private String resourceUri;
+
+        public String resourceUri() {
+            return resourceUri;
+        }
+
+        public SlashProgrammesType withResourceUri(String uri) {
+            resourceUri = uri;
+            return this;
+        }
+        
+    }
+    
     static class SlashProgrammesSameAs {
         
         @XmlAttribute(name = "resource", namespace = RDF.NS)
