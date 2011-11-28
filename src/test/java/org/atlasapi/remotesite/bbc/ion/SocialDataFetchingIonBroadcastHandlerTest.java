@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -40,10 +41,13 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCas
     private final SiteSpecificAdapter<List<RelatedLink>> linkAdapter = mock(SiteSpecificAdapter.class, "link adapter");
     @SuppressWarnings("unchecked")
     private final SiteSpecificAdapter<List<KeyPhrase>> tagAdapter = mock(SiteSpecificAdapter.class, "tag adapter");
+    @SuppressWarnings("unchecked")
+    private final SiteSpecificAdapter<List<Topic>> topicsAdapter = mock(SiteSpecificAdapter.class, "topic adapter");
+    
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final ContentWriter writer = mock(ContentWriter.class);
     
-    private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linkAdapter, tagAdapter, resolver, writer, log);
+    private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linkAdapter, tagAdapter, topicsAdapter, resolver, writer, log);
 
     public void testSetsLinksAndTagsForTopLevelItem() {
         
@@ -68,6 +72,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCas
         checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())));
             one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))));
+            one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(resolver).findByCanonicalUris(with(hasItem(uri))); will(returnValue(builder().build()));
             never(writer).createOrUpdate(with(any(Item.class)));
         }});
@@ -120,6 +125,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCas
         checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(links));
             one(tagAdapter).fetch(uri);will(returnValue(tags));
+            one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(resolver).findByCanonicalUris(with(hasItem(uri))); will(returnValue(builder().put(uri, content).build()));
         }});
     }
@@ -132,8 +138,9 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCas
         IonBroadcast broadcast = broadcast(pid, NO_SERIES, NO_BRAND);
         
         checking(new Expectations(){{
-            one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.<RelatedLink>of()));
-            one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.<KeyPhrase>of()));
+            one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
+            one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
+            one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             never(resolver).findByCanonicalUris(with(any(Iterable.class)));
             never(writer).createOrUpdate(with(any(Item.class)));
         }});

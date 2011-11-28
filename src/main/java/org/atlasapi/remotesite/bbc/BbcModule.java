@@ -5,6 +5,7 @@ import static com.metabroadcast.common.time.DateTimeZones.UTC;
 import static org.atlasapi.http.HttpBackedRemoteSiteClient.httpRemoteSiteClient;
 import static org.atlasapi.http.HttpResponseTransformers.gsonResponseTransformer;
 import static org.atlasapi.http.HttpResponseTransformers.htmlNavigatorTransformer;
+import static org.atlasapi.remotesite.bbc.BbcSlashProgrammesRdfClient.slashProgrammesClient;
 import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.joda.time.Duration.standardMinutes;
 
@@ -19,16 +20,16 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
-import org.atlasapi.remotesite.bbc.ion.BbcIonContentUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
+import org.atlasapi.remotesite.bbc.ion.BbcIonContentUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDayRangeUrlSupplier;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemContentExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
-import org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient;
 import org.atlasapi.remotesite.bbc.ion.DefaultBbcIonBroadcastHandler;
+import org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient;
 import org.atlasapi.remotesite.bbc.ion.OndemandBbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.SocialDataFetchingIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
@@ -45,11 +46,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -99,10 +100,18 @@ public class BbcModule {
     private BbcIonScheduleUpdater bbcIonSocialDataUpdater() {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 7, 7);
         SimpleHttpClient httpClient = HttpClients.webserviceClient();
+        
         BbcRelatedLinksAdapter linksAdapter = new BbcRelatedLinksAdapter(httpRemoteSiteClient(httpClient,
                 gsonResponseTransformer(new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES), SlashProgrammesContainer.class)));
         BbcHashTagAdapter hashTagAdapter = new BbcHashTagAdapter(httpRemoteSiteClient(httpClient, htmlNavigatorTransformer()));
-        BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linksAdapter, hashTagAdapter, contentResolver, contentWriters, log);
+        BbcSlashProgrammesTopicsAdapter topicsAdapter = new BbcSlashProgrammesTopicsAdapter(
+                slashProgrammesClient(httpClient, SlashProgrammesRdf.class),
+                new BbcSlashProgrammesTopicAdapter(
+                        slashProgrammesClient(httpClient, SlashProgrammesRdf.class),
+                        new BbcSlashProgrammesRdfTopicExtractor(topicStore, log)
+                ));
+        
+        BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linksAdapter, hashTagAdapter, topicsAdapter, contentResolver, contentWriters, log);
         return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), handler, log);
     }
 	

@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.RelatedLink;
+import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -27,13 +28,15 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final AdapterLog log;
+    private SiteSpecificAdapter<List<Topic>> topicsAdapter;
 
-    public SocialDataFetchingIonBroadcastHandler(SiteSpecificAdapter<List<RelatedLink>> linkAdapter, SiteSpecificAdapter<List<KeyPhrase>> phraseAdapter, ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public SocialDataFetchingIonBroadcastHandler(SiteSpecificAdapter<List<RelatedLink>> linkAdapter, SiteSpecificAdapter<List<KeyPhrase>> phraseAdapter, SiteSpecificAdapter<List<Topic>> topicsAdapter, ContentResolver resolver, ContentWriter writer, AdapterLog log) {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
         this.relatedLinkAdapter = linkAdapter;
         this.hashTagAdapter = phraseAdapter;
+        this.topicsAdapter = topicsAdapter;
     }
 
     @Override
@@ -47,6 +50,8 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
         if (broadcast.hasBrand()) {
             updateSocialDataFor(broadcast.getBrandId());
         }
+        
+        
     }
 
     private void updateSocialDataFor(String pid) { 
@@ -54,21 +59,23 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
         try {
             List<RelatedLink> links = relatedLinkAdapter.fetch(pidUri);
             List<KeyPhrase> phrases = hashTagAdapter.fetch(pidUri);
-
-            if (!links.isEmpty() || !phrases.isEmpty()) {
-                upadteContent(pidUri, links, phrases);
+            List<Topic> topics = topicsAdapter.fetch(pidUri);
+            
+            if (!links.isEmpty() || !phrases.isEmpty() || !topics.isEmpty()) {
+                upadteContent(pidUri, links, phrases, topics);
             }
         } catch (Exception e) {
             log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception fetching social data for " + pidUri));
         }
     }
 
-    private void upadteContent(String pidUri, List<RelatedLink> links, List<KeyPhrase> phrases) {
+    private void upadteContent(String pidUri, List<RelatedLink> links, List<KeyPhrase> phrases, List<Topic> topics) {
         Maybe<Identified> possibleContent = resolver.findByCanonicalUris(ImmutableList.of(pidUri)).get(pidUri);
         if (possibleContent.hasValue()) {
             Content content = (Content) possibleContent.requireValue();
             content.setRelatedLinks(links);
             content.setKeyPhrases(phrases);
+            content.setTopics(topics);
             if (content instanceof Container) {
                 writer.createOrUpdate((Container) content);
             } else if (content instanceof Item) {
