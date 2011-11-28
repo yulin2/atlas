@@ -34,7 +34,7 @@ public class ChildRefUpdateTaskTest extends MockObjectTestCase {
     
     DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
     
-    ChildRefUpdateTask task = new ChildRefUpdateTask(lister, resolver, mongo, progressStore, new NullAdapterLog(), BBC);
+    ChildRefUpdateTask task = new ChildRefUpdateTask(lister, resolver, mongo, progressStore, new NullAdapterLog()).forPublishers(BBC);
     
     ContainerTranslator translator = new ContainerTranslator();
     
