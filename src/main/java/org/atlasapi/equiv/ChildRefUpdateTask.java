@@ -46,17 +46,19 @@ import com.mongodb.DBObject;
 public class ChildRefUpdateTask extends ScheduledTask {
 
     private final ContentLister contentStore;
-    private final ImmutableList<Publisher> publishers;
-    private final ScheduleTaskProgressStore progressStore;
-    private final String scheduleKey;
-    private final AdapterLog log;
     private final ContentResolver resolver;
+    private final ScheduleTaskProgressStore progressStore;
 
     private final DBCollection containers;
     private final DBCollection programmeGroups;
     private final ContainerTranslator translator = new ContainerTranslator();
 
-    public ChildRefUpdateTask(ContentLister lister, ContentResolver resolver, DatabasedMongo mongo, ScheduleTaskProgressStore progressStore, AdapterLog log, Publisher... publishers) {
+    private final AdapterLog log;
+
+    private ImmutableList<Publisher> publishers;
+    private String scheduleKey;
+
+    public ChildRefUpdateTask(ContentLister lister, ContentResolver resolver, DatabasedMongo mongo, ScheduleTaskProgressStore progressStore, AdapterLog log) {
         this.contentStore = lister;
         this.resolver = resolver;
         
@@ -67,8 +69,12 @@ public class ChildRefUpdateTask extends ScheduledTask {
         this.log = log;
         
         this.progressStore = progressStore;
+    }
+    
+    public ChildRefUpdateTask forPublishers(Publisher... publishers) {
         this.publishers = ImmutableList.copyOf(publishers);
         this.scheduleKey = "childref" + Joiner.on("-").join(this.publishers);
+        return this;
     }
 
     @Override

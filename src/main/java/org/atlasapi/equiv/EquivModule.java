@@ -84,10 +84,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
@@ -213,8 +214,15 @@ public class EquivModule {
             taskScheduler.schedule(publisherUpdateTask(Publisher.ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(childRefUpdateTask().withName("BBC Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.BBC).withName("BBC Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.PA).withName("PA Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().forPublishers(publishersApartFrom(Publisher.BBC, Publisher.PA)).withName("Other Publishers Child Ref Update"), RepetitionRules.NEVER);
         }
+    }
+
+    private Publisher[] publishersApartFrom(Publisher...publishers) {
+        SetView<Publisher> remainingPublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.copyOf(publishers));
+        return remainingPublishers.toArray(new Publisher[remainingPublishers.size()]);
     }
 
     protected @Bean ChildRefUpdateController childRefUpdateController() {
@@ -222,7 +230,7 @@ public class EquivModule {
     }
     
     protected @Bean ChildRefUpdateTask childRefUpdateTask() {
-        return new ChildRefUpdateTask(contentLister, contentResolver, db, progressStore(), log, Publisher.BBC);
+        return new ChildRefUpdateTask(contentLister, contentResolver, db, progressStore(), log);
     }
     
     //Controllers...
@@ -250,6 +258,5 @@ public class EquivModule {
     @Bean ManualScheduleUpdateController scheduleUpdateController() {
         return new ManualScheduleUpdateController(scheduleResolver, contentResolver);
     }
-    
     
 }
