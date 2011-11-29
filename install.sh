@@ -1,10 +1,10 @@
-cd ../common/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../common-persistence/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../common-social/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../common-webapp/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../atlas-model/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../atlas-persistence/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../atlas-feeds/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../atlas-applications/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../atlas-client/ && mvn clean install -DskipTests && mvn eclipse:eclipse
-cd ../atlas/ && mvn clean install -DskipTests && mvn eclipse:eclipse
+cd ../common/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../common-persistence/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../common-social/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../common-webapp/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../atlas-model/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../atlas-persistence/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../atlas-feeds/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../atlas-applications/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../atlas-client/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true
+cd ../atlas/ && mvn clean install -DskipTests && mvn eclipse:eclipse -DdownloadSources=true -DdownloadJavadocs=true

@@ -12,6 +12,7 @@ import org.atlasapi.remotesite.bbc.BbcModule;
 import org.atlasapi.remotesite.channel4.C4Module;
 import org.atlasapi.remotesite.five.FiveModule;
 import org.atlasapi.remotesite.hulu.HuluModule;
+import org.atlasapi.remotesite.itunes.ItunesModule;
 import org.atlasapi.remotesite.itv.ItvModule;
 import org.atlasapi.remotesite.itv.interlinking.ItvInterlinkingModule;
 import org.atlasapi.remotesite.pa.PaModule;
@@ -38,7 +39,7 @@ public class RemoteSiteModuleConfigurer {
         .put("aorg",    ArchiveOrgModule.class)
         .put("hulu",    HuluModule.class)
  //       .put("hbo",     HboModule.class)
- //       .put("itunes",  ItunesModule.class)
+        .put("itunes",  ItunesModule.class)
  //       .put("msn",     MsnVideoModule.class)
         .put("pa",      PaModule.class)
   //      .put("youtube", YouTubeModule.class)
