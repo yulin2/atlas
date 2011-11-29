@@ -1,26 +1,37 @@
 package org.atlasapi.equiv.update;
 
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.lookup.LookupWriter;
+import org.joda.time.Duration;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.MapMaker;
 
 public class LookupWritingEquivalenceUpdater<T extends Content> implements ContentEquivalenceUpdater<T> {
 
     private final ContentEquivalenceUpdater<T> delegate;
     private final LookupWriter writer;
-    private ConcurrentMap<String, String> seenAsEquiv;
+    private Cache<String, String> seenAsEquiv;
 
     public LookupWritingEquivalenceUpdater(ContentEquivalenceUpdater<T> delegate, LookupWriter writer) {
+        this(delegate, writer, Duration.standardHours(5));
+    }
+    
+    public LookupWritingEquivalenceUpdater(ContentEquivalenceUpdater<T> delegate, LookupWriter writer, Duration cacheDuration) {
         this.delegate = delegate;
         this.writer = writer;
-        this.seenAsEquiv = new MapMaker().expireAfterWrite(5, TimeUnit.HOURS).makeMap();
+        this.seenAsEquiv = CacheBuilder.newBuilder().expireAfterWrite(cacheDuration.getMillis(), MILLISECONDS).build(new CacheLoader<String, String>() {
+            @Override
+            public String load(String key) throws Exception {
+                return "";
+            }
+        });
     }
     
     @Override
@@ -30,12 +41,12 @@ public class LookupWritingEquivalenceUpdater<T extends Content> implements Conte
         Iterable<T> equivs = Iterables.transform(equivalenceResult.strongEquivalences().values(),ScoredEquivalent.<T>toEquivalent());
         
         //abort writing if seens as equiv and not equiv to anything
-        if(seenAsEquiv.containsKey(content.getCanonicalUri()) && Iterables.isEmpty(equivs)) {
+        if(seenAsEquiv.asMap().containsKey(content.getCanonicalUri()) && Iterables.isEmpty(equivs)) {
             return equivalenceResult;
         }
         
         for (T equiv : equivs) {
-            seenAsEquiv.put(equiv.getCanonicalUri(), "");
+            seenAsEquiv.getUnchecked(equiv.getCanonicalUri());
         }
         
         writer.writeLookup(content, equivs);
