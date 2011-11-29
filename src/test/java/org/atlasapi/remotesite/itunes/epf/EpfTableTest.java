@@ -1,57 +1,120 @@
 package org.atlasapi.remotesite.itunes.epf;
 
+import static org.atlasapi.remotesite.itunes.epf.model.EpfTableColumn.INTEGER;
+import static org.atlasapi.remotesite.itunes.epf.model.EpfTableColumn.STRING;
+import static org.atlasapi.remotesite.itunes.epf.model.EpfTableColumn.TIMESTAMP;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
+import java.util.List;
 
-import org.atlasapi.remotesite.itunes.epf.model.EpfArtist;
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
-import org.jmock.Expectations;
+import org.atlasapi.remotesite.itunes.epf.model.EpfTableColumn;
+import org.atlasapi.remotesite.itunes.epf.model.EpfTableRow;
 import org.jmock.integration.junit3.MockObjectTestCase;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
+import com.metabroadcast.common.time.Timestamp;
 
 public class EpfTableTest extends MockObjectTestCase {
 
-    @SuppressWarnings("unchecked")
-    private final EpfTableRowProcessor<EpfArtist,Integer> processor = mock(EpfTableRowProcessor.class);
+    private final Joiner fsJoiner = Joiner.on((char)1);
     
-    public void testProcessingRows() throws IOException {
+    private static class TestEpfRow extends EpfTableRow {
+        public TestEpfRow(List<String> rowParts) {
+            super(rowParts);
+        }
+        private static int iota = 0;
+        public static final EpfTableColumn<Timestamp> EXPORT_DATE = new EpfTableColumn<Timestamp>(iota++, TIMESTAMP){};
+        public static final EpfTableColumn<Integer> ARTIST_ID = new EpfTableColumn<Integer>(iota++, INTEGER){};
+        public static final EpfTableColumn<String> NAME = new EpfTableColumn<String>(iota++, STRING){};
+    }
+    
+    private static class CapturingTableRowProcessor implements EpfTableRowProcessor<TestEpfRow, List<TestEpfRow>> {
+
+        private final ImmutableList.Builder<TestEpfRow> results = ImmutableList.builder();
         
-        final String name = "Zoltán Kocsis";
-        final String rowString = Joiner.on((char)1).join(ImmutableList.of(
-                "1320832802897","341126",name,"1","http://itunes.apple.com/artist/zoltan-kocsis/id341126?uo=5","1"+((char)2)+"\n"
-        ));
-        
-        EpfTable<EpfArtist> table = new EpfTable<EpfArtist>(CharStreams.newReaderSupplier(rowString), EpfArtist.FROM_ROW_PARTS);
-        
-        checking(new Expectations(){{
-            one(processor).process(with(rowWithName(name))); will(returnValue(Boolean.TRUE));
-            one(processor).getResult(); will(returnValue(5));
-        }});
-        
-        int processed = table.processRows(processor);
-        
-        assertThat(processed, is(5));
+        @Override
+        public boolean process(TestEpfRow row) {
+            results.add(row);
+            return true;
+        }
+
+        @Override
+        public List<TestEpfRow> getResult() {
+            return results.build();
+        }
         
     }
 
-    private TypeSafeMatcher<EpfArtist> rowWithName(final String name) {
-        return new TypeSafeMatcher<EpfArtist>() {
+    private final Function<List<String>, TestEpfRow> convertToTestRow = new Function<List<String>, TestEpfRow>() {
+        @Override
+        public TestEpfRow apply(List<String> input) {
+            return new TestEpfRow(input);
+        }
+    };
 
-            @Override
-            public void describeTo(Description desc) {
-                desc.appendValue(String.format("Row with %s", name));
-            }
+    public void testCallsProcessorForRows() throws IOException {
 
-            @Override
-            public boolean matchesSafely(EpfArtist row) {
-                return row.get(EpfArtist.NAME).equals(name);
-            }
-        };
+        final CapturingTableRowProcessor processor = new CapturingTableRowProcessor();
+        
+        final String timestamp = "1320832802897";
+        final String id = "341126";
+        final String name = "Zoltán Kocsis";
+        
+        final String rowString = fsJoiner.join(ImmutableList.of(timestamp,id,name+((char)2)+"\n"));
+        
+        EpfTable<TestEpfRow> table = new EpfTable<TestEpfRow>(CharStreams.newReaderSupplier(rowString), convertToTestRow);
+        
+        List<TestEpfRow> processed = table.processRows(processor);
+        
+        assertThat(processed.size(), is(1));
+        
+        TestEpfRow row = processed.get(0);
+        assertThat(row.get(TestEpfRow.EXPORT_DATE), is(equalTo(Timestamp.of(Long.valueOf(timestamp)))));
+        assertThat(row.get(TestEpfRow.ARTIST_ID), is(equalTo(Integer.valueOf(id))));
+        assertThat(row.get(TestEpfRow.NAME), is(equalTo(name)));
+        
+    }
+    
+    public void testTrimsRowsCorrectly() throws IOException {
+        
+        final CapturingTableRowProcessor processor = new CapturingTableRowProcessor();
+        
+        final String rowString = fsJoiner.join(ImmutableList.of("1321437625956","1609240",""+((char)2)+"\n"));
+        
+        EpfTable<TestEpfRow> table = new EpfTable<TestEpfRow>(CharStreams.newReaderSupplier(rowString), convertToTestRow);
+        
+        List<TestEpfRow> processed = table.processRows(processor);
+        
+        assertThat(processed.size(), is(1));
+        
+        TestEpfRow row = processed.get(0);
+        assertThat(row.get(TestEpfRow.NAME), is(equalTo("")));
+        
+    }
+    
+    public void testProcessesRowsOverMultipleLines() throws IOException {
+        
+        final CapturingTableRowProcessor processor = new CapturingTableRowProcessor();
+        
+        final String id = "341126";
+        String name = "On a \nnew line";
+        final String rowString = fsJoiner.join(ImmutableList.of("1321437625956",id+"\n","\n"+name+((char)2)+"\n"));
+        
+        EpfTable<TestEpfRow> table = new EpfTable<TestEpfRow>(CharStreams.newReaderSupplier(rowString), convertToTestRow);
+        
+        List<TestEpfRow> processed = table.processRows(processor);
+        
+        assertThat(processed.size(), is(1));
+        
+        TestEpfRow row = processed.get(0);
+        assertThat(row.get(TestEpfRow.ARTIST_ID), is(equalTo(Integer.valueOf(id))));
+        assertThat(row.get(TestEpfRow.NAME), is(equalTo(name)));
+        
     }
 }

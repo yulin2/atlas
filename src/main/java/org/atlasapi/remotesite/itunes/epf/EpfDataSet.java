@@ -22,6 +22,7 @@ import com.metabroadcast.common.intl.Country;
 public class EpfDataSet {
 
     private static final String TAB_FIELD_SEPARATOR = "\t";
+    private static final String EMPTY_ROW_SEPARATOR = null;
     private final File datasetDirectory;
 
     public EpfDataSet(File datasetDirectory) {
@@ -52,7 +53,7 @@ public class EpfDataSet {
     public EpfTable<EpfPricing> getPricingTable(Country country) {
         String filename = String.format("tvEpisode-%s.txt", iso3Code(country));
         if (new File(datasetDirectory, filename).exists()) {
-            return new EpfTable<EpfPricing>(readerSupplierFor(filename), EpfPricing.FROM_ROW_PARTS, TAB_FIELD_SEPARATOR);
+            return new EpfTable<EpfPricing>(readerSupplierFor(filename), EpfPricing.FROM_ROW_PARTS, TAB_FIELD_SEPARATOR, EMPTY_ROW_SEPARATOR);
         } else {
             return null;
         }

@@ -44,7 +44,7 @@ public abstract class EpfTableColumn<T> {
     public static final Function<String, Integer> INTEGER = new Function<String, Integer>() {
         @Override
         public Integer apply(String input) {
-            return Integer.valueOf(input);
+            return input.matches("-?\\d+") ? Integer.valueOf(input) : null;
         }
     };
     
@@ -71,7 +71,7 @@ public abstract class EpfTableColumn<T> {
 
         @Override
         public BigDecimal apply(String input) {
-            return new BigDecimal(input);
+            return input.matches("\\d+(.\\d+)?") ? new BigDecimal(input) : null;
         } 
         
     };

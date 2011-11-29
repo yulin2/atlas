@@ -29,25 +29,20 @@ public class ItunesVideoEpisodeExtractor implements ContentExtractor<ItunesEpfVi
         episode.setIsLongForm(true);
         episode.setMediaType(MediaType.VIDEO);
         episode.setSpecialization(Specialization.TV);
-        episode.setSeriesNumber(source.parentSeries().getSeriesNumber());
-        episode.setEpisodeNumber(source.episodeNumber());
-        
-        episode.setContainer(source.parentBrand());
-        episode.setSeries(source.parentSeries());
         
         Version version = new Version();
         version.setDuration(new Duration(row.get(EpfVideo.TRACK_LENGTH).longValue()));
         
-        Encoding encoding = new Encoding();
         Iterable<Location> locations = source.locations();
         if(locations != null) {
+            Encoding encoding = new Encoding();
             for (Location location : locations) {
                 location.getPolicy().setAvailabilityStart(row.get(EpfVideo.ITUNES_RELEASE_DATE));
                 encoding.addAvailableAt(location);
             }
+            version.addManifestedAs(encoding);
         }
         
-        version.addManifestedAs(encoding);
         episode.addVersion(version);
         return episode;
     }
