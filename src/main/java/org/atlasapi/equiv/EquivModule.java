@@ -84,6 +84,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
@@ -180,11 +182,15 @@ public class EquivModule {
                 return !(Publisher.PA.equals(input.getPublisher()) && input instanceof Film);
             }
         });
-        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, new MongoScheduleTaskProgressStore(db)).forPublishers(publishers);
+        return new ContentEquivalenceUpdateTask(filteringLister, contentUpdater(), log, progressStore()).forPublishers(publishers);
+    }
+
+    public @Bean MongoScheduleTaskProgressStore progressStore() {
+        return new MongoScheduleTaskProgressStore(db);
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
-        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, new MongoScheduleTaskProgressStore(db));
+        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, progressStore());
     }
     
     public @Bean ContentEquivalenceUpdater<Film> filmUpdater() {
@@ -208,8 +214,23 @@ public class EquivModule {
             taskScheduler.schedule(publisherUpdateTask(Publisher.ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(Publisher.BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
-//            taskScheduler.schedule(new ChildRefUpdateTask(contentLister, mongo).withName("Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.BBC).withName("BBC Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.PA).withName("PA Child Ref Update"), RepetitionRules.NEVER);
+            taskScheduler.schedule(childRefUpdateTask().forPublishers(publishersApartFrom(Publisher.BBC, Publisher.PA)).withName("Other Publishers Child Ref Update"), RepetitionRules.NEVER);
         }
+    }
+
+    private Publisher[] publishersApartFrom(Publisher...publishers) {
+        SetView<Publisher> remainingPublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.copyOf(publishers));
+        return remainingPublishers.toArray(new Publisher[remainingPublishers.size()]);
+    }
+
+    protected @Bean ChildRefUpdateController childRefUpdateController() {
+        return new ChildRefUpdateController(childRefUpdateTask(), contentResolver);
+    }
+    
+    protected @Bean ChildRefUpdateTask childRefUpdateTask() {
+        return new ChildRefUpdateTask(contentLister, contentResolver, db, progressStore(), log);
     }
     
     //Controllers...
@@ -237,6 +258,5 @@ public class EquivModule {
     @Bean ManualScheduleUpdateController scheduleUpdateController() {
         return new ManualScheduleUpdateController(scheduleResolver, contentResolver);
     }
-    
     
 }
