@@ -229,7 +229,7 @@ public class EquivModule {
         return new ChildRefUpdateController(childRefUpdateTask(), contentResolver);
     }
     
-    protected @Bean ChildRefUpdateTask childRefUpdateTask() {
+    protected ChildRefUpdateTask childRefUpdateTask() {
         return new ChildRefUpdateTask(contentLister, contentResolver, db, progressStore(), log);
     }
     
