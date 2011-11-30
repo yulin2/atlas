@@ -37,6 +37,7 @@ public class EquivalenceGenerators<T extends Content> {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription(
                         "Exception running generator %s for %s %s", generator.getClass().getSimpleName(), content.getClass().getSimpleName(), content.getCanonicalUri()
                 ));
+                //TODO: propagate? It a generator fails we probably want to stop updating because it could change the result, splitting equivs.
             }
             
         }

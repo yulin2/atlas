@@ -1,5 +1,6 @@
-package org.atlasapi.equiv.results;
+package org.atlasapi.equiv.handlers;
 
+import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
 import org.atlasapi.media.entity.Content;
 

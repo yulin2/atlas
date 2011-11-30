@@ -18,6 +18,8 @@ public abstract class Score {
     public abstract Score add(Score other);
     
     public static final Score NULL_SCORE = new NullScore();
+    public static final Score ONE = Score.valueOf(1.0);
+    public static final Score ZERO = Score.valueOf(0.0);
     
     public static final Predicate<Score> IS_REAL_SCORE = new Predicate<Score>() {
 
