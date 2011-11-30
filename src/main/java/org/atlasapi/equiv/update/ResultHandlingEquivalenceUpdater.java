@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.update;
 
+import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.equiv.results.EquivalenceResultHandler;
 import org.atlasapi.media.entity.Content;
 
 public class ResultHandlingEquivalenceUpdater<T extends Content> implements ContentEquivalenceUpdater<T> {

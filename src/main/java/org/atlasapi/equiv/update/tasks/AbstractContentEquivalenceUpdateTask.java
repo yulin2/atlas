@@ -5,7 +5,6 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 
 import java.util.Iterator;
 
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -16,12 +15,10 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public abstract class AbstractContentEquivalenceUpdateTask<T extends Content> extends ScheduledTask {
 
-    private final ContentEquivalenceUpdater<T> rootUpdater;
     private final ScheduleTaskProgressStore progressStore;
     private final AdapterLog log;
     
-    public AbstractContentEquivalenceUpdateTask(ContentEquivalenceUpdater<T> rootUpdater, AdapterLog log, ScheduleTaskProgressStore progressStore) {
-        this.rootUpdater = rootUpdater;
+    public AbstractContentEquivalenceUpdateTask(AdapterLog log, ScheduleTaskProgressStore progressStore) {
         this.log = log;
         this.progressStore = progressStore;
     }
@@ -48,7 +45,7 @@ public abstract class AbstractContentEquivalenceUpdateTask<T extends Content> ex
                     content = contents.next();
                     reportStatus(String.format("Processed %d. Processing %s", processed, content.getCanonicalUri()));
     
-                    rootUpdater.updateEquivalences(content);
+                    handle(content);
     
                     if (++processed % 100 == 0) {
                         updateProgress(progressFrom(content));
@@ -66,6 +63,8 @@ public abstract class AbstractContentEquivalenceUpdateTask<T extends Content> ex
         reportStatus(String.format("Processed %d", processed));
         persistProgress(shouldContinue, content);
     }
+
+    protected abstract void handle(T content);
 
     private void persistProgress(boolean finished, Content content) {
         if (finished) {

@@ -20,10 +20,12 @@ public class FilmEquivalenceUpdateTask extends AbstractContentEquivalenceUpdateT
 
     private static final String schedulingKey = "film-equivalence";
     private final ContentLister contentLister;
+    private final ContentEquivalenceUpdater<Film> updater;
     
     public FilmEquivalenceUpdateTask(ContentLister contentLister, ContentEquivalenceUpdater<Film> updater, AdapterLog log, ScheduleTaskProgressStore progressStore) {
-        super(updater, log, progressStore);
+        super(log, progressStore);
         this.contentLister = contentLister;
+        this.updater = updater;
     }
 
     @Override
@@ -35,6 +37,11 @@ public class FilmEquivalenceUpdateTask extends AbstractContentEquivalenceUpdateT
     @Override
     protected String schedulingKey() {
         return schedulingKey;
+    }
+
+    @Override
+    protected void handle(Film content) {
+        updater.updateEquivalences(content);
     }
 
 }
