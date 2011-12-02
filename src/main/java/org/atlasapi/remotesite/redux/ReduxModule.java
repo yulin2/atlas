@@ -13,6 +13,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +26,7 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 @Configuration
 public class ReduxModule {
 
-    private @Autowired ContentResolver resolver;
+    private @Autowired @Qualifier("contentResolver") ContentResolver resolver;
     private @Autowired ContentWriter writer;
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler taskScheduler;
