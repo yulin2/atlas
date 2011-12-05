@@ -3,6 +3,7 @@ package org.atlasapi.equiv.results;
 import static org.hamcrest.Matchers.hasItems;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.atlasapi.equiv.handlers.LookupWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.EquivalenceResult;
@@ -19,15 +20,17 @@ import org.joda.time.Duration;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
 public class LookupWritingEquivalenceHandlerTest extends MockObjectTestCase {
 
     private final LookupWriter lookupWriter = mock(LookupWriter.class);
+    private final Set<Publisher> publishers = ImmutableSet.of(Publisher.BBC,Publisher.PA, Publisher.ITV);
     
     public void testWritesLookups() {
         
-        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter);
+        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers);
         
         final Item content = new Item("item","c:item", Publisher.BBC);
         final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
@@ -36,7 +39,7 @@ public class LookupWritingEquivalenceHandlerTest extends MockObjectTestCase {
         final EquivalenceResult<Item> equivResult = equivResultFor(content, ImmutableList.of(equiv1,equiv2));
         
         checking(new Expectations(){{
-            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)));
+            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)), with(publishers));
         }});
         
         updater.handle(equivResult);
@@ -46,7 +49,7 @@ public class LookupWritingEquivalenceHandlerTest extends MockObjectTestCase {
     @SuppressWarnings("unchecked")
     public void testDoesntWriteLookupsForItemWhichWasSeenAsEquivalentButDoesntAssertAnyEquivalences() {
         
-        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter);
+        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers);
         
         final Item content = new Item("item","c:item", Publisher.BBC);
         final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
@@ -56,8 +59,8 @@ public class LookupWritingEquivalenceHandlerTest extends MockObjectTestCase {
         final EquivalenceResult<Item> noEquivalences = equivResultFor(equiv1, ImmutableList.<Item>of());
         
         checking(new Expectations(){{
-            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)));
-            never(lookupWriter).writeLookup(with(equiv1), with(any(Iterable.class)));
+            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)), with(publishers));
+            never(lookupWriter).writeLookup(with(equiv1), with(any(Iterable.class)), with(publishers));
         }});
         
         updater.handle(equivResult);
@@ -68,7 +71,7 @@ public class LookupWritingEquivalenceHandlerTest extends MockObjectTestCase {
     public void testWritesLookupsForItemWhichWasSeenAsEquivalentButDoesntAssertAnyEquivalencesWhenCacheTimesOut() throws InterruptedException {
         
         Duration cacheDuration = new Duration(5);
-        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, cacheDuration);
+        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers, cacheDuration);
         
         final Item content = new Item("item","c:item", Publisher.BBC);
         final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
@@ -78,8 +81,8 @@ public class LookupWritingEquivalenceHandlerTest extends MockObjectTestCase {
         final EquivalenceResult<Item> equivResult2 = equivResultFor(equiv1, ImmutableList.<Item>of(content));
         
         checking(new Expectations(){{
-            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)));
-            one(lookupWriter).writeLookup(with(equiv1), with(hasItems(content)));
+            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)), with(publishers));
+            one(lookupWriter).writeLookup(with(equiv1), with(hasItems(content)), with(publishers));
         }});
         
         updater.handle(equivResult1);

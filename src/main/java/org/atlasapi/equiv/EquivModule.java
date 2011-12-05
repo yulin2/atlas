@@ -18,7 +18,14 @@ import static org.atlasapi.equiv.results.EquivalenceResultBuilder.resultBuilder;
 import static org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor.extractorMoreThanPercent;
 import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.ITEM_UPDATER_NAME;
 import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.containerUpdater;
-import static org.atlasapi.media.entity.Publisher.*;
+import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
+import static org.atlasapi.media.entity.Publisher.C4;
+import static org.atlasapi.media.entity.Publisher.ITUNES;
+import static org.atlasapi.media.entity.Publisher.ITV;
+import static org.atlasapi.media.entity.Publisher.PA;
+
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -27,7 +34,6 @@ import org.atlasapi.equiv.generators.ContainerChildEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
-import org.atlasapi.equiv.generators.ScalingEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ScalingScoringGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
 import org.atlasapi.equiv.handlers.BroadcastingEquivalenceResultHandler;
@@ -128,23 +134,23 @@ public class EquivModule {
         return new TransitiveLookupWriter(new MongoLookupEntryStore(db));
     }
 
-    protected @Bean <T extends Content> LookupWritingEquivalenceHandler<T> lookupWritingEquivalenceHandler() {
-        return new LookupWritingEquivalenceHandler<T>(lookupWriter());
+    protected <T extends Content> LookupWritingEquivalenceHandler<T> lookupWritingEquivalenceHandler(Iterable<Publisher> publishers) {
+        return new LookupWritingEquivalenceHandler<T>(lookupWriter(), publishers);
     }
 
     public @Bean MongoScheduleTaskProgressStore progressStore() {
         return new MongoScheduleTaskProgressStore(db);
     }
     
-    private <T extends Content> EquivalenceResultHandler<T> standardResultHandlers() {
+    private <T extends Content> EquivalenceResultHandler<T> standardResultHandlers(Iterable<Publisher> publishers) {
         return new BroadcastingEquivalenceResultHandler<T>(ImmutableList.of(
-                this.<T>lookupWritingEquivalenceHandler(),
+                this.<T>lookupWritingEquivalenceHandler(publishers),
                 new ResultWritingEquivalenceHandler<T>(equivalenceResultStore())
         ));
     }
     
-    private <T extends Content> ResultHandlingEquivalenceUpdater<T> resultHandlingUpdater(ContentEquivalenceUpdater<T> delegate) {
-        return new ResultHandlingEquivalenceUpdater<T>(delegate, this.<T>standardResultHandlers());
+    private <T extends Content> ResultHandlingEquivalenceUpdater<T> resultHandlingUpdater(ContentEquivalenceUpdater<T> delegate, Iterable<Publisher> publishers) {
+        return new ResultHandlingEquivalenceUpdater<T>(delegate, this.<T>standardResultHandlers(publishers));
     }
     
     private <T extends Content> EquivalenceResultBuilder<T> standardResultBuilder() {
@@ -173,15 +179,18 @@ public class EquivModule {
         return new ItemEquivalenceUpdater<Item>(itemGenerators, itemScorers, resultBuilder);
     }
     
-    public ContainerEquivalenceUpdater.Builder containerUpdaterBuilder() {
+    public ContainerEquivalenceUpdater.Builder containerUpdaterBuilder(Iterable<Publisher> publishers) {
         
         EquivalenceResultBuilder<Container> containerResultBuilder = standardResultBuilder();
-        EquivalenceResultHandler<Item> itemResultHandler = standardResultHandlers();
+        EquivalenceResultHandler<Item> itemResultHandler = standardResultHandlers(publishers);
         
         return containerUpdater(contentResolver, liveResultsStore(), containerResultBuilder, itemResultHandler, log);
     }
 
     public @Bean ResultHandlingEquivalenceUpdater<Content> contentUpdater() {
+        //Generally acceptable publishers.
+        Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()),ImmutableSet.of(Publisher.PREVIEW_NETWORKS));
+        
         ScalingScoringGenerator<Container> titleScoringGenerator = ScalingScoringGenerator.from(new TitleMatchingEquivalenceScoringGenerator(searchResolver), new Function<Double, Double>() {
             @Override
             public Double apply(Double input) {
@@ -190,7 +199,7 @@ public class EquivModule {
         });
         
         ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
-        Builder containerUpdaterBuilder = containerUpdaterBuilder().withGenerator(titleScoringGenerator).withScorer(titleScoringGenerator);
+        Builder containerUpdaterBuilder = containerUpdaterBuilder(publishers).withGenerator(titleScoringGenerator).withScorer(titleScoringGenerator);
         
         ImmutableMap.Builder<Publisher, ContentEquivalenceUpdater<Content>> publisherUpdaters = ImmutableMap.builder();
         publisherUpdaters.put(Publisher.ITUNES, new RootEquivalenceUpdater(containerUpdaterBuilder.build(), itemUpdater));
@@ -205,7 +214,7 @@ public class EquivModule {
             }
         }
         
-        return resultHandlingUpdater(new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build()));
+        return resultHandlingUpdater(new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build()), publishers);
     }
     
     private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
@@ -231,7 +240,7 @@ public class EquivModule {
         EquivalenceResultBuilder<Film> resultBuilder = standardResultBuilder();
         
         ContentEquivalenceUpdater<Film> updater = new ItemEquivalenceUpdater<Film>(generators, scorers, resultBuilder);
-        return resultHandlingUpdater(updater);
+        return resultHandlingUpdater(updater, ImmutableSet.of(Publisher.PREVIEW_NETWORKS));
     }
     
     @PostConstruct
