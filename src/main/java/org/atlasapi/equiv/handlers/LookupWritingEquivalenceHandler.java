@@ -2,28 +2,34 @@ package org.atlasapi.equiv.handlers;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.Set;
+
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.lookup.LookupWriter;
 import org.joda.time.Duration;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 public class LookupWritingEquivalenceHandler<T extends Content> implements EquivalenceResultHandler<T> {
  
     private final LookupWriter writer;
     private final Cache<String, String> seenAsEquiv;
+    private final Set<Publisher> publishers;
     
-    public LookupWritingEquivalenceHandler(LookupWriter writer) {
-        this(writer, Duration.standardHours(5));
+    public LookupWritingEquivalenceHandler(LookupWriter writer, Iterable<Publisher> publishers) {
+        this(writer, publishers, Duration.standardHours(5));
     }
 
-    public LookupWritingEquivalenceHandler(LookupWriter writer, Duration cacheDuration) {
+    public LookupWritingEquivalenceHandler(LookupWriter writer, Iterable<Publisher> publishers, Duration cacheDuration) {
         this.writer = writer;
+        this.publishers = ImmutableSet.copyOf(publishers);
         this.seenAsEquiv = CacheBuilder.newBuilder().expireAfterWrite(cacheDuration.getMillis(), MILLISECONDS).build(new CacheLoader<String, String>() {
             @Override
             public String load(String key) throws Exception {
@@ -46,7 +52,7 @@ public class LookupWritingEquivalenceHandler<T extends Content> implements Equiv
             seenAsEquiv.getUnchecked(equiv.getCanonicalUri());
         }
         
-        writer.writeLookup(result.target(), equivs);
+        writer.writeLookup(result.target(), equivs, publishers);
         
     }
 
