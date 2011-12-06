@@ -160,11 +160,13 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
             Container prevContainer = (Container) previously.requireValue();
             if(!equal(prevContainer, container)) {
                 container.setLastUpdated(clock.now());
+                container.setThisOrChildLastUpdated(clock.now());
             }
         }
         
         if(container.getLastUpdated() == null || previously.isNothing()) {
             container.setLastUpdated(clock.now());
+            container.setThisOrChildLastUpdated(clock.now());
         }
         
         writer.createOrUpdate(container);
