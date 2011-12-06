@@ -78,6 +78,6 @@ public class QueryWebModule {
     }
 
     @Bean AtlasModelWriter atlasModelOutputter() {
-        return new DispatchingAtlasModelWriter(topicResolver);
+        return new DispatchingAtlasModelWriter(contentResolver, topicResolver);
     }
 }
