@@ -111,10 +111,20 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
     }
 
     private Encoding encodingFrom(ReduxMedia media, String diskref, String key, DateTime availableFrom) {
+        final String type = media.getType();
         try {
             Encoding encoding = new Encoding();
             
-            encoding.setVideoCoding(MimeType.fromString(media.getType()));
+            final MimeType mimeType = getMimeType(type);
+            if("audio".equals(media.getKind())) {
+                encoding.setAudioCoding(mimeType);
+            } else {
+                encoding.setVideoCoding(mimeType);
+            }
+            
+            encoding.setBitRate(media.getBitrate());
+            encoding.setVideoHorizontalSize(media.getWidth());
+            encoding.setVideoVerticalSize(media.getHeight());
             
             encoding.setAvailableAt(ImmutableSet.of(
                 locationFrom(media, diskref, key, availableFrom)
@@ -122,7 +132,16 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
             
             return encoding;
         } catch (Exception e) {
-            log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception extracting encoding %s for diskref %s", media.getType(), diskref));
+            log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception extracting encoding %s for diskref %s", type, diskref));
+            return null;
+        }
+    }
+
+    private MimeType getMimeType(final String type) {
+        try {
+            return MimeType.fromString(type);
+        } catch (Exception e) {
+            log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception for mimeType:", type));
             return null;
         }
     }

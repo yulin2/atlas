@@ -40,7 +40,7 @@ public class FullProgrammeItemExtractorTest extends TestCase {
                     .withAd(false)
                     .withWhen("2011-10-11T16:00:00Z");
         
-        ReduxMedia media = new ReduxMedia(MimeType.VIDEO_MP4.toString(), "aUri", "High-rate MPEG-4", "mp4");
+        ReduxMedia media = new ReduxMedia(MimeType.VIDEO_MP4.toString(), "aUri", "High-rate MPEG-4", "mp4", "video", 500, 500, "flv","mpga",512);
         programmeBuilder.withMedia(ImmutableMap.of("mp4-hi", media));
         
         FullReduxProgramme programme = programmeBuilder.build();
