@@ -5,6 +5,7 @@ import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.feeds.AtlasFeedsModule;
 import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
 import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
+import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
 import org.atlasapi.persistence.ManualScheduleRebuildModule;
@@ -40,7 +41,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(AtlasModule.class, AtlasLoggingModule.class, AtlasWebModule.class, QueryModule.class, MongoContentPersistenceModule.class, 
-                AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class, RadioPlayerModule.class, RemoteSiteHealthModule.class);
+                AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class, RadioPlayerModule.class, XmlTvModule.class, RemoteSiteHealthModule.class);
         
         if(runProcessingOnly()) {
             builder.add(EquivModule.class, ManualScheduleRebuildModule.class, InterlinkingDeltaModule.class);
