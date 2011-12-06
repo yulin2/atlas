@@ -59,7 +59,7 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
         	setUpdatedVersions(Sets.<Version>newHashSet(), item.getVersions(), now);
         }
         
-        if(item.getLastUpdated() == null) {
+        if(item.getLastUpdated() == null  || previously.isNothing()) {
             item.setLastUpdated(clock.now());
         }
         
@@ -160,11 +160,13 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
             Container prevContainer = (Container) previously.requireValue();
             if(!equal(prevContainer, container)) {
                 container.setLastUpdated(clock.now());
+                container.setThisOrChildLastUpdated(clock.now());
             }
         }
         
-        if(container.getLastUpdated() == null) {
+        if(container.getLastUpdated() == null || previously.isNothing()) {
             container.setLastUpdated(clock.now());
+            container.setThisOrChildLastUpdated(clock.now());
         }
         
         writer.createOrUpdate(container);
