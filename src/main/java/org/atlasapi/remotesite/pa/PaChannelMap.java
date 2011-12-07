@@ -295,8 +295,8 @@ public class PaChannelMap {
         channelMap.put(1307, Channel.NAT_GEO_WILD);
         channelMap.put(1308, Channel.CRIME_AND_INVESTIGATION);
         channelMap.put(1491, Channel.CRIME_AND_INVESTIGATION_PLUS1);
-//        channelMap.put(1318, Channel.SKY_MOVIES_CHRISTMAS_CHANNEL);
-//        channelMap.put(1536, Channel.SKY_MOVIES_CHRISTMAS_CHANNEL_HD);
+        channelMap.put(1318, Channel.SKY_MOVIES_CHRISTMAS_CHANNEL);
+        channelMap.put(1536, Channel.SKY_MOVIES_CHRISTMAS_CHANNEL_HD);
         channelMap.put(1319, Channel.SKY_MOVIES_CRIME_AND_THRILLER);
         channelMap.put(1537, Channel.SKY_MOVIES_CRIME_AND_THRILLER_HD);
         channelMap.put(1320, Channel.SKY_MOVIES_PREMIERE);
