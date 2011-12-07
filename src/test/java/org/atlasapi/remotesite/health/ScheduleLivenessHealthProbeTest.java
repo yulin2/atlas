@@ -46,7 +46,7 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
 		
 		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
-				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO));
+				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO), Publisher.PA);
 		ProbeResult result = probe.probe();
 		
 		assertThat(result.isFailure(), is(false));
@@ -66,7 +66,7 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
 		
 		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
-				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO, Channel.ITV1_LONDON));
+				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO, Channel.ITV1_LONDON), Publisher.PA);
 		ProbeResult result = probe.probe();
 		
 		assertThat(result.isFailure(), is(true));
@@ -86,7 +86,7 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
 		
 		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
-				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO));
+				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO), Publisher.PA);
 		
 		ProbeResult result = probe.probe();
 		
