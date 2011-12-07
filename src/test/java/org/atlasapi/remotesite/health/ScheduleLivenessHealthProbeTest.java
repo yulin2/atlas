@@ -1,0 +1,131 @@
+package org.atlasapi.remotesite.health;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+
+import java.util.List;
+
+import junit.framework.TestCase;
+
+import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Schedule;
+import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.persistence.content.ScheduleResolver;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Minutes;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.metabroadcast.common.health.ProbeResult;
+
+public class ScheduleLivenessHealthProbeTest extends TestCase {
+	private static final int TWELVE_POINT_FIVE_DAYS_IN_HOURS = 300;
+	private DateTime startTimeForScheduleTest;
+	private DateTime endTimeForScheduleTest;
+	
+	public void setUp() {
+		this.startTimeForScheduleTest = new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS);
+		this.endTimeForScheduleTest = startTimeForScheduleTest.plusHours(12);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void testHasSchedule() throws Exception {
+		
+		Interval dummyInterval = new Interval(startTimeForScheduleTest, endTimeForScheduleTest);
+		Item item = new Item();
+		Schedule schedule = new Schedule(ImmutableList.of(
+				new ScheduleChannel(Channel.BBC_ONE, ImmutableList.<Item>of(item)),
+				new ScheduleChannel(Channel.BBC_TWO, ImmutableList.<Item>of(item))
+				), dummyInterval);
+		
+		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
+		
+		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
+				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO));
+		ProbeResult result = probe.probe();
+		
+		assertThat(result.isFailure(), is(false));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void testNoSchedule() throws Exception {
+		Interval dummyInterval = new Interval(new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS), new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS).plusHours(12));
+		Item item = new Item();
+		Schedule schedule = new Schedule(ImmutableList.of(
+				new ScheduleChannel(Channel.BBC_ONE, ImmutableList.<Item>of(item)),
+				new ScheduleChannel(Channel.BBC_TWO, ImmutableList.<Item>of(item))
+				), dummyInterval);
+		
+		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
+		
+		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
+				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO, Channel.ITV1_LONDON));
+		ProbeResult result = probe.probe();
+		
+		assertThat(result.isFailure(), is(true));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void testNoItemsInSchedule() throws Exception {
+		Interval dummyInterval = new Interval(new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS), new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS).plusHours(12));
+		Item item = new Item();
+		Schedule schedule = new Schedule(ImmutableList.of(
+				new ScheduleChannel(Channel.BBC_ONE, ImmutableList.<Item>of()),
+				new ScheduleChannel(Channel.BBC_TWO, ImmutableList.<Item>of(item))
+				), dummyInterval);
+		
+		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
+		
+		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
+				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO));
+		
+		ProbeResult result = probe.probe();
+		
+		assertThat(result.isFailure(), is(true));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+	}
+	
+	protected static class DummyScheduleResolver implements ScheduleResolver {
+
+		public DateTime requestedStartTime;
+		public DateTime requestedEndTime;
+		
+		private Schedule schedule;
+		
+		public DummyScheduleResolver(Schedule dummySchedule) {
+			this.schedule = dummySchedule;
+		}
+
+		@Override
+		public Schedule schedule(DateTime from, DateTime to,
+				Iterable<Channel> channels, Iterable<Publisher> publisher) {
+			
+			this.requestedStartTime = from;
+			this.requestedEndTime = to;
+			
+			final List<Channel> channelList = ImmutableList.copyOf(channels);
+			
+			return new Schedule(ImmutableList.copyOf(Iterables.filter(schedule.scheduleChannels(), new Predicate<ScheduleChannel>() {
+
+				@Override
+				public boolean apply(ScheduleChannel input) {
+					return channelList.contains(input.channel());
+				}
+				
+				
+			})), schedule.interval());
+			
+		}
+		
+	}
+}
