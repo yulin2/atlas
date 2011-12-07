@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.bbc;
 
 import static com.metabroadcast.common.scheduling.RepetitionRules.every;
 import static com.metabroadcast.common.time.DateTimeZones.UTC;
-import static org.atlasapi.remotesite.bbc.ion.BbcIonFeedClient.clientForFeedType;
+import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.joda.time.Duration.standardMinutes;
 
 import javax.annotation.PostConstruct;
@@ -13,14 +13,20 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcIonContentUpdateController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDayRangeUrlSupplier;
-import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemFetcherClient;
+import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemAdapter;
+import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemContentExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
 import org.atlasapi.remotesite.bbc.ion.DefaultBbcIonScheduleHandler;
+import org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient;
 import org.atlasapi.remotesite.bbc.ion.OndemandBbcIonScheduleHandler;
+import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
+import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeTaskBuilder;
@@ -32,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -68,12 +75,12 @@ public class BbcModule {
 	
     private BbcIonScheduleUpdater bbcIonScheduleUpdater(int lookBack, int lookAhead) {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, lookAhead, lookBack);
-        return new BbcIonScheduleUpdater(urlSupplier, clientForFeedType(IonSchedule.class), defaultBbcIonScheduleHandler(), log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), defaultBbcIonScheduleHandler(), log);
     }
     
     private BbcIonScheduleUpdater bbcIonScheduleOndemandUpdater(int lookBack) {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_ONDEMAND_FORMAT, 0, lookBack);
-        return new BbcIonScheduleUpdater(urlSupplier, clientForFeedType(IonSchedule.class), new OndemandBbcIonScheduleHandler(contentResolver, contentWriters, log), log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonScheduleHandler(contentResolver, contentWriters, log), log);
     }
 	
 	private BbcIonDayRangeUrlSupplier dayRangeUrlSupplier(String urlPattern, int ahead, int back) {
@@ -81,14 +88,24 @@ public class BbcModule {
 	}
 	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
-	    return new BbcIonScheduleController(clientForFeedType(IonSchedule.class), defaultBbcIonScheduleHandler(), log);
+	    return new BbcIonScheduleController(bbcIonScheduleClient(), defaultBbcIonScheduleHandler(), log);
+	}
+	
+	@Bean HttpBackedBbcIonClient<IonSchedule> bbcIonScheduleClient() {
+	    return ionClient(HttpClients.webserviceClient(), new TypeToken<IonSchedule>(){});
 	}
 	
     @Bean DefaultBbcIonScheduleHandler defaultBbcIonScheduleHandler() {
         return new DefaultBbcIonScheduleHandler(contentResolver, contentWriters, log)
-            .withItemFetcherClient(new BbcIonEpisodeDetailItemFetcherClient(log))
+            .withItemFetcherClient(bbcIonEpisodeDetailItemAdapter())
             .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
             .withItemPeopleWriter(itemsPeopleWriter);
+    }
+
+    private BbcIonEpisodeDetailItemAdapter bbcIonEpisodeDetailItemAdapter() {
+        return new BbcIonEpisodeDetailItemAdapter(
+                ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
+                new BbcIonEpisodeDetailItemContentExtractor(log, ionClient(HttpClients.webserviceClient(), IonContainerFeed.class)));
     }
     
     @Bean OndemandBbcIonScheduleHandler ondemandBbcIonScheduleHandler() {
@@ -103,11 +120,15 @@ public class BbcModule {
 	    return new BbcIonOndemandChangeUpdater(bbcIonOndemandChangeUpdateBuilder(), log);
 	}
 
-    private BbcIonOndemandChangeUpdateBuilder bbcIonOndemandChangeUpdateBuilder() {
-        return new BbcIonOndemandChangeUpdateBuilder(new BbcIonOndemandChangeTaskBuilder(contentResolver, contentWriters, log), log, clientForFeedType(IonOndemandChanges.class));
+    @Bean BbcIonOndemandChangeUpdateBuilder bbcIonOndemandChangeUpdateBuilder() {
+        return new BbcIonOndemandChangeUpdateBuilder(new BbcIonOndemandChangeTaskBuilder(contentResolver, contentWriters, log), log, ionClient(HttpClients.webserviceClient(),IonOndemandChanges.class));
     }
 	
 	@Bean BbcIonOndemandChangeUpdateController bbcIonOndemandChangeController() {
 	    return new BbcIonOndemandChangeUpdateController(bbcIonOndemandChangeUpdateBuilder());
+	}
+	
+	@Bean BbcIonContentUpdateController bbcIonContentUpdateController() {
+	    return new BbcIonContentUpdateController(contentWriters, contentResolver, bbcIonEpisodeDetailItemAdapter());
 	}
 }

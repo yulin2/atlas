@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
 
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.remotesite.bbc.ion.BbcIonFeedClient;
+import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.joda.time.DateTime;
@@ -29,11 +29,11 @@ public class BbcIonOndemandChangeUpdateBuilder {
     private final static String CHANGES_URL = "http://www.bbc.co.uk/iplayer/ion/ondemand/change/from_datetime/%S/format/json";
 
     private final AdapterLog log;
-    private final BbcIonFeedClient<IonOndemandChanges> feedClient;
+    private final RemoteSiteClient<IonOndemandChanges> feedClient;
     private final ExecutorService updateProcessor;
     private final BbcIonOndemandChangeTaskBuilder taskBuilder;
 
-    public BbcIonOndemandChangeUpdateBuilder(BbcIonOndemandChangeTaskBuilder taskBuilder, AdapterLog log, BbcIonFeedClient<IonOndemandChanges> feedClient) {
+    public BbcIonOndemandChangeUpdateBuilder(BbcIonOndemandChangeTaskBuilder taskBuilder, AdapterLog log, RemoteSiteClient<IonOndemandChanges> feedClient) {
         this.taskBuilder = taskBuilder;
         this.log = log;
         this.feedClient = feedClient;
@@ -106,7 +106,7 @@ public class BbcIonOndemandChangeUpdateBuilder {
         private IonOndemandChanges fetch(DateTime limitedLastRun) throws Exception {
             for (int i = 0; i < MAX_RETRIES; i++) {
                 try {
-                    return feedClient.getFeed(String.format(CHANGES_URL, limitedLastRun.toString()));
+                    return feedClient.get(String.format(CHANGES_URL, limitedLastRun.toString()));
                 } catch (Exception e) {
                     
                     // throw if no more retries
