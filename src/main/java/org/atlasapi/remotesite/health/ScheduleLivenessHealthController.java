@@ -31,7 +31,7 @@ public class ScheduleLivenessHealthController {
 		}
 	}
 
-	@RequestMapping("feeds/pa/schedule-liveness")
+	@RequestMapping("health/pa/schedule-liveness")
 	public String scheduleLiveness(HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		if (checker == null) {
