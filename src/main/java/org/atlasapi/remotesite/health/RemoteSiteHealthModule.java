@@ -11,8 +11,10 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.health.HealthProbe;
+import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
+import com.metabroadcast.common.webapp.health.HealthController;
 
 @Configuration
 public class RemoteSiteHealthModule {
@@ -20,6 +22,8 @@ public class RemoteSiteHealthModule {
     private @Autowired ContentResolver store;
 
     private @Autowired ScheduleResolver scheduleResolver;
+    
+    private @Autowired HealthController health;
     
     private final Clock clock = new SystemClock();
 
@@ -49,4 +53,21 @@ public class RemoteSiteHealthModule {
     public @Bean HealthProbe bbcScheduleProbe() {
         return new ScheduleProbe(Publisher.BBC, Channel.BBC_ONE, scheduleResolver, clock);
     }
+    
+    public @Bean HealthProbe scheduleLivenessHealthProbe() {
+    	return new ScheduleLivenessHealthProbe(scheduleResolver, ImmutableList.of(
+    			Channel.BBC_ONE,
+    			Channel.BBC_TWO,
+    			Channel.ITV1_LONDON,
+    			Channel.CHANNEL_FOUR,
+    			Channel.FIVE,
+    			Channel.SKY1,
+    			Channel.SKY_ATLANTIC
+    	), Publisher.PA);
+    }
+    
+    @Bean
+    public ScheduleLivenessHealthController scheduleLivenessHealthController() {
+    	return new ScheduleLivenessHealthController(health, Configurer.get("pa.schedule.health.username", "").get(), Configurer.get("pa.schedule.health.password", "").get());
+    } 
 }
