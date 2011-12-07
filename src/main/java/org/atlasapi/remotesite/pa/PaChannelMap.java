@@ -696,7 +696,11 @@ public class PaChannelMap {
         channelMap.put(600, Channel.WAVE_102FM);
         channelMap.put(601, Channel.REAL_RADIO_(WALES));
         channelMap.put(603, Channel.YORKSHIRE_COAST_(BRID)_102.4FM);
-        channelMap.put(607, Channel.107.6_JUICE_FM);
+        channelMap.put(607, Channel.107.6_JUICE_FM);*/
+        channelMap.put(622, Channel.BBC_RADIO_RADIOSCOTLAND_MW);
+        channelMap.put(637, Channel.BBC_RADIO_RADIOORKNEY);
+        channelMap.put(638, Channel.BBC_RADIO_RADIOSHETLAND);
+        /*
         channelMap.put(673, Channel.COMPASS_FM);
         channelMap.put(717, Channel.GALWAY_BAY_FM_95.8);
         channelMap.put(715, Channel.WINCHESTER_HOSPITAL_RADIO);
