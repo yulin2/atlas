@@ -1,27 +1,27 @@
 package org.atlasapi.equiv.results.combining;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasEntry;
+
 import java.util.List;
+import java.util.Map;
 
-import junit.framework.TestCase;
-
-import org.atlasapi.equiv.results.description.DefaultDescription;
+import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoreThreshold;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.jmock.Expectations;
+import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class ItemScoreFilteringCombinerTest extends TestCase {
+public class ItemScoreFilteringCombinerTest extends MockObjectTestCase {
 
     public final Item target = target("target", "Target", Publisher.BBC);
-    public final Item equivalent1 = target("equivalent1", "Equivalent1", Publisher.BBC);
-    public final Item equivalent2 = target("equivalent2", "Equivalent2", Publisher.BBC);
-    public final Item equivalent3 = target("equivalent3", "Equivalent3", Publisher.C4);
-    public final Item equivalent4 = target("equivalent4", "Equivalent4", Publisher.C4);
     
     private Item target(String name, String title, Publisher publisher) {
         Item target = new Item(name+"Uri", name+"Curie", publisher);
@@ -29,26 +29,97 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
         return target;
     }
     
-    public void testCombine() {
-
-        List<ScoredEquivalents<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource(ContainerEquivalenceUpdater.ITEM_UPDATER).addEquivalent(equivalent1, Score.valueOf(1.0)).addEquivalent(equivalent2, Score.NULL_SCORE).addEquivalent(equivalent3, Score.valueOf(0.0)).build(),
-                DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent4, Score.NULL_SCORE).addEquivalent(equivalent2, Score.valueOf(1.0)).addEquivalent(equivalent3, Score.valueOf(1.0)).addEquivalent(equivalent1, Score.valueOf(1.0)).build(),
-                DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent4, Score.valueOf(1.0)).addEquivalent(equivalent1, Score.NULL_SCORE).build()
-        );
+    @SuppressWarnings("unchecked")
+    private final EquivalenceCombiner<Item> delegate = mock(EquivalenceCombiner.class);
+    private final ResultDescription desc = mock(ResultDescription.class);
     
+    private final String sourceName = "itemSource";
+    private final ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(delegate, sourceName, ScoreThreshold.greaterThan(0.2));
+    
+    public void testMaintainsScoreWhenItemScorePassesThreshold() {
+
+        final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.valueOf(0.8))));
+
+        final Score combinedScore = Score.ONE;
         
-        ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(new NullScoreAwareAveragingCombiner<Item>(), ContainerEquivalenceUpdater.ITEM_UPDATER);
+        checking(new Expectations(){{
+            ignoring(desc);
+            one(delegate).combine(scores, desc); 
+                will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, combinedScore))));
+        }});
         
-        ScoredEquivalents<Item> combined = combiner.combine(scores, new DefaultDescription());
+        ScoredEquivalents<Item> combined = combiner.combine(scores, desc);
         
-        assertEquals(ImmutableMap.of(
-                equivalent1, Score.valueOf(1.0),
-                equivalent2, Score.NULL_SCORE,
-                equivalent3, Score.NULL_SCORE,
-                equivalent4, Score.NULL_SCORE
-        ),combined.equivalents());
+        assertThat(combined.equivalents(), hasEntry(target, combinedScore));
         
+    }
+    
+    public void testSetsScoreToNullWhenItemScoreFailsThreshold() {
+
+        final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.valueOf(0.1))));
+
+        checking(new Expectations(){{
+            ignoring(desc);
+            one(delegate).combine(scores, desc); 
+                will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));
+        }});
+        
+        ScoredEquivalents<Item> combined = combiner.combine(scores, desc);
+        
+        assertThat(combined.equivalents(), hasEntry(target, Score.NULL_SCORE));
+        
+    }
+    
+    public void testSetsScoreToNullWhenItemScoreIsNull() {
+
+        final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.NULL_SCORE)));
+
+        checking(new Expectations(){{
+            ignoring(desc);
+            one(delegate).combine(scores, desc); 
+                will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));
+        }});
+        
+        ScoredEquivalents<Item> combined = combiner.combine(scores, desc);
+        
+        assertThat(combined.equivalents(), hasEntry(target, Score.NULL_SCORE));
+        
+    }
+
+    public void testSetsScoreToNullWhenItemScoreIsMissing() {
+
+        final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.<Item, Score>of()));
+
+        checking(new Expectations(){{
+            ignoring(desc);
+            one(delegate).combine(scores, desc); 
+                will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));
+        }});
+        
+        ScoredEquivalents<Item> combined = combiner.combine(scores, desc);
+        
+        assertThat(combined.equivalents(), hasEntry(target, Score.NULL_SCORE));
+        
+    }
+
+    public void testDoesntFilterScoresWhenItemSourceNotFound() {
+        
+        final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs("anotherSource", ImmutableMap.of(target, Score.valueOf(0.1))));
+
+        checking(new Expectations(){{
+            ignoring(desc);
+            one(delegate).combine(scores, desc); 
+                will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));
+        }});
+        
+        ScoredEquivalents<Item> combined = combiner.combine(scores, desc);
+        
+        assertThat(combined.equivalents(), hasEntry(target, Score.ONE));
+        
+    }
+    
+    private ScoredEquivalents<Item> scoredEquivs(String source, Map<Item, Score> scoreMap) {
+        return DefaultScoredEquivalents.fromMappedEquivs(source, scoreMap);
     }
 
 }

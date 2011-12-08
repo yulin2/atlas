@@ -20,10 +20,14 @@ public class ItemScoreFilteringCombiner<T extends Content> implements Equivalenc
     private final String source;
     private final ScoreThreshold threshold;
 
-    public ItemScoreFilteringCombiner(EquivalenceCombiner<T> delegate, String source) {
+    public ItemScoreFilteringCombiner(EquivalenceCombiner<T> delegate, String source, ScoreThreshold threshold) {
         this.delegate = delegate;
         this.source = source;
-        this.threshold = ScoreThreshold.POSITIVE;
+        this.threshold = threshold;
+    }
+    
+    public ItemScoreFilteringCombiner(EquivalenceCombiner<T> delegate, String source) {
+        this(delegate, source, ScoreThreshold.POSITIVE);
     }
     
     @Override

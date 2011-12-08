@@ -1,10 +1,9 @@
-package org.atlasapi.equiv.update;
+package org.atlasapi.equiv.handlers;
 
 import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.equiv.results.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;

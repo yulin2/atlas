@@ -9,11 +9,22 @@ import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 public class EquivalenceResult<T extends Content> {
+    
+    public static final <T extends Content> Function<EquivalenceResult<T>, T> toTarget() {
+        return new Function<EquivalenceResult<T>, T>() {
+
+            @Override
+            public T apply(EquivalenceResult<T> input) {
+                return input.target();
+            }
+        };
+    }
 
     private final T target;
     private final List<ScoredEquivalents<T>> scores;

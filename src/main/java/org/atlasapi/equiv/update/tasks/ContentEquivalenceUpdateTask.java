@@ -26,10 +26,13 @@ public class ContentEquivalenceUpdateTask extends AbstractContentEquivalenceUpda
     
     private String schedulingKey = "equivalence";
     private List<Publisher> publishers;
+
+    private final ContentEquivalenceUpdater<Content> rootUpdater;
     
     public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, ScheduleTaskProgressStore progressStore) {
-        super(rootUpdater, log, progressStore);
+        super(log, progressStore);
         this.contentStore = contentStore;
+        this.rootUpdater = rootUpdater;
     }
     
     @Override
@@ -46,6 +49,11 @@ public class ContentEquivalenceUpdateTask extends AbstractContentEquivalenceUpda
     @Override
     protected String schedulingKey() {
         return schedulingKey;
+    }
+
+    @Override
+    protected void handle(Content content) {
+        rootUpdater.updateEquivalences(content);
     }
 
 }
