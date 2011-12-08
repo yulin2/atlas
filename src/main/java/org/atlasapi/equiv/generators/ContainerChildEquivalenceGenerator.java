@@ -63,6 +63,9 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
         return childResults;
     }
     
+   /* Resolve all children of the container and use the supplied item equivalence updater to compute equivalence results for the children.
+    * Results are put into the results store for later retrieval after container equivalence has been fully computed.  
+    */
     private Set<EquivalenceResult<Item>> computeInitialChildResults(List<String> childrenUris) {
         final Map<String, Identified> resolvedChildren = contentResolver.findByCanonicalUris(childrenUris).asResolvedMap();
         
@@ -78,10 +81,14 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
         }), Predicates.notNull()));
     }
     
+    /* Calculates equivalence scores for the containers of items that are strongly equivalent to the items of the subject container.
+     * Scores are normalized by the number of items in the container. 
+     */
     private ScoredEquivalents<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults, ResultDescription desc) {
 
         desc.startStage("Extracting containers from child results");
         
+        //Local cache, hopefully the same containers will be resolved multiple times.
         Map<String, Maybe<Container>> containerCache = Maps.newHashMap();
         
         ScoredEquivalentsBuilder<Container> containerEquivalents = DefaultScoredEquivalents.fromSource(NAME);
@@ -101,6 +108,7 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
             }
         }
         
+        //Give more weight to the scores...
         ScaledScoredEquivalents<Container> scaled = ScaledScoredEquivalents.scale(containerEquivalents.build(), new Function<Double, Double>() {
             @Override
             public Double apply(Double input) {
@@ -116,6 +124,7 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
         return scaled;
     }
     
+    //Resolve a container, looking in the cache first.
     private Maybe<Container> resolve(ParentRef parentEquivalent, Map<String, Maybe<Container>> containerCache) {
         if(parentEquivalent == null) {
             return Maybe.nothing();
