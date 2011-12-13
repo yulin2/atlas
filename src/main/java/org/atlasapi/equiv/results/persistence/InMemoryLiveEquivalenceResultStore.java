@@ -9,6 +9,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Maps;
 
+/* Temporary cache for child results. 
+ * To avoid size growing indefinitely results are removed when they're read. Not a problem 
+ * since children only have one top-level parent.
+ */
 public class InMemoryLiveEquivalenceResultStore implements LiveEquivalenceResultStore {
 
     private ConcurrentMap<String, EquivalenceResult<Item>> cache;
