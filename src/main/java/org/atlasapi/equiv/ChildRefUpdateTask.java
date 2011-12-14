@@ -28,7 +28,7 @@ import org.atlasapi.persistence.content.mongo.MongoContentTables;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
-import org.atlasapi.persistence.media.entity.DescriptionTranslator;
+import org.atlasapi.persistence.media.entity.IdentifiedTranslator;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
@@ -134,7 +134,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
     }
     
     private void createOrUpdateContainer(Container container, DBCollection collection, DBObject containerDbo) {
-        MongoQueryBuilder where = where().fieldEquals(DescriptionTranslator.CANONICAL_URI, container.getCanonicalUri());
+        MongoQueryBuilder where = where().fieldEquals(IdentifiedTranslator.CANONICAL_URI, container.getCanonicalUri());
         collection.update(where.build(), set(containerDbo), true, false);
     }
 
