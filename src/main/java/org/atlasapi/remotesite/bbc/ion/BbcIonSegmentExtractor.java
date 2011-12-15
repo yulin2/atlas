@@ -51,7 +51,9 @@ public class BbcIonSegmentExtractor implements ContentExtractor<IonSegmentEvent,
         segment.setPublisher(Publisher.BBC);
         segment.setDescription(descriptionOf(ionSegment));
         segment.setType(SegmentType.fromString(ionSegment.getSegmentType()).valueOrNull());
-        segment.setDuration(Duration.standardSeconds(ionSegment.getDuration()));
+        if (ionSegment.getDuration() != null) {
+            segment.setDuration(Duration.standardSeconds(ionSegment.getDuration()));
+        }
         return segment;
     }
 
