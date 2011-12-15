@@ -23,6 +23,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
@@ -36,7 +37,7 @@ public class ChildRefUpdateTaskTest extends MockObjectTestCase {
     
     ChildRefUpdateTask task = new ChildRefUpdateTask(lister, resolver, mongo, progressStore, new NullAdapterLog()).forPublishers(BBC);
     
-    ContainerTranslator translator = new ContainerTranslator();
+    ContainerTranslator translator = new ContainerTranslator(new SubstitutionTableNumberCodec());
     
     public void testUpdatesChildRefSortKeys() {
         

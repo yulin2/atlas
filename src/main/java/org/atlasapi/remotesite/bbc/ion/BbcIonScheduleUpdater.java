@@ -29,6 +29,10 @@ public class BbcIonScheduleUpdater extends ScheduledTask {
     private final BbcIonBroadcastHandler handler;
     private final AdapterLog log;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> mbst-694-model-segments
     public BbcIonScheduleUpdater(Supplier<Iterable<String>> urlSupplier, RemoteSiteClient<IonSchedule> client, BbcIonBroadcastHandler handler, AdapterLog log) {
         this.urlSupplier = urlSupplier;
         this.scheduleClient = client;

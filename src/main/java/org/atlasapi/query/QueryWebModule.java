@@ -5,6 +5,7 @@ import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -14,7 +15,6 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
 import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
@@ -38,7 +38,8 @@ public class QueryWebModule {
     private @Autowired PeopleResolver peopleResolver;
     private @Autowired TopicQueryResolver topicResolver;
     private @Autowired TopicContentLister topicContentLister;
-    
+    private @Autowired SegmentResolver segmentResolver;
+
     @Autowired
     private KnownTypeQueryExecutor queryExecutor;
     @Autowired
@@ -78,6 +79,6 @@ public class QueryWebModule {
     }
 
     @Bean AtlasModelWriter atlasModelOutputter() {
-        return new DispatchingAtlasModelWriter(contentResolver, topicResolver);
+        return new DispatchingAtlasModelWriter(contentResolver, topicResolver, segmentResolver);
     }
 }

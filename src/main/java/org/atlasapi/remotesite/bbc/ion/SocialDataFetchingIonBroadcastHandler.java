@@ -51,7 +51,6 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
             updateSocialDataFor(broadcast.getBrandId());
         }
         
-        
     }
 
     private void updateSocialDataFor(String pid) { 
