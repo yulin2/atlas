@@ -35,6 +35,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.MongoConstants;
 import com.metabroadcast.common.persistence.mongo.MongoQueryBuilder;
@@ -51,7 +52,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
 
     private final DBCollection containers;
     private final DBCollection programmeGroups;
-    private final ContainerTranslator translator = new ContainerTranslator();
+    private final ContainerTranslator translator = new ContainerTranslator(new SubstitutionTableNumberCodec());
 
     private final AdapterLog log;
 
