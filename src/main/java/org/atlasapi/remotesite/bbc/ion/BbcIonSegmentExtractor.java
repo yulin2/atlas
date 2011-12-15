@@ -29,7 +29,10 @@ public class BbcIonSegmentExtractor implements ContentExtractor<IonSegmentEvent,
         SegmentEvent event = new SegmentEvent();
         event.setCanonicalUri(BbcFeeds.slashProgrammesUriForPid(ionSegmentEvent.getPid()));
         event.setPosition(ionSegmentEvent.getPosition());
-        event.setOffset(standardSeconds(ionSegmentEvent.getOffset()));
+        
+        if (ionSegmentEvent.getOffset() != null) {
+            event.setOffset(standardSeconds(ionSegmentEvent.getOffset()));
+        }
         event.setIsChapter(ionSegmentEvent.getIsChapter());
         event.setDescription(descriptionOf(ionSegmentEvent));
         return event;
@@ -48,7 +51,9 @@ public class BbcIonSegmentExtractor implements ContentExtractor<IonSegmentEvent,
         segment.setPublisher(Publisher.BBC);
         segment.setDescription(descriptionOf(ionSegment));
         segment.setType(SegmentType.fromString(ionSegment.getSegmentType()).valueOrNull());
-        segment.setDuration(Duration.standardSeconds(ionSegment.getDuration()));
+        if (ionSegment.getDuration() != null) {
+            segment.setDuration(Duration.standardSeconds(ionSegment.getDuration()));
+        }
         return segment;
     }
 
