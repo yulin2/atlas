@@ -30,6 +30,17 @@ public class BbcIonDeserializers {
             return new DateTime(jsonString);
         }
     }
+    
+    public static class IntegerDeserializer implements JsonDeserializer<Integer> {
+        @Override
+        public Integer deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            String jsonString = json.getAsJsonPrimitive().getAsString();
+            if(Strings.isNullOrEmpty(jsonString)) {
+                return null;
+            }
+            return json.getAsInt();
+        }
+    }
 
     public static class LongDeserializer implements JsonDeserializer<Long> {
         @Override
@@ -119,6 +130,7 @@ public class BbcIonDeserializers {
             this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(DateTime.class, new DateTimeDeserializer())
                 .registerTypeAdapter(Long.class, new LongDeserializer())
+                .registerTypeAdapter(Integer.class, new IntegerDeserializer())
                 .registerTypeAdapter(Boolean.class, new BooleanDeserializer())
                 .registerTypeAdapter(URL.class, new URLDeserializer())
 //                .registerTypeAdapter(new TypeToken<List<IonTagScheme>>(){}.getType(), new IonTagSchemeListDeserialiser())
