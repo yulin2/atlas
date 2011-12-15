@@ -33,6 +33,7 @@ public class PaChannelMap {
         channelMap.put(16, Channel.BBC_ONE_SOUTH_EAST);
         channelMap.put(17, Channel.BBC_ONE_SOUTH_WEST);
         channelMap.put(18, Channel.BBC_ONE_WEST);
+        channelMap.put(1609, Channel.BBC_ONE_HD);
         
         // covered by code 4, disable to avoid duplicates
        // channelMap.put(713, Channel.BBC_ONE);
