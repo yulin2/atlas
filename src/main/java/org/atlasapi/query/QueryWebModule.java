@@ -5,6 +5,7 @@ import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -32,6 +33,7 @@ public class QueryWebModule {
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
     private @Autowired PeopleResolver peopleResolver;
+    private @Autowired SegmentResolver segmentResolver;
     @Autowired
     private KnownTypeQueryExecutor queryExecutor;
     @Autowired
@@ -67,6 +69,6 @@ public class QueryWebModule {
     }
 
     @Bean AtlasModelWriter atlasModelOutputter() {
-        return new DispatchingAtlasModelWriter(contentResolver);
+        return new DispatchingAtlasModelWriter(contentResolver, segmentResolver);
     }
 }
