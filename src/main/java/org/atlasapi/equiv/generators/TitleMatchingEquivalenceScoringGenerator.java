@@ -1,8 +1,10 @@
 package org.atlasapi.equiv.generators;
 
 import java.util.List;
+import java.util.Map;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
@@ -15,6 +17,8 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -83,9 +87,17 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
 
     private List<Identified> searchForEquivalents(Container content) {
         SetView<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher()));
-        ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithIncludedPublishers(publishers);
+        ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabled(publishers));
 
         List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
         return search;
+    }
+
+    private Map<Publisher, SourceStatus> enabled(SetView<Publisher> publishers) {
+        Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
+        for (Publisher publisher : publishers) {
+            builder.put(publisher, SourceStatus.AVAILABLE_ENABLED);
+        }
+        return builder.build();
     }
 }

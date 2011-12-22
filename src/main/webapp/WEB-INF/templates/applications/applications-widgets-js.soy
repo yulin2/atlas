@@ -22,25 +22,32 @@
 	</p>
 </form>
 <h3>Publishers</h3>
-<ul id="app-publishers" class="mod" data-app="{$application.slug}">
-
 {if not $application.configuration.precedence}
     <p>Publisher precedence not enabled, <a id="enable-precedence" href="#enable" onclick="$('.precedenceControl').css({lb}'visibility': 'visible'{rb}); return false;">enable</a></p>
 {/if}
-
+<table id="app-publishers" class="mod" data-app="{$application.slug}">
+<thead>
+    <tr><td></td><td>Source</td><td>Availability</td><td>Enabled</td></tr>
+</thead>
 {foreach $publisher in $application.configuration.publishers}
-	<li publisher="{$publisher.key}">
-		<label style="width: 150px; float: left;">
-			<input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}>
-			{$publisher.title}
-		</label>
-		<p class="precedenceControl" style="{if not $application.configuration.precedence}visibility: hidden; {/if}"> 
+	<tr publisher="{$publisher.key}">
+		<td class="precedenceControl" style="{if not $application.configuration.precedence}visibility: hidden; {/if}"> 
 		  <a href="#up" class="up">up</a> <a href="#down" class="down" onclick="">down</a>
-		</p>
-		<div style="clear: both;"/>
-	</li>
+		</td>
+	   <td>{$publisher.title}</td>
+        {if $publisher.state == 'available'}
+            <td>available</td>
+            <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}></td>
+        {elseif $publisher.state == 'unavailable'}
+            <td><a class="request-link" href="/admin/applications/{$application.slug}/publishers/requested?pubkey={$publisher.key}">request?</a></td>
+            <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
+        {else}
+            <td>{$publisher.state}</td>
+            <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
+        {/if}
+	</tr>
 {/foreach}
-</ul>
+</table>
 
 
 {/template}
