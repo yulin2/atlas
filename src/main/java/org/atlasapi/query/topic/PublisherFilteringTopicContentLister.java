@@ -22,7 +22,7 @@ public class PublisherFilteringTopicContentLister implements TopicContentLister 
 
     @Override
     public Iterator<Content> contentForTopic(String topicUri, ContentQuery contentQuery) {
-        final Set<Publisher> includedPublishers = contentQuery.getConfiguration().getIncludedPublishers();
+        final Set<Publisher> includedPublishers = contentQuery.getConfiguration().getEnabledSources();
         return contentQuery.getSelection().applyTo(Iterators.filter(delegate.contentForTopic(topicUri, contentQuery), new Predicate<Described>() {
             @Override
             public boolean apply(Described input) {
