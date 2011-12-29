@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasEntry;
 
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
@@ -23,22 +25,26 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class ContainerChildEquivalenceGeneratorTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class ContainerChildEquivalenceGeneratorTest extends TestCase {
 
     private final String A_SORT_KEY = "asdf";
     private final DateTime NULL_UPDATED = null;
 
+    private final Mockery context = new Mockery();
     @SuppressWarnings("unchecked")
-    private final ContentEquivalenceUpdater<Item> itemUpdater = mock(ContentEquivalenceUpdater.class);
-    private final ContentResolver contentResolver = mock(ContentResolver.class);
-    private final LiveEquivalenceResultStore resultStore = mock(LiveEquivalenceResultStore.class);
+    private final ContentEquivalenceUpdater<Item> itemUpdater = context.mock(ContentEquivalenceUpdater.class);
+    private final ContentResolver contentResolver = context.mock(ContentResolver.class);
+    private final LiveEquivalenceResultStore resultStore = context.mock(LiveEquivalenceResultStore.class);
     
     private final ContainerChildEquivalenceGenerator generator = new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, resultStore, new NullAdapterLog());
     
@@ -49,7 +55,7 @@ public class ContainerChildEquivalenceGeneratorTest extends MockObjectTestCase {
                 new ChildRef("child2", A_SORT_KEY, NULL_UPDATED, EntityType.EPISODE)
         );
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             ignoring(itemUpdater);
             ignoring(resultStore);
             one(contentResolver).findByCanonicalUris(Lists.transform(childRefs, ChildRef.TO_URI));
@@ -70,7 +76,7 @@ public class ContainerChildEquivalenceGeneratorTest extends MockObjectTestCase {
 
         final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.<Publisher,ScoredEquivalent<Item>>of());
 
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(contentResolver).findByCanonicalUris(Lists.transform(childRefs, ChildRef.TO_URI));
                 will(returnValue(ResolvedContent.builder().put(ep.getCanonicalUri(), ep).build()));
             one(itemUpdater).updateEquivalences(ep);
@@ -99,7 +105,7 @@ public class ContainerChildEquivalenceGeneratorTest extends MockObjectTestCase {
         
         final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.of(Publisher.PA, ScoredEquivalent.<Item>equivalentScore(equiv, Score.ONE)));
 
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(contentResolver);
                 will(returnValue(ResolvedContent.builder().put(ep.getCanonicalUri(), ep).build()));
             one(itemUpdater).updateEquivalences(ep);

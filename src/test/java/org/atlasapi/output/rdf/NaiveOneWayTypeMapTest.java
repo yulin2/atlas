@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-package org.atlasapi.beans;
+package org.atlasapi.output.rdf;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -26,7 +26,8 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.rdf.beans.TypeMap;
+import org.atlasapi.output.rdf.NaiveTypeMap;
+import org.atlasapi.output.rdf.TypeMap;
 
 /**
  *

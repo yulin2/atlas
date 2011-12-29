@@ -22,7 +22,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.atlasapi.feeds.OembedItem;
+import org.atlasapi.output.oembed.OembedItem;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.HttpClients;
 

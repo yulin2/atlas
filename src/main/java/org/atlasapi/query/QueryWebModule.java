@@ -1,10 +1,22 @@
 package org.atlasapi.query;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.beans.AtlasModelWriter;
-import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Person;
+import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.entity.simple.ContentQueryResult;
+import org.atlasapi.media.entity.simple.PeopleQueryResult;
+import org.atlasapi.media.entity.simple.ScheduleQueryResult;
+import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.output.DispatchingAtlasModelWriter;
+import org.atlasapi.output.JaxbXmlTranslator;
+import org.atlasapi.output.JsonTranslator;
+import org.atlasapi.output.SimpleContentModelWriter;
+import org.atlasapi.output.SimplePersonModelWriter;
+import org.atlasapi.output.SimpleScheduleModelWriter;
+import org.atlasapi.output.rdf.RdfXmlTranslator;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -12,10 +24,8 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.query.content.schedule.BroadcastRemovingScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
-import org.atlasapi.query.content.schedule.ThreadedScheduleOverlapListener;
 import org.atlasapi.query.v2.PeopleController;
 import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
@@ -23,6 +33,8 @@ import org.atlasapi.query.v2.SearchController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.metabroadcast.common.media.MimeType;
 
 @Configuration
 public class QueryWebModule {
@@ -40,7 +52,7 @@ public class QueryWebModule {
     private AdapterLog log;
     
     @Bean QueryController queryController() {
-        return new QueryController(queryExecutor, configFetcher, log, atlasModelOutputter());
+        return new QueryController(queryExecutor, configFetcher, log, contentModelOutputter());
     }
     
     @Bean ScheduleOverlapListener scheduleOverlapListener() {
@@ -55,18 +67,43 @@ public class QueryWebModule {
     
     @Bean ScheduleController schedulerController() {
         ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, scheduleOverlapListener(), log);
-        return new ScheduleController(resolver, configFetcher, log, atlasModelOutputter());
+        return new ScheduleController(resolver, configFetcher, log, scheduleChannelModelOutputter());
     }
     
     @Bean PeopleController peopleController() {
-        return new PeopleController(peopleResolver, configFetcher, log, atlasModelOutputter());
+        return new PeopleController(peopleResolver, configFetcher, log, personModelOutputter());
     }
     
     @Bean SearchController searchController() {
-        return new SearchController(searchResolver, configFetcher, log, atlasModelOutputter());
+        return new SearchController(searchResolver, configFetcher, log, contentModelOutputter());
     }
 
-    @Bean AtlasModelWriter atlasModelOutputter() {
-        return new DispatchingAtlasModelWriter(contentResolver);
+    @Bean AtlasModelWriter<Iterable<Content>> contentModelOutputter() {
+        return this.<Content>standardWriter(
+            new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), contentResolver),
+            new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(),contentResolver)
+        );
+    }
+    
+    @Bean AtlasModelWriter<Iterable<Person>> personModelOutputter() {
+        return this.<Person>standardWriter(
+            new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>(), contentResolver),
+            new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>(),contentResolver)
+        );
+    }
+    
+    @Bean AtlasModelWriter<Iterable<ScheduleChannel>> scheduleChannelModelOutputter() {
+        return this.<ScheduleChannel>standardWriter(
+            new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), contentResolver),
+            new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(),contentResolver)
+        );
+    }
+    
+    private <T> AtlasModelWriter<Iterable<T>> standardWriter(AtlasModelWriter<Iterable<T>> jsonWriter, AtlasModelWriter<Iterable<T>> xmlWriter) {
+        return DispatchingAtlasModelWriter.<Iterable<T>>dispatchingModelWriter()
+                .register(new RdfXmlTranslator<T>(), "rdf.xml", MimeType.APPLICATION_RDF_XML)
+                .register(jsonWriter, "json", MimeType.APPLICATION_JSON)
+                .register(xmlWriter, "xml", MimeType.APPLICATION_XML)
+                .build();
     }
 }

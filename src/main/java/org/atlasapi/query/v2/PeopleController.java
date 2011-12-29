@@ -6,11 +6,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.beans.AtlasErrorSummary;
-import org.atlasapi.beans.AtlasModelType;
-import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Person;
+import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
@@ -20,12 +19,12 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.query.Selection;
 
 @Controller
-public class PeopleController extends BaseController {
+public class PeopleController extends BaseController<Person> {
 
     private final PeopleResolver resolver;
 
     public PeopleController(PeopleResolver resolver, ApplicationConfigurationFetcher configFetcher,
-                    AdapterLog log, AtlasModelWriter outputter) {
+                    AdapterLog log, AtlasModelWriter<Iterable<Person>> outputter) {
         super(configFetcher, log, outputter);
         this.resolver = resolver;
     }
@@ -45,7 +44,7 @@ public class PeopleController extends BaseController {
             
             Person person = resolver.person(uri);
             
-            modelAndViewFor(request, response, ImmutableList.of(person), AtlasModelType.PEOPLE);
+            modelAndViewFor(request, response, ImmutableList.of(person));
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }

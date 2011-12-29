@@ -12,13 +12,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-package org.atlasapi.beans;
+package org.atlasapi.output;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-
-import java.util.Set;
-
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.simple.Broadcast;
@@ -42,15 +39,16 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
+	private JaxbXmlTranslator<ContentQueryResult> translator;
 
 	@Override
 	public void setUp() throws Exception {
 		this.request = new StubHttpServletRequest();
 		this.response = new StubHttpServletResponse();
+		this.translator = new JaxbXmlTranslator<ContentQueryResult>();
 	}
 	
 	public void testCanOutputSimpleItemObjectModelAsXml() throws Exception {
-		Set<Object> graph = Sets.newHashSet();
 
 		Item item = new Item();
 		item.setTitle("Blue Peter");
@@ -64,9 +62,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		item.addBroadcast(new Broadcast("channel", transmitted, transmitted.plusHours(1)));
 		ContentQueryResult result = new ContentQueryResult();
 		result.add(item);
-		graph.add(result);
 		
-		new JaxbXmlTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
+		translator.writeTo(request, response, result);
 		
 		String output = response.getResponseAsString();
 		assertThat(output, containsString("<play:item>" +
@@ -102,7 +99,6 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
 	
 	public void testCanOutputSimpleListObjectModelAsXml() throws Exception {
-		Set<Object> graph = Sets.newHashSet();
 
 		Playlist list = new Playlist();
 
@@ -110,9 +106,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
 		ContentQueryResult result = new ContentQueryResult();
 		result.setContents(ImmutableList.<Description>of(list));
-		graph.add(result);
 		
-		new JaxbXmlTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
+		translator.writeTo(request, response, result);
 		
 
 		assertThat(response.getResponseAsString(), containsString("<play:item>" +

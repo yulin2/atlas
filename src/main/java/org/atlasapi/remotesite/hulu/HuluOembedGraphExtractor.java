@@ -17,7 +17,7 @@ package org.atlasapi.remotesite.hulu;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.feeds.OembedItem;
+import org.atlasapi.output.oembed.OembedItem;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.oembed.OembedGraphExtractor;
 

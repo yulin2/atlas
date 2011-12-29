@@ -14,12 +14,12 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.youtube;
 
-import org.jmock.integration.junit3.MockObjectTestCase;
+import junit.framework.TestCase;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YoutubeUriCanonicaliserTest extends MockObjectTestCase {
+public class YoutubeUriCanonicaliserTest extends TestCase {
 
 	private YoutubeUriCanonicaliser canonicaliser;
 	

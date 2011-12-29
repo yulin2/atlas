@@ -21,11 +21,12 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
-import org.jmock.integration.junit3.MockObjectTestCase;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.Iterables;
@@ -36,7 +37,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BbcSlashProgrammesEpisodeRdfClientTest extends MockObjectTestCase {
+public class BbcSlashProgrammesEpisodeRdfClientTest extends TestCase {
 	
 	private static final String URI = "http://example.com";
 	

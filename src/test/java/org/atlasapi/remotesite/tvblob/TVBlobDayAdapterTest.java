@@ -1,23 +1,29 @@
 package org.atlasapi.remotesite.tvblob;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.junit.runner.RunWith;
 
-public class TVBlobDayAdapterTest extends MockObjectTestCase {
-	
-    private ContentResolver resolver = mock(ContentResolver.class);
-    private ContentWriter writer = mock(ContentWriter.class);
+@RunWith(JMock.class)
+public class TVBlobDayAdapterTest extends TestCase {
+
+    private final Mockery context = new Mockery();
+    private ContentResolver resolver = context.mock(ContentResolver.class);
+    private ContentWriter writer = context.mock(ContentWriter.class);
     private TVBlobDayAdapter adapter = new TVBlobDayAdapter(writer, resolver);
 
     public void testShouldRetrieveToday() throws Exception {
-        checking(new Expectations() {{
+        context.checking(new Expectations() {{
             allowing(resolver).findByCanonicalUris(with(Expectations.<Iterable<String>>anything())); will(returnValue(ResolvedContent.builder().build()));
             allowing(writer).createOrUpdate((Episode) with(anything()));
             allowing(writer).createOrUpdate((Brand) with(anything()));

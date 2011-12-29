@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
@@ -18,7 +20,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableSet;
@@ -29,7 +30,7 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.intl.Country;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class C4FourOdEpisodesExtractorTest extends MockObjectTestCase {
+public class C4FourOdEpisodesExtractorTest extends TestCase {
 
 	private final AtomFeedBuilder fourOdFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-4od.atom"));
 	

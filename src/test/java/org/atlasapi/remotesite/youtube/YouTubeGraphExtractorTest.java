@@ -25,6 +25,8 @@ import static org.hamcrest.Matchers.not;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
@@ -34,7 +36,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.hamcrest.Matcher;
-import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.Duration;
 
 import com.google.common.collect.Iterables;
@@ -47,7 +48,7 @@ import com.metabroadcast.common.media.MimeType;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YouTubeGraphExtractorTest extends MockObjectTestCase {
+public class YouTubeGraphExtractorTest extends TestCase {
 
 	static final String ITEM_URI = "http://www.youtube.com/watch?v=otA7tjinFX4";
 

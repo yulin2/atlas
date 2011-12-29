@@ -21,10 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.beans.AtlasErrorSummary;
-import org.atlasapi.beans.AtlasModelType;
-import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
@@ -36,12 +36,12 @@ import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.query.Selection;
 
 @Controller
-public class QueryController extends BaseController {
+public class QueryController extends BaseController<Content> {
 	
 	private final KnownTypeQueryExecutor executor;
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
-    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
+    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Content>> outputter) {
 	    super(configFetcher, log, outputter);
         this.executor = executor;
 	}
@@ -77,7 +77,7 @@ public class QueryController extends BaseController {
 			if (Iterables.isEmpty(uris)) {
 				throw new IllegalArgumentException("No uris specified");
 			}
-			modelAndViewFor(request, response, ImmutableList.copyOf(Iterables.concat(executor.executeUriQuery(uris, filter).values())), AtlasModelType.CONTENT);
+			modelAndViewFor(request, response, Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class));
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}

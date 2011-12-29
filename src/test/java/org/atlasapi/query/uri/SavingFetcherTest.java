@@ -14,22 +14,28 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.uri;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.Fetcher;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 @SuppressWarnings("unchecked")
-public class SavingFetcherTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class SavingFetcherTest extends TestCase {
 
-	Fetcher<Identified> delegateFetcher = mock(Fetcher.class);
-	ContentWriter store = mock(ContentWriter.class);
+    private final Mockery context = new Mockery();
+	Fetcher<Identified> delegateFetcher = context.mock(Fetcher.class);
+	ContentWriter store = context.mock(ContentWriter.class);
 	
 	String URI = "http://example.com";
 	Item item1 = new Item();
@@ -37,7 +43,7 @@ public class SavingFetcherTest extends MockObjectTestCase {
 	
 	public void testFetchesItemsFromDelegateAndSavesToStore() throws Exception {
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(delegateFetcher).fetch(URI); will(returnValue(item1));
 			one(store).createOrUpdate(item1);
 		}});

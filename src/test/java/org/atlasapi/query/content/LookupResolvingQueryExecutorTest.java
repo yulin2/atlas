@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasItems;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.content.criteria.MatchesNothing;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -15,17 +17,20 @@ import org.atlasapi.persistence.lookup.InMemoryLookupEntryStore;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupRef;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-public class LookupResolvingQueryExecutorTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class LookupResolvingQueryExecutorTest extends TestCase {
 
-    private KnownTypeContentResolver contentResolver = mock(KnownTypeContentResolver.class);
+    private final Mockery context = new Mockery();
+    private KnownTypeContentResolver contentResolver = context.mock(KnownTypeContentResolver.class);
     
     private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
-    
     private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(contentResolver, lookupStore);
     
     public void testSetsSameAs() {
@@ -38,7 +43,7 @@ public class LookupResolvingQueryExecutorTest extends MockObjectTestCase {
         
         lookupStore.store(lookupEntryWithEquivalents(query, LookupRef.from(queryItem), LookupRef.from(equivItem)));
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(contentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
                 will(returnValue(ResolvedContent.builder()
                         .put(queryItem.getCanonicalUri(), queryItem)
