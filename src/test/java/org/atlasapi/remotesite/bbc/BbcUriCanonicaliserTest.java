@@ -14,9 +14,9 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
-import org.jmock.integration.junit3.MockObjectTestCase;
+import junit.framework.TestCase;
 
-public class BbcUriCanonicaliserTest extends MockObjectTestCase {
+public class BbcUriCanonicaliserTest extends TestCase {
 
 	BbcUriCanonicaliser canonicaliser;
 	

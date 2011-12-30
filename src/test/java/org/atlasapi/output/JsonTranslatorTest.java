@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-package org.atlasapi.beans;
+package org.atlasapi.output;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -24,6 +24,7 @@ import junit.framework.TestCase;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -52,7 +53,7 @@ public class JsonTranslatorTest extends TestCase {
 		item.addLocation(location);
 		graph.add(item);
 		
-		new JsonTranslator().writeTo(request, response, graph, AtlasModelType.CONTENT);
+		new JsonTranslator<Item>().writeTo(request, response, item, ImmutableSet.<Annotation>of());
 		
 		String output = response.getResponseAsString();
 		assertThat(output, containsString("\"uri\":\"http://www.bbc.co.uk/bluepeter\""));

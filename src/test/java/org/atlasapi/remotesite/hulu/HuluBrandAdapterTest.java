@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.hulu;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -9,19 +11,23 @@ import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.hulu.WritingHuluBrandAdapter.HuluBrandCanonicaliser;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 @SuppressWarnings("unchecked")
-public class HuluBrandAdapterTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class HuluBrandAdapterTest extends TestCase {
     
-    private final SiteSpecificAdapter<Episode> episodeAdapter = mock(SiteSpecificAdapter.class);
-    private final ContentWriter contentWriter = mock(ContentWriter.class);
+    private final Mockery context = new Mockery();
+    private final SiteSpecificAdapter<Episode> episodeAdapter = context.mock(SiteSpecificAdapter.class);
+    private final ContentWriter contentWriter = context.mock(ContentWriter.class);
     private final AdapterLog log = new SystemOutAdapterLog();
     private final HuluClient client = new HttpBackedHuluClient(HttpClients.webserviceClient(),log);
     private final WritingHuluBrandAdapter adapter = new WritingHuluBrandAdapter(client, episodeAdapter, contentWriter, log);
 
     public void testShouldGetBrand() throws Exception {
-        checking(new Expectations() {{
+        context.checking(new Expectations() {{
             one(contentWriter).createOrUpdate(with(any(Brand.class)));
             atLeast(1).of(episodeAdapter).fetch((String) with(anything())); will(returnValue(new Episode()));
             atLeast(1).of(contentWriter).createOrUpdate(with(any(Episode.class)));

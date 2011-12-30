@@ -8,12 +8,13 @@ import static org.hamcrest.Matchers.not;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BroadcastOn;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.Interval;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.Service;
-import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
@@ -22,7 +23,7 @@ import com.google.common.collect.Lists;
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BbcProgrammeGraphExtractorTest extends MockObjectTestCase {
+public class BbcProgrammeGraphExtractorTest extends TestCase {
 
 	public void testGeneratesSetOfBbcAliasUrisForIplayerEpisode() {
 		Set<String> aliases = BbcAliasCompiler.bbcAliasUrisFor("http://www.bbc.co.uk/iplayer/episode/b00nxb4q/Later_Live..._with_Jools_Holland_Series_35_Episode_9/");

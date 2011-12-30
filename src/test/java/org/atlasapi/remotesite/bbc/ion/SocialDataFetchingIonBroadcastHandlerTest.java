@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasItem;
 
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -25,27 +27,31 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
 
     private static final String NO_SERIES = null;
     private static final String NO_BRAND = null;
 
+    private final Mockery context = new Mockery();
     private final AdapterLog log = new NullAdapterLog();
     
     @SuppressWarnings("unchecked")
-    private final SiteSpecificAdapter<List<RelatedLink>> linkAdapter = mock(SiteSpecificAdapter.class, "link adapter");
+    private final SiteSpecificAdapter<List<RelatedLink>> linkAdapter = context.mock(SiteSpecificAdapter.class, "link adapter");
     @SuppressWarnings("unchecked")
-    private final SiteSpecificAdapter<List<KeyPhrase>> tagAdapter = mock(SiteSpecificAdapter.class, "tag adapter");
+    private final SiteSpecificAdapter<List<KeyPhrase>> tagAdapter = context.mock(SiteSpecificAdapter.class, "tag adapter");
     @SuppressWarnings("unchecked")
-    private final SiteSpecificAdapter<List<Topic>> topicsAdapter = mock(SiteSpecificAdapter.class, "topic adapter");
+    private final SiteSpecificAdapter<List<Topic>> topicsAdapter = context.mock(SiteSpecificAdapter.class, "topic adapter");
     
-    private final ContentResolver resolver = mock(ContentResolver.class);
-    private final ContentWriter writer = mock(ContentWriter.class);
+    private final ContentResolver resolver = context.mock(ContentResolver.class);
+    private final ContentWriter writer = context.mock(ContentWriter.class);
     
     private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linkAdapter, tagAdapter, topicsAdapter, resolver, writer, log);
 
@@ -63,13 +69,14 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCas
         handler.handle(broadcast);
     }
     
+
     public void testDoesntWriteContentWhenReferencedContentNotFound() {
 
         final String pid = "b00pgl7s";
         IonBroadcast broadcast = broadcast(pid, NO_SERIES, NO_BRAND);
         
         final String uri = BbcFeeds.slashProgrammesUriForPid(pid);
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())));
             one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
@@ -108,21 +115,21 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCas
 
     public void checkingUpdateLinksAndTagsForContainer(Container content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         checkFetchesLinksTagsAndContent(content, links, tags);
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(writer).createOrUpdate((Container)with(contentWithLinksAndTags(links, tags)));
         }});
     }
 
     public void checkingUpdateLinksAndTagsForItem(Item content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         checkFetchesLinksTagsAndContent(content, links, tags);
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(writer).createOrUpdate((Item)with(contentWithLinksAndTags(links, tags)));
         }});
     }
 
     public <T extends Content> void checkFetchesLinksTagsAndContent(final T content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
         final String uri = content.getCanonicalUri();
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(links));
             one(tagAdapter).fetch(uri);will(returnValue(tags));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
@@ -137,7 +144,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends MockObjectTestCas
         final String uri = BbcFeeds.slashProgrammesUriForPid(pid);
         IonBroadcast broadcast = broadcast(pid, NO_SERIES, NO_BRAND);
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));

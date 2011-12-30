@@ -7,20 +7,26 @@ import static org.hamcrest.Matchers.isIn;
 import java.io.InputStreamReader;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
 
-public class BbcHashTagAdapterTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class BbcHashTagAdapterTest extends TestCase {
 
+    private final Mockery context = new Mockery();
     @SuppressWarnings("unchecked")
-    private final RemoteSiteClient<HtmlNavigator> buzzPageClient = mock(RemoteSiteClient.class);
+    private final RemoteSiteClient<HtmlNavigator> buzzPageClient = context.mock(RemoteSiteClient.class);
 
     private final BbcHashTagAdapter hashTagAdapter = new BbcHashTagAdapter(buzzPageClient);
     
@@ -29,7 +35,7 @@ public class BbcHashTagAdapterTest extends MockObjectTestCase {
         final String uri = "http://www.bbc.co.uk/programmes/b006mkw3/buzz";
         final HtmlNavigator buzzNavigator = new HtmlNavigator(new InputStreamReader(Resources.getResource("bbc-hignfy-buzz.html").openStream(), Charsets.UTF_8));
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(buzzPageClient).get(uri); will(returnValue(buzzNavigator));
         }});
         

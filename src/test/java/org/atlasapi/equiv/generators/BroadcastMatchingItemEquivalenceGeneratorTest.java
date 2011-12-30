@@ -10,6 +10,8 @@ import static org.joda.time.Duration.standardMinutes;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -22,18 +24,22 @@ import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTestCase {
-    
-    private final ScheduleResolver resolver = mock(ScheduleResolver.class);
+@RunWith(JMock.class)
+public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
+
+    private final Mockery context = new Mockery();
+    private final ScheduleResolver resolver = context.mock(ScheduleResolver.class);
     private final BroadcastMatchingItemEquivalenceGenerator generator = new BroadcastMatchingItemEquivalenceGenerator(resolver , ImmutableSet.of(BBC), standardMinutes(1));
     
     public void testGenerateEquivalencesForOneMatchingBroadcast() {
@@ -43,7 +49,7 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTes
         
         final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(Channel.BBC_ONE), ImmutableSet.of(BBC));
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});

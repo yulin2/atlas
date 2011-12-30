@@ -17,15 +17,15 @@ package org.atlasapi.remotesite.oembed;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import junit.framework.TestCase;
 
-import org.atlasapi.feeds.OembedItem;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.output.oembed.OembedItem;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;
 
@@ -34,7 +34,7 @@ import com.google.common.collect.Iterables;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class OembedGraphExtractorTest extends MockObjectTestCase {
+public class OembedGraphExtractorTest extends TestCase {
 	
 	OembedItem item = createTestItem();
 	

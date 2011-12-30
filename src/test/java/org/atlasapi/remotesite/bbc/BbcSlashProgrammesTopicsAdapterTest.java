@@ -4,22 +4,28 @@ import static org.atlasapi.remotesite.bbc.BbcSlashProgrammesRdfClient.slashProgr
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class BbcSlashProgrammesTopicsAdapterTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class BbcSlashProgrammesTopicsAdapterTest extends TestCase {
 
+    private final Mockery context = new Mockery();
     private static String URI = "http://www.bbc.co.uk/programmes/b0144pvg.rdf";
     @SuppressWarnings("unchecked")
-    private final SiteSpecificAdapter<Topic> topicFetcher = mock(SiteSpecificAdapter.class);
+    private final SiteSpecificAdapter<Topic> topicFetcher = context.mock(SiteSpecificAdapter.class);
     private static final SimpleHttpClient httpClient = new FixedResponseHttpClient(URI , xmlDocument());
 
     private static String xmlDocument()  {
@@ -38,7 +44,7 @@ public class BbcSlashProgrammesTopicsAdapterTest extends MockObjectTestCase {
         
         for (String topicSuffix : topics) {
             final String uri = slashProgrammsUri(topicSuffix);
-            checking(new Expectations() {{
+            context.checking(new Expectations() {{
                 one(topicFetcher).canFetch(uri); will(returnValue(true));
                 one(topicFetcher).fetch(uri); will(returnValue(null));
             }});

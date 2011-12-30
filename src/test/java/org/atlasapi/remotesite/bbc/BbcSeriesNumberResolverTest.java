@@ -19,21 +19,27 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class BbcSeriesNumberResolverTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class BbcSeriesNumberResolverTest extends TestCase {
 
-	final SimpleHttpClient client = mock(SimpleHttpClient.class);
+    private final Mockery context = new Mockery();
+	final SimpleHttpClient client = context.mock(SimpleHttpClient.class);
 
 	public void testTheResolver() throws Exception {
 		final String seriesUri = "http://www.bbc.co.uk/programmes/b007q8vv";
 		
-		checking(new Expectations() {{
+		context.checking(new Expectations() {{
 			one(client).getContentsOf(seriesUri + ".rdf"); will(returnValue(xmlDocument()));
 		}});
 		
@@ -48,7 +54,7 @@ public class BbcSeriesNumberResolverTest extends MockObjectTestCase {
 	public void testLookupingUpAMissingSeries() throws Exception {
 		final String missingSeriesUri = "http://www.bbc.co.uk/programmes/b00missing";
 		
-		checking(new Expectations() {{
+		context.checking(new Expectations() {{
 			one(client).getContentsOf(missingSeriesUri + ".rdf"); will(returnValue("this string doesn't contain a series number"));
 		}});
 		

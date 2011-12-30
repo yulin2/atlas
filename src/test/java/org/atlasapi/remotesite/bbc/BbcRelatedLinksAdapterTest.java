@@ -5,20 +5,26 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesProgramme;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesRelatedLink;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class BbcRelatedLinksAdapterTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class BbcRelatedLinksAdapterTest extends TestCase {
 
+    private final Mockery context = new Mockery();
     @SuppressWarnings("unchecked")
-    private final RemoteSiteClient<SlashProgrammesContainer> client = mock(RemoteSiteClient.class);
+    private final RemoteSiteClient<SlashProgrammesContainer> client = context.mock(RemoteSiteClient.class);
     
     private final BbcRelatedLinksAdapter adapter = new BbcRelatedLinksAdapter(client);
     
@@ -28,7 +34,7 @@ public class BbcRelatedLinksAdapterTest extends MockObjectTestCase {
         
         final SlashProgrammesRelatedLink link = slashProgrammesLink("misc","Tag Title","http://ceci.nest.pas/une/link");
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(client).get(uri + ".json"); will(returnValue(containerWithLink(link)));
         }});
         

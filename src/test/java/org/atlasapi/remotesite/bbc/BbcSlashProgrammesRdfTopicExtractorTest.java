@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
@@ -13,14 +14,18 @@ import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
-public class BbcSlashProgrammesRdfTopicExtractorTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 
-    private final TopicStore topicStore = mock(TopicStore.class);
+    private final Mockery context = new Mockery();
+    private final TopicStore topicStore = context.mock(TopicStore.class);
     private final BbcSlashProgrammesRdfTopicExtractor extractor = new BbcSlashProgrammesRdfTopicExtractor(topicStore , new NullAdapterLog());
     
     public void testExtractsTopicFromValidSlashProgrammesTopic() {
@@ -34,7 +39,7 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends MockObjectTestCase 
                 ImmutableSet.of(new SlashProgrammesRdf.SlashProgrammesType().withResourceUri(typeUri))
         ));
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(topicStore).topicFor("dbpedia", topicUri);will(returnValue(Maybe.just(new Topic(topicUriForId("100")))));
             one(topicStore).write(with(any(Topic.class)));
         }});

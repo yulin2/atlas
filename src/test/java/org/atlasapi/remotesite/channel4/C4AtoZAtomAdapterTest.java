@@ -14,13 +14,17 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.channel4;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 import com.google.common.io.Resources;
 import com.sun.syndication.feed.atom.Feed;
@@ -29,8 +33,11 @@ import com.sun.syndication.feed.atom.Feed;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class C4AtoZAtomAdapterTest extends TestCase {
 
+    private final Mockery context = new Mockery();
+    
 	String uri = "http://www.channel4.com/programmes/atoz/a";
 	
 	private C4BrandUpdater brandAdapter;
@@ -49,15 +56,15 @@ public class C4AtoZAtomAdapterTest extends MockObjectTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		brandAdapter = mock(C4BrandUpdater.class);
-		itemClient = mock(RemoteSiteClient.class);
-		writer = mock(ContentWriter.class);
+		brandAdapter = context.mock(C4BrandUpdater.class);
+		itemClient = context.mock(RemoteSiteClient.class);
+		writer = context.mock(ContentWriter.class);
 		adapter = new C4AtoZAtomContentLoader(itemClient, brandAdapter, new NullAdapterLog());
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
-		checking(new Expectations() {{
+		context.checking(new Expectations() {{
 			one(itemClient).get("http://api.channel4.com/pmlsd/atoz/a.atom"); will(returnValue(atoza.build()));
 			allowing(brandAdapter).canFetch("http://www.channel4.com/programmes/a-bipolar-expedition"); will(returnValue(true));
 			allowing(brandAdapter).createOrUpdateBrand("http://www.channel4.com/programmes/a-bipolar-expedition"); //will(returnValue(brand101));

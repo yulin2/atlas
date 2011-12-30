@@ -14,6 +14,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.dailymotion;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
@@ -21,7 +23,9 @@ import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 /**
  * Unit test for {@link C4BrandAdapter}.
@@ -29,8 +33,11 @@ import org.jmock.integration.junit3.MockObjectTestCase;
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author John Ayres (john@metabroadcast.com)
  */
-public class DailyMotionItemAdapterTest extends MockObjectTestCase {
-	
+@RunWith(JMock.class)
+public class DailyMotionItemAdapterTest extends TestCase {
+
+    private final Mockery context = new Mockery();
+    
 	String uri = "http://www.dailymotion.com/video/x9l8e7_protesting-irans-election_news";
 	
 	RemoteSiteClient<HtmlDescriptionOfItem> itemClient;
@@ -46,14 +53,14 @@ public class DailyMotionItemAdapterTest extends MockObjectTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		itemClient = mock(RemoteSiteClient.class);
-		propertyExtractor = mock(ContentExtractor.class);
+		itemClient = context.mock(RemoteSiteClient.class);
+		propertyExtractor = context.mock(ContentExtractor.class);
 		adapter = new DailyMotionItemAdapter(itemClient, propertyExtractor);
 	}
 	
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
-		checking(new Expectations() {{
+		context.checking(new Expectations() {{
 			one(itemClient).get(uri); will(returnValue(htmlItem));
 			one(propertyExtractor).extract(source); will(returnValue(item));
 		}});

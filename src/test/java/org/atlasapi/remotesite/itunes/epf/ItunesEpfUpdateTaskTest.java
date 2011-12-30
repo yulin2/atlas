@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.itunes.epf;
 
 import java.io.File;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
@@ -11,7 +13,9 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
@@ -19,11 +23,13 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 
-public class ItunesEpfUpdateTaskTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class ItunesEpfUpdateTaskTest extends TestCase {
     
-    private final ContentWriter writer = mock(ContentWriter.class);
+    private final Mockery context = new Mockery();
+    private final ContentWriter writer = context.mock(ContentWriter.class);
     @SuppressWarnings("unchecked")
-    private final Supplier<EpfDataSet> dataSupplier = mock(Supplier.class);
+    private final Supplier<EpfDataSet> dataSupplier = context.mock(Supplier.class);
     private File parent;
 
     private static final String LINE_END = ((char)2)+"\n";
@@ -67,7 +73,7 @@ public class ItunesEpfUpdateTaskTest extends MockObjectTestCase {
         
         ItunesEpfUpdateTask task = new ItunesEpfUpdateTask(dataSupplier, writer, new NullAdapterLog());
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             one(dataSupplier).get();will(returnValue(new EpfDataSet(parent)));
             one(writer).createOrUpdate(with(brand("http://itunes.apple.com/artist/id102225079")));
             one(writer).createOrUpdate(with(series("http://itunes.apple.com/tv-season/id102772946")));

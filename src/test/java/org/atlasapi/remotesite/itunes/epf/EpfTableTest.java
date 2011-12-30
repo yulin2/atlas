@@ -10,9 +10,10 @@ import static org.hamcrest.Matchers.is;
 import java.io.IOException;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.remotesite.itunes.epf.model.EpfTableColumn;
 import org.atlasapi.remotesite.itunes.epf.model.EpfTableRow;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -20,7 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.CharStreams;
 import com.metabroadcast.common.time.Timestamp;
 
-public class EpfTableTest extends MockObjectTestCase {
+public class EpfTableTest extends TestCase {
 
     private final Joiner fsJoiner = Joiner.on((char)1);
     

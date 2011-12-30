@@ -21,6 +21,8 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -29,14 +31,13 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class TedTalkGraphExtractorTest extends MockObjectTestCase {
+public class TedTalkGraphExtractorTest extends TestCase {
 	
 	static final String ITEM_URI = "http://www.ted.com/talks/elizabeth_gilbert_on_genius.html";
 	

@@ -14,13 +14,17 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bliptv;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.runner.RunWith;
 
 /**
  * Unit test for {@link C4BrandAdapter}.
@@ -28,7 +32,10 @@ import org.jmock.integration.junit3.MockObjectTestCase;
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author John Ayres (john@metabroadcast.com)
  */
-public class BlipTvAdapterTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class BlipTvAdapterTest extends TestCase {
+    
+    private final Mockery context = new Mockery();
 	
 	static final String URI = "http://blip.tv/file/2276955";
 	static final String VIDEO_SOURCE_URI = "http://e.blip.tv/scripts/flash/showplayer.swf?file=http://blip.tv/rss/flash/2289908";
@@ -43,8 +50,8 @@ public class BlipTvAdapterTest extends MockObjectTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		itemClient = mock(RemoteSiteClient.class, "itemClient");
-		propertyExtractor = mock(ContentExtractor.class);
+		itemClient = context.mock(RemoteSiteClient.class, "itemClient");
+		propertyExtractor = context.mock(ContentExtractor.class);
 		adapter = new BlipTvAdapter(itemClient, propertyExtractor);
 		
 		item.setVideoSource(VIDEO_SOURCE_URI);

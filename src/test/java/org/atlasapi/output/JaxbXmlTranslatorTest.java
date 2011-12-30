@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
 implied. See the License for the specific language governing
 permissions and limitations under the License. */
 
-package org.atlasapi.beans;
+package org.atlasapi.output;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -53,9 +53,10 @@ import com.metabroadcast.common.servlet.StubHttpServletResponse;
  */
 public class JaxbXmlTranslatorTest extends TestCase {
 
+    private final JaxbXmlTranslator<ContentQueryResult> translator = new JaxbXmlTranslator<ContentQueryResult>();
+    
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
-    private final JaxbXmlTranslator translator = new JaxbXmlTranslator();
 
 	@Override
 	public void setUp() throws Exception {
@@ -68,6 +69,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		Item item = item().build();
 		
 		Document outputDoc = serializeToXml(new ContentQueryResult(item));
+
 		
 		Element root = outputDoc.getRootElement();
 		assertThat(root, allOf(of(localName(is("content")), namespacePrefix(is("play")))));
@@ -237,7 +239,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 	}
 
     private Document serializeToXml(ContentQueryResult result) throws IOException, ParsingException, ValidityException {
-        translator.writeTo(request, response, ImmutableSet.<Object>of(result), AtlasModelType.CONTENT);
+        translator.writeTo(request, response, result, ImmutableSet.copyOf(Annotation.values()));
         
         String output = response.getResponseAsString();
 
