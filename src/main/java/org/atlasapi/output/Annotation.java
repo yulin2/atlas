@@ -33,8 +33,6 @@ public enum Annotation {
         DESCRIPTION,
         EXTENDED_DESCRIPTION,
         SUB_ITEMS,
-        BRAND_SUMMARY,
-        SERIES_SUMMARY,
         BROADCASTS,
         LOCATIONS,
         PEOPLE,
