@@ -17,6 +17,7 @@ package org.atlasapi.output;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -84,7 +85,7 @@ public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
     }
 
     @Override
-	public void writeTo(final HttpServletRequest request, final HttpServletResponse response, T result) throws IOException {
+	public void writeTo(final HttpServletRequest request, final HttpServletResponse response, T result, Set<Annotation> annotations) throws IOException {
 		try {
             writeOut(request, response, result);
         } catch (JAXBException e) {

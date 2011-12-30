@@ -5,15 +5,15 @@ import static com.metabroadcast.common.media.MimeType.TEXT_PLAIN;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.output.AtlasModelWriter;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.media.MimeType;
@@ -61,10 +61,10 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
 	}
 
     @Override
-    public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph) throws IOException {
+    public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations) throws IOException {
         MappedWriter<T> writer = findWriterFor(request);
         if (writer != null) {
-            writer.writeTo(request, response, graph);
+            writer.writeTo(request, response, graph, annotations);
         } else {
             writeNotFound(response);
         }
@@ -103,11 +103,11 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
 		}
 		
         @Override
-        public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph) throws IOException {
+        public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations) throws IOException {
             response.setStatus(HttpStatusCode.OK.code());
             response.setCharacterEncoding(Charsets.UTF_8.toString());
             response.setContentType(mimeType.toString());
-            writer.writeTo(request, response, graph);
+            writer.writeTo(request, response, graph, annotations);
         }
 
 		@Override

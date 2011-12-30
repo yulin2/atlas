@@ -1,22 +1,12 @@
 package org.atlasapi.output;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.common.base.Function;
-
 public abstract class TransformingModelWriter<I, O> implements AtlasModelWriter<I> {
-
-    public static final <I,O> AtlasModelWriter<I> transform(AtlasModelWriter<O> delegate, final Function<? super I, O> transformer) {
-        return new TransformingModelWriter<I, O>(delegate) {
-            @Override
-            protected O transform(I model) {
-                return transformer.apply(model);
-            }
-        };
-    }
     
     private final AtlasModelWriter<O> delegate;
 
@@ -25,11 +15,11 @@ public abstract class TransformingModelWriter<I, O> implements AtlasModelWriter<
     }
     
     @Override
-    public void writeTo(HttpServletRequest request, HttpServletResponse response, I model) throws IOException {
-        delegate.writeTo(request, response, transform(model));
+    public void writeTo(HttpServletRequest request, HttpServletResponse response, I model, Set<Annotation> annotations) throws IOException {
+        delegate.writeTo(request, response, transform(model,annotations), annotations);
     }
 
-    protected abstract O transform(I model);
+    protected abstract O transform(I model, Set<Annotation> annotations);
 
     @Override
     public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException {

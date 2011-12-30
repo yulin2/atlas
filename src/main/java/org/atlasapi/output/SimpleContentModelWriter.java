@@ -1,9 +1,6 @@
 package org.atlasapi.output;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -38,17 +35,17 @@ public class SimpleContentModelWriter extends TransformingModelWriter<Iterable<C
 	}
 	
 	@Override
-	protected ContentQueryResult transform(Iterable<Content> fullGraph) {
+	protected ContentQueryResult transform(Iterable<Content> fullGraph, Set<Annotation> annotations) {
 	    ContentQueryResult outputGraph = new ContentQueryResult();
 		for (Described described : fullGraph) {
 			if (described instanceof Container) {
-				outputGraph.add(containerModelSimplifier.apply((Container) described));
+				outputGraph.add(containerModelSimplifier.simplify((Container) described, annotations));
 			}
 			if (described instanceof ContentGroup) {
-				outputGraph.add(contentGroupSimplifier.apply((ContentGroup) described));
+				outputGraph.add(contentGroupSimplifier.simplify((ContentGroup) described, annotations));
 			}
 			if (described instanceof org.atlasapi.media.entity.Item) {
-				outputGraph.add(itemModelSimplifier.apply((org.atlasapi.media.entity.Item) described));
+				outputGraph.add(itemModelSimplifier.simplify((org.atlasapi.media.entity.Item) described, annotations));
 			}
 		}
 		return outputGraph;

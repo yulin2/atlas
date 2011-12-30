@@ -16,6 +16,7 @@ permissions and limitations under the License. */
 package org.atlasapi.output.oembed;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 
@@ -47,7 +49,7 @@ public class OembedTranslator implements AtlasModelWriter<Iterable<Content>> {
 	}
 
 	@Override
-	public void writeTo(HttpServletRequest request, HttpServletResponse response, Iterable<Content> graph) throws IOException {
+	public void writeTo(HttpServletRequest request, HttpServletResponse response, Iterable<Content> graph, Set<Annotation> annotations) throws IOException {
 
 		OembedOutput output = feedFactory.createOutput();
 		

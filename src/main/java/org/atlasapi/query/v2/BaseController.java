@@ -1,5 +1,7 @@
 package org.atlasapi.query.v2;
 
+import static org.atlasapi.output.Annotation.defaultAnnotations;
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -34,13 +36,15 @@ public abstract class BaseController<T> {
     protected final AdapterLog log;
     protected final AtlasModelWriter<Iterable<T>> outputter;
 
+    private final QueryParameterAnnotationsExtractor annotationExtractor;
     private final ApplicationConfigurationFetcher configFetcher;
     
     protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<T>> outputter) {
         this.configFetcher = configFetcher;
         this.log = log;
         this.outputter = outputter;
-        this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(), configFetcher) ;
+        this.builder = new ApplicationConfigurationIncludingQueryBuilder(new QueryStringBackedQueryBuilder(), configFetcher);
+        this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
     
     protected void errorViewFor(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary ae) throws IOException {
@@ -52,7 +56,7 @@ public abstract class BaseController<T> {
         if (queryResult == null) {
             errorViewFor(request, response, AtlasErrorSummary.forException(new NullPointerException("Query result was null")));
         } else {
-            outputter.writeTo(request, response, queryResult);
+            outputter.writeTo(request, response, queryResult, annotationExtractor.extract(request).or(defaultAnnotations()));
         }
     }
     

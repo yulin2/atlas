@@ -19,15 +19,14 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.output.oembed.OembedOutput;
-import org.atlasapi.output.oembed.OembedTranslator;
-import org.atlasapi.output.oembed.OembedTranslator.OutputFactory;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.output.Annotation;
+import org.atlasapi.output.oembed.OembedTranslator.OutputFactory;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -35,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -71,7 +71,7 @@ public class OembedTranslatorTest extends TestCase {
 			one(outputFactory).createOutput(); 
 		}});
 		
-		new OembedTranslator(outputFactory).writeTo(request, response, graph);
+		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of());
 	}
 	
 	@Test
@@ -82,7 +82,7 @@ public class OembedTranslatorTest extends TestCase {
 			one(oembedOutput).writeTo(response.getOutputStream());
 		}});
 		
-		new OembedTranslator(outputFactory).writeTo(request, response, graph);
+		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of());
 	}
 	
 	@Test
@@ -119,7 +119,7 @@ public class OembedTranslatorTest extends TestCase {
 			one(oembedOutput).setEmbedCode("<embed src=\\\"a\\\" />");
 		}});
 		
-		new OembedTranslator(outputFactory).writeTo(request, response, graph);
+		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of());
 	}
 
 }

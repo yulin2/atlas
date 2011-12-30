@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.output;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface AtlasModelWriter<T> {
 	
-	public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph) throws IOException;
+	public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations) throws IOException;
 	
 	public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException;
 	

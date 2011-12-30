@@ -23,8 +23,8 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Location;
-import org.atlasapi.output.JsonTranslator;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -53,7 +53,7 @@ public class JsonTranslatorTest extends TestCase {
 		item.addLocation(location);
 		graph.add(item);
 		
-		new JsonTranslator<Item>().writeTo(request, response, item);
+		new JsonTranslator<Item>().writeTo(request, response, item, ImmutableSet.<Annotation>of());
 		
 		String output = response.getResponseAsString();
 		assertThat(output, containsString("\"uri\":\"http://www.bbc.co.uk/bluepeter\""));

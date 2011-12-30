@@ -17,6 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
@@ -47,11 +48,11 @@ public class FullToSimpleModelTranslatorTest {
 		graph.add(new Episode());
 		
 		context.checking(new Expectations() {{ 
-			one(xmlOutputter).writeTo(with(request), with(response), with(simpleGraph()));
+			one(xmlOutputter).writeTo(with(request), with(response), with(simpleGraph()), ImmutableSet.<Annotation>of());
 			ignoring(contentResolver);
 		}});
 		
-        translator.writeTo(request, response, graph);
+        translator.writeTo(request, response, graph, ImmutableSet.<Annotation>of());
 	}
 
 	protected Matcher<ContentQueryResult> simpleGraph() {

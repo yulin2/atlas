@@ -2,11 +2,11 @@ package org.atlasapi.output;
 
 import java.io.IOException;
 
-import org.atlasapi.output.AtlasModelWriter;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -29,10 +29,10 @@ public class DispatchingAtlasModelWriterTest {
         final String model = "Hello";
 
         context.checking(new Expectations(){{
-            one(delegate).writeTo(request, response, model);
+            one(delegate).writeTo(request, response, model, ImmutableSet.<Annotation>of());
         }});
         
-        writer.writeTo(request, response, model);
+        writer.writeTo(request, response, model, ImmutableSet.<Annotation>of());
         
         context.assertIsSatisfied();
     }

@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.Item;
+import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.jmock.Expectations;
@@ -72,7 +73,7 @@ public class ItemModelSimplifierTest {
         CrewMember person = Actor.actor("hisID", "Andrew Collings", "Dirt-bag Humperdink", Publisher.BBC);
         fullItem.addPerson(person);
         
-        Item simpleItem = itemSimplifier.apply(fullItem);
+        Item simpleItem = itemSimplifier.simplify(fullItem, Annotation.defaultAnnotations());
         List<org.atlasapi.media.entity.simple.Person> people = simpleItem.getPeople();
         org.atlasapi.media.entity.simple.Person simpleActor = Iterables.getOnlyElement(people);
         assertThat(simpleActor.getCharacter(), is("Dirt-bag Humperdink"));

@@ -38,9 +38,10 @@ import com.metabroadcast.common.query.Selection;
 @Controller
 public class QueryController extends BaseController<Content> {
 	
-	private final KnownTypeQueryExecutor executor;
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
+	private final KnownTypeQueryExecutor executor;
+	
     public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Content>> outputter) {
 	    super(configFetcher, log, outputter);
         this.executor = executor;
@@ -77,6 +78,7 @@ public class QueryController extends BaseController<Content> {
 			if (Iterables.isEmpty(uris)) {
 				throw new IllegalArgumentException("No uris specified");
 			}
+			
 			modelAndViewFor(request, response, Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class));
 		} catch (Exception e) {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));

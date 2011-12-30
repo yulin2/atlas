@@ -1,28 +1,30 @@
 package org.atlasapi.output.simple;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
+import org.atlasapi.output.Annotation;
 
 import com.google.common.collect.Lists;
 
 public class ContentGroupModelSimplifier extends DescribedModelSimplifier<ContentGroup, Playlist> {
 
     @Override
-    public Playlist apply(ContentGroup fullPlayList) {
-        
+    public Playlist simplify(ContentGroup model, Set<Annotation> annotations) {
+
         Playlist simplePlaylist = new Playlist();
-        
-        copyBasicDescribedAttributes(fullPlayList, simplePlaylist);
-        
-        simplePlaylist.setContent(simpleContentListFrom(fullPlayList.getContents()));
-        
+
+        copyBasicDescribedAttributes(model, simplePlaylist, annotations);
+
+        simplePlaylist.setContent(simpleContentListFrom(model.getContents()));
+
         return simplePlaylist;
     }
-    
+
     private List<ContentIdentifier> simpleContentListFrom(Iterable<ChildRef> contents) {
         List<ContentIdentifier> contentList = Lists.newArrayList();
         for (ChildRef ref : contents) {
@@ -30,4 +32,5 @@ public class ContentGroupModelSimplifier extends DescribedModelSimplifier<Conten
         }
         return contentList;
     }
+
 }

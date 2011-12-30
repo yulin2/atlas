@@ -28,6 +28,7 @@ import org.atlasapi.media.entity.simple.Playlist;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -63,7 +64,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		ContentQueryResult result = new ContentQueryResult();
 		result.add(item);
 		
-		translator.writeTo(request, response, result);
+		translator.writeTo(request, response, result, ImmutableSet.<Annotation>of());
 		
 		String output = response.getResponseAsString();
 		assertThat(output, containsString("<play:item>" +
@@ -107,7 +108,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		ContentQueryResult result = new ContentQueryResult();
 		result.setContents(ImmutableList.<Description>of(list));
 		
-		translator.writeTo(request, response, result);
+		translator.writeTo(request, response, result, ImmutableSet.<Annotation>of());
 		
 
 		assertThat(response.getResponseAsString(), containsString("<play:item>" +

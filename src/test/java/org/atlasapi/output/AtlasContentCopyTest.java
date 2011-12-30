@@ -17,6 +17,7 @@ import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
 
@@ -40,14 +41,14 @@ public class AtlasContentCopyTest {
         
         ByteArrayOutputStream outputStream1 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(item));
+        translator.writeTo(request, response, ImmutableList.of(item), ImmutableSet.<Annotation>of());
         
         String itemOriginalString = outputStream1.toString(Charsets.UTF_8.name());
         outputStream1.close();
         
         ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(item.copy()));
+        translator.writeTo(request, response, ImmutableList.of(item.copy()), ImmutableSet.<Annotation>of());
         
         String itemCopyString = outputStream2.toString(Charsets.UTF_8.name());
         outputStream2.close();
@@ -83,14 +84,14 @@ public class AtlasContentCopyTest {
         
         ByteArrayOutputStream outputStream1 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(playlist));
+        translator.writeTo(request, response, ImmutableList.of(playlist), ImmutableSet.<Annotation>of());
         
         String playlistOriginalString = outputStream1.toString(Charsets.UTF_8.name());
         outputStream1.close();
         
         ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(playlist.copy()));
+        translator.writeTo(request, response, ImmutableList.of(playlist.copy()), ImmutableSet.<Annotation>of());
         
         String playlistCopyString = outputStream2.toString(Charsets.UTF_8.name());
         outputStream2.close();

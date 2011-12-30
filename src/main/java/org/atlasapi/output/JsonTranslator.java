@@ -22,6 +22,7 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -74,7 +75,7 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
     }
 
     @Override
-	public void writeTo(HttpServletRequest request, HttpServletResponse response, T model) throws IOException {
+	public void writeTo(HttpServletRequest request, HttpServletResponse response, T model, Set<Annotation> annotations) throws IOException {
 
 	    OutputStream out = response.getOutputStream();
 
