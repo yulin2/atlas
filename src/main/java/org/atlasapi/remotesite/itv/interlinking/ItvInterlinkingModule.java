@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.itv.interlinking;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -21,6 +22,9 @@ public class ItvInterlinkingModule {
     
     @Autowired
     private ContentResolver contentResolver;
+    
+    @Autowired
+    private ChannelResolver channelResolver;
     
     @Autowired
     private SimpleScheduler scheduler;
@@ -61,6 +65,6 @@ public class ItvInterlinkingModule {
     
     @Bean
     public ItvInterlinkingContentExtractor itvInterlinkingContentExtractor() {
-        return new ItvInterlinkingContentExtractor(contentResolver);
+        return new ItvInterlinkingContentExtractor(contentResolver, channelResolver);
     }
 }

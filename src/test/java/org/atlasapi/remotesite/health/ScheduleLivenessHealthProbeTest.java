@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
@@ -28,6 +29,10 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 	private DateTime startTimeForScheduleTest;
 	private DateTime endTimeForScheduleTest;
 	
+    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
+    private static final Channel BBC_TWO = new Channel(Publisher.METABROADCAST, "BBC Two", "bbctwo", MediaType.AUDIO, "http://www.bbc.co.uk/bbctwo");
+    private static final Channel ITV1_LONDON = new Channel(Publisher.METABROADCAST, "ITV 1 London", "itv1london", MediaType.AUDIO, "http://www.itv.com");
+
 	public void setUp() {
 		this.startTimeForScheduleTest = new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS);
 		this.endTimeForScheduleTest = startTimeForScheduleTest.plusHours(12);
@@ -39,14 +44,14 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		Interval dummyInterval = new Interval(startTimeForScheduleTest, endTimeForScheduleTest);
 		Item item = new Item();
 		Schedule schedule = new Schedule(ImmutableList.of(
-				new ScheduleChannel(Channel.BBC_ONE, ImmutableList.<Item>of(item)),
-				new ScheduleChannel(Channel.BBC_TWO, ImmutableList.<Item>of(item))
+				new ScheduleChannel(BBC_ONE, ImmutableList.<Item>of(item)),
+				new ScheduleChannel(BBC_TWO, ImmutableList.<Item>of(item))
 				), dummyInterval);
 		
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
 		
 		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
-				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO), Publisher.PA);
+				ImmutableList.of(BBC_ONE, BBC_TWO), Publisher.PA);
 		ProbeResult result = probe.probe();
 		
 		assertThat(result.isFailure(), is(false));
@@ -59,14 +64,14 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		Interval dummyInterval = new Interval(new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS), new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS).plusHours(12));
 		Item item = new Item();
 		Schedule schedule = new Schedule(ImmutableList.of(
-				new ScheduleChannel(Channel.BBC_ONE, ImmutableList.<Item>of(item)),
-				new ScheduleChannel(Channel.BBC_TWO, ImmutableList.<Item>of(item))
+				new ScheduleChannel(BBC_ONE, ImmutableList.<Item>of(item)),
+				new ScheduleChannel(BBC_TWO, ImmutableList.<Item>of(item))
 				), dummyInterval);
 		
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
 		
 		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
-				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO, Channel.ITV1_LONDON), Publisher.PA);
+				ImmutableList.of(BBC_ONE, BBC_TWO, ITV1_LONDON), Publisher.PA);
 		ProbeResult result = probe.probe();
 		
 		assertThat(result.isFailure(), is(true));
@@ -79,14 +84,14 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		Interval dummyInterval = new Interval(new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS), new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS).plusHours(12));
 		Item item = new Item();
 		Schedule schedule = new Schedule(ImmutableList.of(
-				new ScheduleChannel(Channel.BBC_ONE, ImmutableList.<Item>of()),
-				new ScheduleChannel(Channel.BBC_TWO, ImmutableList.<Item>of(item))
+				new ScheduleChannel(BBC_ONE, ImmutableList.<Item>of()),
+				new ScheduleChannel(BBC_TWO, ImmutableList.<Item>of(item))
 				), dummyInterval);
 		
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
 		
 		ScheduleLivenessHealthProbe probe = new ScheduleLivenessHealthProbe(dummySchedule,
-				ImmutableList.of(Channel.BBC_ONE, Channel.BBC_TWO), Publisher.PA);
+				ImmutableList.of(BBC_ONE, BBC_TWO), Publisher.PA);
 		
 		ProbeResult result = probe.probe();
 		

@@ -2,11 +2,6 @@ package org.atlasapi.remotesite.channel4;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
-import static org.atlasapi.media.entity.Channel.E_FOUR;
-import static org.atlasapi.media.entity.Channel.FILM_4;
-import static org.atlasapi.media.entity.Channel.FOUR_MUSIC;
-import static org.atlasapi.media.entity.Channel.MORE_FOUR;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,11 +16,11 @@ import com.google.common.collect.ImmutableBiMap;
 public class C4BroadcastBuilder {
 
     private final static BiMap<String, String> CHANNEL_MAP = ImmutableBiMap.of(
-            CHANNEL_FOUR.uri(), "C4",
-            MORE_FOUR.uri(), "M4",
-            FILM_4.uri(), "F4",
-            E_FOUR.uri(), "E4",
-            FOUR_MUSIC.uri(), "4M"
+    		"http://www.channel4.com", "C4",
+    		"http://www.channel4.com/more4", "M4",
+    		"http://film4.com", "F4",
+    		"http://www.e4.com", "E4",
+    		"http://www.4music.com", "4M"
     );
     
     private final static Pattern ID_PATTERN = Pattern.compile("tag:([^,]+),(\\d{4}):slot/(\\d+)");

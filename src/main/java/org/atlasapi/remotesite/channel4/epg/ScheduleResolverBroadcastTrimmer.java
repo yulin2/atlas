@@ -55,7 +55,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
                         for (Broadcast broadcast : version.getBroadcasts()) {
                             // double-check the broadcast is in the valid interval/channel
                             if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
-                                if (broadcast.getId() != null && !itemEmbeddedInScheduleUri.equals(acceptableIds.get(broadcast.getId()))) {
+                                if (broadcast.getSourceId() != null && !itemEmbeddedInScheduleUri.equals(acceptableIds.get(broadcast.getSourceId()))) {
                                     if(!Boolean.FALSE.equals(broadcast.isActivelyPublished())) {
                                         broadcast.setIsActivelyPublished(false);
                                         changed = true;

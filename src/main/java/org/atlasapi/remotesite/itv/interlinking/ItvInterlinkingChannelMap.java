@@ -3,18 +3,20 @@ package org.atlasapi.remotesite.itv.interlinking;
 import java.util.Map;
 
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.persistence.channels.ChannelResolver;
 
 import com.google.common.collect.Maps;
 
 public class ItvInterlinkingChannelMap {
     private Map<String, Channel> idToChannel = Maps.newHashMap();
 
-    public ItvInterlinkingChannelMap() {
-        idToChannel.put("ITV1", Channel.ITV1_LONDON);
-        idToChannel.put("ITV2", Channel.ITV2);
-        idToChannel.put("ITV3", Channel.ITV3);
-        idToChannel.put("ITV4", Channel.ITV4);
-        idToChannel.put("CITV", Channel.CITV);
+    public ItvInterlinkingChannelMap(ChannelResolver channelResolver) {
+    	
+        idToChannel.put("ITV1", channelResolver.fromUri("http://www.itv.com/channels/itv1/london").requireValue());
+        idToChannel.put("ITV2", channelResolver.fromUri("http://www.itv.com/channels/itv2").requireValue());
+        idToChannel.put("ITV3", channelResolver.fromUri("http://www.itv.com/channels/itv3").requireValue());
+        idToChannel.put("ITV4", channelResolver.fromUri("http://www.itv.com/channels/itv4").requireValue());
+        idToChannel.put("CITV", channelResolver.fromUri("http://www.itv.com/channels/citv").requireValue());
     }
     
     public Channel get(String key) {

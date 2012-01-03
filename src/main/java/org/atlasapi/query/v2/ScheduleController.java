@@ -13,6 +13,7 @@ import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.DateTime;
@@ -30,10 +31,12 @@ public class ScheduleController extends BaseController {
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
+	private ChannelResolver channelResolver;
     
-    public ScheduleController(ScheduleResolver scheduleResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
+    public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
         super(configFetcher, log, outputter);
         this.scheduleResolver = scheduleResolver;
+        this.channelResolver = channelResolver;
     }
 
     @RequestMapping("/3.0/schedule.*")
@@ -72,7 +75,7 @@ public class ScheduleController extends BaseController {
     private Set<Channel> channels(String channelString) {
         ImmutableSet.Builder<Channel> channels = ImmutableSet.builder();
         for (String channelKey: URI_SPLITTER.split(channelString)) {
-            Maybe<Channel> channel = Channel.fromKey(channelKey);
+            Maybe<Channel> channel = channelResolver.fromKey(channelKey);
             if (channel.hasValue()) {
                 channels.add(channel.requireValue());
             }

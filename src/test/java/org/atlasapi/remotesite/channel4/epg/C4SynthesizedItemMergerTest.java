@@ -35,9 +35,9 @@ public class C4SynthesizedItemMergerTest extends TestCase {
         Version version = Iterables.getOnlyElement(canonical.getVersions());
         Set<Broadcast> broadcasts = version.getBroadcasts();
         assertThat(broadcasts.size(), is(equalTo(2)));
-        assertThat(Iterables.get(broadcasts, 0).getId(), is(isOneOf("b1", "b2")));
-        assertThat(Iterables.get(broadcasts, 1).getId(), is(isOneOf("b1", "b2")));
-        assertFalse(Iterables.get(broadcasts, 1).getId().equals(Iterables.get(broadcasts, 0).getId()));
+        assertThat(Iterables.get(broadcasts, 0).getSourceId(), is(isOneOf("b1", "b2")));
+        assertThat(Iterables.get(broadcasts, 1).getSourceId(), is(isOneOf("b1", "b2")));
+        assertFalse(Iterables.get(broadcasts, 1).getSourceId().equals(Iterables.get(broadcasts, 0).getSourceId()));
         
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
         Set<Location> locations = encoding.getAvailableAt();

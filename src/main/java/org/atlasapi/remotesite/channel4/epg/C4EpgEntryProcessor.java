@@ -224,7 +224,7 @@ public class C4EpgEntryProcessor {
         Broadcast newBroadcast = broadcastFrom(entry, channel, now);
         Set<Broadcast> broadcasts = Sets.newHashSet(newBroadcast);
         for (Broadcast broadcast : version.getBroadcasts()) {
-            if (!newBroadcast.getId().equals(broadcast.getId())){
+            if (!newBroadcast.getSourceId().equals(broadcast.getSourceId())){
                 broadcasts.add(broadcast);
             } else {
                 if(changed(newBroadcast, broadcast) || newBroadcast.getLastUpdated() == null) {

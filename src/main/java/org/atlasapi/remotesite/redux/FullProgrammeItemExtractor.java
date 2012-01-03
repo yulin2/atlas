@@ -13,10 +13,13 @@ import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
@@ -45,9 +48,11 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
     private static final String LOCATION_URI_FORMAT = "http://devapi.bbcredux.com/programme/%s/media/%s";
     
     private final AdapterLog log;
+	private ReduxServices reduxServices;
     
-    public FullProgrammeItemExtractor(AdapterLog log) {
-        this.log = log;
+    public FullProgrammeItemExtractor(ChannelResolver channelResolver, AdapterLog log) {
+        this.reduxServices = new ReduxServices(channelResolver);
+    	this.log = log;
     }
     
     @Override
@@ -67,8 +72,10 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
         item.setImage(source.getDepiction());
         item.setThumbnail(thumbnailFrom(source.getDepiction()));
 
-        item.setMediaType(ReduxServices.mediaTypeForService(source.getService()));
-        item.setSpecialization(ReduxServices.specializationForService(source.getService()));
+        Channel channel = reduxServices.channelMap().get(source.getService());
+        
+        item.setMediaType(channel.mediaType());
+        item.setSpecialization(MediaType.AUDIO.equals(channel.mediaType()) ? Specialization.RADIO : Specialization.TV);
         
         item.setVersions(ImmutableSet.of(
             versionFrom(source)
@@ -146,7 +153,7 @@ public class FullProgrammeItemExtractor implements ContentExtractor<FullReduxPro
     }
 
     private Broadcast broadcastFrom(FullReduxProgramme source) {
-        Channel channel = ReduxServices.CHANNEL_MAP.get(source.getService());
+        Channel channel = reduxServices.channelMap().get(source.getService());
         Duration duration = getDuration(source);
         if (channel != null && duration != null) {
             Broadcast broadcast = new Broadcast(channel.uri(), ISO_FORMAT.parseDateTime(source.getWhen()), duration);

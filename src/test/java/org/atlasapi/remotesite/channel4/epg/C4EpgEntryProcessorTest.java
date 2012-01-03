@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.channel4.epg;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -14,9 +13,12 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -37,6 +39,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgEntryProcessorTest extends TestCase {
     
+	private static final Channel CHANNEL_FOUR = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com");
+
     private final AdapterLog log = new SystemOutAdapterLog();
     
     private final C4BrandUpdater brandUpdater = new C4BrandUpdater() {
@@ -87,7 +91,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         assertThat(version.getDuration().longValue(), is(equalTo(Duration.standardMinutes(24).plus(Duration.standardSeconds(12)).getStandardSeconds())));
         
         Broadcast broadcast = getOnlyElement(version.getBroadcasts());
-        assertThat(broadcast.getId(), is(equalTo("c4:337")));
+        assertThat(broadcast.getSourceId(), is(equalTo("c4:337")));
         assertThat(broadcast.getAliases().size(), is(1));
         assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
         assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
@@ -137,7 +141,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         
         assertThat(version.getBroadcasts().size(), is(2));
         Broadcast broadcast = Iterables.getLast(version.getBroadcasts()).getCurie() != null ? Iterables.get(version.getBroadcasts(), 0) : Iterables.getLast(version.getBroadcasts());
-        assertThat(broadcast.getId(), is(equalTo("c4:337")));
+        assertThat(broadcast.getSourceId(), is(equalTo("c4:337")));
         assertThat(broadcast.getAliases().size(), is(1));
         assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
         assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));
@@ -207,7 +211,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         assertThat(version.getDuration().longValue(), is(equalTo(Duration.standardMinutes(24).plus(Duration.standardSeconds(12)).getStandardSeconds())));
         
         Broadcast broadcast = getOnlyElement(version.getBroadcasts());
-        assertThat(broadcast.getId(), is(equalTo("c4:337")));
+        assertThat(broadcast.getSourceId(), is(equalTo("c4:337")));
         assertThat(broadcast.getAliases().size(), is(1));
         assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4337"));
         assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-07T06:35:00.000Z"))));

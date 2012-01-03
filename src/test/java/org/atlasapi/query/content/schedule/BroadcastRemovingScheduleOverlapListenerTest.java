@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -35,9 +36,11 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
     private final DateTime now = new DateTime(DateTimeZones.UTC);
     private final Item item = new Item("item1", "item1", Publisher.BBC);
     
-    private final Broadcast broadcast1 = new Broadcast(Channel.BBC_ONE.uri(), now, now.plusMinutes(2));
-    private final Broadcast broadcast2 = new Broadcast(Channel.BBC_ONE.uri(), now.plusMinutes(2), now.plusMinutes(3));
-    private final Broadcast broadcast3 = new Broadcast(Channel.BBC_ONE.uri(), now.plusMinutes(3), now.plusMinutes(6));
+    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
+
+    private final Broadcast broadcast1 = new Broadcast(BBC_ONE.uri(), now, now.plusMinutes(2));
+    private final Broadcast broadcast2 = new Broadcast(BBC_ONE.uri(), now.plusMinutes(2), now.plusMinutes(3));
+    private final Broadcast broadcast3 = new Broadcast(BBC_ONE.uri(), now.plusMinutes(3), now.plusMinutes(6));
     
     @Override
     protected void setUp() throws Exception {

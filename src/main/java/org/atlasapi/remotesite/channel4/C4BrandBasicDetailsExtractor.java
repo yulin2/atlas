@@ -6,6 +6,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Element;
@@ -21,7 +22,12 @@ import com.sun.syndication.feed.atom.Link;
 public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Brand> {
 
 	private static final String PRESENTATION_BRAND = "relation.presentationBrand";
+	private final C4AtomApi c4AtomApi;
 
+	public C4BrandBasicDetailsExtractor(ChannelResolver channelResolver) {
+		this.c4AtomApi = new C4AtomApi(channelResolver);
+	}
+	
     @Override
 	public Brand extract(Feed source) {
 		
@@ -52,7 +58,7 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		
 		String presentationBrand = getPresentationBrand(source);
 		if(presentationBrand != null) {
-		    brand.setPresentationChannel(C4AtomApi.C4_CHANNEL_MAP.get(presentationBrand));
+		    brand.setPresentationChannel(c4AtomApi.getChannelMap().get(presentationBrand));
 		}
 		
 		C4AtomApi.addImages(brand, source.getLogo());

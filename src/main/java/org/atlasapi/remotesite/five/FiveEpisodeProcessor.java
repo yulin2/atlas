@@ -44,9 +44,9 @@ public class FiveEpisodeProcessor {
     private static final String FIVE_USA = "https://pdb.five.tv/internal/channels/C7";
     
     private static final Map<String, String> channelMap = ImmutableMap.<String, String>builder()
-        .put(FIVE, Channel.FIVE.uri())
-        .put(FIVER, Channel.FIVER.uri())
-        .put(FIVE_USA, Channel.FIVE_USA.uri())
+        .put(FIVE, "http://www.five.tv")
+        .put(FIVER, "http://www.five.tv/channels/fiver")
+        .put(FIVE_USA, "http://www.five.tv/channels/five-usa")
     .build();
 
     private final GenreMap genreMap = new FiveGenreMap();

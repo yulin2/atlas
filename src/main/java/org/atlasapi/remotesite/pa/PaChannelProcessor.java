@@ -46,7 +46,7 @@ public class PaChannelProcessor {
                     ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
                     if(itemAndBroadcast != null) {
 	                    broadcasts.add(itemAndBroadcast);
-	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getId(),itemAndBroadcast.getItemUri());
+	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
                     }
                     processed++;
                 } catch (Exception e) {

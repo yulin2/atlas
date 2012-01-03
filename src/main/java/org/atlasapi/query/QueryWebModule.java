@@ -5,6 +5,7 @@ import org.atlasapi.beans.AtlasModelWriter;
 import org.atlasapi.feeds.www.DispatchingAtlasModelWriter;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -29,6 +30,7 @@ public class QueryWebModule {
     
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
+    private @Autowired ChannelResolver channelResolver;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
     private @Autowired PeopleResolver peopleResolver;
@@ -55,7 +57,7 @@ public class QueryWebModule {
     
     @Bean ScheduleController schedulerController() {
         ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, scheduleOverlapListener(), log);
-        return new ScheduleController(resolver, configFetcher, log, atlasModelOutputter());
+        return new ScheduleController(resolver, channelResolver, configFetcher, log, atlasModelOutputter());
     }
     
     @Bean PeopleController peopleController() {

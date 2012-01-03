@@ -5,6 +5,7 @@ import java.util.List;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.ScheduleEntry;
@@ -25,7 +26,8 @@ public class ScheduleOverlapResolverTest extends MockObjectTestCase {
     private final ScheduleResolver scheduleResolver = mock(ScheduleResolver.class);
     private final ScheduleOverlapListener listener = mock(ScheduleOverlapListener.class);
     
-    private final Channel channel = Channel.BBC_ONE;
+    private final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
+    
     private final Publisher publisher = Publisher.BBC;
     private final DateTime now = new DateTime(DateTimeZones.UTC);
     

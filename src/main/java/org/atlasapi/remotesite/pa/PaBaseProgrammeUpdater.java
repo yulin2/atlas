@@ -31,6 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
@@ -59,7 +60,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
-    private final PaChannelMap channelMap = new PaChannelMap();
+    private final PaChannelMap channelMap;
     private final Set<String> currentlyProcessing = Sets.newHashSet();
     
     private List<Channel> supportedChannels = ImmutableList.of();
@@ -69,15 +70,16 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     private final PaChannelProcessor processor;
     private final AdapterLog log;
 
-    public PaBaseProgrammeUpdater(ExecutorService executor, PaChannelProcessor processor, PaProgrammeDataStore dataStore, AdapterLog log) {
+    public PaBaseProgrammeUpdater(ExecutorService executor, PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, AdapterLog log) {
         this.executor = executor;
         this.processor = processor;
         this.dataStore = dataStore;
+        this.channelMap = new PaChannelMap(channelResolver);
         this.log = log;
     }
     
-    public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, AdapterLog log) {
-        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, log);
+    public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, AdapterLog log) {
+        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver, log);
     }
     
     public void supportChannels(Iterable<Channel> channels) {

@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.metabroadcast.common.time.DateTimeZones.UTC;
-import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -14,7 +13,9 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -32,6 +33,8 @@ import com.google.common.collect.Iterables;
 
 public class C4EpgBrandlessEntryProcessorTest extends TestCase {
 
+	private static final Channel CHANNEL_FOUR = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com");
+	
     private final AdapterLog log = new SystemOutAdapterLog();
     
     private final C4BrandUpdater brandUpdater = new C4BrandUpdater() {
@@ -76,7 +79,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
         assertThat(version.getDuration().longValue(), is(equalTo(Duration.standardMinutes(110).getStandardSeconds())));
         
         Broadcast broadcast = getOnlyElement(version.getBroadcasts());
-        assertThat(broadcast.getId(), is(equalTo("c4:606")));
+        assertThat(broadcast.getSourceId(), is(equalTo("c4:606")));
         assertThat(broadcast.getAliases().size(), is(1));
         assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C4606"));
         assertThat(broadcast.getTransmissionTime(), is(equalTo(new DateTime("2011-01-08T00:05:00.000Z"))));
@@ -116,7 +119,7 @@ public class C4EpgBrandlessEntryProcessorTest extends TestCase {
         Broadcast b0 = Iterables.get(v.getBroadcasts(), 1);
         Broadcast b1 = Iterables.get(v.getBroadcasts(), 0);
         
-        assertEquals("c4:616", b1.getId());
+        assertEquals("c4:616", b1.getSourceId());
         assertEquals(new DateTime(0, UTC), b1.getTransmissionTime());
 
         assertEquals(new DateTime("2011-01-08T00:05:00.000Z"), b0.getTransmissionTime());

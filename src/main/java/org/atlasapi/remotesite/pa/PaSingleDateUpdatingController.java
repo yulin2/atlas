@@ -7,6 +7,7 @@ import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.entity.Channel;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
@@ -27,12 +28,14 @@ public class PaSingleDateUpdatingController {
     private final AdapterLog log;
     private final PaProgrammeDataStore fileManager;
     private final ScheduleResolver scheduleResolver;
+	private ChannelResolver channelResolver;
 
-    public PaSingleDateUpdatingController(PaChannelProcessor channelProcessor, ScheduleResolver scheduleResolver, AdapterLog log, PaProgrammeDataStore fileManager) {
+    public PaSingleDateUpdatingController(PaChannelProcessor channelProcessor, ScheduleResolver scheduleResolver, ChannelResolver channelResolver, AdapterLog log, PaProgrammeDataStore fileManager) {
         this.channelProcessor = channelProcessor;
         this.scheduleResolver = scheduleResolver;
         this.log = log;
         this.fileManager = fileManager;
+        this.channelResolver = channelResolver;
     }
     
     @PreDestroy
@@ -42,17 +45,17 @@ public class PaSingleDateUpdatingController {
 
     @RequestMapping("/system/update/pa/{dateString}")
     public void runUpdate(@PathVariable String dateString, HttpServletResponse response) {
-        PaSingleDateUpdater updater = new PaSingleDateUpdater(channelProcessor, log, fileManager, dateString);
+        PaSingleDateUpdater updater = new PaSingleDateUpdater(channelProcessor, log, fileManager, channelResolver, dateString);
         executor.execute(updater);
         response.setStatus(200);
     }
     
     @RequestMapping("/system/update/pa/{dateString}/{channelString}")
     public void runUpdate(@PathVariable String dateString, @PathVariable String channelString, @RequestParam(required=false) String fillGaps, HttpServletResponse response) {
-        Maybe<Channel> channel = Channel.fromKey(channelString);
+        Maybe<Channel> channel = channelResolver.fromKey(channelString);
         if (channel.hasValue()) {
 //            PaProgDataProcessor processor = Boolean.parseBoolean(fillGaps) ? new PaEmptyScheduleProcessor(this.processor, scheduleResolver) : this.processor;
-            PaSingleDateUpdater updater = new PaSingleDateUpdater(channelProcessor, log, fileManager, dateString);
+            PaSingleDateUpdater updater = new PaSingleDateUpdater(channelProcessor, log, fileManager, channelResolver, dateString);
             updater.supportChannels(ImmutableList.of(channel.requireValue()));
             executor.execute(updater);
             response.setStatus(HttpServletResponse.SC_OK);

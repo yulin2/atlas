@@ -23,6 +23,7 @@ import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
@@ -66,19 +67,92 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private final ContentWriter contentWriter;
     private final ContentResolver contentResolver;
+    private final ChannelResolver channelResolver;
     private final AdapterLog log;
-    private final PaChannelMap channelMap = new PaChannelMap();
     private final PaCountryMap countryMap = new PaCountryMap();
     
     private final GenreMap genreMap = new PaGenreMap();
     
     private final ItemsPeopleWriter personWriter;
+	private final ImmutableList<Channel> terrestrialChannels;
 
-    public PaProgrammeProcessor(ContentWriter contentWriter, ContentResolver contentResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
+    public PaProgrammeProcessor(ContentWriter contentWriter, ContentResolver contentResolver, ChannelResolver channelResolver, ItemsPeopleWriter itemsPeopleWriter, AdapterLog log) {
         this.contentWriter = contentWriter;
         this.contentResolver = contentResolver;
         this.log = log;
         this.personWriter = itemsPeopleWriter;
+        this.channelResolver = channelResolver;
+        this.terrestrialChannels = ImmutableList.<Channel>builder()
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/east").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbchd").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/west_midlands").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/east_midlands").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/yorkshire").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/north_east").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/north_west").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/ni").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/wales").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/scotland").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/south").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/south_west").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/west").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/south_east").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/england").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/ni").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/scotland").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/wales").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/cbbc").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/cbeebies").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/anglia").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/bordersouth").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/london").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/carltoncentral").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/channel").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/granada").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/meridian").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/tynetees").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/hd").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv2/hd").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv3/hd").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv4/hd").requireValue())
+        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/ytv").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/carltonwestcountry").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/wales").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/west").requireValue())
+        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/stvcentral").requireValue())
+        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/ulster").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv1/bordernorth").requireValue())
+        		.add(channelResolver.fromUri("http://www.channel4.com").requireValue())
+        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/s4c").requireValue())
+        		.add(channelResolver.fromUri("http://www.five.tv").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio1/england").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio2").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio3").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio4/fm").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio7").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/radio4/lw").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/5live").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/5livesportsextra").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/6music").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/1xtra").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/asiannetwork").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/worldservice").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcthree").requireValue())
+        		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcfour").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv2").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv3").requireValue())
+        		.add(channelResolver.fromUri("http://www.itv.com/channels/itv4").requireValue())
+        		.add(channelResolver.fromUri("http://www.five.tv/channels/five_hd").requireValue())
+        		.add(channelResolver.fromUri("http://www.five.tv/channels/five-usa").requireValue())
+        		.add(channelResolver.fromUri("http://www.e4.com/hd").requireValue())
+        		.add(channelResolver.fromUri("http://www.e4.com").requireValue())
+        		.add(channelResolver.fromUri("http://www.channel4.com/more4").requireValue())
+        		.add(channelResolver.fromUri("http://film4.com").requireValue())
+        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/stvhd").requireValue())
+        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/channel4hd").requireValue())
+        		.add(channelResolver.fromUri("http://ref.atlasapi.org/channels/film4hd").requireValue())
+        		.build();
     }
 
     @Override
@@ -296,7 +370,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
 
-        episode.setMediaType(channelMap.isRadioChannel(channel) ? MediaType.AUDIO : MediaType.VIDEO);
+        episode.setMediaType(channel.mediaType());
         episode.setSpecialization(specialization(progData, channel));
         setGenres(progData, episode);
         
@@ -431,83 +505,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         broadcast.setLastUpdated(updateAt.toDateTimeUTC());
         return broadcast;
     }
-
-    private static final Set<Channel> TERRESTRIAL_CHANNELS = ImmutableSet.<Channel>builder()
-        .add(Channel.BBC_ONE_EAST)
-        .add(Channel.BBC_ONE)
-        .add(Channel.BBC_HD)
-        .add(Channel.BBC_ONE_WEST_MIDLANDS)
-        .add(Channel.BBC_ONE_EAST_MIDLANDS)
-        .add(Channel.BBC_ONE_YORKSHIRE)
-        .add(Channel.BBC_ONE_NORTH_EAST)
-        .add(Channel.BBC_ONE_NORTH_WEST)
-        .add(Channel.BBC_ONE_NORTHERN_IRELAND)
-        .add(Channel.BBC_ONE_WALES)
-        .add(Channel.BBC_ONE_SCOTLAND)
-        .add(Channel.BBC_ONE_SOUTH)
-        .add(Channel.BBC_ONE_SOUTH_WEST)
-        .add(Channel.BBC_ONE_WEST)
-        .add(Channel.BBC_ONE_SOUTH_EAST)
-        .add(Channel.BBC_TWO)
-        .add(Channel.BBC_TWO_NORTHERN_IRELAND)
-        .add(Channel.BBC_TWO_SCOTLAND)
-        .add(Channel.BBC_TWO_WALES)
-        .add(Channel.CBBC)
-        .add(Channel.CBEEBIES)
-        .add(Channel.ITV1_ANGLIA)
-        .add(Channel.ITV1_BORDER_SOUTH)
-        .add(Channel.ITV1_LONDON)
-        .add(Channel.ITV1_CARLTON_CENTRAL)
-        .add(Channel.ITV1_CHANNEL)
-        .add(Channel.ITV1_GRANADA)
-        .add(Channel.ITV1_MERIDIAN)
-        .add(Channel.ITV1_TYNE_TEES)
-        .add(Channel.ITV1_HD)
-        .add(Channel.ITV2_HD)
-        .add(Channel.ITV3_HD)
-        .add(Channel.ITV4_HD)
-        .add(Channel.YTV)
-        .add(Channel.ITV1_CARLTON_WESTCOUNTRY)
-        .add(Channel.ITV1_WALES)
-        .add(Channel.ITV1_WEST)
-        .add(Channel.STV_CENTRAL)
-        .add(Channel.ULSTER)
-        .add(Channel.ITV1_BORDER_NORTH)
-        .add(Channel.CHANNEL_FOUR)
-        .add(Channel.S4C)
-        .add(Channel.FIVE)
-        .add(Channel.BBC_RADIO_RADIO1)
-        .add(Channel.BBC_RADIO_RADIO2)
-        .add(Channel.BBC_RADIO_RADIO3)
-        .add(Channel.BBC_RADIO_RADIO4)
-        .add(Channel.BBC_RADIO_RADIO7)
-        .add(Channel.BBC_RADIO_RADIO4_LW)
-        .add(Channel.BBC_RADIO_5LIVE)
-        .add(Channel.BBC_RADIO_5LIVESPORTSEXTRA)
-        .add(Channel.BBC_RADIO_6MUSIC)
-        .add(Channel.BBC_RADIO_1XTRA)
-        .add(Channel.BBC_RADIO_ASIANNETWORK)
-        .add(Channel.BBC_RADIO_WORLDSERVICE)
-        .add(Channel.BBC_THREE)
-        .add(Channel.BBC_FOUR)
-        .add(Channel.ITV2)
-        .add(Channel.ITV3)
-        .add(Channel.ITV4)
-        .add(Channel.FIVE)
-        .add(Channel.FIVE_HD)
-        .add(Channel.FIVE_USA)
-        .add(Channel.E4_HD)
-        .add(Channel.E_FOUR)
-        .add(Channel.MORE_FOUR)
-        .add(Channel.FILM_4)
-        .add(Channel.STV_HD)
-        .add(Channel.Channel_4_HD)
-        .add(Channel.FILM4_HD)
-    .build();
     
     private Boolean isRepeat(Channel channel, Attr attr) {
         // If the broadcast is on a 'terrestrial' channel only inspect repeat flag
-        if (TERRESTRIAL_CHANNELS.contains(channel)) {
+        if (terrestrialChannels.contains(channel)) {
             return getBooleanValue(attr.getRepeat());
         }
         // check new episode flag, will be set to yes only if definitely new content 
@@ -516,16 +517,16 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
 
     private void addBroadcast(Version version, Broadcast broadcast) {
-        if (! Strings.isNullOrEmpty(broadcast.getId())) {
+        if (! Strings.isNullOrEmpty(broadcast.getSourceId())) {
             Set<Broadcast> broadcasts = Sets.newHashSet();
             Maybe<Interval> broadcastInterval = broadcast.transmissionInterval();
             
             for (Broadcast currentBroadcast: version.getBroadcasts()) {
                 // I know this is ugly, but it's easier to read.
-                if (Strings.isNullOrEmpty(currentBroadcast.getId())) {
+                if (Strings.isNullOrEmpty(currentBroadcast.getSourceId())) {
                     continue;
                 }
-                if (broadcast.getId().equals(currentBroadcast.getId())) {
+                if (broadcast.getSourceId().equals(currentBroadcast.getSourceId())) {
                     continue;
                 }
                 if (currentBroadcast.transmissionInterval().hasValue() && broadcastInterval.hasValue()) {
@@ -606,7 +607,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     protected Specialization specialization(ProgData progData, Channel channel) {
-        if (channelMap.isRadioChannel(channel)) {
+        if (MediaType.AUDIO.equals(channel.mediaType())) {
             return Specialization.RADIO;
         }
         return Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? Specialization.TV : Specialization.FILM;

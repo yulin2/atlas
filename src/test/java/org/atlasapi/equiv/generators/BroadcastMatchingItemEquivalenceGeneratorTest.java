@@ -1,6 +1,5 @@
 package org.atlasapi.equiv.generators;
 
-import static org.atlasapi.media.entity.Channel.BBC_ONE;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -17,9 +16,11 @@ import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.jmock.Expectations;
 import org.jmock.integration.junit3.MockObjectTestCase;
@@ -29,22 +30,38 @@ import org.joda.time.Interval;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTestCase {
     
+	private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
+	private static final Channel BBC_ONE_CAMBRIDGE = new Channel(Publisher.METABROADCAST, "BBC One Cambridgeshire", "bbcone-cambridge", MediaType.AUDIO, "http://www.bbc.co.uk/services/bbcone/cambridge");
+	
     private final ScheduleResolver resolver = mock(ScheduleResolver.class);
-    private final BroadcastMatchingItemEquivalenceGenerator generator = new BroadcastMatchingItemEquivalenceGenerator(resolver , ImmutableSet.of(BBC), standardMinutes(1));
+    private BroadcastMatchingItemEquivalenceGenerator generator;
     
+    public void setUp() {
+    	final ChannelResolver channelResolver = mock(ChannelResolver.class);
+		checking(new Expectations() {
+			{
+				allowing(channelResolver).fromUri(BBC_ONE.uri());
+				will(returnValue(Maybe.just(BBC_ONE)));
+				allowing(channelResolver).fromUri(BBC_ONE_CAMBRIDGE.uri());
+				will(returnValue(Maybe.just(BBC_ONE_CAMBRIDGE)));
+			}
+		});
+    	generator = new BroadcastMatchingItemEquivalenceGenerator(resolver, channelResolver, ImmutableSet.of(BBC), standardMinutes(1));
+    }
     public void testGenerateEquivalencesForOneMatchingBroadcast() {
         final Item item1 = episodeWithBroadcasts("subjectItem", Publisher.PA, 
-                new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000)),
-                new Broadcast(Channel.BBC_ONE_CAMBRIDGE.uri(), utcTime(100000), utcTime(200000)));//ignored
+                new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000)),
+                new Broadcast(BBC_ONE_CAMBRIDGE.uri(), utcTime(100000), utcTime(200000)));//ignored
         
-        final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(Channel.BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
+        final Item item2 = episodeWithBroadcasts("equivItem", Publisher.BBC, new Broadcast(BBC_ONE.uri(), utcTime(100000), utcTime(200000)));
         
         checking(new Expectations(){{
-            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(Channel.BBC_ONE), ImmutableSet.of(BBC));
+            one(resolver).schedule(utcTime(40000), utcTime(260000), ImmutableSet.of(BBC_ONE), ImmutableSet.of(BBC));
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
@@ -75,4 +92,5 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends MockObjectTes
         item.addVersion(version);
         return item;
     }
+    
 }

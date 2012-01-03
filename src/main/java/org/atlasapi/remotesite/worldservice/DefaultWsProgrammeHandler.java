@@ -15,7 +15,6 @@ import static org.joda.time.Duration.standardSeconds;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -46,7 +45,8 @@ public class DefaultWsProgrammeHandler implements WsProgrammeHandler {
     private static final DateTime BBC_FOUNDED = new DateTime(1927, 01, 01, 0, 0, 0, 0);
     private static final DateTimeFormatter dayFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.S").withZone(LONDON);
     private static final String LOCATION_PREFIX = "http://bbcdbmsw023.national.core.bbc.co.uk/MediaLibrary";
-
+    private static final String BBC_WORLD_SERVICE_URI = "http://www.bbc.co.uk/services/worldservice";
+    
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final AdapterLog log;
@@ -182,7 +182,7 @@ public class DefaultWsProgrammeHandler implements WsProgrammeHandler {
         if (!Strings.isNullOrEmpty(programme.getFirstTxDate()) && !Strings.isNullOrEmpty(programme.getProgDuration())) {
             DateTime start = dayFormatter.parseDateTime(programme.getFirstTxDate());
             if (start.isAfter(BBC_FOUNDED)) {
-                Broadcast broadcast = new Broadcast(Channel.BBC_RADIO_WORLDSERVICE.uri(), start, standardSeconds(parseInt(programme.getProgDuration())));
+                Broadcast broadcast = new Broadcast(BBC_WORLD_SERVICE_URI, start, standardSeconds(parseInt(programme.getProgDuration())));
                 broadcast.setScheduleDate(start.toLocalDate());
                 return broadcast;
             }

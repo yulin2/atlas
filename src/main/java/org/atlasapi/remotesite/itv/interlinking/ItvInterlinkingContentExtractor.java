@@ -22,6 +22,7 @@ import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
@@ -47,11 +48,12 @@ public class ItvInterlinkingContentExtractor {
     private static final Splitter keywordSplitter = Splitter.on(",").trimResults();
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeParser();
     private final PeriodFormatter periodFormatter = ISOPeriodFormat.standard();
-    private final ItvInterlinkingChannelMap channelMap = new ItvInterlinkingChannelMap();
+    private final ItvInterlinkingChannelMap channelMap;
     private final ContentResolver contentResolver;
     
-    public ItvInterlinkingContentExtractor(ContentResolver contentResolver) {
+    public ItvInterlinkingContentExtractor(ContentResolver contentResolver, ChannelResolver channelResolver) {
         this.contentResolver = contentResolver;
+        channelMap = new ItvInterlinkingChannelMap(channelResolver);
     }
     
     public InterlinkingEntry<Brand> getBrand(Element brandElem) {

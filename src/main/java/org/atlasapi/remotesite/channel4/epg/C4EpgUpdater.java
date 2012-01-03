@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.channel4.epg;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.ERROR;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
-import static org.atlasapi.remotesite.channel4.C4AtomApi.C4_CHANNEL_MAP;
 
 import java.util.List;
 import java.util.Map;
@@ -14,10 +13,12 @@ import nu.xom.XPathContext;
 
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
+import org.atlasapi.persistence.channels.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
@@ -25,6 +26,7 @@ import org.joda.time.LocalTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -44,14 +46,16 @@ public class C4EpgUpdater extends ScheduledTask {
     private final C4EpgEntryProcessor entryProcessor;
     private final C4EpgBrandlessEntryProcessor brandlessEntryProcessor;
     private final BroadcastTrimmer trimmer;
+	private final C4AtomApi c4AtomApi;
 
-    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, C4EpgEntryProcessor entryProcessor, C4EpgBrandlessEntryProcessor brandlessEntryProcessor, BroadcastTrimmer trimmer, AdapterLog log, DayRangeGenerator generator) {
+    public C4EpgUpdater(RemoteSiteClient<Document> fetcher, C4EpgEntryProcessor entryProcessor, C4EpgBrandlessEntryProcessor brandlessEntryProcessor, BroadcastTrimmer trimmer, AdapterLog log, DayRangeGenerator generator, ChannelResolver channelResolver) {
         this.c4AtomFetcher = fetcher;
         this.trimmer = trimmer;
         this.log = log;
         this.rangeGenerator = generator;
         this.entryProcessor = entryProcessor;
         this.brandlessEntryProcessor = brandlessEntryProcessor;
+        this.c4AtomApi = new C4AtomApi(channelResolver);
     }
 
     @Override
@@ -61,12 +65,13 @@ public class C4EpgUpdater extends ScheduledTask {
         
         DayRange dayRange = rangeGenerator.generate(new LocalDate(DateTimeZones.UTC));
         
-        int total = Iterables.size(dayRange) * C4_CHANNEL_MAP.entrySet().size();
+        BiMap<String, Channel> channelMap = c4AtomApi.getChannelMap();
+		int total = Iterables.size(dayRange) * channelMap.size();
         int processed = 0;
         int failures = 0;
         int broadcasts = 0;
         
-        for (Map.Entry<String, Channel> channelEntry : C4_CHANNEL_MAP.entrySet()) {
+        for (Map.Entry<String, Channel> channelEntry : channelMap.entrySet()) {
             for (LocalDate scheduleDay : dayRange) {
                 reportStatus(String.format("Processed %s/%s. %s failures. %s broadcasts processed", processed++, total, failures, broadcasts));
                 
@@ -105,7 +110,7 @@ public class C4EpgUpdater extends ScheduledTask {
     private Map<String, String> broacastIdsFrom(List<ItemRefAndBroadcast> processedItems) {
         ImmutableMap.Builder<String, String> broadcastIdItemIdMap = ImmutableMap.builder();
         for (ItemRefAndBroadcast itemRefAndBroadcast : processedItems) {
-            broadcastIdItemIdMap.put(itemRefAndBroadcast.getBroadcast().getId(), itemRefAndBroadcast.getItemUri());
+            broadcastIdItemIdMap.put(itemRefAndBroadcast.getBroadcast().getSourceId(), itemRefAndBroadcast.getItemUri());
         }
         return broadcastIdItemIdMap.build();
     }

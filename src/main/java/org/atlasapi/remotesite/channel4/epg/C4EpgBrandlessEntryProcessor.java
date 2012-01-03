@@ -166,7 +166,7 @@ public class C4EpgBrandlessEntryProcessor {
                 Set<Broadcast> broadcasts = Sets.newHashSet();
                 Broadcast newBroadcast = null;
                 for (Broadcast broadcast : version.getBroadcasts()) {
-                    if(broadcast.getId() != null && broadcast.getId().equals(C4BroadcastBuilder.idFrom(channel.uri(), entry.id()))) {
+                    if(broadcast.getSourceId() != null && broadcast.getSourceId().equals(C4BroadcastBuilder.idFrom(channel.uri(), entry.id()))) {
                         newBroadcast = createBroadcast(entry, channel);
                         broadcasts.add(newBroadcast);
                         found = true;

@@ -5,23 +5,46 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
-import junit.framework.TestCase;
-
 import org.atlasapi.genres.AtlasGenre;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.persistence.channels.ChannelResolver;
+import org.jmock.Expectations;
+import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 
 import com.google.common.io.Resources;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
 
 
-public class C4BrandBasicDetailsExtractorTest extends TestCase {
+public class C4BrandBasicDetailsExtractorTest extends MockObjectTestCase {
 
-	private final C4BrandBasicDetailsExtractor extractor = new C4BrandBasicDetailsExtractor();
+	private C4BrandBasicDetailsExtractor extractor;
 	
+	public void setUp() {
+		final ChannelResolver channelResolver = mock(ChannelResolver.class);
+		checking(new Expectations() {
+			{
+				one(channelResolver).fromUri("http://www.channel4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com"))));
+				one(channelResolver).fromUri("http://www.channel4.com/more4");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.more4.com"))));
+				one(channelResolver).fromUri("http://film4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", MediaType.VIDEO, "http://film4.com"))));
+				one(channelResolver).fromUri("http://www.e4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com"))));
+				one(channelResolver).fromUri("http://www.4music.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com"))));
+			}
+		});
+		extractor = new C4BrandBasicDetailsExtractor(channelResolver);
+	}
 	public void testExtractingABrand() throws Exception {
+		
 		
 		AtomFeedBuilder brandFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares.atom"));
 		
