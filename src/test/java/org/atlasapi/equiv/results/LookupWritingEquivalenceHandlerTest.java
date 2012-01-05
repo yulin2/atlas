@@ -19,6 +19,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.Duration;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.base.Function;
@@ -33,7 +34,8 @@ public class LookupWritingEquivalenceHandlerTest extends TestCase {
 
     private final LookupWriter lookupWriter = context.mock(LookupWriter.class);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.BBC,Publisher.PA, Publisher.ITV);
-    
+
+    @Test
     public void testWritesLookups() {
         
         LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers);
@@ -51,7 +53,8 @@ public class LookupWritingEquivalenceHandlerTest extends TestCase {
         updater.handle(equivResult);
         
     }
-    
+
+    @Test
     @SuppressWarnings("unchecked")
     public void testDoesntWriteLookupsForItemWhichWasSeenAsEquivalentButDoesntAssertAnyEquivalences() {
         
@@ -73,7 +76,8 @@ public class LookupWritingEquivalenceHandlerTest extends TestCase {
         updater.handle(noEquivalences);
         
     }
-    
+
+    @Test
     public void testWritesLookupsForItemWhichWasSeenAsEquivalentButDoesntAssertAnyEquivalencesWhenCacheTimesOut() throws InterruptedException {
         
         Duration cacheDuration = new Duration(5);

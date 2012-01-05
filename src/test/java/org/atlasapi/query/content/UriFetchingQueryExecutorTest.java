@@ -31,6 +31,7 @@ import org.atlasapi.persistence.system.Fetcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -54,6 +55,7 @@ public class UriFetchingQueryExecutorTest extends TestCase {
 	
 	private UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate);
 
+    @Test
 	public void testThatWhenTheQueryIsSatisfiedByTheDatabaseThatTheFetcherIsNotUsed() throws Exception {
 		
 		context.checking(new Expectations() {{ 
@@ -63,7 +65,8 @@ public class UriFetchingQueryExecutorTest extends TestCase {
 		
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);
 	}
-	
+
+    @Test
 	public void testThatWhenTheQueryIsNotSatisfiedByTheDatabaseTheFetcherIsUsed() throws Exception {
 		
 		context.checking(new Expectations() {{ 
@@ -77,7 +80,8 @@ public class UriFetchingQueryExecutorTest extends TestCase {
 		
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);
 	}
-	
+
+    @Test
 	public void testThatIfTheFetcherReturnsNothingTheTheDBIsNotRetried() throws Exception {
 		
 		context.checking(new Expectations() {{ 
@@ -88,7 +92,8 @@ public class UriFetchingQueryExecutorTest extends TestCase {
 
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);
 	}
-	
+
+    @Test
 	public void testThatWhenSomeItemsAreInTheDatabaseAndSomeAreNotThatTheFetcherIsUsedOnTheMissingItems() throws Exception {
 		final List<String> urisOfItems1And2 = ImmutableList.of("item1", "item2");
 		

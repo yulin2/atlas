@@ -1,28 +1,49 @@
 package org.atlasapi.remotesite.redux;
 
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.remotesite.redux.model.FullReduxProgramme;
 import org.atlasapi.remotesite.redux.model.ReduxMedia;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.time.DateTimeZones;
+import com.mongodb.util.TestCase;
 
-import junit.framework.TestCase;
-
+@RunWith(JMock.class)
 public class FullProgrammeItemExtractorTest extends TestCase {
+    
+    private final Mockery context = new Mockery();
+    private final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
 
+    @Test
     public void testExtract() {
 
-        FullProgrammeItemExtractor extractor = new FullProgrammeItemExtractor(new NullAdapterLog());
+        final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
+    	channel.addAlias("http://devapi.bbcredux.com/channels/bbconehd");
+    	context.checking(new Expectations() {
+			{
+				allowing(channelResolver).forAliases("http://devapi.bbcredux.com/channels/");
+				will(returnValue(ImmutableMap.of("http://devapi.bbcredux.com/channels/bbconehd", channel)));
+			}
+		});
+    	
+        FullProgrammeItemExtractor extractor = new FullProgrammeItemExtractor(channelResolver, new NullAdapterLog());
         
         FullReduxProgramme.Builder programmeBuilder = (FullReduxProgramme.Builder) FullReduxProgramme.builder()
                     .withDiskref("5662249519293501114")
@@ -60,7 +81,7 @@ public class FullProgrammeItemExtractorTest extends TestCase {
         assertEquals(new DateTime(2011, 10, 11, 16, 00, 00, 000,DateTimeZones.UTC), broadcast.getTransmissionTime());
         assertEquals(new DateTime(2011, 10, 11, 16, 15, 00, 000,DateTimeZones.UTC), broadcast.getTransmissionEndTime());
         assertEquals(programme.getDuration(), broadcast.getBroadcastDuration().toString());
-        assertEquals(Channel.BBC_ONE_HD.uri(), broadcast.getBroadcastOn());
+        assertEquals(channel.uri(), broadcast.getBroadcastOn());
         assertTrue(broadcast.getSubtitled());
         assertFalse(broadcast.getSigned());
         assertFalse(broadcast.getHighDefinition());

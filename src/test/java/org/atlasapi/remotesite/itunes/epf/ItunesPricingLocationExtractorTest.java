@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.remotesite.itunes.epf.model.EpfPricing;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
@@ -25,7 +26,8 @@ import com.metabroadcast.common.intl.Countries;
 public class ItunesPricingLocationExtractorTest extends TestCase {
 
     private final ItunesPricingLocationExtractor extractor = new ItunesPricingLocationExtractor();
-    
+
+    @Test
     public void testExtract() {
         
         String locationUri = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTVSeason?uo=5&i=258143336&id=256322090";

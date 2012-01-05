@@ -4,9 +4,10 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.ScheduleEntry;
@@ -18,6 +19,7 @@ import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -31,7 +33,8 @@ public class ScheduleOverlapResolverTest extends TestCase {
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
     private final ScheduleOverlapListener listener = context.mock(ScheduleOverlapListener.class);
     
-    private final Channel channel = Channel.BBC_ONE;
+    private final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
+    
     private final Publisher publisher = Publisher.BBC;
     private final DateTime now = new DateTime(DateTimeZones.UTC);
     
@@ -52,6 +55,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     private final ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, listener, new SystemOutAdapterLog());
     
+    @Test
     public void testBroadcastsShouldNotOverlap() {
         context.checking(new Expectations() {{ 
             one(scheduleResolver).schedule(from, to, channels, publishers); will(returnValue(schedule));
@@ -61,6 +65,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
         assertSchedules(schedule, result);
     }
     
+    @Test
     public void testOverlappingWithIdBroadcast() {
         final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(35), now.plusMinutes(60)).withId("3");
         overlap.setLastUpdated(now);
@@ -78,6 +83,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
         assertSchedules(schedule, result);
     }
     
+    @Test
     public void testOverlappingLastWithIdBroadcast() {
         final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(70), now.plusMinutes(80)).withId("4");
         overlap.setLastUpdated(now);
@@ -95,6 +101,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
         assertSchedules(schedule, result);
     }
     
+    @Test
     public void testOverlappingBroadcastSwap() {
         final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(35), now.plusMinutes(70)).withId("somethingElse");
         final Item overlappingItem = item(overlap);
@@ -110,6 +117,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
         assertSchedules(schedule, result);
     }
     
+    @Test
     public void testOverlappingEarlierBroadcastSwap() {
         final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(20), now.plusMinutes(70)).withId("somethingElse");
         final Item overlappingItem = item(overlap);
@@ -125,6 +133,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
         assertSchedules(schedule, result);
     }
     
+    @Test
     public void testMultipleOverlappingBroadcastSwap() {
         final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(20), now.plusMinutes(70)).withId("somethingElse");
         final Item overlappingItem = item(overlap);
@@ -143,6 +152,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
         assertSchedules(schedule, result);
     }
     
+    @Test
     public void testOverlappingBroadcastExactSwap() {
         final Broadcast overlap = new Broadcast(channel.uri(), now.plusMinutes(35), now.plusMinutes(60)).withId("somethingElse");
         overlap.setLastUpdated(now);

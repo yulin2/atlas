@@ -20,6 +20,8 @@ import org.atlasapi.search.model.SearchResults;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -42,11 +44,13 @@ public class ContentResolvingSearchTest extends TestCase {
     private ContentResolvingSearcher searcher;
 
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         brand.setChildRefs(ImmutableList.of(item.childRef()));
         searcher = new ContentResolvingSearcher(fuzzySearcher, contentResolver);
     }
-    
+
+    @Test
     public void testShouldReturnSearchedForItem() {
         final String searchQuery = "test";
         final ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();

@@ -22,6 +22,7 @@ import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -44,6 +45,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
     
     ContainerTranslator translator = new ContainerTranslator(new SubstitutionTableNumberCodec());
     
+    @Test
     public void testUpdatesChildRefSortKeys() {
         
         final String containerUri = "brandUri";

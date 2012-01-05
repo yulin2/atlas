@@ -135,7 +135,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
     }
     
     private void createOrUpdateContainer(Container container, DBCollection collection, DBObject containerDbo) {
-        MongoQueryBuilder where = where().fieldEquals(IdentifiedTranslator.CANONICAL_URI, container.getCanonicalUri());
+        MongoQueryBuilder where = where().fieldEquals(IdentifiedTranslator.ID, container.getCanonicalUri());
         collection.update(where.build(), set(containerDbo), true, false);
     }
 

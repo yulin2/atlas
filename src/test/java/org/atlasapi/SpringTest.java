@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
+import org.junit.Test;
 
 import com.metabroadcast.common.properties.Configurer;
 
@@ -30,6 +31,7 @@ import com.metabroadcast.common.properties.Configurer;
  */
 public class SpringTest extends TestCase {
 
+    @Test
     public void testCanCreateQueryController() throws Exception {
         System.setProperty(Configurer.PLATFORM_VARIABLE, "dev");
         Configurer.load();
@@ -39,6 +41,7 @@ public class SpringTest extends TestCase {
         applicationContext.getBean(QueryController.class);
     }
 
+    @Test
     public void testCanCreatProcessing() throws Exception {
         System.setProperty("processing.config", "true");
         ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();

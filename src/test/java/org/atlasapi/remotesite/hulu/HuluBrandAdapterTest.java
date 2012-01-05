@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.hulu.WritingHuluBrandAdapter.HuluBrandCanonicalis
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SuppressWarnings("unchecked")
@@ -45,12 +46,14 @@ public class HuluBrandAdapterTest extends TestCase {
         assertNotNull(brand.getThumbnail());
         assertFalse(brand.getTags().isEmpty());
     }
-    
+
+    @Test
     public void testShouldBeAbleToFetchBrands() throws Exception {
         assertTrue(adapter.canFetch("http://www.hulu.com/glee"));
         assertFalse(adapter.canFetch("http://www.hulu.com/watch/123/glee"));
     }
-    
+
+    @Test
     public void testShouldCanonicalise() throws Exception {
         assertEquals("http://www.hulu.com/glee", new HuluBrandCanonicaliser().canonicalise("http://www.hulu.com/glee"));
         assertEquals("http://www.hulu.com/americas-game", new HuluBrandCanonicaliser().canonicalise("http://www.hulu.com/nfl/americas-game"));

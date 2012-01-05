@@ -9,9 +9,10 @@ import java.util.Set;
 import nu.xom.Element;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -48,11 +49,12 @@ public class ItvInterlinkingContentExtractor {
     private static final Splitter keywordSplitter = Splitter.on(",").trimResults();
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeParser();
     private final PeriodFormatter periodFormatter = ISOPeriodFormat.standard();
-    private final ItvInterlinkingChannelMap channelMap = new ItvInterlinkingChannelMap();
+    private final ItvInterlinkingChannelMap channelMap;
     private final ContentResolver contentResolver;
     
-    public ItvInterlinkingContentExtractor(ContentResolver contentResolver) {
+    public ItvInterlinkingContentExtractor(ContentResolver contentResolver, ChannelResolver channelResolver) {
         this.contentResolver = contentResolver;
+        channelMap = new ItvInterlinkingChannelMap(channelResolver);
     }
     
     public InterlinkingEntry<Brand> getBrand(Element brandElem) {

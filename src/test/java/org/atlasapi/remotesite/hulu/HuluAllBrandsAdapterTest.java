@@ -12,6 +12,7 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.util.concurrent.MoreExecutors;
@@ -26,6 +27,7 @@ public class HuluAllBrandsAdapterTest extends TestCase {
     private final AdapterLog log = new NullAdapterLog();
     private final HuluAllBrandsUpdater updater = new HuluAllBrandsUpdater(new HttpBackedHuluClient(HttpClients.webserviceClient(),log), brandAdapter, executor, log);
 
+    @Test
     public void testShouldGetBrand() throws Exception {
     	
         context.checking(new Expectations() {{

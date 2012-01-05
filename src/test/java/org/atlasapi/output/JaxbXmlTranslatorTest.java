@@ -41,6 +41,7 @@ import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.entity.simple.RelatedLink;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
@@ -63,7 +64,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		this.request = new StubHttpServletRequest();
 		this.response = new StubHttpServletResponse();
 	}
-	
+
+    @Test
 	public void testCanOutputSimpleItemObjectModelIdentifiedFieldsAsXml() throws Exception {
 	    
 		Item item = item().build();
@@ -83,7 +85,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
         assertThat(itemElem, hasChildElem(allOf(of(localName(is("type")), value(is(item.getType()))))));
         
 	}
-	
+
+    @Test
 	public void testCanOutputSimpleItemObjectModelAliasedFieldsAsXml() throws Exception {
         
         Item item = item().withAliases("thisisanalias").build();
@@ -95,7 +98,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
         assertThat(itemElem, hasChildElem(allOf(of(localName(is("aliases")),hasChildElem(allOf(of(localName(is("alias")),value(is(getOnlyElement(item.getAliases()))))))))));
 		
 	}
-	
+
+    @Test
 	public void testCanOutputSimpleItemObjectModelDescriptionFieldsAsXml() throws Exception {
         
         Item item = item().build();
@@ -128,7 +132,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
         //TODO: clips, key phrases, tags, sameAs, mediaType, topics, presentation channel
         
 	}
-	
+
+    @Test
 	public void testCanOutputSimpleItemObjectModelItemFieldsAsXml() throws Exception {
         
         Item item = item().build();
@@ -158,7 +163,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
         
         //TODO: locations, broadcasts, people, blackAndWhite, countriesOfOrigin, year
 	}
-	
+
+    @Test
     public void testCanOutputSimeItemObjectModelItemWithKeyPhrasesAsXml() throws Exception {
         KeyPhrase phrase = new KeyPhrase("phrase",new PublisherDetails(Publisher.BBC.key()),1.0);
         Item item = item().withKeyPhrases(ImmutableSet.of(phrase)).build();
@@ -182,7 +188,8 @@ public class JaxbXmlTranslatorTest extends TestCase {
                 )))
         ))));
     }
-    
+
+    @Test
     public void testCanOutputSimeItemObjectModelItemWithRelatedLinksAsXml() throws Exception {
         RelatedLink link = new RelatedLink();
         link.setType("facebook");
@@ -215,7 +222,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
         ))));
     }
 
-
+    @Test
 	public void testCanOutputSimpleListObjectModelPlaylistFieldsAsXml() throws Exception {
 
 		Playlist list = playlist().build();

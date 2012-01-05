@@ -28,6 +28,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -48,6 +49,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
     
     private final ContainerChildEquivalenceGenerator generator = new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, resultStore, new NullAdapterLog());
     
+    @Test
     public void testAttemptsToResolveAllChildrenOfContainer() {
         
         final ImmutableList<ChildRef> childRefs = ImmutableList.of(
@@ -68,6 +70,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         generator.generate(container, new DefaultDescription());
     }
     
+    @Test
     public void testCallsUpdaterAndStoresResultForChildrenOfContainer() {
         
         final Episode ep = new Episode("ep1", "cep2", Publisher.BBC);
@@ -90,6 +93,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         generator.generate(container, new DefaultDescription());
     }
     
+    @Test
     public void testExtractsContainerFromStrongItemEquivalents() {
         
         final Episode ep = new Episode("ep1", "cep2", Publisher.BBC);

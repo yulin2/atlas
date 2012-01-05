@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
@@ -26,6 +27,7 @@ public class ItvCatchupClientTest extends TestCase {
     private final Mockery context = new Mockery();
 	SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
 
+    @Test
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		context.checking(new Expectations() {{ 

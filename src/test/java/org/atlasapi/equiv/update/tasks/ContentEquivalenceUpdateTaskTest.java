@@ -21,6 +21,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.junit.Test;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -56,7 +57,8 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
             }
         };
     }
-    
+
+    @Test
     public void testCallUpdateOnContent() {
 
         ContentLister contentLister = listerForContent(ImmutableMap.<Publisher,List<Content>>of(

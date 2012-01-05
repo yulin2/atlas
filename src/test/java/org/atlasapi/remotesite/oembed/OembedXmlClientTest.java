@@ -28,6 +28,7 @@ import org.atlasapi.output.oembed.OembedItem;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
@@ -44,6 +45,7 @@ public class OembedXmlClientTest extends TestCase {
 	
 	private final SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
 
+    @Test
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		context.checking(new Expectations() {{ 

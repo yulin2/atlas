@@ -24,6 +24,8 @@ import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -48,7 +50,8 @@ public class BlipTvAdapterTest extends TestCase {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		itemClient = context.mock(RemoteSiteClient.class, "itemClient");
 		propertyExtractor = context.mock(ContentExtractor.class);
@@ -56,7 +59,8 @@ public class BlipTvAdapterTest extends TestCase {
 		
 		item.setVideoSource(VIDEO_SOURCE_URI);
 	}
-		
+
+    @Test
 	public void testCanFetchResourcesForBlipTvItems() throws Exception {
 		
 		Canonicaliser canonicaliser = new BlipTvAdapter.BlipTvCanonicaliser();

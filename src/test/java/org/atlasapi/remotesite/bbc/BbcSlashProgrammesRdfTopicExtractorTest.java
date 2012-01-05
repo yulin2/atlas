@@ -16,6 +16,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableSet;
@@ -27,7 +28,8 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
     private final Mockery context = new Mockery();
     private final TopicStore topicStore = context.mock(TopicStore.class);
     private final BbcSlashProgrammesRdfTopicExtractor extractor = new BbcSlashProgrammesRdfTopicExtractor(topicStore , new NullAdapterLog());
-    
+
+    @Test
     public void testExtractsTopicFromValidSlashProgrammesTopic() {
         
         final String topicUri = "http://dbpedia.org/resource/Religion";

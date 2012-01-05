@@ -9,6 +9,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.metabroadcast.common.base.Maybe;
@@ -22,7 +23,8 @@ public class CopyingWsDataStoreTest extends TestCase {
     private final WritableWsDataStore local = context.mock(WritableWsDataStore.class);
 
     private final CopyingWsDataStore store = new CopyingWsDataStore(remote, local, new NullAdapterLog());
-    
+
+    @Test
     public void testGettingLatestDataIsNothingWhenLocalAndRemoteReturnNothing() {
         
         context.checking(new Expectations(){{
@@ -33,7 +35,8 @@ public class CopyingWsDataStoreTest extends TestCase {
         assertTrue(store.latestData().isNothing());
         
     }
-    
+
+    @Test
     public void testGettingLatestDataIsLocalWhenRemoteReturnsNothing() {
         
         final WsDataSet testSet = new WsDataSet() {
@@ -58,7 +61,8 @@ public class CopyingWsDataStoreTest extends TestCase {
         assertTrue(latestData.requireValue() == testSet);
         
     }
-    
+
+    @Test
     public void testGettingLatestDataIsLocalWhenRemoteReturnsSameVersion() {
         DateTime day = new DateTime(DateTimeZones.UTC);
         final WsDataSet localSet = setFor(day);
@@ -73,7 +77,8 @@ public class CopyingWsDataStoreTest extends TestCase {
         assertTrue(latestData.requireValue() == localSet);
         
     }
-    
+
+    @Test
     public void testGettingLatestDataIsWrittenLocallyWhenLocalReturnsNothing() throws IOException {
         DateTime day = new DateTime(DateTimeZones.UTC);
         final WsDataSet localSet = setFor(day);
@@ -90,6 +95,7 @@ public class CopyingWsDataStoreTest extends TestCase {
         
     }
 
+    @Test
     public void testGettingLatestDataIsWrittenLocallyWhenRemoteVersionIsMoreRecent() throws IOException {
         DateTime day = new DateTime(DateTimeZones.UTC);
         final WsDataSet localSet = setFor(day);
@@ -106,7 +112,8 @@ public class CopyingWsDataStoreTest extends TestCase {
         assertTrue(latestData.requireValue() == writtenSet);
         
     }
-    
+
+    @Test
     public void testGettingDateForDayReturnsOnlyLocalWhenAvailable() throws IOException {
         final DateTime day = new DateTime(DateTimeZones.UTC);
         final WsDataSet localSet = setFor(day);
@@ -121,7 +128,8 @@ public class CopyingWsDataStoreTest extends TestCase {
         assertTrue(dayData.requireValue() == localSet);
         
     }
-    
+
+    @Test
     public void testGettingDateForDayGetsRemoteAndDoesntWriteIfNothing() throws IOException {
         final DateTime day = new DateTime(DateTimeZones.UTC);
         
@@ -136,6 +144,7 @@ public class CopyingWsDataStoreTest extends TestCase {
         
     }
 
+    @Test
     public void testGettingDateForDayWritesRemoteDataLocally() throws IOException {
         final DateTime day = new DateTime(DateTimeZones.UTC);
         final WsDataSet localSet = setFor(day);

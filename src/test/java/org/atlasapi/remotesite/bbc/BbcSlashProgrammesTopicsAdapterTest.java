@@ -13,6 +13,7 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
@@ -38,6 +39,7 @@ public class BbcSlashProgrammesTopicsAdapterTest extends TestCase {
     
     BbcSlashProgrammesTopicsAdapter adapter = new BbcSlashProgrammesTopicsAdapter(slashProgrammesClient(httpClient, SlashProgrammesRdf.class), topicFetcher);
     
+    @Test
     public void testFetch() {
         
         ImmutableList<String> topics = ImmutableList.of("public_transport", "sandi_toksvig", "brighton", "eastbourne");

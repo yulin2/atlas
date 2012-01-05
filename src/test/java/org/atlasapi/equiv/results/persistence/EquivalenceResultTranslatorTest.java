@@ -15,6 +15,7 @@ import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -38,7 +39,8 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         target.setTitle("Test " + title);
         return target;
     }
-    
+
+    @Test
     public void testCodecForEmptyResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of();
@@ -54,6 +56,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
     }
 
+    @Test
     public void testCodecForTrivialResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
@@ -82,7 +85,8 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         assertTrue(Iterables.getOnlyElement(restoredResult.combinedResults().entrySet()).getKey().strong());
         
     }
-    
+
+    @Test
     public void testCodecForSinglePublisherResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
@@ -117,7 +121,8 @@ public class EquivalenceResultTranslatorTest extends TestCase {
                 id2, 5.0 
         ), restoredResult.combinedResults());
     }
-    
+
+    @Test
     public void testCodecForTwoPublisherResult() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(

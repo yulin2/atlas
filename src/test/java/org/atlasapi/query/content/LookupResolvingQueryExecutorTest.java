@@ -19,6 +19,7 @@ import org.atlasapi.persistence.lookup.entry.LookupRef;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -32,7 +33,8 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
     
     private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
     private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(contentResolver, lookupStore);
-    
+
+    @Test
     public void testSetsSameAs() {
 
         final String query = "query";

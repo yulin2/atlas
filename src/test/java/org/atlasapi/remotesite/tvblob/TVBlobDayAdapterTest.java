@@ -12,6 +12,7 @@ import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(JMock.class)
@@ -36,7 +37,8 @@ public class TVBlobDayAdapterTest extends TestCase {
         Period period = new Period(begin, end);
         System.out.println("Generated the playlist in " + period.getMinutes() + " minutes and " + period.getSeconds() + " seconds.");
     }
-    
+
+    @Test
     public void testCanFetch() {
         assertTrue(adapter.canPopulate("http://epgadmin.tvblob.com/api/raiuno/programmes/schedules/today.json"));
     }

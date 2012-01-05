@@ -18,6 +18,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -41,7 +42,8 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
     
     private final String sourceName = "itemSource";
     private final ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(delegate, sourceName, ScoreThreshold.greaterThan(0.2));
-    
+
+    @Test
     public void testMaintainsScoreWhenItemScorePassesThreshold() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.valueOf(0.8))));
@@ -59,7 +61,8 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
         assertThat(combined.equivalents(), hasEntry(target, combinedScore));
         
     }
-    
+
+    @Test
     public void testSetsScoreToNullWhenItemScoreFailsThreshold() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.valueOf(0.1))));
@@ -75,7 +78,8 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
         assertThat(combined.equivalents(), hasEntry(target, Score.NULL_SCORE));
         
     }
-    
+
+    @Test
     public void testSetsScoreToNullWhenItemScoreIsNull() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.NULL_SCORE)));
@@ -92,6 +96,7 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
         
     }
 
+    @Test
     public void testSetsScoreToNullWhenItemScoreIsMissing() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.<Item, Score>of()));
@@ -108,6 +113,7 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
         
     }
 
+    @Test
     public void testDoesntFilterScoresWhenItemSourceNotFound() {
         
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs("anotherSource", ImmutableMap.of(target, Score.valueOf(0.1))));

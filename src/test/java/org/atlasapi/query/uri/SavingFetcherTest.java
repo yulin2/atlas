@@ -24,6 +24,7 @@ import org.atlasapi.persistence.system.Fetcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -40,7 +41,8 @@ public class SavingFetcherTest extends TestCase {
 	String URI = "http://example.com";
 	Item item1 = new Item();
 	Brand brand = new Brand();
-	
+
+    @Test
 	public void testFetchesItemsFromDelegateAndSavesToStore() throws Exception {
 		
 		context.checking(new Expectations() {{ 

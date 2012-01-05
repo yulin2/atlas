@@ -25,6 +25,8 @@ import org.atlasapi.remotesite.html.HtmlDescriptionSource;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -51,13 +53,15 @@ public class DailyMotionItemAdapterTest extends TestCase {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		itemClient = context.mock(RemoteSiteClient.class);
 		propertyExtractor = context.mock(ContentExtractor.class);
 		adapter = new DailyMotionItemAdapter(itemClient, propertyExtractor);
 	}
-	
+
+    @Test
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
 		context.checking(new Expectations() {{
@@ -67,7 +71,8 @@ public class DailyMotionItemAdapterTest extends TestCase {
 		
 		assertEquals(item, adapter.fetch(uri));
 	}
-	
+
+    @Test
 	public void testCanFetchResourcesForDailyMotionItems() throws Exception {
 		
 		Canonicaliser canonicaliser = new DailyMotionItemAdapter.DailyMotionItemCanonicaliser();

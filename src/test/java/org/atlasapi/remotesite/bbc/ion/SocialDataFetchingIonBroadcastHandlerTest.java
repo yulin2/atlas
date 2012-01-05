@@ -29,6 +29,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -55,6 +56,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     
     private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linkAdapter, tagAdapter, topicsAdapter, resolver, writer, log);
 
+    @Test
     public void testSetsLinksAndTagsForTopLevelItem() {
         
         final String pid = "b00pgl7s";
@@ -70,6 +72,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     }
     
 
+    @Test
     public void testDoesntWriteContentWhenReferencedContentNotFound() {
 
         final String pid = "b00pgl7s";
@@ -87,6 +90,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
         handler.handle(broadcast);
     }
 
+    @Test
     public void testSetsLinksAndTagsForEpisodeWithSeriesAndBrand() {
         
         final String epPid = "b00pgl7s";
@@ -136,7 +140,8 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
             one(resolver).findByCanonicalUris(with(hasItem(uri))); will(returnValue(builder().put(uri, content).build()));
         }});
     }
-    
+
+    @Test
     @SuppressWarnings("unchecked")
     public void testDoesntResolveOrUpdateContentWhenNoLinksOrTagsAreFound() {
         

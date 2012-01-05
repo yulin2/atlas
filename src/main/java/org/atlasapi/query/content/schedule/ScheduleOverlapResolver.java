@@ -2,8 +2,8 @@ package org.atlasapi.query.content.schedule;
 
 import java.util.List;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
@@ -88,7 +88,7 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
         Broadcast previousBroadcast = ScheduleEntry.BROADCAST.apply(previous);
         Broadcast broadcast = ScheduleEntry.BROADCAST.apply(item);
 
-        if (Objects.equal(previousBroadcast.getId(), broadcast.getId()) && previousBroadcast.getLastUpdated() != null && broadcast.getLastUpdated() != null) {
+        if (Objects.equal(previousBroadcast.getSourceId(), broadcast.getSourceId()) && previousBroadcast.getLastUpdated() != null && broadcast.getLastUpdated() != null) {
             if (previousBroadcast.getLastUpdated().isAfter(broadcast.getLastUpdated())) {
                 overlapListener.itemRemovedFromSchedule(item, broadcast);
                 return OverlapResolution.removeCurrent();

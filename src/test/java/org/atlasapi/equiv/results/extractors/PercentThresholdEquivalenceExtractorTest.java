@@ -7,12 +7,14 @@ import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 
 public class PercentThresholdEquivalenceExtractorTest extends TestCase {
 
+    @Test
     public void testExtractsItemWith90PercentOfTotalWithNegatives() {
 
         PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>extractorMoreThanPercent(90);
@@ -29,7 +31,8 @@ public class PercentThresholdEquivalenceExtractorTest extends TestCase {
         assertEquals(extract.requireValue(), strong);
         
     }
-    
+
+    @Test
     public void testDoesntExtractItemWhenAllNegative() {
 
         PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>extractorMoreThanPercent(90);

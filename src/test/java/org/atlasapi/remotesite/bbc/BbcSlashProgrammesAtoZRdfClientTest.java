@@ -25,6 +25,7 @@ import org.atlasapi.remotesite.bbc.atoz.SlashProgrammesAtoZRdf;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
@@ -43,6 +44,7 @@ public class BbcSlashProgrammesAtoZRdfClientTest extends TestCase {
     private final Mockery context = new Mockery();
 	private final SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
 
+	@Test
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		context.checking(new Expectations() {{ 

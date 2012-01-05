@@ -1,10 +1,5 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
-import static org.atlasapi.media.entity.Channel.E_FOUR;
-import static org.atlasapi.media.entity.Channel.FILM_4;
-import static org.atlasapi.media.entity.Channel.FOUR_MUSIC;
-import static org.atlasapi.media.entity.Channel.MORE_FOUR;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasKey;
@@ -15,12 +10,17 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 import junit.framework.TestCase;
+
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -30,17 +30,30 @@ import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.channel4.C4BrandUpdater;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.DayRangeGenerator;
 
 //TODO: extract a SiteSpecificAdapter or similar from C4EpgUpdater which handles a single channel day feed.
+@RunWith(JMock.class)
 public class C4EpgUpdaterTest extends TestCase {
     
+	private static final Channel CHANNEL_FOUR = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com");
+	private static final Channel E_FOUR = new Channel(Publisher.METABROADCAST, "E4", "e4", MediaType.VIDEO, "http://www.e4.com");
+	private static final Channel FILM_4 = new Channel(Publisher.METABROADCAST, "Film4", "film4", MediaType.VIDEO, "http://www.film4.com");
+	private static final Channel FOUR_MUSIC = new Channel(Publisher.METABROADCAST, "4 Music", "4music", MediaType.VIDEO, "http://www.4music.com");
+	private static final Channel MORE_FOUR = new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.channel4.com/more4");
+
+	
     private final Mockery context = new Mockery();
     
     private final Builder builder = new Builder(new C4EpgElementFactory());
@@ -59,13 +72,32 @@ public class C4EpgUpdaterTest extends TestCase {
     
     private final C4EpgEntryProcessor entryProcessor = new C4EpgEntryProcessor(contentWriter, resolver, brandUpdater, log);
     private final C4EpgBrandlessEntryProcessor brandlessProcessor = new C4EpgBrandlessEntryProcessor(contentWriter, resolver, brandUpdater, log);
-    private final C4EpgUpdater updater = new C4EpgUpdater(c4AtomFetcher, entryProcessor, brandlessProcessor, trimmer, log, new DayRangeGenerator());
+    private C4EpgUpdater updater;
+    private ChannelResolver channelResolver;
     
     @Override
+    @Before
     public void setUp() throws Exception {
         c4EpgFeed = builder.build(new InputStreamReader(Resources.getResource("c4-epg-2011-09-13.atom").openStream()));
+        channelResolver = context.mock(ChannelResolver.class);
+        context.checking(new Expectations() {
+			{
+				allowing(channelResolver).fromUri("http://www.channel4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com"))));
+				allowing(channelResolver).fromUri("http://www.channel4.com/more4");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.more4.com"))));
+				allowing(channelResolver).fromUri("http://film4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", MediaType.VIDEO, "http://film4.com"))));
+				allowing(channelResolver).fromUri("http://www.e4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com"))));
+				allowing(channelResolver).fromUri("http://www.4music.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com"))));
+			}
+		});
+		updater = new C4EpgUpdater(c4AtomFetcher, entryProcessor, brandlessProcessor, trimmer, log, new DayRangeGenerator(), channelResolver);
     }
 
+    @Test
     @SuppressWarnings("unchecked")
     public void testRun() throws Exception {
         

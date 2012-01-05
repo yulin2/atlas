@@ -13,19 +13,20 @@ import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSameAs;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-@RunWith(JMock.class)
 public class BbcSlashProgrammesTopicRdfClientTest extends TestCase {
 
 	private static final String URI = "http://example.com";
 	
 	private static final SimpleHttpClient httpClient = new FixedResponseHttpClient(URI, xmlDocument());
 
+    @Test
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
 		SlashProgrammesRdf description = new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(httpClient, SlashProgrammesRdf.class).get(URI);

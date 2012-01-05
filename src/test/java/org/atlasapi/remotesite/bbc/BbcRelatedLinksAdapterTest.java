@@ -14,6 +14,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesRelat
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -27,7 +28,8 @@ public class BbcRelatedLinksAdapterTest extends TestCase {
     private final RemoteSiteClient<SlashProgrammesContainer> client = context.mock(RemoteSiteClient.class);
     
     private final BbcRelatedLinksAdapter adapter = new BbcRelatedLinksAdapter(client);
-    
+
+    @Test
     public void testCanFetchRelatedLinksForBbcProgramme() throws Exception {
         
         final String uri = "http://www.bbc.co.uk/programmes/b006mkw3";

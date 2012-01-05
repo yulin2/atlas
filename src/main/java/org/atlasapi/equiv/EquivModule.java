@@ -73,6 +73,7 @@ import org.atlasapi.equiv.update.tasks.FilmEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.FilteringContentLister;
 import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
 import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Film;
@@ -117,6 +118,7 @@ public class EquivModule {
     private @Autowired SearchResolver searchResolver;
     private @Autowired ContentLister contentLister;
     private @Autowired ContentResolver contentResolver;
+    private @Autowired ChannelResolver channelResolver;
     private @Autowired DatabasedMongo db;
 
     private @Autowired AdapterLog log;
@@ -166,7 +168,7 @@ public class EquivModule {
     
     public @Bean ItemEquivalenceUpdater<Item> standardItemUpdater() {
         EquivalenceGenerators<Item> itemGenerators = EquivalenceGenerators.from(ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
-                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
+                new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, channelResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
         ),log);
         
         EquivalenceScorers<Item> itemScorers = EquivalenceScorers.from(ImmutableSet.<ContentEquivalenceScorer<Item>>of(

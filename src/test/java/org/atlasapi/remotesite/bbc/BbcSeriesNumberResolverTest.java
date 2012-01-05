@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
@@ -36,6 +37,7 @@ public class BbcSeriesNumberResolverTest extends TestCase {
     private final Mockery context = new Mockery();
 	final SimpleHttpClient client = context.mock(SimpleHttpClient.class);
 
+    @Test
 	public void testTheResolver() throws Exception {
 		final String seriesUri = "http://www.bbc.co.uk/programmes/b007q8vv";
 		
@@ -50,7 +52,8 @@ public class BbcSeriesNumberResolverTest extends TestCase {
 		// first request should have populated the cache
 		assertThat(resolver.seriesNumberFor(seriesUri).requireValue(), is(Integer.valueOf(6)));
 	}
-	
+
+    @Test
 	public void testLookupingUpAMissingSeries() throws Exception {
 		final String missingSeriesUri = "http://www.bbc.co.uk/programmes/b00missing";
 		

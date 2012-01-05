@@ -24,6 +24,8 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.io.Resources;
@@ -54,14 +56,16 @@ public class C4AtoZAtomAdapterTest extends TestCase {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		brandAdapter = context.mock(C4BrandUpdater.class);
 		itemClient = context.mock(RemoteSiteClient.class);
 		writer = context.mock(ContentWriter.class);
 		adapter = new C4AtoZAtomContentLoader(itemClient, brandAdapter, new NullAdapterLog());
 	}
-	
+
+    @Test
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
 		context.checking(new Expectations() {{

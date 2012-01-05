@@ -23,6 +23,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
@@ -37,18 +38,22 @@ public class FilmEquivalenceGeneratorTest extends TestCase {
     
     private final Film subjectFilm = aFilm(Publisher.PA, "Test Film Title", 2000, "http://imdb.com/title/tt0409345");
 
+    @Test
     public void testFilmWithSameTitleAndYearWithScores1() {
         checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Test Film Title", 2000), Score.valueOf(1.0));
     }
-
+    
+    @Test
     public void testFilmWithImdbMatchScores1NoMatterTitleAndYear() {
         checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Wrong Title", 2010, "http://imdb.com/title/tt0409345"), Score.valueOf(1.0));
     }
-    
+
+    @Test
     public void testFilmWithSameTitleDifferentYearScores0() {
         checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Test Film Title", 2001, "http://imdb.com/title/wrong"), Score.valueOf(0.0));
     }
 
+    @Test
     public void testFilmWithDifferentTitleSameYearScores0() {
         checkScore(aFilm(Publisher.PREVIEW_NETWORKS, "Another Film Title", 2000, "http://imdb.com/title/wrong"), Score.valueOf(0.0));
     }

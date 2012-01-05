@@ -26,6 +26,8 @@ import org.atlasapi.persistence.testing.StubContentResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -42,13 +44,16 @@ public class LocalOrRemoteFetcherTest extends TestCase {
 	Item bean = new Item(URI, URI, Publisher.BBC);
 
     private final Mockery context = new Mockery();
+    
+    @Before
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
 		remoteFetcher = context.mock(Fetcher.class);
 	}
 
+    @Test
 	public void testQueriesRemoteFetcherForNewUri() throws Exception {
 		ContentResolver resources = StubContentResolver.RESOLVES_NOTHING;
 		LocalOrRemoteFetcher localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
@@ -59,7 +64,8 @@ public class LocalOrRemoteFetcherTest extends TestCase {
 		
 		localOrRemoteFetcher.fetch(URI);
 	}
-	
+
+    @Test
 	public void testLoadsKnownResourcesFromDatabaseAndDoesNotFetch() throws Exception {
 		ContentResolver resources = new StubContentResolver().respondTo(bean);
 		LocalOrRemoteFetcher localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);

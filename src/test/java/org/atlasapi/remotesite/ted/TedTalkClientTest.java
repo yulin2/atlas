@@ -27,6 +27,7 @@ import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
@@ -43,6 +44,7 @@ public class TedTalkClientTest extends TestCase {
 	private final Mockery context = new Mockery();
 	private final SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
 	
+	@Test
 	public void testTheClient() throws Exception {
 		
 		context.checking(new Expectations() {{ 

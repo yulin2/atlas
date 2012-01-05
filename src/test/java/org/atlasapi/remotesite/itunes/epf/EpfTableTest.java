@@ -14,6 +14,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.itunes.epf.model.EpfTableColumn;
 import org.atlasapi.remotesite.itunes.epf.model.EpfTableRow;
+import org.junit.Test;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -59,6 +60,7 @@ public class EpfTableTest extends TestCase {
         }
     };
 
+    @Test
     public void testCallsProcessorForRows() throws IOException {
 
         final CapturingTableRowProcessor processor = new CapturingTableRowProcessor();
@@ -81,7 +83,8 @@ public class EpfTableTest extends TestCase {
         assertThat(row.get(TestEpfRow.NAME), is(equalTo(name)));
         
     }
-    
+
+    @Test
     public void testTrimsRowsCorrectly() throws IOException {
         
         final CapturingTableRowProcessor processor = new CapturingTableRowProcessor();
@@ -98,7 +101,8 @@ public class EpfTableTest extends TestCase {
         assertThat(row.get(TestEpfRow.NAME), is(equalTo("")));
         
     }
-    
+
+    @Test
     public void testProcessesRowsOverMultipleLines() throws IOException {
         
         final CapturingTableRowProcessor processor = new CapturingTableRowProcessor();

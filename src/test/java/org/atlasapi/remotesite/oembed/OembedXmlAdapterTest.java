@@ -30,6 +30,8 @@ import org.atlasapi.remotesite.FetchException;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
@@ -54,7 +56,8 @@ public class OembedXmlAdapterTest extends TestCase {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		super.setUp();
 		oembedClient = context.mock(RemoteSiteClient.class);
 		propertyExtractor = context.mock(ContentExtractor.class);
@@ -63,6 +66,7 @@ public class OembedXmlAdapterTest extends TestCase {
 		adapter.setAcceptedUriPattern("http://www.vimeo.com/\\d+");
 	}
 	
+	@Test
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
 		context.checking(new Expectations() {{
@@ -73,6 +77,7 @@ public class OembedXmlAdapterTest extends TestCase {
 		adapter.fetch(VIDEO_URI);
 	}
 	
+	@Test
 	public void testPassesMaxWidthParamIfSet() throws Exception {
 		
 		adapter.setMaxWidth(400);

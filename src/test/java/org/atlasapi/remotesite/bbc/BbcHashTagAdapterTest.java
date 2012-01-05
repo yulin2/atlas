@@ -15,6 +15,7 @@ import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.base.Charsets;
@@ -29,7 +30,8 @@ public class BbcHashTagAdapterTest extends TestCase {
     private final RemoteSiteClient<HtmlNavigator> buzzPageClient = context.mock(RemoteSiteClient.class);
 
     private final BbcHashTagAdapter hashTagAdapter = new BbcHashTagAdapter(buzzPageClient);
-    
+
+    @Test
     public void testCanFetchHashTagsFromBbcProgrammeBuzzPage() throws Exception {
         
         final String uri = "http://www.bbc.co.uk/programmes/b006mkw3/buzz";
@@ -48,18 +50,22 @@ public class BbcHashTagAdapterTest extends TestCase {
         assertThat(fetchedTags.get(1).getPhrase(), isIn(expectedTags));
     }
 
+    @Test
     public void testCanFetchSlashProgrammesUri() {
         assertTrue(hashTagAdapter.canFetch("http://www.bbc.co.uk/programmes/b006mkw3"));
     }
-    
+
+    @Test
     public void testCanFetchSlashProgrammesBuzzUri() {
         assertTrue(hashTagAdapter.canFetch("http://www.bbc.co.uk/programmes/b006mkw3/buzz"));
     }
-    
+
+    @Test
     public void testCantFetchNonSlashProgrammesUri() {
         assertFalse(hashTagAdapter.canFetch("http://www.example.com/uri"));
     }
-    
+
+    @Test
     public void testCantFetchNonSlash() {
         assertFalse(hashTagAdapter.canFetch("http://www.example.com/uri/buzz"));
     }

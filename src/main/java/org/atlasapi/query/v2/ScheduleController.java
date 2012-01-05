@@ -7,7 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
@@ -30,10 +31,12 @@ public class ScheduleController extends BaseController<ScheduleChannel> {
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
+	private ChannelResolver channelResolver;
     
-    public ScheduleController(ScheduleResolver scheduleResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ScheduleChannel>> outputter) {
+    public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ScheduleChannel>> outputter) {
         super(configFetcher, log, outputter);
         this.scheduleResolver = scheduleResolver;
+        this.channelResolver = channelResolver;
     }
 
     @RequestMapping("/3.0/schedule.*")
@@ -72,7 +75,7 @@ public class ScheduleController extends BaseController<ScheduleChannel> {
     private Set<Channel> channels(String channelString) {
         ImmutableSet.Builder<Channel> channels = ImmutableSet.builder();
         for (String channelKey: URI_SPLITTER.split(channelString)) {
-            Maybe<Channel> channel = Channel.fromKey(channelKey);
+            Maybe<Channel> channel = channelResolver.fromKey(channelKey);
             if (channel.hasValue()) {
                 channels.add(channel.requireValue());
             }

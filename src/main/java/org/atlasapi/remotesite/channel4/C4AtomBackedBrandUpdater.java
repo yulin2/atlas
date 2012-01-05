@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -40,8 +41,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 	private final RemoteSiteClient<Feed> feedClient;
 	private final C4BrandExtractor extractor;
 	
-	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
-		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, contentStore, lakeviewFetcher, log));
+	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentStore, ChannelResolver channelResolver, C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
+		this(atomClient, new C4BrandExtractor(atomClient, contentResolver, contentStore, channelResolver, lakeviewFetcher, log));
 	}
 	
 	public C4AtomBackedBrandUpdater(RemoteSiteClient<Feed> feedClient, C4BrandExtractor extractor) {

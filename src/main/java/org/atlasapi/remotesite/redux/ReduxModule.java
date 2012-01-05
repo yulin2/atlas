@@ -8,6 +8,7 @@ import java.text.ParseException;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -28,6 +29,7 @@ public class ReduxModule {
 
     private @Autowired @Qualifier("contentResolver") ContentResolver resolver;
     private @Autowired ContentWriter writer;
+    private @Autowired ChannelResolver channelResolver;
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler taskScheduler;
 
@@ -59,7 +61,7 @@ public class ReduxModule {
 
     @Bean
     protected DefaultReduxProgrammeAdapter reduxProgrammeAdapter() {
-        return new DefaultReduxProgrammeAdapter(reduxClient(), new FullProgrammeItemExtractor(log));
+        return new DefaultReduxProgrammeAdapter(reduxClient(), new FullProgrammeItemExtractor(channelResolver, log));
     }
 
 }

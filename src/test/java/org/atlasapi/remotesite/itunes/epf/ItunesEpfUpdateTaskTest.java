@@ -15,6 +15,8 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.base.Charsets;
@@ -34,7 +36,8 @@ public class ItunesEpfUpdateTaskTest extends TestCase {
 
     private static final String LINE_END = ((char)2)+"\n";
     
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         Joiner joiner = Joiner.on((char)1);
         
         parent = Files.createTempDir();
@@ -68,7 +71,8 @@ public class ItunesEpfUpdateTaskTest extends TestCase {
                 "Diversity Day","","R1101","The Office, Season 1","2005 03 29","2005 NBC Universal","http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewTVSeason?uo=5&i=102225077&id=102772946","http://a708.phobos.apple.com/us/r1000/021/Music/c8/1b/65/mzi.qkeekydh.133x100-99.jpg","","","SD","1.89","","","",""
         )), new File(parent,"tvEpisode-gbr.txt"), Charsets.UTF_8);
     }
-    
+
+    @Test
     public void testUpdaterWritesBrandsFromArtistsFile() {
         
         ItunesEpfUpdateTask task = new ItunesEpfUpdateTask(dataSupplier, writer, new NullAdapterLog());

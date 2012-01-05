@@ -7,8 +7,9 @@ import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
@@ -30,9 +31,11 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     private final ScheduleResolver resolver;
     private final Set<Publisher> supportedPublishers;
     private final Duration flexibility;
+	private ChannelResolver channelResolver;
 
-    public BroadcastMatchingItemEquivalenceGenerator(ScheduleResolver resolver, Set<Publisher> supportedPublishers, Duration flexibility) {
+    public BroadcastMatchingItemEquivalenceGenerator(ScheduleResolver resolver, ChannelResolver channelResolver, Set<Publisher> supportedPublishers, Duration flexibility) {
         this.resolver = resolver;
+        this.channelResolver = channelResolver;
         this.supportedPublishers = supportedPublishers;
         this.flexibility = flexibility;
     }
@@ -87,30 +90,30 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
 
     private static final Set<String> ignoredChannels = ImmutableSet.<String>builder()
-        .add(Channel.BBC_ONE_NORTHERN_IRELAND.uri())
-        .add(Channel.BBC_ONE_CAMBRIDGE.uri())
-        .add(Channel.BBC_ONE_CHANNEL_ISLANDS.uri())
-        .add(Channel.BBC_ONE_EAST.uri())
-        .add(Channel.BBC_ONE_EAST_MIDLANDS.uri())
-        .add(Channel.BBC_ONE_HD.uri())
-        .add(Channel.BBC_ONE_NORTH_EAST.uri())
-        .add(Channel.BBC_ONE_NORTH_WEST.uri())
-        .add(Channel.BBC_ONE_OXFORD.uri())
-        .add(Channel.BBC_ONE_SCOTLAND.uri())
-        .add(Channel.BBC_ONE_SOUTH.uri())
-        .add(Channel.BBC_ONE_SOUTH_EAST.uri())
-        .add(Channel.BBC_ONE_WALES.uri())
-        .add(Channel.BBC_ONE_SOUTH_WEST.uri())
-        .add(Channel.BBC_ONE_WEST.uri())
-        .add(Channel.BBC_ONE_WEST_MIDLANDS.uri())
-        .add(Channel.BBC_ONE_EAST_YORKSHIRE.uri())
-        .add(Channel.BBC_ONE_YORKSHIRE.uri())
-        .add(Channel.BBC_TWO_NORTHERN_IRELAND.uri())
-        .add(Channel.BBC_TWO_NORTHERN_IRELAND_ALALOGUE.uri())
-        .add(Channel.BBC_TWO_SCOTLAND.uri())
-        .add(Channel.BBC_TWO_WALES.uri())
-        .add(Channel.BBC_TWO_WALES_ANALOGUE.uri())
-        .add(Channel.BBC_RADIO_RADIO4_LW.uri())
+		.add("http://www.bbc.co.uk/services/bbcone/ni")
+		.add("http://www.bbc.co.uk/services/bbcone/cambridge")
+		.add("http://www.bbc.co.uk/services/bbcone/channel_islands")
+		.add("http://www.bbc.co.uk/services/bbcone/east")
+		.add("http://www.bbc.co.uk/services/bbcone/east_midlands")
+		.add("http://www.bbc.co.uk/services/bbcone/hd")
+		.add("http://www.bbc.co.uk/services/bbcone/north_east")
+		.add("http://www.bbc.co.uk/services/bbcone/north_west")
+		.add("http://www.bbc.co.uk/services/bbcone/oxford")
+		.add("http://www.bbc.co.uk/services/bbcone/scotland")
+		.add("http://www.bbc.co.uk/services/bbcone/south")
+		.add("http://www.bbc.co.uk/services/bbcone/south_east")
+		.add("http://www.bbc.co.uk/services/bbcone/wales")
+		.add("http://www.bbc.co.uk/services/bbcone/south_west")
+		.add("http://www.bbc.co.uk/services/bbcone/west")
+		.add("http://www.bbc.co.uk/services/bbcone/west_midlands")
+		.add("http://www.bbc.co.uk/services/bbcone/east_yorkshire")
+		.add("http://www.bbc.co.uk/services/bbcone/yorkshire")
+		.add("http://www.bbc.co.uk/services/bbctwo/ni")
+		.add("http://www.bbc.co.uk/services/bbctwo/ni_analogue")
+		.add("http://www.bbc.co.uk/services/bbctwo/scotland")
+		.add("http://www.bbc.co.uk/services/bbctwo/wales")
+		.add("http://www.bbc.co.uk/services/bbctwo/wales_analogue")
+		.add("http://www.bbc.co.uk/services/radio4/lw")
      .build();
 
     private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts, final ResultDescription desc) {
@@ -150,7 +153,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     private Schedule scheduleAround(Broadcast broadcast, Set<Publisher> publishers) {
         DateTime start = broadcast.getTransmissionTime().minus(flexibility);
         DateTime end = broadcast.getTransmissionEndTime().plus(flexibility);
-        Channel channel = Channel.fromUri(broadcast.getBroadcastOn()).requireValue();
+        Channel channel = channelResolver.fromUri(broadcast.getBroadcastOn()).requireValue();
 
         return resolver.schedule(start, end, ImmutableSet.of(channel), publishers);
     }

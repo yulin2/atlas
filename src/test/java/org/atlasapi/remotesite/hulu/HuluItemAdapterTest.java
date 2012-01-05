@@ -13,6 +13,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter.HuluItemCanonicaliser;
+import org.junit.Test;
 
 import com.metabroadcast.common.intl.Countries;
 
@@ -23,7 +24,7 @@ public class HuluItemAdapterTest extends TestCase {
     private final String vanityUrl = episodeUrl+"/glee-asian-f#s-p1-so-i0";
     private final HuluItemAdapter adapter = basicHuluItemAdapter(new HttpBackedHuluClient(HttpClients.screenScrapingClient(),log));
 
-    public void testShouldRetrieveHuluItem() throws Exception {
+    public void shouldRetrieveHuluItem() throws Exception {
         Episode item = (Episode) adapter.fetch(vanityUrl);
         assertNotNull(item);
 
@@ -89,18 +90,21 @@ public class HuluItemAdapterTest extends TestCase {
         assertEquals(Countries.US, location.getPolicy().getAvailableCountries().iterator().next());
     }
 
+    @Test
     public void testShouldBeAbleToFetch() throws Exception {
         assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348/glee-funk"));
         assertTrue(adapter.canFetch("http://www.hulu.com/watch/152348"));
         assertFalse(adapter.canFetch("http://www.hulu.com/glee"));
     }
 
+    @Test
     public void testCanonicaliser() throws Exception {
         assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348/glee-funk"));
         assertEquals("http://www.hulu.com/watch/152348", new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/watch/152348"));
         assertNull(new HuluItemCanonicaliser().canonicalise("http://www.hulu.com/glee"));
     }
     
+    @Test
     public void testShouldReturnNullOn404() { 
     	assertNull(adapter.fetch("http://www.hulu.com/watch/1782261234123421835349856794835649876439876"));
     }
