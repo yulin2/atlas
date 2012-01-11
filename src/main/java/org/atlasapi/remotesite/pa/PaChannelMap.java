@@ -561,9 +561,9 @@ public class PaChannelMap {
         channelMap.put(370, Channel.SUNSHINE_855);
         channelMap.put(371, Channel.JUICE_107.2);
         channelMap.put(372, Channel.107.4_THE_SEVERN);
-        channelMap.put(373, Channel.TFM_RADIO);
-        channelMap.put(1191, Channel.BBC_THREE_COUNTIES_RADIO);
-        channelMap.put(375, Channel.TIPPERARY_MID_WEST_FM_RADIO);
+        channelMap.put(373, Channel.TFM_RADIO);*/
+        channelMap.put(1191, Channel.BBC_RADIO_THREECOUNTIES);
+        /*channelMap.put(375, Channel.TIPPERARY_MID_WEST_FM_RADIO);
         channelMap.put(376, Channel.TIPP_FM);
         channelMap.put(377, Channel.TOWER_107.4FM);
         channelMap.put(378, Channel.TRENT_FM);
@@ -622,9 +622,9 @@ public class PaChannelMap {
         channelMap.put(456, Channel.KEY_103);
         channelMap.put(457, Channel.PEAK_107FM);
         channelMap.put(460, Channel.MAGIC_1152_(MANCHESTER));
-        channelMap.put(461, Channel.RTE_LYRIC_FM);
-        channelMap.put(462, Channel.BBC_LONDON);
-        channelMap.put(463, Channel.LINCS_FM);
+        channelMap.put(461, Channel.RTE_LYRIC_FM);*/
+        channelMap.put(462, Channel.BBC_RADIO_LONDON);
+        /* channelMap.put(463, Channel.LINCS_FM);
         channelMap.put(464, Channel.Q102);
         channelMap.put(465, Channel.ISLAND_FM);
         channelMap.put(466, Channel.IMAGINE_FM);
@@ -674,7 +674,7 @@ public class PaChannelMap {
         channelMap.put(564, Channel.BBC_RADIO_SUFFOLK);
 //        channelMap.put(567, Channel.BBC_RADIO_SWINDON);
         channelMap.put(569, Channel.BBC_RADIO_WILTSHIRE);
-//        channelMap.put(570, Channel.BBC_RADIO_RADIOWM);
+        channelMap.put(570, Channel.BBC_RADIO_WM);
         channelMap.put(568, Channel.BBC_RADIO_YORK);
         channelMap.put(575, Channel.ABSOLUTE_RADIO);
 /*        channelMap.put(576, Channel.GALAXY_102);
