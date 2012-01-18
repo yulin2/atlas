@@ -97,7 +97,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
     
     private Predicate<LookupRef> enabledPublishers(ApplicationConfiguration config) {
-        final Set<Publisher> enabledPublishers = config.getEnabledSources();
+        final Set<Publisher> enabledPublishers = config.getIncludedPublishers();
         return new Predicate<LookupRef>() {
             @Override
             public boolean apply(LookupRef input) {

@@ -66,7 +66,7 @@ public abstract class BaseController<T> {
     }
     
     protected Set<Publisher> publishers(String publisherString, ApplicationConfiguration config) {
-        Set<Publisher> appPublishers = ImmutableSet.copyOf(config.orderdPublishers());
+        Set<Publisher> appPublishers = ImmutableSet.copyOf(config.publishersInOrder());
         if (Strings.isNullOrEmpty(publisherString)) {
             return appPublishers;
         }
