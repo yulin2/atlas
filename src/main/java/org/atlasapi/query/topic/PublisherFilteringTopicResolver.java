@@ -22,7 +22,7 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
     
     @Override
     public Iterable<Topic> topicsFor(ContentQuery query) {
-        final Set<Publisher> includedPublishers = query.getConfiguration().getEnabledSources();
+        final Set<Publisher> includedPublishers = query.getConfiguration().getIncludedPublishers();
         return query.getSelection().applyTo(Iterables.filter(delegate.topicsFor(query), new Predicate<Topic>() {
             @Override
             public boolean apply(Topic input) {

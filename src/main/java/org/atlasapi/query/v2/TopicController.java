@@ -64,7 +64,7 @@ public class TopicController extends BaseController<Topic> {
         Topic topic = topicForUri.requireValue();
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(Sets.intersection(query.getConfiguration().getEnabledSources(),topic.getPublishers()).isEmpty()) {
+        if(Sets.intersection(query.getConfiguration().getIncludedPublishers(),topic.getPublishers()).isEmpty()) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
             return;
         }
@@ -88,7 +88,7 @@ public class TopicController extends BaseController<Topic> {
         Topic topic = topicForUri.requireValue();
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(Sets.intersection(query.getConfiguration().getEnabledSources(),topic.getPublishers()).isEmpty()) {
+        if(Sets.intersection(query.getConfiguration().getIncludedPublishers(),topic.getPublishers()).isEmpty()) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
             return;
         }
