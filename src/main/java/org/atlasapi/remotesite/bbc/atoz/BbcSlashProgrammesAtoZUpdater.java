@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.bbc.atoz;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -10,10 +11,13 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
+import org.atlasapi.remotesite.bbc.ProgressStore;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
@@ -25,25 +29,36 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
     private final List<String> channels = ImmutableList.of("bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd", "radio2", "radio1", "radio3", "radio4");
 	
 	private final AdapterLog log;
+
+    private final ProgressStore progressStore;
     
-    public BbcSlashProgrammesAtoZUpdater(ContentWriter writer, AdapterLog log) {
-        this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(writer, log), log);
+    public BbcSlashProgrammesAtoZUpdater(ContentWriter writer, ProgressStore progressStore, TopicStore topicStore, AdapterLog log) {
+        this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(writer,topicStore, log), progressStore, log);
     }
 
-    public BbcSlashProgrammesAtoZUpdater(RemoteSiteClient<SlashProgrammesAtoZRdf> client, BbcProgrammeAdapter fetcher, AdapterLog log) {
+    public BbcSlashProgrammesAtoZUpdater(RemoteSiteClient<SlashProgrammesAtoZRdf> client, BbcProgrammeAdapter fetcher, ProgressStore progressStore, AdapterLog log) {
         this.client = client;
         this.fetcher = fetcher;
+        this.progressStore = progressStore;
 		this.log = log;
     }
 
     @Override
     public void runTask() {
     	ExecutorService executor = Executors.newFixedThreadPool(3);
-        for (String channel : channels) {
+    	
+    	Entry<String, String> progress = progressStore.getProgress();
+    	List<String> remaingChannels = progress == null ? channels : channels.subList(channels.indexOf(progress.getKey()), channels.size());
+    	String lastPid = progress == null ? null : progress.getValue();
+    	
+        for (final String channel : remaingChannels) {
             final String uri = String.format(ATOZ_BASE, channel);
             try {
                 SlashProgrammesAtoZRdf atoz = client.get(uri);
-                for (final String pid : atoz.programmeIds()) {
+                for (final String pid : Ordering.natural().immutableSortedCopy(atoz.programmeIds())) {
+                    if(lastPid != null && lastPid.compareTo(pid) > 0) {
+                        continue;
+                    }
                     executor.execute(new Runnable() {
 						@Override
 						public void run() {
@@ -51,16 +66,25 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 								return;
 							}
 							reportStatus(uri + " : " + pid);
-							loadAndSave(pid);							
+							loadAndSave(pid);		
+							progressStore.saveProgress(channel, pid);
 						}
                     });
+                    if(!shouldContinue()) {
+                        break;
+                    }
                 }
             } catch (Exception e) {
             	log.record(new AdapterLogEntry(Severity.WARN).withCause(e).withUri(uri).withDescription("Failed to load BBC atoz page: " + uri).withSource(getClass()));
             }
+            lastPid = null;
+            if(!shouldContinue()) {
+                break;
+            }
         }
         executor.shutdown();
         try {
+            reportStatus("Awaiting shutdown");
             executor.awaitTermination(10, TimeUnit.DAYS);
         }catch (InterruptedException e) {
             log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withCause(e).withDescription("Interrupted waiting for executor to terminate"));

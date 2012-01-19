@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
@@ -39,7 +40,7 @@ public class C4BrandExtractor {
 
     private static final Pattern BAD_EPISODE_REDIRECT = Pattern.compile("(\\/episode-guide\\/series-\\d+)");
 
-    private final C4BrandBasicDetailsExtractor basicDetailsExtractor = new C4BrandBasicDetailsExtractor();
+    private final C4BrandBasicDetailsExtractor basicDetailsExtractor;
     private final C4SeriesExtractor seriesExtractor;
     
     private final C4EpisodesExtractor fourOditemExtrator;
@@ -56,7 +57,7 @@ public class C4BrandExtractor {
 
 	private final ContentWriter contentWriter;
 
-    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentWriter, C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
+    public C4BrandExtractor(RemoteSiteClient<Feed> atomClient, ContentResolver contentResolver, ContentWriter contentWriter, ChannelResolver channelResolver, C4LakeviewOnDemandFetcher lakeviewFetcher, AdapterLog log) {
         feedClient = atomClient;
 		this.contentWriter = contentWriter;
         this.log = log;
@@ -67,6 +68,7 @@ public class C4BrandExtractor {
         versionMerger = new C4PreviousVersionDataMerger(contentResolver);
         synthesizedItemUpdater = new C4SynthesizedItemUpdater(contentResolver, contentWriter);
         broadcastExtractor = new C4EpisodeBroadcastExtractor(log);
+        basicDetailsExtractor = new C4BrandBasicDetailsExtractor(channelResolver);
     }
 
     public Brand write(Feed source) {
@@ -291,11 +293,11 @@ public class C4BrandExtractor {
                     } else {
                         version = episode.getVersions().iterator().next();
                     }
-                    synthesizedItemUpdater.findAndUpdateFromPossibleSynthesized(broadcast.getId(), episode, brand.getCanonicalUri());
+                    synthesizedItemUpdater.findAndUpdateFromPossibleSynthesized(broadcast.getSourceId(), episode, brand.getCanonicalUri());
 
                     boolean found = false;
                     for (Broadcast currentBroadcast : version.getBroadcasts()) {
-                        if (currentBroadcast.equals(broadcast) || (currentBroadcast.getId() != null && currentBroadcast.getId().equals(broadcast.getId()))) {
+                        if (currentBroadcast.equals(broadcast) || (currentBroadcast.getSourceId() != null && currentBroadcast.getSourceId().equals(broadcast.getSourceId()))) {
                             currentBroadcast.setAliases(broadcast.getAliases());
                             currentBroadcast.setLastUpdated(broadcast.getLastUpdated());
                             found = true;

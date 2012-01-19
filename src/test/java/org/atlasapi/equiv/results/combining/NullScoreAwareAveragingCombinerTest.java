@@ -10,6 +10,7 @@ import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 
@@ -27,7 +28,8 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
         target.setTitle("Test " + title);
         return target;
     }
-    
+
+    @Test
     public void testCombine() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(
@@ -43,7 +45,8 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
         assertEquals(Score.valueOf(7.5), combined.equivalents().get(equivalent1));
         assertEquals(Score.valueOf(5.0), combined.equivalents().get(equivalent2));
     }
-    
+
+    @Test
     public void testCombineNulls() {
         
         List<ScoredEquivalents<Item>> scores = ImmutableList.of(

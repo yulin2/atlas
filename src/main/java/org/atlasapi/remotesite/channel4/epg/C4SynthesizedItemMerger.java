@@ -56,7 +56,7 @@ public class C4SynthesizedItemMerger {
          */
         Set<String> currentBroadcastIds = currentBroadcastIds(version.getBroadcasts());
         for (Broadcast synthBroadcast : synthVersion.getBroadcasts()) {
-            if (!currentBroadcastIds.contains(synthBroadcast.getId())) {
+            if (!currentBroadcastIds.contains(synthBroadcast.getSourceId())) {
                 version.addBroadcast(synthBroadcast);
             }
         }
@@ -66,7 +66,7 @@ public class C4SynthesizedItemMerger {
         return ImmutableSet.copyOf(Iterables.transform(broadcasts, new Function<Broadcast, String>() {
             @Override
             public String apply(Broadcast broadcast) {
-                return broadcast.getId();
+                return broadcast.getSourceId();
             }
         }));
     }

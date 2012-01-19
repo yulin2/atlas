@@ -25,13 +25,18 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSameAs;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesTopic;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesVersion;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
@@ -48,16 +53,28 @@ public class BbcProgrammeAdapter  {
     private final BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient;
 
 	private final ContentWriter writer;
+    private final BbcSlashProgrammesRdfClient<SlashProgrammesRdf> topicClient;
 
-    public BbcProgrammeAdapter(ContentWriter writer, AdapterLog log) {
-        this(writer, new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), new BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf>(SlashProgrammesVersionRdf.class), new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), new BbcProgrammeGraphExtractor(log), log);
+    public BbcProgrammeAdapter(ContentWriter writer, TopicStore topicStore, AdapterLog log) {
+        this(writer, 
+                new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
+                new BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf>(SlashProgrammesVersionRdf.class), 
+                new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
+                new BbcSlashProgrammesRdfClient<SlashProgrammesRdf>(SlashProgrammesRdf.class), 
+                new BbcProgrammeGraphExtractor(topicStore,log), log);
     }
 
-    public BbcProgrammeAdapter(ContentWriter writer, BbcSlashProgrammesRdfClient<SlashProgrammesRdf> episodeClient, BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf> versionClient, BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient, ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
+    public BbcProgrammeAdapter(ContentWriter writer, 
+            BbcSlashProgrammesRdfClient<SlashProgrammesRdf> episodeClient, 
+            BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf> versionClient, 
+            BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient, 
+            BbcSlashProgrammesRdfClient<SlashProgrammesRdf> topicClient, 
+            ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
         this.writer = writer;
 		this.versionClient = versionClient;
         this.episodeClient = episodeClient;
         this.clipClient = clipClient;
+        this.topicClient = topicClient;
         this.itemExtractor = propertyExtractor;
         this.brandExtractor = new BbcBrandExtractor(this, writer, log);
     }
@@ -141,10 +158,48 @@ public class BbcProgrammeAdapter  {
 		    }
 		}
 		
-		BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, versions, clips);
+//		Set<SlashProgrammesTopic> subjects = content.episode().subjects() != null ? content.episode().subjects() : ImmutableSet.<SlashProgrammesTopic>of();
+//		Set<SlashProgrammesTopic> people = content.episode().people() != null ? content.episode().people() : ImmutableSet.<SlashProgrammesTopic>of();
+//		Set<SlashProgrammesTopic> places = content.episode().places() != null ? content.episode().places() : ImmutableSet.<SlashProgrammesTopic>of();
+		ImmutableMap.Builder<SlashProgrammesTopic,String> topicUriMap = ImmutableMap.builder();
+//		for (SlashProgrammesTopic topic : Iterables.concat(subjects, people, places)) {
+//            String resolvedTopicSameAs = resolveTopic(topic);
+//            if(resolvedTopicSameAs != null) {
+//                topicUriMap.put(topic, resolvedTopicSameAs);
+//            }
+//        }
+		
+		BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, versions, clips, topicUriMap.build());
 		Item item = itemExtractor.extract(source);
 		return item;
 	}
+
+    private String resolveTopic(SlashProgrammesTopic topic) {
+        String topicUri = "http://www.bbc.co.uk" + topic.resourceUri().substring(0, topic.resourceUri().indexOf("#"));
+        SlashProgrammesRdf topicRdf = getSlashProgrammesDataForTopic(topicUri);
+        
+        if(topicRdf == null) {
+            return null;
+        }
+        if (topicRdf.description() != null && topicRdf.description().getSameAs() != null) {
+            for (SlashProgrammesSameAs sameAs : topicRdf.description().getSameAs()) {
+                String resourceUri = sameAs.resourceUri();
+                if(resourceUri.startsWith("http://dbpedia.org")) {
+                    return resourceUri;
+                }
+            }
+        }
+        return null;
+    }
+
+    private SlashProgrammesRdf getSlashProgrammesDataForTopic(String topicUri) {
+        try {
+            return topicClient.get(topicUri + ".rdf");
+        } catch (Exception e) {
+            oldLog.warn(e);
+            return null;
+        }
+    }
 
     private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {
         try {

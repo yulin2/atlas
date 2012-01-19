@@ -2,15 +2,19 @@ package org.atlasapi.remotesite.redux;
 
 import static org.atlasapi.remotesite.redux.HttpBackedReduxClient.reduxClientForHost;
 import static org.atlasapi.remotesite.redux.ReduxLatestUpdateTasks.completeReduxLatestTask;
-import static org.atlasapi.remotesite.redux.ReduxLatestUpdateTasks.maximumReduxLatestTask;
+import static org.atlasapi.remotesite.redux.ReduxLatestUpdateTasks.untilFoundReduxLatestTask;
 
 import java.text.ParseException;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +27,9 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 @Configuration
 public class ReduxModule {
 
+    private @Autowired @Qualifier("contentResolver") ContentResolver resolver;
     private @Autowired ContentWriter writer;
+    private @Autowired ChannelResolver channelResolver;
     private @Autowired AdapterLog log;
     private @Autowired SimpleScheduler taskScheduler;
 
@@ -42,8 +48,9 @@ public class ReduxModule {
     
     @PostConstruct
     public void scheduleTasks() {
-        taskScheduler.schedule(maximumReduxLatestTask(1000, reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Latest 1000 updater"), RepetitionRules.NEVER);
-        taskScheduler.schedule(ReduxLatestUpdateTasks.firstBatchOnlyReduxLatestTask(reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Latest First Batch updater"), RepetitionRules.NEVER);
+//        taskScheduler.schedule(maximumReduxLatestTask(1000, reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Latest 1000 updater"), RepetitionRules.NEVER);
+//        taskScheduler.schedule(ReduxLatestUpdateTasks.firstBatchOnlyReduxLatestTask(reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Latest First Batch updater"), RepetitionRules.NEVER);
+        taskScheduler.schedule(untilFoundReduxLatestTask(reduxClient(), writer, reduxProgrammeAdapter(), log, resolver).withName("Redux Until Found Updater"), RepetitionRules.every(Duration.standardHours(1)));
         taskScheduler.schedule(completeReduxLatestTask(reduxClient(), writer, reduxProgrammeAdapter(), log).withName("Redux Complete Latest updater"), RepetitionRules.NEVER);
     }
 
@@ -54,7 +61,7 @@ public class ReduxModule {
 
     @Bean
     protected DefaultReduxProgrammeAdapter reduxProgrammeAdapter() {
-        return new DefaultReduxProgrammeAdapter(reduxClient(), new FullProgrammeItemExtractor(log));
+        return new DefaultReduxProgrammeAdapter(reduxClient(), new FullProgrammeItemExtractor(channelResolver, log));
     }
 
 }

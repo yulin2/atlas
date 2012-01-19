@@ -19,8 +19,9 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.remotesite.FixedResponseHttpClient;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.io.Resources;
 import com.metabroadcast.common.http.SimpleHttpClient;
@@ -28,7 +29,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class C4HomepageClientTest extends MockObjectTestCase {
+public class C4HomepageClientTest extends TestCase {
 
 	String FOUR_OD_HOMEPAGE = "http://www.channel4.com/programmes/4od";
 	String HIGHLIGHTS_URI = "http://www.channel4.com/programmes/4od/highlights";

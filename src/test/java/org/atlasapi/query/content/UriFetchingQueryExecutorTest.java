@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.hasItems;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -27,7 +29,10 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -36,31 +41,35 @@ import com.google.common.collect.ImmutableMap;
  * @author Robert Chatley (robert@metabroadcast.com)
  */
 @SuppressWarnings("unchecked")
-public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class UriFetchingQueryExecutorTest extends TestCase {
 
 	private static final ContentQuery A_FILTER = ContentQuery.MATCHES_EVERYTHING;
 	
 	private static final Episode item1 = new Episode("item1", "curie:1", Publisher.BBC);
 	private static final Episode item2 = new Episode("item2", "curie:2", Publisher.BBC);
 
-	private Fetcher<Identified> fetcher = mock(Fetcher.class);
-	private KnownTypeQueryExecutor delegate = mock(KnownTypeQueryExecutor.class);
+    private final Mockery context = new Mockery();
+	private Fetcher<Identified> fetcher = context.mock(Fetcher.class);
+	private KnownTypeQueryExecutor delegate = context.mock(KnownTypeQueryExecutor.class);
 	
 	private UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate);
 
+    @Test
 	public void testThatWhenTheQueryIsSatisfiedByTheDatabaseThatTheFetcherIsNotUsed() throws Exception {
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(delegate).executeUriQuery(ImmutableList.of("item1"), A_FILTER); will(returnValue(uriContentMapFor(item1)));
 			never(fetcher);
 		}});
 		
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);
 	}
-	
+
+    @Test
 	public void testThatWhenTheQueryIsNotSatisfiedByTheDatabaseTheFetcherIsUsed() throws Exception {
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(delegate).executeUriQuery(ImmutableList.of("item1"), A_FILTER); will(returnValue(ImmutableMap.<String,List<Identified>>of()));
 			one(fetcher).fetch("item1"); will(returnValue(item1));
 			
@@ -71,10 +80,11 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 		
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);
 	}
-	
+
+    @Test
 	public void testThatIfTheFetcherReturnsNothingTheTheDBIsNotRetried() throws Exception {
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(delegate).executeUriQuery(ImmutableList.of("item1"), A_FILTER); will(returnValue(ImmutableMap.of()));
 			one(fetcher).fetch("item1"); will(returnValue(null));
 
@@ -82,11 +92,12 @@ public class UriFetchingQueryExecutorTest extends MockObjectTestCase {
 
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);
 	}
-	
+
+    @Test
 	public void testThatWhenSomeItemsAreInTheDatabaseAndSomeAreNotThatTheFetcherIsUsedOnTheMissingItems() throws Exception {
 		final List<String> urisOfItems1And2 = ImmutableList.of("item1", "item2");
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(delegate).executeUriQuery(urisOfItems1And2, A_FILTER); will(returnValue(uriContentMapFor(item1)));
 			one(fetcher).fetch("item2"); will(returnValue(item2));
 			one(delegate).executeUriQuery(with(hasItems("item2")), with(A_FILTER)); //will(returnValue(ImmutableList.of(item1, item2)));

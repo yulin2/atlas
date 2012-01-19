@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
+import org.junit.Test;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -17,6 +18,7 @@ import com.google.gson.reflect.TypeToken;
 
 public class BbcIonScheduleDeserialiserTest extends TestCase {
 
+    @Test
     public void testScheduleFrom() throws IOException {
         String json =  Resources.toString(Resources.getResource("ion-schedule.json"), Charsets.UTF_8);
         
@@ -34,7 +36,8 @@ public class BbcIonScheduleDeserialiserTest extends TestCase {
         
         assertThat(schedule.getBlocklist().get(0).isHasGuidance(), is(false));
     }
-    
+
+    @Test
     public void testEpisodeDetailFrom() throws IOException {
         String json =  Resources.toString(Resources.getResource("ion-episode-detail.json"), Charsets.UTF_8);
         

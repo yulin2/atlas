@@ -8,6 +8,8 @@ import static org.atlasapi.remotesite.worldservice.WsGenre.genresForCode;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -58,6 +60,9 @@ public class DefaultWsSeriesHandler implements WsSeriesHandler {
     }
 
     private void update(Brand wsBrand, WsSeries series) {
+        
+        wsBrand.setMediaType(MediaType.AUDIO);
+        wsBrand.setSpecialization(Specialization.RADIO);
         
         wsBrand.setTitle(series.getSeriesTitle());
         wsBrand.setGenres(genresForCode(series.getGenreCode()));

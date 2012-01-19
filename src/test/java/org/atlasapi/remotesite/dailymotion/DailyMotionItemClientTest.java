@@ -21,24 +21,32 @@ import static org.hamcrest.Matchers.startsWith;
 import java.io.IOException;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class DailyMotionItemClientTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class DailyMotionItemClientTest extends TestCase {
 
 	private String URI = "/uri";
-	
-	private SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
-	
+
+    private final Mockery context = new Mockery();
+	private SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
+
+    @Test
 	public void testTheClient() throws Exception {
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(httpClient).getContentsOf(URI); will(returnValue(itemHtml()));
 		}});
 		

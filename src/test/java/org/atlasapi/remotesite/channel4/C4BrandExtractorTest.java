@@ -11,6 +11,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
@@ -18,25 +20,37 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.testing.StubContentResolver;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
 
+@RunWith(JMock.class)
 public class C4BrandExtractorTest extends TestCase {
+    
+    private final Mockery context = new Mockery();
 
 	private final AtomFeedBuilder rknSeries3Feed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-series-3.atom"));
 	private final AtomFeedBuilder rknSeries4Feed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares-series-4.atom"));
@@ -60,12 +74,32 @@ public class C4BrandExtractorTest extends TestCase {
 	
 	private final static AdapterLog nullLog = new NullAdapterLog();
 	private final StubContentResolver contentResolver = new StubContentResolver();
+	private ChannelResolver channelResolver;
 	
-	
+	@Before
+	public void setUp() {
+		channelResolver = context.mock(ChannelResolver.class);
+		context.checking(new Expectations() {
+			{
+				allowing(channelResolver).fromUri("http://www.channel4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com"))));
+				allowing(channelResolver).fromUri("http://www.channel4.com/more4");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.more4.com"))));
+				allowing(channelResolver).fromUri("http://film4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", MediaType.VIDEO, "http://film4.com"))));
+				allowing(channelResolver).fromUri("http://www.e4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com"))));
+				allowing(channelResolver).fromUri("http://www.4music.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com"))));
+			}
+		});
+	}
+
+    @Test
 	public void testExtractingABrand() throws Exception {
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
 		
-		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 
 		Brand brand = Iterables.getOnlyElement(recordingWriter.updatedBrands);
 		
@@ -90,12 +124,13 @@ public class C4BrandExtractorTest extends TestCase {
 		Episode episodeNotOn4od = (Episode) find("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-5", recordingWriter.updatedItems);
 		assertThat(episodeNotOn4od.getVersions().size(), is(0));
 	}
-	
+
+    @Test
 	public void testThatBroadcastIsExtractedFromEpg() throws Exception {
 		
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
 
-	    new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+	    new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 	    
 	    boolean found = false;
 	    for (Item item : recordingWriter.updatedItems) {
@@ -107,7 +142,7 @@ public class C4BrandExtractorTest extends TestCase {
 	            for (Broadcast broadcast: version.getBroadcasts()) {
 	                if (broadcast.getBroadcastDuration() == 60*55) {
 	                    assertTrue(broadcast.getAliases().contains("tag:www.channel4.com,2009:slot/E439861"));
-	                    assertThat(broadcast.getId(), is("e4:39861"));
+	                    assertThat(broadcast.getSourceId(), is("e4:39861"));
 	                    assertEquals(new DateTime("2010-08-11T14:06:33.341Z", DateTimeZones.UTC), broadcast.getLastUpdated());
 	                    found = true;
 	                }
@@ -117,7 +152,8 @@ public class C4BrandExtractorTest extends TestCase {
 	    
 	    assertTrue(found);
 	}
-	
+
+    @Test
 	public void testOldEpisodeWithBroadcast() throws Exception {
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
 		
@@ -129,7 +165,7 @@ public class C4BrandExtractorTest extends TestCase {
 	    version.addBroadcast(oldBroadcast);
 	    contentResolver.respondTo(episode);
 	    
-	    new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+	    new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
         
         boolean found = false;
         boolean foundOld = false;
@@ -142,7 +178,7 @@ public class C4BrandExtractorTest extends TestCase {
                 for (Broadcast broadcast: version.getBroadcasts()) {
                     if (broadcast.getBroadcastDuration() == 60*55) {
                         assertTrue(broadcast.getAliases().contains("tag:www.channel4.com,2009:slot/E439861"));
-                        assertThat(broadcast.getId(), is("e4:39861"));
+                        assertThat(broadcast.getSourceId(), is("e4:39861"));
                         assertEquals(new DateTime("2010-08-11T14:06:33.341Z", DateTimeZones.UTC), broadcast.getLastUpdated());
                         found = true;
                     } else if (broadcast.getAliases().contains("tag:www.channel4.com:someid")) {
@@ -155,7 +191,8 @@ public class C4BrandExtractorTest extends TestCase {
         assertTrue(found);
         assertTrue(foundOld);
 	}
-	
+
+    @Test
 	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries1IsAssumed() throws Exception {
 	    HttpResponsePrologue response = new HttpResponsePrologue(403, "error").withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
 		
@@ -165,10 +202,11 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
 	}
-	
+
+    @Test
 	public void testThatWhenTheEpisodeGuide404sSeries1IsAssumed() throws Exception {
 	   HttpResponsePrologue response = new HttpResponsePrologue(404, "error");
 		
@@ -178,10 +216,11 @@ public class C4BrandExtractorTest extends TestCase {
 			.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-1.atom", rknSeries3Feed.build());
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
 	}
-	
+
+    @Test
 	public void testThatWhenTheEpisodeGuideReturnsABadStatusCodeSeries3IsReturned() throws Exception {
 	    HttpResponsePrologue response = new HttpResponsePrologue(403, "error").withFinalUrl("http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-3.atom");
         RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
@@ -190,25 +229,26 @@ public class C4BrandExtractorTest extends TestCase {
             .respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries4Feed.build());
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-        new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+        new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
         assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
     }
 	
-	
+    @Test
 	public void testFlattenedBrandsItemsAreNotPutIntoSeries() throws Exception {
 		 RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
          .respondTo("http://api.channel4.com/pmlsd/dispatches.atom", dispatchesBrandFeed.build())
          .respondTo("http://api.channel4.com/pmlsd/dispatches/episode-guide.atom", dispatchesEpisodeGuideFeed.build());
 		 
 		 RecordingContentWriter recordingWriter = new RecordingContentWriter();
-	     new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/dispatches");
+	     new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/dispatches");
 	     
 	     assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
 	     for (Item item : recordingWriter.updatedItems) {
 			assertThat(item.getVersions().size(), is(0));
 		}
 	}
-	
+
+    @Test
 	public void testThatWhenTheEpisodeGuideRedirectsToAnEpisodeFeedTheSeriesIsFetched() throws Exception {
 	   
 		Feed episodeFeed = new Feed();
@@ -220,20 +260,22 @@ public class C4BrandExtractorTest extends TestCase {
            .respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom", rknSeries3Feed.build());
 
 	   RecordingContentWriter recordingWriter = new RecordingContentWriter();
-       new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+       new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
        assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
 	}
-	
+
+    @Test
 	public void testThatWhenTheEpisodeGuideRedirectsToSeries1TheSeriesIsRead() throws Exception {
 		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
 			.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
 			.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", rknSeries3Feed.build());
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 	    assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
 	}
 
+    @Test
 	public void testThatClipsAreAddedToBrands() throws Exception {
 		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
 		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", rknBrandFeed.build())
@@ -241,10 +283,11 @@ public class C4BrandExtractorTest extends TestCase {
 		.respondTo("http://api.channel4.com/pmlsd/ramsays-kitchen-nightmares/video.atom", uglyBettyClipFeed.build());
 		
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		assertThat(Iterables.getOnlyElement(recordingWriter.updatedBrands).getClips().size(), is(greaterThan(1)));
 	}
-	
+
+    @Test
 	public void testThatOldLocationsAndBroadcastsAreCopied() {
 
 		RemoteSiteClient<Feed> feedClient = new StubC4AtomClient()
@@ -269,7 +312,7 @@ public class C4BrandExtractorTest extends TestCase {
 		contentResolver.respondTo(series3Ep1);
 		
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
-		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+		new C4AtomBackedBrandUpdater(feedClient, contentResolver, recordingWriter, channelResolver, null, nullLog).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
 		Item series3Ep1Parsed = Iterables.get(recordingWriter.updatedItems, 0);
 		
 		assertTrue(Iterables.getOnlyElement(series3Ep1Parsed.getVersions()) == c4Version);

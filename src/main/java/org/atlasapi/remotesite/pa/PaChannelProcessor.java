@@ -5,7 +5,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
@@ -46,7 +46,7 @@ public class PaChannelProcessor {
                     ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
                     if(itemAndBroadcast != null) {
 	                    broadcasts.add(itemAndBroadcast);
-	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getId(),itemAndBroadcast.getItemUri());
+	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
                     }
                     processed++;
                 } catch (Exception e) {
@@ -61,6 +61,7 @@ public class PaChannelProcessor {
             scheduleWriter.replaceScheduleBlock(Publisher.PA, channel, broadcasts);
             
         } catch (Exception e) {
+            //TODO: should we just throw e?
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s", channel.key()));
         }
         return processed;

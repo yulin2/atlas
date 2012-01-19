@@ -7,12 +7,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.beans.AtlasErrorSummary;
-import org.atlasapi.beans.AtlasModelType;
-import org.atlasapi.beans.AtlasModelWriter;
-import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
+import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.DateTime;
@@ -26,14 +27,16 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 @Controller
-public class ScheduleController extends BaseController {
+public class ScheduleController extends BaseController<ScheduleChannel> {
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
+	private ChannelResolver channelResolver;
     
-    public ScheduleController(ScheduleResolver scheduleResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter outputter) {
+    public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ScheduleChannel>> outputter) {
         super(configFetcher, log, outputter);
         this.scheduleResolver = scheduleResolver;
+        this.channelResolver = channelResolver;
     }
 
     @RequestMapping("/3.0/schedule.*")
@@ -63,7 +66,7 @@ public class ScheduleController extends BaseController {
             }
             
             Schedule schedule = scheduleResolver.schedule(fromWhen, toWhen, channels, publishers);
-            modelAndViewFor(request, response, schedule.scheduleChannels(), AtlasModelType.SCHEDULE);
+            modelAndViewFor(request, response, schedule.scheduleChannels());
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
@@ -72,7 +75,7 @@ public class ScheduleController extends BaseController {
     private Set<Channel> channels(String channelString) {
         ImmutableSet.Builder<Channel> channels = ImmutableSet.builder();
         for (String channelKey: URI_SPLITTER.split(channelString)) {
-            Maybe<Channel> channel = Channel.fromKey(channelKey);
+            Maybe<Channel> channel = channelResolver.fromKey(channelKey);
             if (channel.hasValue()) {
                 channels.add(channel.requireValue());
             }

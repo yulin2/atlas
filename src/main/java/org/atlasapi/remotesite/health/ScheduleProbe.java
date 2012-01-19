@@ -5,8 +5,8 @@ import static com.metabroadcast.common.health.ProbeResult.ProbeResultType.INFO;
 
 import java.util.List;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
@@ -102,6 +102,6 @@ public class ScheduleProbe implements HealthProbe {
 
     @Override
     public String slug() {
-        return String.format("%s%sschedule", publisher.name(), channel.key());
+        return String.format("%s%dschedule", publisher.name(), channel.getId());
     }
 }

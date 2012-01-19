@@ -15,7 +15,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.oembed;
 
-import org.atlasapi.feeds.OembedItem;
+import org.atlasapi.output.oembed.OembedItem;
 import org.atlasapi.remotesite.BaseSource;
 
 /**

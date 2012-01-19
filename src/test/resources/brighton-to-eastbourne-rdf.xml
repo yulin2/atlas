@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf      = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs     = "http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl      = "http://www.w3.org/2002/07/owl#"
+         xmlns:foaf     = "http://xmlns.com/foaf/0.1/"
+         xmlns:po       = "http://purl.org/ontology/po/"
+         xmlns:mo       = "http://purl.org/ontology/mo/"
+         xmlns:skos     = "http://www.w3.org/2008/05/skos#"
+         xmlns:time     = "http://www.w3.org/2006/time#"
+         xmlns:dc       = "http://purl.org/dc/elements/1.1/"
+         xmlns:dcterms  = "http://purl.org/dc/terms/"
+         xmlns:wgs84_pos= "http://www.w3.org/2003/01/geo/wgs84_pos#"
+         xmlns:timeline = "http://purl.org/NET/c4dm/timeline.owl#"
+         xmlns:event    = "http://purl.org/NET/c4dm/event.owl#">
+
+<rdf:Description rdf:about="/programmes/b0144pvg.rdf">
+  <rdfs:label>Description of the episode Bus trip from Brighton to Eastbourne</rdfs:label>
+  <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2011-08-26T02:07:55+01:00</dcterms:created>
+  <dcterms:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2011-08-26T02:07:55+01:00</dcterms:modified>
+  <foaf:primaryTopic rdf:resource="/programmes/b0144pvg#programme"/>
+</rdf:Description>
+
+<po:Episode rdf:about="/programmes/b0144pvg#programme">
+
+  <po:pid>b0144pvg</po:pid>
+  <dc:title>Bus trip from Brighton to Eastbourne</dc:title>
+  <po:short_synopsis>Sandi Toksvig takes a bus trip from Brighton to Eastbourne.</po:short_synopsis>
+  <po:medium_synopsis>Sandi Toksvig takes a bus trip from Brighton to Eastbourne and discovers the delights of the south coast of England, from a 1930s lido to the lighthouse at Beachy Head.</po:medium_synopsis>
+  <po:long_synopsis>Sandi Toksvig takes a bus trip along the south coast of England from Brighton to Eastbourne in the company of the listener who suggested it, Veronica Groocock. Together they discover the delights to be had on an ordinary scheduled bus route. These include Kipling&#39;s garden, a 1930s lido, the Greenwich meridian, a lamb called Hardy and the lighthouse at Beachy Head. 
+
+
+Producer: Harry Parker.</po:long_synopsis>
+
+  
+
+  <foaf:depiction rdf:resource="/iplayer/images/episode/b0144pvg_512_288.jpg"/>
+
+  <po:masterbrand rdf:resource="/radio4#service"/>
+
+  
+
+  <po:genre rdf:resource="/programmes/genres/factual/travel#genre" />
+
+  <po:format rdf:resource="/programmes/formats/magazinesandreviews#format" />
+
+  <po:subject rdf:resource="/programmes/topics/public_transport#subject" />
+
+  <po:person rdf:resource="/programmes/topics/sandi_toksvig#person" />
+
+  <po:place rdf:resource="/programmes/topics/brighton#place" />
+  <po:place rdf:resource="/programmes/topics/eastbourne#place" />
+
+  <po:version rdf:resource="/programmes/b0144nxy#programme" />
+
+
+</po:Episode>
+
+
+
+<po:Brand rdf:about="/programmes/b006qjds#programme">
+  <po:episode rdf:resource="/programmes/b0144pvg#programme"/>
+</po:Brand>
+
+
+</rdf:RDF>

@@ -11,6 +11,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.worldservice.WsProgrammeUpdate.WsProgrammeUpdateBuilder;
 import org.jets3t.service.security.AWSCredentials;
+import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import com.metabroadcast.common.time.DayOfWeek;
 
 @Configuration
 public class WorldServicesModule {
@@ -46,7 +48,7 @@ public class WorldServicesModule {
     
     @PostConstruct
     public void schedule() {
-        scheduler.schedule(worldServiceUpdateBuilder().updateLatest(), RepetitionRules.NEVER);
+        scheduler.schedule(worldServiceUpdateBuilder().updateLatest(), RepetitionRules.weekly(DayOfWeek.WEDNESDAY, new LocalTime(06,00,00)));
     }
     
 }

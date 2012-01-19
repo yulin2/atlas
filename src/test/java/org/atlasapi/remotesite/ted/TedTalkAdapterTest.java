@@ -15,8 +15,9 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.ted;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.remotesite.ted.TedTalkAdapter.TedTalkCanonicaliser;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 /**
  * Unit test for {@link TedTalkAdapter}.
@@ -24,7 +25,7 @@ import org.jmock.integration.junit3.MockObjectTestCase;
  * @author Robert Chatley (robert@metabroadcast.com)
  * @author John Ayres (john@metabroadcast.com)
  */
-public class TedTalkAdapterTest extends MockObjectTestCase {
+public class TedTalkAdapterTest extends TestCase {
 	
 	
 	public void testCanFetchResourcesForTedTalks() throws Exception {

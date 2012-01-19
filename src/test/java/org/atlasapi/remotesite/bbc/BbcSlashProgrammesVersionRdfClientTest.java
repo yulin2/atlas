@@ -17,10 +17,10 @@ package org.atlasapi.remotesite.bbc;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
-import org.jmock.integration.junit3.MockObjectTestCase;
 import org.joda.time.DateTime;
 
 import com.google.common.io.Resources;
@@ -32,7 +32,7 @@ import com.metabroadcast.common.time.DateTimeZones;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BbcSlashProgrammesVersionRdfClientTest extends MockObjectTestCase {
+public class BbcSlashProgrammesVersionRdfClientTest extends TestCase {
 	
 	String URI = "http://example.com";
 	

@@ -2,6 +2,8 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Clip;
@@ -10,11 +12,10 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.io.Resources;
 
-public class C4ClipExtractorTest extends MockObjectTestCase {
+public class C4ClipExtractorTest extends TestCase {
 
 	private final AtomFeedBuilder fourOdFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "hestons-mission-impossible.atom"));
 	

@@ -38,6 +38,13 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		brand3.addEquivalentTo(brand1);
 		item1.addEquivalentTo(item2);
 		item2.addClip(clip1);
+		
+		brand1.setId("one");
+		brand2.setId("two");
+		brand3.setId("three");
+		item1.setId("eyeone");
+		item2.setId("eyetwo");
+		clip1.setId("clipone");
 	}
 	
 	public void dontTestMergingBrands() throws Exception {
@@ -71,6 +78,11 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 			public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 				return ImmutableMap.<String, List<Identified>>of(respondWith[0].getCanonicalUri(), ImmutableList.<Identified>copyOf(respondWith));
 			}
+
+            @Override
+            public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, ContentQuery query) {
+                return ImmutableMap.<String, List<Identified>>of(respondWith[0].getStringId(), ImmutableList.<Identified>copyOf(respondWith));
+            }
 		};
 	}
 }

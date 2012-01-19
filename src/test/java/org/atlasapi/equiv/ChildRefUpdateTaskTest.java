@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import junit.framework.TestCase;
 
 import org.atlasapi.equiv.update.tasks.ScheduleTaskProgressStore;
 import org.atlasapi.media.entity.Brand;
@@ -19,25 +20,32 @@ import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
-public class ChildRefUpdateTaskTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class ChildRefUpdateTaskTest extends TestCase {
 
-    ScheduleTaskProgressStore progressStore = mock(ScheduleTaskProgressStore.class);
-    ContentResolver resolver = mock(ContentResolver.class);
-    ContentLister lister = mock(ContentLister.class);
+    private final Mockery context = new Mockery();
+    ScheduleTaskProgressStore progressStore = context.mock(ScheduleTaskProgressStore.class);
+    ContentResolver resolver = context.mock(ContentResolver.class);
+    ContentLister lister = context.mock(ContentLister.class);
     
     DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
     
     ChildRefUpdateTask task = new ChildRefUpdateTask(lister, resolver, mongo, progressStore, new NullAdapterLog()).forPublishers(BBC);
     
-    ContainerTranslator translator = new ContainerTranslator();
+    ContainerTranslator translator = new ContainerTranslator(new SubstitutionTableNumberCodec());
     
+    @Test
     public void testUpdatesChildRefSortKeys() {
         
         final String containerUri = "brandUri";
@@ -52,7 +60,7 @@ public class ChildRefUpdateTaskTest extends MockObjectTestCase {
         ep2.setSeriesNumber(5);
         ep2.setEpisodeNumber(6);
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             ignoring(progressStore);
             one(lister).listContent(with(any(ContentListingCriteria.class))); will(returnValue(Iterators.forArray(aContainer(containerUri, ep1.childRef(), ep2.childRef()))));
             one(resolver).findByCanonicalUris(with(hasItems(ep1Uri, ep2Uri))); will(returnValue(ResolvedContent.builder().put(ep1Uri, ep1).put(ep2Uri, ep2).build()));

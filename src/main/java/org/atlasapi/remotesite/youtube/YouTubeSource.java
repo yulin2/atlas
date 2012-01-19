@@ -21,7 +21,6 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.feeds.Defect;
 import org.atlasapi.remotesite.BaseSource;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.joda.time.Duration;
@@ -132,7 +131,7 @@ public class YouTubeSource extends BaseSource {
             try {
                 result.add(ATLAS_GENRES_SCHEME + URLEncoder.encode(videoEntry.category, com.google.common.base.Charsets.UTF_8.name()));
             } catch (UnsupportedEncodingException e) {
-                throw new Defect("UTF-8 not found");
+                throw new RuntimeException("UTF-8 not found");
             }
         }
         return result;

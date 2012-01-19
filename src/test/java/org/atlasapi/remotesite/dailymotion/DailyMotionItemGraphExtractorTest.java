@@ -19,6 +19,8 @@ import static org.hamcrest.Matchers.is;
 
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -27,14 +29,13 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;
 
 /**
  * @author John Ayres (john@metabroadcast.com)
  */
-public class DailyMotionItemGraphExtractorTest extends MockObjectTestCase {
+public class DailyMotionItemGraphExtractorTest extends TestCase {
 	
 	static final String ITEM_URI = "http://www.dailymotion.com/video/xbqomc_dont-do-anything_fun";
 	

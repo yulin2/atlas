@@ -1,20 +1,14 @@
 package org.atlasapi.remotesite.channel4;
 
-import static org.atlasapi.media.entity.Channel.CHANNEL_FOUR;
-import static org.atlasapi.media.entity.Channel.E_FOUR;
-import static org.atlasapi.media.entity.Channel.FILM_4;
-import static org.atlasapi.media.entity.Channel.FOUR_MUSIC;
-import static org.atlasapi.media.entity.Channel.MORE_FOUR;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.equiv.query.SeriesAndEpisodeNumber;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
@@ -76,6 +70,19 @@ public class C4AtomApi {
     public static final Pattern SLOT_PATTERN = Pattern.compile("tag:.*,\\d{4}:slot/(\\d+)");
 	private static final Pattern AVAILABILTY_RANGE_PATTERN = Pattern.compile("start=(.*); end=(.*); scheme=W3C-DTF");
 
+	private final BiMap<String, Channel> channelMap;
+	
+	
+
+	public C4AtomApi(ChannelResolver channelResolver) {
+		channelMap = ImmutableBiMap.<String, Channel>builder()
+	            .put("C4", channelResolver.fromUri("http://www.channel4.com").requireValue())
+	            .put("M4", channelResolver.fromUri("http://www.channel4.com/more4").requireValue())
+	            .put("F4", channelResolver.fromUri("http://film4.com").requireValue())
+	            .put("E4", channelResolver.fromUri("http://www.e4.com").requireValue())
+	            .put("4M", channelResolver.fromUri("http://www.4music.com").requireValue())
+	            .build();
+	}
 	
 	public static void addImages(Described content, String anImage) {
 		if (! Strings.isNullOrEmpty(anImage)) {
@@ -250,13 +257,9 @@ public class C4AtomApi {
 		return null;
 	}
 	
-	public final static BiMap<String, Channel> C4_CHANNEL_MAP = ImmutableBiMap.of(
-            "C4", CHANNEL_FOUR,
-            "M4", MORE_FOUR,
-            "F4", FILM_4,
-            "E4", E_FOUR,
-            "4M", FOUR_MUSIC
-    );
+	public BiMap<String, Channel> getChannelMap() {
+		return channelMap;
+	}
 	
 	public static Location locationFrom(String uri, String locationId, Map<String, String> lookup, Set<Country> availableCountries, DateTime lastUpdated, Platform platform) {
 		Location location = new Location();
