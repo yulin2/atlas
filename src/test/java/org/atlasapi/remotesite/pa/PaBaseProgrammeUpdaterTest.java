@@ -197,6 +197,9 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
 		@Override
 		public Maybe<Channel> fromUri(String uri) {
+			if("http://www.bbc.co.uk/bbcone".equals(uri)) {
+				return Maybe.just(new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone"));
+			}
 			return Maybe.just(new Channel());
 		}
 
