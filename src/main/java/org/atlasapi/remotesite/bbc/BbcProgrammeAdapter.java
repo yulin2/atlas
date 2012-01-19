@@ -158,16 +158,16 @@ public class BbcProgrammeAdapter  {
 		    }
 		}
 		
-		Set<SlashProgrammesTopic> subjects = content.episode().subjects() != null ? content.episode().subjects() : ImmutableSet.<SlashProgrammesTopic>of();
-		Set<SlashProgrammesTopic> people = content.episode().people() != null ? content.episode().people() : ImmutableSet.<SlashProgrammesTopic>of();
-		Set<SlashProgrammesTopic> places = content.episode().places() != null ? content.episode().places() : ImmutableSet.<SlashProgrammesTopic>of();
+//		Set<SlashProgrammesTopic> subjects = content.episode().subjects() != null ? content.episode().subjects() : ImmutableSet.<SlashProgrammesTopic>of();
+//		Set<SlashProgrammesTopic> people = content.episode().people() != null ? content.episode().people() : ImmutableSet.<SlashProgrammesTopic>of();
+//		Set<SlashProgrammesTopic> places = content.episode().places() != null ? content.episode().places() : ImmutableSet.<SlashProgrammesTopic>of();
 		ImmutableMap.Builder<SlashProgrammesTopic,String> topicUriMap = ImmutableMap.builder();
-		for (SlashProgrammesTopic topic : Iterables.concat(subjects, people, places)) {
-            String resolvedTopicSameAs = resolveTopic(topic);
-            if(resolvedTopicSameAs != null) {
-                topicUriMap.put(topic, resolvedTopicSameAs);
-            }
-        }
+//		for (SlashProgrammesTopic topic : Iterables.concat(subjects, people, places)) {
+//            String resolvedTopicSameAs = resolveTopic(topic);
+//            if(resolvedTopicSameAs != null) {
+//                topicUriMap.put(topic, resolvedTopicSameAs);
+//            }
+//        }
 		
 		BbcProgrammeSource source = new BbcProgrammeSource(uri, uri, content, versions, clips, topicUriMap.build());
 		Item item = itemExtractor.extract(source);
