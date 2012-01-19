@@ -30,14 +30,15 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         
         BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, topicStore, new SystemOutAdapterLog());
         
-        context.checking(new Expectations(){{
-            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic("one", "dbpedia", "http://dbpedia.org/resource/Religion")));
-            oneOf(topicStore).write(with(topicMatcher("one","dbpedia", "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
-            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic("two", "dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah")));
-            oneOf(topicStore).write(with(topicMatcher("two","dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
-            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic("three", "dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks")));
-            oneOf(topicStore).write(with(topicMatcher("three","dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
-        }});
+        //topics are disabled currently
+//        context.checking(new Expectations(){{
+//            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic("one", "dbpedia", "http://dbpedia.org/resource/Religion")));
+//            oneOf(topicStore).write(with(topicMatcher("one","dbpedia", "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
+//            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic("two", "dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah")));
+//            oneOf(topicStore).write(with(topicMatcher("two","dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
+//            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic("three", "dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks")));
+//            oneOf(topicStore).write(with(topicMatcher("three","dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
+//        }});
 
         Content programme = (Content) adapter.createOrUpdate("http://www.bbc.co.uk/programmes/b015d4pt");
         assertNotNull(programme);
@@ -53,7 +54,8 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
             assertFalse(clip.getVersions().isEmpty());
         }
         
-        assertEquals(ImmutableSet.of("one","two","three"), ImmutableSet.copyOf(programme.getTopics()));
+        //topics are disabled currently
+        //assertEquals(ImmutableSet.of("one","two","three"), ImmutableSet.copyOf(programme.getTopics()));
         
         context.assertIsSatisfied();
     }
