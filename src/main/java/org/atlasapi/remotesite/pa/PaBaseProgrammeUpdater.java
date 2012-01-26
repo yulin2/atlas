@@ -79,7 +79,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     }
     
     public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, AdapterLog log) {
-        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver, log);
+        this(Executors.newFixedThreadPool(5, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver, log);
     }
     
     public void supportChannels(Iterable<Channel> channels) {
