@@ -90,6 +90,7 @@ addApplication = function(slug, data) {
 	appList.append('<li style="display:none"><a class="app-link" href="/admin/applications/'+slug+'">'+title+'</a></li>');
 	appList.children().last().slideDown();
 	appList.attr('data-apps', appList.children().length);
+	$('.overlayBlocker').hide();
 }
 
 $("input.app-publisher").live('change', function(){
@@ -140,19 +141,6 @@ appendIp = function(){
 	$('#app-ips').attr('data-ips', $('#app-ips').children().length);
 	$("input[name='ipaddress']").val("");
 }
-
-$("#app-ips li").live('mouseover', function(){
-	$(this).css({padding: '5px'});
-	$(this).children().last().css({display:"inline"}).stop().animate({opacity:1});
-});
-
-$("#app-ips li").live('mouseout', function(){
-	var cont = $(this);
-	$(this).children().last().stop().animate({opacity:0}, function(){
-		$(this).css({display:"none"});
-		cont.css({padding: '5px 21px 5px 5px'});
-	});
-});
 
 $("#app-ips li span:last-child").live('click', function(){
 	var del = $(this).closest('li');
