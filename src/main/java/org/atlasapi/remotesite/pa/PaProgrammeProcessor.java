@@ -383,18 +383,20 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
         if (progData.getPictures() != null) {
+        	String bestImage = null;
             for (PictureUsage picture : progData.getPictures().getPictureUsage()) {
-                if (picture.getType().equals("series") && episode.getImage() == null){
-                    episode.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                if (picture.getType().equals("series") && bestImage == null) {
+                    bestImage = PA_BASE_IMAGE_URL + picture.getvalue();
                 }
-                if (picture.getType().equals("season") && episode.getImage() == null){
-                    episode.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                if (picture.getType().equals("season")) {
+                	bestImage = PA_BASE_IMAGE_URL + picture.getvalue();
                 }
                 if (picture.getType().equals("episode")){
-                    episode.setImage(PA_BASE_IMAGE_URL + picture.getvalue());
+                	bestImage = PA_BASE_IMAGE_URL + picture.getvalue();
                     break;
                 }
             }
+            episode.setImage(bestImage);
         }
         
         episode.setPeople(people(progData));
