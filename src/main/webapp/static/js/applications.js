@@ -114,10 +114,11 @@ $("input.app-publisher").live('change', function(){
 });
 
 $("form#ipaddress").live('submit', function(){
+	var ipAddress = $('#addIp').val();
 	$.ajax({
 		type: "post",
 		url: "/admin/applications/"+$(this).attr("data-app")+"/ipranges.json",
-		data: $(this).serializeArray(),
+		data: {ipaddress: ipAddress},
 		success:function(responseData, textStatus, XMLHttpRequest) {
 			if($('#app-ips').attr('data-ips') == '0'){
 				$('#app-ips').children().fadeOut(function(){
@@ -129,7 +130,7 @@ $("form#ipaddress").live('submit', function(){
 			}
 		},
 		error:function(textStatus) {
-			console.log("failure")
+			console.log(textStatus)
 		}
 	});
 	return false;
@@ -165,17 +166,22 @@ $("#app-ips li span:last-child").live('click', function(){
 
 var updatePrecedence = function() {
 	var precedenceCsv = "";
-	$("#app-publishers").find("li").each(function(i) {
+	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 		if (i > 0) {
-			 precedenceCsv = precedenceCsv + ",";
+			 precedenceCsv += ",";
 		}
-		precedenceCsv = precedenceCsv + $(this).attr('publisher');
-	});
-	var url = "/admin/applications/" + $("#app-publishers").closest('ul').attr("data-app") + "/precedence";
+		precedenceCsv += app.configuration.publishers[i].key;
+	};
+	var url = "/admin/applications/" + app.slug + "/precedence.json";
 	$.ajax({
         type: "post",
         url: url,
         data: ({'precedence': precedenceCsv}),
+        success: function(data){
+        	if(data.application){
+        		page.redraw(data.application);
+        	}
+        },
         error:function(textStatus) {
             console.log("failure")
         }
@@ -188,16 +194,46 @@ $("#enable-precedence").live('click', function(){
 });
 
 $("#app-publishers a.up").live('click', function() {
-    var $row = $(this).closest('li'); 
+    /*var $row = $(this).closest('li'); 
     $row.prev().before($row); 
-    updatePrecedence();  
+    updatePrecedence();*/
+    var pub = $(this).parent().parent().index();
+    if(pub !== 0){
+    	var current = app.configuration.publishers[pub];
+    	var replacement = app.configuration.publishers[pub-1];
+		app.configuration.publishers[pub] = replacement;
+		app.configuration.publishers[pub-1] = current;
+		updatePrecedence();
+    }
     return false;
 });
 
 $("#app-publishers a.down").live('click', function() {
-    var $row = $(this).closest('li'); 
+    /*var $row = $(this).closest('li'); 
     $row.next().after($row)
-    updatePrecedence();  
+    updatePrecedence();*/
+   	var pub = $(this).parent().parent().index();
+    if(pub !== app.configuration.publishers.length-1){
+    	var current = app.configuration.publishers[pub];
+    	var replacement = app.configuration.publishers[pub+1];
+		app.configuration.publishers[pub] = replacement;
+		app.configuration.publishers[pub+1] = current;
+		updatePrecedence();
+    }
     return false;
 });
 
+var page = {
+	redraw: function(newApp){
+		app = newApp;
+		
+		var publisherString = '<tbody>';
+		for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+			var publisher = app.configuration.publishers[i];
+			publisherString += atlas.templates.applications.widgets.publisher({publisher: publisher, precedence: app.configuration.precedence, slug: app.slug});
+		}
+		publisherString += '</tbody>';
+		
+		$('#app-publishers tbody').replaceWith(publisherString);
+	}
+};	

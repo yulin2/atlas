@@ -5,16 +5,21 @@
  */
 {template .applicationContent}
 <h1>Application: {$application.title}</h1>
-<h2>API Key</h2>
-<p>{$application.credentials.apiKey}</p>
 <div class="line">
 	<div class="unit size1of2">
+		<h2>API Key</h2>
+		<div class="form">
+			<div class="inputHolder mlm">
+				<input type="text" value="{$application.credentials.apiKey}" />
+			</div>
+		</div>
+		
 		<h2>IP Addresses</h2>
 		<ul id="app-ips" class="mod" data-app="{$application.slug}" data-ips="{length($application.credentials.ipRanges)}">
 			{foreach $range in $application.credentials.ipRanges}
 				<li><span>{$range}</span><span style="display:none;opacity:0">✖</span></li>
 			{ifempty}
-				<li><div class="alert inf">No addresses</div></li>
+				<li><div class="alert inf mln mrn">No addresses</div></li>
 			{/foreach}
 		</ul>
 		<form id="ipaddress" method="post" action="/admin/applications/{$application.slug}/ipranges" data-app="{$application.slug}" class="form">
@@ -31,7 +36,9 @@
 	<div class="unit size1of2 lastUnit">
 		<h2>Publishers</h2>
 		{if not $application.configuration.precedence}
-		    <p>Publisher precedence not enabled, <a id="enable-precedence" href="#enable" onclick="$('.precedenceControl').css({lb}'visibility': 'visible'{rb}); return false;">enable</a></p>
+		    <div class="alert inf">Publisher precedence not enabled, <a id="enable-precedence" href="#enable">enable</a></div>
+		{else}
+			<div class="alert inf">Publisher precedence enabled, <a id="disable-precedence" href="#disable">disable</a></div>
 		{/if}
 		<table id="app-publishers" class="mod simpleTable" data-app="{$application.slug}">
 			<thead>
@@ -44,31 +51,42 @@
 			</thead>
 			<tbody>
 				{foreach $publisher in $application.configuration.publishers}
-					<tr publisher="{$publisher.key}">
-						<td class="precedenceControl">
-							{if not $application.configuration.precedence}
-								&nbsp;
-							{else}
-								<a href="#up" class="up">up</a> <a href="#down" class="down" onclick="">down</a>
-							{/if}
-						</td>
-						<td>{$publisher.title}</td>
-						{if $publisher.state == 'available'}
-				            <td>available</td>
-		        		    <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}></td>
-				        {elseif $publisher.state == 'unavailable'}
-		        		    <td><a class="request-link" href="/admin/applications/{$application.slug}/publishers/requested?pubkey={$publisher.key}">request?</a></td>
-				            <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
-		        		{else}
-				            <td>{$publisher.state}</td>
-				            <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
-		        		{/if}
-					</tr>
+					{call atlas.templates.applications.widgets.publisher}
+						{param publisher: $publisher /}
+						{param precedence: $application.configuration.precedence /}
+						{param slug: $application.slug /}
+					{/call}
 				{/foreach}
 			</tbody>
 		</table>
 	</div>
 </div>
+{/template}
 
-
+/**
+ * @param publisher
+ * @param precedence
+ * @param slug
+ */
+{template .publisher}
+	<tr publisher="{$publisher.key}">
+		<td class="precedenceControl">
+			{if $precedence}
+				<a href="#up" class="up">up</a> <a href="#down" class="down" onclick="">down</a>
+			{else}
+				&nbsp;
+			{/if}
+		</td>
+		<td>{$publisher.title}</td>
+		{if $publisher.state == 'available'}
+	        <td>available</td>
+		    <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}></td>
+	    {elseif $publisher.state == 'unavailable'}
+		    <td><a class="request-link" href="/admin/applications/{$slug}/publishers/requested?pubkey={$publisher.key}">request?</a></td>
+	        <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
+		{else}
+	        <td>{$publisher.state}</td>
+	        <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
+		{/if}
+	</tr>
 {/template}
