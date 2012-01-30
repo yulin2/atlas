@@ -2,6 +2,7 @@
 
 /**
  * @param applications
+ * @param application
  */
 {template .head}
 <!DOCTYPE HTML>
@@ -11,10 +12,75 @@
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script src="/static/js/base.js"></script>
 	<script src="/static/js/soyutils.js"></script>
-	<script type="text/javascript" src="/static/js/generated/applications-widgets-js_templates.js"></script>
+	<script type="text/javascript" src="/js/generated/applications-widgets-js_templates.js"></script>
 	<script src="/static/js/jquery.ba-hashchange.js"></script>
 	<script src="/static/js/jquery.colorbox.js"></script>
 	<script src="/static/js/applications.js"></script>
+	
+	{if $applications and length($applications) > 0}
+		<script>
+			var apps = [];
+			{foreach $app in $applications}
+				apps.push({lb}
+					title: '{$app.title}',
+					created: '{$app.created}',
+					credentials: {lb}
+						ipRanges: [],
+						apiKey: '{$app.credentials.apiKey}'
+					{rb},
+					slug: '{$app.slug}',
+					configuration: {lb}
+						publishers: [],
+						precedence: {$app.configuration.precedence}
+					{rb}
+				{rb});
+				
+				{foreach $ip in $app.credentials.ipRanges}
+					apps[apps.length-1].credentials.ipRanges.push('{$ip}');
+				{/foreach}
+				
+				{foreach $publisher in $app.configuration.publishers}
+					apps[apps.length-1].configuration.publishers.push({lb}
+						enabled: {$publisher.enabled},
+						title: '{$publisher.title}',
+						state: '{$publisher.state}',
+						key: '{$publisher.key}'
+					{rb});
+				{/foreach}
+			{/foreach}
+		</script>
+	{/if}
+	
+	{if $application}
+		<script>
+			var app = {lb}
+				title: '{$application.title}',
+				created: '{$application.created}',
+				credentials: {lb}
+					ipRanges: [],
+					apiKey: '{$application.credentials.apiKey}'
+				{rb},
+				slug: '{$application.slug}',
+				configuration: {lb}
+					publishers: [],
+					precedence: {$application.configuration.precedence}
+				{rb}
+			{rb};
+			
+			{foreach $ip in $application.credentials.ipRanges}
+				app.credentials.ipRanges.push('{$ip}');
+			{/foreach}
+			
+			{foreach $publisher in $application.configuration.publishers}
+				app.configuration.publishers.push({lb}
+					enabled: {$publisher.enabled},
+					title: '{$publisher.title}',
+					state: '{$publisher.state}',
+					key: '{$publisher.key}'
+				{rb});
+			{/foreach}
+		</script>
+	{/if}
 	
 	<link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
 	<link rel="stylesheet" type="text/css" href="/static/css/colorbox.css" />
@@ -24,7 +90,7 @@
 	<div class="page">
 		<div class="head clearfix">
 			<span class="adminLogo"></span>
-			{if $applications}
+			{if $applications or $application}
 				<nav><a href="/admin/applications">Applications</a><a href="/admin/logout">Logout</a></nav>
 			{/if}
 		</div>
@@ -50,6 +116,7 @@
 {template .index}
 {call atlas.templates.applications.head}
 	{param applications: $applications /}
+	{param application: null /}
 {/call}
 	<h1>Applications</h1>
 	<h2>Current Applications</h2>
@@ -58,8 +125,8 @@
 			<a class="media app-link" href="/admin/applications/{$application.slug}"><span class="img"></span><span class="bd">{$application.title}</span></a>
 		{ifempty}
 			<div class="alert inf">You don't currently have any applications.</div>
-			<button type="button" class="btn pos mlm" onclick="$('.overlayBlocker').show();">Create Application</button>
 		{/foreach}
+		<button type="button" class="btn pos mlm" onclick="$('.overlayBlocker').show();">Create Application</button>
 	</div>
 	
 	<div class="overlayBlocker" style="display: none;">
@@ -98,7 +165,8 @@
  */
 {template .application}
 {call atlas.templates.applications.head}
-	{param applications: $application /}
+	{param applications: null /}
+	{param application: $application /}
 {/call}
 	{call atlas.templates.applications.widgets.applicationContent}
 		{param application: $application /}
