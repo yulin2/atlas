@@ -4,10 +4,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.RelatedLink;
+import org.atlasapi.media.entity.RelatedLink.LinkType;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesProgramme;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesRelatedLink;
@@ -18,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 
 @RunWith(JMock.class)
@@ -44,6 +48,32 @@ public class BbcRelatedLinksAdapterTest extends TestCase {
         
         assertThat(Iterables.getOnlyElement(links).getTitle(), is(link.getTitle()));
         assertThat(Iterables.getOnlyElement(links).getUrl(), is(link.getUrl()));
+    }
+    
+    @Test
+    public void testCreateCorrectLinkTypesForBbcProgramme() throws Exception {
+    	Map<String, LinkType> relatedLinks = ImmutableMap.<String, LinkType>builder()
+    		.put("http://www.twitter.com/foo", LinkType.TWITTER)
+	    	.put("http://www.facebook.com/foo", LinkType.FACEBOOK)
+	    	.put("http://twitter.com/foo", LinkType.TWITTER)
+	    	.put("http://facebook.com/foo", LinkType.FACEBOOK)
+	    	.put("https://www.twitter.com/foo", LinkType.TWITTER)
+	    	.put("http://www.example.com/foo", LinkType.UNKNOWN)
+	    	.build();
+    	
+    	final String uri = "http://www.bbc.co.uk/programmes/b006mkw3";
+    	
+    	for(Entry<String, LinkType> relatedLink : relatedLinks.entrySet()) {
+	        final SlashProgrammesRelatedLink link = slashProgrammesLink("misc","Tag Title", relatedLink.getKey());
+	        
+	        context.checking(new Expectations(){{
+	            one(client).get(uri + ".json"); will(returnValue(containerWithLink(link)));
+	        }});
+	        
+	        List<RelatedLink> links = adapter.fetch(uri);
+	        
+	        assertThat(Iterables.getOnlyElement(links).getType(), is(relatedLink.getValue()));
+    	}
     }
 
     private SlashProgrammesContainer containerWithLink(SlashProgrammesRelatedLink link) {
