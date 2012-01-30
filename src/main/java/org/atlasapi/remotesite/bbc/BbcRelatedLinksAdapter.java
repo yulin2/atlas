@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.bbc;
 import static org.atlasapi.remotesite.bbc.BbcFeeds.isACanonicalSlashProgrammesUri;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.persistence.system.RemoteSiteClient;
@@ -17,6 +18,9 @@ import com.google.common.collect.Iterables;
 public class BbcRelatedLinksAdapter implements SiteSpecificAdapter<List<RelatedLink>> {
 
     private final RemoteSiteClient<SlashProgrammesContainer> programmesClient;
+    
+    private static final Pattern TWITTER_URI_PATTERN = Pattern.compile("https?://(www.)?twitter.com(/.*)?");
+    private static final Pattern FACEBOOK_URI_PATTERN = Pattern.compile("https?://(www.)?facebook.com(/.*)?");
 
     public BbcRelatedLinksAdapter(RemoteSiteClient<SlashProgrammesContainer> slashProgrammesClient) {
         this.programmesClient = slashProgrammesClient;
@@ -37,7 +41,14 @@ public class BbcRelatedLinksAdapter implements SiteSpecificAdapter<List<RelatedL
             new Function<SlashProgrammesRelatedLink, RelatedLink>() {
                 @Override
                 public RelatedLink apply(SlashProgrammesRelatedLink input) {
-                    return RelatedLink.unknownTypeLink(input.getUrl()).withTitle(input.getTitle()).build();
+                	String url = input.getUrl();
+                	if(TWITTER_URI_PATTERN.matcher(url).matches()) {
+                		return RelatedLink.twitterLink(url).withTitle(input.getTitle()).build();
+                	}
+                	else if(FACEBOOK_URI_PATTERN.matcher(url).matches()) {
+                		return RelatedLink.facebookLink(url).withTitle(input.getTitle()).build();
+                	}
+                	else return RelatedLink.unknownTypeLink(url).withTitle(input.getTitle()).build();
                 }
             }
         ));
