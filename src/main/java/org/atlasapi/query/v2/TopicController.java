@@ -64,7 +64,7 @@ public class TopicController extends BaseController<Topic> {
         Topic topic = topicForUri.requireValue();
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(!query.getConfiguration().getIncludedPublishers().contains(topic.getPublisher())) {
+        if(!query.getConfiguration().includedPublishers().contains(topic.getPublisher())) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
             return;
         }
@@ -88,7 +88,7 @@ public class TopicController extends BaseController<Topic> {
         Topic topic = topicForUri.requireValue();
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(!query.getConfiguration().getIncludedPublishers().contains(topic.getPublisher())) {
+        if(!query.getConfiguration().includedPublishers().contains(topic.getPublisher())) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
             return;
         }
