@@ -1,11 +1,12 @@
 package org.atlasapi.remotesite.bbc;
 
-import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.atlasapi.media.entity.Topic.Type.SUBJECT;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.Set;
 
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -17,7 +18,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesType;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
-public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<SlashProgrammesRdf, Maybe<Topic>> {
+public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<SlashProgrammesRdf, Maybe<TopicRef>> {
 
     private static final String DBPEDIA_NAMESPACE = "dbpedia";
     private final TopicStore topicStore;
@@ -29,7 +30,7 @@ public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<Sla
     }
     
     @Override
-    public Maybe<Topic> extract(SlashProgrammesRdf source) {
+    public Maybe<TopicRef> extract(SlashProgrammesRdf source) {
         
         String topicUri = extractTopicUri(source);
         
@@ -41,11 +42,13 @@ public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<Sla
                 Topic topic = possibleTopic.requireValue();
                 topic.setValue(topicUri);
                 topic.setNamespace(DBPEDIA_NAMESPACE);
-                topic.addPublisher(BBC);
+                topic.setPublisher(DBPEDIA);
                 topic.setTitle(titleFrom(topicUri));
                 topic.setType(Type.fromKey(typeKeyFrom(source.description()), SUBJECT));
                 topicStore.write(topic);
-                return Maybe.just(topic);
+                
+                TopicRef contentTopic = new TopicRef(topic.getCanonicalUri(), 1.0f, true);
+                return Maybe.just(contentTopic);
             }
         }
         return Maybe.nothing();

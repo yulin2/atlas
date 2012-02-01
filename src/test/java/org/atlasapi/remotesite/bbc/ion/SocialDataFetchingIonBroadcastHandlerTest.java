@@ -10,12 +10,12 @@ import junit.framework.TestCase;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -49,7 +49,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     @SuppressWarnings("unchecked")
     private final SiteSpecificAdapter<List<KeyPhrase>> tagAdapter = context.mock(SiteSpecificAdapter.class, "tag adapter");
     @SuppressWarnings("unchecked")
-    private final SiteSpecificAdapter<List<Topic>> topicsAdapter = context.mock(SiteSpecificAdapter.class, "topic adapter");
+    private final SiteSpecificAdapter<List<TopicRef>> topicsAdapter = context.mock(SiteSpecificAdapter.class, "topic adapter");
     
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final ContentWriter writer = context.mock(ContentWriter.class);
