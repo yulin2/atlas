@@ -14,6 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
+import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.remotesite.HttpClients.webserviceClient;
@@ -32,6 +33,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
@@ -175,11 +177,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                 log.record(warnEntry().withSource(getClass()).withDescription("Couldn't get Topic for %s, can't create new one", topicUri.getValue()));
             } else {
                 Topic topic = possibleTopic.requireValue();
-                topic.addPublisher(BBC);
+                topic.setPublisher(DBPEDIA);
                 topic.setTitle(titleFrom(topicUri.getValue()));
                 topic.setType(typeFrom(topicUri.getKey().resourceUri()));
-                item.addTopic(topic);
+                
                 topicStore.write(topic);
+
+                TopicRef contentTopic = new TopicRef(topicUri.getValue(), 1.0f, true);
+                item.addTopicRef(contentTopic);
             }
         }
 

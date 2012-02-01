@@ -26,7 +26,7 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
         return query.getSelection().applyTo(Iterables.filter(delegate.topicsFor(query), new Predicate<Topic>() {
             @Override
             public boolean apply(Topic input) {
-                return ! Sets.intersection(input.getPublishers(), includedPublishers).isEmpty();
+                return includedPublishers.contains(input.getPublisher());
             }
         }));
     }
