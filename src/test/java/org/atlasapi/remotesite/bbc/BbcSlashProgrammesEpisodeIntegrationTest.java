@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
@@ -30,15 +31,15 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         
         BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, topicStore, new SystemOutAdapterLog());
         
-        //topics are disabled currently
-//        context.checking(new Expectations(){{
-//            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic("one", "dbpedia", "http://dbpedia.org/resource/Religion")));
-//            oneOf(topicStore).write(with(topicMatcher("one","dbpedia", "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
-//            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic("two", "dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah")));
-//            oneOf(topicStore).write(with(topicMatcher("two","dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
-//            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic("three", "dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks")));
-//            oneOf(topicStore).write(with(topicMatcher("three","dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
-//        }});
+//        topics are disabled currently
+        context.checking(new Expectations(){{
+            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic("one", "dbpedia", "http://dbpedia.org/resource/Religion")));
+            oneOf(topicStore).write(with(topicMatcher("one","dbpedia", "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
+            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic("two", "dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah")));
+            oneOf(topicStore).write(with(topicMatcher("two","dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
+            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic("three", "dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks")));
+            oneOf(topicStore).write(with(topicMatcher("three","dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
+        }});
 
         Content programme = (Content) adapter.createOrUpdate("http://www.bbc.co.uk/programmes/b015d4pt");
         assertNotNull(programme);
@@ -55,7 +56,11 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         }
         
         //topics are disabled currently
-        //assertEquals(ImmutableSet.of("one","two","three"), ImmutableSet.copyOf(programme.getTopics()));
+        TopicRef topic1 = new TopicRef("http://dbpedia.org/resource/Jonathan_Sacks", 1.0f, true);
+        TopicRef topic2 = new TopicRef("http://dbpedia.org/resource/Religion", 1.0f, true);
+        TopicRef topic3 = new TopicRef("http://dbpedia.org/resource/Rosh_Hashanah", 1.0f, true);
+        
+        assertEquals(ImmutableSet.of(topic1, topic2, topic3), ImmutableSet.copyOf(programme.getTopicRefs()));
         
         context.assertIsSatisfied();
     }
@@ -74,7 +79,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
                 topic.getNamespace().equals(ns) &&
                 topic.getValue().equals(value) &&
                 topic.getTitle().equals(title) &&
-                topic.getPublishers().equals(ImmutableSet.of(Publisher.BBC)) &&
+                topic.getPublisher().equals(Publisher.DBPEDIA) &&
                 topic.getType().equals(type);
             }
         };
