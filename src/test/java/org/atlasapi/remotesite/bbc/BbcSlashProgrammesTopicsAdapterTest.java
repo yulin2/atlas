@@ -7,7 +7,7 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.jmock.Expectations;
@@ -26,7 +26,7 @@ public class BbcSlashProgrammesTopicsAdapterTest extends TestCase {
     private final Mockery context = new Mockery();
     private static String URI = "http://www.bbc.co.uk/programmes/b0144pvg.rdf";
     @SuppressWarnings("unchecked")
-    private final SiteSpecificAdapter<Topic> topicFetcher = context.mock(SiteSpecificAdapter.class);
+    private final SiteSpecificAdapter<TopicRef> topicFetcher = context.mock(SiteSpecificAdapter.class);
     private static final SimpleHttpClient httpClient = new FixedResponseHttpClient(URI , xmlDocument());
 
     private static String xmlDocument()  {
