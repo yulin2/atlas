@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
@@ -53,7 +54,11 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
             assertFalse(clip.getVersions().isEmpty());
         }
         
-        assertEquals(ImmutableSet.of("one","two","three"), ImmutableSet.copyOf(programme.getTopics()));
+        TopicRef topic1 = new TopicRef("http://dbpedia.org/resource/Jonathan_Sacks", 1.0f, true);
+        TopicRef topic2 = new TopicRef("http://dbpedia.org/resource/Religion", 1.0f, true);
+        TopicRef topic3 = new TopicRef("http://dbpedia.org/resource/Rosh_Hashanah", 1.0f, true);
+        
+        assertEquals(ImmutableSet.of(topic1, topic2, topic3), ImmutableSet.copyOf(programme.getTopicRefs()));
         
         context.assertIsSatisfied();
     }
@@ -72,7 +77,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
                 topic.getNamespace().equals(ns) &&
                 topic.getValue().equals(value) &&
                 topic.getTitle().equals(title) &&
-                topic.getPublishers().equals(ImmutableSet.of(Publisher.BBC)) &&
+                topic.getPublisher().equals(Publisher.DBPEDIA) &&
                 topic.getType().equals(type);
             }
         };
