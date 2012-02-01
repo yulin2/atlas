@@ -21,12 +21,7 @@ public class TopicModelSimplifier extends IdentifiedModelSimplifier<Topic, org.a
         topic.setDescription(fullTopic.getDescription());
         topic.setImage(fullTopic.getImage());
         topic.setThumbnail(fullTopic.getThumbnail());
-        topic.setPublishers(ImmutableSet.copyOf(Iterables.transform(fullTopic.getPublishers(), new Function<Publisher, PublisherDetails>() {
-            @Override
-            public PublisherDetails apply(Publisher input) {
-                return toPublisherDetails(input);
-            }
-        })));
+        topic.setPublisher(toPublisherDetails(fullTopic.getPublisher()));
         topic.setType(fullTopic.getType().toString());
         topic.setValue(fullTopic.getValue());
         topic.setNamespace(fullTopic.getNamespace());
