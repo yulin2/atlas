@@ -90,3 +90,10 @@
 		{/if}
 	</tr>
 {/template}
+
+/**
+ * @param app
+ */
+{template .applicationLink}
+	<a class="media app-link" href="/admin/applications/{$app.slug}" data-id="{$app.slug}"><span class="img"></span><span class="bd">{$app.title}</span></a>
+{/template}

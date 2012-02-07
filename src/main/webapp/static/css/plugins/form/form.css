@@ -22,6 +22,7 @@
 	position: relative;
 }
 
+
 .form input[type="text"]{
 	margin: 0;
 	width: 100%;
@@ -36,6 +37,11 @@
 	position: relative;
 }
 
+.form input:focus {
+	outline: none;
+	border: 1px solid rgba(0,0,0,0.3);
+}
+
 .form .extra {
 	width: 48px;
 	height: 30px;
@@ -45,6 +51,27 @@
 	display: block;
 	z-index: 1;
 	border-radius: 0 5px 5px 0;
+}
+
+.form .extra .icn {
+	display: block;
+	width: 30px;
+	height: 30px;
+	background: url(/static/images/extraSpriteSheet.png) 0 0 no-repeat;
+	text-indent: -9999px;
+	float: right;
+}
+
+.form .extra .icn.tick {
+	background-position: 0 0;
+}
+
+.form .extra .icn.cross {
+	background-position: 0 -30px;
+}
+
+.form .extra .icn.move {
+	background-position: 0 -60px;
 }
 
 .form input[type="submit"] {

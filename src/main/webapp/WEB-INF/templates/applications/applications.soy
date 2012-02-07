@@ -3,6 +3,7 @@
 /**
  * @param applications
  * @param application
+ * @param sources
  */
 {template .head}
 <!DOCTYPE HTML>
@@ -17,8 +18,9 @@
 	<script src="/static/js/jquery.colorbox.js"></script>
 	<script src="/static/js/applications.js"></script>
 	
-	{if $applications and length($applications) > 0}
-		<script>
+	<script>
+		var apps = null, app = null, sources = null;
+		{if $applications and length($applications) > 0}
 			var apps = [];
 			{foreach $app in $applications}
 				apps.push({lb}
@@ -50,11 +52,9 @@
 					{rb});
 				{/foreach}
 			{/foreach}
-		</script>
-	{/if}
-	
-	{if $application}
-		<script>
+		{/if}
+		
+		{if $application}
 			var app = {lb}
 				title: '{$application.title}',
 				created: '{$application.created}',
@@ -83,8 +83,23 @@
 					key: '{$publisher.key}'
 				{rb});
 			{/foreach}
-		</script>
-	{/if}
+		{/if}
+		
+		{if $sources}
+			var sources = [];
+			{foreach $source in $sources}
+				sources.push({lb}
+					id: '{$source.id}',
+					title: '{$source.title}',
+					key: '{$source.key}',
+					country: {lb}
+						name: '{$source.country.name}',
+						code: '{$source.country.code}'
+					{rb}
+				{rb});
+			{/foreach}
+		{/if}
+	</script>
 	
 	<link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
 	<link rel="stylesheet" type="text/css" href="/static/css/colorbox.css" />
@@ -94,7 +109,7 @@
 	<div class="page">
 		<div class="head clearfix">
 			<span class="adminLogo"></span>
-			{if $applications or $application}
+			{if $applications or $application or $sources}
 				<nav><a href="/admin/sources">Sources</a><a href="/admin/applications">Applications</a><a href="/admin/logout">Logout</a></nav>
 			{/if}
 		</div>
@@ -123,10 +138,21 @@
 	{param application: null /}
 {/call}
 	<h1>Applications</h1>
-	<h2>Current Applications</h2>
-	<div id="applications-list" data-apps="{length($applications)}" class="clearfix">
+	<div class="form fr mrm">
+    	<div class="grp">
+    		<label for="filter">Filter</label>
+    		<div class="inputHolder">
+    			<input type="text" id="filter" />
+    			<span class="extra neg" style="display: none;"><a href="#" class="icn cross" id="clearFilter" title="Clear">Clear</a></span>
+    		</div>
+    	</div>
+	</div>
+	<h2 class="fl">Current Applications</h2>
+	<div id="applications-list" data-apps="{length($applications)}" class="clearfix clear">
 		{foreach $application in $applications}
-			<a class="media app-link" href="/admin/applications/{$application.slug}"><span class="img"></span><span class="bd">{$application.title}</span></a>
+			{call atlas.templates.applications.widgets.applicationLink}
+				{param app: $application /}
+			{/call}
 		{ifempty}
 			<div class="alert inf">You don't currently have any applications.</div>
 		{/foreach}
@@ -161,6 +187,7 @@
 			</form>
 		</div>
 	</div>
+	<script src="/static/js/list.js"></script>
 {call atlas.templates.applications.foot /}
 {/template}
 
@@ -178,6 +205,32 @@
 {call atlas.templates.applications.foot /}
 {/template}
 
+/**
+ * @param sources
+ */
+{template .sources}
+{call atlas.templates.applications.head}
+	{param sources: $sources /}
+{/call}
+    <h1>Sources</h1>
+	<div class="form fr mrm">
+    	<div class="grp">
+    		<label for="filter">Filter</label>
+    		<div class="inputHolder">
+    			<input type="text" id="filter" />
+    			<span class="extra neg" style="display: none;"><a href="#" class="icn cross" id="clearFilter" title="Clear">Clear</a></span>
+    		</div>
+    	</div>
+	</div>
+    {if length($sources) > 0}
+    	{foreach $source in $sources}
+			<a class="media app-link clear" href="/admin/sources/{$source.id}/applications" data-id="{$source.key}"><span class="img"></span><span class="bd">{$source.title}</span></a>
+		{/foreach}
+    {else}
+    	<div class="alert inf">There aren't any sources yet.</div>
+    {/if}
+    <script src="/static/js/list.js"></script>
+{/template}
 
 /**
  * @param source
