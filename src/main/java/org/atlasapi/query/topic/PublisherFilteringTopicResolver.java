@@ -34,8 +34,8 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
     //TODO pass in ContentQuery, filter by publisher, selection etc...
 
     @Override
-    public Maybe<Topic> topicForUri(String uri) {
-        return delegate.topicForUri(uri);
+    public Maybe<Topic> topicForId(Long id) {
+        return delegate.topicForId(id);
     }
 
     @Override

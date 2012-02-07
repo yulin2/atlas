@@ -183,7 +183,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                 
                 topicStore.write(topic);
 
-                TopicRef contentTopic = new TopicRef(topicUri.getValue(), 1.0f, true);
+                TopicRef contentTopic = new TopicRef(topic.getId(), 1.0f, true);
                 item.addTopicRef(contentTopic);
             }
         }

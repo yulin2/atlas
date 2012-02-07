@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.bbc;
 
-import static org.atlasapi.media.entity.Topic.topicUriForId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -40,7 +39,7 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         Topic storedTopic = topicStore.getStoredTopic();
         
         assertTrue(extractedTopicRef.hasValue());
-        assertThat(extractedTopicRef.requireValue().getTopic(), is(equalTo(storedTopic.getCanonicalUri())));
+        assertThat(extractedTopicRef.requireValue().getTopic(), is(equalTo(storedTopic.getId())));
         assertThat(extractedTopicRef.requireValue().getWeighting(), is(equalTo(1f)));
         assertThat(extractedTopicRef.requireValue().isSupervised(), is(true));
         
@@ -64,7 +63,7 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 			Preconditions.checkArgument(namespace == "dbpedia", "Unexpected namespace");
 			Preconditions.checkArgument(value == topicUri, "Unexpected URI");
 			
-			return Maybe.just(new Topic(topicUriForId("100")));
+			return Maybe.just(new Topic(100l));
 		}
 
 		@Override

@@ -47,7 +47,7 @@ public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<Sla
                 topic.setType(Type.fromKey(typeKeyFrom(source.description()), SUBJECT));
                 topicStore.write(topic);
                 
-                TopicRef contentTopic = new TopicRef(topic.getCanonicalUri(), 1.0f, true);
+                TopicRef contentTopic = new TopicRef(topic.getId(), 1.0f, true);
                 return Maybe.just(contentTopic);
             }
         }
