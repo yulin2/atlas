@@ -1,38 +1,32 @@
 package org.atlasapi.remotesite.bbc;
 
-import static org.atlasapi.media.entity.Topic.topicUriForId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
-@RunWith(JMock.class)
 public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 
-    private final Mockery context = new Mockery();
-    private final TopicStore topicStore = context.mock(TopicStore.class);
+    private final String topicUri = "http://dbpedia.org/resource/Religion";
+    private final DummyTopicStore topicStore = new DummyTopicStore(topicUri);
     private final BbcSlashProgrammesRdfTopicExtractor extractor = new BbcSlashProgrammesRdfTopicExtractor(topicStore , new NullAdapterLog());
 
     @Test
     public void testExtractsTopicFromValidSlashProgrammesTopic() {
         
-        final String topicUri = "http://dbpedia.org/resource/Religion";
         String typeUri = "http://purl.org/ontology/po/Person";
         
         SlashProgrammesRdf rdf = new SlashProgrammesRdf().withDescription(new SlashProgrammesDescription().withSameAs(
@@ -41,20 +35,46 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
                 ImmutableSet.of(new SlashProgrammesRdf.SlashProgrammesType().withResourceUri(typeUri))
         ));
         
-        context.checking(new Expectations(){{
-            one(topicStore).topicFor("dbpedia", topicUri);will(returnValue(Maybe.just(new Topic(topicUriForId("100")))));
-            one(topicStore).write(with(any(Topic.class)));
-        }});
+        Maybe<TopicRef> extractedTopicRef = extractor.extract(rdf);
+        Topic storedTopic = topicStore.getStoredTopic();
         
-        Maybe<Topic> extractedTopic = extractor.extract(rdf);
+        assertTrue(extractedTopicRef.hasValue());
+        assertThat(extractedTopicRef.requireValue().getTopic(), is(equalTo(storedTopic.getId())));
+        assertThat(extractedTopicRef.requireValue().getWeighting(), is(equalTo(1f)));
+        assertThat(extractedTopicRef.requireValue().isSupervised(), is(true));
         
-        assertTrue(extractedTopic.hasValue());
-        assertThat(extractedTopic.requireValue().getValue(), is(equalTo(topicUri)));
-        assertThat(extractedTopic.requireValue().getType(), is(equalTo(Type.PERSON)));
-        assertThat(extractedTopic.requireValue().getPublishers(), hasItem(Publisher.BBC));
-        assertThat(extractedTopic.requireValue().getNamespace(), is(equalTo("dbpedia")));
-        assertThat(extractedTopic.requireValue().getTitle(), is(equalTo("Religion")));
+        assertThat(storedTopic.getValue(), is(equalTo(topicUri)));
+        assertThat(storedTopic.getType(), is(equalTo(Type.PERSON)));
+        assertThat(storedTopic.getPublisher(), is(equalTo(Publisher.DBPEDIA)));
+        assertThat(storedTopic.getNamespace(), is(equalTo("dbpedia")));
+        assertThat(storedTopic.getTitle(), is(equalTo("Religion")));
         
+    }
+    
+    private static class DummyTopicStore implements TopicStore {
+    	private Topic storedTopic;
+		private String topicUri;
+
+    	public DummyTopicStore(String topicUri) {
+    		this.topicUri = topicUri;
+    	}
+		@Override
+		public Maybe<Topic> topicFor(String namespace, String value) {
+			Preconditions.checkArgument(namespace == "dbpedia", "Unexpected namespace");
+			Preconditions.checkArgument(value == topicUri, "Unexpected URI");
+			
+			return Maybe.just(new Topic(100l));
+		}
+
+		@Override
+		public void write(Topic topic) {
+			Preconditions.checkState(topicUri != null, "Already stored a topic");
+			this.storedTopic = topic;
+		}
+    	
+    	public Topic getStoredTopic() {
+    		return storedTopic;
+    	}
     }
     
 }

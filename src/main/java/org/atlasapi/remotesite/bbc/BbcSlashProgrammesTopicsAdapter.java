@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
@@ -17,22 +17,22 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
-public class BbcSlashProgrammesTopicsAdapter implements SiteSpecificAdapter<List<Topic>> {
+public class BbcSlashProgrammesTopicsAdapter implements SiteSpecificAdapter<List<TopicRef>> {
 
     private final RemoteSiteClient<SlashProgrammesRdf> rdfClient;
-    private final SiteSpecificAdapter<Topic> singleTopicFetcher;
+    private final SiteSpecificAdapter<TopicRef> singleTopicFetcher;
 
-    public BbcSlashProgrammesTopicsAdapter(RemoteSiteClient<SlashProgrammesRdf> rdfClient, SiteSpecificAdapter<Topic> singleTopicFetcher) {
+    public BbcSlashProgrammesTopicsAdapter(RemoteSiteClient<SlashProgrammesRdf> rdfClient, SiteSpecificAdapter<TopicRef> singleTopicFetcher) {
         this.rdfClient = rdfClient;
         this.singleTopicFetcher = singleTopicFetcher;
     }
     
     @Override
-    public List<Topic> fetch(String uri) {
+    public List<TopicRef> fetch(String uri) {
         checkArgument(canFetch(uri));
-        return ImmutableList.copyOf(Iterables.filter(Iterables.transform(topicsFor(uri), new Function<SlashProgrammesTopic, Topic>() {
+        return ImmutableList.copyOf(Iterables.filter(Iterables.transform(topicsFor(uri), new Function<SlashProgrammesTopic, TopicRef>() {
             @Override
-            public Topic apply(SlashProgrammesTopic input) {
+            public TopicRef apply(SlashProgrammesTopic input) {
                 String topicUri = topicUriFrom(input);
                 return singleTopicFetcher.canFetch(topicUri) ? singleTopicFetcher.fetch(topicUri) : null;
             }

@@ -26,7 +26,7 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
         return query.getSelection().applyTo(Iterables.filter(delegate.topicsFor(query), new Predicate<Topic>() {
             @Override
             public boolean apply(Topic input) {
-                return ! Sets.intersection(input.getPublishers(), includedPublishers).isEmpty();
+                return includedPublishers.contains(input.getPublisher());
             }
         }));
     }
@@ -34,8 +34,8 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
     //TODO pass in ContentQuery, filter by publisher, selection etc...
 
     @Override
-    public Maybe<Topic> topicForUri(String uri) {
-        return delegate.topicForUri(uri);
+    public Maybe<Topic> topicForId(Long id) {
+        return delegate.topicForId(id);
     }
 
     @Override
