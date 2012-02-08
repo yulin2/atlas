@@ -49,7 +49,7 @@ public class ItemModelSimplifierTest {
         
         context.checking(new Expectations(){{
             allowing(contentResolver).findByCanonicalUris(with(any(Iterable.class)));will(returnValue(ResolvedContent.builder().build()));
-            allowing(topicResolver).topicsForUris(with(any(Iterable.class)));will(returnValue(ImmutableList.of()));
+            allowing(topicResolver).topicsForIds(with(any(Iterable.class)));will(returnValue(ImmutableList.of()));
             allowing(segmentResolver).resolveById(with(any(Iterable.class)));will(returnValue(ImmutableMap.of()));
         }});
         

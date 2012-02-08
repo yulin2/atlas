@@ -38,7 +38,7 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
     }
 
     @Override
-    public Iterable<Topic> topicsForUris(Iterable<String> uris) {
-        return delegate.topicsForUris(uris);
+    public Iterable<Topic> topicsForIds(Iterable<Long> ids) {
+        return delegate.topicsForIds(ids);
     }
 }
