@@ -92,7 +92,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
         List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
         return search;
     }
-
+    
     private Map<Publisher, SourceStatus> enabled(SetView<Publisher> publishers) {
         Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
         for (Publisher publisher : publishers) {

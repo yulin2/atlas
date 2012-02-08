@@ -20,7 +20,6 @@ public class PaChannelMap {
     private final Map<Integer, Channel> channelMap = Maps.newHashMap();
     private final Map<Channel, Integer> reverseMap = Maps.newHashMap();
     
-    
     public PaChannelMap(ChannelResolver channelResolver) {
         for (Entry<String, Channel> entry: channelResolver.forAliases(PA_URI_PREFIX).entrySet()) {
         	Matcher m = PA_URI_MATCHER.matcher(entry.getKey());

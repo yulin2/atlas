@@ -9,7 +9,6 @@ import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 public class PublisherFilteringTopicResolver implements TopicQueryResolver {
@@ -34,8 +33,8 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
     //TODO pass in ContentQuery, filter by publisher, selection etc...
 
     @Override
-    public Maybe<Topic> topicForUri(String uri) {
-        return delegate.topicForUri(uri);
+    public Maybe<Topic> topicForId(Long id) {
+        return delegate.topicForId(id);
     }
 
     @Override

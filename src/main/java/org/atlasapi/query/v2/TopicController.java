@@ -19,18 +19,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 @Controller
 public class TopicController extends BaseController<Topic> {
 
-    private final TopicQueryResolver topicResolver;
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException()).withErrorCode("TOPIC_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
-    private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException()).withErrorCode("TOPIC_NOT_FOUND").withStatusCode(HttpStatusCode.FORBIDDEN);
+    private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException()).withErrorCode("TOPIC_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
+
+    private final TopicQueryResolver topicResolver;
     private final TopicContentLister contentLister;
     private final QueryController queryController;
+    
+    private final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
 
     public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController) {
         super(configFetcher, log, atlasModelOutputter);
@@ -53,11 +57,10 @@ public class TopicController extends BaseController<Topic> {
         
         ContentQuery query = builder.build(req);
         
-        String topicUri = Topic.topicUriForId(id);
-        Maybe<Topic> topicForUri = topicResolver.topicForUri(topicUri);
+        Maybe<Topic> topicForUri = topicResolver.topicForId(idCodec.decode(id).longValue());
         
         if(topicForUri.isNothing()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + topicUri + " not found"));
+            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
             return;
         }
         
@@ -65,7 +68,7 @@ public class TopicController extends BaseController<Topic> {
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
         if(!query.getConfiguration().getEnabledSources().contains(topic.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
+            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
             return;
         }
         
@@ -76,12 +79,12 @@ public class TopicController extends BaseController<Topic> {
     @RequestMapping(value={"3.0/topics/{id}/content.*", "/topics/{id}/content"})
     public void topicContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
         ContentQuery query = builder.build(req);
-        
-        String topicUri = Topic.topicUriForId(id);
-        Maybe<Topic> topicForUri = topicResolver.topicForUri(topicUri);
+
+        long decodedId = idCodec.decode(id).longValue();
+        Maybe<Topic> topicForUri = topicResolver.topicForId(decodedId);
         
         if(topicForUri.isNothing()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + topicUri + " not found"));
+            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
             return;
         }
         
@@ -89,12 +92,12 @@ public class TopicController extends BaseController<Topic> {
         
         //TODO: train wreck: query.allowsPublisher(publisher)?;
         if(!query.getConfiguration().getEnabledSources().contains(topic.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + topicUri + " unavailable"));
+            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
             return;
         }
         
         try {
-            queryController.modelAndViewFor(req, resp, ImmutableList.copyOf(contentLister.contentForTopic(topicUri, query)));
+            queryController.modelAndViewFor(req, resp, ImmutableList.copyOf(contentLister.contentForTopic(decodedId, query)));
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }

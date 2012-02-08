@@ -86,7 +86,7 @@ public class BbcModule {
         scheduler.schedule(bbcIonScheduleUpdater(7, 7).withName("BBC Ion schedule update (14 days)"), ONE_HOUR);
         scheduler.schedule(bbcIonScheduleOndemandUpdater(7).withName("BBC Ion on-demand schedule update (7 days)"), every(standardMinutes(10)).withOffset(standardMinutes(5)));
         scheduler.schedule(bbcIonSocialDataUpdater().withName("BBC Social data updater"), RepetitionRules.daily(new LocalTime(8, 0, 0)));
-        scheduler.schedule(bbcIonSegmentUpdater().withName("BBC Segment Updater"), TEN_MINUTES);
+        //scheduler.schedule(bbcIonSegmentUpdater().withName("BBC Segment Updater"), TEN_MINUTES);
         
         scheduler.schedule(bbcIonOndemandChangeUpdater().withName("BBC Ion Ondemand Change Updater"), TEN_MINUTES);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("BBC update scheduled tasks installed"));

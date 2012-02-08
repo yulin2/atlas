@@ -4,6 +4,7 @@
  * @param application
  */
 {template .applicationContent}
+<<<<<<< HEAD
 <h1>Application: {$application.title}</h1>
 <div class="line">
 	<div class="unit size1of2">
@@ -89,4 +90,45 @@
 	        <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
 		{/if}
 	</tr>
+=======
+<h2>Application: {$application.title}</h2>
+<h3>API Key</h3>
+<p style="margin-left:48px">{$application.credentials.apiKey}</p>
+<h3>IP Addresses</h3>
+<ul id="app-ips" class="mod" data-app="{$application.slug}" data-ips="{length($application.credentials.ipRanges)}">
+{foreach $range in $application.credentials.ipRanges}
+	<li><span>{$range}</span><span style="display:none;opacity:0">✖</span></li>
+	{ifempty}
+	<li>No Addresses</li>
+{/foreach}
+</ul>
+<form id="ipaddress" method="post" action="/admin/applications/{$application.slug}/ipranges" data-app="{$application.slug}">
+	<p>
+		<label>IP Address: <input type="text" name="ipaddress" placeholder="CIDR" required /></label>
+		<input type="submit" value="Add" />
+	</p>
+</form>
+<h3>Publishers</h3>
+<ul id="app-publishers" class="mod" data-app="{$application.slug}">
+
+{if not $application.configuration.precedence}
+    <p>Publisher precedence not enabled, <a id="enable-precedence" href="#enable" onclick="$('.precedenceControl').css({lb}'visibility': 'visible'{rb}); return false;">enable</a></p>
+{/if}
+
+{foreach $publisher in $application.configuration.publishers}
+	<li publisher="{$publisher.key}">
+		<label style="width: 150px; float: left;">
+			<input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}>
+			{$publisher.title}
+		</label>
+		<p class="precedenceControl" style="{if not $application.configuration.precedence}visibility: hidden; {/if}"> 
+		  <a href="#up" class="up">up</a> <a href="#down" class="down" onclick="">down</a>
+		</p>
+		<div style="clear: both;"/>
+	</li>
+{/foreach}
+</ul>
+
+
+>>>>>>> mbst-596-1069-topics
 {/template}

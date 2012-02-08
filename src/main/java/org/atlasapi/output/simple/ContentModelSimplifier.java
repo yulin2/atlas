@@ -1,5 +1,6 @@
 package org.atlasapi.output.simple;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -111,12 +112,12 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     	});
     }
 
-	private static Function<TopicRef, String> TOPICREF_TO_TOPIC_ID = new Function<TopicRef, String>() {
-    		@Override
-    		public String apply(TopicRef input) {
-    			return input.getTopic();
-    		}
-    	};
+    private final Function<TopicRef, String> TOPICREF_TO_TOPIC_ID = new Function<TopicRef, String>() {
+        @Override
+        public String apply(TopicRef input) {
+            return idCodec.encode(BigInteger.valueOf(input.getTopic()));
+        }
+    };
 
     private static Function<org.atlasapi.media.entity.simple.Topic, String> TOPIC_TO_TO_TOPIC_ID = new Function<org.atlasapi.media.entity.simple.Topic, String>() {
     		@Override
