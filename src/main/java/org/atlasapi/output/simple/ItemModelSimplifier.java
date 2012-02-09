@@ -2,45 +2,53 @@ package org.atlasapi.output.simple;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.SystemClock;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
-    protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
-    private final ContentResolver contentResolver;
+    private final ContainerSummaryResolver containerSummaryResolver;
+    private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
     
-    public ItemModelSimplifier(ContentResolver contentResolver, TopicQueryResolver topicResolver, SegmentResolver segmentResolver) {
+    protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
+    
+    public ItemModelSimplifier(TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
+        this(topicResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+    }
+
+    public ItemModelSimplifier(TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
         super(topicResolver);
-        this.contentResolver = contentResolver;
+        this.containerSummaryResolver = containerSummaryResolver;
+        this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
     }
 
@@ -115,15 +123,61 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             }
         }
 
+        Iterable<Broadcast> broadcasts = null;
         if (annotations.contains(Annotation.BROADCASTS)) {
-            for (Broadcast broadcast : version.getBroadcasts()) {
-                if (broadcast.isActivelyPublished()) {
-                    org.atlasapi.media.entity.simple.Broadcast simpleBroadcast = simplify(broadcast);
-                    copyProperties(version, simpleBroadcast, item);
-                    simpleItem.addBroadcast(simpleBroadcast);
-                }
+            broadcasts = filterInactive(version.getBroadcasts());
+        } else if (annotations.contains(Annotation.FIRST_BROADCASTS)) {
+            broadcasts = firstBroadcasts(filterInactive(version.getBroadcasts()));
+        } else if (annotations.contains(Annotation.NEXT_BROADCASTS)) {
+            broadcasts = nextBroadcast(filterInactive(version.getBroadcasts()));
+        }
+        if (broadcasts != null) {
+            for (Broadcast broadcast : broadcasts) {
+                org.atlasapi.media.entity.simple.Broadcast simpleBroadcast = simplify(broadcast);
+                copyProperties(version, simpleBroadcast, item);
+                simpleItem.addBroadcast(simpleBroadcast);
             }
         }
+    }
+
+    private Iterable<Broadcast> nextBroadcast(Iterable<Broadcast> broadcasts) {
+        DateTime now = clock.now();
+        DateTime earliest = null;
+        Builder<Broadcast> filteredBroadcasts = ImmutableSet.builder();
+        for (Broadcast broadcast : broadcasts) {
+            DateTime transmissionTime = broadcast.getTransmissionTime();
+            if (transmissionTime.isAfter(now) && (earliest == null || transmissionTime.isBefore(earliest))) {
+                earliest = transmissionTime;
+                filteredBroadcasts = ImmutableSet.<Broadcast>builder().add(broadcast);
+            } else if (transmissionTime.isEqual(earliest)) {
+                filteredBroadcasts.add(broadcast);
+            }
+        }
+        return filteredBroadcasts.build();
+    }
+
+    private Iterable<Broadcast> firstBroadcasts(Iterable<Broadcast> broadcasts) {
+        DateTime earliest = null;
+        Builder<Broadcast> filteredBroadcasts = ImmutableSet.builder();
+        for (Broadcast broadcast : broadcasts) {
+            DateTime transmissionTime = broadcast.getTransmissionTime();
+            if (earliest == null || transmissionTime.isBefore(earliest)) {
+                earliest = transmissionTime;
+                filteredBroadcasts = ImmutableSet.<Broadcast>builder().add(broadcast);
+            } else if (transmissionTime.isEqual(earliest)) {
+                filteredBroadcasts.add(broadcast);
+            }
+        }
+        return filteredBroadcasts.build();
+    }
+
+    private Iterable<Broadcast> filterInactive(Iterable<Broadcast> broadcasts) {
+        return Iterables.filter(broadcasts, new Predicate<Broadcast>() {
+            @Override
+            public boolean apply(Broadcast input) {
+                return input.isActivelyPublished();
+            }
+        });
     }
 
     private org.atlasapi.media.entity.simple.Broadcast simplify(Broadcast broadcast) {
@@ -200,37 +254,17 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     }
 
     private SeriesSummary seriesSummaryFromResolved(ParentRef seriesRef, Set<Annotation> annotations) {
-        SeriesSummary seriesSummary = new SeriesSummary();
-        seriesSummary.setUri(seriesRef.getUri());
+        SeriesSummary baseSummary = new SeriesSummary();
+        baseSummary.setUri(seriesRef.getUri());
 
-        if (annotations.contains(Annotation.SERIES_SUMMARY)) {
-            final Maybe<Identified> resolved = contentResolver.findByCanonicalUris(ImmutableList.of(seriesRef.getUri())).get(seriesRef.getUri());
-            if (resolved.hasValue() && resolved.requireValue() instanceof Series) {
-                Series series = (Series) resolved.requireValue();
-                seriesSummary.setTitle(series.getTitle());
-                seriesSummary.setDescription(series.getDescription());
-                seriesSummary.setCurie(series.getCurie());
-            }
-        }
-        
-        return seriesSummary;
+        return annotations.contains(Annotation.SERIES_SUMMARY) ? containerSummaryResolver.summarizeSeries(seriesRef).or(baseSummary) : baseSummary;
     }
 
     private BrandSummary summaryFromResolved(ParentRef container, Set<Annotation> annotations) {
-        BrandSummary brandSummary = new BrandSummary();
-        brandSummary.setUri(container.getUri());
+        BrandSummary baseSummary = new BrandSummary();
+        baseSummary.setUri(container.getUri());
 
-        if (annotations.contains(Annotation.BRAND_SUMMARY)) {
-            final Maybe<Identified> resolved = contentResolver.findByCanonicalUris(ImmutableList.of(container.getUri())).get(container.getUri());
-            if (resolved.hasValue() && resolved.requireValue() instanceof Brand) {
-                Brand brand = (Brand) resolved.requireValue();
-                brandSummary.setTitle(brand.getTitle());
-                brandSummary.setDescription(brand.getDescription());
-                brandSummary.setCurie(brand.getCurie());
-            }
-        }
-        
-        return brandSummary;
+        return annotations.contains(Annotation.BRAND_SUMMARY) ? containerSummaryResolver.summarizeTopLevelContainer(container).or(baseSummary) : baseSummary;
     }
 
     private void copyProperties(Encoding encoding, org.atlasapi.media.entity.simple.Location simpleLocation) {

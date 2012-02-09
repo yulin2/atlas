@@ -25,9 +25,10 @@ public enum Annotation {
     KEY_PHRASES,
     BROADCASTS,   
     LOCATIONS,
-    FIRST_BROADCAST,
-    NEXT_BROADCAST,
-    AVAILABLE_LOCATIONS;
+    FIRST_BROADCASTS,
+    NEXT_BROADCASTS,
+    AVAILABLE_LOCATIONS,
+    UPCOMING;
     
     private static final ImmutableSet<Annotation> defaultAnnotations = ImmutableSet.of(
         DESCRIPTION,

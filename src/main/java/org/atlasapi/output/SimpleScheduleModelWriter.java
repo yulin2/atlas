@@ -4,10 +4,7 @@ import java.util.Set;
 
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
-import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.simple.ItemModelSimplifier;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.collect.ImmutableList;
 
@@ -21,9 +18,9 @@ public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<
 
     private final ItemModelSimplifier itemModelSimplifier;
 
-	public SimpleScheduleModelWriter(AtlasModelWriter<ScheduleQueryResult> outputter, ContentResolver contentResolver, TopicQueryResolver topicResolver, SegmentResolver segmentResolver) {
+	public SimpleScheduleModelWriter(AtlasModelWriter<ScheduleQueryResult> outputter, ItemModelSimplifier itemModelSimplifier) {
 		super(outputter);
-        this.itemModelSimplifier = new ItemModelSimplifier(contentResolver, topicResolver, segmentResolver);
+        this.itemModelSimplifier = itemModelSimplifier;
 	}
 	
 	@Override

@@ -7,12 +7,9 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
-import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 /**
  * {@link AtlasModelWriter} that translates the full URIplay object model
@@ -26,10 +23,10 @@ public class SimpleContentModelWriter extends TransformingModelWriter<Iterable<C
     private final ContainerModelSimplifier containerModelSimplifier;
     private final ContentGroupModelSimplifier contentGroupSimplifier;
 
-	public SimpleContentModelWriter(AtlasModelWriter<ContentQueryResult> outputter, ContentResolver contentResolver, TopicQueryResolver topicResolver, SegmentResolver segmentResolver) {
+	public SimpleContentModelWriter(AtlasModelWriter<ContentQueryResult> outputter, ItemModelSimplifier itemModelSimplifier, ContainerModelSimplifier containerModelSimplifier) {
 	    super(outputter);
-	    this.itemModelSimplifier = new ItemModelSimplifier(contentResolver, topicResolver, segmentResolver);
-		this.containerModelSimplifier = new ContainerModelSimplifier(contentResolver, topicResolver, segmentResolver);
+	    this.itemModelSimplifier = itemModelSimplifier;
+		this.containerModelSimplifier = containerModelSimplifier;
 		this.contentGroupSimplifier = new ContentGroupModelSimplifier();
 	}
 	

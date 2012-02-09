@@ -5,7 +5,6 @@ import java.util.Set;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
 import org.atlasapi.output.simple.PersonModelSimplifier;
-import org.atlasapi.persistence.content.ContentResolver;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -18,12 +17,10 @@ import com.google.common.collect.Iterables;
  */
 public class SimplePersonModelWriter extends TransformingModelWriter<Iterable<Person>, PeopleQueryResult> {
 
-    private final ContentResolver contentResolver;
     private final PersonModelSimplifier personSimplifier;
 
-	public SimplePersonModelWriter(AtlasModelWriter<PeopleQueryResult> outputter, ContentResolver contentResolver) {
+	public SimplePersonModelWriter(AtlasModelWriter<PeopleQueryResult> outputter) {
 		super(outputter);
-        this.contentResolver = contentResolver;
         this.personSimplifier = new PersonModelSimplifier();
 	}
 	
