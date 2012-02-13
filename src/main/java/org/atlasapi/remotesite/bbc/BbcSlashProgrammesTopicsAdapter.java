@@ -17,6 +17,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
+@Deprecated
 public class BbcSlashProgrammesTopicsAdapter implements SiteSpecificAdapter<List<TopicRef>> {
 
     private final RemoteSiteClient<SlashProgrammesRdf> rdfClient;
