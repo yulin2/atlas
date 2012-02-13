@@ -6,12 +6,11 @@ import java.util.List;
 
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.RelatedLink;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -19,8 +18,8 @@ import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 
 public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHandler {
@@ -67,6 +66,7 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
             }
         } catch (Exception e) {
             log.record(warnEntry().withCause(e).withSource(getClass()).withDescription("Exception fetching social data for " + pidUri));
+            Throwables.propagate(e);
         }
     }
 

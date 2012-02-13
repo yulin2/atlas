@@ -20,6 +20,7 @@ import org.springframework.core.io.ClassPathResource;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
+@Deprecated
 @RunWith(JMock.class)
 public class BbcSlashProgrammesTopicsAdapterTest extends TestCase {
 
