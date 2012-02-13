@@ -40,12 +40,12 @@ $(document).ready(function() {
 	$(window).hashchange();*/
 });
 
-$("a.app-link").live('click', function(){
+/*$("a.app-link").live('click', function(){
 	var parts = $(this).attr('href').split('/');
 	var appName = parts[parts.length-1];
 	window.location.hash = window.location.hash + "!" + appName;
 	return false;
-});
+});*/
 
 addApplication = function(slug, data) {
 	var app = null;
