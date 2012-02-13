@@ -7,7 +7,12 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.output.simple.ContainerModelSimplifier;
+import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.output.AvailableChildrenResolver;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -32,9 +37,13 @@ public class FullToSimpleModelTranslatorTest {
     private final ContentResolver contentResolver = context.mock(ContentResolver.class);
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
-    @SuppressWarnings("unchecked")
-    private final AtlasModelWriter<ContentQueryResult> xmlOutputter = context.mock(AtlasModelWriter.class);
-    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, contentResolver, topicResolver, segmentResolver);
+    private final AvailableChildrenResolver availableChildren = context.mock(AvailableChildrenResolver.class);
+    private final UpcomingChildrenResolver upcomingChildren = context.mock(UpcomingChildrenResolver.class);
+    private @SuppressWarnings("unchecked") final AtlasModelWriter<ContentQueryResult> xmlOutputter = context.mock(AtlasModelWriter.class);
+    private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
+
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicResolver, segmentResolver, containerSummaryResolver);
+    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, topicResolver, availableChildren, upcomingChildren));
     
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
