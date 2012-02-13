@@ -22,7 +22,7 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$(window).hashchange( function(){
+	/*$(window).hashchange( function(){
 		var loc = location.hash.substring(2)
 		if( loc.length > 0 ){
 			$.getJSON('/admin/applications/'+loc+'.json', function(data){
@@ -37,7 +37,7 @@ $(document).ready(function() {
 		}
 	})
 	
-	$(window).hashchange();
+	$(window).hashchange();*/
 });
 
 //$("a.app-link").live('click', function(){
