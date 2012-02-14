@@ -21,8 +21,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -38,17 +37,16 @@ import com.metabroadcast.common.media.MimeType;
 public class ItemModelSimplifierTest {
 
     private final Mockery context = new Mockery();
-    private final ContentResolver contentResolver = context.mock(ContentResolver.class);
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(contentResolver, topicResolver, segmentResolver);
+    private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicResolver, segmentResolver, containerSummaryResolver );
     
     @Test
     @SuppressWarnings("unchecked")
     public void testCanCreateSimpleItemFromFullItem() throws Exception {
         
         context.checking(new Expectations(){{
-            allowing(contentResolver).findByCanonicalUris(with(any(Iterable.class)));will(returnValue(ResolvedContent.builder().build()));
             allowing(topicResolver).topicsForIds(with(any(Iterable.class)));will(returnValue(ImmutableList.of()));
             allowing(segmentResolver).resolveById(with(any(Iterable.class)));will(returnValue(ImmutableMap.of()));
         }});

@@ -23,6 +23,8 @@ import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
 import org.atlasapi.output.SimpleTopicModelWriter;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
+import org.atlasapi.output.simple.ContainerModelSimplifier;
+import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -30,6 +32,12 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.output.AvailableChildrenResolver;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
+import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
+import org.atlasapi.persistence.output.MongoUpcomingChildrenResolver;
+import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
@@ -51,10 +59,12 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 @Configuration
 public class QueryWebModule {
     
+    private @Autowired DatabasedMongo mongo;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
@@ -116,22 +126,35 @@ public class QueryWebModule {
 
     @Bean AtlasModelWriter<Iterable<Content>> contentModelOutputter() {
         return this.<Content>standardWriter(
-            new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), contentResolver, topicResolver, segmentResolver),
-            new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(),contentResolver, topicResolver, segmentResolver)
+            new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier()),
+            new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier())
         );
+    }
+
+    @Bean ContainerModelSimplifier containerSimplifier() {
+        AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
+        UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), topicResolver, availableChildren, upcomingChildren);
+        return containerSimplier;
+    }
+
+    @Bean ItemModelSimplifier itemModelSimplifier() {
+        ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicResolver, segmentResolver, containerSummary);
+        return itemSimplifier;
     }
     
     @Bean AtlasModelWriter<Iterable<Person>> personModelOutputter() {
         return this.<Person>standardWriter(
-            new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>(), contentResolver),
-            new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>(),contentResolver)
+            new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>()),
+            new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>())
         );
     }
     
     @Bean AtlasModelWriter<Iterable<ScheduleChannel>> scheduleChannelModelOutputter() {
         return this.<ScheduleChannel>standardWriter(
-            new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), contentResolver, topicResolver, segmentResolver),
-            new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(),contentResolver, topicResolver, segmentResolver)
+            new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), itemModelSimplifier()),
+            new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), itemModelSimplifier())
         );
     }
     

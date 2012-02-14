@@ -37,7 +37,6 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         if (annotations.contains(Annotation.CLIPS)) {
             simpleDescription.setClips(clipToSimple(content.getClips(), annotations));
         }
-
         if (annotations.contains(Annotation.TOPICS)) {
             simpleDescription.setTopics(topicRefToSimple(content.getTopicRefs(), annotations));
         }
