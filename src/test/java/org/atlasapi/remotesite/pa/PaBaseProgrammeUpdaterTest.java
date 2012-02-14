@@ -4,16 +4,20 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -27,10 +31,14 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.TimeMachine;
@@ -45,20 +53,25 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     private ContentWriter contentWriter;
 	private MongoScheduleStore scheduleWriter;
 
+	private ChannelResolver channelResolver;
+
     @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         super.setUp();
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
         MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(db);
         resolver = new LookupResolvingContentResolver(new MongoContentResolver(db), lookupStore);
         
+        channelResolver = new DummyChannelResolver();
         contentWriter = new MongoContentWriter(db, lookupStore, clock);
-        programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, new DummyItemsPeopleWriter(), log);
-        scheduleWriter = new MongoScheduleStore(db, resolver);
+        programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, channelResolver, new DummyItemsPeopleWriter(), log);
+        scheduleWriter = new MongoScheduleStore(db, resolver, channelResolver);
     }
 
+    @Test
     public void testShouldCreateCorrectPaData() throws Exception {
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, log, scheduleWriter);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter);
         updater.run();
         Identified content = null;
 
@@ -84,7 +97,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertFalse(version.getBroadcasts().isEmpty());
 
         Broadcast broadcast = version.getBroadcasts().iterator().next();
-        assertEquals("pa:71118471", broadcast.getId());
+        assertEquals("pa:71118471", broadcast.getSourceId());
 
         updater.run();
         Thread.sleep(1000);
@@ -102,7 +115,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         assertFalse(version.getBroadcasts().isEmpty());
 
         broadcast = version.getBroadcasts().iterator().next();
-        assertEquals("pa:71118471", broadcast.getId());
+        assertEquals("pa:71118471", broadcast.getSourceId());
 
 //        // Test people get created
 //        for (CrewMember crewMember : item.people()) {
@@ -111,7 +124,8 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 //            assertEquals(crewMember.name(), ((Person) content).name());
 //        }
     }
-    
+
+    @Test
     public void testGroupAndOrderFilesByDay() throws Exception {
     	File file1 = new File(new URI("file:/data/pa/TV/201101010145_20110102_tvdata.xml"));
     	File file2 = new File(new URI("file:/data/pa/TV/20110101_tvdata.xml"));
@@ -132,7 +146,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     	files.add(file7);
     	files.add(file8);
     	
-    	PaSingleDateUpdater updater = new PaSingleDateUpdater(null, null, null, null);
+    	PaSingleDateUpdater updater = new PaSingleDateUpdater(null, null, null, new DummyChannelResolver(), null);
     	Set<Queue<File>> groupedFiles = updater.groupAndOrderFilesByDay(files);
     	assertEquals(3, groupedFiles.size());
     	
@@ -159,14 +173,52 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
     static class TestPaProgrammeUpdater extends PaBaseProgrammeUpdater {
 
-        public TestPaProgrammeUpdater(PaProgDataProcessor processor, AdapterLog log, MongoScheduleStore scheduleWriter) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, scheduleWriter, log), new DefaultPaProgrammeDataStore("/data/pa", null), log);
+        public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, AdapterLog log, MongoScheduleStore scheduleWriter) {
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, scheduleWriter, log), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, log);
         }
 
         @Override
         public void runTask() {
             this.processFiles(ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())));
         }
+    }
+    
+    static class DummyChannelResolver implements ChannelResolver {
+
+		@Override
+		public Maybe<Channel> fromKey(String key) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Maybe<Channel> fromId(long id) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Maybe<Channel> fromUri(String uri) {
+			if("http://www.bbc.co.uk/bbcone".equals(uri)) {
+				return Maybe.just(new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone"));
+			}
+			return Maybe.just(new Channel());
+		}
+
+		@Override
+		public Iterable<Channel> all() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Map<String, Channel> forAliases(String aliasPrefix) {
+			return ImmutableMap.of(
+					"http://pressassociation.com/channels/4", new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone"));
+		}
+
+        @Override
+        public Iterable<Channel> forIds(Iterable<Long> ids) {
+            throw new UnsupportedOperationException();
+        }
+    	
     }
    
 }

@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.health;
 
-import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
@@ -21,6 +22,8 @@ public class RemoteSiteHealthModule {
     
     private @Autowired ContentResolver store;
 
+    private @Autowired ChannelResolver channelResolver;
+    
     private @Autowired ScheduleResolver scheduleResolver;
     
     private @Autowired HealthController health;
@@ -47,22 +50,22 @@ public class RemoteSiteHealthModule {
     }
     
     public @Bean HealthProbe c4ScheduleProbe() {
-        return new ScheduleProbe(Publisher.C4, Channel.CHANNEL_FOUR, scheduleResolver, clock);
+        return new ScheduleProbe(Publisher.C4, channelResolver.fromUri("http://www.channel4.com").requireValue(), scheduleResolver, clock);
     }
     
     public @Bean HealthProbe bbcScheduleProbe() {
-        return new ScheduleProbe(Publisher.BBC, Channel.BBC_ONE, scheduleResolver, clock);
+        return new ScheduleProbe(Publisher.BBC, channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london").requireValue(), scheduleResolver, clock);
     }
     
     public @Bean HealthProbe scheduleLivenessHealthProbe() {
     	return new ScheduleLivenessHealthProbe(scheduleResolver, ImmutableList.of(
-    			Channel.BBC_ONE,
-    			Channel.BBC_TWO,
-    			Channel.ITV1_LONDON,
-    			Channel.CHANNEL_FOUR,
-    			Channel.FIVE,
-    			Channel.SKY1,
-    			Channel.SKY_ATLANTIC
+    			channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london").requireValue(),
+    			channelResolver.fromUri("http://www.bbc.co.uk/services/bbctwo/england").requireValue(),
+    			channelResolver.fromUri("http://www.itv.com/channels/itv1/london").requireValue(),
+    			channelResolver.fromUri("http://www.channel4.com").requireValue(),
+    			channelResolver.fromUri("http://www.five.tv").requireValue(),
+    			channelResolver.fromUri("http://ref.atlasapi.org/channels/sky1").requireValue(),
+    			channelResolver.fromUri("http://ref.atlasapi.org/channels/skyatlantic").requireValue()
     	), Publisher.PA);
     }
     

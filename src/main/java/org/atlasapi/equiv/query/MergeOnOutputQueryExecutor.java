@@ -40,11 +40,20 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	
 	@Override
 	public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-		ApplicationConfiguration config = query.getConfiguration();
-		if (!config.precedenceEnabled()) {
-			return delegate.executeUriQuery(uris, query);
+	    return mergeResults(query, delegate.executeUriQuery(uris, query));
+	}
+
+	@Override
+	public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, final ContentQuery query) {
+	    return mergeResults(query, delegate.executeIdQuery(ids, query));
+	}
+
+    private Map<String, List<Identified>> mergeResults(final ContentQuery query, Map<String, List<Identified>> unmergedResult) {
+        ApplicationConfiguration config = query.getConfiguration();
+        if (!config.precedenceEnabled()) {
+			return unmergedResult;
 		}
-		return Maps.transformValues(delegate.executeUriQuery(uris, query), new Function<List<Identified>,List<Identified>>(){
+		return Maps.transformValues(unmergedResult, new Function<List<Identified>,List<Identified>>(){
             @Override
             public List<Identified> apply(List<Identified> input) {
                 
@@ -61,7 +70,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 
                 return ImmutableList.copyOf(Iterables.concat(mergeDuplicates(query.getConfiguration(), content), ids));
             }});
-	}
+    }
 
 	@SuppressWarnings("unchecked")
 	private <T extends Content> List<T> mergeDuplicates(ApplicationConfiguration config, List<T> contents) {

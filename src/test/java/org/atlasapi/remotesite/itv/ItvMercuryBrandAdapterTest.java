@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
@@ -34,7 +35,8 @@ public class ItvMercuryBrandAdapterTest extends TestCase {
     };
     
     private final SiteSpecificAdapter<Brand> adapter = new ItvMercuryBrandAdapter(itemStoringWriter);
-    
+
+    @Test
     public void testShouldGetBrand() throws Exception {
         String uri = "http://www.itv.com/itvplayer/video/?Filter=Emmerdale";
         Brand brand = adapter.fetch(uri);
@@ -75,7 +77,8 @@ public class ItvMercuryBrandAdapterTest extends TestCase {
             }
         }
     }
-    
+
+    @Test
     public void testShouldBeAbleToFetch() {
         assertTrue(adapter.canFetch("http://www.itv.com/itvplayer/video/?Filter=...Do%20the%20Funniest%20Things"));
         assertFalse(adapter.canFetch("http://www.itv.com/itvplayer/video/?Filter=1234"));

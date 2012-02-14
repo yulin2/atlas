@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
+import static org.atlasapi.remotesite.bbc.BbcFeeds.slashProgrammesUriForPid;
 import static org.atlasapi.remotesite.bbc.BbcModule.SCHEDULE_DEFAULT_FORMAT;
 import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.hamcrest.core.AllOf.allOf;
@@ -11,10 +12,10 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.hamcrest.Matcher;
@@ -33,75 +34,71 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private static final String DAY = "21010101";
     private static final String ION_FEED_URI = String.format(SCHEDULE_DEFAULT_FORMAT, SERVICE, DAY);
     
-	private static final String SLASH_PROGRAMMES_ROOT = "http://www.bbc.co.uk/programmes/";
-	private static final String ITEM_A = SLASH_PROGRAMMES_ROOT + "b00y377q";
-    
     private Mockery context = new Mockery();
     
     private final ContentWriter writer = context.mock(ContentWriter.class);
+    private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
+    private final BbcIonBroadcastHandler handler = new DefaultBbcIonBroadcastHandler(resolver, writer, log);
     
     @SuppressWarnings("unchecked")
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {
 
-        ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
         RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-no-brand-no-series.json")),IonSchedule.class);
         
         context.checking(new Expectations(){{
+            one(resolver).findByCanonicalUris((Iterable<String>)with(anything()));will(returnValue(ResolvedContent.builder().build()));
             one(writer).createOrUpdate((Item)with(allOf(
-                    uri(ITEM_A),
+                    uri(slashProgrammesUriForPid("b00y377q")),
                     title("Pleasure and Pain with Michael Mosley"),
-                    version(uri(SLASH_PROGRAMMES_ROOT+"b00y3770")))));
+                    version(uri(slashProgrammesUriForPid("b00y3770"))))));
         }});
 
-        BbcIonScheduleHandler handler = new DefaultBbcIonScheduleHandler(resolver, writer, log);
         new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, log).call();
     }
     
     @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandNoSeries() throws Exception {
 
-    	final String item1 = SLASH_PROGRAMMES_ROOT + "b00y1w9h";
-    	final String item2 = SLASH_PROGRAMMES_ROOT + "b006m86d";
+    	final String item1 = slashProgrammesUriForPid("b00y1w9h");
+    	final String item2 = slashProgrammesUriForPid("b006m86d");
     	
-        ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
         RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-no-series.json")), IonSchedule.class);
 
-        context.checking(new Expectations(){{
+        context.checking(new Expectations(){{            
+            allowing(resolver).findByCanonicalUris((Iterable<String>)with(anything()));will(returnValue(ResolvedContent.builder().build()));
             one(writer).createOrUpdate((Item)with(allOf(
                     uri(item1),
                     title("28/01/2011"),
-                    version(uri(SLASH_PROGRAMMES_ROOT+"b00y1w7k"))
+                    version(uri(slashProgrammesUriForPid("b00y1w7k")))
             )));
             one(writer).createOrUpdate((Brand) with(allOf(
                     uri(item2)
             )));
         }});
 
-        BbcIonScheduleHandler handler = new DefaultBbcIonScheduleHandler(resolver, writer, log);
         new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, log).call();
     }
 
     @SuppressWarnings("unchecked")
     public void testProcessNewEpisodeWithBrandAndSeries() throws Exception {
-        ContentResolver resolver = StubContentResolver.RESOLVES_NOTHING;
         RemoteSiteClient<IonSchedule> client = ionClient(FixedResponseHttpClient.respondTo(ION_FEED_URI, Resources.getResource("ion-item-brand-series.json")), IonSchedule.class);
 
         context.checking(new Expectations(){{
+            allowing(resolver).findByCanonicalUris((Iterable<String>)with(anything()));will(returnValue(ResolvedContent.builder().build()));
             one(writer).createOrUpdate((Item)with(allOf(
-                    uri(SLASH_PROGRAMMES_ROOT+"b00y439c"),
+                    uri(slashProgrammesUriForPid("b00y439c")),
                     title("Episode 4"),
-                    version(uri(SLASH_PROGRAMMES_ROOT+"b00y4336"))
+                    version(uri(slashProgrammesUriForPid("b00y4336")))
             )));
             one(writer).createOrUpdate((Brand)with(allOf(
-                    uri(SLASH_PROGRAMMES_ROOT+"b00xb44r")
+                    uri(slashProgrammesUriForPid("b00xb44r"))
             )));
             one(writer).createOrUpdate((Brand)with(allOf(
-                    uri(SLASH_PROGRAMMES_ROOT+"b007gf9k")
+                    uri(slashProgrammesUriForPid("b007gf9k"))
             )));
         }});
 
-        BbcIonScheduleHandler handler = new DefaultBbcIonScheduleHandler(resolver, writer, log);
         new BbcIonScheduleUpdateTask(ION_FEED_URI, client, handler, log).call();
     }
     

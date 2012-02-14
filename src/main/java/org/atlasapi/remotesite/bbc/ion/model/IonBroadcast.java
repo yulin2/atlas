@@ -4,6 +4,8 @@ import java.net.URL;
 
 import org.joda.time.DateTime;
 
+import com.google.common.base.Strings;
+
 public class IonBroadcast {
 
     private String aspectRatio;
@@ -165,5 +167,141 @@ public class IonBroadcast {
 
     public String getEpisodeId() {
         return episodeId;
+    }
+    
+    public boolean hasSeries() {
+        return !Strings.isNullOrEmpty(getSeriesId());
+    }
+
+    public boolean hasBrand() {
+        return !Strings.isNullOrEmpty(getBrandId());
+    }
+
+    public void setAspectRatio(String aspectRatio) {
+        this.aspectRatio = aspectRatio;
+    }
+
+    public void setDate(DateTime date) {
+        this.date = date;
+    }
+
+    public void setStartTimeIso(DateTime startTimeIso) {
+        this.startTimeIso = startTimeIso;
+    }
+
+    public void setHasGuidance(Boolean hasGuidance) {
+        this.hasGuidance = hasGuidance;
+    }
+
+    public void setCompleteTitle(String completeTitle) {
+        this.completeTitle = completeTitle;
+    }
+
+    public void setUpdated(DateTime updated) {
+        this.updated = updated;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setEpisode(IonEpisode episode) {
+        this.episode = episode;
+    }
+
+    public void setMyurl(String myurl) {
+        this.myurl = myurl;
+    }
+
+    public void setIsRepeat(Boolean isRepeat) {
+        this.isRepeat = isRepeat;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public void setIsAudiodescribed(Boolean isAudiodescribed) {
+        this.isAudiodescribed = isAudiodescribed;
+    }
+
+    public void setVersionId(String versionId) {
+        this.versionId = versionId;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public void setEnd(DateTime end) {
+        this.end = end;
+    }
+
+    public void setOnNow(Boolean onNow) {
+        this.onNow = onNow;
+    }
+
+    public void setIsBlanked(Boolean isBlanked) {
+        this.isBlanked = isBlanked;
+    }
+
+    public void setServiceTitle(String serviceTitle) {
+        this.serviceTitle = serviceTitle;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setStart(DateTime start) {
+        this.start = start;
+    }
+
+    public void setMediumSynopsis(String mediumSynopsis) {
+        this.mediumSynopsis = mediumSynopsis;
+    }
+
+    public void setBrandId(String brandId) {
+        this.brandId = brandId;
+    }
+
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
+    }
+
+    public void setPassionsiteLink(URL passionsiteLink) {
+        this.passionsiteLink = passionsiteLink;
+    }
+
+    public void setEndTimeIso(DateTime endTimeIso) {
+        this.endTimeIso = endTimeIso;
+    }
+
+    public void setParentTitle(String parentTitle) {
+        this.parentTitle = parentTitle;
+    }
+
+    public void setShortSynopsis(String shortSynopsis) {
+        this.shortSynopsis = shortSynopsis;
+    }
+
+    public void setPasssionsiteTitle(String passsionsiteTitle) {
+        this.passsionsiteTitle = passsionsiteTitle;
+    }
+
+    public void setSeriesId(String seriesId) {
+        this.seriesId = seriesId;
+    }
+
+    public void setIsSigned(Boolean isSigned) {
+        this.isSigned = isSigned;
+    }
+
+    public void setEpisodeId(String episodeId) {
+        this.episodeId = episodeId;
     }
 }

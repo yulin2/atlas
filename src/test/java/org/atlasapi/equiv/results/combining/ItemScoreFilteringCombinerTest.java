@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.hasEntry;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
@@ -14,12 +16,16 @@ import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class ItemScoreFilteringCombinerTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class ItemScoreFilteringCombinerTest extends TestCase {
 
     public final Item target = target("target", "Target", Publisher.BBC);
     
@@ -28,21 +34,23 @@ public class ItemScoreFilteringCombinerTest extends MockObjectTestCase {
         target.setTitle("Test " + title);
         return target;
     }
-    
+
+    private final Mockery context = new Mockery();
     @SuppressWarnings("unchecked")
-    private final EquivalenceCombiner<Item> delegate = mock(EquivalenceCombiner.class);
-    private final ResultDescription desc = mock(ResultDescription.class);
+    private final EquivalenceCombiner<Item> delegate = context.mock(EquivalenceCombiner.class);
+    private final ResultDescription desc = context.mock(ResultDescription.class);
     
     private final String sourceName = "itemSource";
     private final ItemScoreFilteringCombiner<Item> combiner = new ItemScoreFilteringCombiner<Item>(delegate, sourceName, ScoreThreshold.greaterThan(0.2));
-    
+
+    @Test
     public void testMaintainsScoreWhenItemScorePassesThreshold() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.valueOf(0.8))));
 
         final Score combinedScore = Score.ONE;
         
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             ignoring(desc);
             one(delegate).combine(scores, desc); 
                 will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, combinedScore))));
@@ -53,12 +61,13 @@ public class ItemScoreFilteringCombinerTest extends MockObjectTestCase {
         assertThat(combined.equivalents(), hasEntry(target, combinedScore));
         
     }
-    
+
+    @Test
     public void testSetsScoreToNullWhenItemScoreFailsThreshold() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.valueOf(0.1))));
 
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             ignoring(desc);
             one(delegate).combine(scores, desc); 
                 will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));
@@ -69,12 +78,13 @@ public class ItemScoreFilteringCombinerTest extends MockObjectTestCase {
         assertThat(combined.equivalents(), hasEntry(target, Score.NULL_SCORE));
         
     }
-    
+
+    @Test
     public void testSetsScoreToNullWhenItemScoreIsNull() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.of(target, Score.NULL_SCORE)));
 
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             ignoring(desc);
             one(delegate).combine(scores, desc); 
                 will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));
@@ -86,11 +96,12 @@ public class ItemScoreFilteringCombinerTest extends MockObjectTestCase {
         
     }
 
+    @Test
     public void testSetsScoreToNullWhenItemScoreIsMissing() {
 
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs(sourceName, ImmutableMap.<Item, Score>of()));
 
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             ignoring(desc);
             one(delegate).combine(scores, desc); 
                 will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));
@@ -102,11 +113,12 @@ public class ItemScoreFilteringCombinerTest extends MockObjectTestCase {
         
     }
 
+    @Test
     public void testDoesntFilterScoresWhenItemSourceNotFound() {
         
         final List<ScoredEquivalents<Item>> scores = ImmutableList.of(scoredEquivs("anotherSource", ImmutableMap.of(target, Score.valueOf(0.1))));
 
-        checking(new Expectations(){{
+        context.checking(new Expectations(){{
             ignoring(desc);
             one(delegate).combine(scores, desc); 
                 will(returnValue(scoredEquivs("asource", ImmutableMap.of(target, Score.ONE))));

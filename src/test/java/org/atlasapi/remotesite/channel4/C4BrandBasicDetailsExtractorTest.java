@@ -8,20 +8,53 @@ import static org.hamcrest.Matchers.startsWith;
 import junit.framework.TestCase;
 
 import org.atlasapi.genres.AtlasGenre;
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
 import org.joda.time.DateTime;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.io.Resources;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.sun.syndication.feed.atom.Feed;
 
-
+@RunWith(JMock.class)
 public class C4BrandBasicDetailsExtractorTest extends TestCase {
 
-	private final C4BrandBasicDetailsExtractor extractor = new C4BrandBasicDetailsExtractor();
+    private final Mockery context = new Mockery();
+	private C4BrandBasicDetailsExtractor extractor;
 	
+	@Before
+	public void setUp() {
+		final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
+		context.checking(new Expectations() {
+			{
+				one(channelResolver).fromUri("http://www.channel4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com"))));
+				one(channelResolver).fromUri("http://www.channel4.com/more4");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.more4.com"))));
+				one(channelResolver).fromUri("http://film4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", MediaType.VIDEO, "http://film4.com"))));
+				one(channelResolver).fromUri("http://www.e4.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com"))));
+				one(channelResolver).fromUri("http://www.4music.com");
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com"))));
+			}
+		});
+		extractor = new C4BrandBasicDetailsExtractor(channelResolver);
+	}
+	
+    @Test
 	public void testExtractingABrand() throws Exception {
+		
 		
 		AtomFeedBuilder brandFeed = new AtomFeedBuilder(Resources.getResource(getClass(), "ramsays-kitchen-nightmares.atom"));
 		
@@ -43,7 +76,8 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
 		        AtlasGenre.LIFESTYLE.getUri()
 		));
 	}
-	
+
+    @Test
 	public void testThatNonBrandPagesAreRejected() throws Exception {
 		checkIllegalArgument("an id");
 		checkIllegalArgument("tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/video");

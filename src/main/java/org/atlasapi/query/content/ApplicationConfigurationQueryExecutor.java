@@ -34,6 +34,11 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 	public Map<String,List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return delegate.executeUriQuery(uris, queryForContent(query));
 	}
+
+	@Override
+	public Map<String,List<Identified>> executeIdQuery(Iterable<String> uris, ContentQuery query) {
+	    return delegate.executeIdQuery(uris, queryForContent(query));
+	}
 	
 	private ContentQuery queryForContent(ContentQuery query) {
 		Iterable<AtomicQuery> softs = ImmutableList.of(/*(AtomicQuery)
@@ -49,7 +54,7 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 	}
 
 	private AtomicQuery mergeAttribute(Attribute<?> attr, ContentQuery query){
-		Set<Publisher> configPublishers = query.getConfiguration().getEnabledSources();
+		Set<Publisher> configPublishers = query.getConfiguration().getIncludedPublishers();
 		ImmutableSet<Publisher> requestedPublishers = query.includedPublishers();
 		
 		Set<?> values;

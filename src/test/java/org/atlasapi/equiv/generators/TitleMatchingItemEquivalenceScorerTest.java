@@ -10,12 +10,13 @@ import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer.TitleType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.junit.Test;
 
 import com.google.common.collect.Iterables;
 
 public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
-    
-    
+
+    @Test
     public void testTitleTyping() {
         
        assertEquals(TitleType.DATE, TitleType.titleTypeOf(itemWithTitle("09/10/2011")));
@@ -36,6 +37,7 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
         
     }
 
+    @Test
     public void testGenerateEquivalences() {
 
         TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
@@ -52,7 +54,8 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
         score(0, scorer.score(itemWithTitle("Episode 1"), of(itemWithTitle("Different")), desc));
         
     }
-    
+
+    @Test
     public void testSeqTitleTypes() {
 
         DefaultDescription desc = new DefaultDescription();

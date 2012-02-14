@@ -2,8 +2,8 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Map;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -55,7 +55,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
                         for (Broadcast broadcast : version.getBroadcasts()) {
                             // double-check the broadcast is in the valid interval/channel
                             if (contained(broadcast, scheduleInterval) && broadcast.getBroadcastOn().equals(channel.uri())) {
-                                if (broadcast.getId() != null && !itemEmbeddedInScheduleUri.equals(acceptableIds.get(broadcast.getId()))) {
+                                if (broadcast.getSourceId() != null && !itemEmbeddedInScheduleUri.equals(acceptableIds.get(broadcast.getSourceId()))) {
                                     if(!Boolean.FALSE.equals(broadcast.isActivelyPublished())) {
                                         broadcast.setIsActivelyPublished(false);
                                         changed = true;

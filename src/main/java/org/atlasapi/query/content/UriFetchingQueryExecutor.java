@@ -60,6 +60,11 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return executeContentQuery(uris, query);
 	}
+
+	@Override
+	public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, ContentQuery query) {
+	    return delegate.executeIdQuery(ids, query);
+	}
 	
 	public Map<String, List<Identified>> executeContentQuery(Iterable<String> uris, ContentQuery query) {
 

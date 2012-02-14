@@ -38,8 +38,16 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        
-        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupResolver.entriesFor(uris), LookupEntry.TO_ID);
+        return resolveLookupEntries(query, lookupResolver.entriesForUris(uris));
+    }
+
+    @Override
+    public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, final ContentQuery query) {
+        return resolveLookupEntries(query, lookupResolver.entriesForIds(ids));
+    }
+
+    private Map<String, List<Identified>> resolveLookupEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
+        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupEntries, LookupEntry.TO_ID);
         
         Map<String, Set<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
 
@@ -89,7 +97,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
     
     private Predicate<LookupRef> enabledPublishers(ApplicationConfiguration config) {
-        final Set<Publisher> enabledPublishers = config.getEnabledSources();
+        final Set<Publisher> enabledPublishers = config.getIncludedPublishers();
         return new Predicate<LookupRef>() {
             @Override
             public boolean apply(LookupRef input) {

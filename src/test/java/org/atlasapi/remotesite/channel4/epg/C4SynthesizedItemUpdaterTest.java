@@ -74,7 +74,7 @@ public class C4SynthesizedItemUpdaterTest extends TestCase {
         return ImmutableSet.copyOf(Iterables.transform(broadcasts, new Function<Broadcast, String>() {
             @Override
             public String apply(Broadcast input) {
-                return input.getId();
+                return input.getSourceId();
             }
         }));
     }

@@ -20,20 +20,30 @@ import static org.hamcrest.Matchers.instanceOf;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import com.metabroadcast.common.http.HttpStatusCodeException;
 
 /**
  * Unit test for {@link YouTubeAdapter}.
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class YouTubeAdapterTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class YouTubeAdapterTest extends TestCase {
 
+    private final Mockery context = new Mockery();
 	static final String DOCUMENT = "doc";
 	
 	RemoteSiteClient<VideoEntry> gdataClient;
@@ -45,16 +55,17 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-		gdataClient = mock(RemoteSiteClient.class);
-		contentExtractor = mock(ContentExtractor.class);
+	@Before
+	public void setUp() throws Exception {
+		gdataClient = context.mock(RemoteSiteClient.class);
+		contentExtractor = context.mock(ContentExtractor.class);
 		adapter = new YouTubeAdapter(gdataClient, contentExtractor);
 	}
 	
+	@Test
 	public void testPerformsGetCorrespondingGivenUriAndPassesResultToExtractor() throws Exception {
 		
-		checking(new Expectations() {{
+		context.checking(new Expectations() {{
 			one(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); will(returnValue(videoEntry));
 			one(contentExtractor).extract(youtubeSource); will(returnValue(new Item()));
 		}});
@@ -62,9 +73,10 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 		adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8");
 	}
 	
+	@Test
 	public void testWrapsExceptionIfGDataClientThrowsIOException() throws Exception {
 		
-		checking(new Expectations() {{
+		context.checking(new Expectations() {{
 			allowing(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); will(throwException(new IOException()));
 		}});
 		
@@ -78,14 +90,15 @@ public class YouTubeAdapterTest extends MockObjectTestCase {
 	
 	public void tesRetunsNullIfGDataClientThrowsResourceNotFoundException() throws Exception {
 		
-		checking(new Expectations() {{
+		context.checking(new Expectations() {{
 			allowing(gdataClient).get("http://uk.youtube.com/watch?v=-OBxL8PiFc8"); 
-				will(throwException(new Exception()));
+				will(throwException(new HttpStatusCodeException(404, "Not Found")));
 		}});
 		
 		assertNull(adapter.fetch("http://uk.youtube.com/watch?v=-OBxL8PiFc8"));
 	}
 	
+	@Test
 	public void testCanFetchResourcesForYouTubeClipUris() throws Exception {
 		assertTrue(adapter.canFetch("http://www.youtube.com/watch?v=-OBxL8PiFc8"));
 		

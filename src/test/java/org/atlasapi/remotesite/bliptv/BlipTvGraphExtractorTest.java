@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
+import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Item;
@@ -28,7 +29,6 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.Matchers.EncodingMatcher;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.atlasapi.remotesite.html.HtmlDescriptionSource;
-import org.jmock.integration.junit3.MockObjectTestCase;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -37,7 +37,7 @@ import com.metabroadcast.common.media.MimeType;
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class BlipTvGraphExtractorTest extends MockObjectTestCase {
+public class BlipTvGraphExtractorTest extends TestCase {
 	
 	static final String ITEM_URI = "http://blip.tv/file/2276955/";
 	

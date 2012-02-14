@@ -42,6 +42,14 @@ public class BbcSlashProgrammesRdfClient<T> implements RemoteSiteClient<T> {
 
 	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
+	
+	public static <T> RemoteSiteClient<T> slashProgrammesClient(Class<T> cls) {
+	    return slashProgrammesClient(HttpClients.webserviceClient(), cls);
+	}
+	
+	public static <T> RemoteSiteClient<T> slashProgrammesClient(SimpleHttpClient httpClient, Class<T> cls) {
+	    return new BbcSlashProgrammesRdfClient<T>(httpClient, cls);
+	}
 
 	public BbcSlashProgrammesRdfClient(Class<T> clazz) {
 		this(HttpClients.webserviceClient(), clazz);

@@ -40,38 +40,11 @@ $(document).ready(function() {
 	$(window).hashchange();*/
 });
 
-//$("a.app-link").live('click', function(){
-//	var parts = $(this).attr('href').split('/');
-//	var appName = parts[parts.length-1];
-//	window.location.hash = window.location.hash + "!" + appName;
-//	return false;
-//});
-
-$("a.request-link").live('click', function(){
-    var link = $(this);
-    var requestUrl = link.attr('href');
-    $.ajax({
-        type: "post",
-        url: requestUrl,
-        success:function(data, test, req) {
-            link.parent().html("requested");
-        }
-    })
-    return false;
-});
-
-$("a.approve-link").live('click', function(){
-    var link = $(this);
-    var requestUrl = link.attr('href');
-    var cell = link.parent();
-    $.ajax({
-        type: "post",
-        url: requestUrl,
-        success:function(data, test, req) {
-            cell.empty();
-        }
-    })
-    return false;
+$("a.app-link").live('click', function(){
+	var parts = $(this).attr('href').split('/');
+	var appName = parts[parts.length-1];
+	window.location.hash = window.location.hash + "!" + appName;
+	return false;
 });
 
 addApplication = function(slug, data) {
@@ -94,7 +67,7 @@ $("input.app-publisher").live('change', function(){
 	var checked =  $(this).is(":checked")
 	$.ajax({
 		type: checked ? "post" : "delete",
-		url: "/admin/applications/"+checkbox.closest('table').attr("data-app")+"/publishers/enabled"+(checked?"":"/"+$(this).attr("value"))+".json",
+		url: "/admin/applications/"+checkbox.closest('ul').attr("data-app")+"/publishers"+(checked?"":"/"+$(this).attr("value"))+".json",
 		data: ({pubkey : $(this).attr("value")}),
 		success:function(responseData, textStatus, XMLHttpRequest) {
 			checkbox.closest('label').stop().animate({opacity: 0.25}, 500, function() {

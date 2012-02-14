@@ -20,10 +20,15 @@ import static org.hamcrest.Matchers.startsWith;
 
 import java.io.IOException;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.io.IOUtils;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
@@ -31,15 +36,18 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class TedTalkClientTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class TedTalkClientTest extends TestCase {
 
-	String URI = "/uri";
+	private final String URI = "/uri";
+
+	private final Mockery context = new Mockery();
+	private final SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
 	
-	private final SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
-	
+	@Test
 	public void testTheClient() throws Exception {
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(httpClient).getContentsOf(URI); will(returnValue(itemHtml()));
 		}});
 		

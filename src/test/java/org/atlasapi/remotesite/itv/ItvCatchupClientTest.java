@@ -6,23 +6,31 @@ import static org.hamcrest.Matchers.is;
 import java.io.IOException;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.apache.commons.io.IOUtils;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.core.io.ClassPathResource;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
 
-public class ItvCatchupClientTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class ItvCatchupClientTest extends TestCase {
 
 	static String CATCHUP_URI = "http://example.com";
 	static String SERIES_FRAGMENT = "http://www.itv.com/_app/Dynamic/CatchUpData.ashx?ViewType=1&Filter=972&moduleID=262033&columnWidth=2";
-	
-	SimpleHttpClient httpClient = mock(SimpleHttpClient.class);
 
+    private final Mockery context = new Mockery();
+	SimpleHttpClient httpClient = context.mock(SimpleHttpClient.class);
+
+    @Test
 	public void testBindsRetrievedXmlDocumentToObjectModel() throws Exception {
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(httpClient).getContentsOf(CATCHUP_URI); will(returnValue(itvCatchupXmlDocument()));
 			one(httpClient).getContentsOf(SERIES_FRAGMENT); will(returnValue(itvSeriesHtmlFragment()));
 		}});

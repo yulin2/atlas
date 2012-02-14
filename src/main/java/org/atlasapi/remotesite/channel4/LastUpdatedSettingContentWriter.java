@@ -73,7 +73,7 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
         
         for (Version version : versions) {
             for (Broadcast broadcast : version.getBroadcasts()) {
-                Broadcast prevBroadcast = prevBroadcasts.get(broadcast.getId());
+                Broadcast prevBroadcast = prevBroadcasts.get(broadcast.getSourceId());
                 if(prevBroadcast == null || !equal(prevBroadcast, broadcast)) {
                     broadcast.setLastUpdated(now);
                 }
@@ -137,7 +137,7 @@ public class LastUpdatedSettingContentWriter implements ContentWriter {
 
             @Override
             public String apply(Broadcast input) {
-                return input.getId();
+                return input.getSourceId();
             }
         });
     }

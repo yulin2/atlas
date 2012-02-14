@@ -2,9 +2,10 @@ package org.atlasapi.query.content.schedule;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -15,6 +16,7 @@ import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentWriter;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.joda.time.DateTime;
+import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -35,9 +37,11 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
     private final DateTime now = new DateTime(DateTimeZones.UTC);
     private final Item item = new Item("item1", "item1", Publisher.BBC);
     
-    private final Broadcast broadcast1 = new Broadcast(Channel.BBC_ONE.uri(), now, now.plusMinutes(2));
-    private final Broadcast broadcast2 = new Broadcast(Channel.BBC_ONE.uri(), now.plusMinutes(2), now.plusMinutes(3));
-    private final Broadcast broadcast3 = new Broadcast(Channel.BBC_ONE.uri(), now.plusMinutes(3), now.plusMinutes(6));
+    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
+
+    private final Broadcast broadcast1 = new Broadcast(BBC_ONE.uri(), now, now.plusMinutes(2));
+    private final Broadcast broadcast2 = new Broadcast(BBC_ONE.uri(), now.plusMinutes(2), now.plusMinutes(3));
+    private final Broadcast broadcast3 = new Broadcast(BBC_ONE.uri(), now.plusMinutes(3), now.plusMinutes(6));
     
     @Override
     protected void setUp() throws Exception {
@@ -58,7 +62,8 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
         writer.createOrUpdate(item);
         listener = new BroadcastRemovingScheduleOverlapListener(resolver, writer);
     }
-    
+
+    @Test
     public void testRemoveBroadcast() {
         listener.itemRemovedFromSchedule(item, broadcast1);
         

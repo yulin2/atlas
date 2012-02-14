@@ -38,6 +38,13 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		brand3.addEquivalentTo(brand1);
 		item1.addEquivalentTo(item2);
 		item2.addClip(clip1);
+		
+		brand1.setId("one");
+		brand2.setId("two");
+		brand3.setId("three");
+		item1.setId("eyeone");
+		item2.setId("eyetwo");
+		clip1.setId("clipone");
 	}
 	
 	public void dontTestMergingBrands() throws Exception {
@@ -57,7 +64,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 	public void testMergingEpisodes() throws Exception {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
-		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
+		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(new ApplicationConfiguration(null, ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)).copyWithPrecedence(ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
 		Map<String, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
 		
 		assertEquals(ImmutableList.of(item1), merged.get(item1.getCanonicalUri()));
@@ -71,6 +78,11 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 			public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 				return ImmutableMap.<String, List<Identified>>of(respondWith[0].getCanonicalUri(), ImmutableList.<Identified>copyOf(respondWith));
 			}
+
+            @Override
+            public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, ContentQuery query) {
+                return ImmutableMap.<String, List<Identified>>of(respondWith[0].getStringId(), ImmutableList.<Identified>copyOf(respondWith));
+            }
 		};
 	}
 }

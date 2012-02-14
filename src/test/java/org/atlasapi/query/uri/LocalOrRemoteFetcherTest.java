@@ -15,6 +15,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.uri;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -22,38 +24,48 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.persistence.testing.StubContentResolver;
 import org.jmock.Expectations;
-import org.jmock.integration.junit3.MockObjectTestCase;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Unit test for {@link LocalOrRemoteFetcher}.
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class LocalOrRemoteFetcherTest extends MockObjectTestCase {
+@RunWith(JMock.class)
+public class LocalOrRemoteFetcherTest extends TestCase {
 
 	static final String URI = "http://example.com";
     
 	Fetcher<Identified> remoteFetcher;
 	
 	Item bean = new Item(URI, URI, Publisher.BBC);
-	
+
+    private final Mockery context = new Mockery();
+    
+    @Before
 	@Override
 	@SuppressWarnings("unchecked")
-	protected void setUp() throws Exception {
+	public void setUp() throws Exception {
 		super.setUp();
-		remoteFetcher = mock(Fetcher.class);
+		remoteFetcher = context.mock(Fetcher.class);
 	}
 
+    @Test
 	public void testQueriesRemoteFetcherForNewUri() throws Exception {
 		ContentResolver resources = StubContentResolver.RESOLVES_NOTHING;
 		LocalOrRemoteFetcher localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);
 		
-		checking(new Expectations() {{ 
+		context.checking(new Expectations() {{ 
 			one(remoteFetcher).fetch(URI); will(returnValue(bean));
 		}});
 		
 		localOrRemoteFetcher.fetch(URI);
 	}
-	
+
+    @Test
 	public void testLoadsKnownResourcesFromDatabaseAndDoesNotFetch() throws Exception {
 		ContentResolver resources = new StubContentResolver().respondTo(bean);
 		LocalOrRemoteFetcher localOrRemoteFetcher = new LocalOrRemoteFetcher(resources, remoteFetcher);

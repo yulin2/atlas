@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import nu.xom.Builder;
 import nu.xom.Document;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
@@ -57,6 +58,7 @@ public class C4Module {
 	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
 	private @Autowired AdapterLog log;
 	private @Autowired ScheduleResolver scheduleResolver;
+	private @Autowired ChannelResolver channelResolver;
 	
     @PostConstruct
     public void startBackgroundTasks() {
@@ -78,7 +80,7 @@ public class C4Module {
                 new C4EpgBrandlessEntryProcessor(lastUpdatedSettingContentWriter(), contentResolver, c4BrandFetcher(), log), 
                 trimmer,
                 log,
-                new DayRangeGenerator().withLookAhead(7).withLookBack(7));
+                new DayRangeGenerator().withLookAhead(7).withLookBack(7), channelResolver);
     }
 	
 	@Bean public RemoteSiteClient<Document> c4EpgAtomClient() {
@@ -102,7 +104,7 @@ public class C4Module {
 	}
 
 	protected @Bean C4AtomBackedBrandUpdater c4BrandFetcher() {
-		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter(), c4LakeviewOnDemandFetcher(), log);
+		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter(), channelResolver, c4LakeviewOnDemandFetcher(), log);
 	}
 	
 	protected @Bean RemoteSiteClient<Feed> c4XBoxAtomFetcher() {
