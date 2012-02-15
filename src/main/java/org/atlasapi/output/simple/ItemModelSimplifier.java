@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.Restriction;
@@ -41,12 +42,12 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
     
-    public ItemModelSimplifier(TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
-        this(topicResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+    public ItemModelSimplifier(ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier, TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
+        this(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver, new SystemClock());
     }
 
-    public ItemModelSimplifier(TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
-        super(topicResolver);
+    public ItemModelSimplifier(ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier, TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
+        super(topicResolver, topicSimplifier);
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;

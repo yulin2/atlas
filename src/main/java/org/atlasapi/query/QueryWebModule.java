@@ -25,6 +25,7 @@ import org.atlasapi.output.SimpleTopicModelWriter;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
@@ -53,6 +54,7 @@ import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -63,6 +65,8 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 @Configuration
 public class QueryWebModule {
+    
+    private @Value("${local.host.name}") String localHostName;
     
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentWriter contentWriter;
@@ -76,12 +80,9 @@ public class QueryWebModule {
     private @Autowired TopicContentLister topicContentLister;
     private @Autowired SegmentResolver segmentResolver;
 
-    @Autowired
-    private KnownTypeQueryExecutor queryExecutor;
-    @Autowired
-    private ApplicationConfigurationFetcher configFetcher;
-    @Autowired
-    private AdapterLog log;
+    private @Autowired KnownTypeQueryExecutor queryExecutor;
+    private @Autowired ApplicationConfigurationFetcher configFetcher;
+    private @Autowired AdapterLog log;
     
     @Bean ChannelController channelController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
@@ -134,13 +135,13 @@ public class QueryWebModule {
     @Bean ContainerModelSimplifier containerSimplifier() {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), topicResolver, availableChildren, upcomingChildren);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), topicSimplifier(), topicResolver, availableChildren, upcomingChildren);
         return containerSimplier;
     }
 
     @Bean ItemModelSimplifier itemModelSimplifier() {
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicResolver, segmentResolver, containerSummary);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicSimplifier(), topicResolver, segmentResolver, containerSummary);
         return itemSimplifier;
     }
     
@@ -159,10 +160,16 @@ public class QueryWebModule {
     }
     
     @Bean AtlasModelWriter<Iterable<Topic>> topicModelOutputter() {
+        TopicModelSimplifier topicModelSimplifier = topicSimplifier();
         return this.<Topic>standardWriter(
-            new SimpleTopicModelWriter(new JsonTranslator<TopicQueryResult>(), contentResolver),
-            new SimpleTopicModelWriter(new JaxbXmlTranslator<TopicQueryResult>(),contentResolver)
+            new SimpleTopicModelWriter(new JsonTranslator<TopicQueryResult>(), contentResolver, topicModelSimplifier),
+            new SimpleTopicModelWriter(new JaxbXmlTranslator<TopicQueryResult>(),contentResolver, topicModelSimplifier)
         );
+    }
+
+    @Bean TopicModelSimplifier topicSimplifier() {
+        TopicModelSimplifier topicModelSimplifier = new TopicModelSimplifier(localHostName);
+        return topicModelSimplifier;
     }
     
     private <T> AtlasModelWriter<Iterable<T>> standardWriter(AtlasModelWriter<Iterable<T>> jsonWriter, AtlasModelWriter<Iterable<T>> xmlWriter) {

@@ -4,16 +4,16 @@ import java.util.Set;
 
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
-import org.atlasapi.output.simple.TopicModelSimplifier;
+import org.atlasapi.output.simple.ModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 
 public class SimpleTopicModelWriter extends TransformingModelWriter<Iterable<Topic>, TopicQueryResult> {
 
-    private final TopicModelSimplifier topicSimplifier;
+    private final ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier;
 
-    public SimpleTopicModelWriter(AtlasModelWriter<TopicQueryResult> delegate, ContentResolver contentResolver) {
+    public SimpleTopicModelWriter(AtlasModelWriter<TopicQueryResult> delegate, ContentResolver contentResolver, ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier) {
         super(delegate);
-        this.topicSimplifier = new TopicModelSimplifier();
+        this.topicSimplifier = topicSimplifier;
     }
     
     @Override
