@@ -19,6 +19,7 @@ import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.redux.ReduxModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
+import org.atlasapi.remotesite.voila.VoilaModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
 
 import com.google.common.collect.ImmutableMap;
@@ -49,6 +50,7 @@ public class RemoteSiteModuleConfigurer {
         .put("worldservice", WorldServicesModule.class)
         .put("lakeview", LakeviewModule.class)
         .put("redux", ReduxModule.class)
+        .put("voila", VoilaModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
