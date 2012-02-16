@@ -25,10 +25,11 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
 
     private final TopicQueryResolver topicResolver;
 
-    private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier();
+    private final ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier;
 
-    public ContentModelSimplifier(TopicQueryResolver topicResolver) {
+    public ContentModelSimplifier(TopicQueryResolver topicResolver, ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier) {
         this.topicResolver = topicResolver;
+        this.topicSimplifier = topicSimplifier;
     }
 
     protected void copyBasicContentAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
