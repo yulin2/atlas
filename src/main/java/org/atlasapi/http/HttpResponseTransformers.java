@@ -1,11 +1,13 @@
 package org.atlasapi.http;
 
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 
 import org.atlasapi.remotesite.html.HtmlNavigator;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.http.HttpResponseTransformer;
 
 public class HttpResponseTransformers {
@@ -14,22 +16,27 @@ public class HttpResponseTransformers {
     }
     
     public static <T> HttpResponseTransformer<T> gsonResponseTransformer(GsonBuilder gsonBuilder, Class<? extends T> cls) {
-        return new GsonHttpResponseTransformer<T>(gsonBuilder, cls);
+        return new GsonHttpResponseTransformer<T>(gsonBuilder, TypeToken.get(cls).getType());
+    }
+    
+    public static <T> HttpResponseTransformer<T> gsonResponseTransformer(GsonBuilder gsonBuilder, TypeToken<? extends T> token) {
+        return new GsonHttpResponseTransformer<T>(gsonBuilder, token.getType());
     }
 
     public static class GsonHttpResponseTransformer<T> extends AbstractHttpResponseTransformer<T> {
 
-        public GsonHttpResponseTransformer(GsonBuilder gsonBuilder, Class<? extends T> cls) {
+
+        public GsonHttpResponseTransformer(GsonBuilder gsonBuilder, Type type) {
+            this.type = type;
             this.gson = gsonBuilder.create();
-            this.cls = cls;
         }
         
-        private final Class<? extends T> cls;
+        private final Type type;
         private final Gson gson;
 
         @Override
         public T transform(InputStreamReader in) throws Exception {
-            return gson.fromJson(in, cls);
+            return gson.fromJson(in, type);
         }
     }
     
