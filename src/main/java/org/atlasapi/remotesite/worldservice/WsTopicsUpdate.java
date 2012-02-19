@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.worldservice;
 import static org.atlasapi.media.entity.Publisher.WORLD_SERVICE;
 import static org.atlasapi.persistence.content.ContentCategory.ITEMS;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
+import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 
 import java.util.Iterator;
@@ -24,6 +25,7 @@ import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.worldservice.model.WsTopics;
 import org.atlasapi.remotesite.worldservice.model.WsTopics.TopicWeighting;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.metabroadcast.common.base.Maybe;
@@ -72,8 +74,13 @@ public class WsTopicsUpdate extends ScheduledTask {
         int updated = 0;
         while(wsContent.hasNext()) {
             Item content = (Item) wsContent.next();
-            updated += updateTopicsFor(topics, content);
-            reportStatus(String.format("%s topic sets. %s items seen, % updated", topics.size(), ++seen, updated));
+            try {
+                updated += updateTopicsFor(topics, content);
+                reportStatus(String.format("%s topic sets. %s items seen, % updated", topics.size(), ++seen, updated));
+            } catch (Exception e) {
+                log.record(errorEntry().withCause(e).withDescription("Error updating topics of %s",content.getCanonicalUri()).withSource(getClass()));
+                throw Throwables.propagate(e);
+            }
         }
         
         log.record(infoEntry().withSource(getClass()).withDescription("Updated topics of %s items", updated));
