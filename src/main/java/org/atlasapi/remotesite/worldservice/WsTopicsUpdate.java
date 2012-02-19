@@ -76,7 +76,7 @@ public class WsTopicsUpdate extends ScheduledTask {
             Item content = (Item) wsContent.next();
             try {
                 updated += updateTopicsFor(topics, content);
-                reportStatus(String.format("%s topic sets. %s items seen, % updated", topics.size(), ++seen, updated));
+                reportStatus(String.format("%s topic sets. %s items seen, %s updated", topics.size(), ++seen, updated));
             } catch (Exception e) {
                 log.record(errorEntry().withCause(e).withDescription("Error updating topics of %s",content.getCanonicalUri()).withSource(getClass()));
                 throw Throwables.propagate(e);
