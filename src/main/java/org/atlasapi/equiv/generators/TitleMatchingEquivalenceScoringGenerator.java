@@ -100,4 +100,9 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
         }
         return builder.build();
     }
+    
+    @Override
+    public String toString() {
+        return "Title-matching Scorer/Generator";
+    }
 }

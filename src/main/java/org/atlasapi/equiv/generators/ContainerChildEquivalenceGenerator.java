@@ -150,4 +150,9 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
         
         return result;
     }
+    
+    @Override
+    public String toString() {
+        return "Container Child generator";
+    }
 }
