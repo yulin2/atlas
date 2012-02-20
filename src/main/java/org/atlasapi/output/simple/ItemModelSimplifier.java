@@ -21,6 +21,7 @@ import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -31,6 +32,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
@@ -117,9 +119,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Item item, Set<Annotation> annotations) {
 
-        if (annotations.contains(Annotation.LOCATIONS)) {
+        if (annotations.contains(Annotation.LOCATIONS) || annotations.contains(Annotation.AVAILABLE_LOCATIONS)) {
             for (Encoding encoding : version.getManifestedAs()) {
-                addTo(simpleItem, version, encoding, item);
+                addTo(simpleItem, version, encoding, item, annotations);
             }
         }
 
@@ -236,10 +238,19 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         }));
     }
 
-    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Item item) {
+    private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Item item, Set<Annotation> annotations) {
+        DateTime now = new DateTime(DateTimeZones.UTC);
         for (Location location : encoding.getAvailableAt()) {
-            addTo(simpleItem, version, encoding, location, item);
+            if(!annotations.contains(Annotation.AVAILABLE_LOCATIONS) || location.getPolicy() == null || available(location.getPolicy(), now)) {
+                addTo(simpleItem, version, encoding, location, item);
+            }
         }
+    }
+
+    private boolean available(Policy policy, DateTime now) {
+        return policy.getAvailabilityStart() == null 
+            || policy.getAvailabilityEnd() == null
+            || policy.getAvailabilityStart().isBefore(now) && policy.getAvailabilityEnd().isAfter(now);
     }
 
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Location location, Item item) {
