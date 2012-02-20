@@ -198,6 +198,11 @@ public class EquivModule {
             public Double apply(Double input) {
                 return input > 0 ? input / 2 : input;
             }
+            
+            @Override
+            public String toString() {
+                return "half if > 0";
+            }
         });
         
         ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();

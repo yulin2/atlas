@@ -107,4 +107,9 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
         }
         return title;
     }
+    
+    @Override
+    public String toString() {
+        return "Title-matching Item Scorer";
+    }
 }

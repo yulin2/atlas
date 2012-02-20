@@ -19,6 +19,10 @@ public class ScalingEquivalenceScorer<T extends Content> implements ContentEquiv
             public Double apply(Double input) {
                 return input * scaler;
             }
+            @Override
+            public String toString() {
+                return String.format("%+.2f", scaler);
+            }
         });
     }
     
@@ -36,5 +40,9 @@ public class ScalingEquivalenceScorer<T extends Content> implements ContentEquiv
     public ScoredEquivalents<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {
         return ScaledScoredEquivalents.<T>scale(delegate.score(content, suggestions, desc), scalingFunction);
     }
-    
+ 
+    @Override
+    public String toString() {
+        return String.format("%s (scaled by %s)", delegate, scalingFunction);
+    }
 }

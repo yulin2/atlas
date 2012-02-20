@@ -17,7 +17,7 @@ public class ScalingScoringGenerator<T extends Content> implements ContentEquiva
     private final ScalingEquivalenceGenerator<T> generator;
     private final ScalingEquivalenceScorer<T> scorer;
     
-    public ScalingScoringGenerator(ScalingEquivalenceGenerator<T> generator, ScalingEquivalenceScorer<T> scorer) {
+    private ScalingScoringGenerator(ScalingEquivalenceGenerator<T> generator, ScalingEquivalenceScorer<T> scorer) {
         this.generator = generator;
         this.scorer = scorer;
     }
@@ -33,4 +33,9 @@ public class ScalingScoringGenerator<T extends Content> implements ContentEquiva
         return generator.generate(content, desc);
     }
     
+    @Override
+    public String toString() {
+        //scorer/generator are same instance, scaled same.
+        return generator.toString();
+    }
 }

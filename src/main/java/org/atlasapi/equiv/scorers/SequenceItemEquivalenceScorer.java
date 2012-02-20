@@ -17,20 +17,20 @@ public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<I
     @Override
     public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Sequence");
-        
+
         desc.startStage("Sequence scoring").appendText("%s suggestions", Iterables.size(suggestions));
-        
+
         for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(suggestions), Item.class)) {
             equivalents.addEquivalent(suggestion, score(subject, suggestion, desc));
         }
-        
+
         desc.finishStage();
-        
+
         return equivalents.build();
     }
 
     private Score score(Item subject, Item suggestion, ResultDescription desc) {
-        
+
         if (subject instanceof Episode && suggestion instanceof Episode) {
 
             Episode subEp = (Episode) subject;
@@ -43,9 +43,12 @@ public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<I
                 return score;
             }
         }
-            
-        
+
         return Score.NULL_SCORE;
     }
 
+    @Override
+    public String toString() {
+        return "Sequence Item Scorer";
+    }
 }
