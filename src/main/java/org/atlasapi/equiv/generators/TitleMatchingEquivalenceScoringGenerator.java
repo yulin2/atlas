@@ -75,7 +75,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     private String alphaNumeric(String title) {
-        return title.replaceAll("[^\\d\\w]", "").toLowerCase();
+        return title.replaceAll(" & ", " and ").replaceAll("[^\\d\\w]", "").toLowerCase();
     }
 
     private double commonPrefixLength(String t1, String t2) {
