@@ -43,7 +43,7 @@ import com.metabroadcast.common.media.MimeType;
 public class DefaultWsProgrammeHandler implements WsProgrammeHandler {
 
     private static final DateTime BBC_FOUNDED = new DateTime(1927, 01, 01, 0, 0, 0, 0);
-    private static final DateTimeFormatter dayFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.S").withZone(LONDON);
+    private static final DateTimeFormatter dayFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withZone(LONDON);
     private static final String LOCATION_PREFIX = "http://bbcdbmsw023.national.core.bbc.co.uk/MediaLibrary";
     private static final String BBC_WORLD_SERVICE_URI = "http://www.bbc.co.uk/services/worldservice";
     
