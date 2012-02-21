@@ -53,7 +53,7 @@ public class WorldServicesModule {
     @PostConstruct
     public void schedule() {
         scheduler.schedule(worldServiceUpdateBuilder().updateLatest().withName("WS Programme Update"), RepetitionRules.weekly(DayOfWeek.WEDNESDAY, new LocalTime(06,00,00)));
-        scheduler.schedule(worldServiceTopicsUpdate().withName("WS Topics Update"), RepetitionRules.NEVER);
+        scheduler.schedule(worldServiceTopicsUpdate().withName("WS Topics Update"), RepetitionRules.weekly(DayOfWeek.MONDAY, new LocalTime(06,00,00)));
     }
 
     public WsTopicsUpdate worldServiceTopicsUpdate() {
