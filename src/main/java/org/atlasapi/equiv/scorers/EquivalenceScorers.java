@@ -9,10 +9,12 @@ import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 public class EquivalenceScorers<T extends Content> {
-    
+
     public static <T extends Content> EquivalenceScorers<T> from(Iterable<ContentEquivalenceScorer<T>> generators, AdapterLog log) {
         return new EquivalenceScorers<T>(generators, log);
     }
@@ -24,28 +26,27 @@ public class EquivalenceScorers<T extends Content> {
         this.scorers = scorers;
         this.log = log;
     }
-    
-    public List<ScoredEquivalents<T>> score(T content, List<T> generatedSuggestions, ResultDescription desc) {
-        List<ScoredEquivalents<T>> scoredScores = Lists.newArrayList();
 
+    public List<ScoredEquivalents<T>> score(T content, List<T> generatedSuggestions, ResultDescription desc) {
         desc.startStage("Scoring equivalences");
-        
+        Builder<ScoredEquivalents<T>> scoredScores = ImmutableList.builder();
+
         for (ContentEquivalenceScorer<T> scorer : scorers) {
-            
             try {
                 scoredScores.add(scorer.score(content, generatedSuggestions, desc));
             } catch (Exception e) {
-                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription(
-                        "Exception running scorer %s for %s %s", scorer.getClass().getSimpleName(), content.getClass().getSimpleName(), content.getCanonicalUri()
-                ));
+                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Exception running %s for %s", scorer, content));
+                /*
+                 * Propagate to make sure the equivalence update for this
+                 * content fails - if a scorer fails intermittently there's a
+                 * risk of equivalence flip-flop.
+                 */
+                throw Throwables.propagate(e);
             }
-            
         }
-        
+
         desc.finishStage();
-        
-        return scoredScores;
+        return scoredScores.build();
     }
-    
-    
+
 }
