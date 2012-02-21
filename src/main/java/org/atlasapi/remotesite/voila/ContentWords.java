@@ -1,10 +1,11 @@
 package org.atlasapi.remotesite.voila;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class ContentWords {
     
-    public static class ContentWordsList {
+    public static class ContentWordsList implements Iterable<ContentWords>{
         
         private List<ContentWords> results;
         
@@ -14,6 +15,11 @@ public class ContentWords {
         
         public void setResults(List<ContentWords> results) {
             this.results = results;
+        }
+
+        @Override
+        public Iterator<ContentWords> iterator() {
+            return results.iterator();
         }
         
     }
