@@ -40,7 +40,10 @@ public class ItemModelSimplifierTest {
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
     private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicResolver, segmentResolver, containerSummaryResolver );
+    
+    private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localHostName");
+    
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver );
     
     @Test
     @SuppressWarnings("unchecked")
