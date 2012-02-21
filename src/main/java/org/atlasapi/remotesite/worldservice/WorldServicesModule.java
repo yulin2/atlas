@@ -8,7 +8,9 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.worldservice.WsProgrammeUpdate.WsProgrammeUpdateBuilder;
 import org.jets3t.service.security.AWSCredentials;
 import org.joda.time.LocalTime;
@@ -25,7 +27,9 @@ import com.metabroadcast.common.time.DayOfWeek;
 public class WorldServicesModule {
     
     @Autowired private ContentResolver resolver; 
+    @Autowired private ContentLister lister;
     @Autowired private ContentWriter writer;
+    @Autowired private TopicStore topicStore;
     @Autowired private AdapterLog log;
     @Autowired private SimpleScheduler scheduler;
     
@@ -48,7 +52,12 @@ public class WorldServicesModule {
     
     @PostConstruct
     public void schedule() {
-        scheduler.schedule(worldServiceUpdateBuilder().updateLatest(), RepetitionRules.weekly(DayOfWeek.WEDNESDAY, new LocalTime(06,00,00)));
+        scheduler.schedule(worldServiceUpdateBuilder().updateLatest().withName("WS Programme Update"), RepetitionRules.weekly(DayOfWeek.WEDNESDAY, new LocalTime(06,00,00)));
+        scheduler.schedule(worldServiceTopicsUpdate().withName("WS Topics Update"), RepetitionRules.weekly(DayOfWeek.MONDAY, new LocalTime(06,00,00)));
+    }
+
+    public WsTopicsUpdate worldServiceTopicsUpdate() {
+        return new WsTopicsUpdate(new S3WsTopicsClient(new AWSCredentials(s3access, s3secret), "abcip-topics", log), topicStore, lister, writer, log);
     }
     
 }
