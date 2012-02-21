@@ -16,6 +16,8 @@ import com.google.common.collect.Iterables;
 
 public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
 
+    private final TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
+
     @Test
     public void testTitleTyping() {
         
@@ -40,9 +42,8 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
     @Test
     public void testGenerateEquivalences() {
 
-        TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
-        
         DefaultDescription desc = new DefaultDescription();
+        
         score(1.0, scorer.score(itemWithTitle("09/10/2011"), of(itemWithTitle("09/10/2011")), desc));
         
         score(0, scorer.score(itemWithTitle("19/10/2011"), of(itemWithTitle("09/10/2011")), desc));
@@ -59,13 +60,23 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
     public void testSeqTitleTypes() {
 
         DefaultDescription desc = new DefaultDescription();
-        TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
         
         score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2. Kinross")), desc));
         score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2: Kinross")), desc));
         score(1, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2 - Kinross")), desc));
         score(0, scorer.score(itemWithTitle("Kinross"), of(itemWithTitle("2. Different")), desc));
         
+    }
+    
+    @Test
+    public void testMatchingWithAmpersands() {
+        
+        DefaultDescription desc = new DefaultDescription();
+
+        score(1, scorer.score(itemWithTitle("Rosencrantz & Guildenstern Are Dead"), of(itemWithTitle("Rosencrantz and Guildenstern Are Dead")), desc));
+        score(1, scorer.score(itemWithTitle("Bill & Ben"), of(itemWithTitle("2. Bill and Ben")), desc));
+        score(0, scorer.score(itemWithTitle("B&Q"), of(itemWithTitle("BandQ")), desc));
+
     }
 
     private void score(double expected, ScoredEquivalents<Item> scores) {
