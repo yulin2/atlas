@@ -21,6 +21,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.atlasapi.remotesite.voila.ContentWords.ContentWordsList;
+import org.atlasapi.remotesite.voila.ContentWords.WordWeighting;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -63,7 +64,7 @@ public class ContentTwitterTopicsUpdater {
                 Maybe<Identified> possibleContent = resolvedContent.get(contentWordSet.getUri());
                 if(possibleContent.hasValue()) {
                     Content content = (Content) possibleContent.requireValue();
-                    content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(content.getTopicRefs()).build());
+                    content.setTopicRefs(getTopicRefsFor(contentWordSet).build());
                     write(content);
                     result = result.reduce(SUCCESS);
                 } else {
@@ -89,14 +90,14 @@ public class ContentTwitterTopicsUpdater {
 
     public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
         Builder<TopicRef> topicRefs = ImmutableSet.builder();
-        for (String word : ImmutableSet.copyOf(contentWordSet.getWords())) {
-            Maybe<Topic> possibleTopic = topicStore.topicFor("twitter", word);
+        for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
+            Maybe<Topic> possibleTopic = topicStore.topicFor("twitter", wordWeighting.getContent());
             if (possibleTopic.hasValue()) {
                 Topic topic = possibleTopic.requireValue();
                 topic.setPublisher(Publisher.METABROADCAST);
                 topic.setType(Topic.Type.SUBJECT);
                 topicStore.write(topic);
-                topicRefs.add(new TopicRef(topic, 1.0f, false));
+                topicRefs.add(new TopicRef(topic, wordWeighting.getWeight()/100.0f, false));
             }
         }
         return topicRefs;
