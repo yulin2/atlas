@@ -10,6 +10,7 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -25,7 +25,7 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 @Controller
-public class TopicController extends BaseController<Topic> {
+public class TopicController extends BaseController<Iterable<Topic>> {
 
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException()).withErrorCode("TOPIC_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException()).withErrorCode("TOPIC_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
@@ -46,7 +46,8 @@ public class TopicController extends BaseController<Topic> {
     @RequestMapping(value={"3.0/topics.*","/topics.*"})
     public void topics(HttpServletRequest req, HttpServletResponse resp) throws IOException  {
         try {
-            modelAndViewFor(req, resp, ImmutableList.copyOf(topicResolver.topicsFor(builder.build(req))));
+            ContentQuery query = builder.build(req);
+            modelAndViewFor(req, resp, query.getSelection().applyTo(topicResolver.topicsFor(query)));
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
@@ -66,8 +67,7 @@ public class TopicController extends BaseController<Topic> {
         
         Topic topic = topicForUri.requireValue();
         
-        //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(!query.getConfiguration().getEnabledSources().contains(topic.getPublisher())) {
+        if(!query.allowsSource(topic.getPublisher())) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
             return;
         }
@@ -90,14 +90,13 @@ public class TopicController extends BaseController<Topic> {
         
         Topic topic = topicForUri.requireValue();
         
-        //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(!query.getConfiguration().getEnabledSources().contains(topic.getPublisher())) {
+        if(!query.allowsSource(topic.getPublisher())) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
             return;
         }
         
         try {
-            queryController.modelAndViewFor(req, resp, ImmutableList.copyOf(contentLister.contentForTopic(decodedId, query)));
+            queryController.modelAndViewFor(req, resp, QueryResult.of(query.getSelection().applyTo(contentLister.contentForTopic(decodedId, query)), topic));
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }

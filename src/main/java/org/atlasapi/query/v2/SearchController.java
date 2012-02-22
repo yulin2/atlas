@@ -30,7 +30,7 @@ import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.text.MoreStrings;
 
 @Controller
-public class SearchController extends BaseController<Content> {
+public class SearchController extends BaseController<Iterable<Content>> {
 
     private static final String QUERY_PARAM = "q";
     private static final String PUBLISHER_PARAM = "publisher";
