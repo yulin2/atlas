@@ -174,9 +174,9 @@ public class QueryWebModule {
         return topicModelSimplifier;
     }
     
-    private <T> AtlasModelWriter<T> standardWriter(AtlasModelWriter<T> jsonWriter, AtlasModelWriter<T> xmlWriter) {
-        return DispatchingAtlasModelWriter.<T>dispatchingModelWriter()
-                .register(new RdfXmlTranslator<T>(), "rdf.xml", MimeType.APPLICATION_RDF_XML)
+    private <I extends Iterable<?>> AtlasModelWriter<I> standardWriter(AtlasModelWriter<I> jsonWriter, AtlasModelWriter<I> xmlWriter) {
+        return DispatchingAtlasModelWriter.<I>dispatchingModelWriter()
+                .register(new RdfXmlTranslator<I>(), "rdf.xml", MimeType.APPLICATION_RDF_XML)
                 .register(jsonWriter, "json", MimeType.APPLICATION_JSON)
                 .register(xmlWriter, "xml", MimeType.APPLICATION_XML)
                 .build();

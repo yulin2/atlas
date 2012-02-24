@@ -34,12 +34,12 @@ public abstract class BaseController<T> {
     protected final ApplicationConfigurationIncludingQueryBuilder builder;
     
     protected final AdapterLog log;
-    protected final AtlasModelWriter<T> outputter;
+    protected final AtlasModelWriter<? super T> outputter;
 
     private final QueryParameterAnnotationsExtractor annotationExtractor;
     private final ApplicationConfigurationFetcher configFetcher;
     
-    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<T> outputter) {
+    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<? super T> outputter) {
         this.configFetcher = configFetcher;
         this.log = log;
         this.outputter = outputter;

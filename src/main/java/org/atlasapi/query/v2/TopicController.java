@@ -1,12 +1,14 @@
 package org.atlasapi.query.v2;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
@@ -23,6 +25,7 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+import com.metabroadcast.common.query.Selection;
 
 @Controller
 public class TopicController extends BaseController<Iterable<Topic>> {
@@ -47,7 +50,7 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     public void topics(HttpServletRequest req, HttpServletResponse resp) throws IOException  {
         try {
             ContentQuery query = builder.build(req);
-            modelAndViewFor(req, resp, query.getSelection().applyTo(topicResolver.topicsFor(query)));
+            modelAndViewFor(req, resp, topicResolver.topicsFor(query));
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
@@ -96,10 +99,21 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         }
         
         try {
-            queryController.modelAndViewFor(req, resp, QueryResult.of(query.getSelection().applyTo(contentLister.contentForTopic(decodedId, query)), topic));
+            Selection selection = query.getSelection();
+            QueryResult<Content, Topic> result = QueryResult.of(query.getSelection().apply(iterable(contentLister.contentForTopic(decodedId, query))), topic);
+            queryController.modelAndViewFor(req, resp, result.withSelection(selection));
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
+    }
+
+    private Iterable<Content> iterable(final Iterator<Content> iterator) {
+        return new Iterable<Content>() {
+            @Override
+            public Iterator<Content> iterator() {
+                return iterator;
+            }
+        };
     }
      
 }

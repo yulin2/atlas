@@ -1,13 +1,16 @@
 package org.atlasapi.output;
 
+import java.util.Iterator;
+
 import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.Identified;
 
 import com.google.common.base.Optional;
+import com.metabroadcast.common.query.Selection;
 
 
-public class QueryResult<CONTENT, CONTEXT> {
+public class QueryResult<CONTENT, CONTEXT> implements Iterable<CONTENT> {
     
     public static <CONTENT extends Identified, CONTEXT extends Identified> QueryResult<CONTENT, CONTEXT> of(Iterable<CONTENT> content) {
         return of(content, null);
@@ -19,6 +22,7 @@ public class QueryResult<CONTENT, CONTEXT> {
 
     private final Iterable<CONTENT> content;
     private final Optional<CONTEXT> context;
+    private Selection selection;
 
     QueryResult(Iterable<CONTENT> content, Optional<CONTEXT> context) {
         this.content = content;
@@ -31,5 +35,19 @@ public class QueryResult<CONTENT, CONTEXT> {
 
     public Iterable<CONTENT> getContent() {
         return content;
+    }
+
+    @Override
+    public Iterator<CONTENT> iterator() {
+        return content.iterator();
+    }
+    
+    public QueryResult<CONTENT,CONTEXT> withSelection(Selection selection) {
+        this.selection = selection;
+        return this;
+    }
+    
+    public Selection getSelection() {
+        return selection;
     }
 }
