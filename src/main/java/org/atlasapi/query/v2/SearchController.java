@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.JsonTranslator;
+import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.search.model.SearchQuery;
@@ -30,7 +31,7 @@ import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.text.MoreStrings;
 
 @Controller
-public class SearchController extends BaseController<Content> {
+public class SearchController extends BaseController<QueryResult<Content,?extends Identified>> {
 
     private static final String QUERY_PARAM = "q";
     private static final String PUBLISHER_PARAM = "publisher";
@@ -46,7 +47,7 @@ public class SearchController extends BaseController<Content> {
     private final ParameterChecker paramChecker = new ParameterChecker(ImmutableSet.of(IpCheckingApiKeyConfigurationFetcher.API_KEY_QUERY_PARAMETER, Selection.LIMIT_REQUEST_PARAM,
             Selection.START_INDEX_REQUEST_PARAM, QUERY_PARAM, PUBLISHER_PARAM, TITLE_WEIGHTING_PARAM, BROADCAST_WEIGHTING_PARAM, CATCHUP_WEIGHTING_PARAM, JsonTranslator.CALLBACK));
 
-    public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Content>> outputter) {
+    public SearchController(SearchResolver searcher, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content,?extends Identified>> outputter) {
         super(configFetcher, log, outputter);
         this.searcher = searcher;
     }
@@ -76,7 +77,7 @@ public class SearchController extends BaseController<Content> {
             Set<Publisher> publishers = publishers(publisher, appConfig);
             List<Identified> content = searcher.search(new SearchQuery(q, selection, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
 
-            modelAndViewFor(request, response, Iterables.filter(content,Content.class));
+            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)));
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }

@@ -34,12 +34,12 @@ public abstract class BaseController<T> {
     protected final ApplicationConfigurationIncludingQueryBuilder builder;
     
     protected final AdapterLog log;
-    protected final AtlasModelWriter<Iterable<T>> outputter;
+    protected final AtlasModelWriter<? super T> outputter;
 
     private final QueryParameterAnnotationsExtractor annotationExtractor;
     private final ApplicationConfigurationFetcher configFetcher;
     
-    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<T>> outputter) {
+    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<? super T> outputter) {
         this.configFetcher = configFetcher;
         this.log = log;
         this.outputter = outputter;
@@ -52,7 +52,7 @@ public abstract class BaseController<T> {
         outputter.writeError(request, response, ae);
     }
     
-    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, Iterable<T> queryResult) throws IOException {
+    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, T queryResult) throws IOException {
         if (queryResult == null) {
             errorViewFor(request, response, AtlasErrorSummary.forException(new NullPointerException("Query result was null")));
         } else {
