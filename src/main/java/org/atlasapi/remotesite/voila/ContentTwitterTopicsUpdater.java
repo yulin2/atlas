@@ -16,9 +16,10 @@ import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.content.mongo.MongoTopicStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.atlasapi.remotesite.voila.ContentWords.ContentWordsList;
 import org.atlasapi.remotesite.voila.ContentWords.WordWeighting;
@@ -35,15 +36,17 @@ public class ContentTwitterTopicsUpdater {
 
     private static final String TWITTER_NS = "twitter";
     private final ContentResolver contentResolver;
-    private final MongoTopicStore topicStore;
+    private final TopicStore topicStore;
+    private final TopicQueryResolver topicResolver;
     private final ContentWriter contentWriter;
     private final CannonTwitterTopicsClient cannonTopicsClient;
     private final AdapterLog log;
 
-    public ContentTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, MongoTopicStore topicStore, ContentWriter contentWriter, AdapterLog log) {
+    public ContentTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log) {
         this.cannonTopicsClient = cannonTopicsClient;
         this.contentResolver = contentResolver;
         this.topicStore = topicStore;
+        this.topicResolver = topicResolver;
         this.contentWriter = contentWriter;
         this.log = log;
     }
@@ -86,7 +89,7 @@ public class ContentTwitterTopicsUpdater {
         return Iterables.filter(topicRefs, new Predicate<TopicRef>() {
             @Override
             public boolean apply(TopicRef input) {
-                Maybe<Topic> possibleTopic = topicStore.topicForId(input.getTopic());
+                Maybe<Topic> possibleTopic = topicResolver.topicForId(input.getTopic());
                 if (possibleTopic.hasValue()) {
                     Topic topic = possibleTopic.requireValue();
                     return !(TWITTER_NS.equals(topic.getNamespace()) && Publisher.METABROADCAST.equals(topic.getPublisher()));
