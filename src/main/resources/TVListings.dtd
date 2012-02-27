@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.06 05/09/2011 mrj -->
+<!-- listings Radio Times DTD v2.07 17/01/2012 mj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
@@ -17,11 +17,15 @@
 <!-- the data for a particular TV channel
 name: the name of the TV channel
 channel_id: the id of the TV channel
+start_time: the starttime of the channel in xsd:dateTime format. The first prog_data element will start on or after this time.
+end_time: the endtime of the channel in xsd:dateTime format. The last prog_data element will start before this time.
 -->
 <!ELEMENT channel_data (epgdetails?, prog_data+)>
 <!ATTLIST channel_data 
 	name CDATA #REQUIRED
 	channel_id CDATA #REQUIRED
+	start_time CDATA #REQUIRED
+	end_time CDATA #REQUIRED
 >
 
 <!-- epg data -->
@@ -221,6 +225,7 @@ person_id: A unique id for this person
 	field will contain the time of the previous programme. 
 	tv_movie: this programme is a made-for-tv movie
 	web_choice: RT web choice
+	special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
 	 
 -->
 <!ELEMENT attr EMPTY>
@@ -248,6 +253,7 @@ person_id: A unique id for this person
 	familychoice (yes | no) "no"
 	tv_movie (yes | no) "no"
 	web_choice (yes | no) "no"
+	special (yes | no) "no"
 >
 
 
