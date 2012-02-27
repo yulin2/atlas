@@ -8,8 +8,8 @@ import javax.annotation.PostConstruct;
 
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.mongo.MongoTopicStore;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +28,7 @@ public class VoilaModule {
     private @Value("${cannon.host.port}") Integer cannonHostPort;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
-    private @Autowired TopicStore topicStore;
+    private @Autowired MongoTopicStore topicStore;
     private @Autowired SimpleScheduler scheduler;
     private @Autowired AdapterLog log;
     

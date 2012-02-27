@@ -16,15 +16,16 @@ import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.content.mongo.MongoTopicStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.atlasapi.remotesite.voila.ContentWords.ContentWordsList;
 import org.atlasapi.remotesite.voila.ContentWords.WordWeighting;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -32,13 +33,14 @@ import com.metabroadcast.common.base.Maybe;
 
 public class ContentTwitterTopicsUpdater {
 
+    private static final String TWITTER_NS = "twitter";
     private final ContentResolver contentResolver;
-    private final TopicStore topicStore;
+    private final MongoTopicStore topicStore;
     private final ContentWriter contentWriter;
     private final CannonTwitterTopicsClient cannonTopicsClient;
     private final AdapterLog log;
 
-    public ContentTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, TopicStore topicStore, ContentWriter contentWriter, AdapterLog log) {
+    public ContentTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, MongoTopicStore topicStore, ContentWriter contentWriter, AdapterLog log) {
         this.cannonTopicsClient = cannonTopicsClient;
         this.contentResolver = contentResolver;
         this.topicStore = topicStore;
@@ -64,7 +66,7 @@ public class ContentTwitterTopicsUpdater {
                 Maybe<Identified> possibleContent = resolvedContent.get(contentWordSet.getUri());
                 if(possibleContent.hasValue()) {
                     Content content = (Content) possibleContent.requireValue();
-                    content.setTopicRefs(getTopicRefsFor(contentWordSet).build());
+                    content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
                     write(content);
                     result = result.reduce(SUCCESS);
                 } else {
@@ -80,6 +82,20 @@ public class ContentTwitterTopicsUpdater {
         return result;
     }
 
+    private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {
+        return Iterables.filter(topicRefs, new Predicate<TopicRef>() {
+            @Override
+            public boolean apply(TopicRef input) {
+                Maybe<Topic> possibleTopic = topicStore.topicForId(input.getTopic());
+                if (possibleTopic.hasValue()) {
+                    Topic topic = possibleTopic.requireValue();
+                    return !(TWITTER_NS.equals(topic.getNamespace()) && Publisher.METABROADCAST.equals(topic.getPublisher()));
+                }
+                return false;
+            }
+        });
+    }
+
     public void write(Content content) {
         if (content instanceof Container) {
             contentWriter.createOrUpdate((Container) content);
@@ -91,7 +107,7 @@ public class ContentTwitterTopicsUpdater {
     public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
         Builder<TopicRef> topicRefs = ImmutableSet.builder();
         for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-            Maybe<Topic> possibleTopic = topicStore.topicFor("twitter", wordWeighting.getContent());
+            Maybe<Topic> possibleTopic = topicStore.topicFor(TWITTER_NS, wordWeighting.getContent());
             if (possibleTopic.hasValue()) {
                 Topic topic = possibleTopic.requireValue();
                 topic.setPublisher(Publisher.METABROADCAST);
