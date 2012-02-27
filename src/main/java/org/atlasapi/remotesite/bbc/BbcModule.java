@@ -87,7 +87,8 @@ public class BbcModule {
         scheduler.schedule(bbcIonScheduleUpdater(0, 0).withName("BBC Ion schedule update (today only)"), TEN_MINUTES);
         scheduler.schedule(bbcIonScheduleUpdater(7, 7).withName("BBC Ion schedule update (14 days)"), ONE_HOUR);
         scheduler.schedule(bbcIonScheduleOndemandUpdater(7).withName("BBC Ion on-demand schedule update (7 days)"), every(standardMinutes(10)).withOffset(standardMinutes(5)));
-        scheduler.schedule(bbcIonSocialDataUpdater().withName("BBC Social data updater"), RepetitionRules.daily(new LocalTime(8, 0, 0)));
+        scheduler.schedule(bbcIonSocialDataUpdater(7, 7).withName("BBC Social data updater (±7 days)"), RepetitionRules.daily(new LocalTime(8, 0, 0)));
+        scheduler.schedule(bbcIonSocialDataUpdater(0, 365).withName("BBC Social data updater (1 year)"), RepetitionRules.NEVER);
         //scheduler.schedule(bbcIonSegmentUpdater().withName("BBC Segment Updater"), TEN_MINUTES);
         
         scheduler.schedule(bbcIonOndemandChangeUpdater().withName("BBC Ion Ondemand Change Updater"), TEN_MINUTES);
@@ -111,8 +112,8 @@ public class BbcModule {
         return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonBroadcastHandler(contentResolver, contentWriters, log), log);
     }
     
-    private BbcIonScheduleUpdater bbcIonSocialDataUpdater() {
-        BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 7, 7);
+    private BbcIonScheduleUpdater bbcIonSocialDataUpdater(int ahead, int back) {
+        BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, ahead, back);
         SimpleHttpClient httpClient = HttpClients.webserviceClient();
         
         RemoteSiteClient<SlashProgrammesContainer> jsonClient = jsonClient(httpClient);
