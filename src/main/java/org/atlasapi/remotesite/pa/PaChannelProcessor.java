@@ -56,7 +56,7 @@ public class PaChannelProcessor {
                 }
             }
             if (trimmer != null) {
-                trimmer.trimBroadcasts(new Interval(channelData.day(), channelData.day().plusDays(1)), channel, acceptableBroadcastIds.build());
+                trimmer.trimBroadcasts(channelData.schedulePeriod(), channel, acceptableBroadcastIds.build());
             }
             scheduleWriter.replaceScheduleBlock(Publisher.PA, channel, broadcasts);
             
