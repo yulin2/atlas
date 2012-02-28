@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.simple.ChannelQueryResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
@@ -49,11 +50,22 @@ public class ChannelController {
     }
 
     @RequestMapping("/3.0/channels.json")
-    public void listChannels(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public void listChannels(HttpServletRequest request, HttpServletResponse response, @RequestParam String key) throws IOException {
 
         Selection selection = SELECTION_BUILDER.build(request);
+        
+        ImmutableList<Channel> channels = selection.applyTo(channelResolver.all());
+        if (!Strings.isNullOrEmpty(key)) {
+            Maybe<Channel> channelFromKey = channelResolver.fromKey(key);
+            if (channelFromKey.isNothing()) {
+                response.setStatus(HttpStatusCode.NOT_FOUND.code());
+                response.setContentLength(0);
+                return;
+            }
+            channels = ImmutableList.of(channelFromKey.requireValue());
+        }
 
-        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(selection.applyTo(channelResolver.all()),showChannelGroups(request))));
+        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels,showChannelGroups(request))));
     }
     
     @RequestMapping("/3.0/channels/{id}.json")
