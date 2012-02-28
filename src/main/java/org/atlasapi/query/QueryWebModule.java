@@ -8,6 +8,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
+import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
@@ -87,13 +88,16 @@ public class QueryWebModule {
     private @Autowired AdapterLog log;
     
     @Bean ChannelController channelController() {
-        NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelController(channelResolver, idCodec , new ChannelSimplifier(idCodec, channelResolver, channelGroupResolver));
+        return new ChannelController(channelResolver, new SubstitutionTableNumberCodec() , channelSimplifier());
+    }
+
+    @Bean ChannelSimplifier channelSimplifier() {
+        return new ChannelSimplifier(new SubstitutionTableNumberCodec(), channelResolver, channelGroupResolver);
     }
     
     @Bean ChannelGroupController channelGroupController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelGroupController(channelGroupResolver, idCodec , new ChannelSimplifier(idCodec, channelResolver, channelGroupResolver));
+        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier());
     }
     
     @Bean QueryController queryController() {
@@ -156,8 +160,8 @@ public class QueryWebModule {
     
     @Bean AtlasModelWriter<Iterable<ScheduleChannel>> scheduleChannelModelOutputter() {
         return this.<Iterable<ScheduleChannel>>standardWriter(
-            new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), itemModelSimplifier()),
-            new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), itemModelSimplifier())
+            new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), itemModelSimplifier(),channelSimplifier()),
+            new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), itemModelSimplifier(),channelSimplifier())
         );
     }
     
