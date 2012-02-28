@@ -16,6 +16,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
 
+import com.google.common.base.Throwables;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpResponsePrologue;
@@ -49,6 +50,7 @@ public class FiveUpdater extends ScheduledTask {
         return new SimpleHttpClientBuilder()
             .withUserAgent(HttpClients.ATLAS_USER_AGENT)
             .withSocketTimeout(30, TimeUnit.SECONDS)
+            .withTrustUnverifiedCerts()
             .withRetries(3)
             .build();
     }
@@ -60,6 +62,7 @@ public class FiveUpdater extends ScheduledTask {
                 parser.build(in);
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+                Throwables.propagate(e);
             }
             return null;
         }
@@ -78,6 +81,7 @@ public class FiveUpdater extends ScheduledTask {
         }
         catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+            Throwables.propagate(e);
         }
     }
     
