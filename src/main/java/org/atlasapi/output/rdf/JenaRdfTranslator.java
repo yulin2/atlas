@@ -38,7 +38,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 
-public abstract class JenaRdfTranslator<EntityType> extends AbstractRdfTranslator<EntityType, OntModel, Resource, Property, Resource, String> implements InitializingBean {
+public abstract class JenaRdfTranslator<EntityType extends Iterable<?>> extends AbstractRdfTranslator<EntityType, OntModel, Resource, Property, Resource, String> implements InitializingBean {
 
 	private OntDocumentManager documentMgr;
 
@@ -77,7 +77,7 @@ public abstract class JenaRdfTranslator<EntityType> extends AbstractRdfTranslato
     }
 
 	@Override
-    public void writeTo(HttpServletRequest request, HttpServletResponse response, Iterable<EntityType> graph, Set<Annotation> annotations) throws IOException {
+    public void writeTo(HttpServletRequest request, HttpServletResponse response, EntityType graph, Set<Annotation> annotations) throws IOException {
 		OntModel rdf = ModelFactory.createOntologyModel(OWL_MEM);
 
 		loadOntologies(rdf);

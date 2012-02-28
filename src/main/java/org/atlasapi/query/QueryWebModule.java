@@ -5,6 +5,7 @@ import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
@@ -18,6 +19,7 @@ import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
 import org.atlasapi.output.JaxbXmlTranslator;
 import org.atlasapi.output.JsonTranslator;
+import org.atlasapi.output.QueryResult;
 import org.atlasapi.output.SimpleContentModelWriter;
 import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
@@ -125,10 +127,10 @@ public class QueryWebModule {
         return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(),queryController());
     }
 
-    @Bean AtlasModelWriter<Iterable<Content>> contentModelOutputter() {
-        return this.<Content>standardWriter(
-            new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier()),
-            new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier())
+    @Bean AtlasModelWriter<QueryResult<Content,? extends Identified>> contentModelOutputter() {
+        return this.<QueryResult<Content,? extends Identified>>standardWriter(
+            new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(),topicSimplifier()),
+            new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(),topicSimplifier())
         );
     }
 
@@ -146,14 +148,14 @@ public class QueryWebModule {
     }
     
     @Bean AtlasModelWriter<Iterable<Person>> personModelOutputter() {
-        return this.<Person>standardWriter(
+        return this.<Iterable<Person>>standardWriter(
             new SimplePersonModelWriter(new JsonTranslator<PeopleQueryResult>()),
             new SimplePersonModelWriter(new JaxbXmlTranslator<PeopleQueryResult>())
         );
     }
     
     @Bean AtlasModelWriter<Iterable<ScheduleChannel>> scheduleChannelModelOutputter() {
-        return this.<ScheduleChannel>standardWriter(
+        return this.<Iterable<ScheduleChannel>>standardWriter(
             new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), itemModelSimplifier()),
             new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), itemModelSimplifier())
         );
@@ -161,7 +163,7 @@ public class QueryWebModule {
     
     @Bean AtlasModelWriter<Iterable<Topic>> topicModelOutputter() {
         TopicModelSimplifier topicModelSimplifier = topicSimplifier();
-        return this.<Topic>standardWriter(
+        return this.<Iterable<Topic>>standardWriter(
             new SimpleTopicModelWriter(new JsonTranslator<TopicQueryResult>(), contentResolver, topicModelSimplifier),
             new SimpleTopicModelWriter(new JaxbXmlTranslator<TopicQueryResult>(),contentResolver, topicModelSimplifier)
         );
@@ -172,9 +174,9 @@ public class QueryWebModule {
         return topicModelSimplifier;
     }
     
-    private <T> AtlasModelWriter<Iterable<T>> standardWriter(AtlasModelWriter<Iterable<T>> jsonWriter, AtlasModelWriter<Iterable<T>> xmlWriter) {
-        return DispatchingAtlasModelWriter.<Iterable<T>>dispatchingModelWriter()
-                .register(new RdfXmlTranslator<T>(), "rdf.xml", MimeType.APPLICATION_RDF_XML)
+    private <I extends Iterable<?>> AtlasModelWriter<I> standardWriter(AtlasModelWriter<I> jsonWriter, AtlasModelWriter<I> xmlWriter) {
+        return DispatchingAtlasModelWriter.<I>dispatchingModelWriter()
+                .register(new RdfXmlTranslator<I>(), "rdf.xml", MimeType.APPLICATION_RDF_XML)
                 .register(jsonWriter, "json", MimeType.APPLICATION_JSON)
                 .register(xmlWriter, "xml", MimeType.APPLICATION_XML)
                 .build();

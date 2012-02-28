@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.query.Selection;
 
 @Controller
-public class PeopleController extends BaseController<Person> {
+public class PeopleController extends BaseController<Iterable<Person>> {
 
     private final PeopleResolver resolver;
 

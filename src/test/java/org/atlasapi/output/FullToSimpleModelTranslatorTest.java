@@ -46,7 +46,7 @@ public class FullToSimpleModelTranslatorTest {
     private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localhostName"); 
 
     private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver);
-    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, topicSimplifier, topicResolver, availableChildren, upcomingChildren));
+    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, topicSimplifier, topicResolver, availableChildren, upcomingChildren),topicSimplifier);
     
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
@@ -70,7 +70,7 @@ public class FullToSimpleModelTranslatorTest {
 			ignoring(segmentResolver);
 		}});
 		
-        translator.writeTo(request, response, graph, ImmutableSet.<Annotation>of());
+        translator.writeTo(request, response, QueryResult.of(graph), ImmutableSet.<Annotation>of());
 	}
 
 	protected Matcher<ContentQueryResult> simpleGraph() {

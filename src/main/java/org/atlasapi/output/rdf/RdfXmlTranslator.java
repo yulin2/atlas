@@ -37,7 +37,7 @@ import com.hp.hpl.jena.ontology.OntModel;
  *
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class RdfXmlTranslator<EntityType> extends JenaRdfTranslator<EntityType> {
+public class RdfXmlTranslator<EntityType extends Iterable<?>> extends JenaRdfTranslator<EntityType> {
 
 	private static final String RDF_XML = "RDF/XML";
 

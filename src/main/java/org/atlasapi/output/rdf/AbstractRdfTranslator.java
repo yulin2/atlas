@@ -30,7 +30,7 @@ import org.atlasapi.media.vocabulary.RDF;
 import org.atlasapi.output.AtlasModelWriter;
 import org.springframework.beans.BeanWrapperImpl;
 
-public abstract class AbstractRdfTranslator<EntityType, ModelType, ResourceType, PropertyType, ReferenceType, LiteralType> implements  AtlasModelWriter<Iterable<EntityType>> {
+public abstract class AbstractRdfTranslator<EntityType extends Iterable<?>, ModelType, ResourceType, PropertyType, ReferenceType, LiteralType> implements  AtlasModelWriter<EntityType> {
 
 	protected TypeMap typeMap = null;
 	

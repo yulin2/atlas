@@ -27,7 +27,7 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 @Controller
-public class ScheduleController extends BaseController<ScheduleChannel> {
+public class ScheduleController extends BaseController<Iterable<ScheduleChannel>> {
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
