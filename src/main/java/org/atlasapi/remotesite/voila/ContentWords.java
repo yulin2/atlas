@@ -9,6 +9,7 @@ public class ContentWords {
 
         private String content;
         private int weight;
+        private String url;
 
         public String getContent() {
             return this.content;
@@ -24,6 +25,14 @@ public class ContentWords {
 
         public void setWeight(int weight) {
             this.weight = weight;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
         }
 
     }

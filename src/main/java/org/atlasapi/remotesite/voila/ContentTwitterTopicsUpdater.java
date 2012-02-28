@@ -110,9 +110,10 @@ public class ContentTwitterTopicsUpdater {
     public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
         Builder<TopicRef> topicRefs = ImmutableSet.builder();
         for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-            Maybe<Topic> possibleTopic = topicStore.topicFor(TWITTER_NS, wordWeighting.getContent());
+            Maybe<Topic> possibleTopic = topicStore.topicFor(TWITTER_NS, wordWeighting.getUrl());
             if (possibleTopic.hasValue()) {
                 Topic topic = possibleTopic.requireValue();
+                topic.setTitle(wordWeighting.getContent());
                 topic.setPublisher(Publisher.METABROADCAST);
                 topic.setType(Topic.Type.SUBJECT);
                 topicStore.write(topic);
