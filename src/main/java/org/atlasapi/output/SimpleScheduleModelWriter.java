@@ -5,6 +5,7 @@ import java.util.Set;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.query.v2.ChannelSimplifier;
 
 import com.google.common.collect.ImmutableList;
 
@@ -17,10 +18,12 @@ import com.google.common.collect.ImmutableList;
 public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<ScheduleChannel>, ScheduleQueryResult> {
 
     private final ItemModelSimplifier itemModelSimplifier;
+    private final ChannelSimplifier channelSimplifier;
 
-	public SimpleScheduleModelWriter(AtlasModelWriter<ScheduleQueryResult> outputter, ItemModelSimplifier itemModelSimplifier) {
+	public SimpleScheduleModelWriter(AtlasModelWriter<ScheduleQueryResult> outputter, ItemModelSimplifier itemModelSimplifier, ChannelSimplifier channelSimplifier) {
 		super(outputter);
         this.itemModelSimplifier = itemModelSimplifier;
+        this.channelSimplifier = channelSimplifier;
 	}
 	
 	@Override
@@ -37,6 +40,10 @@ public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<
 	    newScheduleChannel.setChannelUri(scheduleChannel.channel().uri());
 	    newScheduleChannel.setChannelKey(scheduleChannel.channel().key());
 	    newScheduleChannel.setChannelTitle(scheduleChannel.channel().title());
+	    
+	    if (annotations.contains(Annotation.CHANNEL)) {
+	        newScheduleChannel.setChannel(channelSimplifier.simplify(scheduleChannel.channel(), false));
+	    }
 	    
 	    ImmutableList.Builder<org.atlasapi.media.entity.simple.Item> items = ImmutableList.builder();
 	    for (org.atlasapi.media.entity.Item item: scheduleChannel.items()) {
