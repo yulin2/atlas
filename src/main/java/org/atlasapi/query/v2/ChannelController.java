@@ -50,7 +50,7 @@ public class ChannelController {
     }
 
     @RequestMapping("/3.0/channels.json")
-    public void listChannels(HttpServletRequest request, HttpServletResponse response, @RequestParam String key) throws IOException {
+    public void listChannels(HttpServletRequest request, HttpServletResponse response, @RequestParam(required=false) String key) throws IOException {
 
         Selection selection = SELECTION_BUILDER.build(request);
         
