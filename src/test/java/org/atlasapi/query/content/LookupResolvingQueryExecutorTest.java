@@ -67,6 +67,6 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
     }
 
     private LookupEntry lookupEntryWithEquivalents(String uri, LookupRef... equiv) {
-        return new LookupEntry(uri, null, null, ImmutableSet.<String>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.copyOf(equiv), null, null);
+        return new LookupEntry(uri, null, LookupRef.from(new Item("uri","curie",Publisher.BBC)), ImmutableSet.<String>of(), ImmutableSet.<LookupRef>of(), ImmutableSet.copyOf(equiv), null, null);
     }
 }
