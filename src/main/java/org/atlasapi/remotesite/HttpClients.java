@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite;
 
+import com.metabroadcast.common.http.OAuthSimpleHttpClient;
 import java.util.concurrent.TimeUnit;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
@@ -32,4 +33,14 @@ public class HttpClients {
 	        .withRetries(3)
         .build();
 	}
+
+    public static SimpleHttpClient oauthClient(String apiKey, String apiSecret) {
+        return new OAuthSimpleHttpClient.Builder()
+                .withApiKey(apiKey)
+                .withApiSecret(apiSecret)
+                .withConnectTimeout(10, TimeUnit.SECONDS)
+                .withReadTimeout(10, TimeUnit.SECONDS)
+                .withUserAgent(ATLAS_USER_AGENT)
+                .build();
+    }
 }
