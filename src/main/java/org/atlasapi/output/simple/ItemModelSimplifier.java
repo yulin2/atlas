@@ -12,17 +12,16 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -44,12 +43,12 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
     
-    public ItemModelSimplifier(ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier, TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
-        this(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+    public ItemModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
+        this(localHostName, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
     }
 
-    public ItemModelSimplifier(ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier, TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
-        super(topicResolver, topicSimplifier);
+    public ItemModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
+        super(localHostName, topicResolver, productResolver);
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
