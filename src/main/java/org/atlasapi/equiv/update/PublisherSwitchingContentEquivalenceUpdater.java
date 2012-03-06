@@ -1,11 +1,13 @@
 package org.atlasapi.equiv.update;
 
+import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 public class PublisherSwitchingContentEquivalenceUpdater implements ContentEquivalenceUpdater<Content> {
@@ -21,7 +23,7 @@ public class PublisherSwitchingContentEquivalenceUpdater implements ContentEquiv
     }
 
     @Override
-    public EquivalenceResult<Content> updateEquivalences(Content content) {
-        return updaterFor(content.getPublisher()).updateEquivalences(content);
+    public EquivalenceResult<Content> updateEquivalences(Content content, Optional<List<Content>> externalCandidates) {
+        return updaterFor(content.getPublisher()).updateEquivalences(content, externalCandidates);
     }
 }

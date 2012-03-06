@@ -67,15 +67,20 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     private Score score(String subjectTitle, String equivalentTitle) {
-        subjectTitle = alphaNumeric(subjectTitle);
-        equivalentTitle = alphaNumeric(equivalentTitle);
+        subjectTitle = removeCommonPrefixes(alphaNumeric(subjectTitle));
+        equivalentTitle = removeCommonPrefixes(alphaNumeric(equivalentTitle));
+        System.out.println(String.format("%s : %s", subjectTitle, equivalentTitle));
         double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
         double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
         return Score.valueOf(commonPrefix / (subjectTitle.length() / 1.0) - difference);
     }
 
+    private String removeCommonPrefixes(String alphaNumeric) {
+        return (alphaNumeric.startsWith("the ") ? alphaNumeric.substring(4) : alphaNumeric).replace(" ", "");
+    }
+
     private String alphaNumeric(String title) {
-        return title.replaceAll(" & ", " and ").replaceAll("[^\\d\\w]", "").toLowerCase();
+        return title.replaceAll(" & ", " and ").replaceAll("[^\\d\\w\\s]", "").toLowerCase();
     }
 
     private double commonPrefixLength(String t1, String t2) {

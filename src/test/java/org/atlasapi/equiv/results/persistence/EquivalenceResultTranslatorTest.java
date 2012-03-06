@@ -6,6 +6,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.equiv.results.DefaultEquivalenceResultBuilder;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.description.DefaultDescription;
@@ -26,7 +27,7 @@ import com.mongodb.DBObject;
 public class EquivalenceResultTranslatorTest extends TestCase {
 
     private final EquivalenceResultTranslator translator = new EquivalenceResultTranslator();
-    private final EquivalenceResultBuilder<Item> resultBuilder = EquivalenceResultBuilder.<Item>resultBuilder(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
+    private final EquivalenceResultBuilder<Item> resultBuilder = DefaultEquivalenceResultBuilder.<Item>resultBuilder(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
 
     public final Item target = target("target", "Target", Publisher.BBC);
     public final Item equivalent1 = target("equivalent1", "Equivalent1", Publisher.BBC);

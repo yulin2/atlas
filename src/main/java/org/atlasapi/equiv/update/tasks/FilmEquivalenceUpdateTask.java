@@ -5,6 +5,7 @@ import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
@@ -13,6 +14,7 @@ import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 import org.atlasapi.persistence.logging.AdapterLog;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 
 
@@ -41,7 +43,7 @@ public class FilmEquivalenceUpdateTask extends AbstractContentEquivalenceUpdateT
 
     @Override
     protected void handle(Film content) {
-        updater.updateEquivalences(content);
+        updater.updateEquivalences(content, Optional.<List<Film>>absent());
     }
 
 }
