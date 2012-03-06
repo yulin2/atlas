@@ -42,7 +42,7 @@ public class ScheduleLivenessHealthController {
 		}
 		boolean allowed = checker.check(request);
 		if (allowed) {
-			return main.showHealthPageForSlugs(response, ScheduleLivenessHealthProbe.SCHEDULE_HEALTH_PROBE_SLUG);
+			return main.showHealthPageForSlugs(response, ScheduleLivenessHealthProbe.SCHEDULE_HEALTH_PROBE_SLUG, false);
 		}
 		HttpBasicAuthChecker.requestAuth(response, "Heath Page");
 		return null;
