@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -34,15 +35,18 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
     }
     
     @Override
-    public EquivalenceResult<T> updateEquivalences(T content) {
+    public EquivalenceResult<T> updateEquivalences(T content, Optional<List<T>> externalCandidates) {
         
         ReadableDescription desc = new DefaultDescription();
         
         List<ScoredEquivalents<T>> generatedScores = generators.generate(content, desc);
         
-        List<T> generatedSuggestions = extractGeneratedSuggestions(generatedScores);
+        List<T> suggestions = ImmutableList.<T>builder()
+                .addAll(extractGeneratedSuggestions(generatedScores))
+                .addAll(externalCandidates.or(ImmutableList.<T>of()))
+                .build();
         
-        List<ScoredEquivalents<T>> scoredScores = scorers.score(content, generatedSuggestions, desc);
+        List<ScoredEquivalents<T>> scoredScores = scorers.score(content, suggestions, desc);
         
         return resultBuilder.resultFor(content, ImmutableList.copyOf(merger.merge(generatedScores, scoredScores)), desc);
     }

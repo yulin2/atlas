@@ -69,8 +69,10 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
                 equivalents.addEquivalent(suggestion, score);
             }
         } else {
-            desc.appendText("Item has no title").finishStage();
+            desc.appendText("Item has no title");
         }
+        
+        desc.finishStage();
         
         return equivalents.build();
     }
@@ -88,14 +90,18 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
         TitleType subjectType = TitleType.titleTypeOf(subject.getTitle());
         TitleType suggestionType = TitleType.titleTypeOf(suggestion.getTitle());
         
-        subjTitle = subjTitle.replaceAll(" & ", " and ").replaceAll("[^A-Za-z0-9]+", "-");
-        suggTitle = suggTitle.replaceAll(" & ", " and ").replaceAll("[^A-Za-z0-9]+", "-");
+        subjTitle = removeCommonPrefixes(subjTitle.replaceAll(" & ", " and ").replaceAll("[^A-Za-z0-9\\s]+", "-").toLowerCase());
+        suggTitle = removeCommonPrefixes(suggTitle.replaceAll(" & ", " and ").replaceAll("[^A-Za-z0-9\\s]+", "-").toLowerCase());
         
         if(subjectType == suggestionType && Objects.equal(subjTitle, suggTitle)) {
             return Score.valueOf(1.0);
         }
         
         return Score.NULL_SCORE;
+    }
+    
+    private String removeCommonPrefixes(String alphaNumeric) {
+        return (alphaNumeric.startsWith("the ") ? alphaNumeric.substring(4) : alphaNumeric).replace(" ", "-");
     }
 
     private final Pattern seqTitle = Pattern.compile("(\\d+)(\\s?[.:-]{1}\\s?)(.*)");

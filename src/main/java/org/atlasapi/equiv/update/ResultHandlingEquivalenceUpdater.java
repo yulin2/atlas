@@ -1,8 +1,12 @@
 package org.atlasapi.equiv.update;
 
+import java.util.List;
+
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.media.entity.Content;
+
+import com.google.common.base.Optional;
 
 public class ResultHandlingEquivalenceUpdater<T extends Content> implements ContentEquivalenceUpdater<T> {
 
@@ -15,8 +19,8 @@ public class ResultHandlingEquivalenceUpdater<T extends Content> implements Cont
     }
     
     @Override
-    public EquivalenceResult<T> updateEquivalences(T content) {
-        EquivalenceResult<T> result = delegate.updateEquivalences(content);
+    public EquivalenceResult<T> updateEquivalences(T content, Optional<List<T>> externalCandidates) {
+        EquivalenceResult<T> result = delegate.updateEquivalences(content, externalCandidates);
         handler.handle(result);
         return result;
     }
