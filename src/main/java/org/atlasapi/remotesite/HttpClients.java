@@ -40,6 +40,8 @@ public class HttpClients {
                 .withApiSecret(apiSecret)
                 .withConnectTimeout(10, TimeUnit.SECONDS)
                 .withReadTimeout(10, TimeUnit.SECONDS)
+                .withAcceptContentType("application/xml")
+                .withAcceptCharset("utf-8")
                 .withUserAgent(ATLAS_USER_AGENT)
                 .build();
     }
