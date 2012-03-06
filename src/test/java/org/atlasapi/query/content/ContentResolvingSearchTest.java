@@ -27,6 +27,7 @@ import org.junit.runner.RunWith;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
 @RunWith(JMock.class)
@@ -54,7 +55,7 @@ public class ContentResolvingSearchTest extends TestCase {
     public void testShouldReturnSearchedForItem() {
         final String searchQuery = "test";
         final ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
-        final SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
+        final SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f, Maybe.<Float>nothing(), Maybe.<Float>nothing());
         
         context.checking(new Expectations() {{ 
             one(fuzzySearcher).search(query); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));

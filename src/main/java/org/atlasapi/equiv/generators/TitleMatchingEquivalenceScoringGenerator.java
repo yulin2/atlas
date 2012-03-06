@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
 public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivalenceGenerator<Container>, ContentEquivalenceScorer<Container> {
@@ -94,7 +95,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
         Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
 
-        List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
+        List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING, Maybe.<Float>nothing(), Maybe.<Float>nothing()), appConfig);
         return search;
     }
 
