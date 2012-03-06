@@ -11,7 +11,9 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
+import org.atlasapi.media.product.Product;
 import org.atlasapi.media.entity.simple.RelatedLink;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
@@ -24,12 +26,16 @@ import com.google.common.collect.Maps;
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
 
     private final TopicQueryResolver topicResolver;
-
     private final ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier;
 
-    public ContentModelSimplifier(TopicQueryResolver topicResolver, ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier) {
+    private final ProductResolver productResolver;
+    private final ModelSimplifier<Product, org.atlasapi.media.entity.simple.Product> productSimplifier;
+
+    public ContentModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver) {
         this.topicResolver = topicResolver;
-        this.topicSimplifier = topicSimplifier;
+        this.productResolver = productResolver;
+        this.topicSimplifier = new TopicModelSimplifier(localHostName);
+        this.productSimplifier = new ProductModelSimplifier(localHostName);
     }
 
     protected void copyBasicContentAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
@@ -47,6 +53,18 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         if (annotations.contains(Annotation.RELATED_LINKS)) {
             simpleDescription.setRelatedLinks(simplifyRelatedLinks(content));
         }
+        if (annotations.contains(Annotation.PRODUCTS)) {
+            simpleDescription.setProducts(resolveAndSimplifyProductsFor(content, annotations));
+        }
+    }
+
+    private Iterable<org.atlasapi.media.entity.simple.Product> resolveAndSimplifyProductsFor(Content content, final Set<Annotation> annotations) {
+        return Iterables.transform(productResolver.productsForContent(content.getCanonicalUri()), new Function<Product, org.atlasapi.media.entity.simple.Product>() {
+            @Override
+            public org.atlasapi.media.entity.simple.Product apply(Product input) {
+                return productSimplifier.simplify(input, annotations);
+            }
+        });
     }
 
     public Iterable<RelatedLink> simplifyRelatedLinks(F content) {

@@ -8,13 +8,15 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
-import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
+import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
+import org.atlasapi.media.product.Product;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
@@ -23,11 +25,13 @@ import org.atlasapi.output.JsonTranslator;
 import org.atlasapi.output.QueryResult;
 import org.atlasapi.output.SimpleContentModelWriter;
 import org.atlasapi.output.SimplePersonModelWriter;
+import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
 import org.atlasapi.output.SimpleTopicModelWriter;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -52,6 +56,7 @@ import org.atlasapi.query.v2.ChannelController;
 import org.atlasapi.query.v2.ChannelGroupController;
 import org.atlasapi.query.v2.ChannelSimplifier;
 import org.atlasapi.query.v2.PeopleController;
+import org.atlasapi.query.v2.ProductController;
 import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
@@ -82,6 +87,7 @@ public class QueryWebModule {
     private @Autowired TopicQueryResolver topicResolver;
     private @Autowired TopicContentLister topicContentLister;
     private @Autowired SegmentResolver segmentResolver;
+    private @Autowired ProductResolver productResolver;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
@@ -128,7 +134,12 @@ public class QueryWebModule {
     }
     
     @Bean TopicController topicController() {
-        return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(),queryController());
+        return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(), queryController());
+    }
+    
+    @Bean ProductController productController() {
+        return new ProductController(productResolver, queryExecutor, configFetcher, log, productModelOutputter(), queryController());
+        
     }
 
     @Bean AtlasModelWriter<QueryResult<Content,? extends Identified>> contentModelOutputter() {
@@ -141,13 +152,13 @@ public class QueryWebModule {
     @Bean ContainerModelSimplifier containerSimplifier() {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), topicSimplifier(), topicResolver, availableChildren, upcomingChildren);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, topicResolver, availableChildren, upcomingChildren, productResolver);
         return containerSimplier;
     }
 
     @Bean ItemModelSimplifier itemModelSimplifier() {
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicSimplifier(), topicResolver, segmentResolver, containerSummary);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, topicResolver, productResolver, segmentResolver, containerSummary);
         return itemSimplifier;
     }
     
@@ -173,9 +184,22 @@ public class QueryWebModule {
         );
     }
 
+    @Bean AtlasModelWriter<Iterable<Product>> productModelOutputter() {
+        ProductModelSimplifier modelSimplifier = productSimplifier();
+        return this.<Iterable<Product>>standardWriter(
+            new SimpleProductModelWriter(new JsonTranslator<ProductQueryResult>(), contentResolver, modelSimplifier),
+            new SimpleProductModelWriter(new JaxbXmlTranslator<ProductQueryResult>(),contentResolver, modelSimplifier)
+        );
+    }
+    
     @Bean TopicModelSimplifier topicSimplifier() {
         TopicModelSimplifier topicModelSimplifier = new TopicModelSimplifier(localHostName);
         return topicModelSimplifier;
+    }
+    
+    @Bean ProductModelSimplifier productSimplifier() {
+        ProductModelSimplifier productModelSimplifier = new ProductModelSimplifier(localHostName);
+        return productModelSimplifier;
     }
     
     private <I extends Iterable<?>> AtlasModelWriter<I> standardWriter(AtlasModelWriter<I> jsonWriter, AtlasModelWriter<I> xmlWriter) {

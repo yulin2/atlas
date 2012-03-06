@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.Item;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
@@ -39,11 +40,10 @@ public class ItemModelSimplifierTest {
     private final Mockery context = new Mockery();
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
+    private final ProductResolver productResolver = context.mock(ProductResolver.class);
     private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     
-    private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localHostName");
-    
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver );
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", topicResolver, productResolver, segmentResolver, containerSummaryResolver );
     
     @Test
     @SuppressWarnings("unchecked")
