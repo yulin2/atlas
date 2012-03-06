@@ -4,6 +4,7 @@ import static com.metabroadcast.common.http.HttpStatusCode.NOT_FOUND;
 import static com.metabroadcast.common.http.HttpStatusCode.OK;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
@@ -68,9 +70,9 @@ public class ContentEquivalenceUpdateController {
             public void run() {
                 try{
                     if (content instanceof Film) {
-                        filmUpdater.updateEquivalences((Film) content);
+                        filmUpdater.updateEquivalences((Film) content, Optional.<List<Film>>absent());
                     } else {
-                        contentUpdater.updateEquivalences(content);
+                        contentUpdater.updateEquivalences(content, Optional.<List<Content>>absent());
                     }
                 }catch (Exception e) {
                     log.record(AdapterLogEntry.errorEntry().withSource(getClass()).withCause(e).withDescription("Equivalence Update failed for "+content.getCanonicalUri()));
