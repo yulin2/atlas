@@ -32,7 +32,6 @@ import javax.annotation.PostConstruct;
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerChildEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
-import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ScalingScoringGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
@@ -58,7 +57,6 @@ import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
-import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
@@ -167,18 +165,18 @@ public class EquivModule {
     }
     
     public @Bean ItemEquivalenceUpdater<Item> standardItemUpdater() {
-        EquivalenceGenerators<Item> itemGenerators = EquivalenceGenerators.from(ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
+        Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, channelResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
-        ),log);
+        );
         
-        EquivalenceScorers<Item> itemScorers = EquivalenceScorers.from(ImmutableSet.<ContentEquivalenceScorer<Item>>of(
+        Set<ContentEquivalenceScorer<Item>> itemScorers = ImmutableSet.<ContentEquivalenceScorer<Item>>of(
                 new TitleMatchingItemEquivalenceScorer(),
                 new SequenceItemEquivalenceScorer()
-        ),log);
+        );
         
         EquivalenceResultBuilder<Item> resultBuilder = standardResultBuilder();
         
-        return new ItemEquivalenceUpdater<Item>(itemGenerators, itemScorers, resultBuilder);
+        return new ItemEquivalenceUpdater<Item>(itemGenerators, itemScorers, resultBuilder, log);
     }
     
     public ContainerEquivalenceUpdater.Builder containerUpdaterBuilder(Iterable<Publisher> publishers) {
@@ -240,13 +238,11 @@ public class EquivModule {
     }
     
     public @Bean ContentEquivalenceUpdater<Film> filmUpdater() {
-        EquivalenceGenerators<Film> generators = EquivalenceGenerators.from(ImmutableSet.<ContentEquivalenceGenerator<Film>>of(
-                new FilmEquivalenceGenerator(searchResolver)
-        ),log);
-        EquivalenceScorers<Film> scorers = EquivalenceScorers.from(ImmutableSet.<ContentEquivalenceScorer<Film>>of(), log);
+        Set<ContentEquivalenceGenerator<Film>> generators = ImmutableSet.<ContentEquivalenceGenerator<Film>>of(new FilmEquivalenceGenerator(searchResolver));
+        Set<ContentEquivalenceScorer<Film>> scorers = ImmutableSet.<ContentEquivalenceScorer<Film>>of();
         EquivalenceResultBuilder<Film> resultBuilder = standardResultBuilder();
         
-        ContentEquivalenceUpdater<Film> updater = new ItemEquivalenceUpdater<Film>(generators, scorers, resultBuilder);
+        ContentEquivalenceUpdater<Film> updater = new ItemEquivalenceUpdater<Film>(generators, scorers, resultBuilder, log);
         return resultHandlingUpdater(updater, ImmutableSet.of(Publisher.PREVIEW_NETWORKS));
     }
     

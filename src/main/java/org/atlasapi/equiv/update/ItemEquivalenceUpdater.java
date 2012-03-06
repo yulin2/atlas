@@ -2,6 +2,7 @@ package org.atlasapi.equiv.update;
 
 import java.util.List;
 
+import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
@@ -9,8 +10,10 @@ import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.results.scores.ScoredEquivalentsMerger;
+import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -24,9 +27,9 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
     private final EquivalenceResultBuilder<T> resultBuilder;
     private final ScoredEquivalentsMerger merger = new ScoredEquivalentsMerger();
 
-    public ItemEquivalenceUpdater(EquivalenceGenerators<T> generators, EquivalenceScorers<T> scorers, EquivalenceResultBuilder<T> resultBuilder) {
-        this.generators = generators;
-        this.scorers = scorers;
+    public ItemEquivalenceUpdater(Iterable<ContentEquivalenceGenerator<T>> generators, Iterable<ContentEquivalenceScorer<T>> scorers, EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
+        this.generators = EquivalenceGenerators.from(generators,log);
+        this.scorers = EquivalenceScorers.from(scorers,log);
         this.resultBuilder = resultBuilder;
     }
     
