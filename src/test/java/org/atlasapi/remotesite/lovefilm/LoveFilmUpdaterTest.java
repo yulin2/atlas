@@ -8,12 +8,12 @@ import static org.mockito.Mockito.*;
 
 /**
  */
+@Ignore
 public class LoveFilmUpdaterTest {
 
     public LoveFilmUpdaterTest() {
     }
 
-    @Ignore
     public void testRunTask() {
         AdapterLog log = mock(AdapterLog.class);
         ContentResolver resolver = mock(ContentResolver.class);
