@@ -6,6 +6,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.intl.Countries;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import nu.xom.Builder;
@@ -52,6 +53,8 @@ public class LoveFilmFilmProcessor {
             film.setDescription(querySingleValue(synopsis, "synopsis_text", null));
         }
 
+        film.setPeople(new ArrayList<CrewMember>());
+        
         Nodes actorsLink = root.query("link[@title='actors']/@href");
         if (actorsLink.size() == 1) {
             Builder actorsParser = new Builder();
@@ -63,7 +66,7 @@ public class LoveFilmFilmProcessor {
                 film.addPerson(actor);
             }
         }
-
+        
         Nodes directorsLink = root.query("link[@title='directors']/@href");
         if (directorsLink.size() == 1) {
             Builder directorsParser = new Builder();
@@ -121,6 +124,7 @@ public class LoveFilmFilmProcessor {
             version.addManifestedAs(encoding);
         }
 
+        film.setVersions(new HashSet<Version>());
         film.addVersion(version);
 
         contentWriter.createOrUpdate(film);
