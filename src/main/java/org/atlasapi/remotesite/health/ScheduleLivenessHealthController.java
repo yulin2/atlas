@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.security.HttpBasicAuthChecker;
 import com.metabroadcast.common.security.UsernameAndPassword;
@@ -42,7 +43,7 @@ public class ScheduleLivenessHealthController {
 		}
 		boolean allowed = checker.check(request);
 		if (allowed) {
-			return main.showHealthPageForSlugs(response, ScheduleLivenessHealthProbe.SCHEDULE_HEALTH_PROBE_SLUG, false);
+			return main.showHealthPageForSlugs(response, ImmutableSet.of(ScheduleLivenessHealthProbe.SCHEDULE_HEALTH_PROBE_SLUG), false);
 		}
 		HttpBasicAuthChecker.requestAuth(response, "Heath Page");
 		return null;
