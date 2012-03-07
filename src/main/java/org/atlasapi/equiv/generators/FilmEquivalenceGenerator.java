@@ -98,7 +98,7 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
 
     private SearchQuery searchQueryFor(Film film) {
         return new SearchQuery(film.getTitle(), Selection.ALL, ImmutableList.of(Publisher.PREVIEW_NETWORKS), TITLE_WEIGHTING,
-                BROADCAST_WEIGHTING, CATCHUP_WEIGHTING);
+                BROADCAST_WEIGHTING, CATCHUP_WEIGHTING, Maybe.<Float>nothing(), Maybe.<Float>nothing());
     }
 
     private boolean sameYear(Film film, Film equivFilm) {

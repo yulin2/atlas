@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.text.MoreStrings;
 
@@ -75,7 +76,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
 
             ApplicationConfiguration appConfig = appConfig(request);
             Set<Publisher> publishers = publishers(publisher, appConfig);
-            List<Identified> content = searcher.search(new SearchQuery(q, selection, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
+            List<Identified> content = searcher.search(new SearchQuery(q, selection, publishers, titleWeighting, broadcastWeighting, catchupWeighting, Maybe.<Float>nothing(), Maybe.<Float>nothing()), appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)));
         } catch (Exception e) {

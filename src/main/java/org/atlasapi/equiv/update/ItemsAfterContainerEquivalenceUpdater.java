@@ -40,7 +40,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
+public class ItemsAfterContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
 
     public static class Builder {
 
@@ -72,10 +72,10 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
             return this;
         }
         
-        public ContainerEquivalenceUpdater build() {
+        public ItemsAfterContainerEquivalenceUpdater build() {
             EquivalenceGenerators<Container> generatorSet = new EquivalenceGenerators<Container>(generators.build(), log);
             EquivalenceScorers<Container> scorerSet = new EquivalenceScorers<Container>(scorers.build(), log);
-            return new ContainerEquivalenceUpdater(contentResolver, resultStore, containerResultBuilder, itemResultHandler, generatorSet, scorerSet);
+            return new ItemsAfterContainerEquivalenceUpdater(contentResolver, resultStore, containerResultBuilder, itemResultHandler, generatorSet, scorerSet);
         }
     }
     
@@ -97,7 +97,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
     private final ScoredEquivalentsMerger merger = new ScoredEquivalentsMerger();
     private final LiveEquivalenceResultStore resultStore;
 
-    public ContainerEquivalenceUpdater(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
+    public ItemsAfterContainerEquivalenceUpdater(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
             EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, 
             EquivalenceGenerators<Container> generators, EquivalenceScorers<Container> scorers) {
                 this.contentResolver = contentResolver;

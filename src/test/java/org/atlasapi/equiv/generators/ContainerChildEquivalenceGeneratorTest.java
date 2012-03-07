@@ -3,6 +3,7 @@ package org.atlasapi.equiv.generators;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
 
+import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
@@ -31,6 +32,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -82,7 +84,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         context.checking(new Expectations(){{
             one(contentResolver).findByCanonicalUris(Lists.transform(childRefs, ChildRef.TO_URI));
                 will(returnValue(ResolvedContent.builder().put(ep.getCanonicalUri(), ep).build()));
-            one(itemUpdater).updateEquivalences(ep);
+            one(itemUpdater).updateEquivalences(ep, Optional.<List<Item>>absent());
                 will(returnValue(equivResult));
             one(resultStore).store(equivResult);will(returnValue(equivResult));
         }});
@@ -112,7 +114,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         context.checking(new Expectations(){{
             one(contentResolver);
                 will(returnValue(ResolvedContent.builder().put(ep.getCanonicalUri(), ep).build()));
-            one(itemUpdater).updateEquivalences(ep);
+            one(itemUpdater).updateEquivalences(ep, Optional.<List<Item>>absent());
                 will(returnValue(equivResult));
             one(resultStore).store(equivResult);will(returnValue(equivResult));
             one(contentResolver);

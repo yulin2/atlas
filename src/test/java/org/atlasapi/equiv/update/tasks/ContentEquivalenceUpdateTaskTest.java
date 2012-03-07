@@ -24,6 +24,7 @@ import org.jmock.Mockery;
 import org.junit.Test;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -70,11 +71,11 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
         context.checking(new Expectations(){{
             one(progressStore).progressForTask(with("pressassociation.com-bbc.co.uk-channel4.com-equivalence"));
                 will(returnValue(ContentListingProgress.START));
-            one(updater).updateEquivalences(paItemOne);
-            one(updater).updateEquivalences(bbcItemOne);
-            one(updater).updateEquivalences(bbcItemTwo);
-            one(updater).updateEquivalences(bbcItemThree);
-            one(updater).updateEquivalences(c4ItemOne);
+            one(updater).updateEquivalences(paItemOne, Optional.<List<Content>>absent());
+            one(updater).updateEquivalences(bbcItemOne, Optional.<List<Content>>absent());
+            one(updater).updateEquivalences(bbcItemTwo, Optional.<List<Content>>absent());
+            one(updater).updateEquivalences(bbcItemThree, Optional.<List<Content>>absent());
+            one(updater).updateEquivalences(c4ItemOne, Optional.<List<Content>>absent());
             one(progressStore).storeProgress(with(any(String.class)), with(ContentListingProgress.START));
         }});
         

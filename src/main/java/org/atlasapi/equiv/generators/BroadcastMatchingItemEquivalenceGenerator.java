@@ -39,6 +39,10 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         this.supportedPublishers = supportedPublishers;
         this.flexibility = flexibility;
     }
+    
+    public BroadcastMatchingItemEquivalenceGenerator(ScheduleResolver resolver, ChannelResolver channelResolver, Set<Publisher> supportedPublishers) {
+        this(resolver, channelResolver, supportedPublishers, Duration.standardMinutes(10));
+    }
 
     @Override
     public ScoredEquivalents<Item> generate(Item content, ResultDescription desc) {
