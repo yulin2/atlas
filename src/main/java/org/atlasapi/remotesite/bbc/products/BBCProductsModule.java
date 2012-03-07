@@ -27,12 +27,12 @@ public class BBCProductsModule {
 
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(updater().withName("BBC Products Updater"), RepetitionRules.NEVER);
+        scheduler.schedule(bbcProductsUpdater().withName("BBC Products Updater"), RepetitionRules.NEVER);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("Installed BBC Products updater"));
     }
 
     @Bean
-    public BBCProductsUpdater updater() {
+    public BBCProductsUpdater bbcProductsUpdater() {
         return new BBCProductsUpdater(productStore, log, Configurer.get("s3.access").get(), Configurer.get("s3.secret").get());
     }
 }

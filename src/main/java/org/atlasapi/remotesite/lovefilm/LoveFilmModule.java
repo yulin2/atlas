@@ -28,12 +28,12 @@ private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0)
     
     @PostConstruct
     public void startBackgroundTasks() {
-        scheduler.schedule(updater().withName("LoveFilm Updater"), DAILY);
+        scheduler.schedule(loveFilmUpdater().withName("LoveFilm Updater"), DAILY);
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("Installed LoveFilm updater"));
     }
     
     @Bean
-    public LoveFilmUpdater updater() {
+    public LoveFilmUpdater loveFilmUpdater() {
         return new LoveFilmUpdater(contentResolver, contentWriter, log, Configurer.get("lovefilm.oauth.api.key").get(), Configurer.get("lovefilm.oauth.api.secret").get());
     }
 }
