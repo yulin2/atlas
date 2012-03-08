@@ -305,6 +305,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
             Broadcast broadcast = new Broadcast(channelUrlFrom(bbcBroadcast.broadcastOn()), bbcBroadcast.broadcastDateTime(), bbcBroadcast.broadcastEndDateTime());
 
+            if (bbcBroadcast.broadcastType() != null) {
+                broadcast.setRepeat(bbcBroadcast.broadcastType().isRepeatType());
+            }
+            
             if (bbcBroadcast.scheduleDate != null) {
                 broadcast.setScheduleDate(new LocalDate(bbcBroadcast.scheduleDate()));
             }
