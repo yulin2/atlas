@@ -42,7 +42,7 @@ public class LoveFilmFilmProcessor {
         film.setId(uri);
         film.setYear(Integer.parseInt(querySingleValue(root, "production_year", null)));
         film.setCurie("lovefilm:b-" + uri);
-        film.setPublisher(Publisher.LOVEFILM);
+        //film.setPublisher(Publisher.LOVEFILM);
 
         film.setTitle(querySingleValue(root, "title/@clean", null));
 
@@ -104,7 +104,7 @@ public class LoveFilmFilmProcessor {
 
         Version version = new Version();
         version.setDuration(Duration.standardSeconds(Integer.parseInt(querySingleValue(root, "run_time", "0")) * 60));
-        version.setProvider(Publisher.LOVEFILM);
+        //version.setProvider(Publisher.LOVEFILM);
 
         boolean rentable = Boolean.parseBoolean(querySingleValue(root, "can_rent", "false"));
         if (rentable) {
