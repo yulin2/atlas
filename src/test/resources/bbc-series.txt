@@ -1,10 +1,8 @@
 id
 series_pid
-2
+3
 
-2
-p00c3mjn
-2
+3
 p00c3mk4
-38
-b0107190
+3
+p00c3mjn
