@@ -68,7 +68,7 @@ public class BBCProductsProcessorTest {
         });
 
         ProductStore store = mock(ProductStore.class);
-        when(store.productForSourceIdentified(eq(Publisher.BBC), anyString())).thenReturn(Optional.<Product>absent());
+        when(store.productForSourceIdentified(eq(Publisher.BBC_PRODUCTS), anyString())).thenReturn(Optional.<Product>absent());
 
         ArgumentCaptor<Product> product = ArgumentCaptor.forClass(Product.class);
 
@@ -76,6 +76,6 @@ public class BBCProductsProcessorTest {
 
         processor.process(client, store);
 
-        verify(store, times(2)).store(product.capture());
+        verify(store, times(3)).store(product.capture());
     }
 }
