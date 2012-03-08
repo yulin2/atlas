@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -49,7 +50,13 @@ public class ProductController extends BaseController<Iterable<Product>> {
     @RequestMapping(value={"3.0/products.*","/products.*"})
     public void products(HttpServletRequest req, HttpServletResponse resp) throws IOException  {
         try {
-            modelAndViewFor(req, resp, productResolver.products());
+            final ContentQuery query = builder.build(req);
+            modelAndViewFor(req, resp, Iterables.filter(productResolver.products(), new Predicate<Product>() {
+                @Override
+                public boolean apply(Product input) {
+                    return query.allowsSource(input.getPublisher());
+                }
+            }));
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
