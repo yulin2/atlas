@@ -17,7 +17,7 @@ import org.atlasapi.search.model.SearchResults;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.metabroadcast.common.iterable.DedupingIterator;
+import com.metabroadcast.common.collect.DedupingIterator;
 
 public class ContentResolvingSearcher implements SearchResolver {
     private final ContentSearcher fuzzySearcher;
