@@ -33,6 +33,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -166,7 +167,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         if (source.clips() != null) {
             for (ClipAndVersion clipAndVersion: source.clips()) {
                 if (clipAndVersion.clip().clip() != null && clipAndVersion.clip().clip().uri() != null) {
-                    addClipToItem(clipAndVersion.clip(), clipAndVersion.version(), item);
+                    addClipToContent(clipAndVersion.clip(), clipAndVersion.version(), item);
                 }
             }
         }
@@ -325,7 +326,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         return "http://www.bbc.co.uk" + broadcastOn;
     }
     
-    private void addClipToItem(SlashProgrammesRdf clipWrapper, SlashProgrammesVersionRdf versionWrapper, Item item) {
+    public void addClipToContent(SlashProgrammesRdf clipWrapper, SlashProgrammesVersionRdf versionWrapper, Content item) {
 //        IonEpisodeDetail clipDetail = getEpisodeDetail(clipWrapper.clip().uri); TODO: use this instead of the policy client.
         
         String curie = BbcUriCanonicaliser.curieFor(clipWrapper.clip().uri());

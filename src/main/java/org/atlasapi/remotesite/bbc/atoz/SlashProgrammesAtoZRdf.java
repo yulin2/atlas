@@ -5,6 +5,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.atlasapi.media.vocabulary.DC;
 import org.atlasapi.media.vocabulary.PO;
 import org.atlasapi.media.vocabulary.RDF;
 
@@ -38,8 +39,15 @@ public class SlashProgrammesAtoZRdf {
         @XmlElement(namespace=PO.NS, name="pid")
         String pid;
         
+        @XmlElement(namespace=DC.NS, name="title")
+        String title;
+        
         public String pid() {
             return pid;
+        }
+        
+        public String title() {
+            return title;
         }
     }
 }
