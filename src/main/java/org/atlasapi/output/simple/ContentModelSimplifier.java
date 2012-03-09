@@ -41,6 +41,8 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     protected void copyBasicContentAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
         copyBasicDescribedAttributes(content, simpleDescription, annotations);
 
+        simpleDescription.setId(null);
+        
         if (annotations.contains(Annotation.CLIPS)) {
             simpleDescription.setClips(clipToSimple(content.getClips(), annotations));
         }

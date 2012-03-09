@@ -32,8 +32,10 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpStatusCode;
 
 @Controller
@@ -74,7 +76,7 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 			} else {
 			    List<String> ids = getIdList(request);
 			    if(!ids.isEmpty()) {
-			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(ids, filter).values()),Content.class)));
+			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Content.class)));
 			    } else {
 			        throw new IllegalArgumentException("Must specify content uri or id");
 			    }
@@ -83,6 +85,15 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}
 	}
+
+    private Iterable<Long> decode(List<String> ids) {
+        return Lists.transform(ids, new Function<String, Long>() {
+            @Override
+            public Long apply(String input) {
+                return idCodec.decode(input).longValue();
+            }
+        });
+    }
 
     private List<String> getUriList(HttpServletRequest request) {
         return split(request.getParameter("uri"));
