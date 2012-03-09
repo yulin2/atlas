@@ -34,12 +34,12 @@ public class LoveFilmFilmProcessor {
         Node root = mainParser.build(content).getRootElement();
         String uri = querySingleValue(root, "id", null);
 
-        Film film = (Film) contentResolver.findByCanonicalUris(ImmutableSet.of(uri)).getFirstValue().valueOrDefault(null);
+        Film film = (Film) contentResolver.findByCanonicalUris(ImmutableSet.of(uri)).getFirstValue().valueOrNull();
         if (film == null) {
             film = new Film();
         }
         
-        film.setId(uri);
+        film.setCanonicalUri(uri);
         film.setYear(Integer.parseInt(querySingleValue(root, "production_year", null)));
         film.setCurie("lovefilm:b-" + uri);
         //film.setPublisher(Publisher.LOVEFILM);

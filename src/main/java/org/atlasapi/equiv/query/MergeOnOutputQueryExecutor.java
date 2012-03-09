@@ -44,7 +44,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	}
 
 	@Override
-	public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, final ContentQuery query) {
+	public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
 	    return mergeResults(query, delegate.executeIdQuery(ids, query));
 	}
 
