@@ -366,12 +366,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             item = new Episode(episodeUri, curie, Publisher.BBC);
 
             SlashProgrammesSeriesContainer series = episode.series();
-            String seriesUri = series.uri();
-            if(series != null && seriesUri != null) {
-                ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
-                //This will get over written below if there's a brand.
-                ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
-            } 
+            if (series != null) {
+                String seriesUri = series.uri();
+                if (seriesUri != null) {
+                    ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
+                    // This will get over written below if there's a brand.
+                    ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
+                }
+            }
             
             SlashProgrammesContainerRef brand = episode.brand();
             if(brand != null && brand.uri() != null) {
