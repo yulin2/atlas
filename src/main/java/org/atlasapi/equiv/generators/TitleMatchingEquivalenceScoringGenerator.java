@@ -92,7 +92,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     private List<Identified> searchForEquivalents(Container content) {
-        Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher(), Publisher.BBC_PRODUCTS));
+        Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher(), Publisher.BBC_PRODUCTS, Publisher.LOVEFILM));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
 
         List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING, Maybe.<Float>nothing(), Maybe.<Float>nothing()), appConfig);
