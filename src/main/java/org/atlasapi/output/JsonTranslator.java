@@ -28,6 +28,7 @@ import java.util.zip.GZIPOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Playlist;
@@ -75,7 +76,7 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
     }
 
     @Override
-	public void writeTo(HttpServletRequest request, HttpServletResponse response, T model, Set<Annotation> annotations) throws IOException {
+	public void writeTo(HttpServletRequest request, HttpServletResponse response, T model, Set<Annotation> annotations, ApplicationConfiguration config) throws IOException {
 
 	    OutputStream out = response.getOutputStream();
 

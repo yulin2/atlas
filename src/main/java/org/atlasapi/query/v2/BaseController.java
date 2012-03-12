@@ -56,11 +56,11 @@ public abstract class BaseController<T> {
         outputter.writeError(request, response, ae);
     }
     
-    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, T queryResult) throws IOException {
+    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, T queryResult, ApplicationConfiguration config) throws IOException {
         if (queryResult == null) {
             errorViewFor(request, response, AtlasErrorSummary.forException(new NullPointerException("Query result was null")));
         } else {
-            outputter.writeTo(request, response, queryResult, annotationExtractor.extract(request).or(defaultAnnotations()));
+            outputter.writeTo(request, response, queryResult, annotationExtractor.extract(request).or(defaultAnnotations()), config);
         }
     }
     

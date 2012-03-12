@@ -2,6 +2,7 @@ package org.atlasapi.output;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.output.simple.ProductModelSimplifier;
@@ -17,10 +18,10 @@ public class SimpleProductModelWriter extends TransformingModelWriter<Iterable<P
     }
 
     @Override
-    protected ProductQueryResult transform(Iterable<Product> model, Set<Annotation> annotations) {
+    protected ProductQueryResult transform(Iterable<Product> model, Set<Annotation> annotations, final ApplicationConfiguration config) {
         ProductQueryResult result = new ProductQueryResult();
         for (Product product : model) {
-            result.add(modelSimplifier.simplify(product, annotations));
+            result.add(modelSimplifier.simplify(product, annotations, config));
         }
         return result;
     }

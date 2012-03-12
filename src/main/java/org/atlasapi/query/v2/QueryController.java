@@ -72,11 +72,11 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 			
 			List<String> uris = getUriList(request);
 			if(!uris.isEmpty()) {
-			    modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class)));
+			    modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class)),filter.getConfiguration());
 			} else {
 			    List<String> ids = getIdList(request);
 			    if(!ids.isEmpty()) {
-			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Content.class)));
+			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Content.class)),filter.getConfiguration());
 			    } else {
 			        throw new IllegalArgumentException("Must specify content uri or id");
 			    }

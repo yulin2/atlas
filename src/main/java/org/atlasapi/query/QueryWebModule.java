@@ -144,8 +144,8 @@ public class QueryWebModule {
 
     @Bean AtlasModelWriter<QueryResult<Content,? extends Identified>> contentModelOutputter() {
         return this.<QueryResult<Content,? extends Identified>>standardWriter(
-            new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(),topicSimplifier()),
-            new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(),topicSimplifier())
+            new SimpleContentModelWriter(new JsonTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(),topicSimplifier(),productSimplifier()),
+            new SimpleContentModelWriter(new JaxbXmlTranslator<ContentQueryResult>(), itemModelSimplifier(), containerSimplifier(),topicSimplifier(),productSimplifier())
         );
     }
 

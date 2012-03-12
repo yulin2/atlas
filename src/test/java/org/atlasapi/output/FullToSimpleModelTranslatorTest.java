@@ -2,6 +2,7 @@ package org.atlasapi.output;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
@@ -10,6 +11,7 @@ import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
@@ -45,10 +47,12 @@ public class FullToSimpleModelTranslatorTest {
     private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     
     private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localhostName");
+
+    private ProductModelSimplifier productSimplifier = new ProductModelSimplifier("localhostName");
     private ProductResolver productResolver = context.mock(ProductResolver.class); 
 
     private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", topicResolver, productResolver , segmentResolver, containerSummaryResolver);
-    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", topicResolver, availableChildren, upcomingChildren, productResolver),topicSimplifier);
+    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", topicResolver, availableChildren, upcomingChildren, productResolver),topicSimplifier, productSimplifier);
     
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
@@ -66,13 +70,13 @@ public class FullToSimpleModelTranslatorTest {
 		graph.add(new Episode());
 		
 		context.checking(new Expectations() {{ 
-			one(xmlOutputter).writeTo(with(request), with(response), with(simpleGraph()), with(ImmutableSet.<Annotation>of()));
+			one(xmlOutputter).writeTo(with(request), with(response), with(simpleGraph()), with(ImmutableSet.<Annotation>of()), with(ApplicationConfiguration.DEFAULT_CONFIGURATION));
 			ignoring(contentResolver);
 			ignoring(topicResolver);
 			ignoring(segmentResolver);
 		}});
 		
-        translator.writeTo(request, response, QueryResult.of(graph), ImmutableSet.<Annotation>of());
+        translator.writeTo(request, response, QueryResult.of(graph), ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
 	}
 
 	protected Matcher<ContentQueryResult> simpleGraph() {

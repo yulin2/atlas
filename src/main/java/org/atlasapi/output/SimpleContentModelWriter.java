@@ -2,6 +2,7 @@ package org.atlasapi.output;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
@@ -10,9 +11,11 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult.Pagination;
+import org.atlasapi.media.product.Product;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
+import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 
 import com.google.common.base.Optional;
@@ -30,17 +33,19 @@ public class SimpleContentModelWriter extends TransformingModelWriter<QueryResul
     private final ContainerModelSimplifier containerModelSimplifier;
     private final ContentGroupModelSimplifier contentGroupSimplifier;
     private final TopicModelSimplifier topicSimplifier;
+    private final ProductModelSimplifier productSimplifier;
 
-	public SimpleContentModelWriter(AtlasModelWriter<ContentQueryResult> outputter, ItemModelSimplifier itemModelSimplifier, ContainerModelSimplifier containerModelSimplifier, TopicModelSimplifier topicSimplifier) {
+	public SimpleContentModelWriter(AtlasModelWriter<ContentQueryResult> outputter, ItemModelSimplifier itemModelSimplifier, ContainerModelSimplifier containerModelSimplifier, TopicModelSimplifier topicSimplifier, ProductModelSimplifier productSimplifier) {
 	    super(outputter);
 	    this.itemModelSimplifier = itemModelSimplifier;
 		this.containerModelSimplifier = containerModelSimplifier;
         this.topicSimplifier = topicSimplifier;
+        this.productSimplifier = productSimplifier;
 		this.contentGroupSimplifier = new ContentGroupModelSimplifier();
 	}
 	
 	@Override
-	protected ContentQueryResult transform(QueryResult<Content,? extends Identified> fullGraph, Set<Annotation> annotations) {
+	protected ContentQueryResult transform(QueryResult<Content,? extends Identified> fullGraph, Set<Annotation> annotations, ApplicationConfiguration config) {
 	    
 	    ContentQueryResult result = new ContentQueryResult();
 
@@ -48,29 +53,33 @@ public class SimpleContentModelWriter extends TransformingModelWriter<QueryResul
 	    if(possibleContext.isPresent() && annotations.contains(Annotation.FILTERING_RESOURCE)) {
 	        Identified context = possibleContext.get();
 	        if (context instanceof Topic) {
-	            org.atlasapi.media.entity.simple.Topic simpleContext = topicSimplifier.simplify((Topic) context, ImmutableSet.copyOf(Annotation.values()));
+	            org.atlasapi.media.entity.simple.Topic simpleContext = topicSimplifier.simplify((Topic) context, ImmutableSet.copyOf(Annotation.values()),config);
                 result = ContentQueryResult.withContext(simpleContext);
 	        }
+	        if (context instanceof Product) {
+	            org.atlasapi.media.entity.simple.Product simpleContext = productSimplifier.simplify((Product)context, ImmutableSet.copyOf(Annotation.values()), config);
+	            result = ContentQueryResult.withContext(simpleContext);
+            }
 	    }
 	    
 	    if (fullGraph.getSelection() != null) {
 	        result.setPagination(Pagination.fromSelection(fullGraph.getSelection()));
 	    }
-	    setContent(result, fullGraph, annotations);
+	    setContent(result, fullGraph, annotations, config);
 	    
 	    return result;
 	}
 
-    private ContentQueryResult setContent(ContentQueryResult result, QueryResult<Content, ? extends Identified> fullGraph, Set<Annotation> annotations) {
+    private ContentQueryResult setContent(ContentQueryResult result, QueryResult<Content, ? extends Identified> fullGraph, Set<Annotation> annotations, ApplicationConfiguration config) {
 		for (Described described : fullGraph.getContent()) {
 			if (described instanceof Container) {
-			    result.add(containerModelSimplifier.simplify((Container) described, annotations));
+			    result.add(containerModelSimplifier.simplify((Container) described, annotations, config));
 			}
 			if (described instanceof ContentGroup) {
-			    result.add(contentGroupSimplifier.simplify((ContentGroup) described, annotations));
+			    result.add(contentGroupSimplifier.simplify((ContentGroup) described, annotations, config));
 			}
 			if (described instanceof org.atlasapi.media.entity.Item) {
-			    result.add(itemModelSimplifier.simplify((org.atlasapi.media.entity.Item) described, annotations));
+			    result.add(itemModelSimplifier.simplify((org.atlasapi.media.entity.Item) described, annotations, config));
 			}
 		}
 		

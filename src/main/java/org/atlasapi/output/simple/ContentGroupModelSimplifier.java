@@ -3,6 +3,7 @@ package org.atlasapi.output.simple;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
@@ -14,7 +15,7 @@ import com.google.common.collect.Lists;
 public class ContentGroupModelSimplifier extends DescribedModelSimplifier<ContentGroup, Playlist> {
 
     @Override
-    public Playlist simplify(ContentGroup model, Set<Annotation> annotations) {
+    public Playlist simplify(ContentGroup model, Set<Annotation> annotations, ApplicationConfiguration config) {
 
         Playlist simplePlaylist = new Playlist();
 

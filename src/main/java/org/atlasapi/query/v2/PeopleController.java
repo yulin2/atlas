@@ -44,7 +44,7 @@ public class PeopleController extends BaseController<Iterable<Person>> {
             
             Person person = resolver.person(uri);
             
-            modelAndViewFor(request, response, ImmutableList.of(person));
+            modelAndViewFor(request, response, ImmutableList.of(person), filter.getConfiguration());
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
