@@ -77,7 +77,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             Set<Publisher> publishers = publishers(publisher, appConfig);
             List<Identified> content = searcher.search(new SearchQuery(q, selection, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
 
-            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)));
+            modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }

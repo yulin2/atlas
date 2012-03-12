@@ -50,7 +50,7 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     public void topics(HttpServletRequest req, HttpServletResponse resp) throws IOException  {
         try {
             ContentQuery query = builder.build(req);
-            modelAndViewFor(req, resp, topicResolver.topicsFor(query));
+            modelAndViewFor(req, resp, topicResolver.topicsFor(query), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
@@ -76,7 +76,7 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         }
         
         
-        modelAndViewFor(req, resp, ImmutableSet.<Topic>of(topicForUri.requireValue()));
+        modelAndViewFor(req, resp, ImmutableSet.<Topic>of(topicForUri.requireValue()), query.getConfiguration());
     }
     
     @RequestMapping(value={"3.0/topics/{id}/content.*", "/topics/{id}/content"})
@@ -101,7 +101,7 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         try {
             Selection selection = query.getSelection();
             QueryResult<Content, Topic> result = QueryResult.of(query.getSelection().apply(iterable(contentLister.contentForTopic(decodedId, query))), topic);
-            queryController.modelAndViewFor(req, resp, result.withSelection(selection));
+            queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }

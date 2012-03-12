@@ -56,7 +56,7 @@ public class ProductController extends BaseController<Iterable<Product>> {
                 public boolean apply(Product input) {
                     return query.allowsSource(input.getPublisher());
                 }
-            }));
+            }), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
@@ -81,7 +81,7 @@ public class ProductController extends BaseController<Iterable<Product>> {
             return;
         }
         
-        modelAndViewFor(req, resp, ImmutableSet.<Product>of(product));
+        modelAndViewFor(req, resp, ImmutableSet.<Product>of(product), query.getConfiguration());
     }
     
     @RequestMapping(value={"3.0/products/{id}/content.*", "/products/{id}/content"})
@@ -106,7 +106,7 @@ public class ProductController extends BaseController<Iterable<Product>> {
         try {
             Selection selection = query.getSelection();
             QueryResult<Content, Product> result = QueryResult.of(Iterables.filter(Iterables.concat(queryExecutor.executeUriQuery(product.getContent(), query).values()),Content.class), product);
-            queryController.modelAndViewFor(req, resp, result.withSelection(selection));
+            queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }

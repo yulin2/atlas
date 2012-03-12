@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -65,7 +66,8 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
                 throw new IllegalArgumentException("You must pass either 'on' or 'from' and 'to'");
             }
             
-            Set<Publisher> publishers = publishers(publisher, appConfig(request));
+            ApplicationConfiguration appConfig = appConfig(request);
+            Set<Publisher> publishers = publishers(publisher, appConfig);
             if (publishers.isEmpty()) {
                 throw new IllegalArgumentException("You must specify at least one publisher that you have permission to view");
             }
@@ -78,7 +80,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
                 throw new IllegalArgumentException("You must specify at least one channel that exists using the channel or channel_id parameter");
             }
             
-            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers).scheduleChannels());
+            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers).scheduleChannels(), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }

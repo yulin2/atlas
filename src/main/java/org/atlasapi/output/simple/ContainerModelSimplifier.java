@@ -2,6 +2,7 @@ package org.atlasapi.output.simple;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.EntityType;
@@ -42,11 +43,11 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     }
     
     @Override
-    public Playlist simplify(Container fullPlayList, Set<Annotation> annotations) {
+    public Playlist simplify(Container fullPlayList, Set<Annotation> annotations, ApplicationConfiguration config) {
 
         Playlist simplePlaylist = new Playlist();
 
-        copyBasicContentAttributes(fullPlayList, simplePlaylist, annotations);
+        copyBasicContentAttributes(fullPlayList, simplePlaylist, annotations, config);
         simplePlaylist.setType(EntityType.from(fullPlayList).toString());
 
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
@@ -93,8 +94,8 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     }
 
     @Override
-    protected org.atlasapi.media.entity.simple.Item simplify(org.atlasapi.media.entity.Item item, Set<Annotation> annotations) {
-        return itemSimplifier.simplify(item, annotations);
+    protected org.atlasapi.media.entity.simple.Item simplify(org.atlasapi.media.entity.Item item, Set<Annotation> annotations,ApplicationConfiguration config) {
+        return itemSimplifier.simplify(item, annotations, config);
     }
 
 }

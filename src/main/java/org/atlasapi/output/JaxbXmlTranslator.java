@@ -30,6 +30,7 @@ import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Serializer;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.simple.Broadcast;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
@@ -89,7 +90,7 @@ public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
     }
 
     @Override
-	public void writeTo(final HttpServletRequest request, final HttpServletResponse response, T result, Set<Annotation> annotations) throws IOException {
+	public void writeTo(final HttpServletRequest request, final HttpServletResponse response, T result, Set<Annotation> annotations, ApplicationConfiguration config) throws IOException {
 		try {
             writeOut(request, response, result);
         } catch (JAXBException e) {

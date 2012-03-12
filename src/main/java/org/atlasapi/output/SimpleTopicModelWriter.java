@@ -2,6 +2,7 @@ package org.atlasapi.output;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.output.simple.ModelSimplifier;
@@ -17,10 +18,10 @@ public class SimpleTopicModelWriter extends TransformingModelWriter<Iterable<Top
     }
     
     @Override
-    protected TopicQueryResult transform(Iterable<Topic> fullTopics, Set<Annotation> annotations) {
+    protected TopicQueryResult transform(Iterable<Topic> fullTopics, Set<Annotation> annotations, ApplicationConfiguration config) {
         TopicQueryResult result = new TopicQueryResult();
         for (Topic fullTopic : fullTopics) {
-            result.add(topicSimplifier.simplify(fullTopic, annotations));
+            result.add(topicSimplifier.simplify(fullTopic, annotations, config));
         }
         return result;
     }

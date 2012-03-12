@@ -19,6 +19,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -71,7 +72,7 @@ public class OembedTranslatorTest extends TestCase {
 			one(outputFactory).createOutput(); 
 		}});
 		
-		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of());
+		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
 	}
 	
 	@Test
@@ -82,7 +83,7 @@ public class OembedTranslatorTest extends TestCase {
 			one(oembedOutput).writeTo(response.getOutputStream());
 		}});
 		
-		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of());
+		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
 	}
 	
 	@Test
@@ -119,7 +120,7 @@ public class OembedTranslatorTest extends TestCase {
 			one(oembedOutput).setEmbedCode("<embed src=\\\"a\\\" />");
 		}});
 		
-		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of());
+		new OembedTranslator(outputFactory).writeTo(request, response, graph, ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
 	}
 
 }

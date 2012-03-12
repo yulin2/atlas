@@ -2,6 +2,7 @@ package org.atlasapi.output.simple;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
@@ -55,17 +56,17 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     }
 
     @Override
-    public org.atlasapi.media.entity.simple.Item simplify(Item full, final Set<Annotation> annotations) {
+    public org.atlasapi.media.entity.simple.Item simplify(Item full, final Set<Annotation> annotations, final ApplicationConfiguration config) {
 
         org.atlasapi.media.entity.simple.Item simple = new org.atlasapi.media.entity.simple.Item();
 
-        copyProperties(full, simple, annotations);
+        copyProperties(full, simple, annotations, config);
         
         boolean doneSegments = false;
         for (Version version : full.getVersions()) {
             addTo(simple, version, full, annotations);
             if(!doneSegments && !version.getSegmentEvents().isEmpty() && annotations.contains(Annotation.SEGMENT_EVENTS) && segmentSimplifier != null) {
-                simple.setSegments(segmentSimplifier.simplify(version.getSegmentEvents(), annotations));
+                simple.setSegments(segmentSimplifier.simplify(version.getSegmentEvents(), annotations, config));
                 doneSegments = true;
             }
         }
@@ -74,7 +75,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             simple.setPeople(Iterables.filter(Iterables.transform(full.people(), new Function<CrewMember, org.atlasapi.media.entity.simple.Person>() {
                 @Override
                 public org.atlasapi.media.entity.simple.Person apply(CrewMember input) {
-                    return crewSimplifier.simplify(input, annotations);
+                    return crewSimplifier.simplify(input, annotations, config);
                 }
             }), Predicates.notNull()));
         }
@@ -82,8 +83,8 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         return simple;
     }
 
-    private void copyProperties(Item fullItem, org.atlasapi.media.entity.simple.Item simpleItem, Set<Annotation> annotations) {
-        copyBasicContentAttributes(fullItem, simpleItem, annotations);
+    private void copyProperties(Item fullItem, org.atlasapi.media.entity.simple.Item simpleItem, Set<Annotation> annotations, ApplicationConfiguration config) {
+        copyBasicContentAttributes(fullItem, simpleItem, annotations, config);
         simpleItem.setType(EntityType.from(fullItem).toString());
         
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {

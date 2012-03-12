@@ -7,6 +7,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Actor;
@@ -82,7 +83,7 @@ public class ItemModelSimplifierTest {
         CrewMember person = Actor.actor("hisID", "Andrew Collings", "Dirt-bag Humperdink", Publisher.BBC);
         fullItem.addPerson(person);
         
-        Item simpleItem = itemSimplifier.simplify(fullItem, Annotation.defaultAnnotations());
+        Item simpleItem = itemSimplifier.simplify(fullItem, Annotation.defaultAnnotations(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         List<org.atlasapi.media.entity.simple.Person> people = simpleItem.getPeople();
         org.atlasapi.media.entity.simple.Person simpleActor = Iterables.getOnlyElement(people);
         assertThat(simpleActor.getCharacter(), is("Dirt-bag Humperdink"));

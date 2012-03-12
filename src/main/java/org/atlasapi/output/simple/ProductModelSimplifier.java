@@ -3,6 +3,7 @@ package org.atlasapi.output.simple;
 import java.math.BigInteger;
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductLocation;
 import org.atlasapi.output.Annotation;
@@ -12,7 +13,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
-public class ProductModelSimplifier implements ModelSimplifier<Product, org.atlasapi.media.entity.simple.Product> {
+public class ProductModelSimplifier extends IdentifiedModelSimplifier<Product, org.atlasapi.media.entity.simple.Product> {
 
     private SubstitutionTableNumberCodec idCodec;
     private final String productUriFormat;
@@ -23,7 +24,7 @@ public class ProductModelSimplifier implements ModelSimplifier<Product, org.atla
     }
     
     @Override
-    public org.atlasapi.media.entity.simple.Product simplify(Product model, Set<Annotation> annotations) {
+    public org.atlasapi.media.entity.simple.Product simplify(Product model, Set<Annotation> annotations, ApplicationConfiguration config) {
         org.atlasapi.media.entity.simple.Product simpleProduct = new org.atlasapi.media.entity.simple.Product();
         
         String id = idCodec.encode(BigInteger.valueOf(model.getId()));
@@ -37,6 +38,7 @@ public class ProductModelSimplifier implements ModelSimplifier<Product, org.atla
         simpleProduct.setThumbnail(model.getThumbnail());
         simpleProduct.setYear(model.getYear());
         simpleProduct.setLocations(simplify(model.getLocations()));
+        simpleProduct.setPublisher(toPublisherDetails(model.getPublisher()));
         
         return simpleProduct;
     }
