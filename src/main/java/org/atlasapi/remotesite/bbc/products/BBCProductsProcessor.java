@@ -52,7 +52,7 @@ public class BBCProductsProcessor {
             String productImage = products.readLine();
             String productThumbnail = products.readLine();
 
-            Product product = productStore.productForSourceIdentified(Publisher.BBC, productId.toString()).orNull();
+            Product product = productStore.productForSourceIdentified(Publisher.BBC_PRODUCTS, productId.toString()).orNull();
             if (product == null) {
                 product = new Product();
             }
@@ -61,11 +61,14 @@ public class BBCProductsProcessor {
             product.setTitle(productTitle);
             product.setGtin(productGtin);
             product.setDescription(productDescription);
-            product.setYear(Integer.parseInt(productYear == null || productYear.isEmpty() ? "0" : productYear));
             product.setType(Product.Type.fromString(productType).orNull());
             product.setImage(Optional.fromNullable(productImage).orNull());
             product.setThumbnail(Optional.fromNullable(productThumbnail).orNull());
-            product.setPublisher(Publisher.BBC);
+            product.setPublisher(Publisher.BBC_PRODUCTS);
+
+            if (productYear != null && productYear.matches("\\d+")) {
+                product.setYear(Integer.parseInt(productYear));
+            }
 
             Set<ProductLocation> collectedLocations = new HashSet<ProductLocation>();
             while (currentLocation != null && Long.parseLong(currentLocation) == productId) {
@@ -74,12 +77,21 @@ public class BBCProductsProcessor {
                 String locationShippingPrice = locations.readLine();
                 String locationAvailability = locations.readLine();
 
-                ProductLocation location = ProductLocation.builder(locationUri).
-                        withAvailability(locationAvailability).
-                        withPrice(new Price(Currency.getInstance(Locale.UK), Double.parseDouble(locationPrice))).
-                        withShippingPrice(new Price(Currency.getInstance(Locale.UK), Double.parseDouble(locationShippingPrice))).
-                        build();
-                collectedLocations.add(location);
+                ProductLocation.Builder location = ProductLocation.builder(locationUri);
+                try {
+                    location.withAvailability(locationAvailability);
+                } catch (Exception ex) {
+                }
+                try {
+                    location.withPrice(new Price(Currency.getInstance(Locale.UK), Double.parseDouble(locationPrice)));
+                } catch (Exception ex) {
+                }
+                try {
+                    location.withShippingPrice(new Price(Currency.getInstance(Locale.UK), Double.parseDouble(locationShippingPrice)));
+                } catch (Exception ex) {
+                }
+
+                collectedLocations.add(location.build());
 
                 currentLocation = locations.readLine();
             }
@@ -89,21 +101,30 @@ public class BBCProductsProcessor {
             while (currentBrand != null && Long.parseLong(currentBrand) == productId) {
                 String brandPid = brands.readLine();
                 if (!brandPid.isEmpty()) {
-                    contents.add(BbcFeeds.slashProgrammesUriForPid(brandPid));
+                    try {
+                        contents.add(BbcFeeds.slashProgrammesUriForPid(brandPid));
+                    } catch (Exception ex) {
+                    }
                 }
                 currentBrand = brands.readLine();
             }
             while (currentSeries != null && Long.parseLong(currentSeries) == productId) {
                 String seriesPid = series.readLine();
                 if (!seriesPid.isEmpty()) {
-                    contents.add(BbcFeeds.slashProgrammesUriForPid(seriesPid));
+                    try {
+                        contents.add(BbcFeeds.slashProgrammesUriForPid(seriesPid));
+                    } catch (Exception ex) {
+                    }
                 }
                 currentSeries = series.readLine();
             }
             while (currentEpisode != null && Long.parseLong(currentEpisode) == productId) {
                 String episodePid = episodes.readLine();
                 if (!episodePid.isEmpty()) {
-                    contents.add(BbcFeeds.slashProgrammesUriForPid(episodePid));
+                    try {
+                        contents.add(BbcFeeds.slashProgrammesUriForPid(episodePid));
+                    } catch (Exception ex) {
+                    }
                 }
                 currentEpisode = episodes.readLine();
             }
