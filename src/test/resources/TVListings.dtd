@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.05 27/04/2011 mrj -->
+<!-- listings Radio Times DTD v2.07 17/01/2012 mj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
@@ -17,11 +17,15 @@
 <!-- the data for a particular TV channel
 name: the name of the TV channel
 channel_id: the id of the TV channel
+start_time: the starttime of the channel in xsd:dateTime format. The first prog_data element will start on or after this time.
+end_time: the endtime of the channel in xsd:dateTime format. The last prog_data element will start before this time.
 -->
 <!ELEMENT channel_data (epgdetails?, prog_data+)>
 <!ATTLIST channel_data 
 	name CDATA #REQUIRED
 	channel_id CDATA #REQUIRED
+	start_time CDATA #REQUIRED
+	end_time CDATA #REQUIRED
 >
 
 <!-- epg data -->
@@ -42,7 +46,7 @@ channel_number: the channel_number of the current channel for this provider
 
 
 <!-- the data for a TV programme -->
-<!ELEMENT prog_data (showing_id, prog_id, series_id?, rt_filmnumber?, date, time, duration, group?, title, episode_title?, episode_number?, episode_total?, series_number?, category*, rt_category?, film_year?, genre?, certificate?,country?,colour?,warning?,subtitles?,dubbing?,star_rating?, cast_member*, staff_member*, billings?, videoplus, attr, rovi_genre? ,rovi_description?, pictures?)>
+<!ELEMENT prog_data (showing_id, prog_id, series_id?, series_synopsis?, series_version?, rt_filmnumber?, date, time, duration, group?, title, episode_title?, programme_version?, episode_number?, episode_total?, series_number?, category*, rt_category?, film_year?, genre?, certificate?,country?,colour?,warning?,subtitles?,dubbing?,star_rating?, cast_member*, staff_member*, billings?, videoplus, attr, rovi_genre? ,rovi_description?, pictures?)>
 
 <!-- The id of a showing of a programme on a particular channel. If the time of a showing changes, the showing_id remains the same -->
 <!ELEMENT showing_id (#PCDATA)>
@@ -52,6 +56,13 @@ channel_number: the channel_number of the current channel for this provider
 
 <!-- The id of a series. E.g. all episodes of Friends have the same series_id -->
 <!ELEMENT series_id (#PCDATA)>
+
+<!-- String containing synopsis of series -->
+<!ELEMENT series_synopsis (#PCDATA)>
+
+<!-- String to help clarify exactly which series this is in cases where there are other series or programmes with the same title -->
+<!ELEMENT series_version (#PCDATA)>
+
 
 <!-- programme broadcast date in the form DD/MM/YYYYY, where YYYY indicates the year, MM indicates the month and DD indicates the day -->
 <!ELEMENT date (#PCDATA)>
@@ -73,6 +84,9 @@ channel_number: the channel_number of the current channel for this provider
 
 <!-- episode title -->
 <!ELEMENT episode_title (#PCDATA)>
+
+<!-- String to help clarify exactly which programme this is in cases where there are other programmes or series with the same title -->
+<!ELEMENT programme_version (#PCDATA)>
 
 <!-- episode number -->
 <!ELEMENT episode_number (#PCDATA)>
@@ -193,7 +207,8 @@ person_id: A unique id for this person
 	repeat: the programme a repeat.
 	bw: the programme broadcast in Black and White.
 	premiere: this a broadcast premiere.
-  new_series: this is the first episode of a news series of this programme.
+    new_episode: this is the first showing of this programme on this channel.
+    new_series: this is the first episode of a news series of this programme.
 	last_in_series: this is the last in a series of showings of this programme.
 	surround: the programme is being broadcast in surround sound.
 	widescreen: the programme being shown in widescreen format.
@@ -210,6 +225,7 @@ person_id: A unique id for this person
 	field will contain the time of the previous programme. 
 	tv_movie: this programme is a made-for-tv movie
 	web_choice: RT web choice
+	special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
 	 
 -->
 <!ELEMENT attr EMPTY>
@@ -219,6 +235,7 @@ person_id: A unique id for this person
 	repeat (yes | no) "no"
 	bw (yes | no) "no"
 	premiere (yes | no) "no"
+	new_episode (yes | no) "no"
 	new_series (yes | no) "no"
 	last_in_series (yes | no) "no"
 	surround (yes | no) "no"
@@ -236,6 +253,7 @@ person_id: A unique id for this person
 	familychoice (yes | no) "no"
 	tv_movie (yes | no) "no"
 	web_choice (yes | no) "no"
+	special (yes | no) "no"
 >
 
 

@@ -1,12 +1,15 @@
 package org.atlasapi.remotesite.bbc;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
+
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Described;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -19,6 +22,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesBase;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesRef;
@@ -28,21 +32,20 @@ import com.google.common.collect.Lists;
 
 public class BbcBrandExtractor  {
 
-	// Some Brands have a lot of episodes, if there are more than this number we
-	// only look at the most recent episodes
-	private static final int MAX_EPISODES = 5000;
-
 	private static final BbcProgrammesGenreMap genreMap = new BbcProgrammesGenreMap();
 	private static final Pattern IMAGE_STEM = Pattern.compile("^(.+)_[0-9]+_[0-9]+\\.[a-zA-Z]+$");
 
+	private final BbcProgrammeGraphExtractor itemExtractor;
 	private final BbcProgrammeAdapter subContentExtractor;
 	private final AdapterLog log;
 
 	private final ContentWriter contentWriter;
 
-	public BbcBrandExtractor(BbcProgrammeAdapter subContentExtractor, ContentWriter contentWriter, AdapterLog log) {
+
+	public BbcBrandExtractor(BbcProgrammeAdapter subContentExtractor, ContentWriter contentWriter, BbcProgrammeGraphExtractor itemExtractor, AdapterLog log) {
 		this.subContentExtractor = subContentExtractor;
 		this.contentWriter = contentWriter;
+        this.itemExtractor = itemExtractor;
 		this.log = log;
 	}
 	
@@ -52,6 +55,12 @@ public class BbcBrandExtractor  {
 		List<String> episodeUris = episodesFrom(rdfSeries.episodeResourceUris());
 		if (brand != null) {
 			series.setParent(brand);
+            if (brand.getMediaType() != null && ! brand.getMediaType().equals(series.getMediaType())) {
+                series.setMediaType(brand.getMediaType());
+            }
+            if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(series.getSpecialization())) {
+                series.setSpecialization(brand.getSpecialization());
+            }
 		}
 		contentWriter.createOrUpdate(series);
 		saveItemsInContainers(episodeUris,  brand == null ? series : brand, series);
@@ -59,10 +68,10 @@ public class BbcBrandExtractor  {
 	}
 	
 	public void saveItemsInContainers(List<String> episodeUris, Container container, Series series) {
-		for (String episodeUri : mostRecent(episodeUris)) {
+		for (String episodeUri : episodeUris) {
 			Identified found = subContentExtractor.fetchItem(episodeUri);
 			if (!(found instanceof Item)) {
-				log.record(new AdapterLogEntry(Severity.WARN).withUri(episodeUri).withSource(getClass()).withDescription("Expected Item for PID: " + episodeUri));
+				log.record(warnEntry().withUri(episodeUri).withSource(getClass()).withDescription("Expected Item for PID: " + episodeUri));
 				continue;
 			}
 			((Item) found).setContainer(container);
@@ -84,29 +93,19 @@ public class BbcBrandExtractor  {
     private void writeBrandEpisodes(SlashProgrammesContainerRef brandRef, Brand brand) {
         List<String> episodes = brandRef.episodes == null ? ImmutableList.<String>of() : episodesFrom(brandRef.episodeResourceUris());
         
-        saveItemsInContainers(episodes, brand, null);
-
         if (brandRef.series != null) {
-        	for (SlashProgrammesSeriesRef seriesRef : brandRef.series) {
-        		String seriesPid = BbcFeeds.pidFrom(seriesRef.resourceUri());
-        		if (seriesPid == null) {
-        			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(seriesRef.resourceUri()).withDescription("Could not extract PID from series ref " + seriesRef.resourceUri() + " for brand with uri " + brand.getCanonicalUri()));
-        			continue;
-        		}
-        		String uri = BbcFeeds.slashProgrammesUriForPid(seriesPid);
-        		Series series = (Series) subContentExtractor.createOrUpdate(uri, brand);
-        		if (series == null || series.getMediaType() == null || brand == null || brand.getMediaType() == null) {
-        			log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withUri(uri).withDescription("Could not load series with uri " + uri + " for brand with uri " + brand.getCanonicalUri()));
-        			continue;
-        		}
-        		if (brand.getMediaType() != null && ! brand.getMediaType().equals(series.getMediaType())) {
-        			series.setMediaType(brand.getMediaType());
-        		}
-        		if (brand.getSpecialization() != null && ! brand.getSpecialization().equals(series.getSpecialization())) {
-                    series.setSpecialization(brand.getSpecialization());
+            for (SlashProgrammesSeriesRef seriesRef : brandRef.series) {
+                String seriesPid = BbcFeeds.pidFrom(seriesRef.resourceUri());
+                if (seriesPid == null) {
+                    log.record(warnEntry().withSource(getClass()).withUri(seriesRef.resourceUri()).withDescription("Could not extract PID from series ref " + seriesRef.resourceUri() + " for brand with uri " + brand.getCanonicalUri()));
+                    continue;
                 }
-        	}
+                String uri = BbcFeeds.slashProgrammesUriForPid(seriesPid);
+                subContentExtractor.createOrUpdate(uri, brand);
+            }
         }
+        
+        saveItemsInContainers(episodes, brand, null);
     }
 
 	private List<String> episodesFrom(List<String> uriFragments) {
@@ -122,14 +121,7 @@ public class BbcBrandExtractor  {
 		return uris;
 	}
 
-	private <T> List<T> mostRecent(List<T> episodes) {
-		if (episodes.size() < MAX_EPISODES) {
-			return episodes;
-		}
-		return episodes.subList(episodes.size() - MAX_EPISODES, episodes.size());
-	}
-
-	private void populatePlaylistAttributes(Described container, SlashProgrammesBase containerRefRef) {
+	private void populatePlaylistAttributes(Content container, SlashProgrammesBase containerRefRef) {
 		String brandUri = containerRefRef.uri();
 		container.setCanonicalUri(brandUri);
 		container.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
@@ -154,5 +146,18 @@ public class BbcBrandExtractor  {
 		}
 		container.setGenres(genreMap.map(containerRefRef.genreUris()));
 		container.setDescription(containerRefRef.description());
+		
+		Set<SlashProgrammesClip> clipRefs = containerRefRef.clips();
+        if (clipRefs != null && !clipRefs.isEmpty()) {
+            for (SlashProgrammesClip clipRef: clipRefs) {
+                SlashProgrammesRdf clip = subContentExtractor.readSlashProgrammesDataForClip(clipRef);
+                
+                SlashProgrammesVersionRdf clipVersion = null;
+                if (clip.clip().versions() != null && ! clip.clip().versions().isEmpty()) {
+                    clipVersion = subContentExtractor.readSlashProgrammesDataForVersion(clip.clip().versions().get(0));
+                    itemExtractor.addClipToContent(clip, clipVersion, container);
+                }
+            }
+        }
 	}
 }

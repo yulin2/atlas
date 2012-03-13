@@ -7,9 +7,9 @@ import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
@@ -34,8 +34,8 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         }
     };
 
-    public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, UpcomingChildrenResolver upcomingChildren) {
-        super(topicResolver, topicSimplifier);
+    public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver) {
+        super(localHostName, topicResolver, productResolver);
         this.itemSimplifier = itemSimplifier;
         this.availableChildrenResolver = availableChildren;
         this.upcomingChildrenResolver = upcomingChildren;

@@ -48,6 +48,7 @@ public class BbcSlashProgrammesVersionRdfClientTest extends TestCase {
 		assertThat(firstBroadcast.broadcastDateTime(), is(new DateTime("2007-11-25T20:00:00Z", DateTimeZones.UTC)));
 		assertThat(firstBroadcast.broadcastOn(), is("/services/bbctwo/ni_analogue#service"));
 		assertThat(firstBroadcast.broadcastEndDateTime(), is(new DateTime("2007-11-25T21:00:00Z", DateTimeZones.UTC)));
+		assertThat(firstBroadcast.broadcastType().isRepeatType(), is(false));
 		assertThat(version.broadcastSlots().get(0).scheduleDate(), is("2007-11-25"));
 	}
 

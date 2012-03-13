@@ -161,7 +161,7 @@ public class BbcModule {
     }
 
     @Bean Runnable bbcFeedsUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(contentWriters,  new ProgressStore(mongo), topicStore, log);
+		return new BbcSlashProgrammesAtoZUpdater(contentWriters,  new MongoProgressStore(mongo), topicStore, log);
 	}
 	
 	@Bean BbcSlashProgrammesController bbcFeedsController() {
