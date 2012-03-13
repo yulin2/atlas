@@ -60,7 +60,7 @@ import com.metabroadcast.common.time.Timestamp;
 public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
     private static final DateTimeFormatter FILEDATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
-    private static final DateTimeFormatter CHANNELINTERVAL_FORMAT = ISODateTimeFormat.dateTimeParser();
+    private static final DateTimeFormatter CHANNELINTERVAL_FORMAT = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZones.LONDON);
     
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
