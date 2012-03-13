@@ -55,6 +55,8 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.Timestamp;
 
+import static nimrod.java.utils.NimrodLogger.*;
+
 public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
@@ -157,6 +159,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     @Override
     public ItemRefAndBroadcast process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+        long start = System.currentTimeMillis();
         try {
             if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
                 return null;
@@ -198,10 +201,15 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 contentWriter.createOrUpdate(item);
                 personWriter.createOrUpdatePeople(item);
             }
+            
+            forGauge("process.success").debug(Long.toString(System.currentTimeMillis() - start));
+            
             return new ItemRefAndBroadcast(itemAndBroadcast.requireValue().getItem(), itemAndBroadcast.requireValue().getBroadcast());
         } catch (Exception e) {
         	e.printStackTrace();
         	log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
+            
+            forGauge("process.failure").debug(Long.toString(System.currentTimeMillis() - start));
         }
         return null;
     }

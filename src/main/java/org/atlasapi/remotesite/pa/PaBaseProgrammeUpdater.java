@@ -56,6 +56,8 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.Timestamp;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 
 public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
@@ -274,8 +276,10 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                         schedulePeriod = new Interval(CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getStartTime()), CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getEndTime()));
                     }
                     
-                    Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
-                    if (channel.hasValue() && isSupported(channel.requireValue()) && shouldContinue()) {
+//                    Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
+//                    if (channel.hasValue() && isSupported(channel.requireValue()) && shouldContinue()) {
+                    Maybe<Channel> channel = Maybe.just(new Channel(Publisher.PA, "title", "key", MediaType.AUDIO, "http://acme.org"));
+                    if (shouldContinue()) {
                         try {
                             final PaChannelData data = new PaChannelData(
                                     channel.requireValue(),

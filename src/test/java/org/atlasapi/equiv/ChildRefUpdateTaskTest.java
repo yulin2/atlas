@@ -30,6 +30,7 @@ import com.google.common.collect.Iterators;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import java.util.List;
 
 @RunWith(JMock.class)
 public class ChildRefUpdateTaskTest extends TestCase {
@@ -72,7 +73,7 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         assertThat(written.getTitle(), is(notNullValue()));
         
-        ImmutableList<ChildRef> childRefs = written.getChildRefs();
+        List<ChildRef> childRefs = written.getChildRefs();
         assertThat(childRefs.size(),is(2));
         assertThat(childRefs.get(0).getSortKey(), is(SortKey.keyFrom(ep2)));
         assertThat(childRefs.get(1).getSortKey(), is(SortKey.keyFrom(ep1)));
