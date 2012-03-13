@@ -173,6 +173,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 }
                 brand.setLastUpdated(updatedAt.toDateTimeUTC());
             	contentWriter.createOrUpdate(brand);
+                forCounter("process.writes").debug("1", brand.getCanonicalUri());
             }
             
             Maybe<Series> series = getSeries(progData, channel, possibleBrand.hasValue());
@@ -182,6 +183,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             	}
             	series.requireValue().setLastUpdated(updatedAt.toDateTimeUTC());
             	contentWriter.createOrUpdate(series.requireValue());
+                forCounter("process.writes").debug("1", series.requireValue().getCanonicalUri());
             }
             
             Maybe<ItemAndBroadcast> itemAndBroadcast = isClosedBrand(possibleBrand) ? getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt) : getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || series.hasValue(), updatedAt);
@@ -200,6 +202,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 item.setLastUpdated(updatedAt.toDateTimeUTC());
                 contentWriter.createOrUpdate(item);
                 personWriter.createOrUpdatePeople(item);
+                forCounter("process.writes").debug("1", item.getCanonicalUri());
             }
             
             forGauge("process.success").debug(Long.toString(System.currentTimeMillis() - start));
