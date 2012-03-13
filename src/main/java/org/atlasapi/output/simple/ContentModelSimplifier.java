@@ -27,6 +27,8 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
 
     private final ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier;
 
+    private boolean exposeIds = false;
+    
     public ContentModelSimplifier(TopicQueryResolver topicResolver, ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier) {
         this.topicResolver = topicResolver;
         this.topicSimplifier = topicSimplifier;
@@ -35,7 +37,9 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     protected void copyBasicContentAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
         copyBasicDescribedAttributes(content, simpleDescription, annotations);
 
-        simpleDescription.setId(null);
+        if(!exposeIds) {
+            simpleDescription.setId(null);
+        }
         
         if (annotations.contains(Annotation.CLIPS)) {
             simpleDescription.setClips(clipToSimple(content.getClips(), annotations));
@@ -49,6 +53,10 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         if (annotations.contains(Annotation.RELATED_LINKS)) {
             simpleDescription.setRelatedLinks(simplifyRelatedLinks(content));
         }
+    }
+    
+    public void exposeIds(boolean expose) {
+        this.exposeIds = expose;
     }
 
     public Iterable<RelatedLink> simplifyRelatedLinks(F content) {
