@@ -6,6 +6,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
@@ -43,10 +44,11 @@ public class FullToSimpleModelTranslatorTest {
     private @SuppressWarnings("unchecked") final AtlasModelWriter<ContentQueryResult> xmlOutputter = context.mock(AtlasModelWriter.class);
     private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     
-    private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localhostName"); 
+    private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localhostName");
+    private ProductResolver productResolver = context.mock(ProductResolver.class); 
 
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver);
-    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, topicSimplifier, topicResolver, availableChildren, upcomingChildren),topicSimplifier);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", topicResolver, productResolver , segmentResolver, containerSummaryResolver);
+    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", topicResolver, availableChildren, upcomingChildren, productResolver),topicSimplifier);
     
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
