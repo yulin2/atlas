@@ -98,6 +98,9 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
             	// Nothing to write
                 return null;
             }
+            if (content.clip() != null) {
+                return null; //don't fetch clips as top-level content.
+            }
             if (content.episode() != null) {
                 return createOrUpdateTopLevelItem(uri, content);
             }

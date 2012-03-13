@@ -29,13 +29,8 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesRef;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class BbcBrandExtractor  {
-
-	// Some Brands have a lot of episodes, if there are more than this number we
-	// only look at the most recent episodes
-	private static final int MAX_EPISODES = 5000;
 
 	private static final BbcProgrammesGenreMap genreMap = new BbcProgrammesGenreMap();
 	private static final Pattern IMAGE_STEM = Pattern.compile("^(.+)_[0-9]+_[0-9]+\\.[a-zA-Z]+$");
@@ -73,7 +68,7 @@ public class BbcBrandExtractor  {
 	}
 	
 	public void saveItemsInContainers(List<String> episodeUris, Container container, Series series) {
-		for (String episodeUri : mostRecent(episodeUris)) {
+		for (String episodeUri : episodeUris) {
 			Identified found = subContentExtractor.fetchItem(episodeUri);
 			if (!(found instanceof Item)) {
 				log.record(warnEntry().withUri(episodeUri).withSource(getClass()).withDescription("Expected Item for PID: " + episodeUri));
@@ -124,13 +119,6 @@ public class BbcBrandExtractor  {
 			uris.add("http://www.bbc.co.uk/programmes/" + pid);
 		}
 		return uris;
-	}
-
-	private <T> List<T> mostRecent(List<T> episodes) {
-		if (episodes.size() < MAX_EPISODES) {
-			return episodes;
-		}
-		return episodes.subList(episodes.size() - MAX_EPISODES, episodes.size());
 	}
 
 	private void populatePlaylistAttributes(Content container, SlashProgrammesBase containerRefRef) {

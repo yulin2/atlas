@@ -30,10 +30,10 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
     private static final String ATOZ_BASE = "http://www.bbc.co.uk/%s/programmes/a-z/all.rdf";
 
     private final List<String> channels = ImmutableList.of(
-            "bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd", 
-            "radio1", "radio2", "radio3", "radio4", "radio4extra", "5live", "5livesportsextra", "6music", "asiannetwork", 
-            "radioscotland", "radionangaidheal", "radiowales", "radiocymru", "radioulster", "radiofoyle"
-            );
+        "bbcone", "bbctwo", "bbcthree", "bbcfour", "bbchd", 
+        "radio1", "radio2", "radio3", "radio4", "radio4extra", "5live", "5livesportsextra", "6music", "asiannetwork", 
+        "radioscotland", "radionangaidheal", "radiowales", "radiocymru", "radioulster", "radiofoyle"
+    );
 
     private final RemoteSiteClient<SlashProgrammesAtoZRdf> client;
     private final SiteSpecificAdapter<Identified> fetcher;
@@ -41,7 +41,7 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 	private final AdapterLog log;
     private final ProgressStore progressStore;
     private final ExecutorService executor;
-    
+
     public BbcSlashProgrammesAtoZUpdater(ContentWriter writer, ProgressStore progressStore, TopicStore topicStore, AdapterLog log) {
         this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(writer,topicStore, log), progressStore, log, null);
     }
@@ -121,12 +121,12 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
         };
     }
 
-	private void loadAndSave(String pid) {
-		String uri = BbcFeeds.slashProgrammesUriForPid(pid);
-		try {
-			fetcher.fetch(uri);
-		} catch (Exception e) {
-        	log.record(AdapterLogEntry.warnEntry().withCause(e).withUri(uri).withSource(getClass()));
-		}
-	}
+    private void loadAndSave(String pid) {
+        String uri = BbcFeeds.slashProgrammesUriForPid(pid);
+        try {
+            fetcher.fetch(uri);
+        } catch (Exception e) {
+            log.record(AdapterLogEntry.warnEntry().withCause(e).withUri(uri).withSource(getClass()));
+        }
+    }
 }

@@ -9,7 +9,9 @@ import org.atlasapi.media.vocabulary.DC;
 import org.atlasapi.media.vocabulary.PO;
 import org.atlasapi.media.vocabulary.RDF;
 
-import com.google.inject.internal.Lists;
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
 @XmlRootElement(name="RDF", namespace=RDF.NS)
 public class SlashProgrammesAtoZRdf {
@@ -22,17 +24,13 @@ public class SlashProgrammesAtoZRdf {
     }
     
     public List<String> programmeIds() {
-        List<String> pids = Lists.newArrayList();
-        if (programmes != null) {
-            for (BbcProgramme programme: programmes) {
-                String pid = programme.pid();
-                // don't include clips
-                if (pid.startsWith("b00")) {
-                	pids.add(pid);
-                }
+        return ImmutableList.copyOf(Iterables.transform(programmes, new Function<BbcProgramme, String>() {
+
+            @Override
+            public String apply(BbcProgramme input) {
+                return input.pid();
             }
-        }
-        return pids;
+        }));
     }
     
     static class BbcProgramme {
