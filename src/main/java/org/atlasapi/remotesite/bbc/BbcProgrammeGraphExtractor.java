@@ -33,6 +33,7 @@ import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -166,7 +167,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         if (source.clips() != null) {
             for (ClipAndVersion clipAndVersion: source.clips()) {
                 if (clipAndVersion.clip().clip() != null && clipAndVersion.clip().clip().uri() != null) {
-                    addClipToItem(clipAndVersion.clip(), clipAndVersion.version(), item);
+                    addClipToContent(clipAndVersion.clip(), clipAndVersion.version(), item);
                 }
             }
         }
@@ -305,6 +306,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
             Broadcast broadcast = new Broadcast(channelUrlFrom(bbcBroadcast.broadcastOn()), bbcBroadcast.broadcastDateTime(), bbcBroadcast.broadcastEndDateTime());
 
+            if (bbcBroadcast.broadcastType() != null) {
+                broadcast.setRepeat(bbcBroadcast.broadcastType().isRepeatType());
+            }
+            
             if (bbcBroadcast.scheduleDate != null) {
                 broadcast.setScheduleDate(new LocalDate(bbcBroadcast.scheduleDate()));
             }
@@ -321,7 +326,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         return "http://www.bbc.co.uk" + broadcastOn;
     }
     
-    private void addClipToItem(SlashProgrammesRdf clipWrapper, SlashProgrammesVersionRdf versionWrapper, Item item) {
+    public void addClipToContent(SlashProgrammesRdf clipWrapper, SlashProgrammesVersionRdf versionWrapper, Content item) {
 //        IonEpisodeDetail clipDetail = getEpisodeDetail(clipWrapper.clip().uri); TODO: use this instead of the policy client.
         
         String curie = BbcUriCanonicaliser.curieFor(clipWrapper.clip().uri());
@@ -361,12 +366,14 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             item = new Episode(episodeUri, curie, Publisher.BBC);
 
             SlashProgrammesSeriesContainer series = episode.series();
-            String seriesUri = series.uri();
-            if(series != null && seriesUri != null) {
-                ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
-                //This will get over written below if there's a brand.
-                ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
-            } 
+            if (series != null) {
+                String seriesUri = series.uri();
+                if (seriesUri != null) {
+                    ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
+                    // This will get over written below if there's a brand.
+                    ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
+                }
+            }
             
             SlashProgrammesContainerRef brand = episode.brand();
             if(brand != null && brand.uri() != null) {

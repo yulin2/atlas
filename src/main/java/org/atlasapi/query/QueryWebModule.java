@@ -75,6 +75,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 public class QueryWebModule {
     
     private @Value("${local.host.name}") String localHostName;
+    private @Value("${ids.expose}") String exposeIds;
     
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentWriter contentWriter;
@@ -153,12 +154,14 @@ public class QueryWebModule {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
         ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, topicResolver, availableChildren, upcomingChildren, productResolver);
+        containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
 
     @Bean ItemModelSimplifier itemModelSimplifier() {
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
         ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, topicResolver, productResolver, segmentResolver, containerSummary);
+        itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
     

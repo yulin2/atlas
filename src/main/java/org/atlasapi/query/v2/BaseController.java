@@ -25,6 +25,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public abstract class BaseController<T> {
@@ -38,6 +40,8 @@ public abstract class BaseController<T> {
 
     private final QueryParameterAnnotationsExtractor annotationExtractor;
     private final ApplicationConfigurationFetcher configFetcher;
+    
+    public final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
     
     protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<? super T> outputter) {
         this.configFetcher = configFetcher;

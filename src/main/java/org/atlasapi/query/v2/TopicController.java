@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.ids.NumberToShortStringCodec;
-import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.query.Selection;
 
 @Controller
@@ -36,8 +34,6 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     private final TopicQueryResolver topicResolver;
     private final TopicContentLister contentLister;
     private final QueryController queryController;
-    
-    private final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
 
     public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController) {
         super(configFetcher, log, atlasModelOutputter);

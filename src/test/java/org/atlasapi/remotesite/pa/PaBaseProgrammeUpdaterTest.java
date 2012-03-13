@@ -30,9 +30,17 @@ import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
+import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -41,10 +49,14 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
 
+@RunWith(JMock.class)
 public class PaBaseProgrammeUpdaterTest extends TestCase {
 
+    private Mockery context = new Mockery();
+    
     private PaProgDataProcessor programmeProcessor;
 
     private TimeMachine clock = new TimeMachine();
@@ -71,7 +83,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
     @Test
     public void testShouldCreateCorrectPaData() throws Exception {
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), null);
         updater.run();
         Identified content = null;
 
@@ -124,7 +136,35 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 //            assertEquals(crewMember.name(), ((Person) content).name());
 //        }
     }
+    
+    @Test
+    public void testBroadcastsTrimmerWindowNoTimesInFile() {
+        
+        final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
+        final Interval firstFileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 6, 0, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 16, 6, 0, 0, 0, DateTimeZones.LONDON));
+         
+        context.checking(new Expectations() {{
+            oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118471", "http://pressassociation.com/episodes/1424497"));
+        }});
+        
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), trimmer);
+        updater.run();
+    }
 
+    @Test
+    public void testBroadcastTrimmerWindowTimesInFile() {
+        
+        final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
+        final Interval fileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 21, 40, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 15, 23, 30, 0, 0, DateTimeZones.LONDON));  
+        
+        context.checking(new Expectations() {{
+            oneOf (trimmer).trimBroadcasts(fileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118472", "http://pressassociation.com/episodes/1424497"));
+        }});
+        
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), trimmer);
+        updater.run();
+    }
+    
     @Test
     public void testGroupAndOrderFilesByDay() throws Exception {
     	File file1 = new File(new URI("file:/data/pa/TV/201101010145_20110102_tvdata.xml"));
@@ -173,13 +213,16 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
     static class TestPaProgrammeUpdater extends PaBaseProgrammeUpdater {
 
-        public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, AdapterLog log, MongoScheduleStore scheduleWriter) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, null, scheduleWriter, log), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, log);
+        private List<File> files;
+
+        public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, AdapterLog log, MongoScheduleStore scheduleWriter, List<File> files, BroadcastTrimmer trimmer) {
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, trimmer, scheduleWriter, log), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, log);
+            this.files = files;
         }
 
         @Override
         public void runTask() {
-            this.processFiles(ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())));
+            this.processFiles(files);
         }
     }
     

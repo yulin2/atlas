@@ -27,7 +27,7 @@ public class CurieResolvingQueryExecutor implements KnownTypeQueryExecutor {
 		return delegate.executeUriQuery(resolve(ids), query);
 	}
 	
-	public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, ContentQuery query) {
+	public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
 	    return delegate.executeIdQuery(ids, query);
 	}
 	

@@ -38,8 +38,10 @@ import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -57,7 +59,9 @@ import com.metabroadcast.common.time.Timestamp;
 
 public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
+    private static final DateTimeFormatter FILEDATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
+    private static final DateTimeFormatter CHANNELINTERVAL_FORMAT = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZones.LONDON);
+    
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
     private final PaChannelMap channelMap;
@@ -259,13 +263,24 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                     
                     ChannelData channelData = (ChannelData) target;
                     
+                    Interval schedulePeriod;
+                    if(channelData.getStartTime() == null) {
+                        // Old format channel file, we revert to guessing the 
+                        // schedule period
+                        DateTime startTime = FILEDATE_FORMAT.parseDateTime(fileDate+"-06:00");
+                        schedulePeriod = new Interval(startTime, startTime.plusDays(1));                       
+                    }
+                    else {
+                        schedulePeriod = new Interval(CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getStartTime()), CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getEndTime()));
+                    }
+                    
                     Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
                     if (channel.hasValue() && isSupported(channel.requireValue()) && shouldContinue()) {
                         try {
                             final PaChannelData data = new PaChannelData(
                                     channel.requireValue(),
                                     channelData.getProgData(), 
-                                    DATE_FORMAT.parseDateTime(fileDate+"-06:00"), 
+                                    schedulePeriod, 
                                     getTimeZone(fileDate), 
                                     lastModified
                             );
@@ -289,14 +304,14 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         
         private final Channel channel;
         private final Iterable<ProgData> programmes;
-        private final DateTime day;
+        private final Interval schedulePeriod;
         private final DateTimeZone zone;
         private final Timestamp lastUpdated;
 
-        public PaChannelData(Channel channel, Iterable<ProgData> programmes, DateTime day, DateTimeZone zone, Timestamp lastUpdated) {
+        public PaChannelData(Channel channel, Iterable<ProgData> programmes, Interval schedulePeriod, DateTimeZone zone, Timestamp lastUpdated) {
             this.channel = channel;
             this.programmes = programmes;
-            this.day = day;
+            this.schedulePeriod = schedulePeriod;
             this.zone = zone;
             this.lastUpdated = lastUpdated;
         }
@@ -309,8 +324,8 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             return programmes;
         }
 
-        public DateTime day() {
-            return day;
+        public Interval schedulePeriod() {
+            return schedulePeriod;
         }
 
         public DateTimeZone zone() {
@@ -334,7 +349,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
      */
     protected static DateTimeZone getTimeZone(String date) {
         String timezoneDateString = date + "-11:00";
-        DateTime timezoneDateTime = DATE_FORMAT.parseDateTime(timezoneDateString);
+        DateTime timezoneDateTime = FILEDATE_FORMAT.parseDateTime(timezoneDateString);
         DateTimeZone zone = timezoneDateTime.getZone();
         return DateTimeZone.forOffsetMillis(zone.getOffset(timezoneDateTime));
     }
