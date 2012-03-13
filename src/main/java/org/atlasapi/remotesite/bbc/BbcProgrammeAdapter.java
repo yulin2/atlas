@@ -27,6 +27,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSameAs;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
@@ -40,7 +41,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
-public class BbcProgrammeAdapter  {
+public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
 
     private final BbcSlashProgrammesRdfClient<SlashProgrammesRdf> episodeClient;
     private final ContentExtractor<BbcProgrammeSource, Item> itemExtractor;
@@ -69,21 +70,21 @@ public class BbcProgrammeAdapter  {
             BbcSlashProgrammesRdfClient<SlashProgrammesVersionRdf> versionClient, 
             BbcSlashProgrammesRdfClient<SlashProgrammesRdf> clipClient, 
             BbcSlashProgrammesRdfClient<SlashProgrammesRdf> topicClient, 
-            ContentExtractor<BbcProgrammeSource, Item> propertyExtractor, AdapterLog log) {
+            BbcProgrammeGraphExtractor propertyExtractor, AdapterLog log) {
         this.writer = writer;
 		this.versionClient = versionClient;
         this.episodeClient = episodeClient;
         this.clipClient = clipClient;
         this.topicClient = topicClient;
         this.itemExtractor = propertyExtractor;
-        this.brandExtractor = new BbcBrandExtractor(this, writer, log);
+        this.brandExtractor = new BbcBrandExtractor(this, writer, propertyExtractor, log);
     }
 
     public boolean canFetch(String uri) {
         return BbcFeeds.isACanonicalSlashProgrammesUri(uri);
     }
 
-    public Identified createOrUpdate(String uri) {
+    public Identified fetch(String uri) {
     	return createOrUpdate(uri, null);
     }
     
@@ -96,6 +97,9 @@ public class BbcProgrammeAdapter  {
             if (content == null) {
             	// Nothing to write
                 return null;
+            }
+            if (content.clip() != null) {
+                return null; //don't fetch clips as top-level content.
             }
             if (content.episode() != null) {
                 return createOrUpdateTopLevelItem(uri, content);
@@ -201,7 +205,7 @@ public class BbcProgrammeAdapter  {
         }
     }
 
-    private SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {
+    SlashProgrammesVersionRdf readSlashProgrammesDataForVersion(SlashProgrammesVersion slashProgrammesVersion) {
         try {
             return versionClient.get(slashProgrammesUri(slashProgrammesVersion));
         } catch (Exception e) {
@@ -219,7 +223,7 @@ public class BbcProgrammeAdapter  {
         }
     }
     
-    private SlashProgrammesRdf readSlashProgrammesDataForClip(SlashProgrammesClip slashProgrammesClip) {
+    SlashProgrammesRdf readSlashProgrammesDataForClip(SlashProgrammesClip slashProgrammesClip) {
         try {
             return clipClient.get(slashProgrammesUri(slashProgrammesClip));
         } catch (Exception e) {

@@ -37,7 +37,7 @@ public class BbcSlashProgrammesController {
         Future<Identified> result = executor.submit(new Callable<Identified>() {
             @Override
             public Identified call() {
-                return fetcher.createOrUpdate(BbcFeeds.slashProgrammesUriForPid(pid));
+                return fetcher.fetch(BbcFeeds.slashProgrammesUriForPid(pid));
             }
         });
         

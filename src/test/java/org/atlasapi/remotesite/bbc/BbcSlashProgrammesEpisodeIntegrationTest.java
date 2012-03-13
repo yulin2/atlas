@@ -41,7 +41,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
             oneOf(topicStore).write(with(topicMatcher(3,"dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
         }});
 
-        Content programme = (Content) adapter.createOrUpdate("http://www.bbc.co.uk/programmes/b015d4pt");
+        Content programme = (Content) adapter.fetch("http://www.bbc.co.uk/programmes/b015d4pt");
         assertNotNull(programme);
         
         assertNotNull(programme.getClips());
