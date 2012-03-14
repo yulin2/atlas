@@ -1,9 +1,12 @@
 package org.atlasapi.output.simple;
 
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.EntityType;
@@ -13,8 +16,11 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.ReleaseDate;
+import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
+import org.atlasapi.media.entity.simple.Language;
 import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.media.product.ProductResolver;
@@ -27,6 +33,7 @@ import org.joda.time.DateTime;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -41,6 +48,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private final ContainerSummaryResolver containerSummaryResolver;
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
+    private final Map<String, Locale> localeMap;
     
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
     
@@ -53,6 +61,15 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
+        this.localeMap = initLocalMap();
+    }
+
+    private Map<String,Locale> initLocalMap() {
+        ImmutableMap.Builder<String, Locale> builder = ImmutableMap.builder();
+        for (String code : Locale.getISOLanguages()) {
+            builder.put(code, new Locale(code));
+        }
+        return builder.build();
     }
 
     @Override
@@ -115,7 +132,64 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         } else if (fullItem instanceof Film && (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION))) {
             Film film = (Film) fullItem;
             simpleItem.setYear(film.getYear());
+            if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
+                simpleItem.setOriginalLanguages(languagesFrom(film.getLanguages()));
+                simpleItem.setSubtitles(simpleSubtitlesFrom(film.getSubtitles()));
+                simpleItem.setCertificates(simpleCertificates(film.getCertificates()));
+                simpleItem.setReleaseDates(simpleReleaseDate(film.getReleaseDates()));
+            }
         }
+    }
+
+    private Iterable<org.atlasapi.media.entity.simple.ReleaseDate> simpleReleaseDate(Set<ReleaseDate> releaseDates) {
+        return Iterables.transform(releaseDates, new Function<ReleaseDate, org.atlasapi.media.entity.simple.ReleaseDate>() {
+
+            @Override
+            public org.atlasapi.media.entity.simple.ReleaseDate apply(ReleaseDate input) {
+                return new org.atlasapi.media.entity.simple.ReleaseDate(
+                        input.date().toDateTimeAtStartOfDay(DateTimeZones.UTC).toDate(), 
+                        input.country().code(), 
+                        input.type().toString().toLowerCase()
+                );
+            }
+        });
+    }
+
+    private Iterable<org.atlasapi.media.entity.simple.Certificate> simpleCertificates(Set<Certificate> certificates) {
+        return Iterables.transform(certificates, new Function<Certificate, org.atlasapi.media.entity.simple.Certificate>() {
+            @Override
+            public org.atlasapi.media.entity.simple.Certificate apply(Certificate input) {
+                return new org.atlasapi.media.entity.simple.Certificate(input.classification(), input.country().code());
+            }
+        });
+    }
+
+    public Iterable<org.atlasapi.media.entity.simple.Subtitles> simpleSubtitlesFrom(Set<Subtitles> subtitles) {
+        return Iterables.filter(Iterables.transform(subtitles, new Function<Subtitles,org.atlasapi.media.entity.simple.Subtitles>(){
+            @Override
+            public org.atlasapi.media.entity.simple.Subtitles apply(Subtitles input) {
+                Language lang = languageForCode(input.code());
+                return lang == null ? null : new org.atlasapi.media.entity.simple.Subtitles(lang);
+            }
+        }
+        ),Predicates.notNull());
+    }
+
+    public Iterable<Language> languagesFrom(Set<String> languages) {
+        return Iterables.filter(Iterables.transform(languages, new Function<String, Language>() {
+            @Override
+            public Language apply(String input) {
+                return languageForCode(input);
+            }
+        }), Predicates.notNull());
+    }
+    
+    public Language languageForCode(String input) {
+        Locale locale = localeMap.get(input);
+        if (locale == null) {
+            return null;
+        }
+        return new Language(locale.getLanguage(), locale.getDisplayLanguage());
     }
 
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Item item, Set<Annotation> annotations) {
@@ -205,6 +279,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
         simpleLocation.setPublishedDuration(version.getPublishedDuration());
         simpleLocation.setDuration(durationFrom(item, version));
+        simpleLocation.set3d(version.is3d());
 
         Restriction restriction = new Restriction();
 
