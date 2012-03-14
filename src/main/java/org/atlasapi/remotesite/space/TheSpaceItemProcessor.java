@@ -3,10 +3,8 @@ package org.atlasapi.remotesite.space;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.http.IdentityHttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
-import java.io.InputStream;
 import java.util.Iterator;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.ParentRef;
@@ -39,13 +37,12 @@ public class TheSpaceItemProcessor {
         this.contentWriter = contentWriter;
     }
 
-    public void process(InputStream content) throws Exception {
+    public void process(JsonNode item) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-
-        JsonNode item = mapper.readTree(content);
+        //
         String type = item.get("type").asText();
         String pid = item.get("pid").asText();
-
+        //
         if (type.equals(SERIES_TYPE)) {
             Series series = (Series) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pid))).getFirstValue().valueOrNull();
             if (series == null) {
@@ -90,11 +87,11 @@ public class TheSpaceItemProcessor {
 
         JsonNode image = node.get("image");
         if (image != null) {
-            JsonNode smallImage = image.get("image.depiction320");
+            JsonNode smallImage = image.get("depiction_320");
             if (smallImage != null) {
                 series.setThumbnail(smallImage.asText());
             }
-            JsonNode bigImage = image.get("image.depiction640");
+            JsonNode bigImage = image.get("depiction_640");
             if (bigImage != null) {
                 series.setImage(bigImage.asText());
             }
@@ -129,11 +126,11 @@ public class TheSpaceItemProcessor {
 
         JsonNode image = node.get("image");
         if (image != null) {
-            JsonNode smallImage = image.get("image.depiction320");
+            JsonNode smallImage = image.get("depiction_320");
             if (smallImage != null) {
                 episode.setThumbnail(smallImage.asText());
             }
-            JsonNode bigImage = image.get("image.depiction640");
+            JsonNode bigImage = image.get("depiction_640");
             if (bigImage != null) {
                 episode.setImage(bigImage.asText());
             }
@@ -142,8 +139,7 @@ public class TheSpaceItemProcessor {
         Iterator<JsonNode> versions = node.get("versions").getElements();
         while (versions.hasNext()) {
             String vPid = versions.next().get("pid").asText();
-            InputStream vStream = client.get(new SimpleHttpRequest<InputStream>(TheSpaceUpdater.BASE_API_URL + "/items/" + vPid + ".json", new IdentityHttpResponseTransformer()));
-            JsonNode version = mapper.readTree(vStream);
+            JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
             episode.addVersion(getVersion(version.get("version")));
         }
 
@@ -152,10 +148,9 @@ public class TheSpaceItemProcessor {
             String pPid = parent.get("pid").asText();
             Series pSeries = (Series) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pPid))).getFirstValue().valueOrNull();
             if (pSeries == null) {
-                InputStream pStream = client.get(new SimpleHttpRequest<InputStream>(TheSpaceUpdater.BASE_API_URL + "/items/" + pPid + ".json", new IdentityHttpResponseTransformer()));
                 pSeries = new Series();
                 pSeries.setChildRefs(ImmutableList.of(episode.childRef()));
-                makeSeries(pSeries, mapper.readTree(pStream), mapper);
+                makeSeries(pSeries, client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + pPid + ".json", new JSonNodeHttpResponseTransformer(mapper))).get("programme"), mapper);
             } else {
                 pSeries.setChildRefs(Iterables.concat(pSeries.getChildRefs(), ImmutableList.of(episode.childRef())));
             }

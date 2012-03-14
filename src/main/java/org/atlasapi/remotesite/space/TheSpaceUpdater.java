@@ -13,6 +13,8 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.RequestLimitingSimpleHttpClient;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  */
@@ -39,7 +41,9 @@ class TheSpaceUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update started from " + BASE_API_URL).withSource(getClass()));
 
-            client.get(new SimpleHttpRequest<Void>(BASE_API_URL + "/film?items_per_page=50", new TheSpaceHttpTransformer(client, log, contentResolver, contentWriter)));
+            TheSpaceItemsProcessor processor = new TheSpaceItemsProcessor(client, log, contentResolver, contentWriter);
+            JsonNode items = client.get(new SimpleHttpRequest<JsonNode>(BASE_API_URL + "/items.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
+            processor.process(items);
 
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
