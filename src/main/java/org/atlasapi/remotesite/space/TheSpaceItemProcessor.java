@@ -254,7 +254,7 @@ public class TheSpaceItemProcessor {
         while (clips.hasNext()) {
             String cPid = clips.next().get("pid").asText();
             JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-            series.addClip(getClip(mapper, clip.get("clip"), series));
+            series.addClip(getClip(mapper, clip.get("programme"), series));
         }
 
         return series;
