@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Series;
@@ -71,6 +72,13 @@ public class TheSpaceItemProcessor {
         JsonNode position = node.get("position");
         if (position != null) {
             episode.setEpisodeNumber(position.asInt());
+        }
+
+        JsonNode mediaType = node.get("media_type");
+        if (mediaType != null && mediaType.asText().toLowerCase().equals("audio")) {
+            episode.setMediaType(MediaType.AUDIO);
+        } else if (mediaType != null && mediaType.asText().toLowerCase().equals("audio_video")) {
+            episode.setMediaType(MediaType.VIDEO);
         }
 
         JsonNode long_synopsis = node.get("long_synopsis");
