@@ -1,9 +1,7 @@
 package org.atlasapi.remotesite.space;
 
-import com.metabroadcast.common.http.IdentityHttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
-import java.io.InputStream;
 import java.util.Iterator;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -28,18 +26,18 @@ public class TheSpaceItemsProcessor {
         this.contentWriter = contentWriter;
     }
 
-    public void process(InputStream content) throws Exception {
+    public void process(JsonNode items) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        //
         TheSpaceItemProcessor processor = new TheSpaceItemProcessor(client, log, contentResolver, contentWriter);
         //
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode root = mapper.readTree(content);
-        Iterator<JsonNode> results = root.get("results").getElements();
+        Iterator<JsonNode> results = items.get("results").getElements();
         while (results.hasNext()) {
             JsonNode item = results.next();
             String pid = item.get("pid").asText();
             try {
-                InputStream stream = client.get(new SimpleHttpRequest<InputStream>(TheSpaceUpdater.BASE_API_URL + "/items/" + pid + ".json", new IdentityHttpResponseTransformer()));
-                processor.process(content);
+                JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+                processor.process(node.get("programme"));
             } catch (Exception ex) {
                 log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withCause(ex));
             }

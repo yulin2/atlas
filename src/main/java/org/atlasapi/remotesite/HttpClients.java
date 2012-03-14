@@ -56,7 +56,7 @@ public class HttpClients {
         return new SimpleHttpClientBuilder()
             .withUserAgent(ATLAS_USER_AGENT)
             .withSocketTimeout(30, TimeUnit.SECONDS)
-            .withSslSocketFactory(new SSLSocketFactory(ks))
+            .withSslSocketFactory(new SSLSocketFactory(ks, password, ks))
             .build();
     }
 }
