@@ -168,7 +168,7 @@ public class PaFilmProcessor {
 
     public Iterable<String> extractOriginalLanguages(Element originalLanguages) {
         List<String> languageCodes = Lists.newArrayList();
-        for (String originalLanguage : slashSplitter.split(originalLanguages.getValue())) {
+        for (String originalLanguage : splitLanguages(originalLanguages.getValue())) {
             Optional<String> code = languageMap.codeForEnglishLanguageName(originalLanguage);
             if (code.isPresent()) {
                 languageCodes.add(code.get());
@@ -177,6 +177,11 @@ public class PaFilmProcessor {
             }
         }
         return languageCodes;
+    }
+
+    public Iterable<String> splitLanguages(String originalLanguage) {
+        Splitter splitter = originalLanguage.indexOf('/') < 0 ? csvSplitter : slashSplitter;
+        return splitter.split(originalLanguage);
     }
 
     public Iterable<Subtitles> extractSubtitles(Element subtitlesElement) {
