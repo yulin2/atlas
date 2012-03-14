@@ -29,7 +29,7 @@ public class BBCProductsModule {
     }
 
     @Bean(name="bbcproductsupdater")
-    public BBCProductsUpdater updater() {
+    public BBCProductsUpdater bbcProductsUpdater() {
         return new BBCProductsUpdater(productStore, log, Configurer.get("s3.access").get(), Configurer.get("s3.secret").get());
     }
 }
