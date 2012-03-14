@@ -102,7 +102,7 @@ public class TheSpaceItemProcessor {
         while (clips.hasNext()) {
             String cPid = clips.next().get("pid").asText();
             JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-            episode.addClip(getClip(mapper, clip.get("clip"), episode));
+            episode.addClip(getClip(mapper, clip.get("programme"), episode));
         }
 
         Iterator<JsonNode> versions = node.get("versions").getElements();
