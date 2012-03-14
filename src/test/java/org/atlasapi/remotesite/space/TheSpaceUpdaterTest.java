@@ -1,12 +1,15 @@
 package org.atlasapi.remotesite.space;
 
 import java.util.Collections;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
@@ -30,7 +33,7 @@ public class TheSpaceUpdaterTest {
 
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                System.out.println(invocation.getArguments()[0]);
+                System.out.println(ToStringBuilder.reflectionToString(invocation.getArguments()[0], ToStringStyle.MULTI_LINE_STYLE));
                 return null;
             }
         }).when(writer).createOrUpdate(any(Container.class));
@@ -38,12 +41,12 @@ public class TheSpaceUpdaterTest {
 
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                System.out.println(invocation.getArguments()[0]);
+                System.out.println(ToStringBuilder.reflectionToString(invocation.getArguments()[0], ToStringStyle.MULTI_LINE_STYLE));
                 return null;
             }
         }).when(writer).createOrUpdate(any(Item.class));
 
-        TheSpaceUpdater updater = new TheSpaceUpdater(resolver, writer, log, "/Users/sergio/atlas.jks", "sergio");
+        TheSpaceUpdater updater = new TheSpaceUpdater(resolver, writer, log, this.getClass().getClassLoader().getResource("atlas.jks").getFile(), "sergio");
         updater.runTask();
     }
 }
