@@ -17,6 +17,8 @@ import org.mockito.stubbing.Answer;
 
 /**
  */
+// TODO: enable with proper maven profile
+@Ignore
 public class TheSpaceUpdaterTest {
 
     public TheSpaceUpdaterTest() {
@@ -27,7 +29,7 @@ public class TheSpaceUpdaterTest {
         AdapterLog log = mock(AdapterLog.class);
         ContentResolver resolver = mock(ContentResolver.class);
         ContentWriter writer = mock(ContentWriter.class);
-        
+
         when(resolver.findByCanonicalUris(anyCollection())).thenReturn(new ResolvedContent(Collections.EMPTY_MAP));
         doAnswer(new Answer() {
 
