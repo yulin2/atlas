@@ -2,13 +2,11 @@ package org.atlasapi.remotesite.space;
 
 import java.util.Collections;
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.junit.Ignore;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 import org.mockito.invocation.InvocationOnMock;
