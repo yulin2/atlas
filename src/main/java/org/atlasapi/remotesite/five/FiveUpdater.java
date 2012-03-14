@@ -43,7 +43,7 @@ public class FiveUpdater extends ScheduledTask {
     public FiveUpdater(ContentWriter contentWriter, AdapterLog log) {
         this.log = log;
         this.streamHttpClient = buildFetcher(log);
-        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(HttpClients.webserviceClient()), 4));
+        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher(log)), 4));
     }
 
     private SimpleHttpClient buildFetcher(final AdapterLog log) {

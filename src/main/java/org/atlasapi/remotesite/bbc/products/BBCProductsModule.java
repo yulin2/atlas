@@ -18,12 +18,9 @@ import org.atlasapi.media.product.ProductStore;
 @Configuration
 public class BBCProductsModule {
 
-    private @Autowired
-    SimpleScheduler scheduler;
-    private @Autowired
-    ProductStore productStore;
-    private @Autowired
-    AdapterLog log;
+    private @Autowired SimpleScheduler scheduler;
+    private @Autowired ProductStore productStore;
+    private @Autowired AdapterLog log;
 
     @PostConstruct
     public void startBackgroundTasks() {
@@ -31,8 +28,8 @@ public class BBCProductsModule {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("Installed BBC Products updater"));
     }
 
-    @Bean
-    public BBCProductsUpdater bbcProductsUpdater() {
+    @Bean(name="bbcproductsupdater")
+    public BBCProductsUpdater updater() {
         return new BBCProductsUpdater(productStore, log, Configurer.get("s3.access").get(), Configurer.get("s3.secret").get());
     }
 }

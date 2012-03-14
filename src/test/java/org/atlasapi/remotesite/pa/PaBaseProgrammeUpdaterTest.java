@@ -49,6 +49,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
 
 @RunWith(JMock.class)
@@ -140,7 +141,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     public void testBroadcastsTrimmerWindowNoTimesInFile() {
         
         final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
-        final Interval firstFileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 6, 0, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 16, 6, 0, 0, 0));
+        final Interval firstFileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 6, 0, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 16, 6, 0, 0, 0, DateTimeZones.LONDON));
          
         context.checking(new Expectations() {{
             oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118471", "http://pressassociation.com/episodes/1424497"));
@@ -154,7 +155,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     public void testBroadcastTrimmerWindowTimesInFile() {
         
         final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
-        final Interval fileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 21, 40, 0, 0), new DateTime(2011, DateTimeConstants.JANUARY, 15, 23, 30, 0, 0));  
+        final Interval fileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 21, 40, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 15, 23, 30, 0, 0, DateTimeZones.LONDON));  
         
         context.checking(new Expectations() {{
             oneOf (trimmer).trimBroadcasts(fileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118472", "http://pressassociation.com/episodes/1424497"));

@@ -1,19 +1,26 @@
 package org.atlasapi.remotesite.pa.film;
 
+import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
+
 import java.util.List;
+import java.util.Set;
 
 import nu.xom.Element;
 import nu.xom.Elements;
 
 import org.atlasapi.media.entity.Actor;
+import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ReleaseDate;
+import org.atlasapi.media.entity.ReleaseDate.ReleaseType;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -24,13 +31,17 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.PaCountryMap;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Duration;
+import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.text.MoreStrings;
 
 public class PaFilmProcessor {
@@ -40,6 +51,10 @@ public class PaFilmProcessor {
     private final ItemsPeopleWriter peopleWriter;
     private final AdapterLog log;
     private final PaCountryMap countryMapper = new PaCountryMap();
+    private final PaLanguageMap languageMap = new PaLanguageMap();
+    
+    private final Splitter csvSplitter = Splitter.on(",").omitEmptyStrings().trimResults();
+    private final Splitter slashSplitter = Splitter.on("/").omitEmptyStrings().trimResults();
 
     public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log) {
         this.contentResolver = contentResolver;
@@ -79,19 +94,24 @@ public class PaFilmProcessor {
         Version version = new Version();
         version.setProvider(Publisher.PA);
         Element certificateElement = filmElement.getFirstChildElement("certificate");
-        if (certificateElement != null && !Strings.isNullOrEmpty(certificateElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
+        if (hasValue(certificateElement) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
             version.setRestriction(Restriction.from(Integer.parseInt(certificateElement.getValue())));
         }
-
+        
         Element durationElement = filmElement.getFirstChildElement("running_time");
-        if (durationElement != null && !Strings.isNullOrEmpty(durationElement.getValue()) && MoreStrings.containsOnlyAsciiDigits(durationElement.getValue())) {
+        if (hasValue(durationElement) && MoreStrings.containsOnlyAsciiDigits(durationElement.getValue())) {
             version.setDuration(Duration.standardMinutes(Long.parseLong(durationElement.getValue())));
+        }
+        
+        Element threeD = filmElement.getFirstChildElement("three_D");
+        if (hasValue(threeD)) {
+            version.set3d("3D".equals(threeD.getValue()));
         }
 
         film.setVersions(ImmutableSet.of(version));
         
         Element countriesElement = filmElement.getFirstChildElement("country_of_origin");
-        if (countriesElement != null && !Strings.isNullOrEmpty(countriesElement.getValue())) {
+        if (hasValue(countriesElement)) {
             film.setCountriesOfOrigin(countryMapper.parseCountries(countriesElement.getValue()));
         }
         
@@ -104,11 +124,85 @@ public class PaFilmProcessor {
             film.setPeople(otherPublisherPeople);
         }
         
+        Element subtitlesElement = filmElement.getFirstChildElement("subtitles");
+        if (hasValue(subtitlesElement)) {
+            film.setSubtitles(extractSubtitles(subtitlesElement));
+        }
+        
+        Element originalLanguages = filmElement.getFirstChildElement("original_language");
+        if (hasValue(originalLanguages)) {
+            film.setLanguages(extractOriginalLanguages(originalLanguages));
+        }
+        
+        Element releaseDate = filmElement.getFirstChildElement("UK_release_date");
+        if (hasValue(releaseDate)) {
+            film.setReleaseDates(ImmutableList.of(ukReleaseDate(releaseDate.getValue())));
+        }
+        
+        Element colour = filmElement.getFirstChildElement("colour");
+        if (hasValue(colour)) {
+            if ("Colour".equals(colour.getValue())) {
+                film.setBlackAndWhite(false);
+            } else if ("BW".equals(colour.getValue())) {
+                film.setBlackAndWhite(true);
+            }
+        }
+        
+        Element ukCinemaCertificate = filmElement.getFirstChildElement("UK_cinema_certificate_BBFC");
+        if (hasValue(ukCinemaCertificate)) {
+            film.setCertificates(certificate(ukCinemaCertificate));
+        }
+        
         contentWriter.createOrUpdate(film);
         
         peopleWriter.createOrUpdatePeople(film);
     }
-    
+
+    private Set<Certificate> certificate(Element ukCinemaCertificate) {
+        return ImmutableSet.of(new Certificate(ukCinemaCertificate.getValue(), Countries.GB));
+    }
+
+    private ReleaseDate ukReleaseDate(String value) {
+        return new ReleaseDate(DateTimeFormat.forPattern("d/M/YYYY").parseDateTime(value).toLocalDate(), Countries.GB, ReleaseType.GENERAL);
+    }
+
+    public Iterable<String> extractOriginalLanguages(Element originalLanguages) {
+        List<String> languageCodes = Lists.newArrayList();
+        for (String originalLanguage : splitLanguages(originalLanguages.getValue())) {
+            Optional<String> code = languageMap.codeForEnglishLanguageName(originalLanguage);
+            if (code.isPresent()) {
+                languageCodes.add(code.get());
+            } else {
+                log.record(warnEntry().withSource(getClass()).withDescription("No language code for original language %s", originalLanguage));
+            }
+        }
+        return languageCodes;
+    }
+
+    public Iterable<String> splitLanguages(String originalLanguage) {
+        Splitter splitter = originalLanguage.indexOf('/') < 0 ? csvSplitter : slashSplitter;
+        return splitter.split(originalLanguage);
+    }
+
+    public Iterable<Subtitles> extractSubtitles(Element subtitlesElement) {
+        //always ends in "+subtitles" so remove it. 
+        String csvLanguages = subtitlesElement.getValue().substring(0, subtitlesElement.getValue().indexOf('+'));
+        List<Subtitles> subtitles = Lists.newArrayList();
+        for (String subtitleLanguage : csvSplitter.split(csvLanguages)) {
+            Optional<String> code = languageMap.codeForEnglishLanguageName(subtitleLanguage);
+            if (code.isPresent()) {
+                subtitles.add(new Subtitles(code.get()));
+            } else {
+                log.record(warnEntry().withSource(getClass()).withDescription("No language code for subtitles %s", subtitleLanguage));
+            }
+        }
+        return subtitles;
+    }
+
+    public boolean hasValue(Element subtitlesElement) {
+        return subtitlesElement != null && !Strings.isNullOrEmpty(subtitlesElement.getValue());
+    }
+
     private String normalize(String imdbRef) {
         String httpRef = imdbRef.replace("www.", "http://");
         return httpRef.substring(0, httpRef.length()-1);
