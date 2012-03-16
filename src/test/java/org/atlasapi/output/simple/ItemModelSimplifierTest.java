@@ -35,22 +35,25 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
+import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifierTest {
 
     private final Mockery context = new Mockery();
+    private final ContentGroupResolver contentGroupResolver = context.mock(ContentGroupResolver.class);
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
     private final ProductResolver productResolver = context.mock(ProductResolver.class);
     private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", topicResolver, productResolver, segmentResolver, containerSummaryResolver );
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver );
     
     @Test
     @SuppressWarnings("unchecked")
     public void testCanCreateSimpleItemFromFullItem() throws Exception {
         
         context.checking(new Expectations(){{
+            allowing(contentGroupResolver).findByIds(with(any(Iterable.class)));will(returnValue(ImmutableList.of()));
             allowing(topicResolver).topicsForIds(with(any(Iterable.class)));will(returnValue(ImmutableList.of()));
             allowing(segmentResolver).resolveById(with(any(Iterable.class)));will(returnValue(ImmutableMap.of()));
         }});
