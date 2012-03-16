@@ -50,7 +50,9 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.TimeMachine;
+import org.junit.Ignore;
 
+@Ignore
 @RunWith(JMock.class)
 public class PaBaseProgrammeUpdaterTest extends TestCase {
 

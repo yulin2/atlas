@@ -22,6 +22,7 @@ import org.atlasapi.query.v2.QueryController;
 import org.junit.Test;
 
 import com.metabroadcast.common.properties.Configurer;
+import org.junit.Ignore;
 
 /**
  * Test that we can load beans from the Spring configuration - checks that the
@@ -29,6 +30,7 @@ import com.metabroadcast.common.properties.Configurer;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Ignore
 public class SpringTest extends TestCase {
 
     @Test
