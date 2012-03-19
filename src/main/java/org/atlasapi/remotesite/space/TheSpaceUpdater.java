@@ -47,9 +47,12 @@ class TheSpaceUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update started from " + BASE_API_URL).withSource(getClass()));
 
-            TheSpaceItemsProcessor processor = new TheSpaceItemsProcessor(client, log, contentResolver, contentWriter, groupResolver, groupWriter);
+            TheSpaceItemsProcessor itemsProcessor = new TheSpaceItemsProcessor(client, log, contentResolver, contentWriter);
+            TheSpacePlaylistsProcessor playlistsProcessor = new TheSpacePlaylistsProcessor(client, log, contentResolver, contentWriter, groupResolver, groupWriter);
             JsonNode items = client.get(new SimpleHttpRequest<JsonNode>(BASE_API_URL + "/items.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
-            processor.process(items);
+            JsonNode playlists = client.get(new SimpleHttpRequest<JsonNode>(BASE_API_URL + "/items/playlists.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
+            itemsProcessor.process(items);
+            playlistsProcessor.process(playlists);
 
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));

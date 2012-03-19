@@ -4,6 +4,7 @@ import java.util.Collections;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
@@ -22,9 +23,6 @@ import org.mockito.stubbing.Answer;
 // TODO: enable with proper maven profile
 @Ignore
 public class TheSpaceUpdaterTest {
-
-    public TheSpaceUpdaterTest() {
-    }
 
     @Test
     public void testRunTask() throws Exception {
@@ -53,6 +51,14 @@ public class TheSpaceUpdaterTest {
         }).when(contentWriter).createOrUpdate(any(Item.class));
         
         when(groupResolver.findByCanonicalUris(anyCollection())).thenReturn(new ResolvedContent(Collections.EMPTY_MAP));
+        doAnswer(new Answer() {
+
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                System.out.println(ToStringBuilder.reflectionToString(invocation.getArguments()[0], ToStringStyle.MULTI_LINE_STYLE));
+                return null;
+            }
+        }).when(groupWriter).createOrUpdate(any(ContentGroup.class));
 
         TheSpaceUpdater updater = new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, this.getClass().getClassLoader().getResource("atlas.jks").getFile(), "sergio");
         updater.runTask();
