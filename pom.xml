@@ -100,6 +100,9 @@
                             <classpathPrefix>/WEB-INF/lib</classpathPrefix>
                             <mainClass>org.atlasapi.AtlasMain</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Class-Path>ks</Class-Path>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
