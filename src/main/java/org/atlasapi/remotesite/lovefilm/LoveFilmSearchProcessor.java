@@ -33,7 +33,7 @@ public class LoveFilmSearchProcessor {
             for (int i = 0; i < titles.size(); i++) {
                 try {
                     Node title = titles.get(i);
-                    processor.process(parser.build(new ByteArrayInputStream(title.toXML().getBytes(Charset.forName("UTF-8")))), client, contentResolver, contentWriter);
+                    processor.process(parser.build(new ByteArrayInputStream(title.toXML().getBytes(Charset.forName("UTF-8")))), client, log, contentResolver, contentWriter);
                 } catch (Exception ex) {
                     log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withCause(ex));
                 }
