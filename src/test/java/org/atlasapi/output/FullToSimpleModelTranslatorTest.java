@@ -33,12 +33,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
+import org.atlasapi.persistence.content.ContentGroupResolver;
 
 @RunWith(JMock.class)
 public class FullToSimpleModelTranslatorTest {
     
     private final Mockery context = new Mockery();
     private final ContentResolver contentResolver = context.mock(ContentResolver.class);
+    private final ContentGroupResolver contentGroupResolver = context.mock(ContentGroupResolver.class);
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
     private final AvailableChildrenResolver availableChildren = context.mock(AvailableChildrenResolver.class);
@@ -51,8 +53,8 @@ public class FullToSimpleModelTranslatorTest {
     private ProductModelSimplifier productSimplifier = new ProductModelSimplifier("localhostName");
     private ProductResolver productResolver = context.mock(ProductResolver.class); 
 
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", topicResolver, productResolver , segmentResolver, containerSummaryResolver);
-    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", topicResolver, availableChildren, upcomingChildren, productResolver),topicSimplifier, productSimplifier);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver, containerSummaryResolver);
+    private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver),topicSimplifier, productSimplifier);
     
 	private StubHttpServletRequest request;
 	private StubHttpServletResponse response;
@@ -72,6 +74,7 @@ public class FullToSimpleModelTranslatorTest {
 		context.checking(new Expectations() {{ 
 			one(xmlOutputter).writeTo(with(request), with(response), with(simpleGraph()), with(ImmutableSet.<Annotation>of()), with(ApplicationConfiguration.DEFAULT_CONFIGURATION));
 			ignoring(contentResolver);
+            ignoring(contentGroupResolver);
 			ignoring(topicResolver);
 			ignoring(segmentResolver);
 		}});
