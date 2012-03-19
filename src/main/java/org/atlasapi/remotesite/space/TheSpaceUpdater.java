@@ -45,7 +45,7 @@ class TheSpaceUpdater extends ScheduledTask {
     public void runTask() {
         try {
             Timestamp start = timestamper.timestamp();
-            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update started from " + BASE_API_URL).withSource(getClass()));
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("TheSpace update started from " + BASE_API_URL).withSource(getClass()));
 
             TheSpaceItemsProcessor itemsProcessor = new TheSpaceItemsProcessor(client, log, contentResolver, contentWriter);
             TheSpacePlaylistsProcessor playlistsProcessor = new TheSpacePlaylistsProcessor(client, log, contentResolver, contentWriter, groupResolver, groupWriter);
@@ -55,9 +55,9 @@ class TheSpaceUpdater extends ScheduledTask {
             playlistsProcessor.process(playlists);
 
             Timestamp end = timestamper.timestamp();
-            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("TheSpace update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing LoveFilm catalog."));
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing TheSpace data."));
             Throwables.propagate(e);
         }
     }
