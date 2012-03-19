@@ -7,6 +7,8 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.time.Timestamp;
 import com.metabroadcast.common.time.Timestamper;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -25,12 +27,16 @@ class TheSpaceUpdater extends ScheduledTask {
     private final Timestamper timestamper = new SystemClock();
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
+    private final ContentGroupResolver groupResolver;
+    private final ContentGroupWriter groupWriter;
     private final AdapterLog log;
     private SimpleHttpClient client;
 
-    public TheSpaceUpdater(ContentResolver contentResolver, ContentWriter contentWriter, AdapterLog log, String keystore, String password) throws Exception {
+    public TheSpaceUpdater(ContentResolver contentResolver, ContentWriter contentWriter, ContentGroupResolver groupResolver, ContentGroupWriter groupWriter, AdapterLog log, String keystore, String password) throws Exception {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
+        this.groupResolver = groupResolver;
+        this.groupWriter = groupWriter;
         this.log = log;
         this.client = new RequestLimitingSimpleHttpClient(HttpClients.httpsClient(keystore, password), 10);
     }
@@ -41,7 +47,7 @@ class TheSpaceUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update started from " + BASE_API_URL).withSource(getClass()));
 
-            TheSpaceItemsProcessor processor = new TheSpaceItemsProcessor(client, log, contentResolver, contentWriter);
+            TheSpaceItemsProcessor processor = new TheSpaceItemsProcessor(client, log, contentResolver, contentWriter, groupResolver, groupWriter);
             JsonNode items = client.get(new SimpleHttpRequest<JsonNode>(BASE_API_URL + "/items.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
             processor.process(items);
 

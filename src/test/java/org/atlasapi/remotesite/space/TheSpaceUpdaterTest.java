@@ -5,6 +5,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -27,10 +29,12 @@ public class TheSpaceUpdaterTest {
     @Test
     public void testRunTask() throws Exception {
         AdapterLog log = mock(AdapterLog.class);
-        ContentResolver resolver = mock(ContentResolver.class);
-        ContentWriter writer = mock(ContentWriter.class);
+        ContentResolver contentResolver = mock(ContentResolver.class);
+        ContentWriter contentWriter = mock(ContentWriter.class);
+        ContentGroupResolver groupResolver = mock(ContentGroupResolver.class);
+        ContentGroupWriter groupWriter = mock(ContentGroupWriter.class);
 
-        when(resolver.findByCanonicalUris(anyCollection())).thenReturn(new ResolvedContent(Collections.EMPTY_MAP));
+        when(contentResolver.findByCanonicalUris(anyCollection())).thenReturn(new ResolvedContent(Collections.EMPTY_MAP));
         doAnswer(new Answer() {
 
             @Override
@@ -38,7 +42,7 @@ public class TheSpaceUpdaterTest {
                 System.out.println(ToStringBuilder.reflectionToString(invocation.getArguments()[0], ToStringStyle.MULTI_LINE_STYLE));
                 return null;
             }
-        }).when(writer).createOrUpdate(any(Container.class));
+        }).when(contentWriter).createOrUpdate(any(Container.class));
         doAnswer(new Answer() {
 
             @Override
@@ -46,9 +50,11 @@ public class TheSpaceUpdaterTest {
                 System.out.println(ToStringBuilder.reflectionToString(invocation.getArguments()[0], ToStringStyle.MULTI_LINE_STYLE));
                 return null;
             }
-        }).when(writer).createOrUpdate(any(Item.class));
+        }).when(contentWriter).createOrUpdate(any(Item.class));
+        
+        when(groupResolver.findByCanonicalUris(anyCollection())).thenReturn(new ResolvedContent(Collections.EMPTY_MAP));
 
-        TheSpaceUpdater updater = new TheSpaceUpdater(resolver, writer, log, this.getClass().getClassLoader().getResource("atlas.jks").getFile(), "sergio");
+        TheSpaceUpdater updater = new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, this.getClass().getClassLoader().getResource("atlas.jks").getFile(), "sergio");
         updater.runTask();
     }
 }
