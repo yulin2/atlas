@@ -40,7 +40,8 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
 
     private boolean exposeIds = false;
     
-    public ContentModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver) {
+    public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver) {
+        this.contentGroupResolver = contentGroupResolver;
         this.topicResolver = topicResolver;
         this.productResolver = productResolver;
         this.contentGroupSimplifier = new ContentGroupModelSimplifier();

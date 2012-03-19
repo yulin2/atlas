@@ -87,6 +87,8 @@ public class QueryWebModule {
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
+    private @Autowired ContentGroupWriter contentGroupWriter;
+    private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ChannelGroupStore channelGroupResolver;
     private @Autowired ScheduleResolver scheduleResolver;
@@ -174,7 +176,7 @@ public class QueryWebModule {
     ContainerModelSimplifier containerSimplifier() {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, topicResolver, availableChildren, upcomingChildren, productResolver);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver);
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
@@ -182,7 +184,7 @@ public class QueryWebModule {
     @Bean
     ItemModelSimplifier itemModelSimplifier() {
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, topicResolver, productResolver, segmentResolver, containerSummary);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
