@@ -91,7 +91,12 @@ public class PaFilmProcessor {
             film.setYear(Integer.parseInt(year));
         }
 
-        Version version = new Version();
+        Version version = getVersion(film);
+        if (version == null) {
+            version = new Version();
+            film.addVersion(version);
+        }
+        
         version.setProvider(Publisher.PA);
         Element certificateElement = filmElement.getFirstChildElement("certificate");
         if (hasValue(certificateElement) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
@@ -108,8 +113,6 @@ public class PaFilmProcessor {
             version.set3d("3D".equals(threeD.getValue()));
         }
 
-        film.setVersions(ImmutableSet.of(version));
-        
         Element countriesElement = filmElement.getFirstChildElement("country_of_origin");
         if (hasValue(countriesElement)) {
             film.setCountriesOfOrigin(countryMapper.parseCountries(countriesElement.getValue()));
@@ -203,6 +206,15 @@ public class PaFilmProcessor {
         return subtitlesElement != null && !Strings.isNullOrEmpty(subtitlesElement.getValue());
     }
 
+    private Version getVersion(Item item) {
+        for (Version version : item.getVersions()) {
+            if (version.getProvider() == Publisher.PA) {
+                return version;
+            }
+        }
+        return null;
+    }
+    
     private String normalize(String imdbRef) {
         String httpRef = imdbRef.replace("www.", "http://");
         return httpRef.substring(0, httpRef.length()-1);
