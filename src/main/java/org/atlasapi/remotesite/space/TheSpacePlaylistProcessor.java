@@ -20,6 +20,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -60,51 +61,56 @@ public class TheSpacePlaylistProcessor {
     }
 
     private void makePlaylist(ContentGroup playlist, JsonNode node, ObjectMapper mapper) throws Exception {
-        JsonNode pid = node.get("pid");
-        playlist.setCanonicalUri(getCanonicalUri(pid.asText()));
-        playlist.setPublisher(Publisher.THESPACE);
+        try {
+            JsonNode pid = node.get("pid");
+            playlist.setCanonicalUri(getCanonicalUri(pid.asText()));
+            playlist.setPublisher(Publisher.THESPACE);
 
-        JsonNode long_synopsis = node.get("long_synopsis");
-        JsonNode medium_synopsis = node.get("medium_synopsis");
-        JsonNode short_synopsis = node.get("short_synopsis");
-        String synopsis = null;
-        if (long_synopsis != null) {
-            synopsis = long_synopsis.asText();
-        } else if (medium_synopsis != null) {
-            synopsis = medium_synopsis.asText();
-        } else if (short_synopsis != null) {
-            synopsis = short_synopsis.asText();
-        }
-        playlist.setDescription(synopsis);
-
-        JsonNode image = node.get("image");
-        if (image != null) {
-            JsonNode smallImage = image.get("depiction_320");
-            if (smallImage != null) {
-                playlist.setThumbnail(smallImage.asText());
+            JsonNode long_synopsis = node.get("long_synopsis");
+            JsonNode medium_synopsis = node.get("medium_synopsis");
+            JsonNode short_synopsis = node.get("short_synopsis");
+            String synopsis = null;
+            if (long_synopsis != null) {
+                synopsis = long_synopsis.asText();
+            } else if (medium_synopsis != null) {
+                synopsis = medium_synopsis.asText();
+            } else if (short_synopsis != null) {
+                synopsis = short_synopsis.asText();
             }
-            JsonNode bigImage = image.get("depiction_640");
-            if (bigImage != null) {
-                playlist.setImage(bigImage.asText());
-            }
-        }
+            playlist.setDescription(synopsis);
 
-        Iterable<Content> contents = getContents(node);
-        playlist.setContents(Iterables.transform(contents, CONTENT_TO_CHILD_REF));
-
-        groupWriter.createOrUpdate(playlist);
-
-        for (Content content : contents) {
-            if (!content.getContentGroupRefs().contains(playlist.contentGroupRef())) {
-                content.addContentGroup(playlist.contentGroupRef());
-                if (contents instanceof Item) {
-                    contentWriter.createOrUpdate((Item) contents);
-                } else if (contents instanceof Container) {
-                    contentWriter.createOrUpdate((Container) contents);
-                } else {
-                    throw new IllegalStateException("Unexpected content type: " + contents.getClass().getName());
+            JsonNode image = node.get("image");
+            if (image != null) {
+                JsonNode smallImage = image.get("depiction_320");
+                if (smallImage != null) {
+                    playlist.setThumbnail(smallImage.asText());
+                }
+                JsonNode bigImage = image.get("depiction_640");
+                if (bigImage != null) {
+                    playlist.setImage(bigImage.asText());
                 }
             }
+
+            Iterable<Content> contents = getContents(node);
+            playlist.setContents(Iterables.transform(contents, CONTENT_TO_CHILD_REF));
+
+            groupWriter.createOrUpdate(playlist);
+
+            for (Content content : contents) {
+                if (!content.getContentGroupRefs().contains(playlist.contentGroupRef())) {
+                    content.addContentGroup(playlist.contentGroupRef());
+                    if (contents instanceof Item) {
+                        contentWriter.createOrUpdate((Item) contents);
+                    } else if (contents instanceof Container) {
+                        contentWriter.createOrUpdate((Container) contents);
+                    } else {
+                        throw new IllegalStateException("Unexpected content type: " + contents.getClass().getName());
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting playlist: " + playlist.getCanonicalUri()).withSource(getClass()));
+            throw ex;
         }
     }
 
