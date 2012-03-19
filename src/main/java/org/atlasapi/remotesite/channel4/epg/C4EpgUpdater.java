@@ -86,6 +86,12 @@ public class C4EpgUpdater extends ScheduledTask {
 
                 try {
                     List<C4EpgEntry> entries = getEntries(scheduleDocument);
+                    if (entries.isEmpty()) {
+                        log.record(new AdapterLogEntry(ERROR).withSource(getClass()).withDescription("Empty schedule " + uri));
+                        failures++;
+                        continue;
+                    }
+                    
                     List<ItemRefAndBroadcast> processedItems = process(entries, channelEntry.getValue());
                     trim(scheduleDay, channelEntry.getValue(), processedItems);
                     broadcasts += processedItems.size();

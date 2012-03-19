@@ -4,10 +4,11 @@ import com.google.common.base.Throwables;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
 import com.metabroadcast.common.http.HttpResponseTransformer;
-import com.metabroadcast.common.http.IdentityHttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import java.io.InputStream;
+import nu.xom.Builder;
+import nu.xom.Document;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -33,13 +34,14 @@ public class LoveFilmFilmHttpTransformer implements HttpResponseTransformer<Void
     public Void transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
         try {
             LoveFilmSearchProcessor processor = new LoveFilmSearchProcessor();
-            InputStream current = body;
+            Builder parser = new Builder();
+            Document current = parser.build(body);
             String next = null;
             do {
                 try {
                     next = processor.process(current, client, log, contentResolver, contentWriter);
                     if (next != null) {
-                        current = client.get(new SimpleHttpRequest<InputStream>(next, new IdentityHttpResponseTransformer()));
+                        current = client.get(new SimpleHttpRequest<Document>(next, new XmlHttpResponseTransformer()));
                     } else {
                         current = null;
                     }
