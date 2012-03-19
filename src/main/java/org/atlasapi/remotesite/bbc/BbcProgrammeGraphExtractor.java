@@ -23,6 +23,7 @@ import static org.joda.time.Duration.standardSeconds;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -77,6 +78,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
@@ -172,6 +174,16 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             }
         }
         
+        for (TopicRef contentTopic : topicRefsFrom(source)) {
+            item.addTopicRef(contentTopic);
+        }
+
+        return item;
+    }
+
+    public Iterable<TopicRef> topicRefsFrom(BbcProgrammeSource source) {
+        ArrayList<TopicRef> topicRefs = Lists.newArrayListWithCapacity(source.topics().size());
+        
         for (Entry<SlashProgrammesTopic, String> topicUri : source.topics().entrySet()) {
             Maybe<Topic> possibleTopic = topicStore.topicFor("dbpedia", topicUri.getValue());
             if(possibleTopic.isNothing()) {
@@ -184,12 +196,11 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                 
                 topicStore.write(topic);
 
-                TopicRef contentTopic = new TopicRef(topic.getId(), 1.0f, true);
-                item.addTopicRef(contentTopic);
+                topicRefs.add(new TopicRef(topic.getId(), 1.0f, true));
             }
         }
-
-        return item;
+        
+        return topicRefs;
     }
 
     private Type typeFrom(String resourceUri) {
