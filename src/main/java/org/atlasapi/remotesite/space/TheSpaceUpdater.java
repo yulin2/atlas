@@ -38,7 +38,7 @@ class TheSpaceUpdater extends ScheduledTask {
         this.groupResolver = groupResolver;
         this.groupWriter = groupWriter;
         this.log = log;
-        this.client = new RequestLimitingSimpleHttpClient(HttpClients.httpsClient(keystore, password), 10);
+        this.client = new RequestLimitingSimpleHttpClient(HttpClients.httpsClient(this.getClass().getClassLoader().getResource(keystore), password), 10);
     }
 
     @Override
