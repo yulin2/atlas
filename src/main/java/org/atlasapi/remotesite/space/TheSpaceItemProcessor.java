@@ -18,6 +18,7 @@ import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentGroupResolver;
@@ -74,6 +75,7 @@ public class TheSpaceItemProcessor {
     private void makeEpisode(Episode episode, JsonNode node, ObjectMapper mapper) throws Exception {
         JsonNode pid = node.get("pid");
         episode.setCanonicalUri(getCanonicalUri(pid.asText()));
+        episode.setPublisher(Publisher.THESPACE);
 
         JsonNode title = node.get("title");
         episode.setTitle(title.asText());
@@ -155,6 +157,7 @@ public class TheSpaceItemProcessor {
 
         JsonNode pid = node.get("pid");
         clip.setCanonicalUri(getCanonicalUri(pid.asText()));
+        clip.setPublisher(Publisher.THESPACE);
 
         JsonNode title = node.get("title");
         clip.setTitle(title.asText());
@@ -240,6 +243,7 @@ public class TheSpaceItemProcessor {
         if (found.isEmpty()) {
             playlist = new ContentGroup(BASE_CANONICAL_URI + DUMMY_PLAYLIST + ".json");
             playlist.setType(ContentGroup.Type.PLAYLIST);
+            playlist.setPublisher(Publisher.THESPACE);
         }
         playlist.addContent(episode.childRef());
         groupWriter.createOrUpdate(playlist);
@@ -249,6 +253,7 @@ public class TheSpaceItemProcessor {
     private Series fillSeries(Series series, ObjectMapper mapper, JsonNode node) throws Exception {
         JsonNode pid = node.get("pid");
         series.setCanonicalUri(getCanonicalUri(pid.asText()));
+        series.setPublisher(Publisher.THESPACE);
 
         JsonNode title = node.get("title");
         series.setTitle(title.asText());
