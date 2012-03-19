@@ -7,6 +7,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.media.MimeType;
 import java.io.FileInputStream;
+import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -50,9 +51,9 @@ public class HttpClients {
                 .build();
     }
     
-    public static SimpleHttpClient httpsClient(String keystore, String password) throws Exception {
+    public static SimpleHttpClient httpsClient(URL keystore, String password) throws Exception {
         KeyStore ks = KeyStore.getInstance("JKS", "SUN");
-        ks.load(new FileInputStream(keystore), password.toCharArray());
+        ks.load(keystore.openStream(), password.toCharArray());
         return new SimpleHttpClientBuilder()
             .withUserAgent(ATLAS_USER_AGENT)
             .withSocketTimeout(30, TimeUnit.SECONDS)
