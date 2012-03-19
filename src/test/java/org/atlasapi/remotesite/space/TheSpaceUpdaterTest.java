@@ -49,7 +49,7 @@ public class TheSpaceUpdaterTest {
                 return null;
             }
         }).when(contentWriter).createOrUpdate(any(Item.class));
-        
+
         when(groupResolver.findByCanonicalUris(anyCollection())).thenReturn(new ResolvedContent(Collections.EMPTY_MAP));
         doAnswer(new Answer() {
 
@@ -60,7 +60,7 @@ public class TheSpaceUpdaterTest {
             }
         }).when(groupWriter).createOrUpdate(any(ContentGroup.class));
 
-        TheSpaceUpdater updater = new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, this.getClass().getClassLoader().getResource("atlas.jks").getFile(), "sergio");
+        TheSpaceUpdater updater = new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, "thespace.jks", "sergio");
         updater.runTask();
     }
 }
