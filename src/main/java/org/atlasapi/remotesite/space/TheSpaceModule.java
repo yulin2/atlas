@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 
 @Configuration
@@ -28,6 +30,10 @@ public class TheSpaceModule {
     private @Autowired
     ContentWriter contentWriter;
     private @Autowired
+    ContentGroupResolver groupResolver;
+    private @Autowired
+    ContentGroupWriter groupWriter;
+    private @Autowired
     AdapterLog log;
 
     @PostConstruct
@@ -38,6 +44,6 @@ public class TheSpaceModule {
 
     @Bean
     public TheSpaceUpdater theSpaceUpdater() throws Exception {
-        return new TheSpaceUpdater(contentResolver, contentWriter, log, Configurer.get("space.keystore.path").get(), Configurer.get("space.keystore.password").get());
+        return new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, Configurer.get("space.keystore.path").get(), Configurer.get("space.keystore.password").get());
     }
 }

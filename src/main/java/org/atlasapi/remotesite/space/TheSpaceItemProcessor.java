@@ -10,6 +10,7 @@ import java.util.Iterator;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -19,8 +20,11 @@ import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -34,16 +38,22 @@ public class TheSpaceItemProcessor {
     private final String BASE_CANONICAL_URI = "http://thespace.org/items/";
     private final String EPISODE_TYPE = "episode";
     //
+    private final Long DUMMY_PLAYLIST = 1L;
+    //
     private final SimpleHttpClient client;
     private final AdapterLog log;
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
+    private final ContentGroupResolver groupResolver;
+    private final ContentGroupWriter groupWriter;
 
-    public TheSpaceItemProcessor(SimpleHttpClient client, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter) {
+    public TheSpaceItemProcessor(SimpleHttpClient client, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, ContentGroupResolver groupResolver, ContentGroupWriter groupWriter) {
         this.client = client;
         this.log = log;
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
+        this.groupResolver = groupResolver;
+        this.groupWriter = groupWriter;
     }
 
     public void process(JsonNode item) throws Exception {
@@ -133,6 +143,10 @@ public class TheSpaceItemProcessor {
             episode.setParentRef(ParentRef.parentRefFrom(series));
             contentWriter.createOrUpdate(series);
         }
+
+        ContentGroup playlist = getPlaylist(episode, mapper, node);
+        episode.addContentGroup(playlist.contentGroupRef());
+
         contentWriter.createOrUpdate(episode);
     }
 
@@ -218,6 +232,18 @@ public class TheSpaceItemProcessor {
         }
 
         return version;
+    }
+
+    private ContentGroup getPlaylist(Episode episode, ObjectMapper mapper, JsonNode node) {
+        ResolvedContent found = groupResolver.findByCanonicalUris(ImmutableList.of(BASE_CANONICAL_URI + DUMMY_PLAYLIST + ".json"));
+        ContentGroup playlist = null;
+        if (found.isEmpty()) {
+            playlist = new ContentGroup(BASE_CANONICAL_URI + DUMMY_PLAYLIST + ".json");
+            playlist.setType(ContentGroup.Type.PLAYLIST);
+        }
+        playlist.addContent(episode.childRef());
+        groupWriter.createOrUpdate(playlist);
+        return playlist;
     }
 
     private Series fillSeries(Series series, ObjectMapper mapper, JsonNode node) throws Exception {
