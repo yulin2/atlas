@@ -37,11 +37,15 @@ public class LoveFilmFilmProcessor {
         }
 
         film.setCanonicalUri(uri);
-        film.setYear(Integer.parseInt(querySingleValue(root, "production_year", null)));
         film.setCurie("lovefilm:b-" + uri);
         film.setPublisher(Publisher.LOVEFILM);
 
         film.setTitle(querySingleValue(root, "title/@clean", null));
+
+        String year = querySingleValue(root, "production_year", null);
+        if (year != null) {
+            film.setYear(Integer.parseInt(year));
+        }
 
         Nodes synopsisLink = root.query("link[@title='synopsis']/@href");
         if (synopsisLink.size() == 1) {
