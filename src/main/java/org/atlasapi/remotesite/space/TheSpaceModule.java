@@ -44,6 +44,6 @@ public class TheSpaceModule {
 
     @Bean
     public TheSpaceUpdater theSpaceUpdater() throws Exception {
-        return new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, Configurer.get("space.keystore.path").get(), Configurer.get("space.keystore.password").get());
+        return new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, Configurer.get("thespace.keystore.path").get(), Configurer.get("thespace.keystore.password").get());
     }
 }
