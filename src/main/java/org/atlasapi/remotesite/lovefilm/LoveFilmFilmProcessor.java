@@ -57,7 +57,7 @@ public class LoveFilmFilmProcessor {
             for (int i = 0; i < actors.size(); i++) {
                 Node current = actors.get(i);
                 CrewMember actor = new CrewMember();
-                actor.withRole(CrewMember.Role.ACTOR).withName(querySingleValue(current, "@title", null));
+                actor.withRole(CrewMember.Role.ACTOR).withName(querySingleValue(current, "@title", null)).withPublisher(Publisher.LOVEFILM);
                 film.addPerson(actor);
             }
         }
@@ -68,7 +68,7 @@ public class LoveFilmFilmProcessor {
             for (int i = 0; i < directors.size(); i++) {
                 Node current = directors.get(i);
                 CrewMember director = new CrewMember();
-                director.withRole(CrewMember.Role.DIRECTOR).withName(querySingleValue(current, "@title", null));
+                director.withRole(CrewMember.Role.DIRECTOR).withName(querySingleValue(current, "@title", null)).withPublisher(Publisher.LOVEFILM);
                 film.addPerson(director);
             }
         }
