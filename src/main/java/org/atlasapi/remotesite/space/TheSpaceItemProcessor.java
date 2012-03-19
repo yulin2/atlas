@@ -23,6 +23,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.joda.time.Duration;
@@ -63,6 +64,7 @@ public class TheSpaceItemProcessor {
     }
 
     private void makeEpisode(Episode episode, JsonNode node, ObjectMapper mapper) throws Exception {
+        try {
         JsonNode pid = node.get("pid");
         episode.setCanonicalUri(getCanonicalUri(pid.asText()));
         episode.setPublisher(Publisher.THESPACE);
@@ -137,6 +139,10 @@ public class TheSpaceItemProcessor {
         }
 
         contentWriter.createOrUpdate(episode);
+        } catch(Exception ex) {
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting episode: " + episode.getCanonicalUri()).withSource(getClass()));
+            throw ex;
+        }
     }
 
     private Clip getClip(ObjectMapper mapper, JsonNode node, Content parent) throws Exception {
