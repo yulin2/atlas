@@ -48,22 +48,35 @@ public class TheSpaceItemProcessor {
         this.contentWriter = contentWriter;
     }
 
-    public void process(JsonNode item) throws Exception {
+    public void process(JsonNode node) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         //
-        String type = item.get("type").asText();
-        String pid = item.get("pid").asText();
+        String type = node.get("type").asText();
+        String pid = node.get("pid").asText();
         //
         if (type.equals(EPISODE_TYPE)) {
-            Episode episode = (Episode) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pid))).getFirstValue().valueOrNull();
-            if (episode == null) {
-                episode = new Episode();
+            Item content = (Item) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pid))).getFirstValue().valueOrNull();
+            boolean isTopLevel = !node.has("parent");
+            if (content == null && isTopLevel) {
+                Item episode = new Item();
+                fillItem(episode, node, mapper);
+                contentWriter.createOrUpdate(episode);
+            } else if (content == null && !isTopLevel) {
+                Episode episode = new Episode();
+                fillItem(episode, node, mapper);
+                fillEpisode(episode, node, mapper);
+                contentWriter.createOrUpdate(episode);
+            } else {
+                fillItem(content, node, mapper);
+                if (content instanceof Episode) {
+                    fillEpisode((Episode) content, node, mapper);
+                }
+                contentWriter.createOrUpdate(content);
             }
-            makeEpisode(episode, item, mapper);
         }
     }
 
-    private void makeEpisode(Episode episode, JsonNode node, ObjectMapper mapper) throws Exception {
+    private void fillItem(Item episode, JsonNode node, ObjectMapper mapper) throws Exception {
         try {
             JsonNode pid = node.get("pid");
             episode.setCanonicalUri(getCanonicalUri(pid.asText()));
@@ -71,11 +84,6 @@ public class TheSpaceItemProcessor {
 
             JsonNode title = node.get("title");
             episode.setTitle(title.asText());
-
-            JsonNode position = node.get("position");
-            if (position != null) {
-                episode.setEpisodeNumber(position.asInt());
-            }
 
             JsonNode mediaType = node.get("media_type");
             if (mediaType != null && mediaType.asText().toLowerCase().equals("audio")) {
@@ -122,8 +130,20 @@ public class TheSpaceItemProcessor {
                 JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
                 episode.addVersion(getVersion(mapper, version.get("version"), episode));
             }
+        } catch (Exception ex) {
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting episode: " + episode.getCanonicalUri()).withSource(getClass()));
+            throw ex;
+        }
+    }
 
-            JsonNode parent = node.get("parent");
+    private void fillEpisode(Episode episode, JsonNode node, ObjectMapper mapper) throws Exception {
+        try {
+            JsonNode position = node.get("position");
+            if (position != null) {
+                episode.setEpisodeNumber(position.asInt());
+            }
+
+            JsonNode parent = node.get("parent").get("programme");
             if (parent != null) {
                 String pPid = parent.get("pid").asText();
                 Series series = (Series) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pPid))).getFirstValue().valueOrNull();
@@ -137,97 +157,10 @@ public class TheSpaceItemProcessor {
                 episode.setParentRef(ParentRef.parentRefFrom(series));
                 contentWriter.createOrUpdate(series);
             }
-
-            contentWriter.createOrUpdate(episode);
         } catch (Exception ex) {
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting episode: " + episode.getCanonicalUri()).withSource(getClass()));
             throw ex;
         }
-    }
-
-    private Clip getClip(ObjectMapper mapper, JsonNode node, Content parent) throws Exception {
-        Clip clip = new Clip();
-
-        JsonNode pid = node.get("pid");
-        clip.setCanonicalUri(getCanonicalUri(pid.asText()));
-        clip.setPublisher(Publisher.THESPACE);
-
-        JsonNode title = node.get("title");
-        clip.setTitle(title.asText());
-
-        JsonNode long_synopsis = node.get("long_synopsis");
-        JsonNode medium_synopsis = node.get("medium_synopsis");
-        JsonNode short_synopsis = node.get("short_synopsis");
-        String synopsis = null;
-        if (long_synopsis != null) {
-            synopsis = long_synopsis.asText();
-        } else if (medium_synopsis != null) {
-            synopsis = medium_synopsis.asText();
-        } else if (short_synopsis != null) {
-            synopsis = short_synopsis.asText();
-        }
-        clip.setDescription(synopsis);
-
-        JsonNode image = node.get("image");
-        if (image != null) {
-            JsonNode smallImage = image.get("depiction_320");
-            if (smallImage != null) {
-                clip.setThumbnail(smallImage.asText());
-            }
-            JsonNode bigImage = image.get("depiction_640");
-            if (bigImage != null) {
-                clip.setImage(bigImage.asText());
-            }
-        }
-
-        Iterator<JsonNode> versions = node.get("versions").getElements();
-        while (versions.hasNext()) {
-            String vPid = versions.next().get("pid").asText();
-            JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-            clip.addVersion(getVersion(mapper, version.get("version"), clip));
-        }
-
-        return clip;
-    }
-
-    private Version getVersion(ObjectMapper mapper, JsonNode node, Item parent) {
-        Version version = new Version();
-
-        JsonNode pid = node.get("pid");
-        version.setCanonicalUri(getCanonicalUri(pid.asText()));
-
-        JsonNode duration = node.get("duration");
-        if (duration != null) {
-            version.setDuration(Duration.standardSeconds(Integer.parseInt(duration.asText())));
-        }
-
-        Iterator<JsonNode> availabilities = node.get("availabilities").getElements();
-        while (availabilities.hasNext()) {
-            Encoding encoding = new Encoding();
-            Location location = new Location();
-            Policy policy = new Policy();
-            encoding.addAvailableAt(location);
-            location.setAvailable(true);
-            location.setTransportType(TransportType.LINK);
-            location.setUri(parent.getCanonicalUri());
-            location.setPolicy(policy);
-            policy.setRevenueContract(Policy.RevenueContract.FREE_TO_VIEW);
-            policy.setAvailableCountries(ImmutableSet.of(Countries.ALL));
-
-            JsonNode availability = availabilities.next();
-            JsonNode start = availability.get("start_of_media_availability");
-            if (start != null) {
-                policy.setAvailabilityStart(ISODateTimeFormat.dateTimeParser().parseDateTime(start.asText()));
-            }
-            JsonNode end = availability.get("end_of_media_availability");
-            if (end != null) {
-                policy.setAvailabilityEnd(ISODateTimeFormat.dateTimeParser().parseDateTime(end.asText()));
-            }
-
-            version.addManifestedAs(encoding);
-        }
-
-        return version;
     }
 
     private Series fillSeries(Series series, ObjectMapper mapper, JsonNode node) throws Exception {
@@ -276,6 +209,91 @@ public class TheSpaceItemProcessor {
         }
 
         return series;
+    }
+
+    private Clip getClip(ObjectMapper mapper, JsonNode node, Content parent) throws Exception {
+        Clip clip = new Clip();
+
+        JsonNode pid = node.get("pid");
+        clip.setCanonicalUri(getCanonicalUri(pid.asText()));
+        clip.setPublisher(Publisher.THESPACE);
+
+        JsonNode title = node.get("title");
+        clip.setTitle(title.asText());
+
+        JsonNode long_synopsis = node.get("long_synopsis");
+        JsonNode medium_synopsis = node.get("medium_synopsis");
+        JsonNode short_synopsis = node.get("short_synopsis");
+        String synopsis = null;
+        if (long_synopsis != null) {
+            synopsis = long_synopsis.asText();
+        } else if (medium_synopsis != null) {
+            synopsis = medium_synopsis.asText();
+        } else if (short_synopsis != null) {
+            synopsis = short_synopsis.asText();
+        }
+        clip.setDescription(synopsis);
+
+        JsonNode image = node.get("image");
+        if (image != null) {
+            JsonNode smallImage = image.get("depiction_320");
+            if (smallImage != null) {
+                clip.setThumbnail(smallImage.asText());
+            }
+            JsonNode bigImage = image.get("depiction_640");
+            if (bigImage != null) {
+                clip.setImage(bigImage.asText());
+            }
+        }
+
+        Iterator<JsonNode> versions = node.get("versions").getElements();
+        while (versions.hasNext()) {
+            String vPid = versions.next().get("pid").asText();
+            JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+            clip.addVersion(getVersion(mapper, version.get("version"), clip));
+        }
+
+        return clip;
+    }
+
+    private Version getVersion(ObjectMapper mapper, JsonNode node, Content parent) {
+        Version version = new Version();
+
+        JsonNode pid = node.get("pid");
+        version.setCanonicalUri(getCanonicalUri(pid.asText()));
+
+        JsonNode duration = node.get("duration");
+        if (duration != null) {
+            version.setDuration(Duration.standardSeconds(Integer.parseInt(duration.asText())));
+        }
+
+        Iterator<JsonNode> availabilities = node.get("availabilities").getElements();
+        while (availabilities.hasNext()) {
+            Encoding encoding = new Encoding();
+            Location location = new Location();
+            Policy policy = new Policy();
+            encoding.addAvailableAt(location);
+            location.setAvailable(true);
+            location.setTransportType(TransportType.LINK);
+            location.setUri(parent.getCanonicalUri());
+            location.setPolicy(policy);
+            policy.setRevenueContract(Policy.RevenueContract.FREE_TO_VIEW);
+            policy.setAvailableCountries(ImmutableSet.of(Countries.ALL));
+
+            JsonNode availability = availabilities.next();
+            JsonNode start = availability.get("start_of_media_availability");
+            if (start != null) {
+                policy.setAvailabilityStart(ISODateTimeFormat.dateTimeParser().parseDateTime(start.asText()));
+            }
+            JsonNode end = availability.get("end_of_media_availability");
+            if (end != null) {
+                policy.setAvailabilityEnd(ISODateTimeFormat.dateTimeParser().parseDateTime(end.asText()));
+            }
+
+            version.addManifestedAs(encoding);
+        }
+
+        return version;
     }
 
     private String getCanonicalUri(String pid) {
