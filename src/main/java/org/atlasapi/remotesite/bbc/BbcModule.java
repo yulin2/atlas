@@ -175,7 +175,7 @@ public class BbcModule {
 	    return new BbcSlashProgrammesController(bbcProgrammeAdapter());
 	}
 	
-	@Bean BbcProgrammeAdapter bbcProgrammeAdapter() {
+	BbcProgrammeAdapter bbcProgrammeAdapter() {
 	    return new BbcProgrammeAdapter(contentWriters, extendedDataAdapter(), log);
 	}
 	
