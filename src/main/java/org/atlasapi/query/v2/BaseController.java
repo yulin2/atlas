@@ -25,6 +25,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public abstract class BaseController<T> {
@@ -34,12 +36,14 @@ public abstract class BaseController<T> {
     protected final ApplicationConfigurationIncludingQueryBuilder builder;
     
     protected final AdapterLog log;
-    protected final AtlasModelWriter<Iterable<T>> outputter;
+    protected final AtlasModelWriter<? super T> outputter;
 
     private final QueryParameterAnnotationsExtractor annotationExtractor;
     private final ApplicationConfigurationFetcher configFetcher;
     
-    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<T>> outputter) {
+    public final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
+    
+    protected BaseController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<? super T> outputter) {
         this.configFetcher = configFetcher;
         this.log = log;
         this.outputter = outputter;
@@ -52,11 +56,11 @@ public abstract class BaseController<T> {
         outputter.writeError(request, response, ae);
     }
     
-    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, Iterable<T> queryResult) throws IOException {
+    protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, T queryResult, ApplicationConfiguration config) throws IOException {
         if (queryResult == null) {
             errorViewFor(request, response, AtlasErrorSummary.forException(new NullPointerException("Query result was null")));
         } else {
-            outputter.writeTo(request, response, queryResult, annotationExtractor.extract(request).or(defaultAnnotations()));
+            outputter.writeTo(request, response, queryResult, annotationExtractor.extract(request).or(defaultAnnotations()), config);
         }
     }
     
@@ -66,7 +70,7 @@ public abstract class BaseController<T> {
     }
     
     protected Set<Publisher> publishers(String publisherString, ApplicationConfiguration config) {
-        Set<Publisher> appPublishers = ImmutableSet.copyOf(config.orderdPublishers());
+        Set<Publisher> appPublishers = ImmutableSet.copyOf(config.getEnabledSources());
         if (Strings.isNullOrEmpty(publisherString)) {
             return appPublishers;
         }

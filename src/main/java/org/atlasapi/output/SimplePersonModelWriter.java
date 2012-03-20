@@ -2,6 +2,7 @@ package org.atlasapi.output;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
 import org.atlasapi.output.simple.PersonModelSimplifier;
@@ -25,13 +26,13 @@ public class SimplePersonModelWriter extends TransformingModelWriter<Iterable<Pe
 	}
 	
 	@Override
-	protected PeopleQueryResult transform(Iterable<Person> people, final Set<Annotation> annotations) {
+	protected PeopleQueryResult transform(Iterable<Person> people, final Set<Annotation> annotations, final ApplicationConfiguration config) {
         PeopleQueryResult simplePeople = new PeopleQueryResult();
         simplePeople.setPeople(Iterables.transform(people, new Function<Person, org.atlasapi.media.entity.simple.Person>() {
 
             @Override
             public org.atlasapi.media.entity.simple.Person apply(Person input) {
-                return personSimplifier.simplify(input, annotations);
+                return personSimplifier.simplify(input, annotations, config);
             }
         }));
         return simplePeople;

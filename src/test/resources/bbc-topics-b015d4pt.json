@@ -1,0 +1,124 @@
+{
+    "programme": {
+        "type": "episode",
+        "pid": "b015d4pt",
+        "expected_child_count": null,
+        "position": null,
+        "image": {
+            "filename": "whats_the_point_of_religion_jonathan_sacks_270911_e_get.jpg"
+        },
+        "media_type": "audio_video",
+        "title": "What's the Point of Religion?",
+        "short_synopsis": "Chief Rabbi, Lord Jonathan Sacks, delivers his New Year Rosh Hashanah message.",
+        "medium_synopsis": "For his New Year Rosh Hashanah message the Chief Rabbi, Lord Jonathan Sacks, puts the case for religion as a vital antidote to what he sees as a crisis in British society.",
+        "long_synopsis": "For his New Year Rosh Hashanah message the Chief Rabbi, Lord Jonathan Sacks, puts the case for religion as a vital antidote to what he sees as a crisis in British society. \n\nHe focuses on three key parts of British life - family, community and communication between generations - examining the breakdown of each and offering an alternative way forward through religious values and concrete examples within the Jewish community of how society is working and can work. \n\nTo debate his case he is joined by two eminent intellectuals: Harvard sociologist, Professor Robert Putnam who, over a period of 25 years, has compiled statistics from over half a million interviews in the US about the state of modern society; and Labour life peer, Maurice Glasman, who is at the forefront of the current political thinking on the Big Society idea.",
+        "first_broadcast_date": "2011-09-27T23:15:00+01:00",
+        "display_title": {
+            "title": "What's the Point of Religion?",
+            "subtitle": ""
+        },
+        "ownership": {
+            "service": {
+                "type": "tv",
+                "id": "bbc_one",
+                "key": "bbcone",
+                "title": "BBC One"
+            }
+        },
+        "versions": [{
+            "canonical": 1,
+            "pid": "b015d4m3",
+            "duration": 1800,
+            "types": ["Original version"]
+        },
+        {
+            "canonical": 0,
+            "pid": "p00kr1k6",
+            "duration": 1800,
+            "types": ["Dubbed Audio Described"]
+        }],
+        "links": [{
+            "type": "related_site",
+            "title": "BBC Religion: Judaism in depth ",
+            "url": "http://www.bbc.co.uk/religion/religions/judaism/"
+        },
+        {
+            "type": "related_site",
+            "title": "BBC Religion: Rosh Hashanah",
+            "url": "http://www.bbc.co.uk/religion/religions/judaism/holydays/roshhashanah.shtml"
+        },
+        {
+            "type": "related_site",
+            "title": "Radio 4: Thinking Allowed: new research on how society works",
+            "url": "http://www.bbc.co.uk/programmes/b006qy05"
+        }],
+        "supporting_content_items": [],
+        "available_clips": [{
+            "type": "clip",
+            "pid": "p00kkkmq",
+            "title": "What's the Point of Religion?",
+            "duration": 86,
+            "media_type": "audio_video"
+        }],
+        "categories": [{
+            "type": "subject",
+            "id": "p007l622",
+            "key": "debate",
+            "title": "Debate",
+            "narrower": [],
+            "broader": {},
+            "has_topic_page": false,
+            "sameAs": "http://dbpedia.org/resource/Debate"
+        },
+        {
+            "type": "format",
+            "id": "PT006",
+            "key": "documentaries",
+            "title": "Documentaries",
+            "narrower": [],
+            "broader": {},
+            "has_topic_page": false,
+            "sameAs": null
+        },
+        {
+            "type": "person",
+            "id": "p00kkjxs",
+            "key": "jonathan_sacks",
+            "title": "Jonathan Sacks",
+            "narrower": [],
+            "broader": {},
+            "has_topic_page": true,
+            "sameAs": "http://dbpedia.org/resource/Jonathan_Sacks"
+        },
+        {
+            "type": "subject",
+            "id": "p007lk96",
+            "key": "religion",
+            "title": "Religion",
+            "narrower": [],
+            "broader": {},
+            "has_topic_page": true,
+            "sameAs": "http://dbpedia.org/resource/Religion"
+        },
+        {
+            "type": "genre",
+            "id": "C00080",
+            "key": "religionandethics",
+            "title": "Religion & Ethics",
+            "narrower": [],
+            "broader": {},
+            "has_topic_page": false,
+            "sameAs": null
+        },
+        {
+            "type": "subject",
+            "id": "p00gw13p",
+            "key": "rosh_hashanah",
+            "title": "Rosh Hashanah",
+            "narrower": [],
+            "broader": {},
+            "has_topic_page": true,
+            "sameAs": "http://dbpedia.org/resource/Rosh_Hashanah"
+        }]
+    }
+}

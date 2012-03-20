@@ -1,35 +1,58 @@
 package org.atlasapi.remotesite.bbc;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
+import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.topic.TopicStore;
+import org.atlasapi.remotesite.FixedResponseHttpClient;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.channel4.RecordingContentWriter;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.integration.junit4.JMock;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
 
-public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
+@RunWith(JMock.class)
+public class BbcSlashProgrammesEpisodeIntegrationTest {
     
     Mockery context = new Mockery();
     private final TopicStore topicStore = context.mock(TopicStore.class);
+    
+    FixedResponseHttpClient httpClient = FixedResponseHttpClient.respondTo("http://www.bbc.co.uk/programmes/b015d4pt.json", Resources.getResource("bbc-topics-b015d4pt.json"));
+    
+    private final BbcSlashProgrammesJsonTopicsAdapter topicsAdapter = new BbcSlashProgrammesJsonTopicsAdapter(new BbcModule().jsonClient(httpClient), topicStore, new NullAdapterLog());
+    private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(nullAdapter((List<RelatedLink>)ImmutableList.<RelatedLink>of()), nullAdapter((List<KeyPhrase>)ImmutableList.<KeyPhrase>of()), topicsAdapter);
 
+    @Test
     public void testClientGetsEpisode() throws Exception {
         
         RecordingContentWriter writer = new RecordingContentWriter();
         
-        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, topicStore, new SystemOutAdapterLog());
+        BbcProgrammeAdapter adapter = new BbcProgrammeAdapter(writer, extendedDataAdapter, new SystemOutAdapterLog());
         
 //        topics are disabled currently
         context.checking(new Expectations(){{
@@ -39,9 +62,11 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
             oneOf(topicStore).write(with(topicMatcher(2,"dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
             oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic(3, "dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks")));
             oneOf(topicStore).write(with(topicMatcher(3,"dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
+            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Debate"); will(returnValue(newTopic(4, "dbpedia", "http://dbpedia.org/resource/Debate")));
+            oneOf(topicStore).write(with(topicMatcher(4,"dbpedia", "http://dbpedia.org/resource/Debate", "Debate",Topic.Type.SUBJECT)));
         }});
 
-        Content programme = (Content) adapter.createOrUpdate("http://www.bbc.co.uk/programmes/b015d4pt");
+        Content programme = (Content) adapter.fetch("http://www.bbc.co.uk/programmes/b015d4pt");
         assertNotNull(programme);
         
         assertNotNull(programme.getClips());
@@ -59,12 +84,28 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         TopicRef topic1 = new TopicRef(3l, 1.0f, true);
         TopicRef topic2 = new TopicRef(1l, 1.0f, true);
         TopicRef topic3 = new TopicRef(2l, 1.0f, true);
+        TopicRef topic4 = new TopicRef(4l, 1.0f, true);
         
-        assertEquals(ImmutableSet.of(topic1, topic2, topic3), ImmutableSet.copyOf(programme.getTopicRefs()));
+        assertEquals(ImmutableSet.of(topic1, topic2, topic3, topic4), ImmutableSet.copyOf(programme.getTopicRefs()));
         
         context.assertIsSatisfied();
     }
     
+    private <T> SiteSpecificAdapter<T> nullAdapter(final T returns) {
+        return new SiteSpecificAdapter<T>() {
+
+            @Override
+            public T fetch(String uri) {
+                return returns;
+            }
+
+            @Override
+            public boolean canFetch(String uri) {
+                return true;
+            }
+        };
+    }
+
     private Matcher<Topic> topicMatcher(final long id, final String ns, final String value, final String title, final Type type) {
         return new TypeSafeMatcher<Topic>() {
 
@@ -85,8 +126,6 @@ public class BbcSlashProgrammesEpisodeIntegrationTest extends TestCase {
         };
     }
     
-    
-
     private Maybe<Topic> newTopic(long id, String ns, String value) {
         Topic topic = new Topic(id);
         topic.setNamespace(ns);

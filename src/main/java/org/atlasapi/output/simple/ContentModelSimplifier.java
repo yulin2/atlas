@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
@@ -11,11 +12,14 @@ import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
+import org.atlasapi.media.product.Product;
 import org.atlasapi.media.entity.simple.RelatedLink;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -24,21 +28,30 @@ import com.google.common.collect.Maps;
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
 
     private final TopicQueryResolver topicResolver;
+    private final ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier;
+    private final ProductResolver productResolver;
+    private final ModelSimplifier<Product, org.atlasapi.media.entity.simple.Product> productSimplifier;
+    private boolean exposeIds = false;
 
-    private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier();
-
-    public ContentModelSimplifier(TopicQueryResolver topicResolver) {
+    public ContentModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver) {
         this.topicResolver = topicResolver;
+        this.productResolver = productResolver;
+        this.topicSimplifier = new TopicModelSimplifier(localHostName);
+        this.productSimplifier = new ProductModelSimplifier(localHostName);
     }
 
-    protected void copyBasicContentAttributes(F content, T simpleDescription, Set<Annotation> annotations) {
+    protected void copyBasicContentAttributes(F content, T simpleDescription, Set<Annotation> annotations, ApplicationConfiguration config) {
         copyBasicDescribedAttributes(content, simpleDescription, annotations);
 
+        if(!exposeIds) {
+            simpleDescription.setId(null);
+        }
+        
         if (annotations.contains(Annotation.CLIPS)) {
-            simpleDescription.setClips(clipToSimple(content.getClips(), annotations));
+            simpleDescription.setClips(clipToSimple(content.getClips(), annotations, config));
         }
         if (annotations.contains(Annotation.TOPICS)) {
-            simpleDescription.setTopics(topicRefToSimple(content.getTopicRefs(), annotations));
+            simpleDescription.setTopics(topicRefToSimple(content.getTopicRefs(), annotations, config));
         }
         if (annotations.contains(Annotation.KEY_PHRASES)) {
             simpleDescription.setKeyPhrases(simplifyPhrases(content));
@@ -46,6 +59,31 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         if (annotations.contains(Annotation.RELATED_LINKS)) {
             simpleDescription.setRelatedLinks(simplifyRelatedLinks(content));
         }
+        if (annotations.contains(Annotation.PRODUCTS)) {
+            simpleDescription.setProducts(resolveAndSimplifyProductsFor(content, annotations, config));
+        }
+    }
+
+    private Iterable<org.atlasapi.media.entity.simple.Product> resolveAndSimplifyProductsFor(Content content, final Set<Annotation> annotations, final ApplicationConfiguration config) {
+        return Iterables.transform(filter(productResolver.productsForContent(content.getCanonicalUri()), config), new Function<Product, org.atlasapi.media.entity.simple.Product>() {
+            @Override
+            public org.atlasapi.media.entity.simple.Product apply(Product input) {
+                return productSimplifier.simplify(input, annotations, config);
+            }
+        });
+    }
+
+    private Iterable<Product> filter(Iterable<Product> productsForContent, final ApplicationConfiguration config) {
+        return Iterables.filter(productsForContent, new Predicate<Product>() {
+            @Override
+            public boolean apply(Product input) {
+                return config.isEnabled(input.getPublisher());
+            }
+        });
+    }
+    
+    public void exposeIds(boolean expose) {
+        this.exposeIds = expose;
     }
 
     public Iterable<RelatedLink> simplifyRelatedLinks(F content) {
@@ -85,16 +123,16 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         });
     }
 
-    private List<org.atlasapi.media.entity.simple.Item> clipToSimple(List<Clip> clips, final Set<Annotation> annotations) {
+    private List<org.atlasapi.media.entity.simple.Item> clipToSimple(List<Clip> clips, final Set<Annotation> annotations, final ApplicationConfiguration config) {
         return Lists.transform(clips, new Function<Clip, org.atlasapi.media.entity.simple.Item>() {
             @Override
             public org.atlasapi.media.entity.simple.Item apply(Clip clip) {
-                return simplify(clip, annotations);
+                return simplify(clip, annotations, config);
             }
         });
     }
 
-    private List<org.atlasapi.media.entity.simple.TopicRef> topicRefToSimple(List<TopicRef> contentTopics, final Set<Annotation> annotations) {
+    private List<org.atlasapi.media.entity.simple.TopicRef> topicRefToSimple(List<TopicRef> contentTopics, final Set<Annotation> annotations, final ApplicationConfiguration config) {
 
         final Map<Long, Topic> topics = Maps.uniqueIndex(resolveTopics(Iterables.transform(contentTopics, TOPICREF_TO_TOPIC_ID), annotations), TOPIC_TO_TO_TOPIC_ID);
 
@@ -104,7 +142,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
                 org.atlasapi.media.entity.simple.TopicRef tr = new org.atlasapi.media.entity.simple.TopicRef();
                 tr.setSupervised(topicRef.isSupervised());
                 tr.setWeighting(topicRef.getWeighting());
-                tr.setTopic(topicSimplifier.simplify(topics.get(topicRef.getTopic()), annotations));
+                tr.setTopic(topicSimplifier.simplify(topics.get(topicRef.getTopic()), annotations, config));
                 return tr;
             }
         });
@@ -124,6 +162,6 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         }
     };
 
-    protected abstract org.atlasapi.media.entity.simple.Item simplify(Item item, Set<Annotation> annotations);
+    protected abstract org.atlasapi.media.entity.simple.Item simplify(Item item, Set<Annotation> annotations, ApplicationConfiguration config);
 
 }

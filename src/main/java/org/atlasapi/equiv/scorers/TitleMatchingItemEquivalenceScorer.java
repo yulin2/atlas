@@ -88,8 +88,8 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
         TitleType subjectType = TitleType.titleTypeOf(subject.getTitle());
         TitleType suggestionType = TitleType.titleTypeOf(suggestion.getTitle());
         
-        subjTitle = subjTitle.replaceAll("[^A-Za-z0-9]+", "-");
-        suggTitle = suggTitle.replaceAll("[^A-Za-z0-9]+", "-");
+        subjTitle = subjTitle.replaceAll(" & ", " and ").replaceAll("[^A-Za-z0-9]+", "-");
+        suggTitle = suggTitle.replaceAll(" & ", " and ").replaceAll("[^A-Za-z0-9]+", "-");
         
         if(subjectType == suggestionType && Objects.equal(subjTitle, suggTitle)) {
             return Score.valueOf(1.0);
@@ -106,5 +106,10 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
             return matcher.group(3);
         }
         return title;
+    }
+    
+    @Override
+    public String toString() {
+        return "Title-matching Item Scorer";
     }
 }

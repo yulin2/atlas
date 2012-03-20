@@ -42,16 +42,22 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     @Override
-    public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, final ContentQuery query) {
+    public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
         return resolveLookupEntries(query, lookupResolver.entriesForIds(ids));
     }
 
     private Map<String, List<Identified>> resolveLookupEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
-        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(lookupEntries, LookupEntry.TO_ID);
+        final ApplicationConfiguration configuration = query.getConfiguration();
+        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(Iterables.filter(lookupEntries, new Predicate<LookupEntry>() {
+            @Override
+            public boolean apply(LookupEntry input) {
+                return configuration.isEnabled(input.lookupRef().publisher());
+            }
+        }), LookupEntry.TO_ID);
         
         Map<String, Set<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
 
-        Iterable<LookupRef> filteredRefs = Iterables.filter(Iterables.concat(lookupRefs.values()), enabledPublishers(query.getConfiguration()));
+        Iterable<LookupRef> filteredRefs = Iterables.filter(Iterables.concat(lookupRefs.values()), enabledPublishers(configuration));
         
         if (Iterables.isEmpty(filteredRefs)) {
             return ImmutableMap.of();

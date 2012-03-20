@@ -35,4 +35,8 @@ public class ScalingEquivalenceGenerator<T extends Content> implements ContentEq
         return ScaledScoredEquivalents.<T>scale(delegate.generate(content, desc), scalingFunction);
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s (scaled by %s)", delegate, scalingFunction);
+    }
 }

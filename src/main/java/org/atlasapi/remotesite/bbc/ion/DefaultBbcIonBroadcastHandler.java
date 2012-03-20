@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import static org.atlasapi.remotesite.bbc.BbcFeeds.slashProgrammesUriForPid;
 
 import org.atlasapi.media.entity.Brand;
@@ -35,19 +34,23 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final AdapterLog log;
+
     private final BbcIonEpisodeItemContentExtractor itemExtractor;
+    private BbcIonBroadcastExtractor broadcastExtractor;
     
     private final BbcIonItemMerger merger = new BbcIonItemMerger();
     
     private SiteSpecificAdapter<Item> itemClient;
     private BbcContainerFetcherClient containerClient;
     private ItemsPeopleWriter itemsPeopleWriter;
+
     
     public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
         this.itemExtractor = new BbcIonEpisodeItemContentExtractor(log);
+        this.broadcastExtractor = new BbcIonBroadcastExtractor();
     }
 
     public DefaultBbcIonBroadcastHandler withItemFetcherClient(SiteSpecificAdapter<Item> client) {
@@ -249,9 +252,11 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             item.addVersion(broadcastVersion);
         }
 
-        Broadcast broadcast = atlasBroadcastFrom(ionBroadcast);
-        if (broadcast != null) {
-            broadcastVersion.addBroadcast(broadcast);
+        Maybe<Broadcast> broadcast = broadcastExtractor.extract(ionBroadcast);
+        if (broadcast.hasValue()) {
+            broadcastVersion.addBroadcast(broadcast.requireValue());
+        } else {
+            log.record(AdapterLogEntry.warnEntry().withSource(getClass()).withDescription("Couldn't find service URI for Ion Service %s", ionBroadcast.getService()));
         }
     }
 
@@ -275,16 +280,4 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         return null;
     }
 
-    private Broadcast atlasBroadcastFrom(IonBroadcast ionBroadcast) {
-        String serviceUri = BbcIonServices.get(ionBroadcast.getService());
-        if (serviceUri == null) {
-            log.record(new AdapterLogEntry(WARN).withSource(getClass()).withDescription("Couldn't find service URI for Ion Service %s", ionBroadcast.getService()));
-            return null;
-        } else {
-            Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
-            broadcast.withId(BBC_CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
-            broadcast.setLastUpdated(ionBroadcast.getUpdated());
-            return broadcast;
-        }
-    }
 }

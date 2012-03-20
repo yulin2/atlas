@@ -9,7 +9,9 @@ import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 public class EquivalenceGenerators<T extends Content> {
     
@@ -26,25 +28,23 @@ public class EquivalenceGenerators<T extends Content> {
     }
     
     public List<ScoredEquivalents<T>> generate(T content, ResultDescription desc) {
-        List<ScoredEquivalents<T>> generatedScores = Lists.newArrayList();
-        
         desc.startStage("Generating equivalences");
+        Builder<ScoredEquivalents<T>> generatedScores = ImmutableList.builder();
         
         for (ContentEquivalenceGenerator<T> generator : generators) {
             try {
                 generatedScores.add(generator.generate(content, desc));
             } catch (Exception e) {
-                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription(
-                        "Exception running generator %s for %s %s", generator.getClass().getSimpleName(), content.getClass().getSimpleName(), content.getCanonicalUri()
-                ));
-                //TODO: propagate? It a generator fails we probably want to stop updating because it could change the result, splitting equivs.
+                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Exception running %s for %s", generator, content));
+                /* Propagate to make sure the equivalence update for this content fails - if a generator fails
+                 * intermittently there's a risk of equivalence flip-flop.
+                 */
+                throw Throwables.propagate(e);
             }
-            
         }
         
         desc.finishStage();
-        
-        return generatedScores;
+        return generatedScores.build();
     }
     
 }

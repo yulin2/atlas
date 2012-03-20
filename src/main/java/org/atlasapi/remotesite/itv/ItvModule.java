@@ -27,7 +27,7 @@ public class ItvModule {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("ITV scheduled updater installed"));
     }
     
-    @Bean ItvUpdater updater() {
+    @Bean(name="itvupdater") ItvUpdater updater() {
         return new ItvUpdater(itvBrandAdapter(), log);
     }
     

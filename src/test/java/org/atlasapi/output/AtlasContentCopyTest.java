@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.testing.BroadcastTestDataBuilder;
@@ -41,14 +42,14 @@ public class AtlasContentCopyTest {
         
         ByteArrayOutputStream outputStream1 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(item), ImmutableSet.<Annotation>of());
+        translator.writeTo(request, response, ImmutableList.of(item), ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         
         String itemOriginalString = outputStream1.toString(Charsets.UTF_8.name());
         outputStream1.close();
         
         ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(item.copy()), ImmutableSet.<Annotation>of());
+        translator.writeTo(request, response, ImmutableList.of(item.copy()), ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         
         String itemCopyString = outputStream2.toString(Charsets.UTF_8.name());
         outputStream2.close();
@@ -84,14 +85,14 @@ public class AtlasContentCopyTest {
         
         ByteArrayOutputStream outputStream1 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(playlist), ImmutableSet.<Annotation>of());
+        translator.writeTo(request, response, ImmutableList.of(playlist), ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         
         String playlistOriginalString = outputStream1.toString(Charsets.UTF_8.name());
         outputStream1.close();
         
         ByteArrayOutputStream outputStream2 = new ByteArrayOutputStream();
         
-        translator.writeTo(request, response, ImmutableList.of(playlist.copy()), ImmutableSet.<Annotation>of());
+        translator.writeTo(request, response, ImmutableList.of(playlist.copy()), ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         
         String playlistCopyString = outputStream2.toString(Charsets.UTF_8.name());
         outputStream2.close();

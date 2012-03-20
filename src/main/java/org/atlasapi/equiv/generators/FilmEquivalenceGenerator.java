@@ -104,4 +104,9 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     private boolean sameYear(Film film, Film equivFilm) {
         return film.getYear().equals(equivFilm.getYear());
     }
+    
+    @Override
+    public String toString() {
+        return "Film generator";
+    }
 }

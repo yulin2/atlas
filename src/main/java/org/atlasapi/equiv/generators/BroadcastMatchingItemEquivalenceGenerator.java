@@ -157,4 +157,9 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
 
         return resolver.schedule(start, end, ImmutableSet.of(channel), publishers);
     }
+    
+    @Override
+    public String toString() {
+        return "Broadcast-matching generator";
+    }
 }

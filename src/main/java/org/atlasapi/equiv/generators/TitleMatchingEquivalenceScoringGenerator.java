@@ -2,6 +2,7 @@ package org.atlasapi.equiv.generators;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
@@ -22,7 +23,6 @@ import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.query.Selection;
 
 public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivalenceGenerator<Container>, ContentEquivalenceScorer<Container> {
@@ -75,7 +75,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     private String alphaNumeric(String title) {
-        return title.replaceAll("[^\\d\\w]", "").toLowerCase();
+        return title.replaceAll(" & ", " and ").replaceAll("[^\\d\\w]", "").toLowerCase();
     }
 
     private double commonPrefixLength(String t1, String t2) {
@@ -86,18 +86,27 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     private List<Identified> searchForEquivalents(Container content) {
-        SetView<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher()));
-        ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabled(publishers));
+        Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher(), Publisher.BBC_PRODUCTS));
+        ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
 
         List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
         return search;
     }
 
-    private Map<Publisher, SourceStatus> enabled(SetView<Publisher> publishers) {
+    private Map<Publisher, SourceStatus> enabledPublishers(Set<Publisher> enabledSources) {
         Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
-        for (Publisher publisher : publishers) {
-            builder.put(publisher, SourceStatus.AVAILABLE_ENABLED);
+        for (Publisher publisher : Publisher.values()) {
+            if (enabledSources.contains(publisher)) {
+                builder.put(publisher, SourceStatus.AVAILABLE_ENABLED);
+            } else {
+                builder.put(publisher, SourceStatus.AVAILABLE_DISABLED);
+            }
         }
         return builder.build();
+    }
+    
+    @Override
+    public String toString() {
+        return "Title-matching Scorer/Generator";
     }
 }

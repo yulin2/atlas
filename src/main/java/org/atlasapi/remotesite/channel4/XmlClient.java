@@ -2,16 +2,16 @@ package org.atlasapi.remotesite.channel4;
 
 import static com.metabroadcast.common.http.SimpleHttpRequest.httpRequestFrom;
 
-import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Set;
 
 import nu.xom.Builder;
 import nu.xom.Document;
 
+import org.atlasapi.http.AbstractHttpResponseTransformer;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 
-import com.metabroadcast.common.http.HttpException;
-import com.metabroadcast.common.http.HttpResponsePrologue;
-import com.metabroadcast.common.http.HttpResponseTransformer;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.http.SimpleHttpClient;
 
 public class XmlClient implements RemoteSiteClient<Document> {
@@ -30,10 +30,16 @@ public class XmlClient implements RemoteSiteClient<Document> {
 
     @Override
     public Document get(String uri) throws Exception {
-        return client.get(httpRequestFrom(uri, new HttpResponseTransformer<Document>() {
+        return client.get(httpRequestFrom(uri, new AbstractHttpResponseTransformer<Document>() {
+
             @Override
-            public Document transform(HttpResponsePrologue prologue, InputStream body) throws HttpException, Exception {
-                return builder.build(body);
+            protected Document transform(InputStreamReader bodyReader) throws Exception {
+                return builder.build(bodyReader);
+            }
+            
+            @Override
+            protected Set<Integer> acceptableResponseCodes() {
+                return ImmutableSet.of(200);
             }
         }));
     }

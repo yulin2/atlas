@@ -42,6 +42,11 @@ public class ScheduleProbe implements HealthProbe {
     @Override
     public ProbeResult probe() throws Exception {
         ProbeResult result = new ProbeResult(title());
+        if (channel == null) {
+            result.addInfo("Channel", "not found");
+            return result;
+        }
+        
         DateTime date = clock.now().withTime(0, 0, 0, 0);
 
         Schedule schedule = scheduleResolver.schedule(date.minusMillis(1), date.plusDays(1), ImmutableSet.of(channel), ImmutableSet.of(publisher));
@@ -97,11 +102,11 @@ public class ScheduleProbe implements HealthProbe {
 
     @Override
     public String title() {
-        return String.format("Schedule %s: %s", publisher.title(), channel.title());
+        return String.format("Schedule %s: %s", publisher.title(), channel == null ? "Unknown Channel" : channel.title());
     }
 
     @Override
     public String slug() {
-        return String.format("%s%dschedule", publisher.name(), channel.getId());
+        return String.format("%s%dschedule", publisher.name(), channel == null ? 0 : channel.getId());
     }
 }

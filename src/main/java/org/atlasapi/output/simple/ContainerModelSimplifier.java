@@ -2,13 +2,15 @@ package org.atlasapi.output.simple;
 
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.EntityType;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
-import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Playlist;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
@@ -22,9 +24,10 @@ import com.google.common.collect.Lists;
 
 public class ContainerModelSimplifier extends ContentModelSimplifier<Container, Playlist> {
 
-    private final ItemModelSimplifier itemSimplifier;
+    private final ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier;
     private final AvailableChildrenResolver availableChildrenResolver;
     private final UpcomingChildrenResolver upcomingChildrenResolver;
+    
     private final Function<ChildRef, ContentIdentifier> toContentIdentifier = new Function<ChildRef, ContentIdentifier>() {
         @Override
         public ContentIdentifier apply(ChildRef input) {
@@ -32,19 +35,19 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         }
     };
 
-    public ContainerModelSimplifier(ItemModelSimplifier itemSimplifier, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, UpcomingChildrenResolver upcomingChildren) {
-        super(topicResolver);
+    public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver) {
+        super(localHostName, topicResolver, productResolver);
+        this.itemSimplifier = itemSimplifier;
         this.availableChildrenResolver = availableChildren;
         this.upcomingChildrenResolver = upcomingChildren;
-        this.itemSimplifier = itemSimplifier;
     }
     
     @Override
-    public Playlist simplify(Container fullPlayList, Set<Annotation> annotations) {
+    public Playlist simplify(Container fullPlayList, Set<Annotation> annotations, ApplicationConfiguration config) {
 
         Playlist simplePlaylist = new Playlist();
 
-        copyBasicContentAttributes(fullPlayList, simplePlaylist, annotations);
+        copyBasicContentAttributes(fullPlayList, simplePlaylist, annotations, config);
         simplePlaylist.setType(EntityType.from(fullPlayList).toString());
 
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
@@ -91,8 +94,8 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     }
 
     @Override
-    protected Item simplify(org.atlasapi.media.entity.Item item, Set<Annotation> annotations) {
-        return itemSimplifier.simplify(item, annotations);
+    protected org.atlasapi.media.entity.simple.Item simplify(org.atlasapi.media.entity.Item item, Set<Annotation> annotations,ApplicationConfiguration config) {
+        return itemSimplifier.simplify(item, annotations, config);
     }
 
 }

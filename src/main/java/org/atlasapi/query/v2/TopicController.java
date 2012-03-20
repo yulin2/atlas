@@ -1,15 +1,18 @@
 package org.atlasapi.query.v2;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
@@ -17,15 +20,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.ids.NumberToShortStringCodec;
-import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+import com.metabroadcast.common.query.Selection;
 
 @Controller
-public class TopicController extends BaseController<Topic> {
+public class TopicController extends BaseController<Iterable<Topic>> {
 
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException()).withErrorCode("TOPIC_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
     private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException()).withErrorCode("TOPIC_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
@@ -33,8 +34,6 @@ public class TopicController extends BaseController<Topic> {
     private final TopicQueryResolver topicResolver;
     private final TopicContentLister contentLister;
     private final QueryController queryController;
-    
-    private final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
 
     public TopicController(TopicQueryResolver topicResolver, TopicContentLister contentLister, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Topic>> atlasModelOutputter, QueryController queryController) {
         super(configFetcher, log, atlasModelOutputter);
@@ -46,7 +45,8 @@ public class TopicController extends BaseController<Topic> {
     @RequestMapping(value={"3.0/topics.*","/topics.*"})
     public void topics(HttpServletRequest req, HttpServletResponse resp) throws IOException  {
         try {
-            modelAndViewFor(req, resp, ImmutableList.copyOf(topicResolver.topicsFor(builder.build(req))));
+            ContentQuery query = builder.build(req);
+            modelAndViewFor(req, resp, topicResolver.topicsFor(query), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
@@ -66,14 +66,13 @@ public class TopicController extends BaseController<Topic> {
         
         Topic topic = topicForUri.requireValue();
         
-        //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(query.getConfiguration().getEnabledSources().contains(topic.getPublisher())) {
+        if(!query.allowsSource(topic.getPublisher())) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
             return;
         }
         
         
-        modelAndViewFor(req, resp, ImmutableSet.<Topic>of(topicForUri.requireValue()));
+        modelAndViewFor(req, resp, ImmutableSet.<Topic>of(topicForUri.requireValue()), query.getConfiguration());
     }
     
     @RequestMapping(value={"3.0/topics/{id}/content.*", "/topics/{id}/content"})
@@ -90,17 +89,27 @@ public class TopicController extends BaseController<Topic> {
         
         Topic topic = topicForUri.requireValue();
         
-        //TODO: train wreck: query.allowsPublisher(publisher)?;
-        if(query.getConfiguration().getEnabledSources().contains(topic.getPublisher())) {
+        if(!query.allowsSource(topic.getPublisher())) {
             outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
             return;
         }
         
         try {
-            queryController.modelAndViewFor(req, resp, ImmutableList.copyOf(contentLister.contentForTopic(decodedId, query)));
+            Selection selection = query.getSelection();
+            QueryResult<Content, Topic> result = QueryResult.of(query.getSelection().apply(iterable(contentLister.contentForTopic(decodedId, query))), topic);
+            queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
+    }
+
+    private Iterable<Content> iterable(final Iterator<Content> iterator) {
+        return new Iterable<Content>() {
+            @Override
+            public Iterator<Content> iterator() {
+                return iterator;
+            }
+        };
     }
      
 }

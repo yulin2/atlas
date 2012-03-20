@@ -54,7 +54,9 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     private final ContentResolver resolver = context.mock(ContentResolver.class);
     private final ContentWriter writer = context.mock(ContentWriter.class);
     
-    private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linkAdapter, tagAdapter, topicsAdapter, resolver, writer, log);
+    private final BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(linkAdapter, tagAdapter, topicsAdapter);
+    
+    private final SocialDataFetchingIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(extendedDataAdapter, resolver, writer, log);
 
     @Test
     public void testSetsLinksAndTagsForTopLevelItem() {

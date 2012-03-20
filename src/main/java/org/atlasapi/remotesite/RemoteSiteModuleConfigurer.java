@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
+import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
 
 public class RemoteSiteModuleConfigurer {
 
@@ -51,6 +53,8 @@ public class RemoteSiteModuleConfigurer {
         .put("lakeview", LakeviewModule.class)
         .put("redux", ReduxModule.class)
         .put("voila", VoilaModule.class)
+        .put("lovefilm", LoveFilmModule.class)
+        .put("bbc-products", BBCProductsModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {

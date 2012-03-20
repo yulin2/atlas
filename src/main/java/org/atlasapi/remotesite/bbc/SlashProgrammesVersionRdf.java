@@ -27,6 +27,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.atlasapi.media.vocabulary.PO;
 import org.atlasapi.media.vocabulary.RDF;
+import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesTopic;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Iterables;
@@ -83,6 +84,9 @@ class SlashProgrammesVersionRdf {
 		@XmlElement(namespace=PO.NS, name="broadcast_on")
 		BroadcastOn broadcastOn;
 		
+		@XmlElement(namespace=RDF.NS, name="type")
+        BroadcastType broadcastType;
+		
 		public BbcBroadcast atTime(String time) {
 			Interval interval =  new Interval();
 			interval.startTime = time;
@@ -131,7 +135,40 @@ class SlashProgrammesVersionRdf {
 			return HashCodeBuilder.reflectionHashCode(this);
 		}
 
+        public BroadcastType broadcastType() {
+            return broadcastType;
+        }
+
+        public void setBroadcastType(BroadcastType broadcastType) {
+            this.broadcastType = broadcastType;
+        }
+
 	}
+	
+	static class BroadcastType {
+
+        @XmlAttribute(name = "resource", namespace = RDF.NS)
+        private String resourceUri;
+
+        public String resourceUri() {
+            return resourceUri;
+        }
+
+        public BroadcastType withResourceUri(String uri) {
+            resourceUri = uri;
+            return this;
+        }
+        
+        public Boolean isRepeatType() {
+            if ("http://purl.org/ontology/po/RepeatBroadcast".equals(resourceUri)) {
+                return true;
+            }
+            if ("http://purl.org/ontology/po/FirstBroadcast".equals(resourceUri)) {
+                return false;
+            }
+            return null;
+        }
+    }
 	
 	static class Event {
 		
