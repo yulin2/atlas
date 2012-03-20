@@ -32,7 +32,6 @@ import org.atlasapi.persistence.content.ResolvedContent;
 public class ContentGroupController extends BaseController<Iterable<ContentGroup>> {
 
     private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
-    private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
     private static final Function<ChildRef, String> CHILD_REF_TO_URI_FN = new ChildRefToUri();
     //
     private final ContentGroupResolver contentGroupResolver;
@@ -46,18 +45,28 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
         this.queryController = queryController;
     }
 
+    @RequestMapping(value = {"3.0/content_groups.*", "content_groups.*"})
+    public void contentGroup(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            ContentQuery query = builder.build(req);
+            modelAndViewFor(req, resp, contentGroupResolver.findAll(), query.getConfiguration());
+        } catch (NumberFormatException ex) {
+            outputter.writeError(req, resp, NOT_FOUND.withMessage("Error retrieving Content Groups!"));
+        }
+    }
+
     @RequestMapping(value = {"3.0/content_groups/{id}.*", "content_groups/{id}.*"})
     public void contentGroup(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
         try {
             ContentQuery query = builder.build(req);
-            ResolvedContent contentGroup = contentGroupResolver.findByIds(ImmutableList.of(Long.parseLong(id)));
+            ResolvedContent contentGroup = contentGroupResolver.findByIds(ImmutableList.of(idCodec.decode(id).longValue()));
             if (contentGroup.isEmpty()) {
-                outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + id + " not found"));
+                outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " not found"));
             } else {
                 modelAndViewFor(req, resp, ImmutableSet.of((ContentGroup) contentGroup.getFirstValue().requireValue()), query.getConfiguration());
             }
         } catch (NumberFormatException ex) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + id + " unavailable"));
+            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " unavailable"));
         }
     }
 
@@ -65,9 +74,9 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
     public void contentGroupContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
         try {
             ContentQuery query = builder.build(req);
-            ResolvedContent resolvedContent = contentGroupResolver.findByIds(ImmutableList.of(Long.parseLong(id)));
+            ResolvedContent resolvedContent = contentGroupResolver.findByIds(ImmutableList.of(idCodec.decode(id).longValue()));
             if (resolvedContent.isEmpty()) {
-                outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + id + " not found"));
+                outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " not found"));
             } else {
                 try {
                     ContentGroup contentGroup = (ContentGroup) resolvedContent.getFirstValue().requireValue();
@@ -84,7 +93,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
                 }
             }
         } catch (NumberFormatException ex) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + id + " unavailable"));
+            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " unavailable"));
         }
     }
 
