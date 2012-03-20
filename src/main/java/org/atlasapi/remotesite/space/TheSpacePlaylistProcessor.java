@@ -99,9 +99,9 @@ public class TheSpacePlaylistProcessor {
             for (Content content : contents) {
                 if (!content.getContentGroupRefs().contains(playlist.contentGroupRef())) {
                     content.addContentGroup(playlist.contentGroupRef());
-                    if (contents instanceof Item) {
+                    if (content instanceof Item) {
                         contentWriter.createOrUpdate((Item) contents);
-                    } else if (contents instanceof Container) {
+                    } else if (content instanceof Container) {
                         contentWriter.createOrUpdate((Container) contents);
                     } else {
                         throw new IllegalStateException("Unexpected content type: " + contents.getClass().getName());
