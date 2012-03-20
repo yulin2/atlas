@@ -100,11 +100,11 @@ public class TheSpacePlaylistProcessor {
                 if (!content.getContentGroupRefs().contains(playlist.contentGroupRef())) {
                     content.addContentGroup(playlist.contentGroupRef());
                     if (content instanceof Item) {
-                        contentWriter.createOrUpdate((Item) contents);
+                        contentWriter.createOrUpdate((Item) content);
                     } else if (content instanceof Container) {
-                        contentWriter.createOrUpdate((Container) contents);
+                        contentWriter.createOrUpdate((Container) content);
                     } else {
-                        throw new IllegalStateException("Unexpected content type: " + contents.getClass().getName());
+                        throw new IllegalStateException("Unexpected content type: " + content.getClass().getName());
                     }
                 }
             }
