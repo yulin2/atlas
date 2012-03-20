@@ -19,13 +19,12 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesBase;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesClip;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesRef;
+import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -40,12 +39,14 @@ public class BbcBrandExtractor  {
 	private final AdapterLog log;
 
 	private final ContentWriter contentWriter;
+    private final BbcExtendedDataContentAdapter extendedDataAdapter;
 
 
-	public BbcBrandExtractor(BbcProgrammeAdapter subContentExtractor, ContentWriter contentWriter, BbcProgrammeGraphExtractor itemExtractor, AdapterLog log) {
+	public BbcBrandExtractor(BbcProgrammeAdapter subContentExtractor, ContentWriter contentWriter, BbcProgrammeGraphExtractor itemExtractor, BbcExtendedDataContentAdapter extendedDataAdapter, AdapterLog log) {
 		this.subContentExtractor = subContentExtractor;
 		this.contentWriter = contentWriter;
         this.itemExtractor = itemExtractor;
+        this.extendedDataAdapter = extendedDataAdapter;
 		this.log = log;
 	}
 	
@@ -113,7 +114,7 @@ public class BbcBrandExtractor  {
 		for (String uri : uriFragments) {
 			String pid = BbcFeeds.pidFrom(uri);
 			if (pid == null) {
-				log.record(new AdapterLogEntry(Severity.WARN).withUri(uri).withSource(getClass()).withDescription("Could not extract PID from: " + uri));
+				log.record(warnEntry().withUri(uri).withSource(getClass()).withDescription("Could not extract PID from: " + uri));
 				continue;
 			}
 			uris.add("http://www.bbc.co.uk/programmes/" + pid);
@@ -121,7 +122,7 @@ public class BbcBrandExtractor  {
 		return uris;
 	}
 
-	private void populatePlaylistAttributes(Content container, SlashProgrammesBase containerRefRef) {
+	private void populatePlaylistAttributes(Container container, SlashProgrammesBase containerRefRef) {
 		String brandUri = containerRefRef.uri();
 		container.setCanonicalUri(brandUri);
 		container.setCurie(BbcUriCanonicaliser.curieFor(brandUri));
@@ -159,5 +160,21 @@ public class BbcBrandExtractor  {
                 }
             }
         }
+        
+        addExtendedData(container);
 	}
+
+    public void addExtendedData(Content content) {
+        String brandUri = content.getCanonicalUri();
+        try {
+            if (extendedDataAdapter.canFetch(brandUri)) {
+                Content extendedDataContent = extendedDataAdapter.fetch(brandUri);
+                content.setKeyPhrases(extendedDataContent.getKeyPhrases());
+                content.setRelatedLinks(extendedDataContent.getRelatedLinks());
+                content.setTopicRefs(extendedDataContent.getTopicRefs());
+            }
+        } catch (Exception e) {
+            log.record(warnEntry().withUri(brandUri).withSource(getClass()).withDescription("Could not fetch extended data for %s", brandUri));
+        }
+    }
 }

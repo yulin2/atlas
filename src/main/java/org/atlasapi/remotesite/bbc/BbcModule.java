@@ -23,6 +23,7 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
+import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonBroadcastHandler;
 import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDayRangeUrlSupplier;
@@ -113,6 +114,13 @@ public class BbcModule {
     
     private BbcIonScheduleUpdater bbcIonSocialDataUpdater() {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 7, 7);
+        BbcExtendedDataContentAdapter extendedDataAdapter = extendedDataAdapter();
+
+        BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(extendedDataAdapter, contentResolver, contentWriters, log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), handler, log);
+    }
+
+    @Bean public BbcExtendedDataContentAdapter extendedDataAdapter() {
         SimpleHttpClient httpClient = HttpClients.webserviceClient();
         
         RemoteSiteClient<SlashProgrammesContainer> jsonClient = jsonClient(httpClient);
@@ -120,14 +128,12 @@ public class BbcModule {
         BbcRelatedLinksAdapter linksAdapter = new BbcRelatedLinksAdapter(jsonClient);
         BbcHashTagAdapter hashTagAdapter = new BbcHashTagAdapter(httpRemoteSiteClient(httpClient, htmlNavigatorTransformer()));
         BbcSlashProgrammesJsonTopicsAdapter topicsAdapter = new BbcSlashProgrammesJsonTopicsAdapter(jsonClient, topicStore, log);
-        
-        BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(linksAdapter, hashTagAdapter, topicsAdapter, contentResolver, contentWriters, log);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), handler, log);
+        BbcExtendedDataContentAdapter extendedDataAdapter = new BbcExtendedDataContentAdapter(linksAdapter, hashTagAdapter, topicsAdapter);
+        return extendedDataAdapter;
     }
 
     public RemoteSiteClient<SlashProgrammesContainer> jsonClient(SimpleHttpClient httpClient) {
         return httpRemoteSiteClient(httpClient, gsonResponseTransformer(new GsonBuilder().setFieldNamingStrategy(new FieldNamingStrategy() {
-
             @Override
             public String translateName(Field f) {
                 return f.getName();
@@ -161,11 +167,15 @@ public class BbcModule {
     }
 
     @Bean Runnable bbcFeedsUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(contentWriters,  new MongoProgressStore(mongo), topicStore, log);
+		return new BbcSlashProgrammesAtoZUpdater(new MongoProgressStore(mongo), bbcProgrammeAdapter(), log);
 	}
 	
 	@Bean BbcSlashProgrammesController bbcFeedsController() {
-	    return new BbcSlashProgrammesController(contentWriters, topicStore, log);
+	    return new BbcSlashProgrammesController(bbcProgrammeAdapter());
+	}
+	
+	BbcProgrammeAdapter bbcProgrammeAdapter() {
+	    return new BbcProgrammeAdapter(contentWriters, extendedDataAdapter(), log);
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
