@@ -3,9 +3,9 @@ package org.atlasapi.query.topic;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicQueryResolver;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;

@@ -1,8 +1,8 @@
 package org.atlasapi.remotesite.preview;
 
-import org.atlasapi.media.entity.Actor;
-import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Actor;
+import org.atlasapi.media.content.CrewMember;
+import org.atlasapi.media.content.Publisher;
 
 public class PreviewPeople {
     private PreviewPeople() {

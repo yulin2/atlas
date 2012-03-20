@@ -25,7 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.atlasapi.content.rdf.annotations.RdfProperty;
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.Identified;
 import org.atlasapi.media.vocabulary.RDF;
 import org.atlasapi.output.AtlasModelWriter;
 import org.springframework.beans.BeanWrapperImpl;

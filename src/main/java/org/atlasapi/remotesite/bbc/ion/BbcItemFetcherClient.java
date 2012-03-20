@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 
 public interface BbcItemFetcherClient {
 

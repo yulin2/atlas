@@ -16,9 +16,9 @@ package org.atlasapi.remotesite;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Item;
 
 import com.google.common.collect.Sets;
 

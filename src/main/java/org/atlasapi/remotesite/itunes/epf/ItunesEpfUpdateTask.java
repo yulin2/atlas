@@ -10,12 +10,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Series;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.itunes.epf.model.ArtistType;
 import org.atlasapi.remotesite.itunes.epf.model.CollectionType;

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Throwables;

@@ -29,11 +29,11 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.remotesite.youtube.YouTubeModel.VideoEntry;
 import org.hamcrest.Matcher;
 import org.joda.time.Duration;

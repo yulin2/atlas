@@ -16,9 +16,9 @@ package org.atlasapi.remotesite.channel4;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.jmock.Expectations;

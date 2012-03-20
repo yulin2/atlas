@@ -11,11 +11,11 @@ import java.util.concurrent.Executors;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Film;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.springframework.stereotype.Controller;

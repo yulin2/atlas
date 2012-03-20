@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.five;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

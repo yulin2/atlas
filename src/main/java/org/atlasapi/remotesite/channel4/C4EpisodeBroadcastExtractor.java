@@ -3,10 +3,10 @@ package org.atlasapi.remotesite.channel4;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

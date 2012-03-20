@@ -14,7 +14,7 @@ import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.results.scores.ScoredEquivalentsMerger;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorers;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;

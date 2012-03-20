@@ -6,11 +6,11 @@ import java.util.Set;
 
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

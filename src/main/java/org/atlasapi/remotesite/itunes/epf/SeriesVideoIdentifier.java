@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.itunes.epf;
 
-import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.content.Series;
 
 public class SeriesVideoIdentifier {
 

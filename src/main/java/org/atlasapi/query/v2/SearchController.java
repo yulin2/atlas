@@ -10,14 +10,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.IpCheckingApiKeyConfigurationFetcher;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.SearchResolver;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.JsonTranslator;
 import org.atlasapi.output.QueryResult;
-import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.search.model.SearchQuery;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.text.MoreStrings;
-import org.atlasapi.media.entity.Specialization;
 
 @Controller
 public class SearchController extends BaseController<QueryResult<Content,?extends Identified>> {

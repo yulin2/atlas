@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.topic.TopicRef;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;

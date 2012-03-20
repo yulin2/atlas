@@ -1,10 +1,10 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Version;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

@@ -9,7 +9,7 @@ import nu.xom.Element;
 import nu.xom.NodeFactory;
 import nu.xom.Nodes;
 
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

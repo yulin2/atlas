@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.channel4;
 
-import static org.atlasapi.media.entity.Publisher.C4;
+import static org.atlasapi.media.content.Publisher.C4;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,9 +10,9 @@ import nu.xom.Builder;
 import nu.xom.Document;
 
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.persistence.content.schedule.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.content.MediaType;
 
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.base.Maybe;

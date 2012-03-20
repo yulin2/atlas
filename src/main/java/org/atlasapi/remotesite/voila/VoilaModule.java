@@ -6,11 +6,11 @@ import java.text.ParseException;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.topic.TopicQueryResolver;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

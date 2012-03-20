@@ -11,14 +11,14 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Restriction;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Policy;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Restriction;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.joda.time.DateTime;
 

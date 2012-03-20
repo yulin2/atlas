@@ -4,9 +4,9 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.junit.Test;
 

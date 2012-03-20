@@ -5,7 +5,7 @@ import java.util.List;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 import com.metabroadcast.common.base.Maybe;
 

@@ -12,10 +12,10 @@ import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.media.content.Film;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
 import com.google.common.base.Objects;

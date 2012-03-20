@@ -4,8 +4,8 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.concurrent.Callable;
 
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 

@@ -9,8 +9,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Series;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.joda.time.DateTime;
 

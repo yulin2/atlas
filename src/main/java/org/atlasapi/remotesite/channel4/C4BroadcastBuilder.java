@@ -6,7 +6,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.content.Broadcast;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 

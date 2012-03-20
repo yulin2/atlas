@@ -11,15 +11,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Restriction;
-import org.atlasapi.media.entity.Song;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentWriter;
+
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.CrewMember;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Policy;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Restriction;
+import org.atlasapi.media.content.Song;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 /**

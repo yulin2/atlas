@@ -2,10 +2,10 @@ package org.atlasapi.remotesite.bbc.ion.ondemand;
 
 import java.util.concurrent.Callable;
 
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

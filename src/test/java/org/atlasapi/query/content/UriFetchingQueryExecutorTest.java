@@ -23,9 +23,9 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 import org.jmock.Expectations;

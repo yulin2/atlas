@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.Person;
+import org.atlasapi.media.content.ChildRef;
+import org.atlasapi.media.content.Person;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.output.Annotation;
 

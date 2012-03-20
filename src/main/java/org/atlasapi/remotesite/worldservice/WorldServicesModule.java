@@ -6,11 +6,11 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.worldservice.WsProgrammeUpdate.WsProgrammeUpdateBuilder;
 import org.jets3t.service.security.AWSCredentials;
 import org.joda.time.LocalTime;

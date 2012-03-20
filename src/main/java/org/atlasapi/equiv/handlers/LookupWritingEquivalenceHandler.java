@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.lookup.LookupWriter;
 import org.joda.time.Duration;
 

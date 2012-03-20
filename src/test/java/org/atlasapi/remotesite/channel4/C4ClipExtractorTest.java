@@ -6,11 +6,11 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Clip;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 
 import com.google.common.io.Resources;

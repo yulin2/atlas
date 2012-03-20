@@ -5,8 +5,8 @@ import junit.framework.TestCase;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Publisher;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;

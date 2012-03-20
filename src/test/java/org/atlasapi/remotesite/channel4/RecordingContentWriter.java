@@ -2,11 +2,11 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Series;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;

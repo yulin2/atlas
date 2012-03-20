@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.itunes.epf;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.content.Location;
 import org.atlasapi.remotesite.itunes.epf.model.EpfVideo;
 
 public class ItunesEpfVideoSource {

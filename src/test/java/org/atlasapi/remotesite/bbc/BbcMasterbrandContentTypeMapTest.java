@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.content.MediaType;
 
 public class BbcMasterbrandContentTypeMapTest extends TestCase {
 

@@ -8,8 +8,8 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;

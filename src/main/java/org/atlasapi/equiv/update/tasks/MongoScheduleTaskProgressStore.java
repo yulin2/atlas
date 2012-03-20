@@ -6,8 +6,8 @@ import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.SINGLE;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.UPSERT;
 
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentCategory;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.util.ContentCategory;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;

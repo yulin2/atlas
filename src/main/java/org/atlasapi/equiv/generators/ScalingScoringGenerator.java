@@ -4,7 +4,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ScalingEquivalenceScorer;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 import com.google.common.base.Function;
 

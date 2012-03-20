@@ -13,8 +13,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.redux.ReduxDayUpdateTask.Builder;

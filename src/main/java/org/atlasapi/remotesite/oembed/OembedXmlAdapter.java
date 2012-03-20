@@ -17,8 +17,8 @@ package org.atlasapi.remotesite.oembed;
 
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.output.oembed.OembedItem;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;

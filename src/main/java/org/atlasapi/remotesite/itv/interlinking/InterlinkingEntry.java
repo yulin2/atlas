@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.itv.interlinking;
 
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.Identified;
 
 import com.metabroadcast.common.base.Maybe;
 

@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;

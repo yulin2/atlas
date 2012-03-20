@@ -3,7 +3,7 @@ package org.atlasapi.equiv.results.persistence;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Iterables.transform;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
-import static org.atlasapi.media.entity.Identified.TO_URI;
+import static org.atlasapi.media.content.Identified.TO_URI;
 
 import java.util.Comparator;
 import java.util.List;
@@ -14,8 +14,8 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Publisher;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.HashBasedTable;

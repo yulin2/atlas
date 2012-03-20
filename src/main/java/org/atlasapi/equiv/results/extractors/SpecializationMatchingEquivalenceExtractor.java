@@ -2,7 +2,7 @@ package org.atlasapi.equiv.results.extractors;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 import com.google.common.base.Objects;
 

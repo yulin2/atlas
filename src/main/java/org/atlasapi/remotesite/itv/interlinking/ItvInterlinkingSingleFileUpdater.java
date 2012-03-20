@@ -5,7 +5,7 @@ import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

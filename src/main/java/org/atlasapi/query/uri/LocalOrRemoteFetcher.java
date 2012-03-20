@@ -16,10 +16,10 @@ permissions and limitations under the License. */
 package org.atlasapi.query.uri;
 
 
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.ResolvedContent;
+import org.atlasapi.media.content.ResolvedContent.ResolvedContentBuilder;
 import org.atlasapi.persistence.system.Fetcher;
 
 import com.google.common.collect.ImmutableList;

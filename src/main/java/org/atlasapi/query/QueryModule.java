@@ -15,12 +15,12 @@ permissions and limitations under the License. */
 package org.atlasapi.query;
 
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
-import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
-import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.media.content.MongoContentResolver;
+import org.atlasapi.media.content.SearchResolver;
+import org.atlasapi.media.content.util.FilterScheduleOnlyKnownTypeContentResolver;
+import org.atlasapi.media.content.util.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.persistence.lookup.MongoLookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;

@@ -1,17 +1,17 @@
 package org.atlasapi.remotesite.worldservice;
 
-import static org.atlasapi.media.entity.Publisher.WORLD_SERVICE;
+import static org.atlasapi.media.content.Publisher.WORLD_SERVICE;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.remotesite.worldservice.WorldServiceIds.curieFor;
 import static org.atlasapi.remotesite.worldservice.WorldServiceIds.uriFor;
 import static org.atlasapi.remotesite.worldservice.WsGenre.genresForCode;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.worldservice.model.WsSeries;
 

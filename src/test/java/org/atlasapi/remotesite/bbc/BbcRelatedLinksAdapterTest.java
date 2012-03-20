@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.RelatedLink;
-import org.atlasapi.media.entity.RelatedLink.LinkType;
+import org.atlasapi.media.content.RelatedLink;
+import org.atlasapi.media.content.RelatedLink.LinkType;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesProgramme;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesRelatedLink;

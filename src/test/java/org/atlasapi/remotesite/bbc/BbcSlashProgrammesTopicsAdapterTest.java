@@ -7,7 +7,7 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 import org.apache.commons.io.IOUtils;
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.topic.TopicRef;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.jmock.Expectations;

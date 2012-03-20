@@ -7,8 +7,8 @@ import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

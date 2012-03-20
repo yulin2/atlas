@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Series;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;

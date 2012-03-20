@@ -1,13 +1,13 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.media.entity.Description.description;
+import static org.atlasapi.media.content.Description.description;
 import static org.joda.time.Duration.standardSeconds;
 
 import java.util.Map.Entry;
 
 import org.atlasapi.media.SegmentType;
-import org.atlasapi.media.entity.Description;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Description;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.remotesite.ContentExtractor;

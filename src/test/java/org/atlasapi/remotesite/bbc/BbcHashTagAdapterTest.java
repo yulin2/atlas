@@ -9,7 +9,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.KeyPhrase;
+import org.atlasapi.media.content.KeyPhrase;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.html.HtmlNavigator;
 import org.jmock.Expectations;

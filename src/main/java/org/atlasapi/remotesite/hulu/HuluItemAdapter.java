@@ -17,8 +17,8 @@ package org.atlasapi.remotesite.hulu;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Episode;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;

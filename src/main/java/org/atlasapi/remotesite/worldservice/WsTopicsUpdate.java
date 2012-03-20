@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.worldservice;
 
-import static org.atlasapi.media.entity.Publisher.WORLD_SERVICE;
-import static org.atlasapi.persistence.content.ContentCategory.ITEMS;
+import static org.atlasapi.media.content.Publisher.WORLD_SERVICE;
+import static org.atlasapi.media.content.util.ContentCategory.ITEMS;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
@@ -9,19 +9,19 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicRef;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.worldservice.model.WsTopics;
 import org.atlasapi.remotesite.worldservice.model.WsTopics.TopicWeighting;
 

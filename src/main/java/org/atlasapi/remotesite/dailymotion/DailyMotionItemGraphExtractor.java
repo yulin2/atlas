@@ -16,11 +16,11 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.dailymotion;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.html.HtmlDescriptionOfItem;

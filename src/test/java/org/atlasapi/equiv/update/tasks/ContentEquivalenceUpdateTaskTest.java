@@ -1,8 +1,8 @@
 package org.atlasapi.equiv.update.tasks;
 
-import static org.atlasapi.media.entity.Publisher.BBC;
-import static org.atlasapi.media.entity.Publisher.C4;
-import static org.atlasapi.media.entity.Publisher.PA;
+import static org.atlasapi.media.content.Publisher.BBC;
+import static org.atlasapi.media.content.Publisher.C4;
+import static org.atlasapi.media.content.Publisher.PA;
 
 import java.util.Iterator;
 import java.util.List;
@@ -11,9 +11,9 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;

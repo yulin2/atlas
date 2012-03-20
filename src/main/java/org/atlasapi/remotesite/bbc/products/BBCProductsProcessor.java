@@ -13,7 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import org.atlasapi.media.entity.Publisher;
+
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductLocation;
 import org.atlasapi.media.product.ProductStore;

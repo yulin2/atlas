@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.hulu;
 import static org.atlasapi.remotesite.hulu.HuluItemAdapter.basicHuluItemAdapter;
 import static org.atlasapi.remotesite.hulu.HuluItemAdapter.brandFetchingHuluItemAdapter;
 
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;

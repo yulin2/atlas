@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;

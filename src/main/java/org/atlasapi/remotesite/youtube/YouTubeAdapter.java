@@ -17,7 +17,7 @@ package org.atlasapi.remotesite.youtube;
 
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;

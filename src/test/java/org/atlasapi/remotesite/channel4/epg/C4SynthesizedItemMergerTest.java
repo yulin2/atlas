@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static org.atlasapi.media.entity.Publisher.C4;
+import static org.atlasapi.media.content.Publisher.C4;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -10,11 +10,11 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Version;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Iterables;

@@ -4,11 +4,11 @@ import static org.atlasapi.remotesite.hulu.HuluItemAdapter.basicHuluItemAdapter;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.ParentRef;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.remotesite.HttpClients;

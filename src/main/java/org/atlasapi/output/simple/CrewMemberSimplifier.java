@@ -3,8 +3,8 @@ package org.atlasapi.output.simple;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Actor;
-import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.content.Actor;
+import org.atlasapi.media.content.CrewMember;
 import org.atlasapi.media.entity.simple.Person;
 import org.atlasapi.output.Annotation;
 

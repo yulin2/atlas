@@ -3,7 +3,7 @@ package org.atlasapi.equiv.update;
 import java.util.List;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 import com.google.common.base.Optional;
 

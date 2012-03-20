@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;

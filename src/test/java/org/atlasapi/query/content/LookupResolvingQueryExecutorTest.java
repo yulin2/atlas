@@ -8,12 +8,12 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.atlasapi.content.criteria.MatchesNothing;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.LookupRef;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.LookupRef;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.ResolvedContent;
+import org.atlasapi.media.content.util.KnownTypeContentResolver;
 import org.atlasapi.persistence.lookup.InMemoryLookupEntryStore;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.jmock.Expectations;
@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.util.regex.Matcher;
 
 @RunWith(JMock.class)
 public class LookupResolvingQueryExecutorTest extends TestCase {

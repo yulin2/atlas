@@ -1,9 +1,9 @@
 package org.atlasapi.remotesite.bbc;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Policy;
 import org.atlasapi.remotesite.bbc.ion.IonService;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 import org.joda.time.Interval;

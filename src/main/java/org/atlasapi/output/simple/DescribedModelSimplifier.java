@@ -2,10 +2,10 @@ package org.atlasapi.output.simple;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.LookupRef;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.content.Described;
+import org.atlasapi.media.content.LookupRef;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.output.Annotation;
 

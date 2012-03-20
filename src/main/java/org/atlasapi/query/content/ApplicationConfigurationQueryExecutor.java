@@ -9,8 +9,8 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.collect.ImmutableList;

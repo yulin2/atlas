@@ -5,29 +5,31 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Certificate;
-import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.EntityType;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.ReleaseDate;
-import org.atlasapi.media.entity.Subtitles;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Certificate;
+import org.atlasapi.media.content.ContentGroupResolver;
+import org.atlasapi.media.content.CrewMember;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.EntityType;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Film;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.ParentRef;
+import org.atlasapi.media.content.Policy;
+import org.atlasapi.media.content.ReleaseDate;
+import org.atlasapi.media.content.Song;
+import org.atlasapi.media.content.Subtitles;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.media.entity.simple.Language;
 import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.media.topic.TopicQueryResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
@@ -42,8 +44,6 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
-import org.atlasapi.media.entity.Song;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
@@ -285,7 +285,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         return simpleModel;
     }
 
-    private void copyProperties(Version version, org.atlasapi.media.entity.simple.Version simpleLocation, org.atlasapi.media.entity.Item item) {
+    private void copyProperties(Version version, org.atlasapi.media.entity.simple.Version simpleLocation, org.atlasapi.media.content.Item item) {
 
         simpleLocation.setPublishedDuration(version.getPublishedDuration());
         simpleLocation.setDuration(durationFrom(item, version));
@@ -304,7 +304,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     // temporary fix: some versions are missing durations so
     // we fall back to the broadcast and location durations
-    private Integer durationFrom(org.atlasapi.media.entity.Item item, Version version) {
+    private Integer durationFrom(org.atlasapi.media.content.Item item, Version version) {
         if (version.getDuration() != null && version.getDuration() > 0) {
             return version.getDuration();
         }

@@ -5,7 +5,7 @@ import static org.atlasapi.remotesite.bbc.BbcFeeds.isACanonicalSlashProgrammesUr
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.RelatedLink;
+import org.atlasapi.media.content.RelatedLink;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesRelatedLink;

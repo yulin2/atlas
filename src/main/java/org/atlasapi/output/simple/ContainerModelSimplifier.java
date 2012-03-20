@@ -3,25 +3,25 @@ package org.atlasapi.output.simple;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.EntityType;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.content.ChildRef;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentGroupResolver;
+import org.atlasapi.media.content.EntityType;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Series;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.product.ProductResolver;
+import org.atlasapi.media.topic.TopicQueryResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ContainerModelSimplifier extends ContentModelSimplifier<Container, Playlist> {
 
@@ -97,7 +97,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     }
 
     @Override
-    protected org.atlasapi.media.entity.simple.Item simplify(org.atlasapi.media.entity.Item item, Set<Annotation> annotations, ApplicationConfiguration config) {
+    protected org.atlasapi.media.entity.simple.Item simplify(org.atlasapi.media.content.Item item, Set<Annotation> annotations, ApplicationConfiguration config) {
         return itemSimplifier.simplify(item, annotations, config);
     }
 }

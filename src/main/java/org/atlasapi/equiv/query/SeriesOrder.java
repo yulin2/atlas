@@ -2,7 +2,7 @@ package org.atlasapi.equiv.query;
 
 import java.util.Comparator;
 
-import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.content.Episode;
 
 public class SeriesOrder implements Comparator<Episode> {
 

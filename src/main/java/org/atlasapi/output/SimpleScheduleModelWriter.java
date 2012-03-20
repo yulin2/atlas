@@ -3,7 +3,7 @@ package org.atlasapi.output;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.content.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.query.v2.ChannelSimplifier;
@@ -47,7 +47,7 @@ public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<
 	    }
 	    
 	    ImmutableList.Builder<org.atlasapi.media.entity.simple.Item> items = ImmutableList.builder();
-	    for (org.atlasapi.media.entity.Item item: scheduleChannel.items()) {
+	    for (org.atlasapi.media.content.Item item: scheduleChannel.items()) {
 	        items.add(itemModelSimplifier.simplify(item, annotations, config));
 	    }
 	    

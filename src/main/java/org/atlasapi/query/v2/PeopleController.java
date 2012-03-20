@@ -7,10 +7,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Person;
+import org.atlasapi.media.content.PeopleResolver;
+import org.atlasapi.media.content.Person;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
-import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

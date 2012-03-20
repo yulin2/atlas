@@ -3,15 +3,15 @@ package org.atlasapi.output;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentGroup;
+import org.atlasapi.media.content.Described;
+import org.atlasapi.media.content.Identified;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult.Pagination;
 import org.atlasapi.media.product.Product;
+import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
@@ -78,8 +78,8 @@ public class SimpleContentModelWriter extends TransformingModelWriter<QueryResul
 			if (described instanceof ContentGroup) {
 			    result.add(contentGroupSimplifier.simplify((ContentGroup) described, annotations, config));
 			}
-			if (described instanceof org.atlasapi.media.entity.Item) {
-			    result.add(itemModelSimplifier.simplify((org.atlasapi.media.entity.Item) described, annotations, config));
+			if (described instanceof org.atlasapi.media.content.Item) {
+			    result.add(itemModelSimplifier.simplify((org.atlasapi.media.content.Item) described, annotations, config));
 			}
 		}
 		

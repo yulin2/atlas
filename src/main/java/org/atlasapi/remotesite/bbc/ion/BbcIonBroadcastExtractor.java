@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.content.Broadcast;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 

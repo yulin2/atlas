@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.content.Policy;
 import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;

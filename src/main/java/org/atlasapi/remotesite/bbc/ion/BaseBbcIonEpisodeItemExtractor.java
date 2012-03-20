@@ -1,17 +1,17 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.media.content.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import static org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient.CONTAINER_DETAIL_PATTERN;
 
-import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.content.CrewMember;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Film;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.ParentRef;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.system.RemoteSiteClient;

@@ -17,7 +17,7 @@ package org.atlasapi.remotesite;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.Identified;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

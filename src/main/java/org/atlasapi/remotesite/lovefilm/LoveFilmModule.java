@@ -3,7 +3,8 @@ package org.atlasapi.remotesite.lovefilm;
 import com.metabroadcast.common.properties.Configurer;
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -15,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import org.atlasapi.persistence.content.ContentResolver;
 
 @Configuration
 public class LoveFilmModule {

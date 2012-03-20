@@ -2,9 +2,9 @@ package org.atlasapi.remotesite.hulu;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Episode;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.remotesite.HttpClients;

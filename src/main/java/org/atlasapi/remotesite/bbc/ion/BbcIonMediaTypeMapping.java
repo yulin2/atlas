@@ -1,17 +1,17 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.media.entity.MediaType.AUDIO;
-import static org.atlasapi.media.entity.MediaType.VIDEO;
-import static org.atlasapi.media.entity.Specialization.RADIO;
-import static org.atlasapi.media.entity.Specialization.TV;
+import static org.atlasapi.media.content.MediaType.AUDIO;
+import static org.atlasapi.media.content.MediaType.VIDEO;
+import static org.atlasapi.media.content.Specialization.RADIO;
+import static org.atlasapi.media.content.Specialization.TV;
 
 import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.feeds.radioplayer.RadioPlayerService;
 import org.atlasapi.feeds.radioplayer.RadioPlayerServices;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Specialization;
 
 import com.google.common.base.Function;
 import com.google.common.base.Functions;

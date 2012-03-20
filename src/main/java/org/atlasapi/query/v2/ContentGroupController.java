@@ -8,7 +8,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.ChildRef;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentGroup;
+import org.atlasapi.media.content.ContentGroupResolver;
+import org.atlasapi.media.content.ResolvedContent;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
@@ -23,10 +27,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.query.Selection;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
 
 @Controller
 public class ContentGroupController extends BaseController<Iterable<ContentGroup>> {

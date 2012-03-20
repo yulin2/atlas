@@ -2,16 +2,16 @@
 package org.atlasapi.equiv.update.tasks;
 
 
-import static org.atlasapi.persistence.content.ContentCategory.CONTAINER;
-import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
+import static org.atlasapi.media.content.util.ContentCategory.CONTAINER;
+import static org.atlasapi.media.content.util.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 
 import java.util.Iterator;
 import java.util.List;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 import org.atlasapi.persistence.logging.AdapterLog;

@@ -2,11 +2,11 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.KeyPhrase;
-import org.atlasapi.media.entity.RelatedLink;
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.KeyPhrase;
+import org.atlasapi.media.content.RelatedLink;
+import org.atlasapi.media.topic.TopicRef;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 

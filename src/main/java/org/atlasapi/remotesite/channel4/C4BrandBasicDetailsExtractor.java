@@ -3,10 +3,10 @@ package org.atlasapi.remotesite.channel4;
 import java.util.Set;
 
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.jdom.Element;

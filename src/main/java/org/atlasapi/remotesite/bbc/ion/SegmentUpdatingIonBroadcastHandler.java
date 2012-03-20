@@ -2,12 +2,12 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.media.segment.SegmentEvent;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 

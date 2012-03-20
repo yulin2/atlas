@@ -6,7 +6,8 @@ import org.atlasapi.application.ApplicationConfiguration;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import org.atlasapi.media.entity.ContentGroup;
+
+import org.atlasapi.media.content.ContentGroup;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 

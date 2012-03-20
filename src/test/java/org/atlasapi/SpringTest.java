@@ -17,7 +17,7 @@ package org.atlasapi;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.persistence.content.mongo.MongoPersonStore;
+import org.atlasapi.media.content.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
 import org.junit.Test;
 

@@ -17,8 +17,8 @@ package org.atlasapi.remotesite;
 import java.util.Collection;
 import java.util.List;
 
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgAdapterModule;

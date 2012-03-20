@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.tinyurl;
 
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.Identified;
 import org.atlasapi.persistence.shorturls.ShortUrlSaver;
 import org.atlasapi.query.uri.canonical.InterestedInTheEventualContentCanonicaliser;
 

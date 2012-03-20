@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.five;
 
-import static org.atlasapi.media.entity.Specialization.FILM;
+import static org.atlasapi.media.content.Specialization.FILM;
 
 import java.io.StringReader;
 import java.util.List;
@@ -15,14 +15,14 @@ import nu.xom.NodeFactory;
 import nu.xom.Nodes;
 
 import org.atlasapi.genres.GenreMap;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Film;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Series;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

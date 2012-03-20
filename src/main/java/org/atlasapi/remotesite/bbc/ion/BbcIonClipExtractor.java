@@ -1,16 +1,16 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.media.content.Publisher.BBC;
 
 import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Clip;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Policy;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;

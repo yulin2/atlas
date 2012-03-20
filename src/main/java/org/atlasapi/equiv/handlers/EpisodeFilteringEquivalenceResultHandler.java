@@ -8,10 +8,10 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;

@@ -16,8 +16,8 @@ package org.atlasapi.output;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Iterables.getOnlyElement;
-import static org.atlasapi.media.entity.testing.ItemTestDataBuilder.item;
-import static org.atlasapi.media.entity.testing.PlaylistTestDataBuilder.playlist;
+import static org.atlasapi.media.content.support.ItemTestDataBuilder.item;
+import static org.atlasapi.media.content.support.PlaylistTestDataBuilder.playlist;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
@@ -32,7 +32,7 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;

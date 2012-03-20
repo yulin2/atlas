@@ -6,11 +6,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.remotesite.ContentExtractor;
 
 import com.google.common.collect.ImmutableSet;

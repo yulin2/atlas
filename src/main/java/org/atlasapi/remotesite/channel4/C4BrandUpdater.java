@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.channel4;
 
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.content.Brand;
 
 public interface C4BrandUpdater {
 	

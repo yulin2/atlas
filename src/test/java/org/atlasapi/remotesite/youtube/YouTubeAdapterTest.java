@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;

@@ -2,14 +2,14 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableList;

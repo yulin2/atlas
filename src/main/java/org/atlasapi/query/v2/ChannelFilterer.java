@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;

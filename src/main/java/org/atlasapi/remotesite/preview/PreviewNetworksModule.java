@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.preview;
 
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;

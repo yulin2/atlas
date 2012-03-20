@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.channel.OldChannel;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;

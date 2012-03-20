@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.content.Brand;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.remotesite.HttpClients;

@@ -3,10 +3,10 @@ package org.atlasapi.output;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.output.simple.ProductModelSimplifier;
-import org.atlasapi.persistence.content.ContentResolver;
 
 public class SimpleProductModelWriter extends TransformingModelWriter<Iterable<Product>, ProductQueryResult> {
 

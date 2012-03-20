@@ -1,23 +1,23 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.atlasapi.persistence.content.ResolvedContent.builder;
+import static org.atlasapi.media.content.ResolvedContent.builder;
 import static org.hamcrest.Matchers.hasItem;
 
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.KeyPhrase;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.RelatedLink;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.KeyPhrase;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.RelatedLink;
+import org.atlasapi.media.content.Series;
+import org.atlasapi.media.topic.TopicRef;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.remotesite.SiteSpecificAdapter;

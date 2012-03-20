@@ -22,10 +22,10 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.output.rdf.NaiveTypeMap;
 import org.atlasapi.output.rdf.TypeMap;
 

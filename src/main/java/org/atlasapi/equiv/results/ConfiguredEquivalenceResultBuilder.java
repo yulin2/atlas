@@ -15,7 +15,7 @@ import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PublisherFilteringExtractor;
 import org.atlasapi.equiv.results.extractors.SpecializationMatchingEquivalenceExtractor;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 public class ConfiguredEquivalenceResultBuilder<T extends Content> implements EquivalenceResultBuilder<T> {
 

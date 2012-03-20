@@ -7,12 +7,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Series;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcFeeds;

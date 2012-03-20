@@ -12,10 +12,10 @@ import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivale
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
 import com.google.common.collect.ImmutableMap;

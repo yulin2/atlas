@@ -7,12 +7,12 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicRef;
+import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.media.topic.Topic.Type;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesCategory;
 import org.atlasapi.remotesite.bbc.SlashProgrammesContainer.SlashProgrammesProgramme;
 import org.hamcrest.Description;

@@ -4,10 +4,10 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.topic.TopicContentLister;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Described;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.topic.TopicContentLister;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;

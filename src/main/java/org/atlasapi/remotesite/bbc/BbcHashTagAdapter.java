@@ -4,8 +4,8 @@ import static org.atlasapi.remotesite.bbc.BbcFeeds.isACanonicalSlashProgrammesUr
 
 import java.util.List;
 
-import org.atlasapi.media.entity.KeyPhrase;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.KeyPhrase;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.html.HtmlNavigator;

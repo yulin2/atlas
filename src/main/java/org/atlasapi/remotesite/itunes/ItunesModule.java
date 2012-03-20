@@ -6,7 +6,7 @@ import java.io.File;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.itunes.epf.ItunesEpfUpdateTask;
 import org.atlasapi.remotesite.itunes.epf.LatestEpfDataSetSupplier;

@@ -8,7 +8,7 @@ import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoreThreshold;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;

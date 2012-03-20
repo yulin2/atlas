@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;

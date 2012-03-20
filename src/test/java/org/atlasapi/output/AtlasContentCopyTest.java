@@ -8,12 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.content.support.BroadcastTestDataBuilder;
+import org.atlasapi.media.content.support.ItemTestDataBuilder;
+import org.atlasapi.media.content.support.LocationTestDataBuilder;
+import org.atlasapi.media.content.support.PlaylistTestDataBuilder;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.entity.simple.Playlist;
-import org.atlasapi.media.entity.testing.BroadcastTestDataBuilder;
-import org.atlasapi.media.entity.testing.ItemTestDataBuilder;
-import org.atlasapi.media.entity.testing.LocationTestDataBuilder;
-import org.atlasapi.media.entity.testing.PlaylistTestDataBuilder;
 import org.junit.Test;
 
 import com.google.common.base.Charsets;

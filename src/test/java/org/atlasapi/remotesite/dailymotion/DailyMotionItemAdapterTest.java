@@ -16,7 +16,7 @@ package org.atlasapi.remotesite.dailymotion;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.remotesite.ContentExtractor;

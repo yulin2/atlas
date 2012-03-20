@@ -18,9 +18,9 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Identified;
 import org.atlasapi.persistence.ContentPersistenceModule;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.query.uri.SavingFetcher;

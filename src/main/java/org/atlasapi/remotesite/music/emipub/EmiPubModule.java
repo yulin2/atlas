@@ -3,6 +3,8 @@ package org.atlasapi.remotesite.music.emipub;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import javax.annotation.PostConstruct;
+
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -10,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration

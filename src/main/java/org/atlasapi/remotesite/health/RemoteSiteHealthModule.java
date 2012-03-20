@@ -2,9 +2,9 @@ package org.atlasapi.remotesite.health;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.persistence.content.schedule.ScheduleResolver;
 import org.atlasapi.persistence.system.AToZUriSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

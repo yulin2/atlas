@@ -10,7 +10,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.content.Broadcast;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BroadcastOn;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.Interval;

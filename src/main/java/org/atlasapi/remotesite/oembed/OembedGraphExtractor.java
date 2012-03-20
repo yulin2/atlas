@@ -16,10 +16,10 @@ permissions and limitations under the License. */
 package org.atlasapi.remotesite.oembed;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.output.oembed.OembedItem;
 import org.atlasapi.remotesite.ContentExtractor;
 

@@ -1,7 +1,8 @@
 package org.atlasapi.remotesite.music.musicbrainz;
 
 import java.io.File;
-import org.atlasapi.persistence.content.ContentWriter;
+
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.junit.Test;

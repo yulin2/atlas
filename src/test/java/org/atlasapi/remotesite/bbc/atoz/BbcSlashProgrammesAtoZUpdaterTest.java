@@ -1,6 +1,6 @@
 package org.atlasapi.remotesite.bbc.atoz;
 
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.Identified;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.atlasapi.remotesite.SiteSpecificAdapter;

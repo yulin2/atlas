@@ -3,7 +3,7 @@ package org.atlasapi.equiv.results.persistence;
 import java.util.concurrent.ConcurrentMap;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;

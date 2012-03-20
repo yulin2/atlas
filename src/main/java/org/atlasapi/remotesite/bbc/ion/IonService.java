@@ -1,8 +1,8 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Policy;
 
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.intl.Countries;

@@ -3,8 +3,8 @@ package org.atlasapi.remotesite.itunes;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

@@ -5,7 +5,7 @@ import java.util.List;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 public class ScalingEquivalenceCombiner<T extends Content> implements EquivalenceCombiner<T> {
     

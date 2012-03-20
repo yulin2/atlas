@@ -6,12 +6,12 @@ import static com.metabroadcast.common.health.ProbeResult.ProbeResultType.INFO;
 import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.ScheduleEntry;
-import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Schedule;
+import org.atlasapi.persistence.content.schedule.ScheduleEntry;
+import org.atlasapi.persistence.content.schedule.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 

@@ -3,15 +3,15 @@ package org.atlasapi.remotesite.channel4.epg;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Schedule;
+import org.atlasapi.media.content.Version;
+import org.atlasapi.persistence.content.schedule.ScheduleResolver;
 import org.joda.time.Interval;
 
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.results.persistence;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 
 /**
  * For storage of 'live', as opposed to 'restored', equivalence results.

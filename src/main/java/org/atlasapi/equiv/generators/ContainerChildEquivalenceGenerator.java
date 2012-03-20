@@ -13,11 +13,11 @@ import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.media.content.ChildRef;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;

@@ -10,7 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Specialization;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -28,7 +29,6 @@ import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.DateTimeZones;
-import org.atlasapi.media.entity.Specialization;
 
 public abstract class BaseController<T> {
 

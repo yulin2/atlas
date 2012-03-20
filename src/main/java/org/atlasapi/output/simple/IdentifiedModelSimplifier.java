@@ -3,8 +3,8 @@ package org.atlasapi.output.simple;
 import java.math.BigInteger;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.media.entity.simple.Aliased;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.output.Annotation;

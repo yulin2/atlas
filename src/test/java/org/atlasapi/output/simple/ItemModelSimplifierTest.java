@@ -10,21 +10,22 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Actor;
-import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Policy.RevenueContract;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Restriction;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Actor;
+import org.atlasapi.media.content.ContentGroupResolver;
+import org.atlasapi.media.content.CrewMember;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Policy;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Restriction;
+import org.atlasapi.media.content.Version;
+import org.atlasapi.media.content.Policy.RevenueContract;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.media.topic.TopicQueryResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
@@ -35,7 +36,6 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifierTest {
 
@@ -58,7 +58,7 @@ public class ItemModelSimplifierTest {
             allowing(segmentResolver).resolveById(with(any(Iterable.class)));will(returnValue(ImmutableMap.of()));
         }});
         
-        org.atlasapi.media.entity.Item fullItem = new org.atlasapi.media.entity.Item();
+        org.atlasapi.media.content.Item fullItem = new org.atlasapi.media.content.Item();
         Version version = new Version();
         
         Restriction restriction = new Restriction();

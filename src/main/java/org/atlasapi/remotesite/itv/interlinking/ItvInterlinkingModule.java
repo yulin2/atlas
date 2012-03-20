@@ -3,8 +3,8 @@ package org.atlasapi.remotesite.itv.interlinking;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;

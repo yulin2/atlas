@@ -17,7 +17,7 @@ package org.atlasapi.query.content;
 import java.util.List;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.Identified;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 public interface DelegateQueryExecutor<T extends Identified> {

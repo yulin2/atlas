@@ -2,13 +2,13 @@ package org.atlasapi.remotesite.itunes.epf;
 
 import static org.atlasapi.remotesite.itunes.epf.EpfHelper.uriForEpisode;
 
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Specialization;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.itunes.epf.model.EpfVideo;
 import org.joda.time.Duration;

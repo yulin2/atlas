@@ -5,14 +5,14 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.junit.Test;
 

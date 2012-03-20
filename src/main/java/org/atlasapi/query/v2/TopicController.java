@@ -8,14 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicContentLister;
+import org.atlasapi.media.topic.TopicQueryResolver;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.topic.TopicContentLister;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

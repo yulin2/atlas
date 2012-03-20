@@ -1,20 +1,20 @@
 package org.atlasapi.remotesite.channel4.epg;
 
-import static org.atlasapi.media.entity.Publisher.C4;
+import static org.atlasapi.media.content.Publisher.C4;
 
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.ScheduleEntry;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.ChildRef;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Version;
+import org.atlasapi.persistence.content.schedule.ScheduleEntry;
+import org.atlasapi.persistence.content.schedule.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

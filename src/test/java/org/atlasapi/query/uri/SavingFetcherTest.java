@@ -16,10 +16,10 @@ package org.atlasapi.query.uri;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.system.Fetcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;

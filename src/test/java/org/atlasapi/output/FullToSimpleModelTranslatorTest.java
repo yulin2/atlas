@@ -3,21 +3,22 @@ package org.atlasapi.output;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentGroupResolver;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Episode;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.media.topic.TopicQueryResolver;
 import org.atlasapi.output.simple.ContainerModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
-import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -33,7 +34,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 @RunWith(JMock.class)
 public class FullToSimpleModelTranslatorTest {

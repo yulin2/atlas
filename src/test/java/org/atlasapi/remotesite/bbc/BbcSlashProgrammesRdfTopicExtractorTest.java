@@ -5,12 +5,12 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicRef;
+import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.media.topic.Topic.Type;
 import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
 import org.junit.Test;
 

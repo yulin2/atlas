@@ -9,14 +9,14 @@ import nu.xom.Nodes;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Clip;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.CrewMember;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Film;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
 import org.joda.time.Duration;
 
 import com.google.common.base.Strings;

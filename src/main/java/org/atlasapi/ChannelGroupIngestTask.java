@@ -12,8 +12,8 @@ import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
-import org.atlasapi.media.entity.Channel;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Channel;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 
 import com.google.common.base.Charsets;

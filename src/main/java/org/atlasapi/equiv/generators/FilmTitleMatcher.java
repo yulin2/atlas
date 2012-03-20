@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.generators;
 
-import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.content.Film;
 
 public class FilmTitleMatcher {
     

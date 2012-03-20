@@ -1,16 +1,16 @@
 package org.atlasapi.remotesite.bbc;
 
-import static org.atlasapi.media.entity.Publisher.DBPEDIA;
-import static org.atlasapi.media.entity.Topic.Type.SUBJECT;
+import static org.atlasapi.media.content.Publisher.DBPEDIA;
+import static org.atlasapi.media.topic.Topic.Type.SUBJECT;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicRef;
+import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.media.topic.Topic.Type;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesDescription;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesType;

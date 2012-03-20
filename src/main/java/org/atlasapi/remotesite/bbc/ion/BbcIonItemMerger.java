@@ -2,11 +2,11 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import java.util.Map;
 
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Film;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Version;
 import org.joda.time.Duration;
 
 import com.google.common.collect.ImmutableList;

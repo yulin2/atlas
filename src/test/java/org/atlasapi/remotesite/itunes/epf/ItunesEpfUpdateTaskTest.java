@@ -4,10 +4,10 @@ import java.io.File;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Series;
 import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

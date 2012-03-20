@@ -5,18 +5,22 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.content.Clip;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentGroup;
+import org.atlasapi.media.content.ContentGroupRef;
+import org.atlasapi.media.content.ContentGroupResolver;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.entity.simple.RelatedLink;
 import org.atlasapi.media.product.ProductResolver;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicQueryResolver;
+import org.atlasapi.media.topic.TopicRef;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -24,10 +28,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.ContentGroupRef;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
 
@@ -100,10 +100,10 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     }
 
     public Iterable<RelatedLink> simplifyRelatedLinks(F content) {
-        return Iterables.transform(content.getRelatedLinks(), new Function<org.atlasapi.media.entity.RelatedLink, RelatedLink>() {
+        return Iterables.transform(content.getRelatedLinks(), new Function<org.atlasapi.media.content.RelatedLink, RelatedLink>() {
 
             @Override
-            public RelatedLink apply(org.atlasapi.media.entity.RelatedLink rl) {
+            public RelatedLink apply(org.atlasapi.media.content.RelatedLink rl) {
                 RelatedLink simpleLink = new RelatedLink();
 
                 simpleLink.setUrl(rl.getUrl());
@@ -141,10 +141,10 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     }
 
     public Iterable<KeyPhrase> simplifyPhrases(F content) {
-        return Iterables.transform(content.getKeyPhrases(), new Function<org.atlasapi.media.entity.KeyPhrase, KeyPhrase>() {
+        return Iterables.transform(content.getKeyPhrases(), new Function<org.atlasapi.media.content.KeyPhrase, KeyPhrase>() {
 
             @Override
-            public KeyPhrase apply(org.atlasapi.media.entity.KeyPhrase input) {
+            public KeyPhrase apply(org.atlasapi.media.content.KeyPhrase input) {
                 return new KeyPhrase(input.getPhrase(), toPublisherDetails(input.getPublisher()), input.getWeighting());
             }
         });

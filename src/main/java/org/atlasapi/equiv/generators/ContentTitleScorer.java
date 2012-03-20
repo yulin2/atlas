@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.generators;
 
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 public class ContentTitleScorer {
 

@@ -1,6 +1,6 @@
 package org.atlasapi.equiv;
 
-import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.media.content.Publisher.BBC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -8,13 +8,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.update.tasks.ScheduleTaskProgressStore;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.SortKey;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.ChildRef;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.ResolvedContent;
+import org.atlasapi.media.content.SortKey;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.persistence.logging.NullAdapterLog;

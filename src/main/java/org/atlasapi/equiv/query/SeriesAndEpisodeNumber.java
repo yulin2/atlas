@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.query;
 
-import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.content.Episode;
 
 import com.google.common.base.Objects;
 

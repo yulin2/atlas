@@ -16,8 +16,8 @@ package org.atlasapi.remotesite;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Location;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;

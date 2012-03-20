@@ -22,7 +22,7 @@ import javax.xml.bind.JAXBException;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.output.oembed.OembedItem;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;

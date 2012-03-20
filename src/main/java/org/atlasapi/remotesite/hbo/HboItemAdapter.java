@@ -3,8 +3,8 @@ package org.atlasapi.remotesite.hbo;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;

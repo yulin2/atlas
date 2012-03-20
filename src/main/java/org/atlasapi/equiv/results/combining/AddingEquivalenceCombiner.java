@@ -5,7 +5,7 @@ import java.util.Map;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;

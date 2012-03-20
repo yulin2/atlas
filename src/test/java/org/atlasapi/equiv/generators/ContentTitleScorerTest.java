@@ -7,9 +7,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Publisher;
 import org.junit.Test;
 
 public class ContentTitleScorerTest {

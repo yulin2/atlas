@@ -4,7 +4,8 @@ import com.google.common.base.Optional;
 import com.google.common.io.Files;
 import com.metabroadcast.common.base.Maybe;
 import java.io.File;
-import org.atlasapi.media.entity.Publisher;
+
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductStore;
 import org.atlasapi.s3.S3Client;

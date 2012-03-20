@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Clip;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Item;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 
 import com.google.common.collect.ImmutableList;
@@ -41,7 +41,7 @@ class C4ClipExtractor {
 	
 	void fetchAndAddClipsTo(Brand brand, List<Episode> episodes) {
 		List<Clip> clips = clipsFrom(brand);
-		Map<String, org.atlasapi.media.entity.Item> lookup = toEpisodeLookup(episodes);
+		Map<String, org.atlasapi.media.content.Item> lookup = toEpisodeLookup(episodes);
 		for (Clip clip : clips) {
 			Item episode = findEpisode(lookup, clip);
 			
@@ -53,13 +53,13 @@ class C4ClipExtractor {
 		}
 	}
 
-	private Item findEpisode(Map<String, org.atlasapi.media.entity.Item> lookup, Clip clip) {
+	private Item findEpisode(Map<String, org.atlasapi.media.content.Item> lookup, Clip clip) {
 		Matcher matcher = C4AtomApi.SERIES_AND_EPISODE_NUMBER_IN_ANY_URI.matcher(clip.getCanonicalUri());
 		if (matcher.find()) {
 			Integer series = Integer.valueOf(matcher.group(1));
 			Integer episodeNumber = Integer.valueOf(matcher.group(2));	
 
-			org.atlasapi.media.entity.Item item = lookup.get(concatSeriesAndEpNum(series, episodeNumber));
+			org.atlasapi.media.content.Item item = lookup.get(concatSeriesAndEpNum(series, episodeNumber));
 			
 			return item;
 		}

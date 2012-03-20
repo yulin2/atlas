@@ -2,11 +2,11 @@ package org.atlasapi.remotesite.channel4.epg;
 
 import java.util.Set;
 
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Episode;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Version;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;

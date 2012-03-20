@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.results.scores;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;

@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.ContentGroup;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 

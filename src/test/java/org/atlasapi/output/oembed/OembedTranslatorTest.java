@@ -20,12 +20,12 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.Encoding;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Version;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.oembed.OembedTranslator.OutputFactory;
 import org.jmock.Expectations;

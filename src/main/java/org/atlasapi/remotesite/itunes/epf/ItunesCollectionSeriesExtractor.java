@@ -3,8 +3,8 @@ package org.atlasapi.remotesite.itunes.epf;
 import static org.atlasapi.remotesite.itunes.epf.model.EpfCollection.COLLECTION_ID;
 import static org.atlasapi.remotesite.itunes.epf.model.EpfCollection.NAME;
 
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.itunes.epf.model.EpfCollection;
 

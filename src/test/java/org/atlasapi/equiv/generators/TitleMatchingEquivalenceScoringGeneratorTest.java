@@ -8,11 +8,11 @@ import java.util.List;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.media.content.Brand;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 import org.junit.Test;
 

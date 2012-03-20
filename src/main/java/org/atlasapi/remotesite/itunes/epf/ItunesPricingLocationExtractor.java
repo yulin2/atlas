@@ -6,9 +6,9 @@ import java.util.Locale;
 
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
-import org.atlasapi.media.entity.Location;
-import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Policy.RevenueContract;
+import org.atlasapi.media.content.Location;
+import org.atlasapi.media.content.Policy;
+import org.atlasapi.media.content.Policy.RevenueContract;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.itunes.epf.model.EpfPricing;
 

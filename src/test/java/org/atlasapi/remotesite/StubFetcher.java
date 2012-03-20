@@ -2,7 +2,7 @@ package org.atlasapi.remotesite;
 
 import java.util.Map;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.persistence.system.Fetcher;
 
 import com.google.common.collect.Maps;

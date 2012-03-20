@@ -5,7 +5,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 
 import java.util.Iterator;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;

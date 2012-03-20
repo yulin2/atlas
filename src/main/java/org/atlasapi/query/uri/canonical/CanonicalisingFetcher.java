@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.ResolvedContent;
+import org.atlasapi.media.content.ResolvedContent.ResolvedContentBuilder;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.NoMatchingAdapterException;
 

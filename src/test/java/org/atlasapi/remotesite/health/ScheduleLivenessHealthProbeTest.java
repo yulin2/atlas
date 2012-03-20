@@ -9,12 +9,12 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.MediaType;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
-import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.media.content.Item;
+import org.atlasapi.media.content.MediaType;
+import org.atlasapi.media.content.Publisher;
+import org.atlasapi.media.content.Schedule;
+import org.atlasapi.media.content.Schedule.ScheduleChannel;
+import org.atlasapi.persistence.content.schedule.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Minutes;

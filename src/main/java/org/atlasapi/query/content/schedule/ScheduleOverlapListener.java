@@ -1,7 +1,7 @@
 package org.atlasapi.query.content.schedule;
 
-import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.content.Broadcast;
+import org.atlasapi.media.content.Item;
 
 public interface ScheduleOverlapListener {
     

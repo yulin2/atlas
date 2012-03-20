@@ -1,8 +1,9 @@
 package org.atlasapi.remotesite.music.emipub;
 
 import java.io.File;
-import org.atlasapi.media.entity.Song;
-import org.atlasapi.persistence.content.ContentWriter;
+
+import org.atlasapi.media.content.ContentWriter;
+import org.atlasapi.media.content.Song;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.junit.Test;
 import static org.junit.Assert.*;

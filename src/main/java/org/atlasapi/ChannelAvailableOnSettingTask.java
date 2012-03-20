@@ -14,7 +14,7 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelTranslator;
 import org.atlasapi.media.channel.MongoChannelStore;
-import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.content.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Sets;

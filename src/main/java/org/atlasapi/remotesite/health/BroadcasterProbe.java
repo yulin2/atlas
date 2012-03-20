@@ -2,10 +2,10 @@ package org.atlasapi.remotesite.health;
 
 import java.util.Map.Entry;
 
-import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.media.content.ContentResolver;
+import org.atlasapi.media.content.Described;
+import org.atlasapi.media.content.Identified;
+import org.atlasapi.media.content.Publisher;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
