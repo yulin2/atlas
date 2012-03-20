@@ -30,7 +30,7 @@ class LoveFilmUpdater extends ScheduledTask {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
         this.log = log;
-        this.client = new RequestLimitingSimpleHttpClient(HttpClients.oauthClient(apiKey, apiSecret), 2);
+        this.client = new RequestLimitingSimpleHttpClient(HttpClients.oauthClient(apiKey, apiSecret), 1);
     }
 
     @Override
@@ -39,7 +39,7 @@ class LoveFilmUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update started from " + BASE_API_URL).withSource(getClass()));
 
-            client.get(new SimpleHttpRequest<Void>(BASE_API_URL + "/film?items_per_page=10", new LoveFilmFilmHttpTransformer(client, log, contentResolver, contentWriter)));
+            client.get(new SimpleHttpRequest<Void>(BASE_API_URL + "/film?items_per_page=50", new LoveFilmFilmHttpTransformer(client, log, contentResolver, contentWriter)));
 
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("LoveFilm update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
