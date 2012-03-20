@@ -22,7 +22,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 class TheSpaceUpdater extends ScheduledTask {
 
-    public static final String BASE_API_URL = "https://web.dev.thespace.org";
+    public static final String BASE_API_URL = "https://web.stage.thespace.org/";
     //
     private final Timestamper timestamper = new SystemClock();
     private final ContentResolver contentResolver;
