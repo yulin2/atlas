@@ -30,7 +30,7 @@ class LoveFilmUpdater extends ScheduledTask {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
         this.log = log;
-        this.client = new RequestLimitingSimpleHttpClient(HttpClients.oauthClient(apiKey, apiSecret), 2);
+        this.client = new RequestLimitingSimpleHttpClient(HttpClients.oauthClient(apiKey, apiSecret), 1);
     }
 
     @Override
