@@ -167,11 +167,15 @@ public class BbcModule {
     }
 
     @Bean Runnable bbcFeedsUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(contentWriters,  new MongoProgressStore(mongo), topicStore, log);
+		return new BbcSlashProgrammesAtoZUpdater(new MongoProgressStore(mongo), bbcProgrammeAdapter(), log);
 	}
 	
 	@Bean BbcSlashProgrammesController bbcFeedsController() {
-	    return new BbcSlashProgrammesController(contentWriters, topicStore, log);
+	    return new BbcSlashProgrammesController(bbcProgrammeAdapter());
+	}
+	
+	@Bean BbcProgrammeAdapter bbcProgrammeAdapter() {
+	    return new BbcProgrammeAdapter(contentWriters, extendedDataAdapter(), log);
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {

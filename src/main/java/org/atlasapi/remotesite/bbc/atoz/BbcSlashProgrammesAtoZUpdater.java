@@ -9,12 +9,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammeAdapter;
@@ -42,8 +40,8 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
     private final ProgressStore progressStore;
     private final ExecutorService executor;
 
-    public BbcSlashProgrammesAtoZUpdater(ContentWriter writer, ProgressStore progressStore, TopicStore topicStore, AdapterLog log) {
-        this(new BbcSlashProgrammesAtoZRdfClient(), new BbcProgrammeAdapter(writer,topicStore, log), progressStore, log, null);
+    public BbcSlashProgrammesAtoZUpdater(ProgressStore progressStore, BbcProgrammeAdapter programmeAdapter, AdapterLog log) {
+        this(new BbcSlashProgrammesAtoZRdfClient(), programmeAdapter, progressStore, log, null);
     }
 
     public BbcSlashProgrammesAtoZUpdater(RemoteSiteClient<SlashProgrammesAtoZRdf> client, SiteSpecificAdapter<Identified> fetcher, ProgressStore progressStore, AdapterLog log, ExecutorService executor) {
