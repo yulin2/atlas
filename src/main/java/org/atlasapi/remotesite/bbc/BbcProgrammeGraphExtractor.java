@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.remotesite.bbc;
 
-import static org.atlasapi.media.entity.Publisher.DBPEDIA;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.remotesite.HttpClients.webserviceClient;
@@ -25,7 +24,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -34,7 +32,6 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
@@ -47,21 +44,18 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcProgrammeSource.ClipAndVersion;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
-import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesTopic;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
+import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
@@ -102,20 +96,20 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 	private final AdapterLog log;
     private final BbcIonDeserializer<IonEpisodeDetailFeed> ionDeserialiser;
     private final BbcProgrammeEncodingAndLocationCreator encodingCreator;
-    private final TopicStore topicStore;
+    private final BbcExtendedDataContentAdapter extendedDataAdapter;
 
-    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, TopicStore topicStore, Clock clock, AdapterLog log) {
+    public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, BbcExtendedDataContentAdapter extendedDataAdapter, Clock clock, AdapterLog log) {
         this.seriesResolver = seriesResolver;
         this.policyClient = policyClient;
-        this.topicStore = topicStore;
+        this.extendedDataAdapter = extendedDataAdapter;
 		this.clock = clock;
         this.log = log;
 		this.ionDeserialiser = BbcIonDeserializers.deserializerForClass(IonEpisodeDetailFeed.class);
 		this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
     }
 
-    public BbcProgrammeGraphExtractor(TopicStore topicStore, AdapterLog log) {
-        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(), topicStore, new SystemClock(), log);
+    public BbcProgrammeGraphExtractor(BbcExtendedDataContentAdapter extendedDataAdapter, AdapterLog log) {
+        this(new SeriesFetchingBbcSeriesNumberResolver(), new BbcProgrammesPolicyClient(), extendedDataAdapter, new SystemClock(), log);
     }
 
     public Item extract(BbcProgrammeSource source) {
@@ -172,38 +166,23 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             }
         }
         
-        for (Entry<SlashProgrammesTopic, String> topicUri : source.topics().entrySet()) {
-            Maybe<Topic> possibleTopic = topicStore.topicFor("dbpedia", topicUri.getValue());
-            if(possibleTopic.isNothing()) {
-                log.record(warnEntry().withSource(getClass()).withDescription("Couldn't get Topic for %s, can't create new one", topicUri.getValue()));
-            } else {
-                Topic topic = possibleTopic.requireValue();
-                topic.setPublisher(DBPEDIA);
-                topic.setTitle(titleFrom(topicUri.getValue()));
-                topic.setType(typeFrom(topicUri.getKey().resourceUri()));
-                
-                topicStore.write(topic);
-
-                TopicRef contentTopic = new TopicRef(topic.getId(), 1.0f, true);
-                item.addTopicRef(contentTopic);
-            }
-        }
+        addExtendedData(item);
 
         return item;
     }
 
-    private Type typeFrom(String resourceUri) {
-        String type = resourceUri.substring(resourceUri.indexOf("#")+1);
-        for (Type topicType : Topic.Type.values()) {
-            if(topicType.key().equals(type)) {
-                return topicType;
+    public void addExtendedData(Content content) {
+        String contentUri = content.getCanonicalUri();
+        try {
+            if (extendedDataAdapter.canFetch(contentUri)) {
+                Content extendedDataContent = extendedDataAdapter.fetch(contentUri);
+                content.setKeyPhrases(extendedDataContent.getKeyPhrases());
+                content.setRelatedLinks(extendedDataContent.getRelatedLinks());
+                content.setTopicRefs(extendedDataContent.getTopicRefs());
             }
+        } catch (Exception e) {
+            log.record(warnEntry().withUri(contentUri).withSource(getClass()).withDescription("Could not fetch extended data for %s", contentUri));
         }
-        return Topic.Type.UNKNOWN;
-    }
-
-    private String titleFrom(String dbpediaUri) {
-        return dbpediaUri.substring(28).replaceAll("_", " ").replace("%28","(").replace("%29",")").replace("%27","'");
     }
 
     public static void setDurations(Version version, IonVersion ionVersion) {
