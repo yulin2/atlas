@@ -48,10 +48,10 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         private final LiveEquivalenceResultStore resultStore;
         private final EquivalenceResultBuilder<Container> containerResultBuilder;
         private final EquivalenceResultHandler<Item> itemResultHandler;
-        
-        private final ImmutableList.Builder<ContentEquivalenceGenerator<Container>> generators = ImmutableList.builder(); 
-        private final ImmutableList.Builder<ContentEquivalenceScorer<Container>> scorers = ImmutableList.builder();
         private final AdapterLog log; 
+        
+        private Iterable<ContentEquivalenceGenerator<Container>> generators; 
+        private Iterable<ContentEquivalenceScorer<Container>> scorers;
 
         public Builder(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
                 EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, AdapterLog log) {
@@ -63,18 +63,28 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         }
      
         public Builder withGenerator(ContentEquivalenceGenerator<Container> generator) {
-            generators.add(generator);
+            this.generators = ImmutableSet.of(generator);
+            return this;
+        }
+        
+        public Builder withGenerators(Iterable<ContentEquivalenceGenerator<Container>> generators) {
+            this.generators = generators;
             return this;
         }
         
         public Builder withScorer(ContentEquivalenceScorer<Container> scorer) {
-            scorers.add(scorer);
+            this.scorers = ImmutableSet.of(scorer);
+            return this;
+        }
+        
+        public Builder withScorers(Iterable<ContentEquivalenceScorer<Container>> scorers) {
+            this.scorers = scorers;
             return this;
         }
         
         public ContainerEquivalenceUpdater build() {
-            EquivalenceGenerators<Container> generatorSet = new EquivalenceGenerators<Container>(generators.build(), log);
-            EquivalenceScorers<Container> scorerSet = new EquivalenceScorers<Container>(scorers.build(), log);
+            EquivalenceGenerators<Container> generatorSet = new EquivalenceGenerators<Container>(ImmutableSet.copyOf(generators), log);
+            EquivalenceScorers<Container> scorerSet = new EquivalenceScorers<Container>(ImmutableSet.copyOf(scorers), log);
             return new ContainerEquivalenceUpdater(contentResolver, resultStore, containerResultBuilder, itemResultHandler, generatorSet, scorerSet);
         }
     }
