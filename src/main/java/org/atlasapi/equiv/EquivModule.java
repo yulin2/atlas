@@ -14,6 +14,8 @@ permissions and limitations under the License. */
 
 package org.atlasapi.equiv;
 
+import static com.google.common.base.Predicates.in;
+import static com.google.common.base.Predicates.not;
 import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.containerUpdater;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
@@ -21,6 +23,7 @@ import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
 import static org.atlasapi.media.entity.Publisher.ITV;
 import static org.atlasapi.media.entity.Publisher.PA;
+import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 
 import java.util.Set;
 
@@ -53,7 +56,6 @@ import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
-import org.atlasapi.equiv.update.ContainerEquivalenceUpdater.Builder;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.ItemEquivalenceUpdater;
 import org.atlasapi.equiv.update.PublisherSwitchingContentEquivalenceUpdater;
@@ -91,6 +93,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -167,9 +170,48 @@ public class EquivModule {
 
     public @Bean ResultHandlingEquivalenceUpdater<Content> contentUpdater() {
         //Generally acceptable publishers.
-        Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()),ImmutableSet.of(Publisher.PREVIEW_NETWORKS));
+        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()),ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX));
         
-        ScalingScoringGenerator<Container> titleScoringGenerator = ScalingScoringGenerator.from(new TitleMatchingEquivalenceScoringGenerator(searchResolver), new Function<Double, Double>() {
+        ScalingScoringGenerator<Container> titleScoringGenerator = defaultScaledTitleScoringGenerator();
+        
+        ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
+        
+        ImmutableMap.Builder<Publisher, ContentEquivalenceUpdater<Content>> publisherUpdaters = ImmutableMap.builder();
+        
+        RootEquivalenceUpdater standardContainerEquivalenceUpdater = new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
+                .withGenerators(ImmutableSet.of(
+                        titleScoringGenerator,
+                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
+                .withScorer(titleScoringGenerator)
+                .build(), itemUpdater);
+        
+        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX);
+        for (Publisher publisher : Iterables.filter(ImmutableList.copyOf(Publisher.values()), not(in(nonStandardPublishers)))) {
+                publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
+        }
+        
+        publisherUpdaters.put(BBC_REDUX, new RootEquivalenceUpdater(containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
+                .withGenerators(ImmutableSet.of(
+                        titleScoringGenerator,
+                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
+                .withScorer(titleScoringGenerator)
+                .build(), itemUpdater)
+        );
+        
+        publisherUpdaters.put(ITUNES, new RootEquivalenceUpdater(
+                containerUpdaterBuilder(acceptablePublishers)
+                    .withGenerator(titleScoringGenerator)
+                    .withScorers(ImmutableSet.of(titleScoringGenerator, 
+                            new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
+                            new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)))
+                    .build(), 
+                itemUpdater));
+        
+        return resultHandlingUpdater(new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build()), acceptablePublishers);
+    }
+
+    public ScalingScoringGenerator<Container> defaultScaledTitleScoringGenerator() {
+        return ScalingScoringGenerator.from(new TitleMatchingEquivalenceScoringGenerator(searchResolver), new Function<Double, Double>() {
             @Override
             public Double apply(Double input) {
                 return input > 0 ? input / 2 : input;
@@ -180,32 +222,6 @@ public class EquivModule {
                 return "half if > 0";
             }
         });
-        
-        ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
-        
-        ImmutableMap.Builder<Publisher, ContentEquivalenceUpdater<Content>> publisherUpdaters = ImmutableMap.builder();
-        
-        RootEquivalenceUpdater standardContainerEquivalenceUpdater = new RootEquivalenceUpdater(containerUpdaterBuilder(publishers)
-                .withGenerator(titleScoringGenerator)
-                .withScorer(titleScoringGenerator)
-                .withGenerator(new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)).build(), itemUpdater);
-        
-        for (Publisher publisher : ImmutableList.copyOf(Publisher.values())) {
-            if(Publisher.ITUNES != publisher) {
-                publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
-            }
-        }
-        
-        publisherUpdaters.put(ITUNES, new RootEquivalenceUpdater(
-                containerUpdaterBuilder(publishers)
-                    .withGenerator(titleScoringGenerator)
-                    .withScorer(titleScoringGenerator)
-                    .withScorer(new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log))
-                    .withScorer(new ContainerHierarchyMatchingEquivalenceScorer(contentResolver))
-                    .build(), 
-                itemUpdater));
-        
-        return resultHandlingUpdater(new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build()), publishers);
     }
     
     private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
