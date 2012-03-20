@@ -12,7 +12,7 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 
 import com.google.common.base.Preconditions;
 
-public class BbcExtendedDataContentAdapter implements SiteSpecificAdapter<Content> {
+public class BbcExtendedDataContentAdapter {
 
     private final SiteSpecificAdapter<List<RelatedLink>> linkAdapter;
     private final SiteSpecificAdapter<List<KeyPhrase>> phraseAdapter;
@@ -22,10 +22,8 @@ public class BbcExtendedDataContentAdapter implements SiteSpecificAdapter<Conten
         this.linkAdapter = linkAdapter;
         this.phraseAdapter = phraseAdapter;
         this.topicsAdapter = topicsAdapter;
-
     }
     
-    @Override
     public Content fetch(String uri) {
         Preconditions.checkArgument(canFetch(uri), "Invalid URI %s", uri);
             List<RelatedLink> links = linkAdapter.fetch(uri);
@@ -40,7 +38,6 @@ public class BbcExtendedDataContentAdapter implements SiteSpecificAdapter<Conten
             
     }
 
-    @Override
     public boolean canFetch(String uri) {
         return BbcFeeds.isACanonicalSlashProgrammesUri(uri);
     }
