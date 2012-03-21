@@ -14,6 +14,8 @@ import org.atlasapi.remotesite.pa.PaProgrammeProcessor;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.s3.DefaultS3Client;
 
+import static nimrod.java.utils.NimrodLogger.*;
+
 /**
  */
 public class PAClient {
@@ -41,7 +43,7 @@ public class PAClient {
 
             paUpdater.run();
         } else {
-            String uri = operation;
+            String iterations = operation;
 
             Properties props = new Properties();
             props.load(PAClient.class.getClassLoader().getResourceAsStream("cassandra.ingestion.properties"));
@@ -50,9 +52,15 @@ public class PAClient {
 
             CassandraContentStore store = new CassandraContentStore(9160, ImmutableList.of(cassandraHost));
 
-            ResolvedContent content = store.findByCanonicalUris(ImmutableList.of(uri));
-            if (!content.isEmpty()) {
-                System.out.println(content.getFirstValue().requireValue());
+            for (int i = 0; i < Long.parseLong(iterations); i++) {
+                long start = System.currentTimeMillis();
+                ResolvedContent content = store.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/episodes/" + i));
+                if (!content.isEmpty()) {
+                    forGauge("read.success").debug(Long.toString(System.currentTimeMillis() - start));
+                    System.out.println(content.getFirstValue().requireValue());
+                } else {
+                    forGauge("read.empty").debug(Long.toString(System.currentTimeMillis() - start));
+                }
             }
         }
     }
