@@ -34,7 +34,6 @@ public class ScalingEquivalenceScorer<T extends Content> implements ContentEquiv
         this.delegate = delegate;
         this.scalingFunction = scalingFunction;
     }
-
     
     @Override
     public ScoredEquivalents<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {

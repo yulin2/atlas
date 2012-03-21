@@ -33,7 +33,9 @@ public class EquivalenceScorers<T extends Content> {
 
         for (ContentEquivalenceScorer<T> scorer : scorers) {
             try {
+                desc.startStage(scorer.toString());
                 scoredScores.add(scorer.score(content, generatedSuggestions, desc));
+                desc.finishStage();
             } catch (Exception e) {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Exception running %s for %s", scorer, content));
                 /*
