@@ -6,7 +6,9 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.intl.Countries;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
@@ -34,6 +36,7 @@ import org.joda.time.format.ISODateTimeFormat;
 public class TheSpaceItemProcessor {
 
     private final String BASE_CANONICAL_URI = "http://thespace.org/items/";
+    private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
     private final String EPISODE_TYPE = "episode";
     //
     private final SimpleHttpClient client;
@@ -118,6 +121,14 @@ public class TheSpaceItemProcessor {
                     episode.setImage(bigImage.asText());
                 }
             }
+            
+            Iterator<JsonNode> categories = node.get("categories").getElements();
+            Set<String> genres = new HashSet<String>();
+            while (categories.hasNext()) {
+                String id = BASE_CATEGORY_URI + categories.next().get("id").asText();
+                genres.add(id);
+            }
+            episode.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
 
             Iterator<JsonNode> clips = node.get("available_clips").getElements();
             while (clips.hasNext()) {
