@@ -5,9 +5,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.SimpleHttpClient;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -29,6 +31,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class TheSpacePlaylistProcessor {
 
     private final String BASE_CANONICAL_URI = "http://thespace.org/items/";
+    private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
+    //
     private final Function<Content, ChildRef> CONTENT_TO_CHILD_REF = new ContentToChildRef();
     //
     private final SimpleHttpClient client;
@@ -65,7 +69,7 @@ public class TheSpacePlaylistProcessor {
             JsonNode pid = node.get("pid");
             playlist.setCanonicalUri(getCanonicalUri(pid.asText()));
             playlist.setPublisher(Publisher.THESPACE);
-            
+
             JsonNode title = node.get("title");
             if (title != null) {
                 playlist.setTitle(title.asText());
@@ -95,6 +99,14 @@ public class TheSpacePlaylistProcessor {
                     playlist.setImage(bigImage.asText());
                 }
             }
+
+            Iterator<JsonNode> categories = node.get("categories").getElements();
+            Set<String> genres = new HashSet<String>();
+            while (categories.hasNext()) {
+                String id = BASE_CATEGORY_URI + categories.next().get("id").asText();
+                genres.add(id);
+            }
+            playlist.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
 
             Iterable<Content> contents = getContents(node);
             playlist.setContents(Iterables.transform(contents, CONTENT_TO_CHILD_REF));
