@@ -54,8 +54,6 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
     public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Title");
         
-        desc.startStage("Title scoring");
-        
         if(!Strings.isNullOrEmpty(subject.getTitle())) {
             for (Item suggestion : Iterables.filter(suggestions, Item.class)) {
                 Score score;
@@ -71,8 +69,6 @@ public class TitleMatchingItemEquivalenceScorer implements ContentEquivalenceSco
         } else {
             desc.appendText("Item has no title");
         }
-        
-        desc.finishStage();
         
         return equivalents.build();
     }
