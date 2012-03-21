@@ -5,8 +5,8 @@ import static com.google.common.collect.Iterables.transform;
 import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.media.entity.Identified.TO_URI;
 
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -19,7 +19,8 @@ import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Table;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
@@ -41,8 +42,27 @@ public class EquivalenceResultTranslator {
     private static final String SOURCE = "source";
     private static final String SCORE = "score";
 
+
+    
     public <T extends Content> DBObject toDBObject(EquivalenceResult<T> result) {
         DBObject dbo = new BasicDBObject();
+        
+        final Ordering<Entry<T, Score>> equivalenceResultOrdering = Ordering.from(new Comparator<Entry<T, Score>>() {
+            @Override
+            public int compare(Entry<T, Score> o1, Entry<T, Score> o2) {
+                return o1.getKey().getPublisher().compareTo(o2.getKey().getPublisher());
+            }
+        }).compound(new Comparator<Entry<T, Score>>() {
+            @Override
+            public int compare(Entry<T, Score> o1, Entry<T, Score> o2) {
+                return Score.SCORE_ORDERING.reverse().compare(o1.getValue(), o2.getValue());
+            }
+        }).compound(new Comparator<Entry<T, Score>>() {
+            @Override
+            public int compare(Entry<T, Score> o1, Entry<T, Score> o2) {
+                return o1.getKey().getCanonicalUri().compareTo(o2.getKey().getCanonicalUri());
+            }
+        });
         
         T target = result.target();
         TranslatorUtils.from(dbo, ID, target.getCanonicalUri());
@@ -52,7 +72,7 @@ public class EquivalenceResultTranslator {
         
         BasicDBList equivList = new BasicDBList();
         
-        for (Entry<T, Score> combinedEquiv : result.combinedEquivalences().equivalents().entrySet()) {
+        for (Entry<T, Score> combinedEquiv : equivalenceResultOrdering.sortedCopy(result.combinedEquivalences().equivalents().entrySet())) {
             DBObject equivDbo = new BasicDBObject();
 
             T content = combinedEquiv.getKey();
@@ -90,20 +110,21 @@ public class EquivalenceResultTranslator {
             return null;
         }
         
+        
+        
         String targetId = TranslatorUtils.toString(dbo, ID);
         String targetTitle = TranslatorUtils.toString(dbo, TITLE);
         
         Set<String> strongs = TranslatorUtils.toSet(dbo, STRONG);
         
-        Map<EquivalenceIdentifier, Double> totals = Maps.newHashMap();
+        ImmutableList.Builder<CombinedEquivalenceScore> totals = ImmutableList.builder();
         Table<String, String, Double> results = HashBasedTable.create();
         
         for (DBObject equivDbo : TranslatorUtils.toDBObjectList(dbo, EQUIVS)) {
             String id = TranslatorUtils.toString(equivDbo, ID);
-            Double combined = TranslatorUtils.toDouble(equivDbo, COMBINED);
-            totals.put(
-                    new EquivalenceIdentifier(id, TranslatorUtils.toString(equivDbo, TITLE), strongs.contains(id), publisherName(equivDbo)), 
-                    combined == null ? Double.NaN : combined
+            Double combined = equivDbo.containsField(COMBINED) ? TranslatorUtils.toDouble(equivDbo, COMBINED) : Double.NaN;
+            totals.add(
+                    new CombinedEquivalenceScore(id, TranslatorUtils.toString(equivDbo, TITLE), combined, strongs.contains(id), publisherName(equivDbo))
             );
             for (DBObject scoreDbo : TranslatorUtils.toDBObjectList(equivDbo, SCORES)) {
                 Double score = TranslatorUtils.toDouble(scoreDbo, SCORE);
@@ -112,7 +133,7 @@ public class EquivalenceResultTranslator {
         }
         
         @SuppressWarnings("unchecked") List<Object> description = (List<Object>)dbo.get("desc");
-        return new RestoredEquivalenceResult(targetId, targetTitle, results, totals, TranslatorUtils.toDateTime(dbo, TIMESTAMP), description);
+        return new RestoredEquivalenceResult(targetId, targetTitle, results, totals.build(), TranslatorUtils.toDateTime(dbo, TIMESTAMP), description);
     }
     
     private String publisherName(DBObject equivDbo) {

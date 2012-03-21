@@ -3,16 +3,18 @@ package org.atlasapi.equiv.results.persistence;
 import com.google.common.base.Objects;
 
 
-public class EquivalenceIdentifier {
+public class CombinedEquivalenceScore {
 
     private final String id;
     private final String title;
+    private final Double score;
     private final boolean strong;
     private final String publisher;
 
-    public EquivalenceIdentifier(String id, String title, boolean strong, String publisher) {
+    public CombinedEquivalenceScore(String id, String title, Double score, boolean strong, String publisher) {
         this.id = id;
         this.title = title;
+        this.score = score;
         this.strong = strong;
         this.publisher = publisher;
     }
@@ -23,6 +25,10 @@ public class EquivalenceIdentifier {
 
     public String title() {
         return title;
+    }
+
+    public Double score() {
+        return score;
     }
 
     public boolean strong() {
@@ -43,8 +49,8 @@ public class EquivalenceIdentifier {
         if(this == that) {
             return true;
         }
-        if(that instanceof EquivalenceIdentifier) {
-            EquivalenceIdentifier other = (EquivalenceIdentifier) that;
+        if(that instanceof CombinedEquivalenceScore) {
+            CombinedEquivalenceScore other = (CombinedEquivalenceScore) that;
             return id.equals(other.id) && title.equals(other.title) && publisher.equals(other.publisher) && strong == other.strong;
         }
         return false;
