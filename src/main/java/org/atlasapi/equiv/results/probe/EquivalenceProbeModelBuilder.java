@@ -8,7 +8,7 @@ import static com.google.common.collect.Iterables.concat;
 import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.equiv.results.persistence.EquivalenceIdentifier;
+import org.atlasapi.equiv.results.persistence.CombinedEquivalenceScore;
 import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
 import org.eclipse.jetty.util.UrlEncoded;
 
@@ -33,49 +33,49 @@ public class EquivalenceProbeModelBuilder {
         model.put("title", result.title());
         model.put("timestamp", result.resultTime().toDateTime(DateTimeZones.LONDON).toString("YYYY-MM-dd HH:mm:ss"));
 
-        Map<String, EquivalenceIdentifier> equivalenceIds = Maps.uniqueIndex(result.combinedResults().keySet(), new Function<EquivalenceIdentifier, String>() {
+        Map<String, CombinedEquivalenceScore> equivalenceIds = Maps.uniqueIndex(result.combinedResults(), new Function<CombinedEquivalenceScore, String>() {
             @Override
-            public String apply(EquivalenceIdentifier input) {
+            public String apply(CombinedEquivalenceScore input) {
                 return input.id();
             }
         });
 
-        model.put("expected", modelForExpected(input.expectedEquivalent(), true, result, equivalenceIds));
-        model.put("notExpected", modelForExpected(input.expectedNotEquivalent(), false, result, equivalenceIds));
-        model.put("others", otherStrongEquivalents(copyOf(concat(input.expectedEquivalent(), input.expectedNotEquivalent())), equivalenceIds, result.combinedResults()));
+        model.put("expected", modelForExpected(input.expectedEquivalent(), true, equivalenceIds));
+        model.put("notExpected", modelForExpected(input.expectedNotEquivalent(), false, equivalenceIds));
+        model.put("others", otherStrongEquivalents(copyOf(concat(input.expectedEquivalent(), input.expectedNotEquivalent())), equivalenceIds));
 
         return model;
     }
 
-    private SimpleModelList modelForExpected(Set<String> expectedEquivalents, boolean isExpected, RestoredEquivalenceResult result, Map<String, EquivalenceIdentifier> equivalenceIds) {
+    private SimpleModelList modelForExpected(Set<String> expectedEquivalents, boolean isExpected, Map<String, CombinedEquivalenceScore> equivalences) {
         SimpleModelList expecteds = new SimpleModelList();
         for (String expected : expectedEquivalents) {
             SimpleModel expectedModel = new SimpleModel().put("id", expected).put("encodedId", UrlEncoded.encodeString(expected));
 
-            EquivalenceIdentifier expectedId = equivalenceIds.get(expected);
+            CombinedEquivalenceScore expectedEquivalence = equivalences.get(expected);
             boolean correctExpectation = false;
-            if (isExpected && expectedId != null && expectedId.strong()) {
+            if (isExpected && expectedEquivalence != null && expectedEquivalence.strong()) {
                 correctExpectation = true;
-            } else if (!isExpected && (expectedId == null || (expectedId != null && !expectedId.strong()))) {
+            } else if (!isExpected && (expectedEquivalence == null || (expectedEquivalence != null && !expectedEquivalence.strong()))) {
                 correctExpectation = true;
             }
             expectedModel.put("correctExpectation", correctExpectation);
-            expectedModel.put("score", expectedId != null ? String.format("%+.3f", result.combinedResults().get(expectedId)) : "N/A");
+            expectedModel.put("score", expectedEquivalence != null ? String.format("%+.3f", expectedEquivalence.score()) : "N/A");
 
             expecteds.add(expectedModel);
         }
         return expecteds;
     }
 
-    private SimpleModelList otherStrongEquivalents(ImmutableSet<String> specified, Map<String, EquivalenceIdentifier> equivalenceIds, Map<EquivalenceIdentifier, Double> combinedResults) {
+    private SimpleModelList otherStrongEquivalents(ImmutableSet<String> specified, Map<String, CombinedEquivalenceScore> equivalenceIds) {
         SimpleModelList others = new SimpleModelList();
 
-        for (EquivalenceIdentifier id : Maps.filterKeys(equivalenceIds, not(in(specified))).values()) {
+        for (CombinedEquivalenceScore id : Maps.filterKeys(equivalenceIds, not(in(specified))).values()) {
             if (id.strong()) {
                 SimpleModel model = new SimpleModel();
                 model.put("id", id.id());
                 model.put("encodedId", UrlEncoded.encodeString(id.id()));
-                model.put("score", String.format("%+.3f", combinedResults.get(id)));
+                model.put("score", String.format("%+.3f", equivalenceIds.get(id).score()));
                 others.add(model);
             }
         }

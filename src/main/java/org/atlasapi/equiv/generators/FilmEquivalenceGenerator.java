@@ -46,8 +46,6 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     public ScoredEquivalents<Film> generate(Film film, ResultDescription desc) {
         ScoredEquivalentsBuilder<Film> scores = DefaultScoredEquivalents.<Film> fromSource("Film");
         
-        desc.startStage("Film equivalence generator");
-
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
             desc.appendText("Can't continue: year '%s', title '%s'", film.getYear(), film.getTitle()).finishStage();
             return scores.build();
@@ -83,7 +81,6 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
             }
         }
         
-        desc.finishStage();
         return scores.build();
     }
 

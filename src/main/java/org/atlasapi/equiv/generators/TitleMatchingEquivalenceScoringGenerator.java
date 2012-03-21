@@ -42,18 +42,12 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
 
     @Override
     public ScoredEquivalents<Container> generate(Container content, ResultDescription desc) {
-        desc.startStage("Title-matching generator");
-        ScoredEquivalents<Container> scores = scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
-        desc.finishStage();
-        return scores;
+        return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
     }
 
     @Override
     public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        desc.startStage("Title-matching scorer");
-        ScoredEquivalents<Container> scores = scoreSuggestions(content, suggestions, desc);
-        desc.finishStage();
-        return scores;
+        return scoreSuggestions(content, suggestions, desc);
     }
 
     private ScoredEquivalents<Container> scoreSuggestions(Container content, Iterable<Container> suggestions, ResultDescription desc) {

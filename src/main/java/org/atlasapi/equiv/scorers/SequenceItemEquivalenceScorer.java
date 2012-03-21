@@ -18,13 +18,11 @@ public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<I
     public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Sequence");
 
-        desc.startStage("Sequence scoring").appendText("%s suggestions", Iterables.size(suggestions));
+        desc.appendText("%s suggestions", Iterables.size(suggestions));
 
         for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(suggestions), Item.class)) {
             equivalents.addEquivalent(suggestion, score(subject, suggestion, desc));
         }
-
-        desc.finishStage();
 
         return equivalents.build();
     }

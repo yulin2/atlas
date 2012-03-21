@@ -9,7 +9,6 @@ import java.util.Set;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
@@ -36,14 +35,12 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
     private final ContentResolver contentResolver;
     private final ContentEquivalenceUpdater<Item> itemUpdater;
     private final LiveEquivalenceResultStore resultStore;
-    private final AdapterLog log;
     private ItemResultContainerResolver itemResultContainerResolver;
     
     public ContainerChildEquivalenceGenerator(ContentResolver contentResolver, ContentEquivalenceUpdater<Item> itemUpdater, LiveEquivalenceResultStore resultStore, AdapterLog log) {
         this.contentResolver = contentResolver;
         this.itemUpdater = itemUpdater;
         this.resultStore = resultStore;
-        this.log = log;
         this.itemResultContainerResolver = new ItemResultContainerResolver(contentResolver, NAME, log);
     }
     
@@ -53,7 +50,6 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
     }
 
     private Set<EquivalenceResult<Item>> calculateContainerChildResults(Container container, ResultDescription desc) {
-        desc.startStage("Computing initial child results");
         Set<EquivalenceResult<Item>> childResults = computeInitialChildResults(Lists.transform(container.getChildRefs(), ChildRef.TO_URI));
         desc.appendText("%s child results", childResults.size()).finishStage();
         return childResults;
@@ -103,6 +99,6 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
     
     @Override
     public String toString() {
-        return "Container Child generator";
+        return "Container Child Result generator";
     }
 }

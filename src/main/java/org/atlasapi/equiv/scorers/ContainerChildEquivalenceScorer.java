@@ -44,7 +44,6 @@ public class ContainerChildEquivalenceScorer implements ContentEquivalenceScorer
     
     @Override
     public ScoredEquivalents<Container> score(Container subject, Iterable<Container> suggestions, ResultDescription desc) {
-        desc.startStage("Computing child results");
         List<Item> childrenOfSuggestedContainers = childrenOf(suggestions);
         List<Item> childrenOfSubject = childrenOf(ImmutableList.of(subject));
         
