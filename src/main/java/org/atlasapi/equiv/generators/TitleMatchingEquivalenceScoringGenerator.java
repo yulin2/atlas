@@ -32,9 +32,11 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     private final static float CATCHUP_WEIGHTING = 0.0f;
 
     private final SearchResolver searchResolver;
+    private ContentTitleScorer titleScorer;
 
     public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
+        this.titleScorer = new ContentTitleScorer();
     }
 
     @Override
@@ -58,7 +60,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
         desc.appendText("Scoring %s suggestions", Iterables.size(suggestions));
         
         for (Container found : ImmutableSet.copyOf(suggestions)) {
-            Score score = score(content.getTitle(), found.getTitle());
+            Score score = titleScorer.score(content, found);
             desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
             equivalents.addEquivalent(found, score);
         }
@@ -66,35 +68,11 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
         return equivalents.build();
     }
 
-    private Score score(String subjectTitle, String equivalentTitle) {
-        subjectTitle = removeCommonPrefixes(alphaNumeric(subjectTitle));
-        equivalentTitle = removeCommonPrefixes(alphaNumeric(equivalentTitle));
-        System.out.println(String.format("%s : %s", subjectTitle, equivalentTitle));
-        double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
-        double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
-        return Score.valueOf(commonPrefix / (subjectTitle.length() / 1.0) - difference);
-    }
-
-    private String removeCommonPrefixes(String alphaNumeric) {
-        return (alphaNumeric.startsWith("the ") ? alphaNumeric.substring(4) : alphaNumeric).replace(" ", "");
-    }
-
-    private String alphaNumeric(String title) {
-        return title.replaceAll(" & ", " and ").replaceAll("[^\\d\\w\\s]", "").toLowerCase();
-    }
-
-    private double commonPrefixLength(String t1, String t2) {
-        int i = 0;
-        for (; i < Math.min(t1.length(), t2.length()) && t1.charAt(i) == t2.charAt(i); i++) {
-        }
-        return i;
-    }
-
     private List<Identified> searchForEquivalents(Container content) {
         Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
 
-        List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
+        List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 20), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
         return search;
     }
 
