@@ -58,7 +58,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         if (annotations.contains(Annotation.TOPICS)) {
             simpleDescription.setTopics(topicRefToSimple(content.getTopicRefs(), annotations, config));
         }
-        if (annotations.contains(Annotation.CONTENT_GROUP)) {
+        if (annotations.contains(Annotation.CONTENT_GROUPS)) {
             simpleDescription.setContentGroups(contentGroupRefToSimple(content.getContentGroupRefs(), annotations, config));
         }
         if (annotations.contains(Annotation.KEY_PHRASES)) {
