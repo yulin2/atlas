@@ -33,7 +33,6 @@ import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerChildEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
-import org.atlasapi.equiv.generators.ScalingScoringGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
 import org.atlasapi.equiv.handlers.BroadcastingEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
@@ -88,7 +87,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -172,7 +170,7 @@ public class EquivModule {
         //Generally acceptable publishers.
         Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()),ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX));
         
-        ScalingScoringGenerator<Container> titleScoringGenerator = defaultScaledTitleScoringGenerator();
+        TitleMatchingEquivalenceScoringGenerator titleScoringGenerator = new TitleMatchingEquivalenceScoringGenerator(searchResolver);
         
         ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
         
@@ -210,18 +208,8 @@ public class EquivModule {
         return resultHandlingUpdater(new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build()), acceptablePublishers);
     }
 
-    public ScalingScoringGenerator<Container> defaultScaledTitleScoringGenerator() {
-        return ScalingScoringGenerator.from(new TitleMatchingEquivalenceScoringGenerator(searchResolver), new Function<Double, Double>() {
-            @Override
-            public Double apply(Double input) {
-                return input > 0 ? input / 2 : input;
-            }
-            
-            @Override
-            public String toString() {
-                return "half if > 0";
-            }
-        });
+    public TitleMatchingEquivalenceScoringGenerator defaultScaledTitleScoringGenerator() {
+        return new TitleMatchingEquivalenceScoringGenerator(searchResolver);
     }
     
     private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
