@@ -65,6 +65,11 @@ public class TheSpacePlaylistProcessor {
             JsonNode pid = node.get("pid");
             playlist.setCanonicalUri(getCanonicalUri(pid.asText()));
             playlist.setPublisher(Publisher.THESPACE);
+            
+            JsonNode title = node.get("title");
+            if (title != null) {
+                playlist.setTitle(title.asText());
+            }
 
             JsonNode long_synopsis = node.get("long_synopsis");
             JsonNode medium_synopsis = node.get("medium_synopsis");

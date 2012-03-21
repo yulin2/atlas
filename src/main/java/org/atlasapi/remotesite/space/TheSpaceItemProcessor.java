@@ -83,7 +83,9 @@ public class TheSpaceItemProcessor {
             episode.setPublisher(Publisher.THESPACE);
 
             JsonNode title = node.get("title");
-            episode.setTitle(title.asText());
+            if (title != null) {
+                episode.setTitle(title.asText());
+            }
 
             JsonNode mediaType = node.get("media_type");
             if (mediaType != null && mediaType.asText().toLowerCase().equals("audio")) {
