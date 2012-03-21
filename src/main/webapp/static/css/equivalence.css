@@ -1,0 +1,212 @@
+* {
+    margin:0;
+    padding:0;
+}
+
+.mod:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+div.clearBox {
+    clear:both;
+}
+body {
+    font-family:"Helvetica Neue", Arial, sans-serif;
+    font-weight:300;
+    color:#333;
+}
+
+a {
+    text-decoration:none;
+}
+
+a img {
+    border:0;
+}
+
+li {
+    list-style-type:none;
+}
+
+h1, h2, h3, h4 {
+    font-weight:100;
+}
+
+#wrapper {
+    width:960px;
+    border:solid #ccc;
+    border-width:0 1px 1px 1px;
+    -webkit-box-shadow:5px 5px 5px #eee;
+    -moz-box-shadow:5px 5px 5px #eee;
+    margin:0 auto;
+}
+
+header {
+    padding: 12px;
+    border-bottom:1px solid #ccc;
+}
+
+nav {
+    margin-top: 5px;
+}
+
+nav h4 {
+    margin-left: 0;
+    display: inline;
+}
+
+h2 {
+    margin:12px;
+    border-bottom:1px solid #ccc;
+}
+
+h3 {
+    margin:12px 24px;
+}
+
+#applications-list {
+    padding:12px 24px;
+}
+
+#applications-list li {
+    margin:5px 0;
+}
+
+form p {
+    margin: 15px 0;
+    padding: 0 10px;
+}
+
+#create, #ipaddress {
+    width:400px;
+    text-align:right;
+    border:1px solid #ccc;
+    background-color:#eee;
+    margin:24px auto 24px auto;
+}
+
+input[type="text"] {
+    color:#333;
+    font-size:120%;
+    margin: 0 5px;
+    padding:2px;
+    border:1px solid #ccc;
+}
+
+input[type="text"]:hover, input[type="text"]:focus {
+    border-color:#666;
+    outline:none;
+}
+
+input[type="submit"] {
+    font-size:120%;
+    color:#333;
+    background-color: #fff;
+    border:1px solid #ccc;
+    margin: 5px;
+    padding: 5px;
+    -webkit-border-radius:5px;
+    -moz-border-radius:5px;
+}
+
+input[type="submit"]:hover, input[type="submit"]:focus {
+    background-color:#eee;
+    border-color:#666;
+    outline:none;
+}
+
+input[type="checkbox"] {
+    margin:5px;
+}
+
+#app-publishers, #app-ips {
+    padding-left: 5%;
+    margin-bottom:25px;
+}
+
+#app-publishers li {
+    margin: 2px;
+    display: block;
+    width: 40%;
+}
+
+#app-publishers li label {
+    display:block;
+    padding:5px;
+}
+
+#app-publishers li label:hover {
+    background-color:#eee;
+    cursor:pointer;
+}
+
+#app-ips li {
+    margin:5px;
+    padding:5px 21px 5px 5px;
+    float:left;
+    display:block;
+}
+
+#app-ips li:hover {
+    background-color: #eee;
+}
+
+#app-ips li span:last-child {
+    cursor:pointer;
+    margin:2px;
+}
+
+table {
+    border: 1px solid #CCC;
+    border-collapse: collapse;
+    margin: 10px;
+}
+td,th {
+    text-align: center;
+    border: 1px solid #CCC;
+    padding: 2px;
+}
+p.time{
+    font-size:90%;
+    color:#aaa;
+    margin: 10px;
+}
+
+td.correct {
+    background-color: #9F9;
+}
+
+td.incorrect {
+    background-color: #F44;
+}
+
+textarea {
+    width: 450px;
+    height:50px;
+    margin-left: 10px;
+}
+
+.probe form p {
+    text-align:right;
+}
+
+.probe form p label {
+    vertical-align: top;
+}
+
+#desc ul {
+padding-left: 24px;
+}
+#desc > ul {
+padding-left: 48px!important;
+}
+#desc ul li{
+    list-style-type: circle;
+}
+#equiv h3, #equiv p {
+    margin-left:12px;
+}
