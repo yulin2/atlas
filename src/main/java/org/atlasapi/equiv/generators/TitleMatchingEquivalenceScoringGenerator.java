@@ -30,9 +30,17 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     private final static float TITLE_WEIGHTING = 1.0f;
     private final static float BROADCAST_WEIGHTING = 0.0f;
     private final static float CATCHUP_WEIGHTING = 0.0f;
-
+    
+    private final Set<Publisher> searchPublishers = ImmutableSet.of(
+            Publisher.BBC, Publisher.C4, Publisher.HULU, Publisher.YOUTUBE, Publisher.TED, 
+            Publisher.VIMEO, Publisher.ITV, Publisher.BLIP, Publisher.DAILYMOTION, 
+            Publisher.FLICKR, Publisher.FIVE, Publisher.SEESAW, Publisher.TVBLOB, 
+            Publisher.ICTOMORROW, Publisher.HBO, Publisher.ITUNES, Publisher.MSN_VIDEO, 
+            Publisher.PA, Publisher.RADIO_TIMES, Publisher.ARCHIVE_ORG, Publisher.WORLD_SERVICE, Publisher.BBC_REDUX
+    );
+    
     private final SearchResolver searchResolver;
-    private ContentTitleScorer titleScorer;
+    private final ContentTitleScorer titleScorer;
 
     public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
@@ -63,7 +71,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     private List<Identified> searchForEquivalents(Container content) {
-        Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher(), Publisher.BBC_PRODUCTS));
+        Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
 
         List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 20), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
