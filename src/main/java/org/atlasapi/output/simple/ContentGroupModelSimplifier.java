@@ -20,7 +20,7 @@ public class ContentGroupModelSimplifier extends DescribedModelSimplifier<org.at
         copyBasicDescribedAttributes(model, simple, annotations);
 
         simple.setContent(simpleContentListFrom(model.getContents()));
-        simple.setGroupType(model.getType().toString());
+        simple.setType(model.getType().toString().toLowerCase());
 
         return simple;
     }
