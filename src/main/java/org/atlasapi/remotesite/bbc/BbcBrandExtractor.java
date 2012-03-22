@@ -26,6 +26,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesConta
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesRef;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
@@ -33,6 +34,7 @@ public class BbcBrandExtractor  {
 
 	private static final BbcProgrammesGenreMap genreMap = new BbcProgrammesGenreMap();
 	private static final Pattern IMAGE_STEM = Pattern.compile("^(.+)_[0-9]+_[0-9]+\\.[a-zA-Z]+$");
+	private static final Pattern SERIES_TITLE = Pattern.compile("Series (\\d+)");
 
 	private final BbcProgrammeGraphExtractor itemExtractor;
 	private final BbcProgrammeAdapter subContentExtractor;
@@ -52,6 +54,7 @@ public class BbcBrandExtractor  {
 	
 	public Series writeSeries(SlashProgrammesSeriesContainer rdfSeries, Brand brand) {
 		Series series = new Series();
+		series.withSeriesNumber(extractSeriesNumber(rdfSeries.title()));
 		populatePlaylistAttributes(series, rdfSeries);
 		List<String> episodeUris = episodesFrom(rdfSeries.episodeResourceUris());
 		if (brand != null) {
@@ -68,7 +71,12 @@ public class BbcBrandExtractor  {
     	return series;
 	}
 	
-	public void saveItemsInContainers(List<String> episodeUris, Container container, Series series) {
+	private Integer extractSeriesNumber(String title) {
+	    Matcher matcher = SERIES_TITLE.matcher(title);
+        return matcher.matches() ? Integer.parseInt(matcher.group(1)) : null;
+    }
+
+    public void saveItemsInContainers(List<String> episodeUris, Container container, Series series) {
 		for (String episodeUri : episodeUris) {
 			Identified found = subContentExtractor.fetchItem(episodeUri);
 			if (!(found instanceof Item)) {
