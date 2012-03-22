@@ -33,6 +33,7 @@ import org.joda.time.format.ISODateTimeFormat;
 
 /**
  */
+//TODO Lots of duplicated code, some refactoring needed.
 public class TheSpaceItemProcessor {
 
     private final String BASE_CANONICAL_URI = "http://thespace.org/items/";
@@ -121,7 +122,7 @@ public class TheSpaceItemProcessor {
                     episode.setImage(bigImage.asText());
                 }
             }
-            
+
             Iterator<JsonNode> categories = node.get("categories").getElements();
             Set<String> genres = new HashSet<String>();
             while (categories.hasNext()) {
@@ -213,6 +214,14 @@ public class TheSpaceItemProcessor {
                 series.setImage(bigImage.asText());
             }
         }
+
+        Iterator<JsonNode> categories = node.get("categories").getElements();
+        Set<String> genres = new HashSet<String>();
+        while (categories.hasNext()) {
+            String id = BASE_CATEGORY_URI + categories.next().get("id").asText();
+            genres.add(id);
+        }
+        series.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
 
         Iterator<JsonNode> clips = node.get("available_clips").getElements();
         while (clips.hasNext()) {
