@@ -33,7 +33,9 @@ public class EquivalenceGenerators<T extends Content> {
         
         for (ContentEquivalenceGenerator<T> generator : generators) {
             try {
+                desc.startStage(generator.toString());
                 generatedScores.add(generator.generate(content, desc));
+                desc.finishStage();
             } catch (Exception e) {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Exception running %s for %s", generator, content));
                 /* Propagate to make sure the equivalence update for this content fails - if a generator fails

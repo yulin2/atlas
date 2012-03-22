@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.atlasapi.equiv.results.persistence.EquivalenceIdentifier;
+import org.atlasapi.equiv.results.persistence.CombinedEquivalenceScore;
 import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbe;
 import org.eclipse.jetty.util.UrlEncoded;
@@ -36,21 +36,19 @@ public class RestoredEquivalenceResultModelBuilder {
         }
         
         SimpleModelList equivalences = new SimpleModelList();
-        for (Entry<EquivalenceIdentifier, Double> equivalence : target.combinedResults().entrySet()) {
+        for (CombinedEquivalenceScore equivalence : target.combinedResults()) {
             SimpleModel equivModel = new SimpleModel();
             
-            EquivalenceIdentifier key = equivalence.getKey();
+            equivModel.put("id",equivalence.id());
+            equivModel.put("encodedId",UrlEncoded.encodeString(equivalence.id()));
+            equivModel.put("title", equivalence.title());
+            equivModel.put("strong", equivalence.strong());
+            equivModel.put("publisher", equivalence.publisher());
+            equivModel.put("scores", scores(equivalence.score(), target.sourceResults().row(equivalence.id()), totals));
             
-            equivModel.put("id",key.id());
-            equivModel.put("encodedId",UrlEncoded.encodeString(key.id()));
-            equivModel.put("title", key.title());
-            equivModel.put("strong", key.strong());
-            equivModel.put("publisher", key.publisher());
-            equivModel.put("scores", scores(equivalence.getValue(), target.sourceResults().row(key.id()), totals));
+            hasStrong |= equivalence.strong();
             
-            hasStrong |= key.strong();
-            
-            equivModel.put("expected", expected(key, probe));
+            equivModel.put("expected", expected(equivalence, probe));
             
             equivalences.add(equivModel);
         }
@@ -93,7 +91,7 @@ public class RestoredEquivalenceResultModelBuilder {
         return model;
     }
 
-    private String expected(EquivalenceIdentifier key, EquivalenceResultProbe probe) {
+    private String expected(CombinedEquivalenceScore key, EquivalenceResultProbe probe) {
         if (probe != null) {
             if (probe.expectedEquivalent().contains(key.id())) {
                 return "expected";

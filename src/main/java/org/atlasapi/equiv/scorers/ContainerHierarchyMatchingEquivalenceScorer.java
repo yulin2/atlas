@@ -35,7 +35,6 @@ public class ContainerHierarchyMatchingEquivalenceScorer implements ContentEquiv
     
     @Override
     public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        desc.startStage("Hierarchy matching");
         ScoredEquivalentsBuilder<Container> results = DefaultScoredEquivalents.fromSource("Hierarchy");
 
         // Brands can have full Series hierarchy so compare its Series' hierarchies if present. 
@@ -58,7 +57,6 @@ public class ContainerHierarchyMatchingEquivalenceScorer implements ContentEquiv
             results.addEquivalent(suggestion, score(content, suggestion, desc));
         }
         
-        desc.finishStage();
         return results.build();
     }
 
