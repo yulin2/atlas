@@ -163,11 +163,9 @@ public class TheSpaceItemProcessor {
                 Series series = (Series) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pPid))).getFirstValue().valueOrNull();
                 if (series == null) {
                     series = new Series();
-                    series.setChildRefs(ImmutableList.of(episode.childRef()));
-                    fillSeries(series, mapper, client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + pPid + ".json", new JSonNodeHttpResponseTransformer(mapper))).get("programme"));
-                } else {
-                    series.setChildRefs(Iterables.concat(series.getChildRefs(), ImmutableList.of(episode.childRef())));
                 }
+                fillSeries(series, mapper, client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + pPid + ".json", new JSonNodeHttpResponseTransformer(mapper))).get("programme"));
+                series.setChildRefs(Iterables.concat(series.getChildRefs(), ImmutableList.of(episode.childRef())));
                 episode.setParentRef(ParentRef.parentRefFrom(series));
                 contentWriter.createOrUpdate(series);
             }
