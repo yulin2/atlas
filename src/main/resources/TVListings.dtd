@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.07 17/01/2012 mj -->
+<!-- listings Radio Times DTD v2.08 28/02/2012 mj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
 
 
 <!-- the TV listings for a particular date
-	date: the date of the listings in the form DD/MM/YYYY, where YYYY indicates the year, MM indicates the month and DD indicates the day -->
+    date: the date of the listings in the form DD/MM/YYYY, where YYYY indicates the year, MM indicates the month and DD indicates the day -->
 <!ELEMENT listings_date (channel_data+)>
 <!ATTLIST listings_date
-	date CDATA #REQUIRED
+    date CDATA #REQUIRED
 >
 
 
@@ -22,10 +22,10 @@ end_time: the endtime of the channel in xsd:dateTime format. The last prog_data 
 -->
 <!ELEMENT channel_data (epgdetails?, prog_data+)>
 <!ATTLIST channel_data 
-	name CDATA #REQUIRED
-	channel_id CDATA #REQUIRED
-	start_time CDATA #REQUIRED
-	end_time CDATA #REQUIRED
+    name CDATA #REQUIRED
+    channel_id CDATA #REQUIRED
+    start_time CDATA #REQUIRED
+    end_time CDATA #REQUIRED
 >
 
 <!-- epg data -->
@@ -158,35 +158,27 @@ channel_number: the channel_number of the current channel for this provider
 <!-- star rating -->
 <!ELEMENT star_rating (#PCDATA)>
 
-<!-- cast member -->
-<!ELEMENT cast_member (character?, actor?)>
+<!-- cast member (this also includes non-acting on-screen roles such as host, guest) -->
+<!ELEMENT cast_member (character?, person?, role)>
 
-<!-- character in a programme -->
+<!-- a character in a programme -->
 <!ELEMENT character (#PCDATA)>
 
 <!-- production staff member -->
 <!ELEMENT staff_member (role, person)>
 
-<!-- production staff role -->
+<!-- A person's role -->
 <!ELEMENT role (#PCDATA)>
 
-<!-- an actor in the cast 
-person_id: A unique id for this person
--->
-<!ELEMENT actor (#PCDATA)>
-<!ATTLIST actor
-	person_id CDATA #REQUIRED
->
-
-<!-- name of member of the production staff 
+<!-- name of member of the cast or production staff 
 person_id: A unique id for this person
 -->
 <!ELEMENT person (#PCDATA)>
 <!ATTLIST person
-	person_id CDATA #REQUIRED
+    person_id CDATA #REQUIRED
 >
 <!-- programme synopsis 
-	programme billings such as synopsis, extra detail and x-refs
+    programme billings such as synopsis, extra detail and x-refs
 -->
 <!ELEMENT billings (billing+)>
 
@@ -194,66 +186,66 @@ person_id: A unique id for this person
 -->
 <!ELEMENT billing (#PCDATA)>
 <!ATTLIST billing
-	type CDATA #REQUIRED
-	reviewer_initials CDATA #IMPLIED
-	reviewer_name CDATA #IMPLIED
+    type CDATA #REQUIRED
+    reviewer_initials CDATA #IMPLIED
+    reviewer_name CDATA #IMPLIED
 >
 
 <!ELEMENT videoplus (#PCDATA)>
 
 <!-- programme attributes 
-	stereo: the programme in stereo.
-	subtitles: the programme carries Teletext or Ceefax subtitles.
-	repeat: the programme a repeat.
-	bw: the programme broadcast in Black and White.
-	premiere: this a broadcast premiere.
+    stereo: the programme in stereo.
+    subtitles: the programme carries Teletext or Ceefax subtitles.
+    repeat: the programme a repeat.
+    bw: the programme broadcast in Black and White.
+    premiere: this a broadcast premiere.
     new_episode: this is the first showing of this programme on this channel.
     new_series: this is the first episode of a news series of this programme.
-	last_in_series: this is the last in a series of showings of this programme.
-	surround: the programme is being broadcast in surround sound.
-	widescreen: the programme being shown in widescreen format.
-	film: the programme a film.
-	sign_lang: the programme have sign language.
-	in_vision:  the programme has in vision subtitles.
-	audio_des: the programme is audio described.
-	interactive: the programme has interactive content.
-	hd: the programme is also showing on the High Definition channel
-	live: this is a live broadcast
-	as_live: this programme is being shown as-live
-	follow_on: this is a follow_on programme. (The programme follows the previous 
-	programme but doesn't have an exact broadcast time). In the xml, the time
-	field will contain the time of the previous programme. 
-	tv_movie: this programme is a made-for-tv movie
-	web_choice: RT web choice
-	special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
-	 
+    last_in_series: this is the last in a series of showings of this programme.
+    surround: the programme is being broadcast in surround sound.
+    widescreen: the programme being shown in widescreen format.
+    film: the programme a film.
+    sign_lang: the programme have sign language.
+    in_vision:  the programme has in vision subtitles.
+    audio_des: the programme is audio described.
+    interactive: the programme has interactive content.
+    hd: the programme is also showing on the High Definition channel
+    live: this is a live broadcast
+    as_live: this programme is being shown as-live
+    follow_on: this is a follow_on programme. (The programme follows the previous 
+    programme but doesn't have an exact broadcast time). In the xml, the time
+    field will contain the time of the previous programme. 
+    tv_movie: this programme is a made-for-tv movie
+    web_choice: RT web choice
+    special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
+     
 -->
 <!ELEMENT attr EMPTY>
 <!ATTLIST attr
-	stereo (yes | no) "no"
-	subtitles (yes | no) "no"
-	repeat (yes | no) "no"
-	bw (yes | no) "no"
-	premiere (yes | no) "no"
-	new_episode (yes | no) "no"
-	new_series (yes | no) "no"
-	last_in_series (yes | no) "no"
-	surround (yes | no) "no"
-	widescreen (yes | no) "no"
-	film (yes | no) "no"
-	sign_lang (yes | no) "no"
-	in_vision (yes | no) "no"
-	audio_des (yes | no) "no"
-	interactive (yes | no) "no"
-	hd (yes | no) "no"
-	live (yes | no) "no"
-	as_live (yes | no) "no"
-	follow_on (yes | no) "no"
-	choice (yes | no) "no"
-	familychoice (yes | no) "no"
-	tv_movie (yes | no) "no"
-	web_choice (yes | no) "no"
-	special (yes | no) "no"
+    stereo (yes | no) "no"
+    subtitles (yes | no) "no"
+    repeat (yes | no) "no"
+    bw (yes | no) "no"
+    premiere (yes | no) "no"
+    new_episode (yes | no) "no"
+    new_series (yes | no) "no"
+    last_in_series (yes | no) "no"
+    surround (yes | no) "no"
+    widescreen (yes | no) "no"
+    film (yes | no) "no"
+    sign_lang (yes | no) "no"
+    in_vision (yes | no) "no"
+    audio_des (yes | no) "no"
+    interactive (yes | no) "no"
+    hd (yes | no) "no"
+    live (yes | no) "no"
+    as_live (yes | no) "no"
+    follow_on (yes | no) "no"
+    choice (yes | no) "no"
+    familychoice (yes | no) "no"
+    tv_movie (yes | no) "no"
+    web_choice (yes | no) "no"
+    special (yes | no) "no"
 >
 
 
@@ -266,12 +258,12 @@ person_id: A unique id for this person
 
 
 <!-- pictureUsage attributes
-	pictureUsage_id: unique ID for this image for this showing
-	copyright: Copyright information for this image.
-	type: Indicates whether picture content refers to this specific episode,
-				season or the whole series. 
-	start_date: date from which this picture can be used alongside this showing.
-	expiry_date: last date on which picture can be used alongside this showing.
+    pictureUsage_id: unique ID for this image for this showing
+    copyright: Copyright information for this image.
+    type: Indicates whether picture content refers to this specific episode,
+                season or the whole series. 
+    start_date: date from which this picture can be used alongside this showing.
+    expiry_date: last date on which picture can be used alongside this showing.
 -->
 
 <!ATTLIST pictureUsage
