@@ -225,6 +225,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         episode.setCurie(CLOSED_CURIE+getClosedPostfix(channel));
         episode.setTitle(progData.getTitle());
         episode.setScheduleOnly(true);
+        episode.setMediaType(channel.mediaType());
         
         Version version = findBestVersion(episode.getVersions());
 
