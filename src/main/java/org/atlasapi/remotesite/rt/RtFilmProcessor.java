@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.pa.film;
+package org.atlasapi.remotesite.rt;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
@@ -44,19 +44,22 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.text.MoreStrings;
 
-public class PaFilmProcessor {
+public class RtFilmProcessor {
+    
+    private static final String RT_FILM_URI_BASE = "http://radiotimes.com/films/";
     
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
     private final ItemsPeopleWriter peopleWriter;
     private final AdapterLog log;
+    
     private final PaCountryMap countryMapper = new PaCountryMap();
-    private final PaLanguageMap languageMap = new PaLanguageMap();
+    private final RtLanguageMap languageMap = new RtLanguageMap();
     
     private final Splitter csvSplitter = Splitter.on(",").omitEmptyStrings().trimResults();
     private final Splitter slashSplitter = Splitter.on("/").omitEmptyStrings().trimResults();
 
-    public PaFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log) {
+    public RtFilmProcessor(ContentResolver contentResolver, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log) {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
         this.peopleWriter = peopleWriter;
@@ -67,18 +70,16 @@ public class PaFilmProcessor {
         String id = filmElement.getFirstChildElement("film_reference_no").getValue();
         
         Film film;
-        Identified existingFilm = contentResolver.findByCanonicalUris(ImmutableList.of(PaHelper.getFilmUri(id))).getFirstValue().valueOrNull();
-        if (existingFilm != null) {
-            if (existingFilm instanceof Film) {
-                film = (Film) existingFilm;
-            } else {
-                film = new Film();
-                Item.copyTo((Item) existingFilm, film);
-            }
+        Identified existingFilm = contentResolver.findByCanonicalUris(ImmutableList.of(RT_FILM_URI_BASE + id)).getFirstValue().valueOrNull();
+        if (existingFilm instanceof Film) {
+            film = (Film) existingFilm;
+        } else if (existingFilm instanceof Item) {
+            film = new Film();
+            Item.copyTo((Item) existingFilm, film);
         } else {
-            film = new Film(PaHelper.getFilmUri(id), PaHelper.getFilmCurie(id), Publisher.PA);
+            film = new Film(PaHelper.getFilmUri(id), PaHelper.getFilmCurie(id), Publisher.RADIO_TIMES);
         }
-        
+
         Element imdbElem = filmElement.getFirstChildElement("imdb_ref");
         if (imdbElem != null) {
             film.addAlias(normalize(imdbElem.getValue()));
@@ -97,7 +98,7 @@ public class PaFilmProcessor {
             film.addVersion(version);
         }
         
-        version.setProvider(Publisher.PA);
+        version.setProvider(Publisher.RADIO_TIMES);
         Element certificateElement = filmElement.getFirstChildElement("certificate");
         if (hasValue(certificateElement) && MoreStrings.containsOnlyAsciiDigits(certificateElement.getValue())) {
             version.setRestriction(Restriction.from(Integer.parseInt(certificateElement.getValue())));
@@ -122,8 +123,7 @@ public class PaFilmProcessor {
         
         if (otherPublisherPeople.isEmpty()) {
             film.setPeople(ImmutableList.copyOf(Iterables.concat(getActors(filmElement.getFirstChildElement("cast")), getDirectors(filmElement.getFirstChildElement("direction")))));
-        }
-        else {
+        } else {
             film.setPeople(otherPublisherPeople);
         }
         
@@ -272,25 +272,19 @@ public class PaFilmProcessor {
     }
     
     private String name(Element personElement) {
-        
+
         Element forename = personElement.getFirstChildElement("forename");
         Element surname = personElement.getFirstChildElement("surname");
-        
+
         if (forename == null && surname == null) {
             log.record(new AdapterLogEntry(Severity.WARN).withDescription("Person found with no name: " + personElement.toXML()).withSource(getClass()));
             return null;
         }
-        
+
         if (forename != null && surname != null) {
-           return forename.getValue() + " " + surname.getValue();
-        }
-        else {
-            if (forename != null) {
-                return forename.getValue();
-            }
-            else {
-                return surname.getValue();
-            }
+            return forename.getValue() + " " + surname.getValue();
+        } else {
+            return forename != null ? forename.getValue() : surname.getValue();
         }
     }
 }

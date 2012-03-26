@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.pa.film;
+package org.atlasapi.remotesite.rt;
 
 import javax.annotation.PostConstruct;
 
@@ -15,7 +15,7 @@ import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
-public class PaFilmModule {
+public class RtFilmModule {
 
     private final static Daily DAILY = RepetitionRules.daily(new LocalTime(5, 30, 0));
 
@@ -30,22 +30,22 @@ public class PaFilmModule {
 
     @PostConstruct
     public void startUp() {
-        scheduler.schedule(paFilmFeedDeltaUpdater().withName("PA Film Feed Updater"), DAILY);
-        scheduler.schedule(paFilmFeedCompleteUpdater().withName("PA Film Feed Complete Updater"), RepetitionRules.NEVER);
+        scheduler.schedule(rtFilmFeedDeltaUpdater().withName("RT Film Feed Updater"), DAILY);
+        scheduler.schedule(rtFilmFeedCompleteUpdater().withName("RT Film Feed Complete Updater"), RepetitionRules.NEVER);
     }
 
     @Bean
-    public PaFilmFeedUpdater paFilmFeedDeltaUpdater() {
-        return new PaFilmFeedUpdater(feedUrl, log, contentResolver, contentWriter, paFilmProcessor());
+    public RtFilmFeedUpdater rtFilmFeedDeltaUpdater() {
+        return new RtFilmFeedUpdater(feedUrl, log, contentResolver, contentWriter, rtFilmProcessor());
     }
     
     @Bean
-    public PaFilmFeedUpdater paFilmFeedCompleteUpdater() {
-        return PaFilmFeedUpdater.completeUpdater(feedUrl, log, contentResolver, contentWriter, paFilmProcessor());
+    public RtFilmFeedUpdater rtFilmFeedCompleteUpdater() {
+        return RtFilmFeedUpdater.completeUpdater(feedUrl, log, contentResolver, contentWriter, rtFilmProcessor());
     }
     
     @Bean
-    public PaFilmProcessor paFilmProcessor() {
-        return new PaFilmProcessor(contentResolver, contentWriter, peopleWriter, log);
+    public RtFilmProcessor rtFilmProcessor() {
+        return new RtFilmProcessor(contentResolver, contentWriter, peopleWriter, log);
     }
 }

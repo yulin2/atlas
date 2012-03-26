@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.pa.film;
+package org.atlasapi.remotesite.rt;
 
 import java.util.Locale;
 import java.util.Map;
@@ -6,11 +6,11 @@ import java.util.Map;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
-public class PaLanguageMap {
+public class RtLanguageMap {
 
     private Map<String, Optional<String>> languageMap;
 
-    public PaLanguageMap() {
+    public RtLanguageMap() {
         this.languageMap = initializeMap();
     }
 
