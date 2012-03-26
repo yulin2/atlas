@@ -18,11 +18,54 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenceUpdater<T> {
 
+    public static <T extends Item> Builder<T> builder(EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
+        return new Builder<T>(resultBuilder, log);
+    }
+    
+    public static class Builder<T extends Item> {
+        
+        private final EquivalenceResultBuilder<T> resultBuilder;
+        private final AdapterLog log;
+        private ImmutableSet<ContentEquivalenceGenerator<T>> generators;
+        private ImmutableSet<ContentEquivalenceScorer<T>> scorers;
+
+        public Builder(EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
+            this.resultBuilder = resultBuilder;
+            this.log = log;
+        }
+
+        public Builder<T> withGenerator(ContentEquivalenceGenerator<T> generator) {
+            this.generators = ImmutableSet.of(generator);
+            return this;
+        }
+        
+        public Builder<T> withGenerators(Iterable<ContentEquivalenceGenerator<T>> generators) {
+            this.generators = ImmutableSet.copyOf(generators);
+            return this;
+        }
+        
+        public Builder<T> withScorer(ContentEquivalenceScorer<T> scorer) {
+            this.scorers = ImmutableSet.of(scorer);
+            return this;
+        }
+        
+        public Builder<T> withScorers(Iterable<ContentEquivalenceScorer<T>> scorers) {
+            this.scorers = ImmutableSet.copyOf(scorers);
+            return this;
+        }
+        
+        public ItemEquivalenceUpdater<T> build() {
+            return new ItemEquivalenceUpdater<T>(generators, scorers, resultBuilder, log);
+        }
+        
+    }
+    
     private final EquivalenceGenerators<T> generators;
     private final EquivalenceScorers<T> scorers;
     private final EquivalenceResultBuilder<T> resultBuilder;
