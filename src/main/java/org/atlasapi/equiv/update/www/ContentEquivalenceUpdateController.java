@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -69,7 +70,7 @@ public class ContentEquivalenceUpdateController {
             @Override
             public void run() {
                 try{
-                    if (content instanceof Film) {
+                    if (content instanceof Film && Publisher.PREVIEW_NETWORKS.equals(content.getPublisher())) {
                         filmUpdater.updateEquivalences((Film) content, Optional.<List<Film>>absent());
                     } else {
                         contentUpdater.updateEquivalences(content, Optional.<List<Content>>absent());
