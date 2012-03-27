@@ -70,14 +70,14 @@ public class RtFilmProcessor {
         String id = filmElement.getFirstChildElement("film_reference_no").getValue();
         
         Film film;
-        Identified existingFilm = contentResolver.findByCanonicalUris(ImmutableList.of(RT_FILM_URI_BASE + id)).getFirstValue().valueOrNull();
+        Identified existingFilm = contentResolver.findByCanonicalUris(ImmutableList.of(rtFilmUriFor(id))).getFirstValue().valueOrNull();
         if (existingFilm instanceof Film) {
             film = (Film) existingFilm;
         } else if (existingFilm instanceof Item) {
             film = new Film();
             Item.copyTo((Item) existingFilm, film);
         } else {
-            film = new Film(PaHelper.getFilmUri(id), PaHelper.getFilmCurie(id), Publisher.RADIO_TIMES);
+            film = new Film(rtFilmUriFor(id), rtCurieFor(id), Publisher.RADIO_TIMES);
         }
 
         Element imdbElem = filmElement.getFirstChildElement("imdb_ref");
@@ -159,6 +159,14 @@ public class RtFilmProcessor {
         contentWriter.createOrUpdate(film);
         
         peopleWriter.createOrUpdatePeople(film);
+    }
+
+    public String rtCurieFor(String id) {
+        return "rt:f-"+id;
+    }
+
+    public String rtFilmUriFor(String id) {
+        return RT_FILM_URI_BASE + id;
     }
 
     private Set<Certificate> certificate(Element ukCinemaCertificate) {
