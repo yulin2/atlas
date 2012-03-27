@@ -16,7 +16,6 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleEntryBuilder;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.joda.time.Duration;
-import org.joda.time.LocalDate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.metabroadcast.common.time.DateTimeZones;
 
 @Controller
 public class ManualScheduleUpdateController {
@@ -40,7 +38,6 @@ public class ManualScheduleUpdateController {
         this.resolver = resolver;
         this.scheduleEntryBuilder = new ScheduleEntryBuilder(channelResolver, Duration.standardSeconds(Long.MAX_VALUE/1000));
         this.executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Manual Schedule Update Thread").build());
-        System.out.println(new LocalDate(DateTimeZones.UTC).year().getMaximumValue());
     }
     
     @RequestMapping(value = "/system/schedule/update", method = RequestMethod.POST)
