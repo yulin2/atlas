@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.update;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
@@ -32,12 +34,12 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
         
         private final EquivalenceResultBuilder<T> resultBuilder;
         private final AdapterLog log;
-        private ImmutableSet<ContentEquivalenceGenerator<T>> generators;
-        private ImmutableSet<ContentEquivalenceScorer<T>> scorers;
+        private ImmutableSet<ContentEquivalenceGenerator<T>> generators = ImmutableSet.of();
+        private ImmutableSet<ContentEquivalenceScorer<T>> scorers = ImmutableSet.of();
 
         public Builder(EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
-            this.resultBuilder = resultBuilder;
-            this.log = log;
+            this.resultBuilder = checkNotNull(resultBuilder);
+            this.log = checkNotNull(log);
         }
 
         public Builder<T> withGenerator(ContentEquivalenceGenerator<T> generator) {
