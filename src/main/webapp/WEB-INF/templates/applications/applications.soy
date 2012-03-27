@@ -153,6 +153,7 @@
 			{call atlas.templates.applications.widgets.applicationLink}
 				{param app: $application /}
 			{/call}
+			<span>{$application.credentials.apiKey}</span>
 		{ifempty}
 			<div class="alert inf">You don't currently have any applications.</div>
 		{/foreach}
@@ -273,7 +274,7 @@
 {template .login}
 {call atlas.templates.applications.head /}
 			<div class="main">
-				<h1>Login</h1>
+				<h1>Sign in</h1>
 				<p><a href="/admin/login/twitter" class="btn pos">Login with Twitter</a></p>
 			</div>
 {call atlas.templates.applications.foot /}

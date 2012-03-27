@@ -10,7 +10,7 @@
 		<h2>API Key</h2>
 		<div class="form">
 			<div class="inputHolder mlm">
-				<input type="text" value="{$application.credentials.apiKey}" />
+				<div>{$application.credentials.apiKey}</div>
 			</div>
 		</div>
 		
@@ -34,12 +34,12 @@
 		</form>
 	</div>
 	<div class="unit size1of2 lastUnit">
-		<h2>Publishers</h2>
-		{if not $application.configuration.precedence}
-		    <div class="alert inf">Publisher precedence not enabled, <a id="enable-precedence" href="#enable">enable</a></div>
-		{else}
+		<h2>Sources</h2>
+		    <div id="enable-precendence-div" class="alert inf {if $application.configuration.precedence}hide{/if}">Publisher precedence not enabled, <a id="enable-precedence" href="#enable">enable</a></div>
+		
 			<!--<div class="alert inf">Publisher precedence enabled, <a id="disable-precedence" href="#disable">disable</a></div>-->
-		{/if}
+			<div id="disable-precendence-div" class="alert inf {if not $application.configuration.precedence}hide{/if}">Publisher precedence enabled, <a id="disable-precedence" href="#disable">disable</a></div>
+	
 		<table id="app-publishers" class="mod simpleTable" data-app="{$application.slug}">
 			<thead>
 			    <tr>
