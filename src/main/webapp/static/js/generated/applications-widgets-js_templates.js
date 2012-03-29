@@ -15,7 +15,7 @@ goog.require('soy.StringBuilder');
  */
 atlas.templates.applications.widgets.applicationContent = function(opt_data, opt_sb) {
   var output = opt_sb || new soy.StringBuilder();
-  output.append('<h2>Application: ', soy.$$escapeHtml(opt_data.application.title), '</h2><h3>API Key</h3><p style="margin-left:48px">', soy.$$escapeHtml(opt_data.application.credentials.apiKey), '</p><h3>IP Addresses</h3><ul id="app-ips" class="mod" data-app="', soy.$$escapeHtml(opt_data.application.slug), '" data-ips="', soy.$$escapeHtml(opt_data.application.credentials.ipRanges.length), '">');
+  output.append('<h1>Application: ', soy.$$escapeHtml(opt_data.application.title), '</h1><div class="line"><div class="unit size1of2"><h2>API Key</h2><div class="form"><div class="inputHolder mlm"><div>', soy.$$escapeHtml(opt_data.application.credentials.apiKey), '</div></div></div><h2>IP Addresses</h2><ul id="app-ips" class="mod" data-app="', soy.$$escapeHtml(opt_data.application.slug), '" data-ips="', soy.$$escapeHtml(opt_data.application.credentials.ipRanges.length), '">');
   var rangeList12 = opt_data.application.credentials.ipRanges;
   var rangeListLen12 = rangeList12.length;
   if (rangeListLen12 > 0) {
@@ -24,15 +24,41 @@ atlas.templates.applications.widgets.applicationContent = function(opt_data, opt
       output.append('<li><span>', soy.$$escapeHtml(rangeData12), '</span><span style="display:none;opacity:0">✖</span></li>');
     }
   } else {
-    output.append('<li>No Addresses</li>');
+    output.append('<li><div class="alert inf mln mrn">No addresses</div></li>');
   }
-  output.append('</ul><form id="ipaddress" method="post" action="/admin/applications/', soy.$$escapeHtml(opt_data.application.slug), '/ipranges" data-app="', soy.$$escapeHtml(opt_data.application.slug), '"><p><label>IP Address: <input type="text" name="ipaddress" placeholder="CIDR" required /></label><input type="submit" value="Add" /></p></form><h3>Publishers</h3><ul id="app-publishers" class="mod" data-app="', soy.$$escapeHtml(opt_data.application.slug), '">', (! opt_data.application.configuration.precedence) ? '<p>Publisher precedence not enabled, <a id="enable-precedence" href="#enable" onclick="$(\'.precedenceControl\').css({\'visibility\': \'visible\'}); return false;">enable</a></p>' : '');
-  var publisherList29 = opt_data.application.configuration.publishers;
-  var publisherListLen29 = publisherList29.length;
-  for (var publisherIndex29 = 0; publisherIndex29 < publisherListLen29; publisherIndex29++) {
-    var publisherData29 = publisherList29[publisherIndex29];
-    output.append('<li publisher="', soy.$$escapeHtml(publisherData29.key), '"><label style="width: 150px; float: left;"><input class="app-publisher" type="checkbox" name="pubkey" value="', soy.$$escapeHtml(publisherData29.key), '" ', (publisherData29.enabled) ? 'checked' : '', '>', soy.$$escapeHtml(publisherData29.title), '</label><p class="precedenceControl" style="', (! opt_data.application.configuration.precedence) ? 'visibility: hidden; ' : '', '"><a href="#up" class="up">up</a> <a href="#down" class="down" onclick="">down</a></p><div style="clear: both;"/></li>');
+  output.append('</ul><form id="ipaddress" method="post" action="/admin/applications/', soy.$$escapeHtml(opt_data.application.slug), '/ipranges" data-app="', soy.$$escapeHtml(opt_data.application.slug), '" class="form"><div class="grp"><label for="addIp">IP Address</label><div class="inputHolder"><input type="text" id="addIp" name="ipaddress" placeholder="CIDR" required /></div></div><input type="submit" value="Add" class="btn pos" /></form></div><div class="unit size1of2 lastUnit"><h2>Sources</h2><div id="enable-precendence-div" class="alert inf ', (opt_data.application.configuration.precedence) ? 'hide' : '', '">Publisher precedence not enabled, <a id="enable-precedence" href="#enable">enable</a></div><!--<div class="alert inf">Publisher precedence enabled, <a id="disable-precedence" href="#disable">disable</a></div>--><div id="disable-precendence-div" class="alert inf ', (! opt_data.application.configuration.precedence) ? 'hide' : '', '">Publisher precedence enabled, <a id="disable-precedence" href="#disable">disable</a></div><table id="app-publishers" class="mod simpleTable" data-app="', soy.$$escapeHtml(opt_data.application.slug), '"><thead><tr><th></th><th>Source</th><th>Availability</th><th>Enabled</th></tr></thead><tbody>');
+  var publisherList34 = opt_data.application.configuration.publishers;
+  var publisherListLen34 = publisherList34.length;
+  for (var publisherIndex34 = 0; publisherIndex34 < publisherListLen34; publisherIndex34++) {
+    var publisherData34 = publisherList34[publisherIndex34];
+    atlas.templates.applications.widgets.publisher({publisher: publisherData34, precedence: opt_data.application.configuration.precedence, slug: opt_data.application.slug}, output);
   }
-  output.append('</ul>');
+  output.append('</tbody></table></div></div><div id="publisherRequestForm" class="overlayBlocker" style="display: none;"><div class="overlay"><a href="#" class="closeOverlay"></a><h2>Request access to publisher</h2><form id="publisherRequest" action="/admin/applications/', soy.$$escapeHtml(opt_data.application.slug), '/publishers/requested" method="post" class="form clearfix"><div class="grp"><label for="email">Your email address</label><div class="inputHolder"><input id="email" name="email" type="text" placeholder="me@example.com"  /></div></div><div class="grp"><label for="reason">Reason for request</label><div class="inputHolder"><input id="reason" name="reason" type="text" placeholder="Why you would like to access this publisher." /></div></div><input type="hidden" name="pubkey" /><input type="button" id="sendPublisherRequest" class="pos btn" value="Send" /><input type="button" class="neg btn fr mrm" value="Cancel" onclick="$(\'#publisherRequestForm\').hide();" /></form></div></div>');
+  if (!opt_sb) return output.toString();
+};
+
+
+/**
+ * @param {Object.<string, *>=} opt_data
+ * @param {soy.StringBuilder=} opt_sb
+ * @return {string|undefined}
+ * @notypecheck
+ */
+atlas.templates.applications.widgets.publisher = function(opt_data, opt_sb) {
+  var output = opt_sb || new soy.StringBuilder();
+  output.append('\t<tr publisher="', soy.$$escapeHtml(opt_data.publisher.key), '"><td class="precedenceControl">', (opt_data.precedence) ? '<a href="#up" class="up">up</a> <a href="#down" class="down" onclick="">down</a>' : '&nbsp;', '</td><td>', soy.$$escapeHtml(opt_data.publisher.title), '</td>', (opt_data.publisher.state == 'available') ? '<td>available</td><td><input class="app-publisher" type="checkbox" name="pubkey" value="' + soy.$$escapeHtml(opt_data.publisher.key) + '" ' + ((opt_data.publisher.enabled) ? 'checked' : '') + '></td>' : (opt_data.publisher.state == 'unavailable') ? '<td><a id="request-link-' + soy.$$escapeHtml(opt_data.publisher.key) + '" class="request-link" href="javascript:requestPublisher(\'' + soy.$$escapeHtml(opt_data.slug) + '\',\'' + soy.$$escapeHtml(opt_data.publisher.key) + '\')">request?</a></td><td><input class="app-publisher" type="checkbox" name="pubkey" value="' + soy.$$escapeHtml(opt_data.publisher.key) + '" disabled></td>' : '<td>' + soy.$$escapeHtml(opt_data.publisher.state) + '</td><td><input class="app-publisher" type="checkbox" name="pubkey" value="' + soy.$$escapeHtml(opt_data.publisher.key) + '" disabled></td>', '</tr>');
+  if (!opt_sb) return output.toString();
+};
+
+
+/**
+ * @param {Object.<string, *>=} opt_data
+ * @param {soy.StringBuilder=} opt_sb
+ * @return {string|undefined}
+ * @notypecheck
+ */
+atlas.templates.applications.widgets.applicationLink = function(opt_data, opt_sb) {
+  var output = opt_sb || new soy.StringBuilder();
+  output.append('\t<a class="media app-link" href="/admin/applications/', soy.$$escapeHtml(opt_data.app.slug), '" data-id="', soy.$$escapeHtml(opt_data.app.slug), '"><span class="img"></span><span class="bd">', soy.$$escapeHtml(opt_data.app.title), '</span></a>');
   if (!opt_sb) return output.toString();
 };

@@ -10,7 +10,7 @@
 		<h2>API Key</h2>
 		<div class="form">
 			<div class="inputHolder mlm">
-				<input type="text" value="{$application.credentials.apiKey}" />
+				<div>{$application.credentials.apiKey}</div>
 			</div>
 		</div>
 		
@@ -34,12 +34,12 @@
 		</form>
 	</div>
 	<div class="unit size1of2 lastUnit">
-		<h2>Publishers</h2>
-		{if not $application.configuration.precedence}
-		    <div class="alert inf">Publisher precedence not enabled, <a id="enable-precedence" href="#enable">enable</a></div>
-		{else}
+		<h2>Sources</h2>
+		    <div id="enable-precendence-div" class="alert inf {if $application.configuration.precedence}hide{/if}">Publisher precedence not enabled, <a id="enable-precedence" href="#enable">enable</a></div>
+		
 			<!--<div class="alert inf">Publisher precedence enabled, <a id="disable-precedence" href="#disable">disable</a></div>-->
-		{/if}
+			<div id="disable-precendence-div" class="alert inf {if not $application.configuration.precedence}hide{/if}">Publisher precedence enabled, <a id="disable-precedence" href="#disable">disable</a></div>
+	
 		<table id="app-publishers" class="mod simpleTable" data-app="{$application.slug}">
 			<thead>
 			    <tr>
@@ -55,18 +55,49 @@
 						{param publisher: $publisher /}
 						{param precedence: $application.configuration.precedence /}
 						{param slug: $application.slug /}
+						{param index: index($publisher) /}
 					{/call}
 				{/foreach}
 			</tbody>
 		</table>
 	</div>
 </div>
+	<div id="publisherRequestForm" class="overlayBlocker" style="display: none;">
+		<div class="overlay">
+			<a href="#" class="closeOverlay"></a>
+			<h2>Request access to publisher</h2>
+			<form id="publisherRequest" action="/admin/applications/{$application.slug}/publishers/requested" method="post" class="form clearfix">
+				<div class="grp">
+					<label for="email">
+						Your email address
+					</label>
+					<div class="inputHolder">
+						<input id="email" name="email" type="text" placeholder="me@example.com"  />
+					</div>
+				</div>
+				
+				<div class="grp">
+					<label for="reason">
+						Reason for request
+					</label>
+					<div class="inputHolder">
+						<input id="reason" name="reason" type="text" placeholder="Why you would like to access this publisher." />
+					</div>
+				</div>
+				<input type="hidden" name="pubkey" />
+				<input type="hidden" name="index" />
+				<input type="button" id="sendPublisherRequest" class="pos btn" value="Send" />
+				<input type="button" class="neg btn fr mrm" value="Cancel" onclick="$('#publisherRequestForm').hide();" />
+			</form>
+		</div>
+	</div>
 {/template}
 
 /**
  * @param publisher
  * @param precedence
  * @param slug
+ * @param index
  */
 {template .publisher}
 	<tr publisher="{$publisher.key}">
@@ -82,7 +113,7 @@
 	        <td>available</td>
 		    <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}></td>
 	    {elseif $publisher.state == 'unavailable'}
-		    <td><a class="request-link" href="/admin/applications/{$slug}/publishers/requested?pubkey={$publisher.key}">request?</a></td>
+		    <td><a id="request-link-{$index|id}" class="request-link" href="javascript:requestPublisher('{$slug}','{$publisher.key}', {$index})">request?</a></td>
 	        <td><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></td>
 		{else}
 	        <td>{$publisher.state}</td>

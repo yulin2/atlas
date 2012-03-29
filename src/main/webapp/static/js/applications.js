@@ -48,18 +48,47 @@ $(document).ready(function() {
 //	return false;
 //});
 
-$("a.request-link").live('click', function(){
-    var link = $(this);
-    var requestUrl = link.attr('href');
-    $.ajax({
-        type: "post",
-        url: requestUrl,
-        success:function(data, test, req) {
-            link.parent().html("requested");
-        }
-    })
+function requestPublisher(slug, pubkey, index){
+    $('[name=pubkey]').val(pubkey);
+    $('[name=index]').val(index);
+	$('#publisherRequestForm').show();
+	///admin/applications/{$slug}/publishers/requested?pubkey={$publisher.key}
+//    var link = $(this);
+//    var requestUrl = link.attr('href');
+//    $.ajax({
+//        type: "post",
+//        url: requestUrl,
+//        success:function(data, test, req) {
+//            link.parent().html("requested");
+//        }
+//    })
     return false;
+}
+
+$("#sendPublisherRequest").live('click', function() {
+	var requestUrl = $('#publisherRequest').attr('action');
+	var data = {};
+	data.pubkey = $('[name=pubkey]').val();
+	data.email = $('[name=email]').val();
+	data.reason = $('[name=reason]').val();
+	var index = $('[name=index]').val();
+    $.ajax({
+      type: "post",
+      data: data, 
+      url: requestUrl,
+      success:function(data, test, req) {
+    		var link = $('#request-link-' + index);
+    		link.parent().html("requested");
+      },
+      error:function(error) {
+		  console.log(error.statusText);
+      }
+    })	
+
+	$('#publisherRequestForm').hide();
+	return false;
 });
+
 
 $("a.approve-link").live('click', function(){
     var link = $(this);
@@ -185,8 +214,35 @@ var updatePrecedence = function() {
     });
 }
 
+var disablePrecedence = function() {
+	
+	var url = "/admin/applications/" + app.slug + "/precedenceOff.json";
+	$.ajax({
+        type: "post",
+        url: url,
+        data: ({}),
+        success: function(data){
+        	if(data.application){
+        		page.redraw(data.application);
+        	}
+        },
+        error:function(textStatus) {
+            console.log("failure")
+        }
+    });
+}
+
 $("#enable-precedence").live('click', function(){
    updatePrecedence();
+   $("#enable-precendence-div").addClass("hide");
+   $("#disable-precendence-div").removeClass("hide");
+   return false;
+});
+
+$("#disable-precedence").live('click', function(){
+   disablePrecedence();
+   $("#enable-precendence-div").removeClass("hide");
+   $("#disable-precendence-div").addClass("hide");
    return false;
 });
 
