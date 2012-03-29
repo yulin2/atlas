@@ -263,7 +263,7 @@ public class RtFilmProcessor {
             Element directorElement = directorElements.get(i);
             
             String role = directorElement.getFirstChildElement("role").getValue();
-            role = role.trim().replace(" ", "_");
+            role = role.trim().replace(" ", "_").toLowerCase();
             
             String name = name(directorElement);
             
