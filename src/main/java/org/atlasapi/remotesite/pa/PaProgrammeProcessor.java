@@ -20,7 +20,6 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -551,9 +550,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         List<CrewMember> people = Lists.newArrayList();
         
         for (CastMember cast: progData.getCastMember()) {
-            if (!Strings.isNullOrEmpty(cast.getPerson().getPersonId())) {
-                Actor actor = Actor.actor(cast.getPerson().getPersonId(), cast.getPerson().getvalue(), cast.getCharacter(), Publisher.PA);
-                actor.withRole(Role.fromKey(cast.getRole().toLowerCase().replace(' ', '_')));
+            if (!Strings.isNullOrEmpty(cast.getActor().getPersonId())) {
+                Actor actor = Actor.actor(cast.getActor().getPersonId(), cast.getActor().getvalue(), cast.getCharacter(), Publisher.PA);
                 if (! people.contains(actor)) {
                     people.add(actor);
                 }
