@@ -29,7 +29,6 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.PaCountryMap;
-import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
@@ -196,8 +195,14 @@ public class RtFilmProcessor {
     }
 
     public Iterable<Subtitles> extractSubtitles(Element subtitlesElement) {
-        //always ends in "+subtitles" so remove it. 
-        String csvLanguages = subtitlesElement.getValue().substring(0, subtitlesElement.getValue().indexOf('+'));
+        String csvLanguages = subtitlesElement.getValue();
+        
+        //almost always ends in "+subtitles", so attempt to remote it.
+        int plusIndex = subtitlesElement.getValue().indexOf('+');
+        if (plusIndex >= 0) {
+            csvLanguages = csvLanguages.substring(0, plusIndex);
+        }
+
         List<Subtitles> subtitles = Lists.newArrayList();
         for (String subtitleLanguage : csvSplitter.split(csvLanguages)) {
             Optional<String> code = languageMap.codeForEnglishLanguageName(subtitleLanguage);
