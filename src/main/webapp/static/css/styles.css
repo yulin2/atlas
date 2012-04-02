@@ -107,7 +107,7 @@ table h1,table h2,table h3, table h4, table h5, table h6, table p, table ul, tab
 }
 .adminLogo {
 	display: block;
-	width: 135px;
+	width: 108px;
 	height: 50px;
 	background: url(/static/images/atlas_admin_logo.png);
 	float: left;
