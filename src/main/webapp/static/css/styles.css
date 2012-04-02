@@ -1,3 +1,104 @@
+/* ====== Headings ====== */
+/* .h1-.h6 classes should be used to maintain the semantically appropriate heading levels - NOT for use on non-headings */
+h1, .h1{font-size:30px; font-weight:normal; font-style: normal; color:#306;}
+h2, .h2{font-size:26px; font-weight:normal; font-style: normal; color:#306;}
+h3, .h3{font-size:22px; font-weight:normal; font-style: normal; color:#DF2B72;}
+h4, .h4{font-size:20px; font-weight:normal; font-style: normal; color: #333;}
+h5, .h5{font-size:16px; font-weight:bold; font-style: normal; color:#306;}
+h6, .h6{font-size:12px; font-weight:normal; font-style: italic; color:#333;}
+/* if additional headings are needed they should be created via additional classes, never via location dependant styling */
+.category{font-size:108%; font-weight:normal; font-style: normal; text-transform:uppercase; color: #333;}
+.category a{color: #333;}
+
+ /* ====== Default spacing ====== */
+h1, h2, h3, h4, h5, h6, ul, ol,dl, p,blockquote, .media, form {margin:10px 0;}
+h1, h2, h3, h4, h5, h6,img{padding-bottom:0px;}
+pre{margin: 10px;}
+table h1,table h2,table h3, table h4, table h5, table h6, table p, table ul, table ol, table dl{padding:0;}
+
+.form {
+	
+}
+
+.form .grp {
+	display: block;
+	margin-bottom: 10px;
+}
+
+.form label {
+	width: 150px;
+	float: left;
+	font-size: 16px;
+	display: block;
+	padding-top: 8px;
+	text-align: right;
+}
+
+.form .inputHolder {
+	margin-left: 160px;
+	padding-right: 55px;
+	position: relative;
+}
+
+
+.form input[type="text"],
+.form .text{
+	margin: 0;
+	width: 100%;
+	padding: 0 10px;
+	line-height: 30px;
+	font-size: 14px;
+	background: #fff;
+	border: 1px solid rgba(0,0,0,0.05);
+	box-shadow: 0 1px 0px #fff, inset 0 1px 2px rgba(0,0,0,0.18);
+	border-radius: 5px;
+	z-index: 5;
+	position: relative;
+}
+
+.form input:focus {
+	outline: none;
+	border: 1px solid rgba(0,0,0,0.3);
+}
+
+.form .extra {
+	width: 48px;
+	height: 30px;
+	position: absolute;
+	right: 0;
+	top: 0;
+	display: block;
+	z-index: 1;
+	border-radius: 0 5px 5px 0;
+}
+
+.form .extra .icn {
+	display: block;
+	width: 30px;
+	height: 30px;
+	background: url(/static/images/extraSpriteSheet.png) 0 0 no-repeat;
+	text-indent: -9999px;
+	float: right;
+}
+
+.form .extra .icn.tick {
+	background-position: 0 0;
+}
+
+.form .extra .icn.cross {
+	background-position: 0 -30px;
+}
+
+.form .extra .icn.move {
+	background-position: 0 -60px;
+	cursor: move;
+}
+
+.form input[type="submit"] {
+	float: right;
+	margin-right: 32px;
+}
+
 .head {
 	padding: 10px;
 }
@@ -80,6 +181,19 @@ nav a {
 }
 .btn:hover {
 	text-decoration: none;
+	box-shadow: inset 0 0 5px #fff;
+	cursor: pointer;
+}
+
+.btn.big {
+	font-size: 20px;
+	padding: 12px 16px;
+}
+.btn.loading {
+	position: relative;
+	padding-left: 36px;
+	margin-left: -26px;
+	background: url(/static/images/loading.gif) 5px center no-repeat;
 }
 
 
@@ -101,9 +215,32 @@ nav a {
 	text-decoration: none;
 }
 
+.dragItem {
+	position: relative;
+	height: 42px;
+}
+
+.dragItemContent {
+	font-size: 14px;
+	padding: 8px 10px 7px;
+	margin: 5px 0;
+	display: block;
+	border-radius: 4px;
+	background: #fff;
+	z-index: 1;
+	position: absolute;
+	left: 0;
+	right: 35px;
+}
+.dragItem .extra {
+	position: absolute;
+	float: right;
+	top: 5px;
+	right: 0;
+}
+
 .alert {
 	display: block;
-	margin: 10px;
 	border-radius: 5px;
 	padding: 5px 10px;
 	font-size: 14px;
@@ -154,4 +291,17 @@ nav a {
 	background: linear-gradient(top,  #0371ce 0%,#004c92 100%);
 	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0371ce', endColorstr='#004c92',GradientType=0 );
 	border: 1px solid rgba(0,0,0,0.04);
+}
+
+.dis {
+	background: #ccc;
+	background: -moz-linear-gradient(top,  #efefef 0%, #ddd 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#efefef), color-stop(100%,#ddd));
+	background: -webkit-linear-gradient(top,  #efefef 0%,#ddd 100%);
+	background: -o-linear-gradient(top,  #efefef 0%,#ddd 100%);
+	background: -ms-linear-gradient(top,  #efefef 0%,#ddd 100%);
+	background: linear-gradient(top,  #efefef 0%,#ddd 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#efefef', endColorstr='#ddd',GradientType=0 );
+	border: 1px solid rgba(0,0,0,0.04);
+	color: #999;
 }
