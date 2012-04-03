@@ -288,7 +288,7 @@ public class EquivModule {
     }
 
     @Bean ManualScheduleUpdateController scheduleUpdateController() {
-        return new ManualScheduleUpdateController(scheduleResolver, contentResolver);
+        return new ManualScheduleUpdateController(scheduleResolver, contentResolver, channelResolver);
     }
     
 }
