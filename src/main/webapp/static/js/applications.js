@@ -51,6 +51,7 @@ $(document).ready(function() {
 function requestPublisher(slug, pubkey, index){
     $('[name=pubkey]').val(pubkey);
     $('[name=index]').val(index);
+    $('#publisherRequestForm').height($('body').height());
 	$('#publisherRequestForm').show();
 	///admin/applications/{$slug}/publishers/requested?pubkey={$publisher.key}
 //    var link = $(this);
