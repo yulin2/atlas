@@ -2,6 +2,8 @@ package org.atlasapi.query.v2;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -85,16 +87,39 @@ public class ChannelController {
     }
     
     private void writeOut(HttpServletResponse response, HttpServletRequest request, ChannelQueryResult channelQueryResult) throws IOException {
+
+        String callback = callback(request);
+        
         OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream(), Charsets.UTF_8);
         boolean ignoreEx = true;
         try {
+            if (callback != null) {
+                writer.write(callback + "(");
+            }
             gson.toJson(channelQueryResult, writer);
+            if (callback != null) {
+                writer.write(");");
+            }
             ignoreEx = false;
         } finally {
             Flushables.flush(writer, ignoreEx);
         }
     }
 
-    
+    private String callback(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        String callback = request.getParameter("callback");
+        if (Strings.isNullOrEmpty(callback)) {
+            return null;
+        }
+
+        try {
+            return URLEncoder.encode(callback, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
+    }
 
 }
