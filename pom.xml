@@ -385,11 +385,6 @@
             <version>1.5.7</version>
         </dependency>
         <dependency>
-            <groupId>nimrod</groupId>
-            <artifactId>nimrod-java</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.jmock</groupId>
             <artifactId>jmock-junit4</artifactId>
             <version>2.5.1</version>
@@ -447,10 +442,6 @@
             <releases>
                 <enabled>true</enabled>
             </releases>
-        </repository>
-        <repository>
-            <id>clojars.org</id>
-            <url>http://clojars.org/repo</url>
         </repository>
     </repositories>
 </project>
