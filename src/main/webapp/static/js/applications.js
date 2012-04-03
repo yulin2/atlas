@@ -251,6 +251,7 @@ var updatePrecedence = function(callback) {
         success: function(data){
         	if(data.application){
         		page.redraw(data.application);
+        		window.location.reload();
         	}
         },
         error:function(textStatus) {
@@ -309,6 +310,7 @@ var disablePrecedence = function() {
         success: function(data){
         	if(data.application){
         		page.redraw(data.application);
+        		window.location.reload();
         	}
         },
         error:function(textStatus) {
@@ -321,7 +323,6 @@ $("#enable-precedence").live('click', function(){
    updatePrecedence();
    $("#enable-precendence-div").addClass("hide");
    $("#disable-precendence-div").removeClass("hide");
-   window.location.reload();
    return false;
 });
 
@@ -329,7 +330,6 @@ $("#disable-precedence").live('click', function(){
    disablePrecedence();
    $("#enable-precendence-div").removeClass("hide");
    $("#disable-precendence-div").addClass("hide");
-   window.location.reload();
    return false;
 });
 
