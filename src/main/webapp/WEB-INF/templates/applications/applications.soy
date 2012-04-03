@@ -238,7 +238,7 @@
 	</div>
     {if length($sources) > 0}
     	{foreach $source in $sources}
-			<a class="media app-link clear" href="/admin/sources/{$source.id}/applications" data-id="{$source.key}"><span class="img"></span><span class="bd">{$source.title}</span></a>
+			<a class="media app-link cb" href="/admin/sources/{$source.id}/applications" data-id="{$source.key}"><span class="img"></span><span class="bd">{$source.title}</span></a>
 		{/foreach}
     {else}
     	<div class="alert inf">There aren't any sources yet.</div>
@@ -256,25 +256,50 @@
 {/call}
     <h1>{$source.title}</h1>
     {if length($applications) > 0}
-    	<table class="mod simpleTable">
-    		<thead>
-    			<tr><th>Application</th><th>Description</th><th>Created</th><th>Status</th><th>Used</th><th></th></tr>
-    		</thead>
-    		<tbody>
-				{foreach $application in $applications}
-	        		<tr data-app="{$application.slug}">
-	            		<td>{$application.title}</td>
-	            		<td>{$application.description}</td>
-	            		<td>{$application.created}</td>
-	            		<td>{$application.configuration.publishers[0].state}</td>
-	            		<td>{$application.configuration.publishers[0].enabled}</td>
-	            		{if $application.configuration.publishers[0].state == 'requested'}
-	                		<td><a class="approve-link" href="/admin/sources/{$source.id}/applications/approved?application={$application.slug}">Approve?</a></td>
-	            		{/if}
-	        		</tr>
-        		{/foreach}
-        	</tbody>
-	    </table>
+    	<div class="line">
+    		<div class="unit size1of6">
+    			<span class="h3">Application</span>
+    		</div>
+    		<div class="unit size1of6">
+    			<span class="h3">Description</span>
+    		</div>
+    		<div class="unit size1of6">
+    			<span class="h3">Created</span>
+    		</div>
+    		<div class="unit size1of6">
+    			<span class="h3">Status</span>
+    		</div>
+    		<div class="unit size1of6">
+    			<span class="h3">Used</span>
+    		</div>
+    		<div class="unit size1of6 lastUnit">
+    			<span class="h3">&nbsp;</span>
+    		</div>
+    	</div>
+    	{foreach $application in $applications}
+    		<div class="line app-link" data-app="{$application.slug}">
+    			<div class="unit size1of6">
+    				{$application.title}
+    			</div>
+    			<div class="unit size1of6">
+    				{$application.description}
+    			</div>
+    			<div class="unit size1of6">
+    				{$application.created}
+    			</div>
+    			<div class="unit size1of6">
+    				{$application.configuration.publishers[0].state}
+    			</div>
+    			<div class="unit size1of6">
+    				{$application.configuration.publishers[0].enabled}
+    			</div>
+    			<div class="unit size1of6 lastUnit">
+    				{if $application.configuration.publishers[0].state == 'requested'}
+	                	<a class="approve-link" href="/admin/sources/{$source.id}/applications/approved?application={$application.slug}">Approve?</a>
+	            	{/if}
+    			</div>
+    		</div>
+        {/foreach}
 	{else}
 		<div class="alert inf">There aren't any applications yet.</div>
 	{/if}

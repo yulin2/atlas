@@ -22,7 +22,8 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	if(app.configuration.precedence){
+	if(app && app.configuration && app.configuration.precedence){
+		var originalIndex = null;
 		$('.js_draggable').sortable({
 			revert: false,
 			axis: 'y',
@@ -32,26 +33,14 @@ $(document).ready(function() {
 				var diff = u.position.top - u.originalPosition.top;
 				var index = null;
 				var newIndex = null;
-				if(diff > 0){
-					// down
-					for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
-						var pub = app.configuration.publishers[i];
-						if(pub.key === item){
-							index = i;
-						}
+				for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+					var pub = app.configuration.publishers[i];
+					if(pub.key === item){
+						index = i;
 					}
-					newIndex = index+1;
-				} else {
-					// up
-					var index = null;
-					for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
-						var pub = app.configuration.publishers[i];
-						if(pub.key === item){
-							index = i;
-						}
-					}
-					newIndex = index-1;
 				}
+				newIndex = $(u.item).index();
+				
 				if(index !== null && newIndex !== null){
 					var publisher = app.configuration.publishers.splice(index, 1);
 					app.configuration.publishers.splice(newIndex, 0, publisher[0]);
@@ -90,6 +79,7 @@ function requestPublisher(slug, pubkey, index){
     $('[name=pubkey]').val(pubkey);
     $('[name=index]').val(index);
     $('#publisherRequestForm').height($('body').height());
+    $('.overlay').css({top: $('body').scrollTop() + 200});
 	$('#publisherRequestForm').show();
 	///admin/applications/{$slug}/publishers/requested?pubkey={$publisher.key}
 //    var link = $(this);
@@ -298,7 +288,7 @@ var updateEnabled = function(callback){
 	}
 }
 
-var disablePrecedence = function() {
+var disablePrecedence = function(callback) {
 	
 	var url = "/admin/applications/" + app.slug + "/precedenceOff.json";
 	$.ajax({
@@ -308,6 +298,7 @@ var disablePrecedence = function() {
         success: function(data){
         	if(data.application){
         		page.redraw(data.application);
+        		callback();
         	}
         },
         error:function(textStatus) {
@@ -317,18 +308,20 @@ var disablePrecedence = function() {
 }
 
 $("#enable-precedence").live('click', function(){
-   updatePrecedence();
-   $("#enable-precendence-div").addClass("hide");
-   $("#disable-precendence-div").removeClass("hide");
-   window.location.reload();
+   updatePrecedence(function(){
+	   $("#enable-precendence-div").addClass("hide");
+	   $("#disable-precendence-div").removeClass("hide");
+	   window.location.reload();
+   });
    return false;
 });
 
 $("#disable-precedence").live('click', function(){
-   disablePrecedence();
-   $("#enable-precendence-div").removeClass("hide");
-   $("#disable-precendence-div").addClass("hide");
-   window.location.reload();
+   disablePrecedence(function(){
+	   $("#enable-precendence-div").removeClass("hide");
+	   $("#disable-precendence-div").addClass("hide");
+	   window.location.reload();
+   });
    return false;
 });
 
