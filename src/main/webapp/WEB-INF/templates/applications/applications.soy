@@ -11,6 +11,7 @@
 <head>
 	<title>Atlas Applications</title>
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+	<script src="/static/js/jquery-ui-1.8.18.custom.min.js"></script>
 	<script src="/static/js/base.js"></script>
 	<script src="/static/js/soyutils.js"></script>
 	<script src="/static/js/generated/applications-widgets-js_templates.js" type="text/javascript"></script>
@@ -101,13 +102,13 @@
 		{/if}
 	</script>
 	
+	<link rel="stylesheet" type="text/css" href="/static/css/min-include.css" />
 	<link rel="stylesheet" type="text/css" href="/static/css/styles.css" />
 	<link rel="stylesheet" type="text/css" href="/static/css/colorbox.css" />
-	<link rel="stylesheet" type="text/css" href="/static/css/all.css" />
 </head>
 <body>
-	<div class="page">
-		<div class="head clearfix">
+	<div class="page w960 mna tal pbl">
+		<div class="head cf">
 			<span class="adminLogo"></span>
 			{if $applications or $application or $sources}
 				<nav><a href="/admin/sources">Sources</a><a href="/admin/applications">Applications</a><a href="/admin/logout">Logout</a></nav>
@@ -138,7 +139,7 @@
 	{param application: null /}
 {/call}
 	<h1>Applications</h1>
-	<div class="form fr mrm">
+	<!--<div class="form fr mrm">
     	<div class="grp">
     		<label for="filter">Filter</label>
     		<div class="inputHolder">
@@ -146,25 +147,41 @@
     			<span class="extra neg" style="display: none;"><a href="#" class="icn cross" id="clearFilter" title="Clear">Clear</a></span>
     		</div>
     	</div>
-	</div>
+	</div>-->
+	<button type="button" class="btn pos mlm fr" onclick="$('.overlayBlocker').show();">Create Application</button>
 	<h2 class="fl">Current Applications</h2>
-	<div id="applications-list" data-apps="{length($applications)}" class="clearfix clear">
-		{foreach $application in $applications}
-			{call atlas.templates.applications.widgets.applicationLink}
-				{param app: $application /}
-			{/call}
-			<span>{$application.credentials.apiKey}</span>
-		{ifempty}
+	<div id="applications-list" data-apps="{length($applications)}" class="cf cb">
+		{if length($applications) > 0}
+			<div class="line">
+				<div class="unit size1of4">
+					<span class="h3">App Name</span>
+				</div>
+				<div class="unit size1of4">
+					<span class="h3">App Slug</span>
+				</div>
+				<div class="unit size1of4">
+					<span class="h3">API Key</span>
+				</div>
+				<div class="unit size1of4 lastUnit">
+					<span class="h3">User</span>
+				</div>
+			</div>
+			{foreach $application in $applications}
+				{call atlas.templates.applications.widgets.applicationLink}
+					{param app: $application /}
+				{/call}
+				<!--<span>{$application.credentials.apiKey}</span>-->
+			{/foreach}
+		{else}
 			<div class="alert inf">You don't currently have any applications.</div>
-		{/foreach}
-		<button type="button" class="btn pos mlm" onclick="$('.overlayBlocker').show();">Create Application</button>
+		{/if}
 	</div>
 	
 	<div class="overlayBlocker" style="display: none;">
 		<div class="overlay">
 			<a href="#" class="closeOverlay"></a>
-			<h2>Create New Application</h2>
-			<form id="create" action="/admin/applications" method="post" class="form clearfix">
+			<h2 class="mlm">Create New Application</h2>
+			<form id="create" action="/admin/applications" method="post" class="form cf">
 				<div class="grp">
 					<label for="slug">
 						Application Slug
@@ -273,9 +290,12 @@
  */
 {template .login}
 {call atlas.templates.applications.head /}
-			<div class="main">
-				<h1>Sign in</h1>
-				<p><a href="/admin/login/twitter" class="btn pos">Login with Twitter</a></p>
+			<div class="main pm">
+				<h1>Welcome to Atlas</h1>
+				<div class="alert inf mtl mbl">To set up a new application or configure an existing one, sign in using Twitter to get started.</div>
+				<div class="tac cf">
+					<a href="/admin/login/twitter" class="btn big pos mna dib">Sign in with Twitter</a>
+				</div>
 			</div>
 {call atlas.templates.applications.foot /}
 {/template}

@@ -22,6 +22,43 @@ $(document).ready(function() {
 		return false;
 	});
 	
+	$('.js_draggable').sortable({
+		revert: false,
+		axis: 'y',
+		containment: '.js_draggable',
+		update: function(e, u){
+			var item = $(u.item).attr('data-publisher');
+			var diff = u.position.top - u.originalPosition.top;
+			var index = null;
+			var newIndex = null;
+			if(diff > 0){
+				// down
+				for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+					var pub = app.configuration.publishers[i];
+					if(pub.key === item){
+						index = i;
+					}
+				}
+				newIndex = index+1;
+			} else {
+				// up
+				var index = null;
+				for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+					var pub = app.configuration.publishers[i];
+					if(pub.key === item){
+						index = i;
+					}
+				}
+				newIndex = index-1;
+			}
+			if(index !== null && newIndex !== null){
+				var publisher = app.configuration.publishers.splice(index, 1);
+				app.configuration.publishers.splice(newIndex, 0, publisher[0]);
+			}
+		}
+	});
+	$('.js_draggable').disableSelection();
+	
 	/*$(window).hashchange( function(){
 		var loc = location.hash.substring(2)
 		if( loc.length > 0 ){
@@ -121,21 +158,26 @@ addApplication = function(slug, data) {
 }
 
 $("input.app-publisher").live('change', function(){
-	var checkbox = $(this);
-	var checked =  $(this).is(":checked")
-	$.ajax({
-		type: checked ? "post" : "delete",
-		url: "/admin/applications/"+checkbox.closest('table').attr("data-app")+"/publishers/enabled"+(checked?"":"/"+$(this).attr("value"))+".json",
-		data: ({pubkey : $(this).attr("value")}),
-		success:function(responseData, textStatus, XMLHttpRequest) {
-			checkbox.closest('label').stop().animate({opacity: 0.25}, 500, function() {
-				checkbox.closest('label').animate({opacity: 1});
-			});
-		},
-		error:function(textStatus) {
-			checkbox.attr("checked", !checked);
-			console.log("fail:", textStatus);
+	var publisher = $(this).val();
+	var checked =  $(this).is(":checked");
+	
+	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+		var item = app.configuration.publishers[i];
+		if(item.key === publisher){
+			item.enabled = checked;
 		}
+	}
+	
+	return false;
+});
+
+$('#saveApplicationSources').live('click', function(){
+	var btn = $(this);
+	btn.addClass('loading');
+	updatePrecedence(function(){
+		updateEnabled(function(){
+			btn.removeClass('loading');
+		});
 	});
 	return false;
 });
@@ -191,7 +233,7 @@ $("#app-ips li span:last-child").live('click', function(){
 	});
 });
 
-var updatePrecedence = function() {
+var updatePrecedence = function(callback) {
 	var precedenceCsv = "";
 	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 		if (i > 0) {
@@ -211,8 +253,48 @@ var updatePrecedence = function() {
         },
         error:function(textStatus) {
             console.log("failure")
+        },
+        complete: function(){
+        	callback();
         }
     });
+    return false;
+}
+
+var updateEnabled = function(callback){
+	var slug = app.slug;
+	var count = 0;
+	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+		var enabled = app.configuration.publishers[i].enabled;
+		var publisher = app.configuration.publishers[i].key;
+		var type = 'delete';
+		if(enabled){
+			type = 'post';
+		}
+		var url = "/admin/applications/"+slug+"/publishers/enabled";
+		if(!enabled){
+			url += "/"+publisher;
+		}
+		url += ".json";
+		
+		$.ajax({
+			type: type,
+			url: url,
+			data: ({pubkey : publisher}),
+			success:function(responseData, textStatus, XMLHttpRequest) {
+				
+			},
+			error:function(textStatus) {
+				console.log("fail:", textStatus);
+			},
+			complete: function(){
+				if(count === ii-1){
+					callback();
+				}
+				count++;
+			}
+		});
+	}
 }
 
 var disablePrecedence = function() {
