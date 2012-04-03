@@ -33,10 +33,8 @@
 					{rb},
 					slug: '{$app.slug}',
 					configuration: {lb}
-						publishers: []
-						{if $app.configuration.precedence},
-							precedence: {$app.configuration.precedence}
-						{/if}
+						publishers: [],
+						precedence: {if $app.configuration.precedence}true{else}false{/if}
 					{rb}
 				{rb});
 				
@@ -65,10 +63,8 @@
 				{rb},
 				slug: '{$application.slug}',
 				configuration: {lb}
-					publishers: []
-					{if $application.configuration.precedence},
-						precedence: {$application.configuration.precedence}
-					{/if}
+					publishers: [],
+					precedence: {if $application.configuration.precedence}true{else}false{/if}
 				{rb}
 			{rb};
 			

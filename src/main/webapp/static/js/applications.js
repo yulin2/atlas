@@ -22,42 +22,44 @@ $(document).ready(function() {
 		return false;
 	});
 	
-	$('.js_draggable').sortable({
-		revert: false,
-		axis: 'y',
-		containment: '.js_draggable',
-		update: function(e, u){
-			var item = $(u.item).attr('data-publisher');
-			var diff = u.position.top - u.originalPosition.top;
-			var index = null;
-			var newIndex = null;
-			if(diff > 0){
-				// down
-				for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
-					var pub = app.configuration.publishers[i];
-					if(pub.key === item){
-						index = i;
-					}
-				}
-				newIndex = index+1;
-			} else {
-				// up
+	if(app.configuration.precedence){
+		$('.js_draggable').sortable({
+			revert: false,
+			axis: 'y',
+			containment: '.js_draggable',
+			update: function(e, u){
+				var item = $(u.item).attr('data-publisher');
+				var diff = u.position.top - u.originalPosition.top;
 				var index = null;
-				for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
-					var pub = app.configuration.publishers[i];
-					if(pub.key === item){
-						index = i;
+				var newIndex = null;
+				if(diff > 0){
+					// down
+					for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+						var pub = app.configuration.publishers[i];
+						if(pub.key === item){
+							index = i;
+						}
 					}
+					newIndex = index+1;
+				} else {
+					// up
+					var index = null;
+					for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
+						var pub = app.configuration.publishers[i];
+						if(pub.key === item){
+							index = i;
+						}
+					}
+					newIndex = index-1;
 				}
-				newIndex = index-1;
+				if(index !== null && newIndex !== null){
+					var publisher = app.configuration.publishers.splice(index, 1);
+					app.configuration.publishers.splice(newIndex, 0, publisher[0]);
+				}
 			}
-			if(index !== null && newIndex !== null){
-				var publisher = app.configuration.publishers.splice(index, 1);
-				app.configuration.publishers.splice(newIndex, 0, publisher[0]);
-			}
-		}
-	});
-	$('.js_draggable').disableSelection();
+		});
+		$('.js_draggable').disableSelection();
+	}
 	
 	/*$(window).hashchange( function(){
 		var loc = location.hash.substring(2)
@@ -318,6 +320,7 @@ $("#enable-precedence").live('click', function(){
    updatePrecedence();
    $("#enable-precendence-div").addClass("hide");
    $("#disable-precendence-div").removeClass("hide");
+   window.location.reload();
    return false;
 });
 
@@ -325,6 +328,7 @@ $("#disable-precedence").live('click', function(){
    disablePrecedence();
    $("#enable-precendence-div").removeClass("hide");
    $("#disable-precendence-div").addClass("hide");
+   window.location.reload();
    return false;
 });
 
