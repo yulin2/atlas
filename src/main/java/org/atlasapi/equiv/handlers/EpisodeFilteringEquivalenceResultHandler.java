@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.handlers;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,20 +13,28 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 
 public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResultHandler<Item> {
 
     private final EquivalenceResultHandler<Item> delegate;
-    private final ImmutableSet<String> containerRefs;
+    private final Multimap<Publisher,String> containerRefs;
+    
+    private static final Function<Container,Publisher> toPublisher = new Function<Container,Publisher>() {
+        @Override
+        public Publisher apply(Container input) {
+            return input.getPublisher();
+        }
+    };
 
     public EpisodeFilteringEquivalenceResultHandler(EquivalenceResultHandler<Item> delegate, Set<Container> strongContainers) {
         this.delegate = delegate;
-        this.containerRefs = ImmutableSet.copyOf(Iterables.transform(strongContainers, Identified.TO_URI));
+        this.containerRefs = Multimaps.transformValues(Multimaps.index(strongContainers, toPublisher), Identified.TO_URI);
     }
 
     @Override
@@ -34,7 +43,6 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
         ReadableDescription desc = (ReadableDescription) result.description().startStage(String.format("Episode parent filter: %s", containerRefs));
         Map<Publisher, ScoredEquivalent<Item>> strongEquivalences = filter(result.strongEquivalences(), desc);
         desc.finishStage();
-        System.out.println();
         delegate.handle(new EquivalenceResult<Item>(result.target(), result.rawScores(), result.combinedEquivalences(), strongEquivalences, desc));
 
     }
@@ -43,11 +51,12 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
         return ImmutableMap.copyOf(Maps.filterValues(strongItems, new Predicate<ScoredEquivalent<Item>>() {
             @Override
             public boolean apply(ScoredEquivalent<Item> input) {
-                if (input.equivalent().getContainer() != null && !containerRefs.contains(input.equivalent().getContainer().getUri())) {
-                    desc.appendText("%s removed. Unacceptable container: %s", input, input.equivalent().getContainer().getUri());
-                    return false;
+                Collection<String> validContainers = containerRefs.get(input.equivalent().getPublisher());
+                if (validContainers == null || validContainers.isEmpty() || input.equivalent().getContainer() == null || validContainers.contains(input.equivalent().getContainer().getUri())) {
+                    return true;
                 }
-                return true;
+                desc.appendText("%s removed. Unacceptable container: %s", input, input.equivalent().getContainer().getUri());
+                return false;
             }
         }));
     }
