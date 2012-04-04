@@ -249,7 +249,6 @@ var updatePrecedence = function(callback) {
         success: function(data){
         	if(data.application){
         		page.redraw(data.application);
-        		window.location.reload();
         	}
         },
         error:function(textStatus) {
