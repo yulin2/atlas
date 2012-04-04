@@ -36,6 +36,7 @@ public class AtlasWebModule {
 
     public @Bean SoyTemplateRenderer soyRenderer() {
         SoyTemplateRenderer renderer = new SoyTemplateRenderer();
+        renderer.loadConstantsFromConfig();
         renderer.setPrefix("/WEB-INF/templates/");
         renderer.setSuffix(".soy");
         return renderer;

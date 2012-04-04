@@ -1,5 +1,7 @@
 goog.require('atlas.templates.applications.widgets');
 
+var updatedPrecedence = false;
+
 $(document).ready(function() {
 
 	//$(".app-link").each(function(){
@@ -45,6 +47,8 @@ $(document).ready(function() {
 					var publisher = app.configuration.publishers.splice(index, 1);
 					app.configuration.publishers.splice(newIndex, 0, publisher[0]);
 				}
+				
+				updatedPrecedence = true;
 			}
 		});
 		$('.js_draggable').disableSelection();
@@ -166,10 +170,14 @@ $("input.app-publisher").live('change', function(){
 $('#saveApplicationSources').live('click', function(){
 	var btn = $(this);
 	btn.addClass('loading');
-	updatePrecedence(function(){
-		updateEnabled(function(){
+	updateEnabled(function(){
+		if(updatedPrecedence){
+			updatePrecedence(function(){
+				btn.removeClass('loading');
+			});
+		} else {
 			btn.removeClass('loading');
-		});
+		}
 	});
 	return false;
 });
@@ -241,7 +249,6 @@ var updatePrecedence = function(callback) {
         success: function(data){
         	if(data.application){
         		page.redraw(data.application);
-        		window.location.reload();
         	}
         },
         error:function(textStatus) {
@@ -261,8 +268,10 @@ var updateEnabled = function(callback){
 		var enabled = app.configuration.publishers[i].enabled;
 		var publisher = app.configuration.publishers[i].key;
 		var type = 'delete';
+		var data = null;
 		if(enabled){
 			type = 'post';
+			data = {pubkey: publisher};
 		}
 		var url = "/admin/applications/"+slug+"/publishers/enabled";
 		if(!enabled){
@@ -273,7 +282,7 @@ var updateEnabled = function(callback){
 		$.ajax({
 			type: type,
 			url: url,
-			data: ({pubkey : publisher}),
+			data: data,
 			success:function(responseData, textStatus, XMLHttpRequest) {
 				
 			},
