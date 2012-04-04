@@ -2,7 +2,7 @@
 <configuration>
 
     <appender name="TASKS" class="ch.qos.logback.core.FileAppender">
-        <file>/usr/local/jetties/atlas-processing/tasks.log</file>
+        <file>/usr/local/jetties/atlas-processing/work/tasks.log</file>
         <encoder>
             <Pattern>%d{HH:mm:ss.SSS} [%thread] %level %logger - %msg%n</Pattern>
         </encoder>
