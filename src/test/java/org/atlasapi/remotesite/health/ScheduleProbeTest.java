@@ -34,20 +34,21 @@ import com.metabroadcast.common.time.TimeMachine;
 
 public class ScheduleProbeTest extends TestCase {
 
-	private static final Channel CHANNEL4 = new Channel(Publisher.METABROADCAST, "Channel 4", "c4", MediaType.AUDIO, "http://channel4.com");
-
-    private final TimeMachine clock = new TimeMachine();
     private final Mockery context = new Mockery();
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
+
+    private final TimeMachine clock = new TimeMachine();
+    private static final Channel CHANNEL4 = new Channel(Publisher.METABROADCAST, "Channel 4", "c4", MediaType.AUDIO, "http://channel4.com");
     private final Set<Channel> channels = ImmutableSet.of(CHANNEL4);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
+
+    private final ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock, 1);
 
     @Test
     public void testProbeProducesFailureResultWhenNoEntriesInSchedule() throws Exception {
 
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
         
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock);
         
         context.checking(new Expectations(){{
             one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
@@ -64,8 +65,6 @@ public class ScheduleProbeTest extends TestCase {
     public void testScheduleWithNoGapsPasses() throws Exception {
         
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
-        
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock);
         
                                     //start, duration in ms
         final Item item1 = broadcastItem(10, 10);
@@ -86,8 +85,6 @@ public class ScheduleProbeTest extends TestCase {
         
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
         
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock);
-        
         final Item item1 = broadcastItem(10, 10);
         final Item item2 = broadcastItem(300022, 10); //starts 5mins and 2 millis after
         
@@ -102,15 +99,12 @@ public class ScheduleProbeTest extends TestCase {
         assertThat(Iterables.get(result.entries(),0).isFailure(), is(false));
         assertThat(Iterables.get(result.entries(),1).isFailure(), is(true));
         assertThat(Iterables.get(result.entries(),2).isFailure(), is(false)); 
-        assertThat(Iterables.get(result.entries(),3).isFailure(), is(false)); 
     }
 
     @Test
     public void testScheduleWithOverlapsFails() throws Exception {
         
         clock.jumpTo(new DateTime(500, DateTimeZones.UTC));
-        
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock);
         
         final Item item1 = broadcastItem(10, 10);
         final Item item2 = broadcastItem(18, 10); //previous ends at 20
@@ -126,31 +120,6 @@ public class ScheduleProbeTest extends TestCase {
         assertThat(Iterables.get(result.entries(),0).isFailure(), is(false));
         assertThat(Iterables.get(result.entries(),1).isFailure(), is(false));
         assertThat(Iterables.get(result.entries(),2).isFailure(), is(true)); 
-        assertThat(Iterables.get(result.entries(),3).isFailure(), is(false)); 
-    }
-
-    @Test
-    public void testScheduleWithStaleItemsFails() throws Exception {
-        
-        clock.jumpTo(new DateTime(3600020, DateTimeZones.UTC));
-        
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock);
-        
-        final Item item1 = broadcastItem(10, 10, 10);
-        final Item item2 = broadcastItem(22, 10, 10);
-        
-        context.checking(new Expectations(){{
-            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
-            will(returnValue(schedule(CHANNEL4, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
-        }});
-        
-        ProbeResult result = probe.probe();
-        
-        assertThat(result.isFailure(), is(true));
-        assertThat(Iterables.get(result.entries(),0).isFailure(), is(false));
-        assertThat(Iterables.get(result.entries(),1).isFailure(), is(false));
-        assertThat(Iterables.get(result.entries(),2).isFailure(), is(false));
-        assertThat(Iterables.get(result.entries(),3).isFailure(), is(true)); 
     }
     
     private Item broadcastItem(long start, long duration) {
