@@ -7,17 +7,23 @@ import static com.google.common.collect.Iterables.transform;
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.update;
 import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 
+import java.net.UnknownHostException;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelTranslator;
+import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.mongodb.DBCollection;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 public class ChannelAvailableOnSettingTask extends ScheduledTask {
     
@@ -34,7 +40,9 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
         for (Channel channel : resolver.all()) {
             Set<String> availableOn = Sets.newHashSet();
             
-            availableOn.add(channel.broadcaster().key());
+            if (channel.broadcaster() != null) {
+                availableOn.add(channel.broadcaster().key());
+            }
             
             addAll(availableOn, filter(transform(channel.getAliases(), TO_AVAILABLE_ON), notNull()));
             
@@ -57,4 +65,10 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
         }
     };
 
+    public static void main(String[] args) throws UnknownHostException, MongoException {
+        
+        DatabasedMongo mongo = new DatabasedMongo(new Mongo(Configurer.get("mongo.host").get()), Configurer.get("mongo.dbName").get());
+        
+        new ChannelAvailableOnSettingTask(new MongoChannelStore(mongo) ,mongo.collection(MongoChannelStore.COLLECTION)).run();
+    }
 }
