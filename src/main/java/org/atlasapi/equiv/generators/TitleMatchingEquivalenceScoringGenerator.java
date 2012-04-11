@@ -30,27 +30,31 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     private final static float TITLE_WEIGHTING = 1.0f;
     private final static float BROADCAST_WEIGHTING = 0.0f;
     private final static float CATCHUP_WEIGHTING = 0.0f;
-
+    
+    private final Set<Publisher> searchPublishers = ImmutableSet.of(
+            Publisher.BBC, Publisher.C4, Publisher.HULU, Publisher.YOUTUBE, Publisher.TED, 
+            Publisher.VIMEO, Publisher.ITV, Publisher.BLIP, Publisher.DAILYMOTION, 
+            Publisher.FLICKR, Publisher.FIVE, Publisher.SEESAW, Publisher.TVBLOB, 
+            Publisher.ICTOMORROW, Publisher.HBO, Publisher.ITUNES, Publisher.MSN_VIDEO, 
+            Publisher.PA, Publisher.RADIO_TIMES, Publisher.ARCHIVE_ORG, Publisher.WORLD_SERVICE, Publisher.BBC_REDUX
+    );
+    
     private final SearchResolver searchResolver;
+    private final ContentTitleScorer titleScorer;
 
     public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
+        this.titleScorer = new ContentTitleScorer();
     }
 
     @Override
     public ScoredEquivalents<Container> generate(Container content, ResultDescription desc) {
-        desc.startStage("Title-matching generator");
-        ScoredEquivalents<Container> scores = scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
-        desc.finishStage();
-        return scores;
+        return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
     }
 
     @Override
     public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        desc.startStage("Title-matching scorer");
-        ScoredEquivalents<Container> scores = scoreSuggestions(content, suggestions, desc);
-        desc.finishStage();
-        return scores;
+        return scoreSuggestions(content, suggestions, desc);
     }
 
     private ScoredEquivalents<Container> scoreSuggestions(Container content, Iterable<Container> suggestions, ResultDescription desc) {
@@ -58,7 +62,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
         desc.appendText("Scoring %s suggestions", Iterables.size(suggestions));
         
         for (Container found : ImmutableSet.copyOf(suggestions)) {
-            Score score = score(content.getTitle(), found.getTitle());
+            Score score = titleScorer.score(content, found);
             desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
             equivalents.addEquivalent(found, score);
         }
@@ -66,30 +70,11 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
         return equivalents.build();
     }
 
-    private Score score(String subjectTitle, String equivalentTitle) {
-        subjectTitle = alphaNumeric(subjectTitle);
-        equivalentTitle = alphaNumeric(equivalentTitle);
-        double commonPrefix = commonPrefixLength(subjectTitle, equivalentTitle);
-        double difference = Math.abs(equivalentTitle.length() - commonPrefix) / equivalentTitle.length();
-        return Score.valueOf(commonPrefix / (subjectTitle.length() / 1.0) - difference);
-    }
-
-    private String alphaNumeric(String title) {
-        return title.replaceAll(" & ", " and ").replaceAll("[^\\d\\w]", "").toLowerCase();
-    }
-
-    private double commonPrefixLength(String t1, String t2) {
-        int i = 0;
-        for (; i < Math.min(t1.length(), t2.length()) && t1.charAt(i) == t2.charAt(i); i++) {
-        }
-        return i;
-    }
-
     private List<Identified> searchForEquivalents(Container content) {
-        Set<Publisher> publishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(content.getPublisher(), Publisher.BBC_PRODUCTS));
+        Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
 
-        List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 10), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
+        List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 20), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
         return search;
     }
 

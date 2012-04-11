@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 
 public class TitleMatchingEquivalenceScoringGeneratorTest {
 
-    
     @Test
     public void testDoesntSearchForPublisherOfSubjectContent() {
         

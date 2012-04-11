@@ -1,12 +1,14 @@
 package org.atlasapi.equiv.generators;
 
+import java.util.List;
+
+import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalent;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
@@ -15,6 +17,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.persistence.content.ContentResolver;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 
@@ -44,7 +47,7 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
                 
                 Item item = (Item) maybeItem.requireValue();
                 
-                EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences(item);
+                EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences(item, Optional.<List<Item>>absent());
                 
                 for (ScoredEquivalent<Item> strongEquivalent : itemEquivalences.strongEquivalences().values()) {
                     ParentRef parentEquivalent = strongEquivalent.equivalent().getContainer();

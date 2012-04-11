@@ -78,7 +78,18 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
         score(0, scorer.score(itemWithTitle("B&Q"), of(itemWithTitle("BandQ")), desc));
 
     }
-
+    
+    @Test
+    public void testMatchingWithThePrefix() {
+        DefaultDescription desc = new DefaultDescription();
+        
+        score(1, scorer.score(itemWithTitle("The Great Escape"), of(itemWithTitle("Great Escape")), desc));
+        score(1, scorer.score(itemWithTitle("the Great Escape"), of(itemWithTitle("Great Escape")), desc));
+        score(0, scorer.score(itemWithTitle("Theatreland"), of(itemWithTitle("The atreland")), desc));
+        score(0, scorer.score(itemWithTitle("theatreland"), of(itemWithTitle("the atreland")), desc));
+        
+    }
+    
     private void score(double expected, ScoredEquivalents<Item> scores) {
         Score value = Iterables.getOnlyElement(scores.equivalents().entrySet()).getValue();
         assertTrue(String.format("expected %s got %s", expected, value), value.equals(expected > 0 ? Score.valueOf(expected) : Score.NULL_SCORE));

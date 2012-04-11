@@ -40,7 +40,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
+public class ItemsAfterContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Container> {
 
     public static class Builder {
 
@@ -48,10 +48,10 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         private final LiveEquivalenceResultStore resultStore;
         private final EquivalenceResultBuilder<Container> containerResultBuilder;
         private final EquivalenceResultHandler<Item> itemResultHandler;
-        private final AdapterLog log; 
         
-        private Iterable<ContentEquivalenceGenerator<Container>> generators; 
-        private Iterable<ContentEquivalenceScorer<Container>> scorers;
+        private final ImmutableList.Builder<ContentEquivalenceGenerator<Container>> generators = ImmutableList.builder(); 
+        private final ImmutableList.Builder<ContentEquivalenceScorer<Container>> scorers = ImmutableList.builder();
+        private final AdapterLog log; 
 
         public Builder(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
                 EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, AdapterLog log) {
@@ -63,29 +63,19 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
         }
      
         public Builder withGenerator(ContentEquivalenceGenerator<Container> generator) {
-            this.generators = ImmutableSet.of(generator);
-            return this;
-        }
-        
-        public Builder withGenerators(Iterable<ContentEquivalenceGenerator<Container>> generators) {
-            this.generators = generators;
+            generators.add(generator);
             return this;
         }
         
         public Builder withScorer(ContentEquivalenceScorer<Container> scorer) {
-            this.scorers = ImmutableSet.of(scorer);
+            scorers.add(scorer);
             return this;
         }
         
-        public Builder withScorers(Iterable<ContentEquivalenceScorer<Container>> scorers) {
-            this.scorers = scorers;
-            return this;
-        }
-        
-        public ContainerEquivalenceUpdater build() {
-            EquivalenceGenerators<Container> generatorSet = new EquivalenceGenerators<Container>(ImmutableSet.copyOf(generators), log);
-            EquivalenceScorers<Container> scorerSet = new EquivalenceScorers<Container>(ImmutableSet.copyOf(scorers), log);
-            return new ContainerEquivalenceUpdater(contentResolver, resultStore, containerResultBuilder, itemResultHandler, generatorSet, scorerSet);
+        public ItemsAfterContainerEquivalenceUpdater build() {
+            EquivalenceGenerators<Container> generatorSet = new EquivalenceGenerators<Container>(generators.build(), log);
+            EquivalenceScorers<Container> scorerSet = new EquivalenceScorers<Container>(scorers.build(), log);
+            return new ItemsAfterContainerEquivalenceUpdater(contentResolver, resultStore, containerResultBuilder, itemResultHandler, generatorSet, scorerSet);
         }
     }
     
@@ -107,7 +97,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
     private final ScoredEquivalentsMerger merger = new ScoredEquivalentsMerger();
     private final LiveEquivalenceResultStore resultStore;
 
-    public ContainerEquivalenceUpdater(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
+    public ItemsAfterContainerEquivalenceUpdater(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
             EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, 
             EquivalenceGenerators<Container> generators, EquivalenceScorers<Container> scorers) {
                 this.contentResolver = contentResolver;
@@ -152,8 +142,7 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
             }
         }));
         
-        EquivalenceResultHandler<Item> episodeMatchingHandler = new EpisodeMatchingEquivalenceResultHandler(itemResultHandler, strongContainerChildren);
-        episodeMatchingHandler = new EpisodeFilteringEquivalenceResultHandler(episodeMatchingHandler, strongContainers);
+        EquivalenceResultHandler<Item> episodeMatchingHandler = new EpisodeFilteringEquivalenceResultHandler(new EpisodeMatchingEquivalenceResultHandler(itemResultHandler, strongContainerChildren), strongContainers) ;
 
         for (EquivalenceResult<Item> equivalenceResult : resultStore.resultsFor(Lists.transform(content.getChildRefs(), ChildRef.TO_URI))) {
             episodeMatchingHandler.handle(equivalenceResult);

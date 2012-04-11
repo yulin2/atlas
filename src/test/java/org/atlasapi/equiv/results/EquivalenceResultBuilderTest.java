@@ -26,7 +26,7 @@ public class EquivalenceResultBuilderTest extends TestCase {
 
         EquivalenceCombiner<Item> combiner = new AddingEquivalenceCombiner<Item>();
         EquivalenceExtractor<Item> extractor = new TopEquivalenceExtractor<Item>();
-        EquivalenceResultBuilder<Item> builder = new EquivalenceResultBuilder<Item>(combiner, extractor);
+        EquivalenceResultBuilder<Item> builder = new DefaultEquivalenceResultBuilder<Item>(combiner, extractor);
 
         Item item = new Item("testUri","testCurie",Publisher.PA);
         Item bbcItem = new Item("bbcItem", "bbcItemCurie", Publisher.BBC);

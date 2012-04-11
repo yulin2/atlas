@@ -17,6 +17,7 @@ import org.atlasapi.persistence.content.listing.ContentListingProgress;
 import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
@@ -53,7 +54,7 @@ public class ContentEquivalenceUpdateTask extends AbstractContentEquivalenceUpda
 
     @Override
     protected void handle(Content content) {
-        rootUpdater.updateEquivalences(content);
+        rootUpdater.updateEquivalences(content, Optional.<List<Content>>absent());
     }
 
 }
