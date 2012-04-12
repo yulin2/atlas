@@ -13,7 +13,7 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public abstract class IdentifiedModelSimplifier<F extends Identified, T extends Aliased> implements ModelSimplifier<F, T> {
 
-    protected final SubstitutionTableNumberCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
+    protected final SubstitutionTableNumberCodec idCodec = new SubstitutionTableNumberCodec();
     
     protected void copyIdentifiedAttributesTo(Identified identified, Aliased aliased, Set<Annotation> annotations) {
         

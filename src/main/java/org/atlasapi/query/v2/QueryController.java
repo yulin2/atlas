@@ -37,13 +37,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.ids.NumberToShortStringCodec;
-import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 @Controller
 public class QueryController extends BaseController<QueryResult<Content, ? extends Identified>> {
 	
-    private final NumberToShortStringCodec contentIdCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
 	private final KnownTypeQueryExecutor executor;
@@ -93,7 +90,7 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
         return Lists.transform(ids, new Function<String, Long>() {
             @Override
             public Long apply(String input) {
-                return contentIdCodec.decode(input).longValue();
+                return idCodec.decode(input).longValue();
             }
         });
     }
