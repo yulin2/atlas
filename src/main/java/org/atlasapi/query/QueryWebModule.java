@@ -104,7 +104,7 @@ public class QueryWebModule {
     private @Autowired AdapterLog log;
     
     @Bean ChannelController channelController() {
-        return new ChannelController(channelResolver, channelGroupResolver, new SubstitutionTableNumberCodec() , channelSimplifier());
+        return new ChannelController(channelResolver, channelGroupResolver, channelSimplifier());
     }
 
     @Bean ChannelSimplifier channelSimplifier() {
