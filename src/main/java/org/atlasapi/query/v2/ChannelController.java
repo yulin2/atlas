@@ -52,6 +52,7 @@ import com.google.gson.GsonBuilder;
 import com.metabroadcast.common.base.MoreOrderings;
 import com.metabroadcast.common.caching.BackgroundComputingValue;
 import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
@@ -68,10 +69,12 @@ public class ChannelController {
     private final ChannelFilterer filterer = new ChannelFilterer();
     private final Gson gson;
     private final BackgroundComputingValue<ChannelAndGroupsData> data;
+    private final NumberToShortStringCodec codec;
     
 
-    public ChannelController(final ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver, ChannelSimplifier channelSimplifier) {
+    public ChannelController(final ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver, ChannelSimplifier channelSimplifier, NumberToShortStringCodec codec) {
         this.channelSimplifier = channelSimplifier;
+        this.codec = codec;
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
         
         this.data = new BackgroundComputingValue<ChannelController.ChannelAndGroupsData>(Duration.standardMinutes(10), new ChannelAndGroupsDataUpdater(channelResolver, channelGroupResolver));
@@ -123,7 +126,7 @@ public class ChannelController {
     @RequestMapping("/3.0/channels/{id}.json")
     public void listChannel(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) throws IOException {
 
-        Channel possibleChannel = data.get().idToChannel.get(id);
+        Channel possibleChannel = data.get().idToChannel.get(codec.decode(id).longValue());
 
         if (possibleChannel == null) {
             response.sendError(HttpStatusCode.NOT_FOUND.code());
@@ -177,10 +180,10 @@ public class ChannelController {
     private Set<ChannelGroup> getChannelGroups(String packageIds, String regionIds) {
         Set<Long> channelGroups = Sets.newHashSet();
         if (packageIds != null) {
-            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(packageIds), TO_LONG));
+            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(packageIds), toDecodedId));
         }
         if (regionIds != null) {
-            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(regionIds), TO_LONG));
+            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(regionIds), toDecodedId));
         }
         
         if (channelGroups.isEmpty()) {
@@ -189,6 +192,14 @@ public class ChannelController {
             return ImmutableSet.copyOf(transform(channelGroups, Functions.forMap(data.get().idToChannelGroup)));
         }
     }
+    
+    private final Function<String, Long> toDecodedId = new Function<String, Long>() {
+
+        @Override
+        public Long apply(String input) {
+            return codec.decode(input).longValue();
+        }
+    };
     
     public boolean showChannelGroups(HttpServletRequest request) {
         return ImmutableSet.copyOf(CSV_SPLITTER.split(Strings.nullToEmpty(request.getParameter("annotations")))).contains("channel_groups");
