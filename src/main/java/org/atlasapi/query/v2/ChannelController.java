@@ -1,5 +1,10 @@
 package org.atlasapi.query.v2;
 
+<<<<<<< HEAD
+=======
+import static com.google.common.collect.Iterables.transform;
+
+>>>>>>> 1ab6520... Add filtering and ordering to the channels endpoint
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import static com.google.common.collect.Iterables.transform;
@@ -66,8 +71,8 @@ public class ChannelController {
 
     private final ChannelSimplifier channelSimplifier;
     private final ChannelFilterer filterer = new ChannelFilterer();
-    private final BackgroundComputingValue<ChannelAndGroupsData> data;
     private final Gson gson;
+    private final BackgroundComputingValue<ChannelAndGroupsData> data;
 
     public ChannelController(final ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver, ChannelSimplifier channelSimplifier) {
         this.channelSimplifier = channelSimplifier;
@@ -116,7 +121,7 @@ public class ChannelController {
             channels = ordering.get().immutableSortedCopy(channels);
         }
 
-        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels,showChannelGroups(request))));
+        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels, showChannelGroups(request))));
     }
     
     @RequestMapping("/3.0/channels/{id}.json")
@@ -203,7 +208,7 @@ public class ChannelController {
             Flushables.flush(writer, ignoreEx);
         }
     }
-
+    
     private String callback(HttpServletRequest request) {
         if (request == null) {
             return null;
