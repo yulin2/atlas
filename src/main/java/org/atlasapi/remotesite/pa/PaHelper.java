@@ -25,7 +25,19 @@ public class PaHelper {
         return "pa:f-" + id;
     }
     
+    public static String getEpisodeCurie(String id) {
+        return "pa:e-" + id;
+    }
+    
     public static String getBroadcastId(String slotId) {
         return "pa:" + slotId;
+    }
+
+    public static String getBrandCurie(String id) {
+        return "pa:b-" + id;
+    }
+    
+    public static String getSeriesCurie(String seriesId, String seriesNumber) {
+        return "pa:s-" + seriesId + "-" + seriesNumber;
     }
 }
