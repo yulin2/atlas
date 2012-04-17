@@ -2,6 +2,11 @@ package org.atlasapi.remotesite.pa;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
+import static org.atlasapi.remotesite.pa.PaHelper.getBrandUri;
+import static org.atlasapi.remotesite.pa.PaHelper.getEpisodeCurie;
+import static org.atlasapi.remotesite.pa.PaHelper.getEpisodeUri;
+import static org.atlasapi.remotesite.pa.PaHelper.getFilmCurie;
+import static org.atlasapi.remotesite.pa.PaHelper.getFilmUri;
 
 import java.util.List;
 import java.util.Set;
@@ -60,14 +65,19 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private static final String PA_BASE_IMAGE_URL = "http://images.atlasapi.org/pa/";
     public static final String BROADCAST_ID_PREFIX = "pa:";
     private static final String YES = "yes";
-    private static final String CLOSED_BRAND = "http://pressassociation.com/brands/8267";
-    private static final String CLOSED_EPISODE = "http://pressassociation.com/episodes/closed";
-    private static final String CLOSED_CURIE = "pa:closed";
-    private static final List<String> IGNORED_BRANDS = ImmutableList.of("70214", "84575");    // 70214 is 'TBA' brand, 84575 is 'Film TBA'
+    private static final String CLOSED_BRAND = getBrandUri("8267");
+    private static final String CLOSED_EPISODE_URI_PREFIX = getEpisodeUri("closed");
+    private static final String CLOSED_CURIE_PREFIX = "pa:closed";
+    
+    public static final String TBC_FILM_BRAND_URI = getBrandUri("84575");
+    public static final String TBC_EPISODE_BRAND_URI = getBrandUri("70214");
+    public static final String TBC_FILM_URI_PREFIX = getFilmUri("tbc");
+    public static final String TBC_EPISODE_URI_PREFIX = getEpisodeUri("tbc");
+    public static final String TBC_FILM_CURIE_PREFIX = getFilmCurie("tbc");
+    public static final String TBC_EPISODE_CURIE_PREFIX = getEpisodeCurie("tbc");
     
     private final ContentWriter contentWriter;
     private final ContentResolver contentResolver;
-    private final ChannelResolver channelResolver;
     private final AdapterLog log;
     private final PaCountryMap countryMap = new PaCountryMap();
     
@@ -81,7 +91,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         this.contentResolver = contentResolver;
         this.log = log;
         this.personWriter = itemsPeopleWriter;
-        this.channelResolver = channelResolver;
         this.terrestrialChannels = ImmutableList.<Channel>builder()
         		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/east").requireValue())
         		.add(channelResolver.fromUri("http://www.bbc.co.uk/services/bbcone/london").requireValue())
@@ -158,7 +167,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     @Override
     public ItemRefAndBroadcast process(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
         try {
-            if (! Strings.isNullOrEmpty(progData.getSeriesId()) && IGNORED_BRANDS.contains(progData.getSeriesId())) {
+            if (Strings.isNullOrEmpty(progData.getSeriesId())) {
                 return null;
             }
             
@@ -181,7 +190,19 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             	contentWriter.createOrUpdate(series.requireValue());
             }
             
-            Maybe<ItemAndBroadcast> itemAndBroadcast = isClosedBrand(possibleBrand) ? getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt) : getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || series.hasValue(), updatedAt);
+            
+            Maybe<ItemAndBroadcast> itemAndBroadcast;
+            
+            if (isClosedBrand(possibleBrand)) {
+                itemAndBroadcast = getClosedEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt);
+            } else if (isTbcFilm(possibleBrand)) {
+                itemAndBroadcast = getTbcFilm(possibleBrand.requireValue(), progData, channel, zone, updatedAt);
+            } else if (isTbcEpisode(possibleBrand)) {
+                itemAndBroadcast = getTbcEpisode(possibleBrand.requireValue(), progData, channel, zone, updatedAt);
+            }
+            else {
+                itemAndBroadcast = getFilmOrEpisode(progData, channel, zone, possibleBrand.hasValue() || series.hasValue(), updatedAt);
+            }
 
             if (itemAndBroadcast.hasValue()) {
             	Item item = itemAndBroadcast.requireValue().getItem();
@@ -210,8 +231,16 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         return brand.hasValue() && CLOSED_BRAND.equals(brand.requireValue().getCanonicalUri());
     }
     
+    private boolean isTbcFilm(Maybe<Brand> brand) {
+        return brand.hasValue() && TBC_FILM_BRAND_URI.equals(brand.requireValue().getCanonicalUri());
+    }
+    
+    private boolean isTbcEpisode(Maybe<Brand> brand) {
+        return brand.hasValue() && TBC_EPISODE_BRAND_URI.equals(brand.requireValue().getCanonicalUri());
+    }
+    
     private Maybe<ItemAndBroadcast> getClosedEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
-        String uri = CLOSED_EPISODE+getClosedPostfix(channel);
+        String uri = CLOSED_EPISODE_URI_PREFIX+getClosedOrTbcPostfix(channel);
         Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
 
         Episode episode;
@@ -220,21 +249,57 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         } else {
             episode = (Episode) getBasicEpisode(progData, true);
         }
-        episode.setCanonicalUri(uri);
-        episode.setCurie(CLOSED_CURIE+getClosedPostfix(channel));
-        episode.setTitle(progData.getTitle());
-        episode.setScheduleOnly(true);
-        episode.setMediaType(channel.mediaType());
         
-        Version version = findBestVersion(episode.getVersions());
-
-        Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
-        addBroadcast(version, broadcast);
-
-        return Maybe.just(new ItemAndBroadcast(episode, broadcast));
+        return Maybe.just(getClosedOrTbcItemAndBroadcast(episode, uri, CLOSED_CURIE_PREFIX, channel, progData, zone, updatedAt));
     }
     
-    private String getClosedPostfix(Channel channel) {
+    private Maybe<ItemAndBroadcast> getTbcEpisode(Brand brand, ProgData progData, Channel channel, DateTimeZone timeZone, Timestamp updatedAt) {
+        
+        String uri = TBC_EPISODE_URI_PREFIX + getClosedOrTbcPostfix(channel);
+        Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
+        
+        Episode episode;
+        if (resolvedContent.hasValue() && resolvedContent.requireValue() instanceof Episode) {
+            episode = (Episode) resolvedContent.requireValue();
+        } else {
+            episode = (Episode) getBasicEpisode(progData, true);
+        }
+        
+        return Maybe.just(getClosedOrTbcItemAndBroadcast(episode, uri, TBC_EPISODE_CURIE_PREFIX, channel, progData, timeZone, updatedAt));
+    }
+    
+    private Maybe<ItemAndBroadcast> getTbcFilm(Brand brand, ProgData progData, Channel channel, DateTimeZone timeZone, Timestamp updatedAt) {
+        String uri = TBC_FILM_URI_PREFIX + getClosedOrTbcPostfix(channel);
+        Maybe<Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
+        
+        Film episode;
+        if (resolvedContent.hasValue() && resolvedContent.requireValue() instanceof Film) {
+            episode = (Film) resolvedContent.requireValue();
+        } else {
+            episode = getBasicFilm(progData);
+        }
+        
+        ItemAndBroadcast itemAndBroadcast = getClosedOrTbcItemAndBroadcast(episode, uri, TBC_FILM_CURIE_PREFIX, channel, progData, timeZone, updatedAt);
+        
+        return Maybe.just(itemAndBroadcast);
+    }
+    
+    private ItemAndBroadcast getClosedOrTbcItemAndBroadcast(Item item, String uri, String curiePrefix, Channel channel, ProgData progData, DateTimeZone timeZone, Timestamp updatedAt) {
+        item.setCanonicalUri(uri);
+        item.setCurie(curiePrefix+getClosedOrTbcPostfix(channel));
+        item.setTitle(progData.getTitle());
+        item.setScheduleOnly(true);
+        item.setMediaType(channel.mediaType());
+        
+        Version version = findBestVersion(item.getVersions());
+
+        Broadcast broadcast = broadcast(progData, channel, timeZone, updatedAt);
+        addBroadcast(version, broadcast);
+        
+        return new ItemAndBroadcast(item, broadcast);
+    }
+    
+    private String getClosedOrTbcPostfix(Channel channel) {
         return "_"+channel.key();
     }
     
@@ -248,7 +313,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(brandUri)).getFirstValue();
         
-        Brand brand = possiblePrevious.hasValue() ? (Brand) possiblePrevious.requireValue() : new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
+        Brand brand = possiblePrevious.hasValue() ? (Brand) possiblePrevious.requireValue() : new Brand(brandUri, PaHelper.getBrandCurie(brandId), Publisher.PA);
         
         brand.setTitle(progData.getTitle());
         brand.setDescription(progData.getSeriesSynopsis());
@@ -278,7 +343,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(seriesUri)).getFirstValue();
         
-        Series series = possiblePrevious.hasValue() ? (Series) possiblePrevious.requireValue() : new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
+        Series series = possiblePrevious.hasValue() ? (Series) possiblePrevious.requireValue() : new Series(seriesUri, PaHelper.getSeriesCurie(progData.getSeriesId(), progData.getSeriesNumber()), Publisher.PA);
         
         if(progData.getEpisodeTotal() != null && progData.getEpisodeTotal().trim().length() > 0) {
             try {
@@ -591,8 +656,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
     private Item getBasicEpisode(ProgData progData, boolean isEpisode) {
         Item item = isEpisode ? new Episode() : new Item();
-        item.setCanonicalUri(PaHelper.getEpisodeUri(programmeId(progData)));
-        item.setCurie("pa:e-" + programmeId(progData));
+        item.setCanonicalUri(getEpisodeUri(programmeId(progData)));
+        item.setCurie(PaHelper.getFilmCurie(programmeId(progData)));
         item.setPublisher(Publisher.PA);
         setBasicDetails(progData, item);
         return item;

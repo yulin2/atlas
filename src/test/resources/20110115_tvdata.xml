@@ -16,6 +16,18 @@
         <epg provider_id ="5" provider_name="Topup" channel_number="1"/>
       </epgdetails>
       <prog_data>
+        <showing_id>71249993</showing_id>
+        <prog_id>131887805</prog_id>
+        <series_id>70214</series_id>
+        <date>11/01/2011</date>
+        <time>13:00</time>
+        <duration>180</duration>
+        <title>TBA</title>
+        <rt_category><maincat></maincat></rt_category>
+        <videoplus></videoplus>
+        <attr stereo="no" subtitles="no" repeat="no" bw="no" premiere="no" new_series="no" last_in_series="no" surround="no" widescreen="no" film="no" sign_lang="no" in_vision="no" audio_des="no" interactive="no" hd="no" live="no" as_live="no" follow_on="no" choice="no" familychoice="no" tv_movie="no" web_choice="no"/>
+      </prog_data>
+      <prog_data>
         <showing_id>71118471</showing_id>
         <prog_id>1424497</prog_id>
         <series_id>122139</series_id>

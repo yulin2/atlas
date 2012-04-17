@@ -80,7 +80,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         programmeProcessor = new PaProgrammeProcessor(contentWriter, resolver, channelResolver, new DummyItemsPeopleWriter(), log);
         scheduleWriter = new MongoScheduleStore(db, resolver, channelResolver);
     }
-
+    
     @Test
     public void testShouldCreateCorrectPaData() throws Exception {
         TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), null);
@@ -88,7 +88,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         Identified content = null;
 
         content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/brands/122139")).get("http://pressassociation.com/brands/122139").requireValue();
-
+        
         assertNotNull(content);
         assertTrue(content instanceof Brand);
         Brand brand = (Brand) content;
@@ -138,13 +138,24 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     }
     
     @Test
+    public void testShouldCreateTbc() throws Exception {
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), null);
+        updater.run();
+        Identified content = null;
+
+        content = resolver.findByCanonicalUris(ImmutableList.of("http://pressassociation.com/episodes/tbc_bbcone")).get("http://pressassociation.com/episodes/tbc_bbcone").requireValue();
+        
+        assertNotNull(content);
+    }
+    
+    @Test
     public void testBroadcastsTrimmerWindowNoTimesInFile() {
         
         final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
         final Interval firstFileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 6, 0, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 16, 6, 0, 0, 0, DateTimeZones.LONDON));
          
         context.checking(new Expectations() {{
-            oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118471", "http://pressassociation.com/episodes/1424497"));
+            oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118471", "http://pressassociation.com/episodes/1424497", "pa:71249993", "http://pressassociation.com/episodes/tbc_bbcone"));
         }});
         
         TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), trimmer);
