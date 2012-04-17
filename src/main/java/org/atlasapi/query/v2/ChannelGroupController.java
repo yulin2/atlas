@@ -48,7 +48,7 @@ public class ChannelGroupController {
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
     }
 
-    @RequestMapping("/3.0/channels_groups.json")
+    @RequestMapping("/3.0/channel_groups.json")
     public void listChannels(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         Selection selection = SELECTION_BUILDER.build(request);
@@ -60,7 +60,7 @@ public class ChannelGroupController {
         return ImmutableSet.copyOf(CSV_SPLITTER.split(Strings.nullToEmpty(request.getParameter("annotations")))).contains("channels");
     }
     
-    @RequestMapping("/3.0/channels_groups/{id}.json")
+    @RequestMapping("/3.0/channel_groups/{id}.json")
     public void listChannel(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) throws IOException {
 
         Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(idCodec.decode(id).longValue());
