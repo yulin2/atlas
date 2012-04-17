@@ -7,6 +7,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.channel.ChannelGroup.ChannelGroupType;
 import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.MongoChannelGroupStore;
@@ -17,11 +18,13 @@ import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.metabroadcast.common.ids.IdGenerator;
+import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.properties.Configurer;
 import com.mongodb.Mongo;
@@ -49,15 +52,15 @@ public class ChannelGroupIngestTask implements Runnable {
             IngestDocument document = gson.fromJson(Resources.toString(resource, Charsets.UTF_8), IngestDocument.class);
             
             for (Platform platform : document.platforms) {
-                createChannelGroup(platform, Publisher.METABROADCAST);
+                createChannelGroup(platform, Publisher.METABROADCAST, ChannelGroupType.PLATFORM);
             }
             
             for (Platform platform : document.bbcRegions) {
-                createChannelGroup(platform, Publisher.BBC);
+                createChannelGroup(platform, Publisher.BBC, ChannelGroupType.REGION);
             }
             
             for (Platform platform : document.itvRegions) {
-                createChannelGroup(platform, Publisher.ITV);
+                createChannelGroup(platform, Publisher.ITV, ChannelGroupType.REGION);
             }
             
         } catch (Exception e) {
@@ -65,12 +68,14 @@ public class ChannelGroupIngestTask implements Runnable {
         }
     }
     
-    private void createChannelGroup(Platform platform, Publisher publisher) {
+    private void createChannelGroup(Platform platform, Publisher publisher, ChannelGroupType type) {
         ChannelGroup channelGroup = new ChannelGroup();
         channelGroup.setId(idGenerator.generateRaw());
         channelGroup.setTitle(platform.name);
         channelGroup.setChannels(Iterables.transform(platform.channels, TO_CHANNEL_ID));
         channelGroup.setPublisher(publisher);
+        channelGroup.setType(type);
+        channelGroup.setAvailableCountries(ImmutableSet.of(Countries.GB));
         
         store.store(channelGroup);
     }

@@ -1,6 +1,5 @@
 package org.atlasapi.query.v2;
 
-import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
 
 import java.io.IOException;
@@ -8,7 +7,9 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +18,12 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.ChannelQueryResult;
+import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter;
+import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter.ChannelFilterBuilder;
+import org.joda.time.Duration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,19 +31,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
+import com.google.common.base.Functions;
+import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
 import com.google.common.io.Flushables;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.base.MoreOrderings;
+import com.metabroadcast.common.caching.BackgroundComputingValue;
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
@@ -45,75 +57,127 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 // TODO transplant on to BaseController when annotations are available.
 public class ChannelController {
 
-    private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(50).withDefaultLimit(10);
+    private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(100).withDefaultLimit(10);
     private static final Splitter CSV_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
+    private static final String TITLE = "title";
+    private static final Object TITLE_REVERSE = "title.reverse";
 
-    private final ChannelResolver channelResolver;
-    private final ChannelGroupStore channelGroupResolver;
-    private final NumberToShortStringCodec idCodec;
     private final ChannelSimplifier channelSimplifier;
+    private final ChannelFilterer filterer = new ChannelFilterer();
+    private final Gson gson;
+    private final BackgroundComputingValue<ChannelAndGroupsData> data;
+    
 
-    private Gson gson;
-
-    public ChannelController(ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver, NumberToShortStringCodec idCodec, ChannelSimplifier channelSimplifier) {
-        this.channelResolver = channelResolver;
-        this.channelGroupResolver = channelGroupResolver;
-        this.idCodec = idCodec;
+    public ChannelController(final ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver, ChannelSimplifier channelSimplifier) {
         this.channelSimplifier = channelSimplifier;
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        
+        this.data = new BackgroundComputingValue<ChannelController.ChannelAndGroupsData>(Duration.standardMinutes(10), new ChannelAndGroupsDataUpdater(channelResolver, channelGroupResolver));
     }
 
     @RequestMapping("/3.0/channels.json")
-    public void listChannels(HttpServletRequest request, HttpServletResponse response, @RequestParam(required = false) String key,
-            @RequestParam(value = "package", required = false) String packageName, @RequestParam(required = false) String regions) throws IOException {
+    public void listChannels(HttpServletRequest request, HttpServletResponse response, 
+            @RequestParam(value = "key", required = false) String channelKey,
+            @RequestParam(value = "package", required = false) String packageKeys, 
+            @RequestParam(value = "regions", required = false) String regionKeys, 
+            @RequestParam(value = "broadcaster", required = false) String broadcasterKey,
+            @RequestParam(value = "media_type", required = false) String mediaTypeKey, 
+            @RequestParam(value = "available_from", required = false) String availableFromKey,
+            @RequestParam(value = "order_by", required = false) String orderBy) throws IOException {
 
         Selection selection = SELECTION_BUILDER.build(request);
 
         List<Channel> channels;
-        if (!Strings.isNullOrEmpty(key)) {
-            Maybe<Channel> channelFromKey = channelResolver.fromKey(key);
-            if (channelFromKey.isNothing()) {
+        if (!Strings.isNullOrEmpty(channelKey)) {
+            Channel channelFromKey = data.get().keyToChannel.get(channelKey);
+            if (channelFromKey == null) {
                 response.setStatus(HttpStatusCode.NOT_FOUND.code());
                 response.setContentLength(0);
                 return;
             }
-            channels = ImmutableList.of(channelFromKey.requireValue());
+            channels = ImmutableList.of(channelFromKey);
         } else {
-            Set<Long> channelGroupIds = getChannelGroups(packageName, regions);
-            if (!channelGroupIds.isEmpty()) {
-                Iterable<ChannelGroup> channelGroups = channelGroupResolver.channelGroupsFor(channelGroupIds);
-                channels = selection.applyTo(channelResolver.forIds(ImmutableSet.copyOf(concat(transform(channelGroups, TO_CHANNEL_IDS)))));
-            } else {
-                channels = selection.applyTo(channelResolver.all());
-            }
+            channels = selection.applyTo(filterer.filter(data.get().allChannels, constructFilter(packageKeys, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey), data.get().channelToGroups));
+        }
+        
+        Optional<Ordering<Channel>> ordering = ordering(orderBy);
+        if (ordering.isPresent()) {
+            channels = ordering.get().immutableSortedCopy(channels);
         }
 
         writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels, showChannelGroups(request))));
     }
-
-    private Set<Long> getChannelGroups(String packageName, String regions) {
-        Builder<Long> channelGroups = ImmutableSet.builder();
-        if (packageName != null) {
-            channelGroups.addAll(Iterables.transform(CSV_SPLITTER.split(packageName), TO_LONG));
-        }
-        if (regions != null) {
-            channelGroups.addAll(Iterables.transform(CSV_SPLITTER.split(regions), TO_LONG));
-        }
-        return channelGroups.build();
-    }
-
+    
     @RequestMapping("/3.0/channels/{id}.json")
     public void listChannel(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) throws IOException {
 
-        Maybe<Channel> possibleChannel = channelResolver.fromId(idCodec.decode(id).longValue());
+        Channel possibleChannel = data.get().idToChannel.get(id);
 
-        if (possibleChannel.isNothing()) {
+        if (possibleChannel == null) {
             response.sendError(HttpStatusCode.NOT_FOUND.code());
         }
 
-        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(ImmutableList.of(possibleChannel.requireValue()), showChannelGroups(request))));
+        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(ImmutableList.of(possibleChannel), showChannelGroups(request))));
+    }
+    
+    private Optional<Ordering<Channel>> ordering(String orderBy) {
+        if (!Strings.isNullOrEmpty(orderBy)) {
+            if (orderBy.equals(TITLE)) {
+                return Optional.of(MoreOrderings.transformingOrdering(TO_TITLE));
+            } else if (orderBy.equals(TITLE_REVERSE)) {
+                return Optional.of(MoreOrderings.transformingOrdering(TO_TITLE, Ordering.<String>natural().reverse()));
+            }
+        }
+        
+        return Optional.absent();
+    }
+    
+    private static final Function<Channel, String> TO_TITLE = new Function<Channel, String>() {
+        @Override
+        public String apply(Channel input) {
+            return input.title();
+        }
+    };
+    
+    private ChannelFilter constructFilter(String packageIds, String regionIds, String broadcasterKey, String mediaTypeKey, String availableFromKey) {
+        ChannelFilterBuilder filter = ChannelFilter.builder();
+        
+        Set<ChannelGroup> channelGroups = getChannelGroups(packageIds, regionIds);
+        if (!channelGroups.isEmpty()) {
+            filter.withChannelGroups(channelGroups);
+        }
+        
+        if (!Strings.isNullOrEmpty(broadcasterKey)) {
+            filter.withBroadcaster(Publisher.fromKey(broadcasterKey).requireValue());
+        }
+        
+        if (!Strings.isNullOrEmpty(mediaTypeKey)) {
+            filter.withMediaType(MediaType.valueOf(mediaTypeKey));
+        }
+        
+        if (!Strings.isNullOrEmpty(availableFromKey)) {
+            filter.withAvailableFrom(Publisher.fromKey(availableFromKey).requireValue());
+        }
+        
+        return filter.build();
     }
 
+    private Set<ChannelGroup> getChannelGroups(String packageIds, String regionIds) {
+        Set<Long> channelGroups = Sets.newHashSet();
+        if (packageIds != null) {
+            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(packageIds), TO_LONG));
+        }
+        if (regionIds != null) {
+            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(regionIds), TO_LONG));
+        }
+        
+        if (channelGroups.isEmpty()) {
+            return ImmutableSet.of();
+        } else {
+            return ImmutableSet.copyOf(transform(channelGroups, Functions.forMap(data.get().idToChannelGroup)));
+        }
+    }
+    
     public boolean showChannelGroups(HttpServletRequest request) {
         return ImmutableSet.copyOf(CSV_SPLITTER.split(Strings.nullToEmpty(request.getParameter("annotations")))).contains("channel_groups");
     }
@@ -137,7 +201,7 @@ public class ChannelController {
             Flushables.flush(writer, ignoreEx);
         }
     }
-
+    
     private String callback(HttpServletRequest request) {
         if (request == null) {
             return null;
@@ -161,10 +225,47 @@ public class ChannelController {
         }
     };
 
-    private static Function<ChannelGroup, Set<Long>> TO_CHANNEL_IDS = new Function<ChannelGroup, Set<Long>>() {
-        @Override
-        public Set<Long> apply(ChannelGroup input) {
-            return input.getChannels();
+    private class ChannelAndGroupsDataUpdater implements Callable<ChannelAndGroupsData> {
+        private final ChannelResolver channelResolver;
+        private final ChannelGroupStore channelGroupResolver;
+
+        public ChannelAndGroupsDataUpdater(ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver) {
+            this.channelResolver = channelResolver;
+            this.channelGroupResolver = channelGroupResolver;
         }
-    };
+
+        @Override
+        public ChannelAndGroupsData call() throws Exception {
+            Set<Channel> allChannels = ImmutableSet.copyOf(channelResolver.all());
+            Set<ChannelGroup> allChannelGroups = ImmutableSet.copyOf(channelGroupResolver.channelGroups());
+            Map<Long, Channel> idToChannel = Maps.uniqueIndex(allChannels, Channel.TO_ID);
+            Map<String, Channel> keyToChannel = Maps.uniqueIndex(allChannels, Channel.TO_KEY);
+            Map<Long, ChannelGroup> idToChannelGroup = Maps.uniqueIndex(allChannelGroups, ChannelGroup.TO_ID);
+            
+            SetMultimap<Channel, ChannelGroup> channelToGroups = HashMultimap.create();
+            for (ChannelGroup group : allChannelGroups) {
+                for (Long id : group.getChannels()) {
+                    channelToGroups.put(idToChannel.get(id), group);
+                }
+            }
+            
+            return new ChannelAndGroupsData(allChannels, idToChannel, keyToChannel, idToChannelGroup, channelToGroups);
+        }
+    }
+    
+    private class ChannelAndGroupsData {
+        private final Set<Channel> allChannels;
+        private final SetMultimap<Channel, ChannelGroup> channelToGroups;
+        private final Map<Long, Channel> idToChannel;
+        private final Map<String, Channel> keyToChannel;
+        private final Map<Long, ChannelGroup> idToChannelGroup;
+        
+        public ChannelAndGroupsData(Set<Channel> allChannels, Map<Long, Channel> idToChannel, Map<String, Channel> keyToChannel, Map<Long, ChannelGroup> idToChannelGroup, SetMultimap<Channel, ChannelGroup> channelToGroups) {
+            this.allChannels = allChannels;
+            this.idToChannel = idToChannel;
+            this.keyToChannel = keyToChannel;
+            this.idToChannelGroup = idToChannelGroup;
+            this.channelToGroups = channelToGroups;
+        }
+    }
 }
