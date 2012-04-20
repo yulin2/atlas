@@ -1,17 +1,16 @@
 /* Copyright 2009 Meta Broadcast Ltd
 
-Licensed under the Apache License, Version 2.0 (the "License"); you
-may not use this file except in compliance with the License. You may
-obtain a copy of the License at
+ Licensed under the Apache License, Version 2.0 (the "License"); you
+ may not use this file except in compliance with the License. You may
+ obtain a copy of the License at
 
-http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
-implied. See the License for the specific language governing
-permissions and limitations under the License. */
-
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ implied. See the License for the specific language governing
+ permissions and limitations under the License. */
 package org.atlasapi.query.v2;
 
 import java.io.IOException;
@@ -40,54 +39,55 @@ import com.metabroadcast.common.http.HttpStatusCode;
 
 @Controller
 public class QueryController extends BaseController<QueryResult<Content, ? extends Identified>> {
-	
-	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
-	private final KnownTypeQueryExecutor executor;
-	
+    private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
+    private final KnownTypeQueryExecutor executor;
+
     public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content, ? extends Identified>> outputter) {
-	    super(configFetcher, log, outputter);
+        super(configFetcher, log, outputter);
         this.executor = executor;
-	}
-    
+    }
+
     @RequestMapping("/")
     public String redirect() {
         return "redirect:http://docs.atlasapi.org";
     }
-    
+
     @RequestMapping(value = {"/2.0/*.*"})
     public void onePointZero(HttpServletRequest request, HttpServletResponse response) throws IOException {
         outputter.writeError(request, response, UNSUPPORTED);
     }
-	
-	@RequestMapping("/3.0/discover.*")
-	public void discover(HttpServletRequest request, HttpServletResponse response) throws IOException {
-	    outputter.writeError(request, response, UNSUPPORTED);
-	}
-	
-	@RequestMapping("/3.0/content.*")
-	public void content(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		try {
-			ContentQuery filter = builder.build(request);
-			
-			List<String> uris = getUriList(request);
-			if(!uris.isEmpty()) {
-			    modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class)),filter.getConfiguration());
-			} else {
-			    List<String> ids = getIdList(request);
-			    if(!ids.isEmpty()) {
-			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Content.class)),filter.getConfiguration());
-			    } else {
-			        throw new IllegalArgumentException("Must specify content uri or id");
-			    }
-			}
-		} catch (Exception e) {
-			errorViewFor(request, response, AtlasErrorSummary.forException(e));
-		}
-	}
+
+    @RequestMapping("/3.0/discover.*")
+    public void discover(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        outputter.writeError(request, response, UNSUPPORTED);
+    }
+
+    @RequestMapping("/3.0/content.*")
+    public void content(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            ContentQuery filter = builder.build(request);
+
+            List<String> uris = getUriList(request);
+            List<String> ids = getIdList(request);
+            List<String> aliases = getAliasList(request);
+            if (!uris.isEmpty()) {
+                modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()), Content.class)), filter.getConfiguration());
+            } else if (!ids.isEmpty()) {
+                modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()), Content.class)), filter.getConfiguration());
+            } else if (!aliases.isEmpty()) {
+                modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(aliases, filter).values()), Content.class)), filter.getConfiguration());
+            } else {
+                throw new IllegalArgumentException("Must specify content uri or id or alias");
+            }
+        } catch (Exception e) {
+            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+        }
+    }
 
     private Iterable<Long> decode(List<String> ids) {
         return Lists.transform(ids, new Function<String, Long>() {
+
             @Override
             public Long apply(String input) {
                 return idCodec.decode(input).longValue();
@@ -103,8 +103,12 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
         return split(request.getParameter("id"));
     }
 
+    private List<String> getAliasList(HttpServletRequest request) {
+        return split(request.getParameter("alias"));
+    }
+
     private ImmutableList<String> split(String parameter) {
-        if(parameter == null) {
+        if (parameter == null) {
             return ImmutableList.of();
         }
         return ImmutableList.copyOf(URI_SPLITTER.split(parameter));
