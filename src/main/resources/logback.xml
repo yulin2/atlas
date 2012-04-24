@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="TASKS" class="ch.qos.logback.core.FileAppender">
+        <file>/usr/local/jetties/atlas-processing/work/tasks.log</file>
+        <encoder>
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %level %logger - %msg%n</Pattern>
+        </encoder>
+    </appender>
+
+    <root>
+        <level value="ERROR"/>
+    </root>
+
+    <logger name="nimrod.alert.tasks">
+        <level value="INFO"/>
+        <appender-ref ref="TASKS"/>
+    </logger>
+    
+    <logger name="nimrod.gauge.tasks">
+        <level value="INFO"/>
+        <appender-ref ref="TASKS"/>
+    </logger>
+
+</configuration>
