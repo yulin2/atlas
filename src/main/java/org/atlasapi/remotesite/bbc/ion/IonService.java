@@ -76,7 +76,20 @@ public enum IonService {
 		public void applyTo(Policy policy) {
 			policy.addAvailableCountry(Countries.ALL);
 		}
-	};
+	},
+	
+	IPLAYER_STREAMING_H264_FLV {
+        @Override
+        public void applyTo(Encoding encoding) {
+            encoding.setDataContainerFormat(MimeType.APPLICATION_XSHOCKWAVEFLASH);
+            encoding.setVideoCoding(MimeType.VIDEO_H264);   
+        }
+
+        @Override
+        public void applyTo(Policy policy) {
+            policy.addAvailableCountry(Countries.GB);
+        }
+    };
 	
 	protected abstract void applyTo(Encoding encoding);
 
