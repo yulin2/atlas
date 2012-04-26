@@ -1,5 +1,7 @@
 package org.atlasapi.query.v2;
 
+import static com.google.common.collect.Iterables.transform;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -51,6 +53,7 @@ public class ChannelSimplifier {
         simple.setAliases(input.getAliases());
         simple.setPublisherDetails(toPublisherDetails(input.publisher()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
+        simple.setAvailableOn(transform(input.availableOn(), Publisher.TO_KEY));
         simple.setTitle(input.title());
         simple.setMediaType(input.mediaType() != null ? input.mediaType().toString().toLowerCase() : null);
         
