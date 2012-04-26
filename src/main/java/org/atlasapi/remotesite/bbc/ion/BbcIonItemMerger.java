@@ -79,10 +79,10 @@ public class BbcIonItemMerger {
         if(intDuration != null) {
             existingVersion.setDuration(Duration.standardSeconds(intDuration));
         }
-        existingVersion.setBroadcasts(ImmutableSet.copyOf(Iterables.concat(fetchedVersion.getBroadcasts(), existingVersion.getBroadcasts())));
+        existingVersion.setBroadcasts(Sets.newHashSet(Iterables.concat(fetchedVersion.getBroadcasts(), existingVersion.getBroadcasts())));
         existingVersion.setPublishedDuration(ifNotNull(fetchedVersion.getPublishedDuration(), existingVersion.getPublishedDuration()));
         existingVersion.setRestriction(ifNotNull(fetchedVersion.getRestriction(), existingVersion.getRestriction()));
-        existingVersion.setManifestedAs(ImmutableSet.copyOf(Iterables.concat(fetchedVersion.getManifestedAs(), existingVersion.getManifestedAs())));
+        existingVersion.setManifestedAs(Sets.newHashSet(Iterables.concat(fetchedVersion.getManifestedAs(), existingVersion.getManifestedAs())));
     }
 
     private <T> T ifNotNull(T preferredVal, T defautVal) {

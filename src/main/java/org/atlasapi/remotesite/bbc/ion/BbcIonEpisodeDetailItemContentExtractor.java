@@ -26,8 +26,6 @@ import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
 import org.joda.time.Duration;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
