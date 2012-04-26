@@ -11,4 +11,8 @@ public class BbcIonEpisodeItemContentExtractor extends BaseBbcIonEpisodeItemExtr
         super(log);
     }
 
+    @Override
+    public Item extract(IonEpisode source) {
+        return super.extract(source);
+    }
 }

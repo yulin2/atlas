@@ -56,6 +56,7 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
 import org.atlasapi.remotesite.bbc.SlashProgrammesVersionRdf.BbcBroadcast;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
+import org.atlasapi.remotesite.bbc.ion.BbcIonClipExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
@@ -97,6 +98,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     private final BbcIonDeserializer<IonEpisodeDetailFeed> ionDeserialiser;
     private final BbcProgrammeEncodingAndLocationCreator encodingCreator;
     private final BbcExtendedDataContentAdapter extendedDataAdapter;
+    private final BbcIonClipExtractor clipExtractor;
 
     public BbcProgrammeGraphExtractor(BbcSeriesNumberResolver seriesResolver, BbcProgrammesPolicyClient policyClient, BbcExtendedDataContentAdapter extendedDataAdapter, Clock clock, AdapterLog log) {
         this.seriesResolver = seriesResolver;
@@ -104,6 +106,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         this.extendedDataAdapter = extendedDataAdapter;
 		this.clock = clock;
         this.log = log;
+        this.clipExtractor = new BbcIonClipExtractor(log);
 		this.ionDeserialiser = BbcIonDeserializers.deserializerForClass(IonEpisodeDetailFeed.class);
 		this.encodingCreator = new BbcProgrammeEncodingAndLocationCreator(clock);
     }
@@ -158,12 +161,8 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
         }
         
-        if (source.clips() != null) {
-            for (ClipAndVersion clipAndVersion: source.clips()) {
-                if (clipAndVersion.clip().clip() != null && clipAndVersion.clip().clip().uri() != null) {
-                    addClipToContent(clipAndVersion.clip(), clipAndVersion.version(), item);
-                }
-            }
+        for (Clip clip : clipExtractor.extract(episodeDetail)) {
+            item.addClip(clip);
         }
         
         addExtendedData(item);
