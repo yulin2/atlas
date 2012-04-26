@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.SystemClock;
@@ -51,11 +52,11 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
     }
     
     private Iterable<Clip> extractClips(List<IonEpisode> clips) {
-        Builder<Clip> extractedClips = ImmutableList.builder();
+        Set<Clip> extractedClips = Sets.newHashSet();
         for (IonEpisode ionClip : clips) {
             extractedClips.add(extractClip(ionClip));
         }
-        return extractedClips.build();
+        return extractedClips;
     }
 
     private Clip extractClip(IonEpisode ionClip) {
@@ -88,7 +89,7 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
     }
 
     private Set<Version> extractVersions(final IonEpisodeDetail source) {
-        return ImmutableSet.copyOf(Iterables.transform(source.getVersions(), new Function<IonVersion, Version>() {
+        return Sets.newHashSet(Iterables.transform(source.getVersions(), new Function<IonVersion, Version>() {
             @Override
             public Version apply(IonVersion input) {
                 return versionFrom(input, source.getId());
