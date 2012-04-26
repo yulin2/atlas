@@ -53,7 +53,7 @@ public class ChannelSimplifier {
         simple.setAliases(input.getAliases());
         simple.setPublisherDetails(toPublisherDetails(input.publisher()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
-        simple.setAvailableOn(transform(input.availableFrom(), TO_PUBLISHER_DETAILS));
+        simple.setAvailableFrom(transform(input.availableFrom(), TO_PUBLISHER_DETAILS));
         simple.setTitle(input.title());
         simple.setMediaType(input.mediaType() != null ? input.mediaType().toString().toLowerCase() : null);
         
