@@ -93,7 +93,7 @@ public class ChannelController {
     @RequestMapping("/3.0/channels.json")
     public void listChannels(HttpServletRequest request, HttpServletResponse response, 
             @RequestParam(value = "key", required = false) String channelKey,
-            @RequestParam(value = "package", required = false) String packageKeys, 
+            @RequestParam(value = "platform", required = false) String platformKey, 
             @RequestParam(value = "regions", required = false) String regionKeys, 
             @RequestParam(value = "broadcaster", required = false) String broadcasterKey,
             @RequestParam(value = "media_type", required = false) String mediaTypeKey, 
@@ -112,13 +112,17 @@ public class ChannelController {
             }
             channels = ImmutableList.of(channelFromKey);
         } else {
-            channels = selection.applyTo(filterer.filter(data.get().allChannels, constructFilter(packageKeys, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey), data.get().channelToGroups));
+            Optional<Ordering<Channel>> ordering = ordering(orderBy);
+            if (ordering.isPresent()) {
+                channels = ordering.get().immutableSortedCopy(data.get().allChannels);
+            }
+            else {
+                channels = ImmutableList.copyOf(data.get().allChannels);
+            }
+            channels = selection.applyTo(filterer.filter(channels, constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey), data.get().channelToGroups));
         }
         
-        Optional<Ordering<Channel>> ordering = ordering(orderBy);
-        if (ordering.isPresent()) {
-            channels = ordering.get().immutableSortedCopy(channels);
-        }
+       
 
         writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels, showChannelGroups(request))));
     }
@@ -154,10 +158,10 @@ public class ChannelController {
         }
     };
     
-    private ChannelFilter constructFilter(String packageIds, String regionIds, String broadcasterKey, String mediaTypeKey, String availableFromKey) {
+    private ChannelFilter constructFilter(String platformId, String regionIds, String broadcasterKey, String mediaTypeKey, String availableFromKey) {
         ChannelFilterBuilder filter = ChannelFilter.builder();
         
-        Set<ChannelGroup> channelGroups = getChannelGroups(packageIds, regionIds);
+        Set<ChannelGroup> channelGroups = getChannelGroups(platformId, regionIds);
         if (!channelGroups.isEmpty()) {
             filter.withChannelGroups(channelGroups);
         }
@@ -167,7 +171,7 @@ public class ChannelController {
         }
         
         if (!Strings.isNullOrEmpty(mediaTypeKey)) {
-            filter.withMediaType(MediaType.valueOf(mediaTypeKey));
+            filter.withMediaType(MediaType.valueOf(mediaTypeKey.toUpperCase()));
         }
         
         if (!Strings.isNullOrEmpty(availableFromKey)) {
@@ -177,10 +181,10 @@ public class ChannelController {
         return filter.build();
     }
 
-    private Set<ChannelGroup> getChannelGroups(String packageIds, String regionIds) {
+    private Set<ChannelGroup> getChannelGroups(String platformId, String regionIds) {
         Set<Long> channelGroups = Sets.newHashSet();
-        if (packageIds != null) {
-            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(packageIds), toDecodedId));
+        if (platformId != null) {
+            Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(platformId), toDecodedId));
         }
         if (regionIds != null) {
             Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(regionIds), toDecodedId));
