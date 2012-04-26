@@ -119,10 +119,10 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
     protected void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {
         if(!Strings.isNullOrEmpty(episode.getMediaType())) {
             String mediaType = episode.getMediaType();
-            if (mediaType == "audio") {
+            if (mediaType.equals("audio")) {
                 item.setMediaType(MediaType.AUDIO);
                 item.setSpecialization(Specialization.RADIO);
-            } else if ( mediaType == "video") {
+            } else if (mediaType.equals("video")) {
                 item.setMediaType(MediaType.VIDEO);
                 item.setSpecialization(Specialization.TV);
             }
