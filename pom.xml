@@ -4,7 +4,7 @@
     <groupId>org.atlasapi</groupId>
     <artifactId>atlas</artifactId>
     <packaging>war</packaging>
-    <version>5.0-SNAPSHOT</version>
+    <version>5.1-SNAPSHOT</version>
     <description>Atlas 3.0 API</description>
     <build>
         <finalName>atlas</finalName>
@@ -15,8 +15,10 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
-                        <fork>true</fork>
-                        <compilerArguments><J>-Xss1M</J></compilerArguments>
+                    <fork>true</fork>
+                    <compilerArguments>
+                        <J>-Xss1M</J>
+                    </compilerArguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -310,6 +312,11 @@
                     <groupId>com.sun.jmx</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.hp.hpl.jena</groupId>
