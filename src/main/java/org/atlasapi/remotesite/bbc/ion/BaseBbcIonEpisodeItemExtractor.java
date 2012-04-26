@@ -29,7 +29,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public abstract class BaseBbcIonEpisodeItemExtractor {
 
-    private static final String CURIE_BASE = "bbc:";
+    protected static final String CURIE_BASE = "bbc:";
 
     private final BbcIonContributorPersonExtractor personExtractor = new BbcIonContributorPersonExtractor();
     private final RemoteSiteClient<IonContainerFeed> containerClient;
@@ -63,7 +63,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         return setItemDetails(item, source);
     }
 
-    private void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
+    protected void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
         if(!Strings.isNullOrEmpty(episodeDetail.getSeriesId())) {
             item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
         }
@@ -90,7 +90,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         }
     }
 
-    private Item setItemDetails(Item item, IonEpisode episode) {
+    protected Item setItemDetails(Item item, IonEpisode episode) {
         
         item.setTitle(getTitle(episode));
         item.setDescription(episode.getSynopsis());
@@ -115,7 +115,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         return item;
     }
 
-    private void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {
+    protected void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {
         String masterbrand = episode.getMasterbrand();
         if(!Strings.isNullOrEmpty(masterbrand)) {
             Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(masterbrand);
@@ -133,8 +133,8 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
             }
         }
     }
-
-    private String getTitle(IonEpisode episode) {
+    
+    protected String getTitle(IonEpisode episode) {
         String title = !Strings.isNullOrEmpty(episode.getOriginalTitle()) ? episode.getOriginalTitle() : episode.getTitle();
         if(!Strings.isNullOrEmpty(episode.getSubseriesTitle())) {
             title = String.format("%s %s", episode.getSubseriesTitle(), title);

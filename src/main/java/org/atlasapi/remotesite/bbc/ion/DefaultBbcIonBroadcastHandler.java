@@ -23,6 +23,7 @@ import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.Duration;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
@@ -116,8 +117,10 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     }
 
     private Item resolveOrFetchItem(IonBroadcast broadcast, String itemUri) {
+        Item item = null;
+        
         //Get basic item from latest remote data.
-        Item item = itemExtractor.extract(broadcast.getEpisode()); 
+        Item basicItem = itemExtractor.extract(broadcast.getEpisode()); 
 
         // look for existing item, merge into latest remote data, else fetch complete.
         Maybe<Identified> possibleIdentified = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
@@ -127,16 +130,31 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
                 log.record(new AdapterLogEntry(Severity.WARN).withDescription("Updating %s, expecting Item, got %s", itemUri, ided.getClass().getSimpleName()).withSource(getClass()));
                 return null;
             }
-            item = merger.merge(item, (Item)ided);
-        } else if (itemClient != null) {
+            item = merger.merge(fetchedFullItemIfPermitted(broadcast, itemUri).or(basicItem), (Item)ided);
+        } else {
+            item = fetchFullItem(itemUri).or(basicItem);
+        }
+        return item;
+    }
+
+    private Optional<Item> fetchedFullItemIfPermitted(IonBroadcast broadcast, String itemUri) {
+        return fullFetchPermitted(broadcast, itemUri) ? fetchFullItem(itemUri) : Optional.<Item>absent();
+    }
+
+    protected boolean fullFetchPermitted(IonBroadcast broadcast, String itemUri) {
+        return false;
+    }
+
+    private Optional<Item> fetchFullItem(String itemUri) {
+        Item fetchedItem = null;
+        if (itemClient != null) {
             try {
-                Item fetchedItem = itemClient.fetch(itemUri);
-                item = fetchedItem != null ? fetchedItem : item;
+                fetchedItem = itemClient.fetch(itemUri);
             } catch (Exception e) {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to fetch ", itemUri));
             }
         }
-        return item;
+        return Optional.fromNullable(fetchedItem);
     }
 
 //    private void merge(Item fetchedItem, Item existing) {
