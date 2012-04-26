@@ -44,7 +44,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         this.containerClient = containerClient;
     }
 
-    public Item extract(IonEpisode source) {
+    protected Item extract(IonEpisode source) {
         Item item = null;
         if (source.getIsFilm()) {
             item = new Film(BbcFeeds.slashProgrammesUriForPid(source.getId()), CURIE_BASE+source.getId(), BBC);
@@ -117,20 +117,14 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
     }
 
     protected void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {
-        String masterbrand = episode.getMasterbrand();
-        if(!Strings.isNullOrEmpty(masterbrand)) {
-            Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(masterbrand);
-            if(maybeMediaType.hasValue()) {
-                item.setMediaType(maybeMediaType.requireValue());
-            } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("No mediaType mapping for " + masterbrand));
-            }
-            
-            Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(masterbrand);
-            if(maybeSpecialisation.hasValue()) {
-                item.setSpecialization(maybeSpecialisation.requireValue());
-            } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("No specialisation mapping for " + masterbrand));
+        if(!Strings.isNullOrEmpty(episode.getMediaType())) {
+            String mediaType = episode.getMediaType();
+            if (mediaType == "audio") {
+                item.setMediaType(MediaType.AUDIO);
+                item.setSpecialization(Specialization.RADIO);
+            } else if ( mediaType == "video") {
+                item.setMediaType(MediaType.VIDEO);
+                item.setSpecialization(Specialization.TV);
             }
         }
     }

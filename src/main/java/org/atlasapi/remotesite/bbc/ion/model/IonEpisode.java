@@ -34,7 +34,7 @@ public class IonEpisode {
     private String contextualFamilyTree;
     private Boolean isAvailableMediasetPcSd;
     private URL passionsiteLink;
-    private String media_type;
+    private String mediaType;
     private String passionsiteTitle;
     private List<IonCategory> categories;
     private String seriesId;
@@ -183,8 +183,8 @@ public class IonEpisode {
         return passionsiteLink;
     }
 
-    public String getMedia_type() {
-        return media_type;
+    public String getMediaType() {
+        return mediaType;
     }
 
     public String getPassionsiteTitle() {
