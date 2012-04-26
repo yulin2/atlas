@@ -96,6 +96,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         item.setDescription(episode.getSynopsis());
         item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
         item.setIsLongForm(true);
+        item.setLastUpdated(episode.getUpdated());
         
         if (!Strings.isNullOrEmpty(episode.getId())) {
             BbcImageUrlCreator.addImagesTo(episode.getMyImageBaseUrl().toString(), episode.getId(), item);

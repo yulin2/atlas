@@ -61,6 +61,7 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
         Clip clip = new Clip(BbcFeeds.slashProgrammesUriForPid(ionClip.getId()), CURIE_BASE+ionClip.getId(), BBC);
         clip.setIsLongForm(false);
         setItemDetails(clip, ionClip);
+        setMediaTypeAndSpecialisation(clip, ionClip);
         clip.addVersion(clipVersion(ionClip));
         return clip;
     }
