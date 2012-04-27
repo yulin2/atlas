@@ -34,17 +34,18 @@ import com.metabroadcast.common.base.Maybe;
 
 public class ContentTwitterTopicsUpdater {
 
-    private static final String TWITTER_NS = "twitter";
     private final ContentResolver contentResolver;
+    private final String topicNamespace;
     private final TopicStore topicStore;
     private final TopicQueryResolver topicResolver;
     private final ContentWriter contentWriter;
     private final CannonTwitterTopicsClient cannonTopicsClient;
     private final AdapterLog log;
 
-    public ContentTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log) {
+    public ContentTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, String topicNamespace, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log) {
         this.cannonTopicsClient = cannonTopicsClient;
         this.contentResolver = contentResolver;
+        this.topicNamespace = topicNamespace;
         this.topicStore = topicStore;
         this.topicResolver = topicResolver;
         this.contentWriter = contentWriter;
@@ -92,7 +93,7 @@ public class ContentTwitterTopicsUpdater {
                 Maybe<Topic> possibleTopic = topicResolver.topicForId(input.getTopic());
                 if (possibleTopic.hasValue()) {
                     Topic topic = possibleTopic.requireValue();
-                    return !(TWITTER_NS.equals(topic.getNamespace()) && Publisher.METABROADCAST.equals(topic.getPublisher()));
+                    return !(topicNamespace.equals(topic.getNamespace()) && Publisher.METABROADCAST.equals(topic.getPublisher()));
                 }
                 return false;
             }
@@ -110,7 +111,7 @@ public class ContentTwitterTopicsUpdater {
     public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
         Builder<TopicRef> topicRefs = ImmutableSet.builder();
         for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-            Maybe<Topic> possibleTopic = topicStore.topicFor(TWITTER_NS, wordWeighting.getUrl());
+            Maybe<Topic> possibleTopic = topicStore.topicFor(topicNamespace, wordWeighting.getUrl());
             if (possibleTopic.hasValue()) {
                 Topic topic = possibleTopic.requireValue();
                 topic.setTitle(wordWeighting.getContent());

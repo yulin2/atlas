@@ -23,25 +23,23 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 public class CannonTwitterTopicsClient {
 
     private final Joiner joiner = Joiner.on(',');
-    
     private final String idListRequestUri;
     private final String contentWordsRequestBase;
-    
     private final RemoteSiteClient<ContentWordsIdList> idListClient;
     private final RemoteSiteClient<ContentWordsList> contentWordsClient;
     private final AdapterLog log;
 
-    public CannonTwitterTopicsClient(SimpleHttpClient httpClient, HostSpecifier cannonHost, Optional<Integer> cannonPort, AdapterLog log) {
+    public CannonTwitterTopicsClient(SimpleHttpClient httpClient, HostSpecifier cannonHost, Optional<Integer> cannonPort, String contentWordsListEndpoint, String contentWordsEndpoint, AdapterLog log) {
         GsonBuilder gson = new GsonBuilder().setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
         this.idListClient = httpRemoteSiteClient(httpClient, gsonResponseTransformer(gson, ContentWordsIdList.class));
         this.contentWordsClient = httpRemoteSiteClient(webserviceClient(), gsonResponseTransformer(gson, ContentWordsList.class));
 
-        this.idListRequestUri = String.format("http://%s%s/contentWordsList", cannonHost, cannonPort.isPresent() ? ":"+cannonPort.get():"");
-        this.contentWordsRequestBase = String.format("http://%s%s/contentWords?ids=", cannonHost, cannonPort.isPresent() ? ":"+cannonPort.get() : "");
-        
+        this.idListRequestUri = String.format("http://%s%s/%s", cannonHost, cannonPort.isPresent() ? ":" + cannonPort.get() : "", contentWordsListEndpoint);
+        this.contentWordsRequestBase = String.format("http://%s%s/%s?ids=", cannonHost, cannonPort.isPresent() ? ":" + cannonPort.get() : "", contentWordsEndpoint);
+
         this.log = log;
     }
-    
+
     public Optional<ContentWordsIdList> getIdList() {
         try {
             return Optional.of(idListClient.get(idListRequestUri));
@@ -50,12 +48,12 @@ public class CannonTwitterTopicsClient {
             return Optional.absent();
         }
     }
-    
+
     public Optional<ContentWordsList> getContentWordsForIds(List<String> contentIds) {
         try {
             return Optional.of(contentWordsClient.get(joiner.appendTo(new StringBuilder(contentWordsRequestBase), contentIds).toString()));
         } catch (Exception e) {
-            log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to get words for %s",joiner.join(contentIds)));
+            log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to get words for %s", joiner.join(contentIds)));
             return Optional.absent();
         }
     }
