@@ -26,7 +26,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 public class VoilaModule {
 
     private static final String TWITTER_NS_FOR_PROGRAMMES = "twitter";
-    private static final String TWITTER_NS_FOR_AUDIENCE = "twitter:audience_related";
+    private static final String TWITTER_NS_FOR_AUDIENCE = "twitter:audience-related";
     private static final String CONTENT_WORDS_FOR_PROGRAMMES = "contentWords";
     private static final String CONTENT_WORDS_LIST_FOR_PROGRAMMES = "contentWordsList";
     private static final String CONTENT_WORDS_FOR_AUDIENCE = "contentWordsForPeopleTalk";
