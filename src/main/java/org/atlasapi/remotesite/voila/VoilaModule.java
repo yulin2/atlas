@@ -51,8 +51,8 @@ public class VoilaModule {
 
     @PostConstruct
     public void scheduleTasks() {
-        scheduler.schedule(cannonTwitterTopicsUpdaterForProgrammes(), RepetitionRules.NEVER);
-        scheduler.schedule(cannonTwitterTopicsUpdaterForAudience(), RepetitionRules.NEVER);
+        scheduler.schedule(cannonTwitterTopicsUpdaterForProgrammes().withName("Twitter Topics Updater for Programmes"), RepetitionRules.NEVER);
+        scheduler.schedule(cannonTwitterTopicsUpdaterForAudience().withName("Twitter Topics Updater for Audience-related Content"), RepetitionRules.NEVER);
     }
 
     @Bean
