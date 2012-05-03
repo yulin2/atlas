@@ -141,9 +141,12 @@ public class TheSpaceItemProcessor {
                 episode.addClip(getClip(mapper, clip.get("programme"), episode));
             }
 
-            JsonNode version = node.get("canonical_version");
-            if (version != null && !version.isNull()) {
-                episode.addVersion(getVersion(version, episode));
+            JsonNode versions = node.get("versions");
+            if (versions != null && !versions.isNull()) {
+                Iterator<JsonNode> it = versions.getElements();
+                while (it.hasNext()) {
+                    episode.addVersion(getVersion(it.next(), episode));
+                }
             }
         } catch (Exception ex) {
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting episode: " + episode.getCanonicalUri()).withSource(getClass()));
@@ -267,9 +270,12 @@ public class TheSpaceItemProcessor {
             }
         }
 
-        JsonNode version = node.get("canonical_version");
-        if (version != null && !version.isNull()) {
-            clip.addVersion(getVersion(version, clip));
+        JsonNode versions = node.get("versions");
+        if (versions != null && !versions.isNull()) {
+            Iterator<JsonNode> it = versions.getElements();
+            while (it.hasNext()) {
+                clip.addVersion(getVersion(it.next(), clip));
+            }
         }
 
         return clip;
