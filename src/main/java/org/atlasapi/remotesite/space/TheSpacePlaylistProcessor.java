@@ -30,7 +30,8 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public class TheSpacePlaylistProcessor {
 
-    private final String BASE_CANONICAL_URI = "http://thespace.org/items/";
+    private final String BASE_CANONICAL_URI = "http://thespace.org/";
+    private final String BASE_ITEMS_URI = "http://thespace.org/items/";
     private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
     //
     private final Function<Content, ChildRef> CONTENT_TO_CHILD_REF = new ContentToChildRef();
@@ -56,9 +57,9 @@ public class TheSpacePlaylistProcessor {
         //
         String pid = item.get("pid").asText();
         //
-        ContentGroup playlist = (ContentGroup) groupResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pid))).getFirstValue().valueOrNull();
+        ContentGroup playlist = (ContentGroup) groupResolver.findByCanonicalUris(ImmutableSet.of(getItemsUri(pid))).getFirstValue().valueOrNull();
         if (playlist == null) {
-            playlist = new ContentGroup(getCanonicalUri(pid));
+            playlist = new ContentGroup(getItemsUri(pid));
             playlist.setType(ContentGroup.Type.PLAYLIST);
         }
         makePlaylist(playlist, item, mapper);
@@ -67,7 +68,7 @@ public class TheSpacePlaylistProcessor {
     private void makePlaylist(ContentGroup playlist, JsonNode node, ObjectMapper mapper) throws Exception {
         try {
             JsonNode pid = node.get("pid");
-            playlist.setCanonicalUri(getCanonicalUri(pid.asText()));
+            playlist.setCanonicalUri(getItemsUri(pid.asText()));
             playlist.setPublisher(Publisher.THESPACE);
 
             JsonNode title = node.get("title");
@@ -92,11 +93,11 @@ public class TheSpacePlaylistProcessor {
             if (image != null && !image.isNull()) {
                 JsonNode smallImage = image.get("depiction_320");
                 if (smallImage != null && !smallImage.isNull()) {
-                    playlist.setThumbnail(smallImage.asText());
+                    playlist.setThumbnail(getImagesUri(smallImage.asText()));
                 }
                 JsonNode bigImage = image.get("depiction_640");
                 if (bigImage != null && !bigImage.isNull()) {
-                    playlist.setImage(bigImage.asText());
+                    playlist.setImage(getImagesUri(bigImage.asText()));
                 }
             }
 
@@ -142,7 +143,7 @@ public class TheSpacePlaylistProcessor {
             while (it.hasNext()) {
                 JsonNode content = it.next();
                 String cPid = content.get("pid").asText();
-                ResolvedContent episode = contentResolver.findByCanonicalUris(ImmutableList.of(getCanonicalUri(cPid)));
+                ResolvedContent episode = contentResolver.findByCanonicalUris(ImmutableList.of(getItemsUri(cPid)));
                 if (!episode.isEmpty()) {
                     result.add((Content) episode.getFirstValue().requireValue());
                 }
@@ -151,8 +152,12 @@ public class TheSpacePlaylistProcessor {
         return result;
     }
 
-    private String getCanonicalUri(String pid) {
-        return BASE_CANONICAL_URI + pid;
+    private String getImagesUri(String image) {
+        return BASE_CANONICAL_URI + image;
+    }
+    
+    private String getItemsUri(String pid) {
+        return BASE_ITEMS_URI + pid;
     }
 
     private class ContentToChildRef implements Function<Content, ChildRef> {

@@ -36,7 +36,8 @@ import org.joda.time.format.ISODateTimeFormat;
 //TODO Lots of duplicated code, some refactoring needed.
 public class TheSpaceItemProcessor {
 
-    private final String BASE_CANONICAL_URI = "http://thespace.org/items/";
+    private final String BASE_CANONICAL_URI = "http://thespace.org/";
+    private final String BASE_ITEMS_URI = "http://thespace.org/items/";
     private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
     private final String EPISODE_TYPE = "episode";
     //
@@ -61,7 +62,7 @@ public class TheSpaceItemProcessor {
         String pid = node.get("pid").asText();
         //
         if (type.equals(EPISODE_TYPE)) {
-            Item content = (Item) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pid))).getFirstValue().valueOrNull();
+            Item content = (Item) contentResolver.findByCanonicalUris(ImmutableSet.of(getItemsUri(pid))).getFirstValue().valueOrNull();
             boolean isTopLevel = !node.has("parent");
             if (content == null && isTopLevel) {
                 Item episode = new Item();
@@ -85,7 +86,7 @@ public class TheSpaceItemProcessor {
     private void fillItem(Item episode, JsonNode node, ObjectMapper mapper) throws Exception {
         try {
             JsonNode pid = node.get("pid");
-            episode.setCanonicalUri(getCanonicalUri(pid.asText()));
+            episode.setCanonicalUri(getItemsUri(pid.asText()));
             episode.setPublisher(Publisher.THESPACE);
 
             JsonNode title = node.get("title");
@@ -117,11 +118,11 @@ public class TheSpaceItemProcessor {
             if (image != null && !image.isNull()) {
                 JsonNode smallImage = image.get("depiction_320");
                 if (smallImage != null && !smallImage.isNull()) {
-                    episode.setThumbnail(smallImage.asText());
+                    episode.setThumbnail(getImagesUri(smallImage.asText()));
                 }
                 JsonNode bigImage = image.get("depiction_640");
                 if (bigImage != null && !bigImage.isNull()) {
-                    episode.setImage(bigImage.asText());
+                    episode.setImage(getImagesUri(bigImage.asText()));
                 }
             }
 
@@ -162,7 +163,7 @@ public class TheSpaceItemProcessor {
             JsonNode parent = node.get("parent").get("programme");
             if (parent != null && !parent.isNull()) {
                 String pPid = parent.get("pid").asText();
-                Series series = (Series) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pPid))).getFirstValue().valueOrNull();
+                Series series = (Series) contentResolver.findByCanonicalUris(ImmutableSet.of(getItemsUri(pPid))).getFirstValue().valueOrNull();
                 if (series == null) {
                     series = new Series();
                 }
@@ -179,7 +180,7 @@ public class TheSpaceItemProcessor {
 
     private Series fillSeries(Series series, ObjectMapper mapper, JsonNode node) throws Exception {
         JsonNode pid = node.get("pid");
-        series.setCanonicalUri(getCanonicalUri(pid.asText()));
+        series.setCanonicalUri(getItemsUri(pid.asText()));
         series.setPublisher(Publisher.THESPACE);
 
         JsonNode title = node.get("title");
@@ -207,11 +208,11 @@ public class TheSpaceItemProcessor {
         if (image != null && !image.isNull()) {
             JsonNode smallImage = image.get("depiction_320");
             if (smallImage != null && !smallImage.isNull()) {
-                series.setThumbnail(smallImage.asText());
+                series.setThumbnail(getImagesUri(smallImage.asText()));
             }
             JsonNode bigImage = image.get("depiction_640");
             if (bigImage != null && !bigImage.isNull()) {
-                series.setImage(bigImage.asText());
+                series.setImage(getImagesUri(bigImage.asText()));
             }
         }
 
@@ -237,7 +238,7 @@ public class TheSpaceItemProcessor {
         Clip clip = new Clip();
 
         JsonNode pid = node.get("pid");
-        clip.setCanonicalUri(getCanonicalUri(pid.asText()));
+        clip.setCanonicalUri(getItemsUri(pid.asText()));
         clip.setPublisher(Publisher.THESPACE);
 
         JsonNode title = node.get("title");
@@ -260,11 +261,11 @@ public class TheSpaceItemProcessor {
         if (image != null && !image.isNull()) {
             JsonNode smallImage = image.get("depiction_320");
             if (smallImage != null && !smallImage.isNull()) {
-                clip.setThumbnail(smallImage.asText());
+                clip.setThumbnail(getImagesUri(smallImage.asText()));
             }
             JsonNode bigImage = image.get("depiction_640");
             if (bigImage != null && !bigImage.isNull()) {
-                clip.setImage(bigImage.asText());
+                clip.setImage(getImagesUri(bigImage.asText()));
             }
         }
 
@@ -282,7 +283,7 @@ public class TheSpaceItemProcessor {
         Version version = new Version();
 
         JsonNode pid = node.get("pid");
-        version.setCanonicalUri(getCanonicalUri(pid.asText()));
+        version.setCanonicalUri(getItemsUri(pid.asText()));
 
         JsonNode duration = node.get("duration");
         if (duration != null && !duration.isNull()) {
@@ -318,7 +319,11 @@ public class TheSpaceItemProcessor {
         return version;
     }
 
-    private String getCanonicalUri(String pid) {
-        return BASE_CANONICAL_URI + pid;
+    private String getImagesUri(String image) {
+        return BASE_CANONICAL_URI + image;
+    }
+    
+    private String getItemsUri(String pid) {
+        return BASE_ITEMS_URI + pid;
     }
 }
