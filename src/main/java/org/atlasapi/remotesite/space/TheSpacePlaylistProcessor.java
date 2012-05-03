@@ -71,7 +71,7 @@ public class TheSpacePlaylistProcessor {
             playlist.setPublisher(Publisher.THESPACE);
 
             JsonNode title = node.get("title");
-            if (title != null) {
+            if (title != null && !title.isNull()) {
                 playlist.setTitle(title.asText());
             }
 
@@ -79,34 +79,37 @@ public class TheSpacePlaylistProcessor {
             JsonNode medium_synopsis = node.get("medium_synopsis");
             JsonNode short_synopsis = node.get("short_synopsis");
             String synopsis = null;
-            if (long_synopsis != null) {
+            if (long_synopsis != null && !long_synopsis.isNull()) {
                 synopsis = long_synopsis.asText();
-            } else if (medium_synopsis != null) {
+            } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
                 synopsis = medium_synopsis.asText();
-            } else if (short_synopsis != null) {
+            } else if (short_synopsis != null && !short_synopsis.isNull()) {
                 synopsis = short_synopsis.asText();
             }
             playlist.setDescription(synopsis);
 
             JsonNode image = node.get("image");
-            if (image != null) {
+            if (image != null && !image.isNull()) {
                 JsonNode smallImage = image.get("depiction_320");
-                if (smallImage != null) {
+                if (smallImage != null && !smallImage.isNull()) {
                     playlist.setThumbnail(smallImage.asText());
                 }
                 JsonNode bigImage = image.get("depiction_640");
-                if (bigImage != null) {
+                if (bigImage != null && !bigImage.isNull()) {
                     playlist.setImage(bigImage.asText());
                 }
             }
 
-            Iterator<JsonNode> categories = node.get("categories").getElements();
-            Set<String> genres = new HashSet<String>();
-            while (categories.hasNext()) {
-                String id = BASE_CATEGORY_URI + categories.next().get("id").asText();
-                genres.add(id);
+            JsonNode categories = node.get("categories");
+            if (categories != null && !categories.isNull()) {
+                Iterator<JsonNode> it = categories.getElements();
+                Set<String> genres = new HashSet<String>();
+                while (it.hasNext()) {
+                    String id = BASE_CATEGORY_URI + it.next().get("id").asText();
+                    genres.add(id);
+                }
+                playlist.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
             }
-            playlist.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
 
             Iterable<Content> contents = getContents(node);
             playlist.setContents(Iterables.transform(contents, CONTENT_TO_CHILD_REF));
@@ -133,13 +136,16 @@ public class TheSpacePlaylistProcessor {
 
     private Iterable<Content> getContents(JsonNode node) throws Exception {
         List<Content> result = new LinkedList<Content>();
-        Iterator<JsonNode> contents = node.get("children").getElements();
-        while (contents.hasNext()) {
-            JsonNode content = contents.next();
-            String cPid = content.get("pid").asText();
-            ResolvedContent episode = contentResolver.findByCanonicalUris(ImmutableList.of(getCanonicalUri(cPid)));
-            if (!episode.isEmpty()) {
-                result.add((Content) episode.getFirstValue().requireValue());
+        JsonNode contents = node.get("children");
+        if (contents != null && !contents.isNull()) {
+            Iterator<JsonNode> it = contents.getElements();
+            while (it.hasNext()) {
+                JsonNode content = it.next();
+                String cPid = content.get("pid").asText();
+                ResolvedContent episode = contentResolver.findByCanonicalUris(ImmutableList.of(getCanonicalUri(cPid)));
+                if (!episode.isEmpty()) {
+                    result.add((Content) episode.getFirstValue().requireValue());
+                }
             }
         }
         return result;
