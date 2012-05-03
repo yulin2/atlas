@@ -36,7 +36,7 @@ import org.joda.time.format.ISODateTimeFormat;
 //TODO Lots of duplicated code, some refactoring needed.
 public class TheSpaceItemProcessor {
 
-    private final String BASE_CANONICAL_URI = "http://thespace.org/";
+    private final String BASE_CANONICAL_URI = "http://thespace.org";
     private final String BASE_ITEMS_URI = "http://thespace.org/items/";
     private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
     private final String EPISODE_TYPE = "episode";

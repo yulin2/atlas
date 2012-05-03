@@ -30,7 +30,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public class TheSpacePlaylistProcessor {
 
-    private final String BASE_CANONICAL_URI = "http://thespace.org/";
+    private final String BASE_CANONICAL_URI = "http://thespace.org";
     private final String BASE_ITEMS_URI = "http://thespace.org/items/";
     private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
     //
