@@ -89,7 +89,7 @@ public class TheSpaceItemProcessor {
             episode.setPublisher(Publisher.THESPACE);
 
             JsonNode title = node.get("title");
-            if (title != null) {
+            if (title != null && !title.isNull()) {
                 episode.setTitle(title.asText());
             }
 
@@ -104,23 +104,23 @@ public class TheSpaceItemProcessor {
             JsonNode medium_synopsis = node.get("medium_synopsis");
             JsonNode short_synopsis = node.get("short_synopsis");
             String synopsis = null;
-            if (long_synopsis != null) {
+            if (long_synopsis != null && !long_synopsis.isNull()) {
                 synopsis = long_synopsis.asText();
-            } else if (medium_synopsis != null) {
+            } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
                 synopsis = medium_synopsis.asText();
-            } else if (short_synopsis != null) {
+            } else if (short_synopsis != null && !short_synopsis.isNull()) {
                 synopsis = short_synopsis.asText();
             }
             episode.setDescription(synopsis);
 
             JsonNode image = node.get("image");
-            if (image != null) {
+            if (image != null && !image.isNull()) {
                 JsonNode smallImage = image.get("depiction_320");
-                if (smallImage != null) {
+                if (smallImage != null && !smallImage.isNull()) {
                     episode.setThumbnail(smallImage.asText());
                 }
                 JsonNode bigImage = image.get("depiction_640");
-                if (bigImage != null) {
+                if (bigImage != null && !bigImage.isNull()) {
                     episode.setImage(bigImage.asText());
                 }
             }
@@ -155,12 +155,12 @@ public class TheSpaceItemProcessor {
     private void fillEpisode(Episode episode, JsonNode node, ObjectMapper mapper) throws Exception {
         try {
             JsonNode position = node.get("position");
-            if (position != null) {
+            if (position != null && !position.isNull()) {
                 episode.setEpisodeNumber(position.asInt());
             }
 
             JsonNode parent = node.get("parent").get("programme");
-            if (parent != null) {
+            if (parent != null && !parent.isNull()) {
                 String pPid = parent.get("pid").asText();
                 Series series = (Series) contentResolver.findByCanonicalUris(ImmutableSet.of(getCanonicalUri(pPid))).getFirstValue().valueOrNull();
                 if (series == null) {
@@ -186,7 +186,7 @@ public class TheSpaceItemProcessor {
         series.setTitle(title.asText());
 
         JsonNode episodes = node.get("expected_child_count");
-        if (episodes != null) {
+        if (episodes != null && !episodes.isNull()) {
             series.setTotalEpisodes(episodes.asInt());
         }
 
@@ -194,23 +194,23 @@ public class TheSpaceItemProcessor {
         JsonNode medium_synopsis = node.get("medium_synopsis");
         JsonNode short_synopsis = node.get("short_synopsis");
         String synopsis = null;
-        if (long_synopsis != null) {
+        if (long_synopsis != null && !long_synopsis.isNull()) {
             synopsis = long_synopsis.asText();
-        } else if (medium_synopsis != null) {
+        } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
             synopsis = medium_synopsis.asText();
-        } else if (short_synopsis != null) {
+        } else if (short_synopsis != null && !short_synopsis.isNull()) {
             synopsis = short_synopsis.asText();
         }
         series.setDescription(synopsis);
 
         JsonNode image = node.get("image");
-        if (image != null) {
+        if (image != null && !image.isNull()) {
             JsonNode smallImage = image.get("depiction_320");
-            if (smallImage != null) {
+            if (smallImage != null && !smallImage.isNull()) {
                 series.setThumbnail(smallImage.asText());
             }
             JsonNode bigImage = image.get("depiction_640");
-            if (bigImage != null) {
+            if (bigImage != null && !bigImage.isNull()) {
                 series.setImage(bigImage.asText());
             }
         }
@@ -247,23 +247,23 @@ public class TheSpaceItemProcessor {
         JsonNode medium_synopsis = node.get("medium_synopsis");
         JsonNode short_synopsis = node.get("short_synopsis");
         String synopsis = null;
-        if (long_synopsis != null) {
+        if (long_synopsis != null && !long_synopsis.isNull()) {
             synopsis = long_synopsis.asText();
-        } else if (medium_synopsis != null) {
+        } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
             synopsis = medium_synopsis.asText();
-        } else if (short_synopsis != null) {
+        } else if (short_synopsis != null && !short_synopsis.isNull()) {
             synopsis = short_synopsis.asText();
         }
         clip.setDescription(synopsis);
 
         JsonNode image = node.get("image");
-        if (image != null) {
+        if (image != null && !image.isNull()) {
             JsonNode smallImage = image.get("depiction_320");
-            if (smallImage != null) {
+            if (smallImage != null && !smallImage.isNull()) {
                 clip.setThumbnail(smallImage.asText());
             }
             JsonNode bigImage = image.get("depiction_640");
-            if (bigImage != null) {
+            if (bigImage != null && !bigImage.isNull()) {
                 clip.setImage(bigImage.asText());
             }
         }
@@ -285,7 +285,7 @@ public class TheSpaceItemProcessor {
         version.setCanonicalUri(getCanonicalUri(pid.asText()));
 
         JsonNode duration = node.get("duration");
-        if (duration != null) {
+        if (duration != null && !duration.isNull()) {
             version.setDuration(Duration.standardSeconds(Integer.parseInt(duration.asText())));
         }
 
@@ -304,11 +304,11 @@ public class TheSpaceItemProcessor {
 
             JsonNode availability = availabilities.next();
             JsonNode start = availability.get("start_of_media_availability");
-            if (start != null) {
+            if (start != null && !start.isNull()) {
                 policy.setAvailabilityStart(ISODateTimeFormat.dateTimeParser().parseDateTime(start.asText()));
             }
             JsonNode end = availability.get("end_of_media_availability");
-            if (end != null) {
+            if (end != null && !end.isNull()) {
                 policy.setAvailabilityEnd(ISODateTimeFormat.dateTimeParser().parseDateTime(end.asText()));
             }
 
