@@ -22,35 +22,39 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 class TheSpaceUpdater extends ScheduledTask {
 
-    public static final String BASE_API_URL = "https://web.stage.thespace.org/";
-    //
     private final Timestamper timestamper = new SystemClock();
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
     private final ContentGroupResolver groupResolver;
     private final ContentGroupWriter groupWriter;
     private final AdapterLog log;
+    private final String url;
     private SimpleHttpClient client;
 
-    public TheSpaceUpdater(ContentResolver contentResolver, ContentWriter contentWriter, ContentGroupResolver groupResolver, ContentGroupWriter groupWriter, AdapterLog log, String keystore, String password) throws Exception {
+    public TheSpaceUpdater(ContentResolver contentResolver, ContentWriter contentWriter, ContentGroupResolver groupResolver, ContentGroupWriter groupWriter, AdapterLog log, String keystore, String password, String url) throws Exception {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
         this.groupResolver = groupResolver;
         this.groupWriter = groupWriter;
         this.log = log;
-        this.client = new RequestLimitingSimpleHttpClient(HttpClients.httpsClient(this.getClass().getClassLoader().getResource(keystore), password), 10);
+        this.url = url;
+        if (keystore == null || keystore.isEmpty() || password == null) {
+            this.client = new RequestLimitingSimpleHttpClient(HttpClients.webserviceClient(), 10);
+        } else {
+            this.client = new RequestLimitingSimpleHttpClient(HttpClients.httpsClient(this.getClass().getClassLoader().getResource(keystore), password), 10);
+        }
     }
 
     @Override
     public void runTask() {
         try {
             Timestamp start = timestamper.timestamp();
-            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("TheSpace update started from " + BASE_API_URL).withSource(getClass()));
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("TheSpace update started from " + url).withSource(getClass()));
 
-            TheSpaceItemsProcessor itemsProcessor = new TheSpaceItemsProcessor(client, log, contentResolver, contentWriter);
-            TheSpacePlaylistsProcessor playlistsProcessor = new TheSpacePlaylistsProcessor(client, log, contentResolver, contentWriter, groupResolver, groupWriter);
-            JsonNode items = client.get(new SimpleHttpRequest<JsonNode>(BASE_API_URL + "/items.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
-            JsonNode playlists = client.get(new SimpleHttpRequest<JsonNode>(BASE_API_URL + "/items/playlists.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
+            TheSpaceItemsProcessor itemsProcessor = new TheSpaceItemsProcessor(url, client, log, contentResolver, contentWriter);
+            TheSpacePlaylistsProcessor playlistsProcessor = new TheSpacePlaylistsProcessor(url, client, log, contentResolver, contentWriter, groupResolver, groupWriter);
+            JsonNode items = client.get(new SimpleHttpRequest<JsonNode>(url + "/items.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
+            JsonNode playlists = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/playlists.json", new JSonNodeHttpResponseTransformer(new ObjectMapper())));
             itemsProcessor.process(items);
             playlistsProcessor.process(playlists);
 

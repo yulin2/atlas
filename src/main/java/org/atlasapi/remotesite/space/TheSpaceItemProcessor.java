@@ -40,12 +40,14 @@ public class TheSpaceItemProcessor {
     private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
     private final String EPISODE_TYPE = "episode";
     //
+    private final String url;
     private final SimpleHttpClient client;
     private final AdapterLog log;
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
 
-    public TheSpaceItemProcessor(SimpleHttpClient client, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter) {
+    public TheSpaceItemProcessor(String url, SimpleHttpClient client, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter) {
+        this.url = url;
         this.client = client;
         this.log = log;
         this.contentResolver = contentResolver;
@@ -134,14 +136,14 @@ public class TheSpaceItemProcessor {
             Iterator<JsonNode> clips = node.get("available_clips").getElements();
             while (clips.hasNext()) {
                 String cPid = clips.next().get("pid").asText();
-                JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+                JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
                 episode.addClip(getClip(mapper, clip.get("programme"), episode));
             }
 
             Iterator<JsonNode> versions = node.get("versions").getElements();
             while (versions.hasNext()) {
                 String vPid = versions.next().get("pid").asText();
-                JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+                JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
                 episode.addVersion(getVersion(mapper, version.get("version"), episode));
             }
         } catch (Exception ex) {
@@ -164,7 +166,7 @@ public class TheSpaceItemProcessor {
                 if (series == null) {
                     series = new Series();
                 }
-                fillSeries(series, mapper, client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + pPid + ".json", new JSonNodeHttpResponseTransformer(mapper))).get("programme"));
+                fillSeries(series, mapper, client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + pPid + ".json", new JSonNodeHttpResponseTransformer(mapper))).get("programme"));
                 series.setChildRefs(Iterables.concat(series.getChildRefs(), ImmutableList.of(episode.childRef())));
                 episode.setParentRef(ParentRef.parentRefFrom(series));
                 contentWriter.createOrUpdate(series);
@@ -224,7 +226,7 @@ public class TheSpaceItemProcessor {
         Iterator<JsonNode> clips = node.get("available_clips").getElements();
         while (clips.hasNext()) {
             String cPid = clips.next().get("pid").asText();
-            JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+            JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
             series.addClip(getClip(mapper, clip.get("programme"), series));
         }
 
@@ -269,7 +271,7 @@ public class TheSpaceItemProcessor {
         Iterator<JsonNode> versions = node.get("versions").getElements();
         while (versions.hasNext()) {
             String vPid = versions.next().get("pid").asText();
-            JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+            JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
             clip.addVersion(getVersion(mapper, version.get("version"), clip));
         }
 
