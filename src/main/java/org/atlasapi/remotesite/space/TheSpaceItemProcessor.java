@@ -141,11 +141,9 @@ public class TheSpaceItemProcessor {
                 episode.addClip(getClip(mapper, clip.get("programme"), episode));
             }
 
-            Iterator<JsonNode> versions = node.get("versions").getElements();
-            while (versions.hasNext()) {
-                String vPid = versions.next().get("pid").asText();
-                JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-                episode.addVersion(getVersion(mapper, version.get("version"), episode));
+            JsonNode version = node.get("canonical_version");
+            if (version != null && !version.isNull()) {
+                episode.addVersion(getVersion(version, episode));
             }
         } catch (Exception ex) {
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting episode: " + episode.getCanonicalUri()).withSource(getClass()));
@@ -269,17 +267,15 @@ public class TheSpaceItemProcessor {
             }
         }
 
-        Iterator<JsonNode> versions = node.get("versions").getElements();
-        while (versions.hasNext()) {
-            String vPid = versions.next().get("pid").asText();
-            JsonNode version = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + vPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-            clip.addVersion(getVersion(mapper, version.get("version"), clip));
+        JsonNode version = node.get("canonical_version");
+        if (version != null && !version.isNull()) {
+            clip.addVersion(getVersion(version, clip));
         }
 
         return clip;
     }
 
-    private Version getVersion(ObjectMapper mapper, JsonNode node, Content parent) {
+    private Version getVersion(JsonNode node, Content parent) {
         Version version = new Version();
 
         JsonNode pid = node.get("pid");
@@ -290,31 +286,25 @@ public class TheSpaceItemProcessor {
             version.setDuration(Duration.standardSeconds(Integer.parseInt(duration.asText())));
         }
 
-        Iterator<JsonNode> availabilities = node.get("availabilities").getElements();
-        while (availabilities.hasNext()) {
-            Encoding encoding = new Encoding();
-            Location location = new Location();
-            Policy policy = new Policy();
-            encoding.addAvailableAt(location);
-            location.setAvailable(true);
-            location.setTransportType(TransportType.LINK);
-            location.setUri(parent.getCanonicalUri());
-            location.setPolicy(policy);
-            policy.setRevenueContract(Policy.RevenueContract.FREE_TO_VIEW);
-            policy.setAvailableCountries(ImmutableSet.of(Countries.ALL));
-
-            JsonNode availability = availabilities.next();
-            JsonNode start = availability.get("start_of_media_availability");
-            if (start != null && !start.isNull()) {
-                policy.setAvailabilityStart(ISODateTimeFormat.dateTimeParser().parseDateTime(start.asText()));
-            }
-            JsonNode end = availability.get("end_of_media_availability");
-            if (end != null && !end.isNull()) {
-                policy.setAvailabilityEnd(ISODateTimeFormat.dateTimeParser().parseDateTime(end.asText()));
-            }
-
-            version.addManifestedAs(encoding);
+        Encoding encoding = new Encoding();
+        Location location = new Location();
+        Policy policy = new Policy();
+        encoding.addAvailableAt(location);
+        location.setAvailable(true);
+        location.setTransportType(TransportType.LINK);
+        location.setUri(parent.getCanonicalUri());
+        location.setPolicy(policy);
+        policy.setRevenueContract(Policy.RevenueContract.FREE_TO_VIEW);
+        policy.setAvailableCountries(ImmutableSet.of(Countries.ALL));
+        JsonNode start = node.get("start_of_media_availability");
+        if (start != null && !start.isNull()) {
+            policy.setAvailabilityStart(ISODateTimeFormat.dateTimeParser().parseDateTime(start.asText()));
         }
+        JsonNode end = node.get("end_of_media_availability");
+        if (end != null && !end.isNull()) {
+            policy.setAvailabilityEnd(ISODateTimeFormat.dateTimeParser().parseDateTime(end.asText()));
+        }
+        version.addManifestedAs(encoding);
 
         return version;
     }
@@ -322,7 +312,7 @@ public class TheSpaceItemProcessor {
     private String getImagesUri(String image) {
         return BASE_CANONICAL_URI + image;
     }
-    
+
     private String getItemsUri(String pid) {
         return BASE_ITEMS_URI + pid;
     }
