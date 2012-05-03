@@ -16,6 +16,7 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public class TheSpacePlaylistsProcessor {
 
+    private final String url;
     private final SimpleHttpClient client;
     private final AdapterLog log;
     private final ContentResolver contentResolver;
@@ -23,7 +24,8 @@ public class TheSpacePlaylistsProcessor {
     private final ContentGroupResolver groupResolver;
     private final ContentGroupWriter groupWriter;
 
-    public TheSpacePlaylistsProcessor(SimpleHttpClient client, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, ContentGroupResolver groupResolver, ContentGroupWriter groupWriter) {
+    public TheSpacePlaylistsProcessor(String url, SimpleHttpClient client, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter, ContentGroupResolver groupResolver, ContentGroupWriter groupWriter) {
+        this.url = url;
         this.client = client;
         this.log = log;
         this.contentResolver = contentResolver;
@@ -42,7 +44,7 @@ public class TheSpacePlaylistsProcessor {
             JsonNode item = results.next();
             String pid = item.get("pid").asText();
             try {
-                JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(TheSpaceUpdater.BASE_API_URL + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+                JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
                 processor.process(node.get("programme"));
             } catch (Exception ex) {
                 log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withCause(ex));

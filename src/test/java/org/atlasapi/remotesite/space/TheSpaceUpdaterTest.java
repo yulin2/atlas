@@ -60,7 +60,7 @@ public class TheSpaceUpdaterTest {
             }
         }).when(groupWriter).createOrUpdate(any(ContentGroup.class));
 
-        TheSpaceUpdater updater = new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, "", "");
+        TheSpaceUpdater updater = new TheSpaceUpdater(contentResolver, contentWriter, groupResolver, groupWriter, log, "", "", "https://web.stage.thespace.org/");
         updater.runTask();
     }
 }
