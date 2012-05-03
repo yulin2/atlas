@@ -22,6 +22,7 @@ import org.mockito.stubbing.Answer;
 /**
  */
 // TODO: enable with proper maven profile
+@Ignore
 public class TheSpaceUpdaterTest {
 
     @Test
