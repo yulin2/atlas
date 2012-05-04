@@ -142,12 +142,14 @@ public class TheSpaceItemProcessor {
             }
 
             JsonNode versions = node.get("versions");
+            Set<Version> versionsObj = new HashSet<Version>();
             if (versions != null && !versions.isNull()) {
                 Iterator<JsonNode> it = versions.getElements();
                 while (it.hasNext()) {
-                    episode.addVersion(getVersion(it.next(), episode));
+                    versionsObj.add(getVersion(it.next(), episode));
                 }
             }
+            episode.setVersions(versionsObj);
         } catch (Exception ex) {
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting episode: " + episode.getCanonicalUri()).withSource(getClass()));
             throw ex;
@@ -271,12 +273,14 @@ public class TheSpaceItemProcessor {
         }
 
         JsonNode versions = node.get("versions");
+        Set<Version> versionsObj = new HashSet<Version>();
         if (versions != null && !versions.isNull()) {
             Iterator<JsonNode> it = versions.getElements();
             while (it.hasNext()) {
-                clip.addVersion(getVersion(it.next(), clip));
+                versionsObj.add(getVersion(it.next(), clip));
             }
         }
+        clip.setVersions(versionsObj);
 
         return clip;
     }
@@ -295,11 +299,13 @@ public class TheSpaceItemProcessor {
         Encoding encoding = new Encoding();
         Location location = new Location();
         Policy policy = new Policy();
+        encoding.setCanonicalUri(parent.getCanonicalUri());
         encoding.addAvailableAt(location);
+        location.setCanonicalUri(parent.getCanonicalUri());
         location.setAvailable(true);
         location.setTransportType(TransportType.LINK);
-        location.setUri(parent.getCanonicalUri());
         location.setPolicy(policy);
+        policy.setCanonicalUri(parent.getCanonicalUri());
         policy.setRevenueContract(Policy.RevenueContract.FREE_TO_VIEW);
         policy.setAvailableCountries(ImmutableSet.of(Countries.ALL));
         JsonNode start = node.get("start_of_media_availability");
