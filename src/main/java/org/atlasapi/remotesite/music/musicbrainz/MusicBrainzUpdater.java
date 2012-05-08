@@ -34,7 +34,7 @@ class MusicBrainzUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("Music Brainz update started!").withSource(getClass()));
 
-            new MusicBrainzProcessor().process(new File(dataDir), contentWriter, peopleWriter);
+            new MusicBrainzProcessor().process(new File(dataDir), log, contentWriter, peopleWriter);
 
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("Music Brainz update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
