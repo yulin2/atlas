@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Policy;
 import org.joda.time.Duration;
 
 import com.metabroadcast.common.intl.Countries;
+import org.joda.time.ReadableDuration;
 
 
 public class BbcProgrammesPolicyClientTest extends TestCase {
@@ -37,7 +38,7 @@ public class BbcProgrammesPolicyClientTest extends TestCase {
 		Policy policy = new BbcProgrammesPolicyClient().policyForUri(programmeThatWillBeAroundForALongWhileAsIsAvailableEverywhere).requireValue();
 		
 		assertThat(policy.getAvailableCountries(), is(Collections.singleton(Countries.ALL)));
-		assertThat(new Duration(policy.getAvailabilityStart(), policy.getAvailabilityEnd()), is(greaterThan(Duration.standardDays(100))));
+		assertThat(new Duration(policy.getAvailabilityStart(), policy.getAvailabilityEnd()), is(greaterThan((ReadableDuration) Duration.standardDays(100))));
 	}
 	
 

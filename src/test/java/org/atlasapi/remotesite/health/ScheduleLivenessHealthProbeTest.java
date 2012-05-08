@@ -23,6 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.health.ProbeResult;
+import org.joda.time.base.BaseSingleFieldPeriod;
 
 public class ScheduleLivenessHealthProbeTest extends TestCase {
 	private static final int TWELVE_POINT_FIVE_DAYS_IN_HOURS = 300;
@@ -55,8 +56,8 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		ProbeResult result = probe.probe();
 		
 		assertThat(result.isFailure(), is(false));
-		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan(Minutes.minutes(2)));
-		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan((BaseSingleFieldPeriod) Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan((BaseSingleFieldPeriod) Minutes.minutes(2)));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -75,8 +76,8 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		ProbeResult result = probe.probe();
 		
 		assertThat(result.isFailure(), is(true));
-		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan(Minutes.minutes(2)));
-		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan((BaseSingleFieldPeriod)Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan((BaseSingleFieldPeriod)Minutes.minutes(2)));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -96,8 +97,8 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		ProbeResult result = probe.probe();
 		
 		assertThat(result.isFailure(), is(true));
-		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan(Minutes.minutes(2)));
-		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan(Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedStartTime, startTimeForScheduleTest), lessThan((BaseSingleFieldPeriod)Minutes.minutes(2)));
+		assertThat(Minutes.minutesBetween(dummySchedule.requestedEndTime, endTimeForScheduleTest), lessThan((BaseSingleFieldPeriod)Minutes.minutes(2)));
 	}
 	
 	protected static class DummyScheduleResolver implements ScheduleResolver {

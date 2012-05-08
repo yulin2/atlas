@@ -5,41 +5,41 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.time.Timestamp;
 import com.metabroadcast.common.time.Timestamper;
-import org.atlasapi.media.product.ProductStore;
+import java.io.File;
+import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.s3.DefaultS3Client;
-import org.atlasapi.s3.S3Client;
 
 /**
  */
 class MusicBrainzUpdater extends ScheduledTask {
 
-    static final String S3_BUCKET = "bbc-products";
-    //
     private final Timestamper timestamper = new SystemClock();
-    private final ProductStore productStore;
+    private final ContentWriter contentWriter;
+    private final ItemsPeopleWriter peopleWriter;
     private final AdapterLog log;
-    private S3Client client;
+    private final String dataDir;
 
-    public MusicBrainzUpdater(ProductStore productStore, AdapterLog log, String s3Access, String s3Secret) {
-        this.productStore = productStore;
+    public MusicBrainzUpdater(ContentWriter contentWriter, ItemsPeopleWriter peopleWriter, AdapterLog log, String dataDir) {
+        this.contentWriter = contentWriter;
+        this.peopleWriter = peopleWriter;
         this.log = log;
-        this.client = new DefaultS3Client(s3Access, s3Secret, S3_BUCKET);
+        this.dataDir = dataDir;
     }
 
     @Override
     public void runTask() {
         try {
             Timestamp start = timestamper.timestamp();
-            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("BBC Products update started!").withSource(getClass()));
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("Music Brainz update started!").withSource(getClass()));
 
-            new MusicBrainzProcessor().process(client, productStore);
+            new MusicBrainzProcessor().process(new File(dataDir), contentWriter, peopleWriter);
 
             Timestamp end = timestamper.timestamp();
-            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("BBC Products update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.INFO).withDescription("Music Brainz update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing BBC Products."));
+            log.record(new AdapterLogEntry(AdapterLogEntry.Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing Music Brainz."));
             Throwables.propagate(e);
         }
     }
