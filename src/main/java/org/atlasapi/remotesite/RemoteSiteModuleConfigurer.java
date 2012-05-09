@@ -28,6 +28,7 @@ import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
+import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
 
 public class RemoteSiteModuleConfigurer {
