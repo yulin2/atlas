@@ -10,6 +10,8 @@ import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
 import java.net.UnknownHostException;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelTranslator;
@@ -27,6 +29,7 @@ import com.mongodb.MongoException;
 
 public class ChannelAvailableOnSettingTask extends ScheduledTask {
     
+    private final Log log = LogFactory.getLog(ChannelAvailableOnSettingTask.class);
     private final ChannelResolver resolver;
     private final DBCollection collection;
 
@@ -37,6 +40,9 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
 
     @Override
     protected void runTask() {
+        
+        log.info("Starting ChannelAvailableOnSettingTask");
+        
         for (Channel channel : resolver.all()) {
             Set<String> availableOn = Sets.newHashSet();
             
@@ -48,6 +54,8 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
             
             collection.update(where().idEquals(channel.getId()).build(), update().setField(ChannelTranslator.AVAILABLE_ON, availableOn).build());
         }
+        
+        log.info("Finished ChannelAvailableOnSettingTask");
     }
     
     private Function<String, String> TO_AVAILABLE_ON = new Function<String, String>() {
@@ -55,8 +63,6 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
         public String apply(String input) {
             if (input.startsWith("http://pressassociation.com")) {
                 return Publisher.PA.key();
-            } else if (input.startsWith("http://xmltv.radiotimes.com")) {
-                return Publisher.RADIO_TIMES.key();
             } else if (input.startsWith("http://devapi.bbcredux.com")) {
                 return Publisher.BBC_REDUX.key();
             } else {
@@ -69,6 +75,6 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
         
         DatabasedMongo mongo = new DatabasedMongo(new Mongo(Configurer.get("mongo.host").get()), Configurer.get("mongo.dbName").get());
         
-        new ChannelAvailableOnSettingTask(new MongoChannelStore(mongo) ,mongo.collection(MongoChannelStore.COLLECTION)).run();
+        new ChannelAvailableOnSettingTask(new MongoChannelStore(mongo), mongo.collection(MongoChannelStore.COLLECTION)).run();
     }
 }

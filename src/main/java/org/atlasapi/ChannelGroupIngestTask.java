@@ -6,6 +6,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroup.ChannelGroupType;
 import org.atlasapi.media.channel.ChannelGroupStore;
@@ -32,6 +34,8 @@ import com.mongodb.MongoException;
 
 public class ChannelGroupIngestTask implements Runnable {
     
+    private final Log log = LogFactory.getLog(ChannelGroupIngestTask.class);
+    
     private final Gson gson = new GsonBuilder().setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES).create();
     private final ChannelGroupStore store;
     private final ChannelResolver channelResolver;
@@ -46,6 +50,8 @@ public class ChannelGroupIngestTask implements Runnable {
 
     @Override
     public void run() {
+        
+        log.info("Starting ChannelGroupIngestTask");
         
         try {
             URL resource = Resources.getResource("channel-groups.json");
@@ -66,6 +72,8 @@ public class ChannelGroupIngestTask implements Runnable {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        
+        log.info("Successfully completed ChannelGroupIngestTask");
     }
     
     private void createChannelGroup(Platform platform, Publisher publisher, ChannelGroupType type) {
