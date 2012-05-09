@@ -57,6 +57,7 @@ public class RemoteSiteModuleConfigurer {
         .put("lovefilm", LoveFilmModule.class)
         .put("bbc-products", BBCProductsModule.class)
         .put("thespace", TheSpaceModule.class)
+        .put("musicbrainz", MusicBrainzModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
