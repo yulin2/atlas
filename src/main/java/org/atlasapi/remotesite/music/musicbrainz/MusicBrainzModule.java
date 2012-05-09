@@ -28,7 +28,7 @@ public class MusicBrainzModule {
         log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("Installed Music Brainz updater"));
     }
 
-    @Bean(name="bbcproductsupdater")
+    @Bean(name="musicbrainzupdater")
     public MusicBrainzUpdater updater() {
         return new MusicBrainzUpdater(contentWriter, peopleWriter, log, Configurer.get("musicbrainz.dataDir").get());
     }
