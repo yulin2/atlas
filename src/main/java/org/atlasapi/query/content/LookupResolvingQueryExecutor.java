@@ -25,28 +25,37 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
+import java.util.HashMap;
+import org.atlasapi.persistence.content.ContentCategory;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
-    private final LookupEntryStore lookupResolver;
-    private final KnownTypeContentResolver contentResolver;
+    private final KnownTypeContentResolver cassandraContentResolver;
+    private final KnownTypeContentResolver mongoContentResolver;
+    private final LookupEntryStore mongoLookupResolver;
 
-    public LookupResolvingQueryExecutor(KnownTypeContentResolver contentResolver, LookupEntryStore lookupResolver) {
-        this.contentResolver = contentResolver;
-        this.lookupResolver = lookupResolver;
+    public LookupResolvingQueryExecutor(KnownTypeContentResolver cassandraContentResolver, KnownTypeContentResolver mongoContentResolver, LookupEntryStore mongoLookupResolver) {
+        this.cassandraContentResolver = cassandraContentResolver;
+        this.mongoContentResolver = mongoContentResolver;
+        this.mongoLookupResolver = mongoLookupResolver;
     }
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        return resolveLookupEntries(query, lookupResolver.entriesForUris(uris));
+        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForUris(uris));
+        Map<String, List<Identified>> cassandraResults = resolveCassandraEntries(uris, query);
+        Map<String, List<Identified>> mergedResults = new HashMap<String, List<Identified>>(mongoResults);
+        mergedResults.putAll(cassandraResults);
+        return mergedResults;
     }
 
     @Override
     public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
-        return resolveLookupEntries(query, lookupResolver.entriesForIds(ids));
+        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForIds(ids));
+        return mongoResults;
     }
 
-    private Map<String, List<Identified>> resolveLookupEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
+    private Map<String, List<Identified>> resolveMongoEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
         final ApplicationConfiguration configuration = query.getConfiguration();
         ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(Iterables.filter(lookupEntries, new Predicate<LookupEntry>() {
             @Override
@@ -64,7 +73,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         }
         
         
-        final ResolvedContent allResolvedResults = contentResolver.findByLookupRefs(filteredRefs);
+        final ResolvedContent allResolvedResults = mongoContentResolver.findByLookupRefs(filteredRefs);
         
         return Maps.transformEntries(lookup, new EntryTransformer<String, LookupEntry, List<Identified>>(){
 
@@ -110,5 +119,24 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 return enabledPublishers.contains(input.publisher());
             }
         };
+    }
+
+    private Map<String, List<Identified>> resolveCassandraEntries(Iterable<String> uris, ContentQuery query) {
+        ResolvedContent result = cassandraContentResolver.findByLookupRefs(Iterables.transform(uris, new Function<String, LookupRef>() {
+
+            @Override
+            public LookupRef apply(String input) {
+                return new LookupRef(input, null, null);
+            }
+            
+        }));
+        return Maps.transformValues(result.asResolvedMap(), new Function<Identified, List<Identified>>() {
+
+            @Override
+            public List<Identified> apply(Identified input) {
+                return ImmutableList.of(input);
+            }
+            
+        });
     }
 }
