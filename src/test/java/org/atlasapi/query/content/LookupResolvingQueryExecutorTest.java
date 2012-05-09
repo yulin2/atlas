@@ -29,10 +29,11 @@ import com.google.common.collect.ImmutableSet;
 public class LookupResolvingQueryExecutorTest extends TestCase {
 
     private final Mockery context = new Mockery();
-    private KnownTypeContentResolver contentResolver = context.mock(KnownTypeContentResolver.class);
+    private KnownTypeContentResolver cassandraContentResolver = context.mock(KnownTypeContentResolver.class);
+    private KnownTypeContentResolver mongoContentResolver = context.mock(KnownTypeContentResolver.class);
     
     private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
-    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(contentResolver, lookupStore);
+    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore);
 
     @Test
     public void testSetsSameAs() {
@@ -46,7 +47,7 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         lookupStore.store(lookupEntryWithEquivalents(query, LookupRef.from(queryItem), LookupRef.from(equivItem)));
         
         context.checking(new Expectations(){{
-            one(contentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
+            one(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
                 will(returnValue(ResolvedContent.builder()
                         .put(queryItem.getCanonicalUri(), queryItem)
                         .put(equivItem.getCanonicalUri(), equivItem)
