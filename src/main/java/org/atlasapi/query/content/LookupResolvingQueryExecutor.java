@@ -25,8 +25,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
-import java.util.HashMap;
-import org.atlasapi.persistence.content.ContentCategory;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
@@ -42,11 +40,11 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForUris(uris));
-        Map<String, List<Identified>> cassandraResults = resolveCassandraEntries(uris, query);
-        Map<String, List<Identified>> mergedResults = new HashMap<String, List<Identified>>(mongoResults);
-        mergedResults.putAll(cassandraResults);
-        return mergedResults;
+        Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForUris(uris));
+        if (results.isEmpty()) {
+            results = resolveCassandraEntries(uris, query);
+        }
+        return results;
     }
 
     @Override
@@ -58,24 +56,25 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     private Map<String, List<Identified>> resolveMongoEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
         final ApplicationConfiguration configuration = query.getConfiguration();
         ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(Iterables.filter(lookupEntries, new Predicate<LookupEntry>() {
+
             @Override
             public boolean apply(LookupEntry input) {
                 return configuration.isEnabled(input.lookupRef().publisher());
             }
         }), LookupEntry.TO_ID);
-        
+
         Map<String, Set<LookupRef>> lookupRefs = Maps.transformValues(lookup, LookupEntry.TO_EQUIVS);
 
         Iterable<LookupRef> filteredRefs = Iterables.filter(Iterables.concat(lookupRefs.values()), enabledPublishers(configuration));
-        
+
         if (Iterables.isEmpty(filteredRefs)) {
             return ImmutableMap.of();
         }
-        
-        
+
+
         final ResolvedContent allResolvedResults = mongoContentResolver.findByLookupRefs(filteredRefs);
-        
-        return Maps.transformEntries(lookup, new EntryTransformer<String, LookupEntry, List<Identified>>(){
+
+        return Maps.transformEntries(lookup, new EntryTransformer<String, LookupEntry, List<Identified>>() {
 
             @Override
             public List<Identified> transformEntry(String uri, LookupEntry entry) {
@@ -83,12 +82,13 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                     return ImmutableList.of();
                 }
                 Iterable<Identified> identifieds = Iterables.filter(Iterables.transform(entry.equivalents(), new Function<LookupRef, Identified>() {
+
                     @Override
                     public Identified apply(LookupRef input) {
                         return allResolvedResults.get(input.id()).valueOrNull();
                     }
                 }), Predicates.notNull());
-                
+
                 return setEquivalentToFields(ImmutableList.copyOf(identifieds));
             }
         });
@@ -96,7 +96,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     private boolean containsRequestedUri(Iterable<LookupRef> equivRefs, String uri) {
         for (LookupRef equivRef : equivRefs) {
-            if(equivRef.id().equals(uri)){
+            if (equivRef.id().equals(uri)) {
                 return true;
             }
         }
@@ -110,10 +110,11 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         }
         return resolvedResults;
     }
-    
+
     private Predicate<LookupRef> enabledPublishers(ApplicationConfiguration config) {
         final Set<Publisher> enabledPublishers = config.getEnabledSources();
         return new Predicate<LookupRef>() {
+
             @Override
             public boolean apply(LookupRef input) {
                 return enabledPublishers.contains(input.publisher());
@@ -128,7 +129,6 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
             public LookupRef apply(String input) {
                 return new LookupRef(input, null, null);
             }
-            
         }));
         return Maps.transformValues(result.asResolvedMap(), new Function<Identified, List<Identified>>() {
 
@@ -136,7 +136,6 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
             public List<Identified> apply(Identified input) {
                 return ImmutableList.of(input);
             }
-            
         });
     }
 }
