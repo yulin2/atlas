@@ -4,6 +4,8 @@ import static com.google.common.collect.Iterables.transform;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -210,16 +212,24 @@ public class ChannelController {
     }
     
     private void writeOut(HttpServletResponse response, HttpServletRequest request, ChannelQueryResult channelQueryResult) throws IOException {
+
+        String callback = callback(request);
+        
         OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream(), Charsets.UTF_8);
         boolean ignoreEx = true;
         try {
+            if (callback != null) {
+                writer.write(callback + "(");
+            }
             gson.toJson(channelQueryResult, writer);
+            if (callback != null) {
+                writer.write(");");
+            }
             ignoreEx = false;
         } finally {
             Flushables.flush(writer, ignoreEx);
         }
     }
-    
     private String callback(HttpServletRequest request) {
         if (request == null) {
             return null;
