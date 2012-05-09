@@ -6,6 +6,11 @@ import java.util.concurrent.TimeUnit;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.media.MimeType;
+import java.io.FileInputStream;
+import java.net.URL;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 
 public class HttpClients {
 
@@ -44,5 +49,15 @@ public class HttpClients {
                 .withAcceptCharset("utf-8")
                 .withUserAgent(ATLAS_USER_AGENT)
                 .build();
+    }
+    
+    public static SimpleHttpClient httpsClient(URL keystore, String password) throws Exception {
+        KeyStore ks = KeyStore.getInstance("JKS", "SUN");
+        ks.load(keystore.openStream(), password.toCharArray());
+        return new SimpleHttpClientBuilder()
+            .withUserAgent(ATLAS_USER_AGENT)
+            .withSocketTimeout(30, TimeUnit.SECONDS)
+            .withSslSocketFactory(new SSLSocketFactory(ks, password, ks))
+            .build();
     }
 }

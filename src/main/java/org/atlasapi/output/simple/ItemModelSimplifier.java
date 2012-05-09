@@ -42,6 +42,7 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
+import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
@@ -52,12 +53,12 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
     
-    public ItemModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
-        this(localHostName, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
+        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
     }
 
-    public ItemModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
-        super(localHostName, topicResolver, productResolver);
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
+        super(localHostName, contentGroupResolver, topicResolver, productResolver);
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;

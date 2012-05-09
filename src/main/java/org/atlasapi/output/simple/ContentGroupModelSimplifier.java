@@ -5,25 +5,24 @@ import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
-import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.output.Annotation;
 
 import com.google.common.collect.Lists;
 
-public class ContentGroupModelSimplifier extends DescribedModelSimplifier<ContentGroup, Playlist> {
+public class ContentGroupModelSimplifier extends DescribedModelSimplifier<org.atlasapi.media.entity.ContentGroup, org.atlasapi.media.entity.simple.ContentGroup> {
 
     @Override
-    public Playlist simplify(ContentGroup model, Set<Annotation> annotations, ApplicationConfiguration config) {
+    public org.atlasapi.media.entity.simple.ContentGroup simplify(org.atlasapi.media.entity.ContentGroup model, Set<Annotation> annotations, ApplicationConfiguration config) {
 
-        Playlist simplePlaylist = new Playlist();
+        org.atlasapi.media.entity.simple.ContentGroup simple = new org.atlasapi.media.entity.simple.ContentGroup();
 
-        copyBasicDescribedAttributes(model, simplePlaylist, annotations);
+        copyBasicDescribedAttributes(model, simple, annotations);
 
-        simplePlaylist.setContent(simpleContentListFrom(model.getContents()));
+        simple.setContent(simpleContentListFrom(model.getContents()));
+        simple.setType(model.getType().toString().toLowerCase());
 
-        return simplePlaylist;
+        return simple;
     }
 
     private List<ContentIdentifier> simpleContentListFrom(Iterable<ChildRef> contents) {
@@ -33,5 +32,4 @@ public class ContentGroupModelSimplifier extends DescribedModelSimplifier<Conten
         }
         return contentList;
     }
-
 }
