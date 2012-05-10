@@ -13,13 +13,14 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import javax.annotation.Resource;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class MusicBrainzModule {
 
-    private @Resource(name="cassandraContentStore") ContentWriter contentWriter;
+    private @Autowired @Qualifier(value="cassandra") ContentWriter contentWriter;
+    private @Autowired @Qualifier(value="cassandra") ItemsPeopleWriter peopleWriter;
     private @Autowired SimpleScheduler scheduler;
-    private @Autowired ItemsPeopleWriter peopleWriter;
     private @Autowired AdapterLog log;
 
     @PostConstruct
