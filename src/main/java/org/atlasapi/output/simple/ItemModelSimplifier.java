@@ -42,6 +42,7 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
+import org.atlasapi.media.entity.Song;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
