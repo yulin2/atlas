@@ -139,6 +139,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 simpleItem.setCertificates(simpleCertificates(film.getCertificates()));
                 simpleItem.setReleaseDates(simpleReleaseDate(film.getReleaseDates()));
             }
+        } else if (fullItem instanceof Song) {
+            Song song = (Song) fullItem;
+            simpleItem.setIsrc(song.getIsrc());
         }
     }
 
