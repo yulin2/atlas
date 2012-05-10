@@ -42,6 +42,7 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
+import org.atlasapi.media.entity.Song;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
@@ -138,6 +139,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 simpleItem.setCertificates(simpleCertificates(film.getCertificates()));
                 simpleItem.setReleaseDates(simpleReleaseDate(film.getReleaseDates()));
             }
+        } else if (fullItem instanceof Song) {
+            Song song = (Song) fullItem;
+            simpleItem.setIsrc(song.getIsrc());
         }
     }
 
