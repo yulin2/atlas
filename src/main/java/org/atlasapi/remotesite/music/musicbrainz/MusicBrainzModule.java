@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class MusicBrainzModule {
 
     private @Autowired @Qualifier(value="cassandra") ContentWriter contentWriter;
-    private @Autowired @Qualifier(value="cassandra") ItemsPeopleWriter peopleWriter;
+    private @Autowired(required=false) @Qualifier(value="cassandra") ItemsPeopleWriter peopleWriter;
     private @Autowired SimpleScheduler scheduler;
     private @Autowired AdapterLog log;
 
