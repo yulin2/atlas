@@ -49,6 +49,8 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.metabroadcast.common.http.HttpHeaders;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import org.atlasapi.media.entity.simple.ContentGroup;
+import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 
 /**
  * Outputs simple URIplay model in plain XML format using JAXB.
@@ -83,7 +85,9 @@ public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
                 Broadcast.class,
                 PublisherDetails.class, 
                 Topic.class, 
-                TopicQueryResult.class);
+                TopicQueryResult.class,
+                ContentGroup.class,
+                ContentGroupQueryResult.class);
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
