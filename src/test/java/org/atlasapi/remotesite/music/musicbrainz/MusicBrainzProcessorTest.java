@@ -21,9 +21,6 @@ public class MusicBrainzProcessorTest {
         ContentWriter contentWriter = mock(ContentWriter.class);
         ItemsPeopleWriter peopleWriter = mock(ItemsPeopleWriter.class);
 
-        //CassandraContentStore contentWriter = new CassandraContentStore(Arrays.asList("127.0.0.1"), 9160, 10, 10000, 10000);
-        //contentWriter.init();
-
         MusicBrainzProcessor processor = new MusicBrainzProcessor();
         processor.process(data, log, contentWriter, peopleWriter);
     }
