@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.regex.Pattern;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Song;
@@ -28,16 +30,18 @@ import org.joda.time.Duration;
  */
 public class MusicBrainzProcessor {
 
-    static final Pattern TAB_PATTERN = Pattern.compile("\\t");
-    static final String MUSIC_BRAINZ_RECORDING_URI = "http://musicbrainz.org/recording/";
-    static final String MUSIC_BRAINZ_ARTIST_URI = "http://musicbrainz.org/artist/";
-    static final String MUSIC_BRAINZ_CURIE_PREFIX = "mb:";
-    static final String RECORDINGS = "recording";
-    static final String ISRCS = "isrc";
-    static final String TRACKS = "track_name";
-    static final String CREDITS = "artist_credit_name";
-    static final String ARTISTS = "artist";
-    static final String NAMES = "artist_name";
+    private static final int NOT_FOUND = -1;
+    //
+    private static final Pattern TAB_PATTERN = Pattern.compile("\\t");
+    private static final String MUSIC_BRAINZ_RECORDING_URI = "http://musicbrainz.org/recording/";
+    private static final String MUSIC_BRAINZ_ARTIST_URI = "http://musicbrainz.org/artist/";
+    private static final String MUSIC_BRAINZ_CURIE_PREFIX = "mb:";
+    private static final String RECORDINGS = "recording";
+    private static final String ISRCS = "isrc";
+    private static final String TRACKS = "track_name";
+    private static final String CREDITS = "artist_credit_name";
+    private static final String ARTISTS = "artist";
+    private static final String NAMES = "artist_name";
 
     public void process(File dataDir, AdapterLog log, ContentWriter contentWriter, ItemsPeopleWriter peopleWriter) throws Exception {
         BufferedReader recordingsFile = getReader(dataDir, RECORDINGS);
@@ -59,46 +63,57 @@ public class MusicBrainzProcessor {
                     Iterable<String> currentRecordingData = Splitter.on(TAB_PATTERN).split(currentRecording);
                     String recordUri = MUSIC_BRAINZ_RECORDING_URI + Iterables.get(currentRecordingData, 1);
                     String recordCurie = MUSIC_BRAINZ_CURIE_PREFIX + Iterables.get(currentRecordingData, 1);
-                    Long duration = null;
+
+                    Song song = new Song(recordUri, recordCurie, Publisher.MUSIC_BRAINZ);
+                    song.setMediaType(MediaType.AUDIO);
+                    song.setSpecialization(Specialization.MUSIC);
+
                     try {
-                        duration = Long.parseLong(Iterables.get(currentRecordingData, 4));
+                        Long duration = Long.parseLong(Iterables.get(currentRecordingData, 4));
+                        Version version = new Version();
+                        if (duration != null) {
+                            version.setDuration(Duration.millis(duration));
+                        }
+                        Encoding encoding = new Encoding();
+                        Location location = new Location();
+                        encoding.addAvailableAt(location);
+                        version.addManifestedAs(encoding);
+                        song.setVersions(Sets.newHashSet(version));
                     } catch (NumberFormatException ex) {
                     }
 
                     String currentIsrc = readData(isrcsFile, isrcsIndex, Iterables.get(currentRecordingData, 0));
-                    Iterable<String> currentIsrcData = Splitter.on(TAB_PATTERN).split(currentIsrc);
-                    String isrc = Iterables.get(currentIsrcData, 2);
-
-                    String currentTrack = readData(tracksFile, tracksIndex, Iterables.get(currentRecordingData, 2));
-                    Iterable<String> currentTrackData = Splitter.on(TAB_PATTERN).split(currentTrack);
-                    String title = Iterables.get(currentTrackData, 1);
-
-                    String currentCredits = readData(creditsFile, creditsIndex, Iterables.get(currentRecordingData, 3));
-                    Iterable<String> currentCreditsData = Splitter.on(TAB_PATTERN).split(currentCredits);
-                    String currentArtist = readData(artistsFile, artistsIndex, Iterables.get(currentCreditsData, 2));
-                    Iterable<String> currentArtistData = Splitter.on(TAB_PATTERN).split(currentArtist);
-                    String artistUri = MUSIC_BRAINZ_ARTIST_URI + Iterables.get(currentArtistData, 1);
-                    String artistCurie = MUSIC_BRAINZ_CURIE_PREFIX + Iterables.get(currentArtistData, 1);
-                    String currentName = readData(namesFile, namesIndex, Iterables.get(currentCreditsData, 3));
-                    Iterable<String> currentNameData = Splitter.on(TAB_PATTERN).split(currentName);
-                    String artistName = Iterables.get(currentNameData, 1);
-
-                    Song song = new Song(recordUri, recordCurie, Publisher.MUSIC_BRAINZ);
-                    song.setIsrc(isrc);
-                    song.setTitle(title);
-                    song.setMediaType(MediaType.SONG);
-                    song.setSpecialization(Specialization.MUSIC);
-
-                    Version version = new Version();
-                    if (duration != null) {
-                        version.setDuration(Duration.millis(duration));
+                    if (currentIsrc != null) {
+                        Iterable<String> currentIsrcData = Splitter.on(TAB_PATTERN).split(currentIsrc);
+                        String isrc = Iterables.get(currentIsrcData, 2);
+                        song.setIsrc(isrc);
                     }
 
-                    CrewMember artist = new CrewMember(artistUri, artistCurie, Publisher.MUSIC_BRAINZ);
-                    artist.withRole(CrewMember.Role.ARTIST).withName(artistName);
+                    String currentTrack = readData(tracksFile, tracksIndex, Iterables.get(currentRecordingData, 2));
+                    if (currentTrack != null) {
+                        Iterable<String> currentTrackData = Splitter.on(TAB_PATTERN).split(currentTrack);
+                        String title = Iterables.get(currentTrackData, 1);
+                        song.setTitle(title);
+                    }
 
-                    song.setVersions(Sets.newHashSet(version));
-                    song.setPeople(Lists.newArrayList(artist));
+                    String currentCredits = readData(creditsFile, creditsIndex, Iterables.get(currentRecordingData, 3));
+                    if (currentCredits != null) {
+                        Iterable<String> currentCreditsData = Splitter.on(TAB_PATTERN).split(currentCredits);
+                        String currentArtist = readData(artistsFile, artistsIndex, Iterables.get(currentCreditsData, 2));
+                        if (currentArtist != null) {
+                            Iterable<String> currentArtistData = Splitter.on(TAB_PATTERN).split(currentArtist);
+                            String artistUri = MUSIC_BRAINZ_ARTIST_URI + Iterables.get(currentArtistData, 1);
+                            String artistCurie = MUSIC_BRAINZ_CURIE_PREFIX + Iterables.get(currentArtistData, 1);
+                            String currentName = readData(namesFile, namesIndex, Iterables.get(currentCreditsData, 3));
+                            if (currentName != null) {
+                                Iterable<String> currentNameData = Splitter.on(TAB_PATTERN).split(currentName);
+                                String artistName = Iterables.get(currentNameData, 1);
+                                CrewMember artist = new CrewMember(artistUri, artistCurie, Publisher.MUSIC_BRAINZ);
+                                artist.withRole(CrewMember.Role.ARTIST).withName(artistName);
+                                song.setPeople(Lists.newArrayList(artist));
+                            }
+                        }
+                    }
 
                     contentWriter.createOrUpdate(song);
                     if (peopleWriter != null) {
@@ -135,6 +150,8 @@ public class MusicBrainzProcessor {
 
     private Long2LongMap buildIndex(RandomAccessFile raf, int pos) throws IOException {
         Long2LongMap index = new Long2LongOpenHashMap();
+        index.defaultReturnValue(NOT_FOUND);
+
         long pointer = raf.getFilePointer();
         String line = raf.readLine();
         while (line != null) {
@@ -150,7 +167,11 @@ public class MusicBrainzProcessor {
 
     private String readData(RandomAccessFile file, Long2LongMap index, String key) throws IOException {
         long pos = index.get(Long.parseLong(key));
-        file.seek(pos);
-        return file.readLine();
+        if (pos != NOT_FOUND) {
+            file.seek(pos);
+            return file.readLine();
+        } else {
+            return null;
+        }
     }
 }
