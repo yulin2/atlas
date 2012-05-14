@@ -142,6 +142,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         } else if (fullItem instanceof Song) {
             Song song = (Song) fullItem;
             simpleItem.setIsrc(song.getIsrc());
+            simpleItem.setDuration(song.getDuration().getStandardSeconds());
         }
     }
 
