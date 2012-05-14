@@ -3,7 +3,6 @@ package org.atlasapi.remotesite.music.musicbrainz;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import java.io.BufferedReader;
@@ -13,13 +12,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.regex.Pattern;
 import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Encoding;
-import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -70,15 +66,9 @@ public class MusicBrainzProcessor {
 
                     try {
                         Long duration = Long.parseLong(Iterables.get(currentRecordingData, 4));
-                        Version version = new Version();
                         if (duration != null) {
-                            version.setDuration(Duration.millis(duration));
+                            song.setDuration(Duration.millis(duration));
                         }
-                        Encoding encoding = new Encoding();
-                        Location location = new Location();
-                        encoding.addAvailableAt(location);
-                        version.addManifestedAs(encoding);
-                        song.setVersions(Sets.newHashSet(version));
                     } catch (NumberFormatException ex) {
                     }
 
