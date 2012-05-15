@@ -50,10 +50,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
     private final Map<String, Locale> localeMap;
-    
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
-    
-    public ItemModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
+
+    public ItemModelSimplifier(String localHostName, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver) {
         this(localHostName, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
     }
 
@@ -65,7 +64,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         this.localeMap = initLocalMap();
     }
 
-    private Map<String,Locale> initLocalMap() {
+    private Map<String, Locale> initLocalMap() {
         ImmutableMap.Builder<String, Locale> builder = ImmutableMap.builder();
         for (String code : Locale.getISOLanguages()) {
             builder.put(code, new Locale(code));
@@ -79,11 +78,11 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         org.atlasapi.media.entity.simple.Item simple = new org.atlasapi.media.entity.simple.Item();
 
         copyProperties(full, simple, annotations, config);
-        
+
         boolean doneSegments = false;
         for (Version version : full.getVersions()) {
             addTo(simple, version, full, annotations);
-            if(!doneSegments && !version.getSegmentEvents().isEmpty() && annotations.contains(Annotation.SEGMENT_EVENTS) && segmentSimplifier != null) {
+            if (!doneSegments && !version.getSegmentEvents().isEmpty() && annotations.contains(Annotation.SEGMENT_EVENTS) && segmentSimplifier != null) {
                 simple.setSegments(segmentSimplifier.simplify(version.getSegmentEvents(), annotations, config));
                 doneSegments = true;
             }
@@ -91,6 +90,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
         if (annotations.contains(Annotation.PEOPLE)) {
             simple.setPeople(Iterables.filter(Iterables.transform(full.people(), new Function<CrewMember, org.atlasapi.media.entity.simple.Person>() {
+
                 @Override
                 public org.atlasapi.media.entity.simple.Person apply(CrewMember input) {
                     return crewSimplifier.simplify(input, annotations, config);
@@ -104,7 +104,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private void copyProperties(Item fullItem, org.atlasapi.media.entity.simple.Item simpleItem, Set<Annotation> annotations, ApplicationConfiguration config) {
         copyBasicContentAttributes(fullItem, simpleItem, annotations, config);
         simpleItem.setType(EntityType.from(fullItem).toString());
-        
+
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
             simpleItem.setBlackAndWhite(fullItem.getBlackAndWhite());
             simpleItem.setCountriesOfOrigin(fullItem.getCountriesOfOrigin());
@@ -142,7 +142,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         } else if (fullItem instanceof Song) {
             Song song = (Song) fullItem;
             simpleItem.setIsrc(song.getIsrc());
-            simpleItem.setDuration(song.getDuration().getStandardSeconds());
+            if (song.getDuration() != null) {
+                simpleItem.setDuration(song.getDuration().getStandardSeconds());
+            }
         }
     }
 
@@ -152,16 +154,16 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             @Override
             public org.atlasapi.media.entity.simple.ReleaseDate apply(ReleaseDate input) {
                 return new org.atlasapi.media.entity.simple.ReleaseDate(
-                        input.date().toDateTimeAtStartOfDay(DateTimeZones.UTC).toDate(), 
-                        input.country().code(), 
-                        input.type().toString().toLowerCase()
-                );
+                        input.date().toDateTimeAtStartOfDay(DateTimeZones.UTC).toDate(),
+                        input.country().code(),
+                        input.type().toString().toLowerCase());
             }
         });
     }
 
     private Iterable<org.atlasapi.media.entity.simple.Certificate> simpleCertificates(Set<Certificate> certificates) {
         return Iterables.transform(certificates, new Function<Certificate, org.atlasapi.media.entity.simple.Certificate>() {
+
             @Override
             public org.atlasapi.media.entity.simple.Certificate apply(Certificate input) {
                 return new org.atlasapi.media.entity.simple.Certificate(input.classification(), input.country().code());
@@ -170,25 +172,26 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     }
 
     public Iterable<org.atlasapi.media.entity.simple.Subtitles> simpleSubtitlesFrom(Set<Subtitles> subtitles) {
-        return Iterables.filter(Iterables.transform(subtitles, new Function<Subtitles,org.atlasapi.media.entity.simple.Subtitles>(){
+        return Iterables.filter(Iterables.transform(subtitles, new Function<Subtitles, org.atlasapi.media.entity.simple.Subtitles>() {
+
             @Override
             public org.atlasapi.media.entity.simple.Subtitles apply(Subtitles input) {
                 Language lang = languageForCode(input.code());
                 return lang == null ? null : new org.atlasapi.media.entity.simple.Subtitles(lang);
             }
-        }
-        ),Predicates.notNull());
+        }), Predicates.notNull());
     }
 
     public Iterable<Language> languagesFrom(Set<String> languages) {
         return Iterables.filter(Iterables.transform(languages, new Function<String, Language>() {
+
             @Override
             public Language apply(String input) {
                 return languageForCode(input);
             }
         }), Predicates.notNull());
     }
-    
+
     public Language languageForCode(String input) {
         Locale locale = localeMap.get(input);
         if (locale == null) {
@@ -255,6 +258,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private Iterable<Broadcast> filterInactive(Iterable<Broadcast> broadcasts) {
         return Iterables.filter(broadcasts, new Predicate<Broadcast>() {
+
             @Override
             public boolean apply(Broadcast input) {
                 return input.isActivelyPublished();
@@ -308,6 +312,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             return null;
         }
         return Ordering.natural().max(Iterables.transform(broadcasts, new Function<Broadcast, Integer>() {
+
             @Override
             public Integer apply(Broadcast input) {
                 Integer duration = input.getBroadcastDuration();
@@ -322,16 +327,16 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Item item, Set<Annotation> annotations) {
         DateTime now = new DateTime(DateTimeZones.UTC);
         for (Location location : encoding.getAvailableAt()) {
-            if(!annotations.contains(Annotation.AVAILABLE_LOCATIONS) || location.getPolicy() == null || available(location.getPolicy(), now)) {
+            if (!annotations.contains(Annotation.AVAILABLE_LOCATIONS) || location.getPolicy() == null || available(location.getPolicy(), now)) {
                 addTo(simpleItem, version, encoding, location, item);
             }
         }
     }
 
     private boolean available(Policy policy, DateTime now) {
-        return policy.getAvailabilityStart() == null 
-            || policy.getAvailabilityEnd() == null
-            || policy.getAvailabilityStart().isBefore(now) && policy.getAvailabilityEnd().isAfter(now);
+        return policy.getAvailabilityStart() == null
+                || policy.getAvailabilityEnd() == null
+                || policy.getAvailabilityStart().isBefore(now) && policy.getAvailabilityEnd().isAfter(now);
     }
 
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Location location, Item item) {
