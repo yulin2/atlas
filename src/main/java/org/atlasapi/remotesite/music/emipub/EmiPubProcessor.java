@@ -29,7 +29,7 @@ public class EmiPubProcessor {
     private static final Pattern SPLIT_PATTERN = Pattern.compile(":");
     private static final String EMI_PUB_WORKS_URI = "http://emimusicpub.com/works/";
     private static final String EMI_PUB_RIGHTS_URI = "http://emimusicpub.com/rights/";
-    private static final String EMI_PUB_CURIE_PREFIX = "ep:";
+    private static final String EMI_PUB_CURIE_PREFIX = "emipub:";
 
     public void process(File csvFile, AdapterLog log, ContentWriter contentWriter) throws Exception {
         BufferedReader csv = getReader(csvFile);
@@ -63,17 +63,18 @@ public class EmiPubProcessor {
                         currentSong.setVersions(Sets.newHashSet(version));
                         contentWriter.createOrUpdate(currentSong);
                     }
-                    currentSong = new Song(EMI_PUB_WORKS_URI + nextCode, EMI_PUB_CURIE_PREFIX + nextCode, Publisher.EMI_PUB);
                     currentCode = nextCode;
                     currentId = Iterables.get(data, 1);
-                    currentSong.setTitle(Iterables.get(data, 2));
+                    currentWriter = null;
                     currentRights = new StringBuilder();
+                    currentSong = new Song(EMI_PUB_WORKS_URI + currentCode, EMI_PUB_CURIE_PREFIX + currentCode, Publisher.EMI_PUB);
+                    currentSong.setTitle(Iterables.get(data, 2));
                 }
                 //
                 String nextWriter = Iterables.get(data, 4);
                 if (!nextWriter.equals(currentWriter)) {
                     currentWriter = nextWriter;
-                    currentSong.addPerson(new CrewMember(null, null, Publisher.EMI_PUB).withName(currentWriter));
+                    currentSong.addPerson(new CrewMember(null, null, Publisher.EMI_PUB).withName(currentWriter).withRole(CrewMember.Role.WRITER));
                 }
                 //
                 currentRights.append(currentWriter).append(":").append(Iterables.get(data, 9)).append(":").append(Iterables.get(data, 11)).append("~");
