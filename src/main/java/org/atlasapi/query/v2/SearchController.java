@@ -29,11 +29,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.text.MoreStrings;
+import org.atlasapi.media.entity.Specialization;
 
 @Controller
 public class SearchController extends BaseController<QueryResult<Content,?extends Identified>> {
 
     private static final String QUERY_PARAM = "q";
+    private static final String SPECIALIZATION_PARAM = "specialization";
     private static final String PUBLISHER_PARAM = "publisher";
     private static final String TITLE_WEIGHTING_PARAM = "titleWeighting";
     private static final String BROADCAST_WEIGHTING_PARAM = "broadcastWeighting";
@@ -53,7 +55,9 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
     }
 
     @RequestMapping("/3.0/search.*")
-    public void search(@RequestParam(QUERY_PARAM) String q, @RequestParam(value = PUBLISHER_PARAM, required = false) String publisher,
+    public void search(@RequestParam(QUERY_PARAM) String q, 
+            @RequestParam(value = SPECIALIZATION_PARAM, required = false) String specialization,
+            @RequestParam(value = PUBLISHER_PARAM, required = false) String publisher,
             @RequestParam(value = TITLE_WEIGHTING_PARAM, required = false) String titleWeightingParam,
             @RequestParam(value = BROADCAST_WEIGHTING_PARAM, required = false) String broadcastWeightingParam,
             @RequestParam(value = CATCHUP_WEIGHTING_PARAM, required = false) String catchupWeightingParam, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -74,8 +78,9 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             float catchupWeighting = getFloatParam(catchupWeightingParam, DEFAULT_CATCHUP_WEIGHTING);
 
             ApplicationConfiguration appConfig = appConfig(request);
+            Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appConfig);
-            List<Identified> content = searcher.search(new SearchQuery(q, selection, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
+            List<Identified> content = searcher.search(new SearchQuery(q, selection, specializations, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
         } catch (Exception e) {
