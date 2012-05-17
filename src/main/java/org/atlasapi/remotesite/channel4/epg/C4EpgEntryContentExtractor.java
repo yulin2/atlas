@@ -80,11 +80,11 @@ public class C4EpgEntryContentExtractor implements
     private void ensureAliases(C4EpgEntry epgEntry, Item item, Optional<Brand> brand) {
         String idUri = uriExtractor.uriForItemId(epgEntry);
         if (!idUri.equals(item.getCanonicalUri())) {
-            item.addAlias(idUri);
+            item.addAliasUrl(idUri);
         }
         Optional<String> hierarchyUri = uriExtractor.uriForItemHierarchy(epgEntry, brand);
         if (hierarchyUri.isPresent() && !hierarchyUri.get().equals(item.getCanonicalUri())) {
-            item.addAlias(hierarchyUri.get());
+            item.addAliasUrl(hierarchyUri.get());
         }
     }
 
