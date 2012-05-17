@@ -5,9 +5,9 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.DateTime;
-import org.joda.time.LocalTime;
 
 import com.metabroadcast.common.time.DateTimeZones;
+import org.joda.time.LocalDate;
 
 public class ScheduleBasedItemUpdatingBroadcastHandler extends DefaultBbcIonBroadcastHandler {
 
@@ -17,8 +17,8 @@ public class ScheduleBasedItemUpdatingBroadcastHandler extends DefaultBbcIonBroa
     
     @Override
     protected boolean fullFetchPermitted(IonBroadcast broadcast, String itemUri) {
-        LocalTime today = new DateTime(DateTimeZones.UTC).toLocalDate();
-        LocalTime broadcastDay = broadcast.getStart().toLocalDate();
+        LocalDate today = new DateTime(DateTimeZones.UTC).toLocalDate();
+        LocalDate broadcastDay = broadcast.getStart().toLocalDate();
         
         String mediaType = broadcast.getMediaType();
         
