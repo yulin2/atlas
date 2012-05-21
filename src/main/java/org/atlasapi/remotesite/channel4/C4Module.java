@@ -73,7 +73,7 @@ public class C4Module {
     }
 
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter(), log);
+	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
         return new C4EpgUpdater(
                 c4EpgAtomClient(), 
                 new C4EpgEntryProcessor(lastUpdatedSettingContentWriter(), contentResolver, c4BrandFetcher(), log), 

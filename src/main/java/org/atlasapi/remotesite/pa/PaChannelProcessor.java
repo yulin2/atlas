@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.pa;
 
-import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,11 +7,11 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
-import org.joda.time.Interval;
+
+import twitter4j.internal.logging.Logger;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -21,16 +19,15 @@ import com.google.common.collect.ImmutableMap.Builder;
 
 public class PaChannelProcessor {
 
+    private static final Logger log = Logger.getLogger(PaChannelProcessor.class);
     private final PaProgDataProcessor processor;
     private final BroadcastTrimmer trimmer;
     private final ScheduleWriter scheduleWriter;
-    private final AdapterLog log;
 
-    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, AdapterLog log) {
+    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter) {
         this.processor = processor;
         this.trimmer = trimmer;
         this.scheduleWriter = scheduleWriter;
-        this.log = log;
     }
 
     public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
@@ -50,7 +47,7 @@ public class PaChannelProcessor {
                     }
                     processed++;
                 } catch (Exception e) {
-                    log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));
+                    log.error(String.format("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));
                 } finally {
                     unlock(currentlyProcessing, programmeLock);
                 }
@@ -62,7 +59,7 @@ public class PaChannelProcessor {
             
         } catch (Exception e) {
             //TODO: should we just throw e?
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing channel %s", channel.key()));
+            log.error(String.format("Error processing channel %s", channel.key()));
         }
         return processed;
     }
