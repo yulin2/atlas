@@ -103,7 +103,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
     }
 
     private String hierarchyUri(Episode episode) {
-        for (String alias : episode.getAliases()) {
+        for (String alias : episode.getAliasUrls()) {
             if (C4AtomApi.isACanonicalEpisodeUri(alias)) {
                 return alias;
             }
