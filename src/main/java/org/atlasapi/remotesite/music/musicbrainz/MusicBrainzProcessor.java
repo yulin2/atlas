@@ -1,8 +1,10 @@
 package org.atlasapi.remotesite.music.musicbrainz;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import java.io.BufferedReader;
@@ -26,6 +28,7 @@ import org.joda.time.Duration;
  */
 public class MusicBrainzProcessor {
 
+    private static final ByteArrayList BUFFER = new ByteArrayList();
     private static final int NOT_FOUND = -1;
     //
     private static final Pattern TAB_PATTERN = Pattern.compile("\\t");
@@ -158,8 +161,33 @@ public class MusicBrainzProcessor {
     private String readData(RandomAccessFile file, Long2LongMap index, String key) throws IOException {
         long pos = index.get(Long.parseLong(key));
         if (pos != NOT_FOUND) {
+            byte b = -1;
+            boolean eol = false;
+            BUFFER.clear();
             file.seek(pos);
-            return file.readLine();
+            while (!eol) {
+                switch (b = file.readByte()) {
+                    case -1:
+                    case '\n':
+                        eol = true;
+                        break;
+                    case '\r':
+                        eol = true;
+                        long cur = file.getFilePointer();
+                        if ((file.read()) != '\n') {
+                            file.seek(cur);
+                        }
+                        break;
+                    default:
+                        BUFFER.add(b);
+                        break;
+                }
+            }
+            if ((b == -1) && (BUFFER.size() == 0)) {
+                return null;
+            } else {
+                return new String(BUFFER.elements(), 0, BUFFER.size(), Charsets.UTF_8);
+            }
         } else {
             return null;
         }
