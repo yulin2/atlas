@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.space;
 
 import com.google.common.base.Throwables;
+import com.metabroadcast.common.http.RequestLimitingSimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -14,7 +15,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.channel4.RequestLimitingSimpleHttpClient;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
