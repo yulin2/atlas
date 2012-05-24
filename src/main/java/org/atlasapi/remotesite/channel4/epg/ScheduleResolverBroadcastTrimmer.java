@@ -12,10 +12,9 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.joda.time.Interval;
+
+import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -24,18 +23,17 @@ import com.metabroadcast.common.base.Maybe;
 
 public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
 
+    private final Logger log = Logger.getLogger(ScheduleResolverBroadcastTrimmer.class);
     private final Publisher publisher;
     private final ContentWriter writer;
-    private final AdapterLog log;
     private final ScheduleResolver scheduleResolver;
 	private final ContentResolver resolver;
 
-    public ScheduleResolverBroadcastTrimmer(Publisher publisher, ScheduleResolver scheduleResolver, ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public ScheduleResolverBroadcastTrimmer(Publisher publisher, ScheduleResolver scheduleResolver, ContentResolver resolver, ContentWriter writer) {
         this.scheduleResolver = scheduleResolver;
         this.publisher = publisher;
 		this.resolver = resolver;
         this.writer = writer;
-        this.log = log;
     }
 
     public void trimBroadcasts(Interval scheduleInterval, Channel channel, Map<String, String> acceptableIds) {
@@ -70,7 +68,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
                 }
             }
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.WARN).withSource(getClass()).withDescription("Exception attempting to trim broadcasts for " + channel.title() + " between " + scheduleInterval).withCause(e));
+            log.error("Exception attempting to trim broadcasts for " + channel.title() + " between " + scheduleInterval, e);
         }
     }
 

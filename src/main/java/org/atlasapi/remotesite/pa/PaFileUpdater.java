@@ -1,19 +1,16 @@
 package org.atlasapi.remotesite.pa;
 
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
-import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.apache.log4j.Logger;
 
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public class PaFileUpdater extends ScheduledTask {
     
+    private static final Logger log = Logger.getLogger(PaFileUpdater.class);
     private final PaFtpFileUpdater fileManager;
-    private final AdapterLog log;
 
-    public PaFileUpdater(PaFtpFileUpdater fileManager, AdapterLog log) {
+    public PaFileUpdater(PaFtpFileUpdater fileManager) {
         this.fileManager = fileManager;
-        this.log = log;
     }
 
     @Override
@@ -21,7 +18,7 @@ public class PaFileUpdater extends ScheduledTask {
         try {
             fileManager.updateFilesFromFtpSite();
         } catch (Exception e) {
-            log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withDescription("Error when updating files from the PA FTP site").withSource(PaFileUpdater.class));
+            log.error("Error when updating files from the PA FTP site", e);
         }
     }
 }
