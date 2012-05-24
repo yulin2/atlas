@@ -8,7 +8,8 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilter;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 
 import com.google.common.base.Strings;
@@ -16,7 +17,7 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 
 public class PaFtpFileUpdater {
     
-    private static final Logger log = Logger.getLogger(PaFtpFileUpdater.class);
+    private static final Logger log = LoggerFactory.getLogger(PaFtpFileUpdater.class);
     
     private static FTPFileFilter ftpFilenameFilter = new FTPFileFilter() {
         @Override

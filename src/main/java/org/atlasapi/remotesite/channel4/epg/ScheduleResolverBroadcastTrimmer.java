@@ -14,7 +14,8 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.Interval;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -23,7 +24,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
 
-    private final Logger log = Logger.getLogger(ScheduleResolverBroadcastTrimmer.class);
+    private final Logger log = LoggerFactory.getLogger(ScheduleResolverBroadcastTrimmer.class);
     private final Publisher publisher;
     private final ContentWriter writer;
     private final ScheduleResolver scheduleResolver;

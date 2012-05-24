@@ -27,7 +27,6 @@ import javax.xml.bind.Unmarshaller.Listener;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.log4j.Logger;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
@@ -39,6 +38,8 @@ import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -56,7 +57,7 @@ import com.metabroadcast.common.time.Timestamp;
 
 public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
-    private static final Logger log = Logger.getLogger(PaBaseProgrammeUpdater.class);
+    private static final Logger log = LoggerFactory.getLogger(PaBaseProgrammeUpdater.class);
     
     private static final DateTimeFormatter FILEDATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
     private static final DateTimeFormatter CHANNELINTERVAL_FORMAT = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZones.LONDON);

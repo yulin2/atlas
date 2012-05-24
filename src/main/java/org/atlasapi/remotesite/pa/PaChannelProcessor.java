@@ -11,7 +11,8 @@ import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -19,7 +20,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 
 public class PaChannelProcessor {
 
-    private static final Logger log = Logger.getLogger(PaChannelProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(PaChannelProcessor.class);
     private final PaProgDataProcessor processor;
     private final BroadcastTrimmer trimmer;
     private final ScheduleWriter scheduleWriter;
