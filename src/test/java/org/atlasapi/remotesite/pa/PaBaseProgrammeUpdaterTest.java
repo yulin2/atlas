@@ -218,7 +218,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         private List<File> files;
 
         public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, AdapterLog log, MongoScheduleStore scheduleWriter, List<File> files, BroadcastTrimmer trimmer) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, trimmer, scheduleWriter, log), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, log);
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, trimmer, scheduleWriter), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver);
             this.files = files;
         }
 
