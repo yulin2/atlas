@@ -11,7 +11,7 @@ import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 
-import twitter4j.internal.logging.Logger;
+import org.apache.log4j.Logger;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;

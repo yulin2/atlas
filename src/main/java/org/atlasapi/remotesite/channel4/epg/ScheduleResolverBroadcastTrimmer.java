@@ -14,7 +14,7 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.Interval;
 
-import twitter4j.internal.logging.Logger;
+import org.apache.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
