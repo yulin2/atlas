@@ -85,8 +85,6 @@ public class QueryWebModule {
     private @Value("${ids.expose}") String exposeIds;
     
     private @Autowired DatabasedMongo mongo;
-    private @Autowired ContentGroupWriter contentGroupWriter;
-    private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentGroupWriter contentGroupWriter;
