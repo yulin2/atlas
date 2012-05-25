@@ -235,7 +235,6 @@ public class ChannelController {
             Flushables.flush(writer, ignoreEx);
         }
     }
-    
     private String callback(HttpServletRequest request) {
         if (request == null) {
             return null;

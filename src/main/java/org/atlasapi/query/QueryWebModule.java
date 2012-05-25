@@ -40,6 +40,7 @@ import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
@@ -84,6 +85,9 @@ public class QueryWebModule {
     private @Value("${ids.expose}") String exposeIds;
     
     private @Autowired DatabasedMongo mongo;
+    private @Autowired ContentGroupWriter contentGroupWriter;
+    private @Autowired ContentGroupResolver contentGroupResolver;
+    private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
