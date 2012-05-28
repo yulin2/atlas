@@ -2,18 +2,20 @@ package org.atlasapi.query.content;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
-import org.atlasapi.persistence.lookup.entry.LookupRef;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -104,9 +106,16 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     private List<Identified> setEquivalentToFields(List<Identified> resolvedResults) {
-        ImmutableSet<String> uris = ImmutableSet.copyOf(Iterables.transform(resolvedResults, Identified.TO_URI));
+        Map<Described, LookupRef> equivRefs = Maps.newHashMap();
         for (Identified ided : resolvedResults) {
-            ided.setEquivalentTo(Sets.difference(uris, ImmutableSet.of(ided.getCanonicalUri())));
+            if (ided instanceof Described) {
+                Described described = (Described) ided;
+                equivRefs.put(described, LookupRef.from(described));
+            }
+        }
+        Set<LookupRef> lookupRefs = ImmutableSet.copyOf(equivRefs.values());
+        for (Entry<Described, LookupRef> equivRef : equivRefs.entrySet()) {
+            equivRef.getKey().setEquivalentTo(Sets.difference(lookupRefs, ImmutableSet.of(equivRef.getValue())));
         }
         return resolvedResults;
     }
