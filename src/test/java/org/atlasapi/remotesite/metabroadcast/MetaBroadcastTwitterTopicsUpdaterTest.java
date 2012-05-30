@@ -46,7 +46,6 @@ public class MetaBroadcastTwitterTopicsUpdaterTest {
 
 	@Test
 	public void testGetNewContent() {
-		Publisher pub = Publisher.VOILA;
 		assertTrue(MetaBroadcastTwitterTopicsUpdater.getNewContent(new Brand() , "http://www.example.com/test", "", Publisher.VOILA) instanceof Brand);
 		assertTrue(MetaBroadcastTwitterTopicsUpdater.getNewContent(new Episode() , "http://www.example.com/test", "", Publisher.VOILA) instanceof Episode);
 		boolean exception = false;
