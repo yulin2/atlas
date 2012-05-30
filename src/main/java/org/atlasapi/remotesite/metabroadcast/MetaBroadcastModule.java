@@ -15,6 +15,8 @@ import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
+import org.joda.time.Duration;
+import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,8 +45,8 @@ public class MetaBroadcastModule {
     
     @PostConstruct
     public void scheduleTasks() {
-        scheduler.schedule(twitterUpdaterTask(), RepetitionRules.NEVER);
-        scheduler.schedule(magpieUpdaterTask(), RepetitionRules.NEVER);
+        scheduler.schedule(twitterUpdaterTask(), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
+        scheduler.schedule(magpieUpdaterTask(), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
     }
 
     @Bean
