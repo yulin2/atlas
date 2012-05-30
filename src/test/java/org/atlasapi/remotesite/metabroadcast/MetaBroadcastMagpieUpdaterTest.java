@@ -22,6 +22,7 @@ import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -34,7 +35,7 @@ public class MetaBroadcastMagpieUpdaterTest {
 	private ContentResolver contentResolverMock = mock(ContentResolver.class);
 	private TopicStore topicStoreMock = mock(TopicStore.class);
 	
-	@Test
+	@Ignore("Calls s3, only run locally")
 	public void testUpdatingContentTopics(){
 		// These depend on what the magpie JSON returns
 		Identified episode = (Episode) MetaBroadcastTwitterTopicsUpdater.getNewContent(new Episode() , "http://www.bbc.co.uk/programmes/b00sz5xg", "", Publisher.MAGPIE);
