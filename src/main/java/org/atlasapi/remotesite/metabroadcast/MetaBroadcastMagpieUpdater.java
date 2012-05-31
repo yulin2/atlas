@@ -36,7 +36,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 	private static final String MAGPIE_S3_FOLDER = "magpie/";
 	private static final String MAGPIE_NS = "magpie";
-	private final Gson gson; 
+	private Gson gson; 
 	private ContentResolver contentResolver;
 	private final S3Service s3Service;
 	private String s3Bucket;
