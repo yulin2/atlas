@@ -50,23 +50,23 @@ public class MetaBroadcastModule {
     }
 
     @Bean
-    private CannonTwitterTopicsUpdater twitterUpdaterTask() {
+    CannonTwitterTopicsUpdater twitterUpdaterTask() {
 		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), twitterUpdater());
 	}
     
 
-	private MagpieUpdaterTask magpieUpdaterTask() {
+	MagpieUpdaterTask magpieUpdaterTask() {
 		return new MagpieUpdaterTask(magpieUpdater());
 	}
 
 	@Bean
-	private MetaBroadcastTwitterTopicsUpdater twitterUpdater() {
+	MetaBroadcastTwitterTopicsUpdater twitterUpdater() {
 		return new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver,
 				topicStore, topicResolver, contentWriter, log);
 	}
 	
     @Bean
-    private MetaBroadcastMagpieUpdater magpieUpdater() {
+    MetaBroadcastMagpieUpdater magpieUpdater() {
 		return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
 				topicResolver, contentWriter, awsService(), s3Bucket, log);
 	}
