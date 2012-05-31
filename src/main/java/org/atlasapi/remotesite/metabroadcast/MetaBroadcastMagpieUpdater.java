@@ -86,7 +86,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 				}
 			}
 		} catch (Exception e) {
-			log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to access s3"));
+			log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed outside inner for loop"));
 			return UpdateProgress.FAILURE;
 		}
 		return result;
