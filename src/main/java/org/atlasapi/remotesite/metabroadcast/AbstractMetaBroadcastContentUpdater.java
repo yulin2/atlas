@@ -59,7 +59,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 	protected UpdateProgress createOrUpdateContent(ResolvedContent resolvedContent, ResolvedContent resolvedMetaBroadcastContent, 
 			UpdateProgress result, ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases, Publisher publisher) {
 		try {
-			String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
+			String mbUri = generateMetaBroadcastUri(contentWordSet.getUri(), publisher);
 			Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.get(mbUri);
 			if(possibleMetaBroadcastContent.hasValue()) {
 				// Content exists, update it
@@ -114,16 +114,24 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 		throw new IllegalArgumentException("Unrecognised type of content");
 	}
 
-	protected List<String> generateMetaBroadcastUris(Iterable<String> uris) {
+	protected List<String> generateMetaBroadcastUris(Iterable<String> uris, Publisher pub) {
 		List<String> list = Lists.newArrayList();
 		for (String uri : uris) {	
-			list.add(generateMetaBroadcastUri(uri));
+			list.add(generateMetaBroadcastUri(uri, pub));
 		}
 		return list;
 	}
 	
-	protected static String generateMetaBroadcastUri(String uri){
-		return "http://metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
+	protected static String generateMetaBroadcastUri(String uri, Publisher pub){
+		if (pub == Publisher.VOILA){
+			return "http://voila.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
+		}
+		else if (pub == Publisher.MAGPIE){
+			return "http://magpie.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
+		}
+		else {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {
