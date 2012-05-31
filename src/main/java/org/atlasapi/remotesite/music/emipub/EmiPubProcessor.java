@@ -107,7 +107,7 @@ public class EmiPubProcessor {
     private String buildRights(Map<String, Float> rights) {
         StringBuilder result = new StringBuilder();
         for (Map.Entry<String, Float> current : rights.entrySet()) {
-            result.append(current.getKey()).append(":").append(current.getValue()).append("~");
+            result.append(current.getKey()).append(":").append(current.getValue()).append(",");
         }
         return result.substring(0, result.length() - 1);
     }
