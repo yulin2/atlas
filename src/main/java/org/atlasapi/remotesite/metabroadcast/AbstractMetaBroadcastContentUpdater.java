@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
@@ -85,7 +86,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 		if(keyPhrase.isPresent()){
 			content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
 		}
-		content.addEquivalentTo(identified); //TODO check equivalent to
+		content.addEquivalentTo((Described) identified); //TODO check equivalent to
 		write(content);
 	}
 
