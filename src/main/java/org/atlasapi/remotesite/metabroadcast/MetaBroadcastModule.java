@@ -18,6 +18,7 @@ import org.jets3t.service.security.AWSCredentials;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,8 +39,8 @@ public class MetaBroadcastModule {
 	private @Value("${magpie.s3.bucket}") String s3Bucket;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
-    private @Autowired TopicStore topicStore;
-    private @Autowired TopicQueryResolver topicResolver;
+    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
+    private @Autowired @Qualifier("topicQueryResolver") TopicQueryResolver topicResolver;
     private @Autowired SimpleScheduler scheduler;
     private @Autowired AdapterLog log;
     
@@ -54,7 +55,7 @@ public class MetaBroadcastModule {
 		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), twitterUpdater());
 	}
     
-
+    @Bean
 	MagpieUpdaterTask magpieUpdaterTask() {
 		return new MagpieUpdaterTask(magpieUpdater());
 	}
