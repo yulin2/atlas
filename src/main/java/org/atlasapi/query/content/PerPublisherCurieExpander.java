@@ -117,7 +117,7 @@ public class PerPublisherCurieExpander implements CurieExpander {
 			@Override
 			public String expand(String curie) {
 				if (curie.startsWith(ITV_CURIE)) {
-				    return ItvMercuryBrandAdapter.BASE_URL+curie.replace(ITV_CURIE, "");
+				    return "http://itv.com/"+curie.replace(ITV_CURIE, "").replace("-", "/");
 				}
 				return null;
 			}
