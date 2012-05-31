@@ -66,7 +66,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 				List<MagpieScheduleItem> magpieItems = json.getResults();
 				Iterable<String> uris = getUris(magpieItems);
-				List<String> mbUris = generateMetaBroadcastUris(uris);
+				List<String> mbUris = generateMetaBroadcastUris(uris, Publisher.MAGPIE);
 
 				ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
 				ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(mbUris);
