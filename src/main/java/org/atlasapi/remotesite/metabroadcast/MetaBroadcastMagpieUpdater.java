@@ -36,7 +36,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 	private static final String MAGPIE_S3_FOLDER = "magpie/";
 	private static final String MAGPIE_NS = "magpie";
-	private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+	private final Gson gson; 
 	private ContentResolver contentResolver;
 	private final S3Service s3Service;
 	private String s3Bucket;
@@ -48,6 +48,14 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 		this.contentResolver = contentResolver;
 		this.s3Service = s3Service;
 		this.s3Bucket = s3Bucket;
+		try {
+			this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+		}
+		catch (Exception e) {
+			log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("The gson builder exceptioned"));
+			this.gson = new GsonBuilder().create();
+		}
+		
 	}
 
 	@Override
