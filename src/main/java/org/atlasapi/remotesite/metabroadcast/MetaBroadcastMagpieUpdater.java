@@ -12,6 +12,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
@@ -60,7 +61,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 					JsonReader streamReader = new JsonReader(inputStreamReader);		
 					json = gson.fromJson(streamReader, MagpieResults.class);
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to parse json"));
 					return UpdateProgress.FAILURE;
 				}
 
@@ -79,6 +80,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 				}
 			}
 		} catch (S3ServiceException e) {
+			log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to access s3"));
 			return UpdateProgress.FAILURE;
 		}
 		return result;
@@ -95,7 +97,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 					S3Object object = s3Service.getObject(s3Bucket, input.getKey());
 					stream =  object.getDataInputStream();
 				} catch (Exception e) {
-					e.printStackTrace();
+					log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to get s3 Stream"));
 				}
 				return stream;
 			}
