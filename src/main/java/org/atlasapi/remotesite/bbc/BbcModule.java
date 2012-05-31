@@ -98,7 +98,7 @@ public class BbcModule {
 
     public BbcIonScheduleUpdater fifteenDayIonScheduleUpdate() {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 7, 7);
-        DefaultBbcIonBroadcastHandler broadcastHandler = new ScheduleBasedItemUpdatingBroadcastHandler(contentResolver, contentWriters, log)
+        DefaultBbcIonBroadcastHandler broadcastHandler = new ScheduleBasedItemUpdatingBroadcastHandler(contentResolver, contentWriters, log, contentLock())
             .withItemFetcherClient(bbcIonEpisodeDetailItemAdapter())
             .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
             .withItemPeopleWriter(itemsPeopleWriter);
@@ -119,7 +119,7 @@ public class BbcModule {
     
     private BbcIonScheduleUpdater bbcIonScheduleOndemandUpdater(int lookBack) {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_ONDEMAND_FORMAT, 0, lookBack);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonBroadcastHandler(contentResolver, contentWriters, log), log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonBroadcastHandler(contentResolver, contentWriters, log, contentLock()), log);
     }
     
     private BbcIonScheduleUpdater bbcIonSocialDataUpdater() {
@@ -164,7 +164,7 @@ public class BbcModule {
     }
 	
     @Bean DefaultBbcIonBroadcastHandler defaultBbcIonBroadcastHandler() {
-        return new DefaultBbcIonBroadcastHandler(contentResolver, contentWriters, log)
+        return new DefaultBbcIonBroadcastHandler(contentResolver, contentWriters, log, contentLock())
             .withItemFetcherClient(bbcIonEpisodeDetailItemAdapter())
             .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
             .withItemPeopleWriter(itemsPeopleWriter);
@@ -198,5 +198,9 @@ public class BbcModule {
 	
 	@Bean BbcIonOndemandChangeUpdateController bbcIonOndemandChangeController() {
 	    return new BbcIonOndemandChangeUpdateController(bbcIonOndemandChangeUpdateBuilder());
+	}
+	
+	@Bean ContentLock contentLock() {
+	    return new ContentLock();
 	}
 }
