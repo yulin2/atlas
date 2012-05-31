@@ -24,10 +24,12 @@ import org.atlasapi.remotesite.worldservice.WorldServicesModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.hp.hpl.jena.graph.query.StageElement.PutBindings;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
+import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
 
 public class RemoteSiteModuleConfigurer {
@@ -57,6 +59,7 @@ public class RemoteSiteModuleConfigurer {
         .put("lovefilm", LoveFilmModule.class)
         .put("bbc-products", BBCProductsModule.class)
         .put("thespace", TheSpaceModule.class)
+        .put("metabroadcast", MetaBroadcastModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
