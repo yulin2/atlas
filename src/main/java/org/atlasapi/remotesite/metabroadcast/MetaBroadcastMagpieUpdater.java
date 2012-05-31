@@ -52,9 +52,11 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 	@Override
 	public UpdateProgress updateTopics(List<String> contentIds) {
+		log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("Got into update topics method"));
 		UpdateProgress result = UpdateProgress.START;
 		try {
 			for (InputStream stream : getS3Stream()){
+				log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("For inputstream %s", stream.hashCode()));
 				MagpieResults json = null;
 				try {
 					InputStreamReader inputStreamReader = new InputStreamReader(stream, "UTF-8");
@@ -73,13 +75,17 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 				ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(mbUris);
 
 				for (MagpieScheduleItem magpieItem : magpieItems) {
-					ContentWords contentWordSet = magpieItemToContentWordSet(magpieItem);
-					List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = getFullKeyPhraseKeys(magpieItem);	
-					result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, 
-							contentWordSet, Optional.of(transformedKeys), Publisher.MAGPIE));
+					try{
+						ContentWords contentWordSet = magpieItemToContentWordSet(magpieItem);
+						List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = getFullKeyPhraseKeys(magpieItem);	
+						result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, 
+								contentWordSet, Optional.of(transformedKeys), Publisher.MAGPIE));
+					} catch (Exception e) {
+						log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("Fails on MagpieItem %s", magpieItem.getUri()));
+					}
 				}
 			}
-		} catch (S3ServiceException e) {
+		} catch (Exception e) {
 			log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to access s3"));
 			return UpdateProgress.FAILURE;
 		}
