@@ -172,7 +172,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 				Maybe<Topic> possibleTopic = topicResolver.topicForId(input.getTopic());
 				if (possibleTopic.hasValue()) {
 					Topic topic = possibleTopic.requireValue();
-					return !(namespace.equals(topic.getNamespace()) && Publisher.METABROADCAST.equals(topic.getPublisher()));
+					return !(namespace.equals(topic.getNamespace()) && publisher.equals(topic.getPublisher()));
 				}
 				return false;
 			}
@@ -194,7 +194,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 			if (possibleTopic.hasValue()) {
 				Topic topic = possibleTopic.requireValue();
 				topic.setTitle(wordWeighting.getContent());
-				topic.setPublisher(Publisher.METABROADCAST);
+				topic.setPublisher(publisher);
 				topic.setType(Topic.Type.SUBJECT);
 				topicStore.write(topic);
 				topicRefs.add(new TopicRef(topic, wordWeighting.getWeight()/100.0f, false));
