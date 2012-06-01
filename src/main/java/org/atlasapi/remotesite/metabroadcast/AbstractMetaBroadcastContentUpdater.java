@@ -29,6 +29,8 @@ import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.ContentWordsList;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 import org.atlasapi.remotesite.redux.UpdateProgress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -42,6 +44,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public abstract class AbstractMetaBroadcastContentUpdater {
 
+    private final static Logger logger = LoggerFactory.getLogger(AbstractMetaBroadcastContentUpdater.class);
 	private final String namespace;
 	private final TopicStore topicStore;
 	private final TopicQueryResolver topicResolver;
@@ -66,6 +69,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 			UpdateProgress result, ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases) {
 		try {
 			String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
+			logger.debug("Processing content {}", mbUri);
 			Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.get(mbUri);
 			if(possibleMetaBroadcastContent.hasValue()) {
 				// Content exists, update it

@@ -37,20 +37,21 @@ import com.google.gson.stream.JsonReader;
 public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpdater {
 
     private static final Logger logger = LoggerFactory.getLogger(MetaBroadcastMagpieUpdater.class);
-	private static final String MAGPIE_S3_FOLDER = "magpie/";
 	private static final String MAGPIE_NS = "magpie";
 	private Gson gson; 
 	private ContentResolver contentResolver;
 	private final S3Service s3Service;
 	private String s3Bucket;
+    private final String s3folder;
 
 	public MetaBroadcastMagpieUpdater(ContentResolver contentResolver, 
 			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, 
-			S3Service s3Service, String s3Bucket, AdapterLog log) {
+			S3Service s3Service, String s3Bucket, String s3folder, AdapterLog log) {
 		super(contentResolver, topicStore, topicResolver, contentWriter, log, MAGPIE_NS, Publisher.MAGPIE);
 		this.contentResolver = contentResolver;
 		this.s3Service = s3Service;
 		this.s3Bucket = s3Bucket;
+        this.s3folder = s3folder;
 		try {
 			this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 		}
@@ -104,7 +105,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 	}
 
 	private List<InputStream> getS3Stream() throws S3ServiceException{
-		S3Object[] listOfObjects = s3Service.listObjects(s3Bucket, MAGPIE_S3_FOLDER, "");
+		S3Object[] listOfObjects = s3Service.listObjects(s3Bucket, s3folder + "/", "");
 		List<S3Object> mostRecentObjectsMetadata = getMostRecentObject(listOfObjects);
 		List<InputStream> mostRecentObjectStreams = Lists.transform(mostRecentObjectsMetadata, new Function<S3Object, InputStream>() {
 			@Override
@@ -113,6 +114,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 				try {
 					S3Object object = s3Service.getObject(s3Bucket, input.getKey());
 					stream =  object.getDataInputStream();
+					logger.debug("Using s3 file {}", input.getKey());
 				} catch (Exception e) {
 					log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to get s3 Stream"));
 				}

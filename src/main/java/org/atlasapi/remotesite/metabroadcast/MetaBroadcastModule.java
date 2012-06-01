@@ -37,6 +37,7 @@ public class MetaBroadcastModule {
 	private @Value("${s3.access}") String s3access;
 	private @Value("${s3.secret}") String s3secret;
 	private @Value("${magpie.s3.bucket}") String s3Bucket;
+	private @Value("${magpie.s3.folder}") String s3folder;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
     private @Autowired @Qualifier("topicStore") TopicStore topicStore;
@@ -78,7 +79,7 @@ public class MetaBroadcastModule {
     @Bean
     MetaBroadcastMagpieUpdater magpieUpdater() {
 		return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
-				topicResolver, contentWriter, awsService(), s3Bucket, log);
+				topicResolver, contentWriter, awsService(), s3Bucket, s3folder, log);
 	}
 
 	@Bean 
