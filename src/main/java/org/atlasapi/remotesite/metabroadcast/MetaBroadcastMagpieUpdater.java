@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.simple.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -147,7 +148,6 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 		ContentWords contentWordSet = new ContentWords();
 		// We don't have the voila content ID so use the Atlas URI
 		contentWordSet.setContentId(magpieItem.getUri());
-
 		contentWordSet.setUri(magpieItem.getUri());
 		List<WordWeighting> words = Lists.newArrayList();
 
@@ -160,7 +160,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 	}
 
 	private WordWeighting topicRefToWordWeighting(TopicRef topic) {
-		return new WordWeighting(topic.getTopic().getTitle(), StrictMath.round(topic.getWeighting() * 100), topic.getTopic().getUri());
+		return new WordWeighting(topic.getTopic().getTitle(), StrictMath.round(topic.getWeighting() * 100), topic.getTopic().getUri(), topic.getTopic().getValue() , Topic.Type.fromKey(topic.getTopic().getType()));
 	}
 
 	private Iterable<String> getUris(List<MagpieScheduleItem> items){
