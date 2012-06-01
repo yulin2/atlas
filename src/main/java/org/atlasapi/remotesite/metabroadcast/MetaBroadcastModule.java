@@ -53,9 +53,9 @@ public class MetaBroadcastModule {
     
     @PostConstruct
     public void scheduleTasks() {
-        scheduler.schedule(twitterUpdaterTask().withName("Voila Twitter ingest"), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
-        scheduler.schedule(twitterPeopleTalkUpdaterTask().withName("Voila Twitter PeopleTalk ingest"), RepetitionRules.every(Duration.standardHours(3)));
-        scheduler.schedule(magpieUpdaterTask().withName("Magpie twitter ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
+        scheduler.schedule(twitterUpdaterTask().withName("Voila Twitter topics ingest"), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
+        scheduler.schedule(twitterPeopleTalkUpdaterTask().withName("Voila Twitter audience topics ingest"), RepetitionRules.every(Duration.standardHours(3)));
+        scheduler.schedule(magpieUpdaterTask().withName("Magpie ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
     }
 
     @Bean
