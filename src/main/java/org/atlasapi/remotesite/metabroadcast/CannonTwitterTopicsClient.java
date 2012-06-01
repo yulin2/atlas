@@ -31,13 +31,13 @@ public class CannonTwitterTopicsClient {
     private final RemoteSiteClient<ContentWordsList> contentWordsClient;
     private final AdapterLog log;
 
-    public CannonTwitterTopicsClient(SimpleHttpClient httpClient, HostSpecifier cannonHost, Optional<Integer> cannonPort, AdapterLog log) {
+    public CannonTwitterTopicsClient(SimpleHttpClient httpClient, HostSpecifier cannonHost, Optional<Integer> cannonPort, AdapterLog log, String listEndpoint,
+            String contentEndpoint) {
         GsonBuilder gson = new GsonBuilder().setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES);
         this.idListClient = httpRemoteSiteClient(httpClient, gsonResponseTransformer(gson, ContentWordsIdList.class));
         this.contentWordsClient = httpRemoteSiteClient(webserviceClient(), gsonResponseTransformer(gson, ContentWordsList.class));
-
-        this.idListRequestUri = String.format("http://%s%s/contentWordsList", cannonHost, cannonPort.isPresent() ? ":"+cannonPort.get():"");
-        this.contentWordsRequestBase = String.format("http://%s%s/contentWords?ids=", cannonHost, cannonPort.isPresent() ? ":"+cannonPort.get() : "");
+        this.idListRequestUri = String.format("http://%s%s/%s", cannonHost, cannonPort.isPresent() ? ":"+cannonPort.get():"", listEndpoint);
+        this.contentWordsRequestBase = String.format("http://%s%s/%s?ids=", cannonHost, cannonPort.isPresent() ? ":"+cannonPort.get() : "", contentEndpoint);
         
         this.log = log;
     }

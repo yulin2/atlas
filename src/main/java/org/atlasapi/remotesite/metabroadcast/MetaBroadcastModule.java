@@ -44,15 +44,24 @@ public class MetaBroadcastModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired AdapterLog log;
     
+    private static final String TWITTER_NS_FOR_PROGRAMMES = "twitter";
+    private static final String TWITTER_NS_FOR_AUDIENCE = "twitter:audience-related";
+    private static final String CONTENT_WORDS_FOR_PROGRAMMES = "contentWords";
+    private static final String CONTENT_WORDS_LIST_FOR_PROGRAMMES = "contentWordsList";
+    private static final String CONTENT_WORDS_FOR_AUDIENCE = "contentWordsForPeopleTalk";
+    private static final String CONTENT_WORDS_LIST_FOR_AUDIENCE = "contentWordsListForPeopleTalk";
+    
     @PostConstruct
     public void scheduleTasks() {
-        scheduler.schedule(twitterUpdaterTask(), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
-        scheduler.schedule(magpieUpdaterTask(), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
+        scheduler.schedule(twitterUpdaterTask().withName("Voila Twitter ingest"), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
+        scheduler.schedule(twitterPeopleTalkUpdaterTask().withName("Voila Twitter PeopleTalk ingest"), RepetitionRules.every(Duration.standardHours(3)));
+        scheduler.schedule(magpieUpdaterTask().withName("Magpie twitter ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
     }
 
     @Bean
     CannonTwitterTopicsUpdater twitterUpdaterTask() {
-		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), twitterUpdater());
+		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
+		        new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_PROGRAMMES, log));
 	}
     
     @Bean
@@ -61,9 +70,9 @@ public class MetaBroadcastModule {
 	}
 
 	@Bean
-	MetaBroadcastTwitterTopicsUpdater twitterUpdater() {
-		return new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver,
-				topicStore, topicResolver, contentWriter, log);
+	CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
+		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
+		        new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_AUDIENCE, log));
 	}
 	
     @Bean
@@ -75,7 +84,16 @@ public class MetaBroadcastModule {
 	@Bean 
     CannonTwitterTopicsClient cannonTopicsClient() {
         try {
-            return new CannonTwitterTopicsClient(webserviceClient(), HostSpecifier.from(cannonHostName), Optional.fromNullable(cannonHostPort), log);
+            return new CannonTwitterTopicsClient(webserviceClient(), HostSpecifier.from(cannonHostName), Optional.fromNullable(cannonHostPort), log, CONTENT_WORDS_LIST_FOR_PROGRAMMES, CONTENT_WORDS_FOR_PROGRAMMES);
+        } catch (ParseException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+    
+    @Bean 
+    CannonTwitterTopicsClient cannonPeopleTalkClient() {
+        try {
+            return new CannonTwitterTopicsClient(webserviceClient(), HostSpecifier.from(cannonHostName), Optional.fromNullable(cannonHostPort), log, CONTENT_WORDS_LIST_FOR_AUDIENCE, CONTENT_WORDS_FOR_AUDIENCE);
         } catch (ParseException e) {
             throw Throwables.propagate(e);
         }

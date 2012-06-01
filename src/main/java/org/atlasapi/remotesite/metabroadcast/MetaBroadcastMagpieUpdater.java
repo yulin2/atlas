@@ -20,6 +20,8 @@ import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.model.S3Object;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -34,6 +36,7 @@ import com.google.gson.stream.JsonReader;
 
 public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpdater {
 
+    private static final Logger logger = LoggerFactory.getLogger(MetaBroadcastMagpieUpdater.class);
 	private static final String MAGPIE_S3_FOLDER = "magpie/";
 	private static final String MAGPIE_NS = "magpie";
 	private Gson gson; 

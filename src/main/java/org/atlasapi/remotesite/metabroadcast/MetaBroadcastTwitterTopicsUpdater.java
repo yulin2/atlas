@@ -17,13 +17,12 @@ import com.google.common.base.Optional;
 
 public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastContentUpdater {
 
-	private static final String TWITTER_NS = "twitter";
 	private final ContentResolver contentResolver;
 	private final CannonTwitterTopicsClient cannonTopicsClient;
 
 	public MetaBroadcastTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, 
-			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log) {
-		super(contentResolver, topicStore, topicResolver, contentWriter, log, TWITTER_NS, Publisher.VOILA);
+			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, String namespace, AdapterLog log) {
+		super(contentResolver, topicStore, topicResolver, contentWriter, log, namespace, Publisher.VOILA);
 		this.cannonTopicsClient = cannonTopicsClient;
 		this.contentResolver = contentResolver;
 	}
