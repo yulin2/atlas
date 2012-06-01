@@ -37,7 +37,7 @@ public class MetaBroadcastMagpieUpdaterTest {
 	    S3Service s3service = new RestS3Service(new AWSCredentials(s3access, s3secret));
 	    MetaBroadcastMagpieUpdater updater = new MetaBroadcastMagpieUpdater( 
                 contentResolverMock, topicStoreMock, mock(TopicQueryResolver.class),
-                contentWriterMock, s3service, s3Bucket, 
+                contentWriterMock, s3service, s3Bucket, "",
                 mock(AdapterLog.class));
 	    
 		// These depend on what the magpie JSON returns
