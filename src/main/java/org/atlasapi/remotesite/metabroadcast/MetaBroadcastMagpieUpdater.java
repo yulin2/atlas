@@ -44,7 +44,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 	public MetaBroadcastMagpieUpdater(ContentResolver contentResolver, 
 			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, 
 			S3Service s3Service, String s3Bucket, AdapterLog log) {
-		super(topicStore, topicResolver, contentWriter, log, MAGPIE_NS);
+		super(contentResolver, topicStore, topicResolver, contentWriter, log, MAGPIE_NS, Publisher.MAGPIE);
 		this.contentResolver = contentResolver;
 		this.s3Service = s3Service;
 		this.s3Bucket = s3Bucket;
@@ -77,7 +77,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 				List<MagpieScheduleItem> magpieItems = json.getResults();
 				Iterable<String> uris = getUris(magpieItems);
-				List<String> mbUris = generateMetaBroadcastUris(uris, Publisher.MAGPIE);
+				List<String> mbUris = generateMetaBroadcastUris(uris);
 
 				ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
 				ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(mbUris);
@@ -87,7 +87,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 						ContentWords contentWordSet = magpieItemToContentWordSet(magpieItem);
 						List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = getFullKeyPhraseKeys(magpieItem);	
 						result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, 
-								contentWordSet, Optional.of(transformedKeys), Publisher.MAGPIE));
+								contentWordSet, Optional.of(transformedKeys)));
 					} catch (Exception e) {
 						log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("Fails on MagpieItem %s", magpieItem.getUri()));
 					}

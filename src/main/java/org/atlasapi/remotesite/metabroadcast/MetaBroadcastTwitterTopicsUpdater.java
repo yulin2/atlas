@@ -23,7 +23,7 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
 
 	public MetaBroadcastTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, 
 			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log) {
-		super(topicStore, topicResolver, contentWriter, log, TWITTER_NS);
+		super(contentResolver, topicStore, topicResolver, contentWriter, log, TWITTER_NS, Publisher.VOILA);
 		this.cannonTopicsClient = cannonTopicsClient;
 		this.contentResolver = contentResolver;
 	}
@@ -39,7 +39,7 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
 		ContentWordsList contentWords = possibleContentWords.get();
 
 		Iterable<String> uris = urisForWords(contentWords);
-		List<String> uriToMetaBroadcastUri = generateMetaBroadcastUris(uris, Publisher.VOILA);
+		List<String> uriToMetaBroadcastUri = generateMetaBroadcastUris(uris);
 
 		ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
 		ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(uriToMetaBroadcastUri);
@@ -47,7 +47,7 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
 		
 		UpdateProgress result = UpdateProgress.START;
 		for (ContentWords contentWordSet : contentWords) {
-			result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, contentWordSet, key, Publisher.VOILA));
+			result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, contentWordSet, key));
 		}
 		return result;
 	}
