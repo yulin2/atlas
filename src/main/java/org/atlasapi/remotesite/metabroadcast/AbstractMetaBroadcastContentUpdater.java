@@ -199,7 +199,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 				Topic topic = possibleTopic.requireValue();
 				topic.setTitle(wordWeighting.getContent());
 				topic.setPublisher(publisher);
-				topic.setType(wordWeighting.getType());
+				topic.setType(topicTypeFromSource(wordWeighting.getType()));
 				topicStore.write(topic);
 				topicRefs.add(new TopicRef(topic, wordWeighting.getWeight()/100.0f, false));
 			}
@@ -215,4 +215,6 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 			}
 		}));
 	}
+	
+	protected abstract Topic.Type topicTypeFromSource(String dbpedia);
 }

@@ -14,12 +14,12 @@ public class ContentWords {
         private int weight;
         private String url;
         private String value;
-        private Type type;
+        private String type;
         
         public WordWeighting(){
 		}
         
-        public WordWeighting(String content, int weight, String url, String value, Topic.Type type){
+        public WordWeighting(String content, int weight, String url, String value, String type){
         	this.content = content;
         	this.weight = weight;
         	this.url = url;
@@ -59,7 +59,7 @@ public class ContentWords {
             this.value = value;
         }
         
-        public Topic.Type getType() {
+        public String getType() {
             return type;
         }
 

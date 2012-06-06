@@ -8,6 +8,7 @@ import java.util.List;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.media.entity.simple.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -170,7 +171,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 	}
 
 	private WordWeighting topicRefToWordWeighting(TopicRef topic) {
-		return new WordWeighting(topic.getTopic().getTitle(), StrictMath.round(topic.getWeighting() * 100), topic.getTopic().getUri(), topic.getTopic().getValue() , Topic.Type.fromKey(topic.getTopic().getType()));
+		return new WordWeighting(topic.getTopic().getTitle(), StrictMath.round(topic.getWeighting() * 100), topic.getTopic().getUri(), topic.getTopic().getValue() , topic.getTopic().getType());
 	}
 
 	private Iterable<String> getUris(List<MagpieScheduleItem> items){
@@ -185,4 +186,18 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 	protected void setReporter(StatusReporter reporter) {
 		this.reporter = reporter;
 	}
+
+    @Override
+    protected Type topicTypeFromSource(String source) {
+        if(source.equals("http://schema.org/Person")) {
+            return Topic.Type.PERSON;
+        }
+        else if (source.equals("http://schema.org/Place")) {
+            return Topic.Type.PLACE;
+        }
+        else if (source.equals("http://schema.org/Product")) {
+            return Topic.Type.PRODUCT;
+        }
+        else return Topic.Type.SUBJECT;
+    }
 }
