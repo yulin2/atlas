@@ -14,13 +14,21 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import java.util.List;
+import java.util.Map;
+
+import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.persistence.topic.TopicContentLister;
+import org.atlasapi.persistence.topic.TopicContentUriLister;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
@@ -37,6 +45,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
@@ -48,6 +57,7 @@ public class QueryModule {
 	
 	private @Autowired DatabasedMongo mongo;
     private @Autowired CassandraContentStore cassandra;
+	private @Autowired TopicContentUriLister topicContentUriLister;
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	private @Value("${atlas.search.host}") String searchHost;
@@ -66,6 +76,26 @@ public class QueryModule {
 	    queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
 	    
 	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
+	}
+	
+	@Bean TopicContentLister mergingTopicContentLister() {
+	    KnownTypeContentResolver contentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
+        final KnownTypeQueryExecutor queryExecutor = new MergeOnOutputQueryExecutor(new LookupResolvingQueryExecutor(new CassandraKnownTypeContentResolver(cassandra), contentResolver, new MongoLookupEntryStore(mongo)));
+        
+        return new TopicContentLister() {
+            
+            @Override
+            public Iterable<Content> contentForTopic(Long topicId, ContentQuery contentQuery) {
+                Map<String, List<Identified>> resolved = queryExecutor.executeUriQuery(urisFor(topicId, contentQuery), contentQuery);
+                return Iterables.filter(Iterables.concat(resolved.values()), Content.class);
+            }
+
+            private Iterable<String> urisFor(Long topicId, ContentQuery contentQuery) {
+                return topicContentUriLister.contentUrisForTopic(topicId, contentQuery);
+            }
+
+        };
+	    
 	}
 	
 	@Bean SearchResolver searchResolver() {

@@ -96,20 +96,11 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         
         try {
             Selection selection = query.getSelection();
-            QueryResult<Content, Topic> result = QueryResult.of(query.getSelection().apply(iterable(contentLister.contentForTopic(decodedId, query))), topic);
+            QueryResult<Content, Topic> result = QueryResult.of(query.getSelection().apply(contentLister.contentForTopic(decodedId, query)), topic);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
             errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
-    }
-
-    private Iterable<Content> iterable(final Iterator<Content> iterator) {
-        return new Iterable<Content>() {
-            @Override
-            public Iterator<Content> iterator() {
-                return iterator;
-            }
-        };
     }
      
 }
