@@ -17,9 +17,7 @@ public class MagpieUpdaterTask extends ScheduledTask{
 
 	@Override
 	protected void runTask() {
-		while(shouldContinue()) {
-			magpieUpdater.updateTopics(new ArrayList<String>());
-		}
+		magpieUpdater.updateTopics(new ArrayList<String>());
 	}
 
 }
