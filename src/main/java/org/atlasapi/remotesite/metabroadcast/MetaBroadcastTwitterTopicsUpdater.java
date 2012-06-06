@@ -13,6 +13,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.ContentWordsList;
+import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 
 import com.google.common.base.Optional;
@@ -65,5 +66,10 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
             return Topic.Type.PRODUCT;
         }
         else return Topic.Type.SUBJECT;
+    }
+
+    @Override
+    protected String topicValueFromWordWeighting(WordWeighting weighting) {
+        return weighting.getUrl();
     }
 }

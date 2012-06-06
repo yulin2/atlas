@@ -195,7 +195,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 	public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
 		Builder<TopicRef> topicRefs = ImmutableSet.builder();
 		for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-			Maybe<Topic> possibleTopic = topicStore.topicFor(publisher, namespace, wordWeighting.getValue());
+			Maybe<Topic> possibleTopic = topicStore.topicFor(publisher, namespace, topicValueFromWordWeighting(wordWeighting));
 			if (possibleTopic.hasValue()) {
 				Topic topic = possibleTopic.requireValue();
 				topic.setTitle(wordWeighting.getContent());
@@ -218,4 +218,6 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 	}
 	
 	protected abstract Topic.Type topicTypeFromSource(String dbpedia);
+	
+	protected abstract String topicValueFromWordWeighting(WordWeighting weighting);
 }

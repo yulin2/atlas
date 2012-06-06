@@ -191,4 +191,9 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
     protected Type topicTypeFromSource(String source) {
         return Type.fromKey(source);
     }
+
+    @Override
+    protected String topicValueFromWordWeighting(WordWeighting weighting) {
+        return weighting.getValue();
+    }
 }
