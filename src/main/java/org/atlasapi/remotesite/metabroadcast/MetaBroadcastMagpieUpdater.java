@@ -34,6 +34,7 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
+import com.metabroadcast.common.scheduling.StatusReporter;
 
 public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpdater {
 
@@ -44,6 +45,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 	private final S3Service s3Service;
 	private String s3Bucket;
     private final String s3folder;
+	private StatusReporter reporter;
 
 	public MetaBroadcastMagpieUpdater(ContentResolver contentResolver, 
 			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, 
@@ -90,9 +92,10 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 				for (MagpieScheduleItem magpieItem : magpieItems) {
 					try{
 						ContentWords contentWordSet = magpieItemToContentWordSet(magpieItem);
-						List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = getFullKeyPhraseKeys(magpieItem);	
+						List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = getFullKeyPhraseKeys(magpieItem);
 						result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, 
 								contentWordSet, Optional.of(transformedKeys)));
+						reporter.reportStatus(result.toString());
 					} catch (Exception e) {
 						log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("Fails on MagpieItem %s", magpieItem.getUri()));
 					}
@@ -170,5 +173,9 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 				return input.getUri();
 			}	
 		}));
+	}
+
+	protected void setReporter(StatusReporter reporter) {
+		this.reporter = reporter;
 	}
 }
