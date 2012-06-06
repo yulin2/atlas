@@ -194,7 +194,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 	public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
 		Builder<TopicRef> topicRefs = ImmutableSet.builder();
 		for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-			Maybe<Topic> possibleTopic = topicStore.topicFor(namespace, wordWeighting.getValue());
+			Maybe<Topic> possibleTopic = topicStore.topicFor(publisher, namespace, wordWeighting.getValue());
 			if (possibleTopic.hasValue()) {
 				Topic topic = possibleTopic.requireValue();
 				topic.setTitle(wordWeighting.getContent());
