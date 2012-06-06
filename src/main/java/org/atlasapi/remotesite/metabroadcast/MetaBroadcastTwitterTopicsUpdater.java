@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -54,6 +55,15 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
 
     @Override
     protected Type topicTypeFromSource(String source) {
-        return Type.fromKey(source);
+        if(source.equals("http://schema.org/Person")) {
+            return Topic.Type.PERSON;
+        }
+        else if (source.equals("http://schema.org/Place")) {
+            return Topic.Type.PLACE;
+        }
+        else if (source.equals("http://schema.org/Product")) {
+            return Topic.Type.PRODUCT;
+        }
+        else return Topic.Type.SUBJECT;
     }
 }

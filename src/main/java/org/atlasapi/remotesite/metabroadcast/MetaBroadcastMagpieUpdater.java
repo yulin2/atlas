@@ -189,15 +189,6 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
     @Override
     protected Type topicTypeFromSource(String source) {
-        if(source.equals("http://schema.org/Person")) {
-            return Topic.Type.PERSON;
-        }
-        else if (source.equals("http://schema.org/Place")) {
-            return Topic.Type.PLACE;
-        }
-        else if (source.equals("http://schema.org/Product")) {
-            return Topic.Type.PRODUCT;
-        }
-        else return Topic.Type.SUBJECT;
+        return Type.fromKey(source);
     }
 }
