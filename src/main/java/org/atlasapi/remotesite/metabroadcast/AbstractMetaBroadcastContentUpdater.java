@@ -65,8 +65,9 @@ public abstract class AbstractMetaBroadcastContentUpdater {
         this.publisher = publisher;
 	}
 	
-	protected UpdateProgress createOrUpdateContent(ResolvedContent resolvedContent, ResolvedContent resolvedMetaBroadcastContent, 
-			UpdateProgress result, ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases) {
+	protected UpdateProgress createOrUpdateContent(ResolvedContent resolvedContent, ResolvedContent resolvedMetaBroadcastContent,
+			ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases) {
+		UpdateProgress result;
 		try {
 			String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
 			logger.debug("Processing content {}", mbUri);
@@ -74,20 +75,20 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 			if(possibleMetaBroadcastContent.hasValue()) {
 				// Content exists, update it
 				updateExistingContent(contentWordSet, possibleMetaBroadcastContent, keyPhrases);
-				result = result.reduce(SUCCESS);
+				result = SUCCESS;
 			} else {
 				// Generate new content
-				createThenUpdateContent(resolvedContent, result, contentWordSet, mbUri, keyPhrases);
-				result = result.reduce(SUCCESS);
+				createThenUpdateContent(resolvedContent, contentWordSet, mbUri, keyPhrases);
+				result = SUCCESS;
 			}
 		} catch (Exception e) {
 			log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to update topics for %s", contentWordSet.getUri()));
-			result = result.reduce(FAILURE);
+			result = FAILURE;
 		}
 		return result;
 	}
 
-	private void createThenUpdateContent(ResolvedContent resolvedContent, UpdateProgress result, ContentWords contentWordSet, String mbUri, 
+	private void createThenUpdateContent(ResolvedContent resolvedContent, ContentWords contentWordSet, String mbUri, 
 			Optional<List<KeyPhrase>> keyPhrase) {
 		String newCuri = ""; // TODO define a curie at some point
 		Identified identified = resolvedContent.get(contentWordSet.getUri()).requireValue();

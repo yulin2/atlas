@@ -48,7 +48,7 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
 		
 		UpdateProgress result = UpdateProgress.START;
 		for (ContentWords contentWordSet : contentWords) {
-			result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, contentWordSet, key));
+			result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, contentWordSet, key));
 		}
 		return result;
 	}

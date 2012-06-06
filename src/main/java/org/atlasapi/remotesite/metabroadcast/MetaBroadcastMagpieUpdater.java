@@ -101,7 +101,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 					try{
 						ContentWords contentWordSet = magpieItemToContentWordSet(magpieItem);
 						List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = getFullKeyPhraseKeys(magpieItem);
-						result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, 
+						result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, 
 								contentWordSet, Optional.of(transformedKeys)));
 						//reporter.reportStatus(result.toString());
 					} catch (Exception e) {
