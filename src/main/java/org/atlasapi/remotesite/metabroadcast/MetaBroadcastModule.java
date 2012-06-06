@@ -73,7 +73,7 @@ public class MetaBroadcastModule {
 	@Bean
 	CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
 		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
-		        new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_AUDIENCE, log));
+		        new MetaBroadcastTwitterTopicsUpdater(cannonPeopleTalkClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_AUDIENCE, log));
 	}
 	
     @Bean
