@@ -70,7 +70,11 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 		log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("Got into update topics method"));
 		UpdateProgress result = UpdateProgress.START;
 		try {
-			for (InputStream stream : getS3Stream()){
+			List<InputStream> s3Streams = getS3Stream();
+			int debugLoopCount = 0;
+			int debugInnerLoopCount = 0;
+			for (InputStream stream : s3Streams){
+				debugLoopCount++;
 				log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("For inputstream %s", stream.hashCode()));
 				MagpieResults json = null;
 				try {
@@ -85,17 +89,20 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 				List<MagpieScheduleItem> magpieItems = json.getResults();
 				Iterable<String> uris = getUris(magpieItems);
 				List<String> mbUris = generateMetaBroadcastUris(uris);
-
+				reporter.reportStatus("On loop iteration " + debugLoopCount + " there were " + magpieItems.size() + " magpie items, " + mbUris.size() + 
+						" mb uris and " + debugInnerLoopCount + " inner loops");
+				
 				ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
 				ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(mbUris);
 
 				for (MagpieScheduleItem magpieItem : magpieItems) {
+					debugInnerLoopCount++;
 					try{
 						ContentWords contentWordSet = magpieItemToContentWordSet(magpieItem);
 						List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = getFullKeyPhraseKeys(magpieItem);
 						result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, result, 
 								contentWordSet, Optional.of(transformedKeys)));
-						reporter.reportStatus(result.toString());
+						//reporter.reportStatus(result.toString());
 					} catch (Exception e) {
 						log.record(AdapterLogEntry.debugEntry().withSource(getClass()).withDescription("Fails on MagpieItem %s", magpieItem.getUri()));
 					}
