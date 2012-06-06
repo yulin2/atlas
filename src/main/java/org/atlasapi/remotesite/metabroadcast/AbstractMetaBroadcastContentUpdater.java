@@ -103,7 +103,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 
 	private void updateExistingContent(ContentWords contentWordSet, Maybe<Identified> possibleMetaBroadcastContent, Optional<List<KeyPhrase>> keyPhrase) {
 		Content content = (Content) possibleMetaBroadcastContent.requireValue();
-		content.setTopicRefs(getTopicRefsFor(contentWordSet).build());
+		content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
 		if(keyPhrase.isPresent()){
 			content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
 		}
@@ -177,7 +177,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 				Maybe<Topic> possibleTopic = topicResolver.topicForId(input.getTopic());
 				if (possibleTopic.hasValue()) {
 					Topic topic = possibleTopic.requireValue();
-					return !(namespace.equals(topic.getNamespace()) && publisher.equals(topic.getPublisher()));
+					return !namespace.equals(topic.getNamespace());
 				}
 				return false;
 			}
