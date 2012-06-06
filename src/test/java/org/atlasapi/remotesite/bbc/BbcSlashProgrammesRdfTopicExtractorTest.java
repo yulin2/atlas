@@ -75,6 +75,11 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
     	public Topic getStoredTopic() {
     		return storedTopic;
     	}
+		@Override
+		public Maybe<Topic> topicFor(Publisher publisher, String namespace,
+				String value) {
+			throw new UnsupportedOperationException();
+		}
     }
     
 }
