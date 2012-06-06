@@ -107,7 +107,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 	private List<InputStream> getS3Stream() throws S3ServiceException{
 		S3Object[] listOfObjects = s3Service.listObjects(s3Bucket, s3folder + "/", "");
-		List<S3Object> mostRecentObjectsMetadata = getMostRecentObject(listOfObjects);
+		List<S3Object> mostRecentObjectsMetadata = getMostRecentObjects(listOfObjects, 21); // Temporarily set to 21 for old ingesting, usually should be 7
 		List<InputStream> mostRecentObjectStreams = Lists.transform(mostRecentObjectsMetadata, new Function<S3Object, InputStream>() {
 			@Override
 			public InputStream apply(S3Object input) {
@@ -125,14 +125,14 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 		return mostRecentObjectStreams;
 	}
 
-	private List<S3Object> getMostRecentObject(S3Object[] listOfObjects) {
+	private List<S3Object> getMostRecentObjects(S3Object[] listOfObjects, int numberOfDaysToIngest) {
 		Ordering<S3Object> byNewest = new Ordering<S3Object>() {
 			@Override
 			public int compare(S3Object left, S3Object right) {
 				return (left.getLastModifiedDate().before(right.getLastModifiedDate())) ? -1 : 1;
 			}
 		};
-		return byNewest.greatestOf(Arrays.asList(listOfObjects), 7);
+		return byNewest.greatestOf(Arrays.asList(listOfObjects), numberOfDaysToIngest);
 	}
 
 	private List<KeyPhrase> getFullKeyPhraseKeys(MagpieScheduleItem magpieItem) {
