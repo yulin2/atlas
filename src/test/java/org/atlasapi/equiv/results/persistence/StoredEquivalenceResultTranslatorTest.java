@@ -5,8 +5,8 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.DefaultEquivalenceResultBuilder;
+import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.description.DefaultDescription;
@@ -21,11 +21,10 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Table.Cell;
-import com.mongodb.DBObject;
 
-public class EquivalenceResultTranslatorTest extends TestCase {
+public class StoredEquivalenceResultTranslatorTest extends TestCase {
 
-    private final EquivalenceResultTranslator translator = new EquivalenceResultTranslator();
+    private final StoredEquivalenceResultTranslator translator = new StoredEquivalenceResultTranslator();
     private final EquivalenceResultBuilder<Item> resultBuilder = DefaultEquivalenceResultBuilder.<Item>resultBuilder(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
 
     public final Item target = target("target", "Target", Publisher.BBC);
@@ -46,13 +45,12 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         List<ScoredEquivalents<Item>> scores = ImmutableList.of();
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
-        DBObject dbo = translator.toDBObject(itemResult);
-        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult storedResult = translator.toStoredEquivalenceResult(itemResult);
         
-        assertEquals(target.getCanonicalUri(), restoredResult.id());
-        assertEquals(target.getTitle(), restoredResult.title());
+        assertEquals(target.getCanonicalUri(), storedResult.id());
+        assertEquals(target.getTitle(), storedResult.title());
         
-        assertTrue(restoredResult.sourceResults().isEmpty());
+        assertTrue(storedResult.sourceResults().isEmpty());
         
     }
 
@@ -65,9 +63,8 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
-        DBObject dbo = translator.toDBObject(itemResult);
-        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
-        
+        StoredEquivalenceResult restoredResult = translator.toStoredEquivalenceResult(itemResult);
+          
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
         
@@ -96,8 +93,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
-        DBObject dbo = translator.toDBObject(itemResult);
-        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.toStoredEquivalenceResult(itemResult);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -129,8 +125,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
-        DBObject dbo = translator.toDBObject(itemResult);
-        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.toStoredEquivalenceResult(itemResult);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());

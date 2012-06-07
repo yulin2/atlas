@@ -26,23 +26,23 @@ public class MongoEquivalenceResultStore implements EquivalenceResultStore {
     }
     
     @Override
-    public <T extends Content> RestoredEquivalenceResult store(EquivalenceResult<T> result) {
+    public <T extends Content> StoredEquivalenceResult store(EquivalenceResult<T> result) {
         DBObject dbo = translator.toDBObject(result);
         equivResults.update(where().fieldEquals(ID, result.target().getCanonicalUri()).build(), dbo, true, false);
         return translator.fromDBObject(dbo);
     }
 
     @Override
-    public RestoredEquivalenceResult forId(String canonicalUri) {
+    public StoredEquivalenceResult forId(String canonicalUri) {
         return translator.fromDBObject(equivResults.findOne(canonicalUri));
     }
 
     @Override
-    public List<RestoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
-        return ImmutableList.copyOf(Iterables.transform(equivResults.find(where().idIn(canonicalUris).build()), new Function<DBObject, RestoredEquivalenceResult>() {
+    public List<StoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
+        return ImmutableList.copyOf(Iterables.transform(equivResults.find(where().idIn(canonicalUris).build()), new Function<DBObject, StoredEquivalenceResult>() {
 
             @Override
-            public RestoredEquivalenceResult apply(DBObject input) {
+            public StoredEquivalenceResult apply(DBObject input) {
                 return translator.fromDBObject(input);
             }
         }));

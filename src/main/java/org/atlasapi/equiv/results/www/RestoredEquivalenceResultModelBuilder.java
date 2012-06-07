@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.atlasapi.equiv.results.persistence.CombinedEquivalenceScore;
-import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
+import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbe;
 import org.eclipse.jetty.util.UrlEncoded;
 
@@ -19,7 +19,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class RestoredEquivalenceResultModelBuilder {
 
-    public SimpleModel build(RestoredEquivalenceResult target, EquivalenceResultProbe probe) {
+    public SimpleModel build(StoredEquivalenceResult target, EquivalenceResultProbe probe) {
         SimpleModel model = new SimpleModel();
         
         model.put("id", target.id());
