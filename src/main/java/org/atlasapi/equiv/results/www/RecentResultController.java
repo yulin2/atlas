@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
-import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
+import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -41,10 +41,10 @@ public class RecentResultController {
         return "equivalence.recentContainers";
     }
     
-    private List<Map<String, ?>> compileResults(List<RestoredEquivalenceResult> latestResults) {
+    private List<Map<String, ?>> compileResults(List<StoredEquivalenceResult> latestResults) {
         SimpleModelList resultsList = new SimpleModelList();
         
-        for (RestoredEquivalenceResult result : Lists.reverse(latestResults)) {
+        for (StoredEquivalenceResult result : Lists.reverse(latestResults)) {
             resultsList.add(resultModelBuilder.build(result, null));
         }
         

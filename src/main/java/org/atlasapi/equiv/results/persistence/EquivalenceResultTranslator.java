@@ -105,7 +105,7 @@ public class EquivalenceResultTranslator {
         return dbo;
     }
 
-    public RestoredEquivalenceResult fromDBObject(DBObject dbo) {
+    public StoredEquivalenceResult fromDBObject(DBObject dbo) {
         if(dbo == null) {
             return null;
         }
@@ -133,7 +133,7 @@ public class EquivalenceResultTranslator {
         }
         
         @SuppressWarnings("unchecked") List<Object> description = (List<Object>)dbo.get("desc");
-        return new RestoredEquivalenceResult(targetId, targetTitle, results, totals.build(), TranslatorUtils.toDateTime(dbo, TIMESTAMP), description);
+        return new StoredEquivalenceResult(targetId, targetTitle, results, totals.build(), TranslatorUtils.toDateTime(dbo, TIMESTAMP), description);
     }
     
     private String publisherName(DBObject equivDbo) {
