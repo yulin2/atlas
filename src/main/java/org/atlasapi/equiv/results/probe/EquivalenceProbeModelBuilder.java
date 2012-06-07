@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.persistence.CombinedEquivalenceScore;
-import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
+import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
 import org.eclipse.jetty.util.UrlEncoded;
 
 import com.google.common.base.Function;
@@ -21,7 +21,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class EquivalenceProbeModelBuilder {
 
-    public SimpleModel build(EquivalenceResultProbe input, RestoredEquivalenceResult result) {
+    public SimpleModel build(EquivalenceResultProbe input, StoredEquivalenceResult result) {
         SimpleModel model = new SimpleModel();
 
         model.put("target", input.target()).put("encodedId", UrlEncoded.encodeString(input.target()));

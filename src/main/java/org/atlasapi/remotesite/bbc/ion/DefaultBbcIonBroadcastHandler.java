@@ -20,6 +20,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.Duration;
 
@@ -45,11 +46,14 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private BbcContainerFetcherClient containerClient;
     private ItemsPeopleWriter itemsPeopleWriter;
 
+    private final ContentLock lock;
+
     
-    public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log, ContentLock lock) {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
+        this.lock = lock;
         this.itemExtractor = new BbcIonEpisodeItemContentExtractor(log);
         this.broadcastExtractor = new BbcIonBroadcastExtractor();
     }
@@ -73,7 +77,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     public void handle(IonBroadcast broadcast) {
         String itemUri = slashProgrammesUriForPid(broadcast.getEpisodeId());
         try {
-                
+            lock.lock(itemUri);
             Item item = resolveOrFetchItem(broadcast, itemUri);
                 
             if(item == null) {
@@ -113,6 +117,8 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass())
                     .withDescription("Schedule Updater failed for %s %s, processing broadcast %s of %s", broadcast.getService(), broadcast.getDate(), broadcast.getId(), itemUri));
+        } finally {
+            lock.unlock(itemUri);
         }
     }
 

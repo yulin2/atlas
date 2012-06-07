@@ -13,19 +13,19 @@ import com.google.common.collect.ImmutableList;
 
 public class RecentEquivalenceResultStore implements EquivalenceResultStore {
 
-    private static class LimitedSizeResultMap extends LinkedHashMap<String,RestoredEquivalenceResult> {
+    private static class LimitedSizeResultMap extends LinkedHashMap<String,StoredEquivalenceResult> {
 
         private static final long serialVersionUID = 1L;
 
         @Override
-        protected boolean removeEldestEntry(java.util.Map.Entry<String, RestoredEquivalenceResult> eldest) {
+        protected boolean removeEldestEntry(java.util.Map.Entry<String, StoredEquivalenceResult> eldest) {
             return size() > 50;
         }
     }
     
     private final EquivalenceResultStore delegate;
-    private final Map<String,RestoredEquivalenceResult> mrwItemCache;
-    private final Map<String,RestoredEquivalenceResult> mrwContainerCache;
+    private final Map<String,StoredEquivalenceResult> mrwItemCache;
+    private final Map<String,StoredEquivalenceResult> mrwContainerCache;
 
     public RecentEquivalenceResultStore(EquivalenceResultStore delegate) {
         this.delegate = delegate;
@@ -34,8 +34,8 @@ public class RecentEquivalenceResultStore implements EquivalenceResultStore {
     }
     
     @Override
-    public <T extends Content> RestoredEquivalenceResult store(EquivalenceResult<T> result) {
-        RestoredEquivalenceResult restoredResult = delegate.store(result);
+    public <T extends Content> StoredEquivalenceResult store(EquivalenceResult<T> result) {
+        StoredEquivalenceResult restoredResult = delegate.store(result);
         if(result.target() instanceof Item) {
             mrwItemCache.put(result.target().getCanonicalUri(), restoredResult);
         }
@@ -46,8 +46,8 @@ public class RecentEquivalenceResultStore implements EquivalenceResultStore {
     }
 
     @Override
-    public RestoredEquivalenceResult forId(String canonicalUri) {
-        RestoredEquivalenceResult equivalenceResult = mrwItemCache.get(canonicalUri);
+    public StoredEquivalenceResult forId(String canonicalUri) {
+        StoredEquivalenceResult equivalenceResult = mrwItemCache.get(canonicalUri);
         if(equivalenceResult != null) {
             return equivalenceResult;
         }
@@ -60,15 +60,15 @@ public class RecentEquivalenceResultStore implements EquivalenceResultStore {
     }
     
     @Override
-    public List<RestoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
+    public List<StoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
         return delegate.forIds(canonicalUris);
     }
     
-    public List<RestoredEquivalenceResult> latestItemResults() {
+    public List<StoredEquivalenceResult> latestItemResults() {
         return ImmutableList.copyOf(mrwItemCache.values());
     }
 
-    public List<RestoredEquivalenceResult> latestContainerResults() {
+    public List<StoredEquivalenceResult> latestContainerResults() {
         return ImmutableList.copyOf(mrwContainerCache.values());
     }
 

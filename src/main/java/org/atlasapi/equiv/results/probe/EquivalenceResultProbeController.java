@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
-import org.atlasapi.equiv.results.persistence.RestoredEquivalenceResult;
+import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -60,7 +60,7 @@ public class EquivalenceResultProbeController {
         return new SimpleModelList(Iterables.transform(probes, new Function<EquivalenceResultProbe, SimpleModel>() {
             @Override
             public SimpleModel apply(EquivalenceResultProbe input) {
-                RestoredEquivalenceResult result = resultStore.forId(input.target());
+                StoredEquivalenceResult result = resultStore.forId(input.target());
                 return probeModelBuilder.build(input, result);
             }
         }));
@@ -78,7 +78,7 @@ public class EquivalenceResultProbeController {
         
         probeStore.store(probe);
 
-        RestoredEquivalenceResult result = resultStore.forId(probe.target());
+        StoredEquivalenceResult result = resultStore.forId(probe.target());
         model.put("probe", probeModelBuilder.build(probe, result));
         
         return "equivalence.widgets.probe";
