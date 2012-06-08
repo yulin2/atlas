@@ -1,10 +1,14 @@
 package org.atlasapi.equiv.results.persistence;
 
+import java.io.Serializable;
+
 import com.google.common.base.Objects;
 
 
-public class CombinedEquivalenceScore {
+public class CombinedEquivalenceScore implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     private final String id;
     private final String title;
     private final Double score;
