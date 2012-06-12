@@ -81,7 +81,7 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             ApplicationConfiguration appConfig = appConfig(request);
             Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appConfig);
-            List<Identified> content = searcher.search(new SearchQuery(q, selection, specializations, publishers, titleWeighting, broadcastWeighting, catchupWeighting, Maybe.<Float>nothing(), Maybe.<Float>nothing()), appConfig);
+            List<Identified> content = searcher.search(new SearchQuery(q, selection, specializations, publishers, titleWeighting, broadcastWeighting, catchupWeighting, Maybe.just(1.0F), Maybe.just(1.0F)), appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
         } catch (Exception e) {
