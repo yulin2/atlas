@@ -118,7 +118,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 	private List<InputStream> getS3Stream() throws S3ServiceException{
 		S3Object[] listOfObjects = s3Service.listObjects(s3Bucket, s3folder + "/", "");
-		List<S3Object> mostRecentObjectsMetadata = getMostRecentObjects(listOfObjects, 21); // Temporarily set to 21 for old ingesting, usually should be 7
+		List<S3Object> mostRecentObjectsMetadata = getMostRecentObjects(listOfObjects, 3);
 		List<InputStream> mostRecentObjectStreams = Lists.transform(mostRecentObjectsMetadata, new Function<S3Object, InputStream>() {
 			@Override
 			public InputStream apply(S3Object input) {
