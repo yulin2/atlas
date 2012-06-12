@@ -24,33 +24,33 @@ import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.regex.Matcher;
 
 @RunWith(JMock.class)
 public class LookupResolvingQueryExecutorTest extends TestCase {
-
     private final Mockery context = new Mockery();
-    private KnownTypeContentResolver contentResolver = context.mock(KnownTypeContentResolver.class);
+    
+    private KnownTypeContentResolver cassandraContentResolver = context.mock(KnownTypeContentResolver.class, "cassandraContentResolver");
+    private KnownTypeContentResolver mongoContentResolver = context.mock(KnownTypeContentResolver.class, "mongoContentResolver");
     
     private final InMemoryLookupEntryStore lookupStore = new InMemoryLookupEntryStore();
-    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(contentResolver, lookupStore);
+    
+    private final LookupResolvingQueryExecutor executor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, lookupStore);
 
     @Test
     public void testSetsSameAs() {
-
         final String query = "query";
-        
         final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
         final Item equivItem = new Item("equiv", "ecurie", Publisher.YOUTUBE);
-        
         
         lookupStore.store(lookupEntryWithEquivalents(query, LookupRef.from(queryItem), LookupRef.from(equivItem)));
         
         context.checking(new Expectations(){{
-            one(contentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
-                will(returnValue(ResolvedContent.builder()
-                        .put(queryItem.getCanonicalUri(), queryItem)
-                        .put(equivItem.getCanonicalUri(), equivItem)
-               .build()));
+            one(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
+            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).put(equivItem.getCanonicalUri(), equivItem).build()));
+        }});
+        context.checking(new Expectations(){{
+            never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
         }});
         
         Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
@@ -64,6 +64,49 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
             }
         }
         
+        context.assertIsSatisfied();
+    }
+    
+    @Test
+    public void testCassandraIsNotCalledIfMongoReturnsSomething() {
+        final String query = "query";
+        final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
+        
+        lookupStore.store(LookupEntry.lookupEntryFrom(queryItem));
+
+        context.checking(new Expectations(){{
+            one(mongoContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).build()));
+        }});
+        context.checking(new Expectations(){{
+            never(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+        }});
+        
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
+        
+        assertEquals(1, result.get(query).size());
+        
+        context.assertIsSatisfied();
+    }
+    
+    @Test
+    public void testCassandraIsCalledIfMongoReturnsNothing() {
+        final String query = "query";
+        final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
+
+        context.checking(new Expectations(){{
+            never(mongoContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+        }});
+        context.checking(new Expectations(){{
+            one(cassandraContentResolver).findByLookupRefs(with(Expectations.<Iterable<LookupRef>>anything()));
+            will(returnValue(ResolvedContent.builder().put(queryItem.getCanonicalUri(), queryItem).build()));
+        }});
+        
+        Map<String, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), MatchesNothing.asQuery());
+        
+        assertEquals(1, result.get(query).size());
+        
+        context.assertIsSatisfied();
     }
 
     private LookupEntry lookupEntryWithEquivalents(String uri, LookupRef... equiv) {
