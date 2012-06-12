@@ -27,14 +27,16 @@ public class RemoteFuzzySearcher implements ContentSearcher {
 
     @Override
     public SearchResults search(SearchQuery query) {
-        String queryString = remoteHost + String.format("/titles?title=%s&%s&specializations=%s&publishers=%s&titleWeighting=%s&broadcastWeighting=%s&catchupWeighting=%s",
+        String queryString = remoteHost + String.format("/titles?title=%s&%s&specializations=%s&publishers=%s&titleWeighting=%s&broadcastWeighting=%s&catchupWeighting=%s&priorityChannelWeighting=%s&firstBroadcastWeighting=%s",
                     UrlEncoding.encode(query.getTerm()), 
                     query.getSelection().asQueryParameters(),
                     CSV.join(query.getIncludedSpecializations()),
                     CSV.join(query.getIncludedPublishers()), 
                     query.getTitleWeighting(), 
                     query.getBroadcastWeighting(), 
-                    query.getCatchupWeighting());
+                    query.getCatchupWeighting(),
+                    query.getPriorityChannelWeighting(),
+                    query.getFirstBroadcastWeighting());
         try {
             HttpResponse response = client.get(queryString);
             if (HttpStatusCode.OK.is(response.statusCode())) {
