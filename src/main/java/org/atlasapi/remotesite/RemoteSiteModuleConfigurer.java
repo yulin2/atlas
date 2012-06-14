@@ -34,7 +34,6 @@ import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.music.emipub.EmiPubModule;
 import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
->>>>>>> mbst-1826-c4-ids
 
 public class RemoteSiteModuleConfigurer {
 
