@@ -83,7 +83,7 @@ public class EmiMusicProcessor {
     }
 
     private Document loadDocument(S3Client client, String name) throws IOException, ParsingException {
-        File file = File.createTempFile(EmiMusicUpdater.S3_BUCKET, name);
+        File file = File.createTempFile(EmiMusicUpdater.S3_BUCKET, null);
         client.getAndSaveIfUpdated(name, file, Maybe.<File>nothing());
         return new Builder().build(file);
     }
