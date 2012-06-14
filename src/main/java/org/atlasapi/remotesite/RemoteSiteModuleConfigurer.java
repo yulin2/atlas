@@ -3,7 +3,6 @@ package org.atlasapi.remotesite;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.feeds.lakeview.LakeviewModule;
@@ -21,7 +20,6 @@ import org.atlasapi.remotesite.redux.ReduxModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.voila.VoilaModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.hp.hpl.jena.graph.query.StageElement.PutBindings;
@@ -33,6 +31,10 @@ import org.atlasapi.remotesite.music.emipub.EmiPubModule;
 import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
 import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
+import org.atlasapi.remotesite.space.TheSpaceModule;
+import org.atlasapi.remotesite.music.emipub.EmiPubModule;
+import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
+>>>>>>> mbst-1826-c4-ids
 
 public class RemoteSiteModuleConfigurer {
 
