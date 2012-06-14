@@ -7,7 +7,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public interface S3Client {
     
-    Iterable<String> list() throws IOException;
+    Iterable<String> list(String prefix, String suffix) throws IOException;
 
     void put(String name, File file) throws IOException;
 

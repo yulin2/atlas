@@ -30,7 +30,7 @@ public class EmiMusicProcessor {
     private static final PeriodFormatterBuilder periodBuilder = new PeriodFormatterBuilder().appendLiteral("PT").appendHours().appendLiteral("H").appendMinutes().appendLiteral("M").appendSeconds().appendLiteral("S");
 
     public void process(S3Client client, ContentWriter contentWriter, AdapterLog log) throws Exception {
-        Iterable<String> files = client.list();
+        Iterable<String> files = client.list(null, "xml");
         for (String file : files) {
             try {
                 Document doc = loadDocument(client, file);
