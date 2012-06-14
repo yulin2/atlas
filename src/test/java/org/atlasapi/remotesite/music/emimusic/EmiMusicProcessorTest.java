@@ -22,7 +22,7 @@ public class EmiMusicProcessorTest {
     @Test
     public void testProcess() throws Exception {
         S3Client client = mock(S3Client.class);
-        when(client.list()).thenReturn(Arrays.asList("emimusic1.xml", "emimusic2.xml"));
+        when(client.list(null, "xml")).thenReturn(Arrays.asList("emimusic1.xml", "emimusic2.xml"));
         when(client.getAndSaveIfUpdated(eq("emimusic1.xml"), any(File.class), any(Maybe.class))).thenAnswer(new Answer<Object>() {
 
             @Override
@@ -41,17 +41,17 @@ public class EmiMusicProcessorTest {
                 return Boolean.TRUE;
             }
         });
-        
+
         ContentWriter writer = mock(ContentWriter.class);
         ArgumentCaptor<Song> captor = ArgumentCaptor.forClass(Song.class);
-        
+
         AdapterLog log = mock(AdapterLog.class);
-        
+
         EmiMusicProcessor processor = new EmiMusicProcessor();
         processor.process(client, writer, log);
-        
+
         verify(writer, times(3)).createOrUpdate(captor.capture());
-        
+
         assertEquals(3, captor.getAllValues().size());
     }
 }

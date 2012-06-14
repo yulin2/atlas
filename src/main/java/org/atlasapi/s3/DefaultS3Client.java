@@ -1,6 +1,7 @@
 package org.atlasapi.s3;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.IOException;
@@ -43,14 +44,24 @@ public class DefaultS3Client implements S3Client {
     }
 
     @Override
-    public Iterable<String> list() throws IOException {
+    public Iterable<String> list(final String prefix, final String suffix) throws IOException {
         try {
             S3Object[] objects = client().listObjects(bucket);
-            return Iterables.transform(Arrays.asList(objects), new Function<S3Object, String>() {
+            return Iterables.filter(Iterables.transform(Arrays.asList(objects), new Function<S3Object, String>() {
 
                 @Override
                 public String apply(S3Object input) {
-                    return input.getKey();
+                    if ((prefix != null && input.getKey().startsWith(prefix)) || (suffix != null && input.getKey().endsWith(suffix))) {
+                        return input.getKey();
+                    } else {
+                        return null;
+                    }
+                }
+            }), new Predicate<String>() {
+
+                @Override
+                public boolean apply(String input) {
+                    return input != null;
                 }
             });
         } catch (S3ServiceException ex) {
