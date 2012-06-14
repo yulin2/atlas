@@ -26,6 +26,7 @@ import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
+import org.atlasapi.remotesite.music.emimusic.EmiMusicModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.music.emipub.EmiPubModule;
 import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
@@ -59,6 +60,7 @@ public class RemoteSiteModuleConfigurer {
         .put("thespace", TheSpaceModule.class)
         .put("musicbrainz", MusicBrainzModule.class)
         .put("emipub", EmiPubModule.class)
+        .put("emimusic", EmiMusicModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {

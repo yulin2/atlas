@@ -1,5 +1,7 @@
 package org.atlasapi.s3;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +20,7 @@ import org.jets3t.service.security.AWSCredentials;
 import org.joda.time.DateTime;
 
 import com.metabroadcast.common.base.Maybe;
+import java.util.Arrays;
 
 public class DefaultS3Client implements S3Client {
 
@@ -36,6 +39,22 @@ public class DefaultS3Client implements S3Client {
             return new RestS3Service(new AWSCredentials(access, secret));
         } catch (S3ServiceException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Iterable<String> list() throws IOException {
+        try {
+            S3Object[] objects = client().listObjects(bucket);
+            return Iterables.transform(Arrays.asList(objects), new Function<S3Object, String>() {
+
+                @Override
+                public String apply(S3Object input) {
+                    return input.getKey();
+                }
+            });
+        } catch (S3ServiceException ex) {
+            throw new IOException(ex);
         }
     }
 
@@ -66,11 +85,11 @@ public class DefaultS3Client implements S3Client {
                 throw new IOException(e);
             }
         }
-        
+
         if (s3object == null) {
             return false;
         }
-        
+
         try {
             if (existingFile.isNothing()
                     || (s3object.getContentLength() == existingFile.requireValue().length() && s3object.getLastModifiedDate().before(new Date(existingFile.requireValue().lastModified())))) {
@@ -84,7 +103,7 @@ public class DefaultS3Client implements S3Client {
         } catch (ServiceException e) {
             throw new IOException(e);
         }
-        
+
         return true;
     }
 }

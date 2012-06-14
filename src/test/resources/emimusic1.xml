@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ernm:NewReleaseMessage 
+    MessageSchemaVersionId="2010/ern-main/32" LanguageAndScriptCode="en" xs:schemaLocation="http://ddex.net/xml/2010/ern-main/32 http://ddex.net/xml/2010/ern-main/32/ern-main.xsd" xmlns:ernm="http://ddex.net/xml/2010/ern-main/32" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance">
+    <MessageHeader>
+        <MessageThreadId>5400b35a-6d8e-46d3-ab5b-608c6e72567b</MessageThreadId>
+        <MessageId>C16B2E6A4F1D2619E0440021282D1C06</MessageId>
+        <MessageSender>
+            <PartyId>PADPIDA2009101501Y</PartyId>
+            <PartyName>
+                <FullName>Sony DADC</FullName>
+            </PartyName>
+        </MessageSender>
+        <SentOnBehalfOf>
+            <PartyId>PADPIDA2007062701B</PartyId>
+            <PartyName>
+                <FullName>EMI</FullName>
+            </PartyName>
+        </SentOnBehalfOf>
+        <MessageRecipient>
+            <PartyId>PA-DPIDA-2012051503-J</PartyId>
+            <PartyName>
+                <FullName>mbcast</FullName>
+            </PartyName>
+        </MessageRecipient>
+        <MessageCreatedDateTime>2012-06-01T22:32:14+01:00</MessageCreatedDateTime>
+    </MessageHeader>
+    <UpdateIndicator>OriginalMessage</UpdateIndicator>  
+    <ResourceList>  
+        <SoundRecording>
+            <SoundRecordingType>MusicalWorkSoundRecording</SoundRecordingType>
+            <SoundRecordingId>
+                <ISRC>US4GE0500042</ISRC>
+                <ProprietaryId Namespace="DPID:PADPIDA2007062701B">DTI:EMIDD0386179</ProprietaryId>
+            </SoundRecordingId>
+            <ResourceReference>A1</ResourceReference>
+            <ReferenceTitle>
+                <TitleText>Disco Infiltrator</TitleText>
+                <SubTitle>FK's Infiltrated Vocal</SubTitle>
+            </ReferenceTitle>
+            <IsInstrumental>false</IsInstrumental>
+            <LanguageOfPerformance>en</LanguageOfPerformance>
+            <Duration>PT0H7M45S</Duration>
+            <CreationDate IsApproximate="true" LocationDescription="Longview Farms Studios, Mass and Plantain Recording House, NYC" TerritoryCode="US">2004-01-01</CreationDate>
+            <MasteredDate IsApproximate="true" LocationDescription="West West Side Music, New Windsor, NY" TerritoryCode="US">2004-01-01</MasteredDate>
+            <SoundRecordingDetailsByTerritory>      
+                <TerritoryCode>Worldwide</TerritoryCode>
+                <Title TitleType="FormalTitle">
+                    <TitleText>Disco Infiltrator</TitleText>
+                    <SubTitle>FK's Infiltrated Vocal</SubTitle>
+                </Title>
+                <Title TitleType="DisplayTitle">
+                    <TitleText>Disco Infiltrator (FK's Infiltrated Vocal)</TitleText>
+                </Title>
+                <DisplayArtist SequenceNumber="1">
+                    <PartyName>
+                        <FullName>LCD Soundsystem</FullName>
+                        <FullNameIndexed>LCD Soundsystem</FullNameIndexed>
+                    </PartyName>
+                    <ArtistRole>MainArtist</ArtistRole>
+                </DisplayArtist>
+                <DisplayArtist SequenceNumber="2">
+                    <PartyName>
+                        <FullName>James Murphy</FullName>
+                        <FullNameIndexed>Murphy, James</FullNameIndexed>
+                    </PartyName>
+                    <ArtistRole>Composer</ArtistRole>
+                </DisplayArtist>
+                <ResourceContributor SequenceNumber="1">
+                    <PartyName>
+                        <FullName>Josh Wilbur</FullName>
+                        <FullNameIndexed>Wilbur</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Engineer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="2">
+                    <PartyName>
+                        <FullName>Tyler Pope</FullName>
+                        <FullNameIndexed>Tyler Pope</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Instruments">AssociatedPerformer</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="3">
+                    <PartyName>
+                        <FullName>Steve Sisco</FullName>
+                        <FullNameIndexed>Steve Sisco</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Engineer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="4">
+                    <PartyName>
+                        <FullName>Robert Rives</FullName>
+                        <FullNameIndexed>Robert Rives</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Additional Keyboards">AssociatedPerformer</ResourceContributorRole>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Additional Programming">Programmer</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="5">
+                    <PartyName>
+                        <FullName>Patrick Mahoney</FullName>
+                        <FullNameIndexed>Patrick Mahoney</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Instruments">AssociatedPerformer</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="6">
+                    <PartyName>
+                        <FullName>Nancy Whang</FullName>
+                        <FullNameIndexed>Nancy Whang</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Instruments">AssociatedPerformer</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="7">
+                    <PartyName>
+                        <FullName>James Murphy</FullName>
+                        <FullNameIndexed>Murphy, James</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Instruments">AssociatedPerformer</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="8">
+                    <PartyName>
+                        <FullName>Mike Callaghan</FullName>
+                        <FullNameIndexed>Mike Callaghan</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Remix Engineer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="9">
+                    <PartyName>
+                        <FullName>Mandy Coon</FullName>
+                        <FullNameIndexed>Mandy Coon</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Instruments">AssociatedPerformer</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="10">
+                    <PartyName>
+                        <FullName>Mike Lapierre</FullName>
+                        <FullNameIndexed>Lapierre</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Engineer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="11">
+                    <PartyName>
+                        <FullName>Eric Kupper</FullName>
+                        <FullNameIndexed>Kupper, Eric</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Additional Keyboards">AssociatedPerformer</ResourceContributorRole>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Additional Programming">Programmer</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="12">
+                    <PartyName>
+                        <FullName>John O'Mahoney</FullName>
+                        <FullNameIndexed>John O'Mahoney</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Engineer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="13">
+                    <PartyName>
+                        <FullName>Ian Hatton</FullName>
+                        <FullNameIndexed>Ian Hatton</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Engineer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="14">
+                    <PartyName>
+                        <FullName>Francois K</FullName>
+                        <FullNameIndexed>Francois K</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Additional Production">Producer</ResourceContributorRole>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Remixer">StudioPersonnel</ResourceContributorRole>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Remix Mixer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="15">
+                    <PartyName>
+                        <FullName>Eric Broucek</FullName>
+                        <FullNameIndexed>Eric Broucek</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Instruments">AssociatedPerformer</ResourceContributorRole>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Assistant">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="16">
+                    <PartyName>
+                        <FullName>The DFA</FullName>
+                        <FullNameIndexed>DFA</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole>Producer</ResourceContributorRole>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Mixer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="17">
+                    <PartyName>
+                        <FullName>Andy Wallace</FullName>
+                        <FullNameIndexed>Andy Wallace</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Mixer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="18">
+                    <PartyName>
+                        <FullName>Andy Sarroff</FullName>
+                        <FullNameIndexed>Andy Sarroff</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Assistant">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <ResourceContributor SequenceNumber="19">
+                    <PartyName>
+                        <FullName>Alana Douches</FullName>
+                        <FullNameIndexed>Alana Douches</FullNameIndexed>
+                    </PartyName>
+                    <ResourceContributorRole Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Mastering Engineer">StudioPersonnel</ResourceContributorRole>
+                </ResourceContributor>
+                <PLine>
+                    <Year>2005</Year>
+                    <PLineText>(P) 2005 The copyright in this sound recording is owned by DFA LLC under exclusive licence to EMI Records Ltd</PLineText>
+                </PLine>
+                <Genre>
+                    <GenreText>Pop</GenreText>
+                </Genre>
+                <ParentalWarningType>NotExplicit</ParentalWarningType>
+            </SoundRecordingDetailsByTerritory>
+        </SoundRecording>    
+        <Image>
+            <ImageType Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Packshot">FrontCoverImage</ImageType>
+            <ImageId>
+                <ProprietaryId Namespace="DPID:PADPIDA2007062701B">PACKSHOT:0094633005556</ProprietaryId>
+            </ImageId>
+            <ResourceReference>A2</ResourceReference>
+            <ImageDetailsByTerritory>      
+                <TerritoryCode>Worldwide</TerritoryCode>
+                <ParentalWarningType>NotExplicit</ParentalWarningType>
+            </ImageDetailsByTerritory>
+        </Image>    
+    </ResourceList>
+    <ReleaseList>  
+        <Release>
+            <ReleaseId>
+                <ICPN IsEan="true">0094633005556</ICPN>
+            </ReleaseId>
+            <ReleaseReference>R0</ReleaseReference>
+            <ReferenceTitle>
+                <TitleText>Disco Infiltrator</TitleText>
+            </ReferenceTitle>
+            <ReleaseResourceReferenceList>
+                <ReleaseResourceReference ReleaseResourceType="PrimaryResource">A1</ReleaseResourceReference>
+                <ReleaseResourceReference ReleaseResourceType="SecondaryResource">A2</ReleaseResourceReference>
+            </ReleaseResourceReferenceList>
+            <ReleaseType Namespace="DPID:PADPIDA2007062701B" UserDefinedValue="Radio Single">SingleResourceRelease</ReleaseType>
+            <ReleaseDetailsByTerritory>
+                <TerritoryCode>Worldwide</TerritoryCode>
+                <DisplayArtistName>LCD Soundsystem</DisplayArtistName>
+                <LabelName>DFA Records</LabelName>
+                <Title TitleType="FormalTitle">
+                    <TitleText>Disco Infiltrator</TitleText>
+                </Title>
+                <Title TitleType="DisplayTitle">
+                    <TitleText>Disco Infiltrator</TitleText>
+                </Title>
+                <DisplayArtist SequenceNumber="1">
+                    <PartyName>
+                        <FullName>LCD Soundsystem</FullName>
+                        <FullNameIndexed>LCD Soundsystem</FullNameIndexed>
+                    </PartyName>
+                    <ArtistRole>MainArtist</ArtistRole>
+                </DisplayArtist>
+                <IsMultiArtistCompilation>false</IsMultiArtistCompilation>
+                <AdministratingRecordCompany Role="RightsAdministrator">
+                    <PartyName>
+                        <FullName>EMI UK</FullName>
+                    </PartyName>
+                </AdministratingRecordCompany>
+                <AdministratingRecordCompany Role="RoyaltyAdministrator">
+                    <PartyName>
+                        <FullName>EMI UK</FullName>
+                    </PartyName>
+                </AdministratingRecordCompany>
+                <ParentalWarningType>NotExplicit</ParentalWarningType>
+                <ResourceGroup>
+                    <ResourceGroup>
+                        <Title TitleType="GroupingTitle">
+                            <TitleText>Component 1</TitleText>
+                        </Title>
+                        <SequenceNumber>1</SequenceNumber>
+                        <ResourceGroupContentItem>
+                            <SequenceNumber>1</SequenceNumber>
+                            <ResourceType>SoundRecording</ResourceType>
+                            <ReleaseResourceReference ReleaseResourceType="PrimaryResource">A1</ReleaseResourceReference>
+                        </ResourceGroupContentItem>
+                    </ResourceGroup>
+                    <ResourceGroupContentItem>
+                        <ResourceType>Image</ResourceType>
+                        <ReleaseResourceReference ReleaseResourceType="SecondaryResource">A2</ReleaseResourceReference>
+                    </ResourceGroupContentItem>
+                </ResourceGroup>
+                <Genre>
+                    <GenreText>Pop</GenreText>
+                </Genre>
+            </ReleaseDetailsByTerritory>
+            <Duration>PT0H7M45S</Duration>
+            <PLine>
+                <Year>2005</Year>
+                <PLineText>(P) 2005 The copyright in this sound recording is owned by DFA LLC under exclusive licence to EMI Records Ltd</PLineText>
+            </PLine>
+            <CLine>
+                <Year>2005</Year>
+                <CLineText>(C) 2005 EMI Records Ltd This label copy information is the subject of copyright protection. All rights reserved. (C) 2005 EMI Records Ltd</CLineText>
+            </CLine>
+        </Release>    
+        <Release>
+            <ReleaseId>
+                <ProprietaryId Namespace="DPID:PADPIDA2007062701B">DTI:EMIDD0386179</ProprietaryId>
+            </ReleaseId>
+            <ReleaseReference>R1</ReleaseReference>
+            <ReferenceTitle>
+                <TitleText>Disco Infiltrator</TitleText>
+                <SubTitle>FK's Infiltrated Vocal</SubTitle>
+            </ReferenceTitle>
+            <ReleaseResourceReferenceList>
+                <ReleaseResourceReference ReleaseResourceType="PrimaryResource">A1</ReleaseResourceReference>
+            </ReleaseResourceReferenceList>
+            <ReleaseType>TrackRelease</ReleaseType>
+            <ReleaseDetailsByTerritory>
+                <TerritoryCode>Worldwide</TerritoryCode>
+                <DisplayArtistName>LCD Soundsystem</DisplayArtistName>
+                <LabelName>DFA Records</LabelName>
+                <Title TitleType="FormalTitle">
+                    <TitleText>Disco Infiltrator</TitleText>
+                    <SubTitle>FK's Infiltrated Vocal</SubTitle>
+                </Title>
+                <Title TitleType="DisplayTitle">
+                    <TitleText>Disco Infiltrator (FK's Infiltrated Vocal)</TitleText>
+                </Title>
+                <DisplayArtist SequenceNumber="1">
+                    <PartyName>
+                        <FullName>LCD Soundsystem</FullName>
+                        <FullNameIndexed>LCD Soundsystem</FullNameIndexed>
+                    </PartyName>
+                    <ArtistRole>MainArtist</ArtistRole>
+                </DisplayArtist>
+                <DisplayArtist SequenceNumber="2">
+                    <PartyName>
+                        <FullName>James Murphy</FullName>
+                        <FullNameIndexed>Murphy, James</FullNameIndexed>
+                    </PartyName>
+                    <ArtistRole>Composer</ArtistRole>
+                </DisplayArtist>
+                <AdministratingRecordCompany Role="RightsAdministrator">
+                    <PartyName>
+                        <FullName>EMI UK</FullName>
+                    </PartyName>
+                </AdministratingRecordCompany>
+                <AdministratingRecordCompany Role="RoyaltyAdministrator">
+                    <PartyName>
+                        <FullName>EMI UK</FullName>
+                    </PartyName>
+                </AdministratingRecordCompany>
+                <ParentalWarningType>NotExplicit</ParentalWarningType>
+                <ResourceGroup>
+                    <ResourceGroupContentItem>
+                        <ResourceType>SoundRecording</ResourceType>
+                        <ReleaseResourceReference ReleaseResourceType="PrimaryResource">A1</ReleaseResourceReference>
+                    </ResourceGroupContentItem>
+                </ResourceGroup>
+                <Genre>
+                    <GenreText>Pop</GenreText>
+                </Genre>
+            </ReleaseDetailsByTerritory>
+            <Duration>PT0H7M45S</Duration>
+            <PLine>
+                <Year>2005</Year>
+                <PLineText>(P) 2005 The copyright in this sound recording is owned by DFA LLC under exclusive licence to EMI Records Ltd</PLineText>
+            </PLine>
+        </Release>    
+    </ReleaseList>
+    <DealList>
+        <ReleaseDeal>
+            <DealReleaseReference>R0</DealReleaseReference>
+            <DealReleaseReference>R1</DealReleaseReference>
+            <Deal>
+                <DealTerms>
+                    <CommercialModelType>AdvertisementSupportedModel</CommercialModelType>
+                    <CommercialModelType>SubscriptionModel</CommercialModelType>
+                    <Usage>
+                        <UseType>ContentInfluencedStream</UseType>
+                        <UseType>NonInteractiveStream</UseType>
+                        <UseType>OnDemandStream</UseType>
+                        <UseType>Rent</UseType>
+                        <UseType>TimeInfluencedStream</UseType>
+                    </Usage>
+                    <TerritoryCode>CA</TerritoryCode>
+                    <TerritoryCode>PM</TerritoryCode>
+                    <ValidityPeriod>
+                        <StartDate>2005-06-07</StartDate>
+                    </ValidityPeriod>
+                </DealTerms>
+            </Deal>
+            <Deal>
+                <DealTerms>
+                    <CommercialModelType>AdvertisementSupportedModel</CommercialModelType>
+                    <CommercialModelType>SubscriptionModel</CommercialModelType>
+                    <Usage>
+                        <UseType>ContentInfluencedStream</UseType>
+                        <UseType>NonInteractiveStream</UseType>
+                        <UseType>OnDemandStream</UseType>
+                        <UseType>Rent</UseType>
+                        <UseType>TimeInfluencedStream</UseType>
+                    </Usage>
+                    <ExcludedTerritoryCode>AF</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>AX</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>BM</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>CA</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>GG</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>GL</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>IM</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>JE</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>KG</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>MK</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>MM</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>PM</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>PS</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>UM</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>US</ExcludedTerritoryCode>
+                    <ExcludedTerritoryCode>VA</ExcludedTerritoryCode>
+                    <ValidityPeriod>
+                        <StartDate>2005-06-06</StartDate>
+                    </ValidityPeriod>
+                </DealTerms>
+            </Deal>
+            <EffectiveDate>2005-06-06</EffectiveDate>
+        </ReleaseDeal>
+    </DealList>
+</ernm:NewReleaseMessage>
