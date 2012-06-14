@@ -172,7 +172,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	    
 	    if (config.peoplePrecedenceEnabled()) {
             Iterable<Film> all = Iterables.concat(ImmutableList.of(chosen), notChosen);
-            List<Film> topFilmMatches = toContentOrdering(config.imagePrecedenceOrdering()).leastOf(Iterables.filter(all, HAS_PEOPLE), 1);
+            List<Film> topFilmMatches = toContentOrdering(config.peoplePrecedenceOrdering()).leastOf(Iterables.filter(all, HAS_PEOPLE), 1);
             
             if (!topFilmMatches.isEmpty()) {
                 Film top = topFilmMatches.get(0);
@@ -213,8 +213,8 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	
     private static final Predicate<Film> HAS_PEOPLE = new Predicate<Film>() {
         @Override
-        public boolean apply(Film content) {
-            return content.getPeople() != null && !content.getPeople().isEmpty();
+        public boolean apply(Film film) {
+            return film.getPeople() != null && !film.getPeople().isEmpty();
         }
     };
 	
