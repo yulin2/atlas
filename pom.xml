@@ -239,23 +239,23 @@
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
-                                	<pluginExecutionFilter>
-                                		<groupId>
-                                			org.jvnet.jaxb2.maven2
-                                		</groupId>
-                                		<artifactId>
-                                			maven-jaxb2-plugin
-                                		</artifactId>
-                                		<versionRange>
-                                			[0.8.1,)
-                                		</versionRange>
-                                		<goals>
-                                			<goal>generate</goal>
-                                		</goals>
-                                	</pluginExecutionFilter>
-                                	<action>
-                                		<ignore></ignore>
-                                	</action>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.jvnet.jaxb2.maven2
+                                        </groupId>
+                                        <artifactId>
+                                            maven-jaxb2-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [0.8.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>generate</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
                                 </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
@@ -279,6 +279,11 @@
             <groupId>org.atlasapi</groupId>
             <artifactId>atlas-persistence</artifactId>
             <version>${atlas.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>6.4.4</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>

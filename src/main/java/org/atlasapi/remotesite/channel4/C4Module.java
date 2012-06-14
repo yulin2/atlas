@@ -67,7 +67,7 @@ public class C4Module {
     }
     
 	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter(), log);
+	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
         return new C4EpgUpdater(atomApi(), httpsClient(), lastUpdatedSettingContentWriter(),
                 contentResolver, c4BrandFetcher(Optional.<Platform>absent()), trimmer, log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }

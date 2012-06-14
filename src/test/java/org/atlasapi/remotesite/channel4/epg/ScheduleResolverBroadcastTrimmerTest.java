@@ -16,8 +16,6 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.atlasapi.persistence.testing.StubContentResolver;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -57,9 +55,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
-        AdapterLog log = new NullAdapterLog();
-        
-        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter);
         
         Interval scheduleInterval = new Interval(100, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableMap.of("c4:1234", item.getCanonicalUri()));
@@ -94,10 +90,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
-
-        AdapterLog log = new NullAdapterLog();
-        
-        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter, log);
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(Publisher.C4, scheduleResolver, resolver, contentWriter);
         
         Interval scheduleInterval = new Interval(50, 200);
         trimmer.trimBroadcasts(scheduleInterval, CHANNEL4, ImmutableMap.of("c4:1234", item2.getCanonicalUri()));

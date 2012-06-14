@@ -302,6 +302,7 @@ public class TheSpaceItemProcessor {
         encoding.setCanonicalUri(parent.getCanonicalUri());
         encoding.addAvailableAt(location);
         location.setCanonicalUri(parent.getCanonicalUri());
+        location.setUri(parent.getCanonicalUri());
         location.setAvailable(true);
         location.setTransportType(TransportType.LINK);
         location.setPolicy(policy);
