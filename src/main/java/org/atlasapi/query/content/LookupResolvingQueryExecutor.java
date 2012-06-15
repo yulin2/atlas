@@ -27,6 +27,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
@@ -132,6 +133,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     private Map<String, List<Identified>> resolveCassandraEntries(Iterable<String> uris, ContentQuery query) {
+        final Set<Publisher> enabledPublishers = query.getConfiguration().getEnabledSources();
         ResolvedContent result = cassandraContentResolver.findByLookupRefs(Iterables.transform(uris, new Function<String, LookupRef>() {
 
             @Override
@@ -139,7 +141,18 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 return new LookupRef(input, null, null);
             }
         }));
-        return Maps.transformValues(result.asResolvedMap(), new Function<Identified, List<Identified>>() {
+        return Maps.transformValues(result.filterContent(new Predicate<Maybe<Identified>>() {
+
+            @Override
+            public boolean apply(Maybe<Identified> input) {
+                if (input.hasValue() && input.requireValue() instanceof Described) {
+                    Described described = (Described) input.requireValue();
+                    return enabledPublishers.contains(described.getPublisher());
+                } else {
+                    return false;
+                }
+            }
+        }).asResolvedMap(), new Function<Identified, List<Identified>>() {
 
             @Override
             public List<Identified> apply(Identified input) {
