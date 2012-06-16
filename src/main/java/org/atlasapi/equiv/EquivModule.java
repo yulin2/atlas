@@ -25,6 +25,7 @@ import static org.atlasapi.media.entity.Publisher.ITV;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
+import static org.atlasapi.persistence.lookup.TransitiveLookupWriter.generatedTransitiveLookupWriter;
 
 import java.io.File;
 import java.util.Set;
@@ -79,8 +80,6 @@ import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.lookup.LookupWriter;
-import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.schedule.ManualScheduleUpdateController;
 import org.joda.time.Duration;
@@ -125,13 +124,9 @@ public class EquivModule {
     public @Bean LiveEquivalenceResultStore liveResultsStore() {
         return new InMemoryLiveEquivalenceResultStore();
     }
-    
-    public @Bean LookupWriter lookupWriter() {
-        return new TransitiveLookupWriter(new MongoLookupEntryStore(db));
-    }
 
     protected <T extends Content> LookupWritingEquivalenceHandler<T> lookupWritingEquivalenceHandler(Iterable<Publisher> publishers) {
-        return new LookupWritingEquivalenceHandler<T>(lookupWriter(), publishers);
+        return new LookupWritingEquivalenceHandler<T>(generatedTransitiveLookupWriter(new MongoLookupEntryStore(db)), publishers);
     }
 
     public @Bean MongoScheduleTaskProgressStore progressStore() {
