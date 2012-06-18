@@ -24,7 +24,6 @@ import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import java.util.regex.Matcher;
 
 @RunWith(JMock.class)
 public class LookupResolvingQueryExecutorTest extends TestCase {
@@ -58,9 +57,9 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         assertEquals(2, result.get(query).size());
         for (Identified resolved : result.get(query)) {
             if(resolved.getCanonicalUri().equals(query)) {
-                assertEquals(ImmutableSet.of(equivItem.getCanonicalUri()), resolved.getEquivalentTo());
+                assertEquals(ImmutableSet.of(LookupRef.from(equivItem)), resolved.getEquivalentTo());
             } else if(resolved.getCanonicalUri().equals("equiv")) {
-                assertEquals(ImmutableSet.of(query), resolved.getEquivalentTo());
+                assertEquals(ImmutableSet.of(LookupRef.from(queryItem)), resolved.getEquivalentTo());
             }
         }
         
