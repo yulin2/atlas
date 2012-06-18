@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 
+import org.atlasapi.messaging.MessagingModule;
 import org.atlasapi.persistence.CassandraPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
@@ -61,7 +62,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class, 
-            EquivModule.class
+            EquivModule.class,
+            MessagingModule.class
         );
         
         if(runProcessingOnly()) {
