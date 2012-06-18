@@ -62,8 +62,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class, 
-            EquivModule.class,
-            MessagingModule.class
+            EquivModule.class
         );
         
         if(runProcessingOnly()) {
