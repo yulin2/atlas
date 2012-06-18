@@ -1,5 +1,6 @@
 package org.atlasapi.messaging;
 
+import javax.annotation.PostConstruct;
 import javax.jms.ConnectionFactory;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.atlasapi.messaging.workers.CassandraReplicator;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
@@ -26,6 +28,8 @@ public class MessagingModule {
     private String replicatorDestination;
     @Value("${messaging.consumers.replicator}")
     private int replicatorConsumers;
+    @Value("${messaging.enabled}")
+    private boolean enabled;
     //
     @Autowired
     @Qualifier(value = "cassandra")
@@ -34,6 +38,7 @@ public class MessagingModule {
     private ContentResolver mongoContentResolver;
 
     @Bean
+    @Lazy(true)
     public ConnectionFactory activemqConnectionFactory() {
         ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory(brokerUrl);
         CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory(activeMQConnectionFactory);
@@ -41,6 +46,7 @@ public class MessagingModule {
     }
 
     @Bean
+    @Lazy(true)
     public DefaultMessageListenerContainer cassandraReplicator() {
         CassandraReplicator cassandraReplicator = new CassandraReplicator(mongoContentResolver, cassandraContentWriter);
         MessageListenerAdapter adapter = new MessageListenerAdapter(cassandraReplicator);
@@ -53,8 +59,13 @@ public class MessagingModule {
         container.setMaxConcurrentConsumers(replicatorConsumers);
         container.setMessageListener(adapter);
 
-        container.start();
-
         return container;
+    }
+    
+    @PostConstruct
+    public void start() {
+        if (enabled) {
+            cassandraReplicator().start();
+        }
     }
 }
