@@ -43,4 +43,5 @@ public abstract class AbstractWorker implements Worker {
     @Override
     public void process(ReplayMessage message) {
     }
+
 }

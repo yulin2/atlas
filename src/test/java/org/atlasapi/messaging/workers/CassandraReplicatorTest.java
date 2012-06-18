@@ -7,6 +7,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -30,42 +32,41 @@ public class CassandraReplicatorTest {
     
     @Test
     public void testProcessContainer() throws IOException {
-        final String uri = "http://metabroadcast.com/1";
+        final Id id = Id.valueOf(1);
         final Container container = mock(Container.class);
 
         ContentResolver resolver = mock(ContentResolver.class);
-        when(resolver.findByCanonicalUris(Arrays.asList(uri))).thenReturn(new ResolvedContent(new HashMap<String, Maybe<Identified>>() {
-
+        when(resolver.findByIds(Arrays.asList(id))).thenReturn(new ResolvedContent(new HashMap<Id, Maybe<Identified>>() {
             {
-                put(uri, Maybe.just((Identified) container));
+                put(id, Maybe.just((Identified) container));
             }
         }));
 
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now.getMillis(), uri, "", Publisher.BBC.key())));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now.getMillis(), id.toString(), "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(container));
     }
 
     @Test
     public void testProcessItem() throws IOException {
-        final String uri = "http://metabroadcast.com/1";
+        final Id id = Id.valueOf(1);
         final Item item = mock(Item.class);
 
         ContentResolver resolver = mock(ContentResolver.class);
-        when(resolver.findByCanonicalUris(Arrays.asList(uri))).thenReturn(new ResolvedContent(new HashMap<String, Maybe<Identified>>() {
+        when(resolver.findByIds(Arrays.asList(id))).thenReturn(new ResolvedContent(new HashMap<Id, Maybe<Identified>>() {
 
             {
-                put(uri, Maybe.just((Identified) item));
+                put(id, Maybe.just((Identified) item));
             }
         }));
 
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now.getMillis(), uri, "", Publisher.BBC.key())));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now.getMillis(), id.toString(), "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(item));
     }
