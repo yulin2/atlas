@@ -1,5 +1,6 @@
 package org.atlasapi.query;
 
+import com.google.common.collect.Iterators;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -77,6 +78,7 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 
 @Configuration
 public class QueryWebModule {
@@ -114,7 +116,8 @@ public class QueryWebModule {
     @Bean
     ChannelGroupController channelGroupController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier());
+        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier(), configFetcher, log,
+                standardWriter(new JsonTranslator<ChannelGroupQueryResult>(), new JaxbXmlTranslator<ChannelGroupQueryResult>()));
     }
 
     @Bean
