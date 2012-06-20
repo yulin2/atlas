@@ -33,21 +33,26 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 
 import com.metabroadcast.common.ids.IdGeneratorBuilder;
+import javax.annotation.Resource;
 
 @Configuration @Primary
 public class AtlasPersistenceModule implements ContentPersistenceModule {
 
-    @Autowired @Qualifier("base") private ContentPersistenceModule delegate;
-    @Autowired private JmsTemplate jmsTemplate;
-    @Autowired private IdGeneratorBuilder idGeneratorBuilder;
+    @Autowired @Qualifier("base") 
+    private ContentPersistenceModule delegate;
+    @Autowired 
+    private IdGeneratorBuilder idGeneratorBuilder;
+    @Resource(name="changesProducer") 
+    private JmsTemplate changesProducer;
     
-    @Value("${ids.generate}") private String generateIds;
+    @Value("${ids.generate}") 
+    private String generateIds;
 
     public AtlasPersistenceModule() {}
     
-    public AtlasPersistenceModule(ContentPersistenceModule delegate, JmsTemplate jmsTemplate, IdGeneratorBuilder idGeneratorBuilder) {
+    public AtlasPersistenceModule(ContentPersistenceModule delegate, JmsTemplate changesProducer, IdGeneratorBuilder idGeneratorBuilder) {
         this.delegate = delegate;
-        this.jmsTemplate = jmsTemplate;
+        this.changesProducer = changesProducer;
         this.idGeneratorBuilder = idGeneratorBuilder;
     }
     
@@ -68,7 +73,7 @@ public class AtlasPersistenceModule implements ContentPersistenceModule {
         if (Boolean.valueOf(generateIds)) {
             contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder.generator("content"), contentWriter);
         }
-        contentWriter = new EventQueueingContentWriter(jmsTemplate, contentWriter);
+        contentWriter = new EventQueueingContentWriter(changesProducer, contentWriter);
         return contentWriter;
     }
 
