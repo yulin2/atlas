@@ -9,8 +9,11 @@ import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
+import org.atlasapi.messaging.MessagingWorkersModule;
+import org.atlasapi.messaging.QueueModule;
+import org.atlasapi.persistence.AtlasPersistenceModule;
+import org.atlasapi.persistence.CassandraPersistenceModule;
 import org.atlasapi.persistence.ManualScheduleRebuildModule;
-import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.SearchModule;
@@ -23,7 +26,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
-import org.atlasapi.persistence.CassandraPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -57,14 +59,16 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class,
-            EquivModule.class
+            EquivModule.class,
         );
         
         if(runProcessingOnly()) {
             builder.add(
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
-                EquivTaskModule.class
+                EquivTaskModule.class,
+                MessagingWorkersModule.class,
+                QueueModule.class,
             );
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
