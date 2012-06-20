@@ -1,5 +1,6 @@
 package org.atlasapi.media.content.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -20,10 +21,13 @@ import org.springframework.jms.core.MessageCreator;
 
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+import javax.jms.TextMessage;
 
 public class EventQueueingContentWriter implements ContentWriter {
 
     private static final Logger log = LoggerFactory.getLogger(EventQueueingContentWriter.class);
+    
+    private final ObjectMapper mapper = JsonFactory.makeJsonMapper();
     
 	private final JmsTemplate template;
 	private final ContentWriter delegate;
@@ -32,11 +36,11 @@ public class EventQueueingContentWriter implements ContentWriter {
     private final ContainerTranslator containerTranslator;
 	
 	public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
+        NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
 		this.template = template;
 		this.delegate = delegate;
-		NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-		itemTranslator = new ItemTranslator(idCodec);
-		containerTranslator = new ContainerTranslator(idCodec);
+		this.itemTranslator = new ItemTranslator(idCodec);
+		this.containerTranslator = new ContainerTranslator(idCodec);
 	}
 	
 	@Override
@@ -59,13 +63,11 @@ public class EventQueueingContentWriter implements ContentWriter {
 	    enqueueMessageUpdatedEvent(container);
 	}
 
-    private void enqueueMessageUpdatedEvent(Content content) {
-        final byte[] bytes = serialize(createEvent(content));
+    private void enqueueMessageUpdatedEvent(final Content content) {
         template.send(new MessageCreator() {
             @Override
             public Message createMessage(Session session) throws JMSException {
-                BytesMessage message = session.createBytesMessage();
-                message.writeBytes(bytes);
+                TextMessage message = session.createTextMessage(serialize(createEvent(content)));
                 return message;
             }
         });
@@ -80,13 +82,13 @@ public class EventQueueingContentWriter implements ContentWriter {
         );
     }
 
-    private byte[] serialize(final EntityUpdatedEvent event) {
-        byte[] bytes = null;
+    private String serialize(final EntityUpdatedEvent event) {
+        String result = null;
         try {
-            bytes = JsonFactory.makeJsonMapper().writeValueAsBytes(event);
+             result = mapper.writeValueAsString(event);
         } catch (Exception e) {
             log.error(event.getEntityId(), e);
         }
-        return bytes;
+        return result;
     }
 }
