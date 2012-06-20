@@ -8,8 +8,8 @@ import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
-import org.atlasapi.messaging.MessagingWorkersModule;
-import org.atlasapi.messaging.QueueModule;
+import org.atlasapi.messaging.WorkersModule;
+import org.atlasapi.messaging.MessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.CassandraPersistenceModule;
 import org.atlasapi.persistence.ManualScheduleRebuildModule;
@@ -60,8 +60,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         
         if(runProcessingOnly()) {
             builder.add(
-                MessagingWorkersModule.class,
-                QueueModule.class,
+                MessagingModule.class,
+                WorkersModule.class,
                 EquivModule.class, 
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class
