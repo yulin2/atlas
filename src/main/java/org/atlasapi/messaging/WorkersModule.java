@@ -20,8 +20,8 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
  *
  */
 @Configuration
-@Import(QueueModule.class)
-public class MessagingWorkersModule {
+@Import(MessagingModule.class)
+public class WorkersModule {
 
     @Value("${messaging.destination.replicator}")
     private String replicatorDestination;
