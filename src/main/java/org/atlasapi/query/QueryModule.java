@@ -15,6 +15,7 @@ permissions and limitations under the License. */
 package org.atlasapi.query;
 
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.persistence.content.DummyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
