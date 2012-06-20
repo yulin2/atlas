@@ -11,8 +11,11 @@ import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
+import org.atlasapi.messaging.MessagingWorkersModule;
+import org.atlasapi.messaging.QueueModule;
+import org.atlasapi.persistence.AtlasPersistenceModule;
+import org.atlasapi.persistence.CassandraPersistenceModule;
 import org.atlasapi.persistence.ManualScheduleRebuildModule;
-import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.SearchModule;
@@ -28,7 +31,6 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 
 import org.atlasapi.messaging.MessagingModule;
-import org.atlasapi.persistence.CassandraPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -49,19 +51,18 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(
-            AtlasModule.class,
-            AtlasLoggingModule.class,
-            AtlasWebModule.class,
-            SearchModule.class,
+            AtlasModule.class, 
+            AtlasLoggingModule.class, 
+            AtlasWebModule.class, 
             QueryModule.class,
-            MongoContentPersistenceModule.class,
+            AtlasPersistenceModule.class, 
             CassandraPersistenceModule.class, 
-            AtlasFetchModule.class,
+            AtlasFetchModule.class, 
             RemoteSiteModule.class, 
-            HealthModule.class,
-            RadioPlayerModule.class,
+            HealthModule.class, 
+            RadioPlayerModule.class, 
             XmlTvModule.class, 
-            RemoteSiteHealthModule.class, 
+            RemoteSiteHealthModule.class,
             EquivModule.class
         );
         
@@ -70,7 +71,9 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
                 EquivTaskModule.class,
-                ChildRefUpdateModule.class
+                ChildRefUpdateModule.class,
+                MessagingWorkersModule.class,
+                QueueModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(YouViewUploadModule.class);

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -39,7 +40,7 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", uri, "")));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(container));
     }
@@ -60,7 +61,7 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", uri, "")));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(item));
     }

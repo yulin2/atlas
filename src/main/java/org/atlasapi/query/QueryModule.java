@@ -18,8 +18,12 @@ import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+<<<<<<< HEAD
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
+=======
+import org.atlasapi.persistence.content.DummyKnownTypeContentResolver;
+>>>>>>> queue update events on content write
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
