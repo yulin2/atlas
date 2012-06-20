@@ -16,8 +16,10 @@ public class QueueModule {
     @Value("${messaging.broker.url}")
     private String brokerUrl;
 
-    public @Bean JmsTemplate jmsTemplate() {
-        return new JmsTemplate(activemqConnectionFactory());
+    public @Bean JmsTemplate virutalTopicChangesTemplate() {
+        JmsTemplate jmsTemplate = new JmsTemplate(activemqConnectionFactory());
+        jmsTemplate.setDefaultDestinationName("VirtualTopic.Changes");
+        return jmsTemplate;
     }
     
     @Bean
