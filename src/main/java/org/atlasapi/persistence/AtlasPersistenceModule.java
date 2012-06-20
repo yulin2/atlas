@@ -142,7 +142,7 @@ public class AtlasPersistenceModule implements ContentPersistenceModule {
         return delegate.knownTypeContentResolver();
     }
 
-    @Override @Bean
+    @Override @Bean @Primary
     public LastUpdatedContentFinder lastUpdatedContentFinder() {
         return delegate.lastUpdatedContentFinder();
     }
