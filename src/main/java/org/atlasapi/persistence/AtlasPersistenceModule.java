@@ -1,317 +1,155 @@
 package org.atlasapi.persistence;
 
-import java.net.UnknownHostException;
-import java.util.List;
-
-import javax.annotation.Resource;
-
-import org.atlasapi.messaging.AtlasMessagingModule;
-import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.content.util.EventQueueingContentWriter;
+import org.atlasapi.media.product.IdSettingProductStore;
+import org.atlasapi.media.product.ProductResolver;
+import org.atlasapi.media.product.ProductStore;
+import org.atlasapi.media.segment.IdSettingSegmentWriter;
+import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.media.segment.SegmentWriter;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ContentGroupWriter;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
-import org.atlasapi.persistence.content.LookupResolvingContentResolver;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
-import org.atlasapi.persistence.content.elasticsearch.EsScheduleIndex;
-import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
-import org.atlasapi.persistence.content.mongo.MongoContentLister;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoPersonStore;
-import org.atlasapi.persistence.content.mongo.MongoProductStore;
-import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
-import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
-import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
-import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
-import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
-import org.atlasapi.persistence.media.channel.MongoChannelStore;
-import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
-import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
-import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
-import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.content.KnownTypeContentResolver;
+import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.persistence.content.mongo.LastUpdatedContentFinder;
+import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
+import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
+import org.atlasapi.persistence.shorturls.ShortUrlSaver;
+import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.atlasapi.persistence.topic.TopicStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicates;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.metabroadcast.common.ids.IdGenerator;
 import com.metabroadcast.common.ids.IdGeneratorBuilder;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.persistence.mongo.health.MongoIOProbe;
-import com.metabroadcast.common.properties.Configurer;
-import com.metabroadcast.common.properties.Parameter;
-import com.mongodb.Mongo;
-import com.mongodb.MongoReplicaSetProbe;
-import com.mongodb.ServerAddress;
-import com.mongodb.WriteConcern;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
-import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
-import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
-@Configuration
-public class AtlasPersistenceModule {
+@Configuration @Primary
+public class AtlasPersistenceModule implements ContentPersistenceModule {
 
-    private final String mongoHost = Configurer.get("mongo.host").get();
-    private final String mongoDbName = Configurer.get("mongo.dbName").get();
-    private final String cassandraSeeds = Configurer.get("cassandra.seeds").get();
-    private final String cassandraPort = Configurer.get("cassandra.port").get();
-    private final String cassandraConnectionTimeout = Configurer.get("cassandra.connectionTimeout").get();
-    private final String cassandraRequestTimeout = Configurer.get("cassandra.requestTimeout").get();
-    private final String esSeeds = Configurer.get("elasticsearch.seeds").get();
-    private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
-    private final Parameter processingConfig = Configurer.get("processing.config");
-    private final String generateIds = Configurer.get("ids.generate").get();
-    //
-    @Resource(name = "changesProducer")
-    private JmsTemplate changesProducer;
+    @Autowired @Qualifier("base") private ContentPersistenceModule delegate;
+    @Autowired private JmsTemplate jmsTemplate;
+    @Autowired private IdGeneratorBuilder idGeneratorBuilder;
     
-    @PostConstruct
-    public void destroy() {
-        cassandraContentPersistenceModule().init();
-        esContentIndexModule().init();
-    }
+    @Value("${ids.generate}") private String generateIds;
 
-    @Bean
-    public ElasticSearchContentIndexModule esContentIndexModule() {
-        return new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
-    }
-
-    @Bean
-    public MongoContentPersistenceModule mongoContentPersistenceModule() {
-        return new MongoContentPersistenceModule(databasedMongo());
-    }
-
-    @Bean
-    public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
-        return new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
+    public AtlasPersistenceModule() {}
+    
+    public AtlasPersistenceModule(ContentPersistenceModule delegate, JmsTemplate jmsTemplate, IdGeneratorBuilder idGeneratorBuilder) {
+        this.delegate = delegate;
+        this.jmsTemplate = jmsTemplate;
+        this.idGeneratorBuilder = idGeneratorBuilder;
     }
     
-    @Bean
-    public ContentBootstrapperModule contentBootstrapperModule() {
-        return new ContentBootstrapperModule(cassandraContentPersistenceModule().cassandraContentStore());
-    }
-    
-    @Bean
-    public ContentBootstrapperModule contentBootstrapperModule() {
-        return new ContentBootstrapperModule(contentLister(), cassandraContentPersistenceModule().cassandraContentStore());
+    @Override @Bean
+    public ContentGroupWriter contentGroupWriter() {
+        return delegate.contentGroupWriter();
     }
 
-    @Bean
-    public DatabasedMongo databasedMongo() {
-        return new DatabasedMongo(mongo(), mongoDbName);
+    @Override @Bean
+    public ContentGroupResolver contentGroupResolver() {
+        return delegate.contentGroupResolver();
     }
 
-    @Bean
-    public Mongo mongo() {
-        Mongo mongo = new Mongo(mongoHosts());
-        if (processingConfig == null || !processingConfig.toBoolean()) {
-            mongo.slaveOk();
-        }
-        return mongo;
-    }
-
-    @Bean
-    public IdGeneratorBuilder idGeneratorBuilder() {
-        return new IdGeneratorBuilder() {
-
-            @Override
-            public IdGenerator generator(String sequenceIdentifier) {
-                return new MongoSequentialIdGenerator(databasedMongo(), sequenceIdentifier);
-            }
-        };
-    }
-
-    @Bean
-    @Primary
-    public MongoContentLister contentLister() {
-        return mongoContentPersistenceModule().contentLister();
-    }
-
-    @Bean
-    @Primary
-    public MongoContentGroupWriter contentGroupWriter() {
-        return mongoContentPersistenceModule().contentGroupWriter();
-    }
-
-    @Bean
-    @Primary
-    public MongoContentGroupResolver contentGroupResolver() {
-        return mongoContentPersistenceModule().contentGroupResolver();
-    }
-
-    @Bean
-    @Primary
+    @Override @Bean
     public ContentWriter contentWriter() {
-        ContentWriter contentWriter = mongoContentPersistenceModule().contentWriter();
+        ContentWriter contentWriter = delegate.contentWriter();
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, lookupStore());
         if (Boolean.valueOf(generateIds)) {
-            contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
+            contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder.generator("content"), contentWriter);
         }
-        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter);
+        contentWriter = new EventQueueingContentWriter(jmsTemplate, contentWriter);
         return contentWriter;
     }
 
-    @Bean
-    @Primary
-    public LookupResolvingContentResolver contentResolver() {
-        return mongoContentPersistenceModule().contentResolver();
+    @Override @Bean
+    public ItemsPeopleWriter itemsPeopleWriter() {
+        return delegate.itemsPeopleWriter();
     }
 
-    @Bean
-    @Primary
-    public QueuingItemsPeopleWriter itemsPeopleWriter() {
-        return mongoContentPersistenceModule().itemsPeopleWriter();
+    @Override @Bean @Primary
+    public ContentResolver contentResolver() {
+        return delegate.contentResolver();
     }
 
-    @Bean
-    @Primary
-    public MongoContentResolver knownTypeContentResolver() {
-        return mongoContentPersistenceModule().knownTypeContentResolver();
+    @Override @Bean
+    public TopicStore topicStore() {
+        return delegate.topicStore();
     }
 
-    @Bean
-    @Primary
-    public TopicCreatingTopicResolver topicStore() {
-        return mongoContentPersistenceModule().topicStore();
-    }
-    
-    @Bean
+    @Override @Bean
     public TopicQueryResolver topicQueryResolver() {
-        return mongoContentPersistenceModule().topicQueryResolver();
+        return delegate.topicQueryResolver();
     }
 
-    @Bean
-    @Primary
-    public MongoShortUrlSaver shortUrlSaver() {
-        return mongoContentPersistenceModule().shortUrlSaver();
+    @Override @Bean
+    public ShortUrlSaver shortUrlSaver() {
+        return delegate.shortUrlSaver();
     }
 
-    @Bean
-    @Primary
-    public IdSettingSegmentWriter segmentWriter() {
-        return new IdSettingSegmentWriter(mongoContentPersistenceModule().segmentWriter(), segmentResolver(), idGeneratorBuilder().generator("segment"));
+    @Override @Bean
+    public SegmentWriter segmentWriter() {
+        return new IdSettingSegmentWriter(delegate.segmentWriter(), segmentResolver(), idGeneratorBuilder.generator("segment"));
     }
 
-    @Bean
-    @Primary
-    public MongoSegmentResolver segmentResolver() {
-        return mongoContentPersistenceModule().segmentResolver();
+    @Override @Bean
+    public SegmentResolver segmentResolver() {
+        return delegate.segmentResolver();
     }
 
-    @Bean
-    @Primary
-    public MongoProductStore productStore() {
-        return mongoContentPersistenceModule().productStore();
+    @Override @Bean
+    public ProductStore productStore() {
+        return new IdSettingProductStore(delegate.productStore(), idGeneratorBuilder.generator("product"));
     }
 
-    @Bean
-    @Primary
-    public MongoLookupEntryStore lookupStore() {
-        return mongoContentPersistenceModule().lookupStore();
+    @Override @Bean
+    public ProductResolver productResolver() {
+        return delegate.productResolver();
     }
 
-    @Bean
-    @Primary
-    public MongoChannelStore channelStore() {
-        return mongoContentPersistenceModule().channelStore();
+    @Override @Bean
+    public LookupEntryStore lookupStore() {
+        return delegate.lookupStore();
     }
 
-    @Bean
-    @Primary
-    public MongoChannelGroupStore channelGroupStore() {
-        return mongoContentPersistenceModule().channelGroupStore();
+    @Override @Bean
+    public ChannelResolver channelResolver() {
+        return delegate.channelResolver();
     }
 
-    @Bean
-    @Primary
-    public MongoPersonStore personStore() {
-        return mongoContentPersistenceModule().personStore();
+    @Override @Bean
+    public ScheduleResolver scheduleResolver() {
+        return delegate.scheduleResolver();
     }
 
-    @Bean
-    @Primary
-    public MongoScheduleStore scheduleStore() {
-        return mongoContentPersistenceModule().scheduleStore();
+    @Override @Bean
+    public ScheduleWriter scheduleWriter() {
+        return delegate.scheduleWriter();
     }
 
-    @Bean
-    @Primary
-    public MongoMessageStore messageStore() {
-        return mongoContentPersistenceModule().messageStore();
+    @Override @Bean
+    public KnownTypeContentResolver knownTypeContentResolver() {
+        return delegate.knownTypeContentResolver();
     }
 
-    @Bean
-    @Primary
-    public ESContentIndexer contentIndexer() {
-        return esContentIndexModule().contentIndexer();
+    @Override @Bean
+    public LastUpdatedContentFinder lastUpdatedContentFinder() {
+        return delegate.lastUpdatedContentFinder();
     }
 
-    @Bean
-    @Primary
-    public EsScheduleIndex scheduleIndex() {
-        return esContentIndexModule().scheduleIndex();
+    @Override @Bean
+    public TopicContentLister topicContentLister() {
+        return delegate.topicContentLister();
     }
 
-    @Bean
-    @Primary
-    public ESTopicSearcher topicSearcher() {
-        return esContentIndexModule().topicSearcher();
-    }
-    
-    @Bean
-    @Primary
-    public ESContentSearcher contentSearcher() {
-        return esContentIndexModule().contentSearcher();
-    }
-
-    @Bean
-    @Qualifier(value = "cassandra")
-    public CassandraContentStore cassandraContentStore() {
-        return cassandraContentPersistenceModule().cassandraContentStore();
-    }
-    
-    @Bean
-    public ContentBootstrapper contentBootstrapper() {
-        return contentBootstrapperModule().contentBootstrapper();
-    }
-
-    @Bean
-    MongoReplicaSetProbe mongoReplicaSetProbe() {
-        return new MongoReplicaSetProbe(mongo());
-    }
-
-    @Bean
-    MongoIOProbe mongoIoSetProbe() {
-        return new MongoIOProbe(mongo()).withWriteConcern(WriteConcern.REPLICAS_SAFE);
-    }
-
-    private List<ServerAddress> mongoHosts() {
-        Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
-        return ImmutableList.copyOf(Iterables.filter(Iterables.transform(splitter.split(mongoHost), new Function<String, ServerAddress>() {
-
-            @Override
-            public ServerAddress apply(String input) {
-                try {
-                    return new ServerAddress(input, 27017);
-                } catch (UnknownHostException e) {
-                    return null;
-                }
-            }
-        }), Predicates.notNull()));
-    }
 }

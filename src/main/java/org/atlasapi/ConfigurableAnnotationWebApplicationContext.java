@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import org.atlasapi.system.SystemModule;
-import org.atlasapi.messaging.MessagingModule;
 import org.atlasapi.persistence.CassandraPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
@@ -59,7 +58,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 RadioPlayerModule.class,
                 XmlTvModule.class,
                 RemoteSiteHealthModule.class,
-                MessagingModule.class,
                 EquivModule.class);
 
         if (runProcessingOnly()) {
@@ -69,7 +67,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 YouViewUploadModule.class,
                 EquivTaskModule.class,
                 AtlasMessagingModule.class,
-                WorkersModule.class
+                AtlasMessagingModule.class
             );
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
