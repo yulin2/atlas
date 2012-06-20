@@ -11,8 +11,8 @@ import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
-import org.atlasapi.messaging.MessagingWorkersModule;
-import org.atlasapi.messaging.QueueModule;
+import org.atlasapi.messaging.WorkersModule;
+import org.atlasapi.messaging.MessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.CassandraPersistenceModule;
 import org.atlasapi.persistence.ManualScheduleRebuildModule;
@@ -29,8 +29,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
-
-import org.atlasapi.messaging.MessagingModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -72,8 +70,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 InterlinkingDeltaModule.class,
                 EquivTaskModule.class,
                 ChildRefUpdateModule.class,
-                MessagingWorkersModule.class,
-                QueueModule.class
+                MessagingModule.class,
+                WorkersModule.class,
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(YouViewUploadModule.class);
