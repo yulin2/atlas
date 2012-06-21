@@ -1,11 +1,15 @@
 package org.atlasapi.remotesite.music.emimusic;
 
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import nu.xom.Builder;
 import nu.xom.Document;
@@ -55,15 +59,13 @@ public class EmiMusicProcessor {
                         song.setDuration(!duration.isEmpty() ? periodBuilder.toFormatter().parsePeriod(duration).toStandardDuration() : null);
                         song.setGenres(!genre.isEmpty() ? Arrays.asList(GENRES_URI_PREFIX + genre) : Collections.EMPTY_LIST);
                         //
-                        Set<String> allCrew = new HashSet<String>();
                         Nodes artists = node.query("SoundRecordingDetailsByTerritory/DisplayArtist");
                         for (int j = 0; j < artists.size(); j++) {
                             Element artist = (Element) artists.get(j);
                             if (artist.getAttribute("LanguageAndScriptCode") == null || artist.getAttribute("LanguageAndScriptCode").getValue().equals("en")) {
                                 String name = getSingleNodeValue(artist, "PartyName/FullName");
-                                String role = getSingleNodeValue(artist, "ArtistRole").equals("MainArtist") ? "artist" : "contributor";
+                                String role = getMultiNodeValues(artist, "ArtistRole").contains("MainArtist") ? "artist" : "contributor";
                                 song.addPerson(new CrewMember().withName(name).withRole(CrewMember.Role.fromKey(role)));
-                                allCrew.add(name);
                             }
                         }
                         Nodes contributors = node.query("SoundRecordingDetailsByTerritory/ResourceContributor");
@@ -71,10 +73,8 @@ public class EmiMusicProcessor {
                             Element contributor = (Element) contributors.get(j);
                             if (contributor.getAttribute("LanguageAndScriptCode") == null || contributor.getAttribute("LanguageAndScriptCode").getValue().equals("en")) {
                                 String name = getSingleNodeValue(contributor, "PartyName/FullName");
-                                if (!allCrew.contains(name)) {
-                                    String role = getSingleNodeValue(contributor, "ResourceContributorRole").equals("MainArtist") ? "artist" : "contributor";
-                                    song.addPerson(new CrewMember().withName(name).withRole(CrewMember.Role.fromKey(role)));
-                                }
+                                String role = getMultiNodeValues(contributor, "ResourceContributorRole").equals("MainArtist") ? "artist" : "contributor";
+                                song.addPerson(new CrewMember().withName(name).withRole(CrewMember.Role.fromKey(role)));
                             }
                         }
                         contentWriter.createOrUpdate(song);
@@ -101,5 +101,14 @@ public class EmiMusicProcessor {
         } else {
             return "";
         }
+    }
+
+    private Collection<String> getMultiNodeValues(Node source, String path) {
+        Nodes nodes = source.query(path);
+        List<String> result = new LinkedList<String>();
+        for (int i = 0; i < nodes.size(); i++) {
+            result.add(nodes.get(i).getValue());
+        }
+        return result;
     }
 }
