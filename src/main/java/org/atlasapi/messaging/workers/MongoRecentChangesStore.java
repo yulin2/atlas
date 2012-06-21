@@ -1,6 +1,7 @@
 package org.atlasapi.messaging.workers;
 
 import org.atlasapi.persistence.messaging.event.EntityUpdatedEvent;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -22,10 +23,11 @@ public class MongoRecentChangesStore implements RecentChangeStore {
             @Override
             public EntityUpdatedEvent apply(DBObject input) {
                 String changeId = TranslatorUtils.toString(input, "cid");
+                DateTime timestamp = TranslatorUtils.toDateTime(input, "ts");
                 String entityId = TranslatorUtils.toString(input, "eid");
                 String entityType = TranslatorUtils.toString(input, "etype");
                 String entitySource = TranslatorUtils.toString(input, "esource");
-                return new EntityUpdatedEvent(changeId, entityId, entityType, entitySource);
+                return new EntityUpdatedEvent(changeId, timestamp, entityId, entityType, entitySource);
             }
         };
 
@@ -45,10 +47,11 @@ public class MongoRecentChangesStore implements RecentChangeStore {
 
     private DBObject toDBObject(EntityUpdatedEvent event) {
         BasicDBObject dbo = new BasicDBObject();
-        dbo.put("cid", event.getChangeId());
-        dbo.put("eid", event.getEntityId());
-        dbo.put("etype", event.getEntityType());
-        dbo.put("esource", event.getEntitySource());
+        TranslatorUtils.from(dbo, "cid", event.getChangeId());
+        TranslatorUtils.fromDateTime(dbo, "ts", event.getDateTime());
+        TranslatorUtils.from(dbo, "eid", event.getEntityId());
+        TranslatorUtils.from(dbo, "etype", event.getEntityType());
+        TranslatorUtils.from(dbo, "esource", event.getEntitySource());
         return dbo;
     }
 
