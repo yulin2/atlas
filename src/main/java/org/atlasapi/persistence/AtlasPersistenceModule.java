@@ -33,11 +33,21 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 
 import com.metabroadcast.common.ids.IdGeneratorBuilder;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import javax.annotation.Resource;
+import org.atlasapi.messaging.workers.MongoRecentChangesStore;
+import org.atlasapi.messaging.workers.RecentChangeStore;
 
 @Configuration @Primary
-public class AtlasPersistenceModule implements ContentPersistenceModule {
+public class AtlasPersistenceModule {
 
+    // TODO: I don't really like this and the recentChangesStore() method below, 
+    // as this configuration should only wire other configurations to be used into Atlas,
+    // so let's move these outside later.
+    @Autowired
+    private DatabasedMongo mongo;
+    //
+    
     @Autowired @Qualifier("base") 
     private ContentPersistenceModule delegate;
     @Autowired 
@@ -56,17 +66,17 @@ public class AtlasPersistenceModule implements ContentPersistenceModule {
         this.idGeneratorBuilder = idGeneratorBuilder;
     }
     
-    @Override @Bean
+    @Bean
     public ContentGroupWriter contentGroupWriter() {
         return delegate.contentGroupWriter();
     }
 
-    @Override @Bean
+    @Bean
     public ContentGroupResolver contentGroupResolver() {
         return delegate.contentGroupResolver();
     }
 
-    @Override @Bean
+    @Bean
     public ContentWriter contentWriter() {
         ContentWriter contentWriter = delegate.contentWriter();
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, lookupStore());
@@ -77,84 +87,88 @@ public class AtlasPersistenceModule implements ContentPersistenceModule {
         return contentWriter;
     }
 
-    @Override @Bean
+    @Bean
     public ItemsPeopleWriter itemsPeopleWriter() {
         return delegate.itemsPeopleWriter();
     }
 
-    @Override @Bean @Primary
+    @Bean @Primary
     public ContentResolver contentResolver() {
         return delegate.contentResolver();
     }
 
-    @Override @Bean
+    @Bean
     public TopicStore topicStore() {
         return delegate.topicStore();
     }
 
-    @Override @Bean
+    @Bean
     public TopicQueryResolver topicQueryResolver() {
         return delegate.topicQueryResolver();
     }
 
-    @Override @Bean
+    @Bean
     public ShortUrlSaver shortUrlSaver() {
         return delegate.shortUrlSaver();
     }
 
-    @Override @Bean
+    @Bean
     public SegmentWriter segmentWriter() {
         return new IdSettingSegmentWriter(delegate.segmentWriter(), segmentResolver(), idGeneratorBuilder.generator("segment"));
     }
 
-    @Override @Bean
+    @Bean
     public SegmentResolver segmentResolver() {
         return delegate.segmentResolver();
     }
 
-    @Override @Bean
+    @Bean
     public ProductStore productStore() {
         return new IdSettingProductStore(delegate.productStore(), idGeneratorBuilder.generator("product"));
     }
 
-    @Override @Bean
+    @Bean
     public ProductResolver productResolver() {
         return delegate.productResolver();
     }
 
-    @Override @Bean
+    @Bean
     public LookupEntryStore lookupStore() {
         return delegate.lookupStore();
     }
 
-    @Override @Bean
+    @Bean
     public ChannelResolver channelResolver() {
         return delegate.channelResolver();
     }
 
-    @Override @Bean
+    @Bean
     public ScheduleResolver scheduleResolver() {
         return delegate.scheduleResolver();
     }
 
-    @Override @Bean
+    @Bean
     public ScheduleWriter scheduleWriter() {
         return delegate.scheduleWriter();
     }
 
-    @Override @Bean
+    @Bean
     public KnownTypeContentResolver knownTypeContentResolver() {
         return delegate.knownTypeContentResolver();
     }
 
-    @Override @Bean @Primary
+    @Bean @Primary
     public LastUpdatedContentFinder lastUpdatedContentFinder() {
         return delegate.lastUpdatedContentFinder();
     }
 
-    @Override @Bean
+    @Bean
     public TopicContentLister topicContentLister() {
         return delegate.topicContentLister();
     }
-
+    
+    @Bean
+    public RecentChangeStore recentChangesStore() {
+        return new MongoRecentChangesStore(mongo);
+    }
 }
