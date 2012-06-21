@@ -7,7 +7,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.event.EntityUpdatedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

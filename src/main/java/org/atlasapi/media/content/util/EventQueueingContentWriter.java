@@ -11,7 +11,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.atlasapi.persistence.media.entity.ItemTranslator;
-import org.atlasapi.persistence.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.event.EntityUpdatedEvent;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
