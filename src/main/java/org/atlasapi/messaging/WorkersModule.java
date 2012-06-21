@@ -2,11 +2,11 @@ package org.atlasapi.messaging;
 
 import javax.annotation.PostConstruct;
 import javax.jms.ConnectionFactory;
-
 import org.atlasapi.messaging.workers.CassandraReplicator;
 import org.atlasapi.messaging.workers.RecentChangesLogger;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.event.RecentChangeStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +16,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
-
-import org.atlasapi.messaging.workers.RecentChangeStore;
 
 /**
  *
