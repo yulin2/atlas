@@ -1,10 +1,9 @@
 package org.atlasapi.media.content.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -19,9 +18,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
-import javax.jms.TextMessage;
+import com.metabroadcast.common.time.Clock;
+import com.metabroadcast.common.time.SystemClock;
 
 public class EventQueueingContentWriter implements ContentWriter {
 
@@ -31,14 +32,20 @@ public class EventQueueingContentWriter implements ContentWriter {
     
 	private final JmsTemplate template;
 	private final ContentWriter delegate;
+	private final Clock clock;
 
     private final ItemTranslator itemTranslator;
     private final ContainerTranslator containerTranslator;
+
+    public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
+        this(template, delegate, new SystemClock());
+    }
 	
-	public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
+	public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate, Clock clock) {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
 		this.template = template;
 		this.delegate = delegate;
+		this.clock = clock;
 		this.itemTranslator = new ItemTranslator(idCodec);
 		this.containerTranslator = new ContainerTranslator(idCodec);
 	}
@@ -75,7 +82,8 @@ public class EventQueueingContentWriter implements ContentWriter {
 
     private EntityUpdatedEvent createEvent(Content content) {
         return new EntityUpdatedEvent(
-            null, 
+            null,
+            clock.now(),
             content.getCanonicalUri(), 
             content.getClass().getSimpleName().toLowerCase(),
             content.getPublisher().key()
