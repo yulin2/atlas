@@ -40,12 +40,16 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import org.atlasapi.persistence.ContentIndexModule;
+import org.atlasapi.persistence.ElasticSearchContentIndexModule;
 
 @Configuration
 public class AtlasModule {
 	
 	private final String mongoHost = Configurer.get("mongo.host").get();
 	private final String dbName = Configurer.get("mongo.dbName").get();
+    private final String esSeeds = Configurer.get("elasticsearch.seeds").get();
+    private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
 	private final Parameter processingConfig = Configurer.get("processing.config");
 	   
     @Bean
@@ -56,6 +60,12 @@ public class AtlasModule {
     @Bean
     MongoIOProbe mongoIoSetProbe() {
         return new MongoIOProbe(mongo()).withWriteConcern(WriteConcern.REPLICAS_SAFE);
+    }
+    
+    // TODO_SB: is this "base" qualifier really needed?
+    
+    public @Bean @Qualifier("base") ContentIndexModule baseContentIndexModule() {
+        return new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
     }
     
     public @Bean @Qualifier("base") ContentPersistenceModule baseContentPersistenceModule() {
