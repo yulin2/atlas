@@ -1,8 +1,9 @@
 package org.atlasapi.messaging.workers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.time.DateTimeZones;
+import static org.mockito.Matchers.same;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,15 +14,18 @@ import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.messaging.EntityUpdatedMessage;
+import org.atlasapi.messaging.Message;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.messaging.EntityUpdatedMessage;
-import org.atlasapi.messaging.Message;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.joda.time.DateTime;
 import org.junit.Test;
-import static org.mockito.Mockito.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.DateTimeZones;
 
 /**
  */
