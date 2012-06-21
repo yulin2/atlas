@@ -4,8 +4,7 @@ import javax.annotation.PostConstruct;
 import javax.jms.ConnectionFactory;
 
 import org.atlasapi.messaging.workers.CassandraReplicator;
-import org.atlasapi.messaging.workers.MongoRecentChangesStore;
-import org.atlasapi.messaging.workers.RecentChangesLog;
+import org.atlasapi.messaging.workers.RecentChangesLogger;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import org.atlasapi.messaging.workers.RecentChangeStore;
 
 /**
  *
@@ -32,10 +31,10 @@ public class WorkersModule {
     @Value("${messaging.consumers.replicator}")
     private int replicatorConsumers;
     
-    @Value("${messaging.destination.recent}")
-    private String recentDestination;
-    @Value("${messaging.consumers.recent}")
-    private int recentConsumers;
+    @Value("${messaging.destination.logger}")
+    private String loggerDestination;
+    @Value("${messaging.consumers.logger}")
+    private int loggerConsumers;
     
     @Value("${messaging.enabled}")
     private boolean enabled;
@@ -48,9 +47,8 @@ public class WorkersModule {
     private ContentWriter cassandraContentWriter;
     @Autowired
     private ContentResolver mongoContentResolver;
-    
     @Autowired
-    private DatabasedMongo mongo;
+    private RecentChangeStore recentChangesStore;
 
     @Bean
     @Lazy(true)
@@ -70,21 +68,17 @@ public class WorkersModule {
     }
     
     @Bean
-    public RecentChangesLog recentChangesLog() {
-        return new RecentChangesLog(new MongoRecentChangesStore(mongo));
-    }
-    
-    @Bean
     @Lazy(true)
-    public DefaultMessageListenerContainer recentChangesLogListener() {
-        MessageListenerAdapter adapter = new MessageListenerAdapter(recentChangesLog());
+    public DefaultMessageListenerContainer recentChangesLogger() {
+        RecentChangesLogger recentChangesLogger = new RecentChangesLogger(recentChangesStore);
+        MessageListenerAdapter adapter = new MessageListenerAdapter(recentChangesLogger);
         DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 
         adapter.setDefaultListenerMethod("onMessage");
         container.setConnectionFactory(connectionFactory);
-        container.setDestinationName(recentDestination);
-        container.setConcurrentConsumers(recentConsumers);
-        container.setMaxConcurrentConsumers(recentConsumers);
+        container.setDestinationName(loggerDestination);
+        container.setConcurrentConsumers(loggerConsumers);
+        container.setMaxConcurrentConsumers(loggerConsumers);
         container.setMessageListener(adapter);
 
         return container;
@@ -94,7 +88,7 @@ public class WorkersModule {
     public void start() {
         if (enabled) {
             cassandraReplicator().start();
-            recentChangesLogListener().start();
+            recentChangesLogger().start();
         }
     }
 }
