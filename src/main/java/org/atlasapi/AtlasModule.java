@@ -40,6 +40,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import javax.annotation.PostConstruct;
 import org.atlasapi.persistence.ContentIndexModule;
 import org.atlasapi.persistence.ElasticSearchContentIndexModule;
 
@@ -65,7 +66,9 @@ public class AtlasModule {
     // TODO_SB: is this "base" qualifier really needed?
     
     public @Bean @Qualifier("base") ContentIndexModule baseContentIndexModule() {
-        return new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
+        ElasticSearchContentIndexModule elasticSearchContentIndexModule = new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
+        elasticSearchContentIndexModule.init();
+        return elasticSearchContentIndexModule;
     }
     
     public @Bean @Qualifier("base") ContentPersistenceModule baseContentPersistenceModule() {
