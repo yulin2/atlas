@@ -5,10 +5,14 @@ import javax.annotation.PreDestroy;
 import javax.jms.ConnectionFactory;
 import org.atlasapi.messaging.worker.Worker;
 import org.atlasapi.messaging.workers.CassandraReplicator;
+<<<<<<< HEAD
 import org.atlasapi.messaging.workers.ESIndexer;
 import org.atlasapi.messaging.workers.MessageLogger;
 import org.atlasapi.messaging.workers.ReplayingWorker;
 import org.atlasapi.media.content.ContentIndexer;
+=======
+import org.atlasapi.messaging.workers.RecentChangesLogger;
+>>>>>>> Refactored recent changes logger implementation.
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.messaging.MessageStore;
@@ -21,6 +25,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 
+<<<<<<< HEAD
+=======
+import org.atlasapi.messaging.workers.RecentChangeStore;
+
+>>>>>>> Refactored recent changes logger implementation.
 /**
  *
  */
@@ -58,6 +67,7 @@ public class WorkersModule {
     private MessageStore mongoMessageStore;
     @Autowired
     private ContentIndexer contentIndexer;
+    private RecentChangeStore recentChangesStore;
 
     @Bean
     @Lazy(true)

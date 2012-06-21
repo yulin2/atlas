@@ -43,7 +43,7 @@ public class AtlasContentPersistenceIntegrationTest {
     public void test() {
         
         MongoContentPersistenceModule delegate = new MongoContentPersistenceModule(db);
-        ContentPersistenceModule module = new AtlasPersistenceModule(delegate, jmsTemplate, idGeneratorBuilder);
+        AtlasPersistenceModule module = new AtlasPersistenceModule(delegate, jmsTemplate, idGeneratorBuilder);
         
         ContentWriter contentWriter = module.contentWriter();
         ContentResolver contentResolver = module.contentResolver();

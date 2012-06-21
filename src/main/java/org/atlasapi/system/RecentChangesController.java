@@ -1,4 +1,4 @@
-package org.atlasapi.messaging.workers;
+package org.atlasapi.system;
 
 import java.io.IOException;
 
@@ -15,36 +15,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
+import org.atlasapi.messaging.workers.RecentChangeStore;
 
 @Controller
-public class RecentChangesLog extends AbstractWorker {
+public class RecentChangesController {
 
-    
     private final RecentChangeStore store;
     private final JsonTranslator<Iterable<EntityUpdatedEvent>> translator;
     private final ApplicationConfiguration configuration;
     private final SelectionBuilder selectionBuilder;
 
-    public RecentChangesLog(RecentChangeStore store) {
+    public RecentChangesController(RecentChangeStore store) {
         this.store = store;
         this.translator = new JsonTranslator<Iterable<EntityUpdatedEvent>>();
         this.configuration = ApplicationConfiguration.DEFAULT_CONFIGURATION;
-        this.selectionBuilder =  Selection.builder().withDefaultLimit(30)
-                .withMaxLimit(100);
-    }
-
-    @Override
-    public void process(EntityUpdatedEvent command) {
-        store.logChange(command);
+        this.selectionBuilder = Selection.builder().withDefaultLimit(30).withMaxLimit(100);
     }
 
     @RequestMapping("system/update/changes")
     public void listChanges(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        
         Iterable<EntityUpdatedEvent> model = store.changes();
         model = selectionBuilder.build(req).apply(model);
         translator.writeTo(req, resp, model, ImmutableSet.<Annotation>of(), configuration);
-        
     }
-    
 }
