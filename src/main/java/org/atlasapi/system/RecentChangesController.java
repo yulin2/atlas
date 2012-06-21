@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.JsonTranslator;
-import org.atlasapi.persistence.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.event.EntityUpdatedEvent;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
