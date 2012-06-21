@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
-import org.atlasapi.messaging.workers.RecentChangeStore;
+import org.atlasapi.persistence.event.RecentChangeStore;
 
 @Controller
 public class RecentChangesController {

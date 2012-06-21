@@ -1,5 +1,7 @@
 package org.atlasapi.persistence;
 
+import com.metabroadcast.common.ids.IdGeneratorBuilder;
+import javax.annotation.Resource;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.util.EventQueueingContentWriter;
 import org.atlasapi.media.product.IdSettingProductStore;
@@ -31,41 +33,31 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
+import org.atlasapi.persistence.event.RecentChangeStore;
 
-import com.metabroadcast.common.ids.IdGeneratorBuilder;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import javax.annotation.Resource;
-import org.atlasapi.messaging.workers.MongoRecentChangesStore;
-import org.atlasapi.messaging.workers.RecentChangeStore;
-
-@Configuration @Primary
+@Configuration
+@Primary
 public class AtlasPersistenceModule {
 
-    // TODO: I don't really like this and the recentChangesStore() method below, 
-    // as this configuration should only wire other configurations to be used into Atlas,
-    // so let's move these outside later.
     @Autowired
-    private DatabasedMongo mongo;
-    //
-    
-    @Autowired @Qualifier("base") 
+    @Qualifier("base")
     private ContentPersistenceModule delegate;
-    @Autowired 
+    @Autowired
     private IdGeneratorBuilder idGeneratorBuilder;
-    @Resource(name="changesProducer") 
+    @Resource(name = "changesProducer")
     private JmsTemplate changesProducer;
-    
-    @Value("${ids.generate}") 
+    @Value("${ids.generate}")
     private String generateIds;
 
-    public AtlasPersistenceModule() {}
-    
+    public AtlasPersistenceModule() {
+    }
+
     public AtlasPersistenceModule(ContentPersistenceModule delegate, JmsTemplate changesProducer, IdGeneratorBuilder idGeneratorBuilder) {
         this.delegate = delegate;
         this.changesProducer = changesProducer;
         this.idGeneratorBuilder = idGeneratorBuilder;
     }
-    
+
     @Bean
     public ContentGroupWriter contentGroupWriter() {
         return delegate.contentGroupWriter();
@@ -92,7 +84,8 @@ public class AtlasPersistenceModule {
         return delegate.itemsPeopleWriter();
     }
 
-    @Bean @Primary
+    @Bean
+    @Primary
     public ContentResolver contentResolver() {
         return delegate.contentResolver();
     }
@@ -157,7 +150,8 @@ public class AtlasPersistenceModule {
         return delegate.knownTypeContentResolver();
     }
 
-    @Bean @Primary
+    @Bean
+    @Primary
     public LastUpdatedContentFinder lastUpdatedContentFinder() {
         return delegate.lastUpdatedContentFinder();
     }
@@ -166,9 +160,9 @@ public class AtlasPersistenceModule {
     public TopicContentLister topicContentLister() {
         return delegate.topicContentLister();
     }
-    
+
     @Bean
     public RecentChangeStore recentChangesStore() {
-        return new MongoRecentChangesStore(mongo);
+        return delegate.recentChangesStore();
     }
 }
