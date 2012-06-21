@@ -27,6 +27,7 @@ import javax.xml.bind.Unmarshaller.Listener;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
@@ -61,6 +62,8 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     
     private static final DateTimeFormatter FILEDATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
     private static final DateTimeFormatter CHANNELINTERVAL_FORMAT = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZones.LONDON);
+    protected static final String SERVICE = "PA";
+    
     
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
@@ -132,6 +135,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         		}
         	}
             
+        	reportStatus(String.format("%s files processed.", filesProcessed));
         } catch (Exception e) {
             log.error("Exception running PA updater", e);
         }
@@ -171,10 +175,13 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		        }
 		        else {
 		            log.info("Not processing file " + file.toString() + " as filename format is not recognised");
+		            storeResult(FileUploadResult.failedUpload(SERVICE, file.getName()).withMessage("Format not recognised"));
 		        }
 		    } catch (Exception e) {
+		        storeResult(FileUploadResult.failedUpload(SERVICE, file.getName()).withCause(e));
 		        log.error("Error processing file " + file.toString(), e);
 		    }
+		    storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
 		}
 		
 		if (!shouldContinue()) {
@@ -338,6 +345,10 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             return lastUpdated;
         }
         
+    }
+    
+    protected void storeResult(FileUploadResult result) {
+        // do nothing. subclasses may choose to implement
     }
 
     /**
