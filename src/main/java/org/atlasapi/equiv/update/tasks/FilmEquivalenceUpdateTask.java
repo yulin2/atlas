@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.update.tasks;
 
-import static org.atlasapi.media.entity.Publisher.PA;
+import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
 import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 
@@ -32,7 +32,7 @@ public class FilmEquivalenceUpdateTask extends AbstractContentEquivalenceUpdateT
 
     @Override
     protected Iterator<Film> getContentIterator(ContentListingProgress progress) {
-        Iterator<Content> lister = contentLister.listContent(defaultCriteria().forContent(TOP_LEVEL_ITEM).forPublisher(PA).startingAt(progress).build());
+        Iterator<Content> lister = contentLister.listContent(defaultCriteria().forContent(TOP_LEVEL_ITEM).forPublisher(RADIO_TIMES).startingAt(progress).build());
         return Iterators.filter(lister, Film.class);
     }
 
