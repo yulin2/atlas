@@ -15,13 +15,13 @@ import com.google.common.collect.ImmutableBiMap;
 
 public class C4BroadcastBuilder {
 
-    private final static BiMap<String, String> CHANNEL_MAP = ImmutableBiMap.of(
-    		"http://www.channel4.com", "C4",
-    		"http://www.channel4.com/more4", "M4",
-    		"http://film4.com", "F4",
-    		"http://www.e4.com", "E4",
-    		"http://www.4music.com", "4M"
-    );
+    private final static BiMap<String, String> CHANNEL_MAP = ImmutableBiMap.<String,String>builder()
+        .put("http://www.channel4.com", "C4")
+        .put("http://www.channel4.com/more4", "M4")
+        .put("http://film4.com", "F4")
+        .put("http://www.e4.com", "E4")
+        .put("http://www.4music.com", "4M")
+        .put("www.channel4.com/4seven", "4S").build();
     
     private static final Pattern ID_PATTERN = Pattern.compile("tag:([^,]+),(\\d{4}):slot/(\\d+)");
     private static final String tagPrefix = "tag:www.channel4.com,2009:slot/";
