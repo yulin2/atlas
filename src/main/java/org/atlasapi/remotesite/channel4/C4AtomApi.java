@@ -81,6 +81,7 @@ public class C4AtomApi {
 	            .put("F4", channelResolver.fromUri("http://film4.com").requireValue())
 	            .put("E4", channelResolver.fromUri("http://www.e4.com").requireValue())
 	            .put("4M", channelResolver.fromUri("http://www.4music.com").requireValue())
+	            .put("4S", channelResolver.fromUri("www.channel4.com/4seven").requireValue())
 	            .build();
 	}
 	
