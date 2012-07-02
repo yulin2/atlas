@@ -47,6 +47,8 @@ public class C4BrandBasicDetailsExtractorTest extends TestCase {
 				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com"))));
 				one(channelResolver).fromUri("http://www.4music.com");
 				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com"))));
+				allowing(channelResolver).fromUri("http://www.channel4.com/4seven");
+                will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4seven", "4seven", MediaType.VIDEO, "http://www.channel4.com/4seven"))));
 			}
 		});
 		extractor = new C4BrandBasicDetailsExtractor(channelResolver);
