@@ -124,6 +124,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 if (series != null) {
                     simpleItem.setSeriesSummary(seriesSummaryFromResolved(series, annotations));
                 }
+            }
+            
+            if (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
                 simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
             }
 
