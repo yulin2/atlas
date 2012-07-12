@@ -48,7 +48,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 
 	public abstract UpdateProgress updateTopics(List<String> contentIds);
 
-	protected AbstractMetaBroadcastContentUpdater(TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log, String namespace){
+	protected AbstractMetaBroadcastContentUpdater(TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log, String namespace) {
 		this.topicStore = topicStore;
 		this.topicResolver = topicResolver;
 		this.contentWriter = contentWriter;

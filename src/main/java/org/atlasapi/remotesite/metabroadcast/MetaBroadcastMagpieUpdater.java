@@ -20,6 +20,7 @@ import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.model.S3Object;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -34,8 +35,8 @@ import com.google.gson.stream.JsonReader;
 
 public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpdater {
 
-	private static final String MAGPIE_S3_FOLDER = "magpie/";
-	private static final String MAGPIE_NS = "magpie";
+	private final String magpieS3Folder ;
+	private final String magpieNamespace;
 	private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
 	private ContentResolver contentResolver;
 	private final S3Service s3Service;
@@ -43,11 +44,13 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 
 	public MetaBroadcastMagpieUpdater(ContentResolver contentResolver, 
 			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, 
-			S3Service s3Service, String s3Bucket, AdapterLog log) {
-		super(topicStore, topicResolver, contentWriter, log, MAGPIE_NS);
+			S3Service s3Service, String s3Bucket, String magpieS3Folder, String magpieNamespace, AdapterLog log) {
+		super(topicStore, topicResolver, contentWriter, log, magpieNamespace);
 		this.contentResolver = contentResolver;
 		this.s3Service = s3Service;
 		this.s3Bucket = s3Bucket;
+		this.magpieS3Folder = magpieS3Folder;
+		this.magpieNamespace = magpieNamespace;
 	}
 
 	@Override
@@ -87,7 +90,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 	}
 
 	private List<InputStream> getS3Stream() throws S3ServiceException{
-		S3Object[] listOfObjects = s3Service.listObjects(s3Bucket, MAGPIE_S3_FOLDER, "");
+		S3Object[] listOfObjects = s3Service.listObjects(s3Bucket, magpieS3Folder, "");
 		List<S3Object> mostRecentObjectsMetadata = getMostRecentObject(listOfObjects);
 		List<InputStream> mostRecentObjectStreams = Lists.transform(mostRecentObjectsMetadata, new Function<S3Object, InputStream>() {
 			@Override
@@ -109,7 +112,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 		Ordering<S3Object> byNewest = new Ordering<S3Object>() {
 			@Override
 			public int compare(S3Object left, S3Object right) {
-				return (left.getLastModifiedDate().before(right.getLastModifiedDate())) ? -1 : 1;
+				return left.getName().compareTo(right.getName());
 			}
 		};
 		return byNewest.greatestOf(Arrays.asList(listOfObjects), 7);
