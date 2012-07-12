@@ -20,7 +20,6 @@ import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.model.S3Object;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -101,6 +100,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
 					stream =  object.getDataInputStream();
 				} catch (Exception e) {
 					log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to get s3 Stream"));
+					e.printStackTrace();
 				}
 				return stream;
 			}
