@@ -148,6 +148,10 @@ public class PaGenreMap extends GenreMap {
 		genres.put("http://pressassociation.com/genres/4F48", AtlasGenre.SPORT);
 		genres.put("http://pressassociation.com/genres/4F49", AtlasGenre.SPORT);
 		genres.put("http://pressassociation.com/genres/4F4A", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F4B", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F4C", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F4D", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F4E", AtlasGenre.SPORT);
 
 		// children's/youth
 		genres.put("http://pressassociation.com/genres/5000", AtlasGenre.CHILDRENS);
@@ -226,6 +230,7 @@ public class PaGenreMap extends GenreMap {
 
 		// special
 		//genres.put("http://pressassociation.com/genres/B300", AtlasGenre.);
+		//genres.put("http://pressassociation.com/genres/BE00", AtlasGenre.);
 		//genres.put("http://pressassociation.com/genres/BF00", AtlasGenre.);
 		genres.put("http://pressassociation.com/genres/BF01", AtlasGenre.FILM);
     }
