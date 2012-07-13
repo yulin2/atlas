@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
+import org.atlasapi.media.entity.Publisher;
 
 @RunWith(JMock.class)
 public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
@@ -39,16 +40,16 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
     BbcSlashProgrammesJsonTopicsAdapter adapter = new BbcSlashProgrammesJsonTopicsAdapter(containerFetcher, topicStore, new NullAdapterLog());
     
     @Test
-    public void testCreatesRefAndStoresValidTopic() throws Exception {
+    public void testWithValidTopic() throws Exception {
         
         final String value = "http://dbpedia.org/resource/Brighton";
-        final String namespace = "dbpedia";
+        final String namespace = Publisher.DBPEDIA.title();
         final String title = "Brighton";
         final long id = 1234l;
         
         context.checking(new Expectations() {{
-                one(containerFetcher).get(URI);will(returnValue(containerWithTopic("place", title, value)));
-                one(topicStore).topicFor(namespace, value); will(returnValue(Maybe.just(topicWithId(id))));
+                one(containerFetcher).get(URI); will(returnValue(containerWithTopic("place", title, value)));
+                one(topicStore).topicFor(namespace, value); will(returnValue(Maybe.just(topicWith(id, namespace, value))));
                 one(topicStore).write(with(topicMatching(id, Topic.Type.PLACE, title, namespace, value)));
         }});
         
@@ -57,7 +58,7 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         assertThat(refs.get(0).getTopic(),is(id));
         assertThat(refs.get(0).getWeighting(), is(1.0f));
         assertThat(refs.get(0).isSupervised(), is(true));
-        
+        assertThat(refs.get(0).getRelationship(), is(TopicRef.Relationship.ABOUT));
     }
     
     @Test
@@ -110,8 +111,8 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         };
     }
     
-    private Topic topicWithId(long id) {
-        return new Topic(id);
+    private Topic topicWith(long id, String namespace, String value) {
+        return new Topic(id, namespace, value);
     }
     
     private SlashProgrammesContainer containerWithTopic(String type, String title, String value) {

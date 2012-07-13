@@ -42,6 +42,7 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         assertThat(extractedTopicRef.requireValue().getTopic(), is(equalTo(storedTopic.getId())));
         assertThat(extractedTopicRef.requireValue().getWeighting(), is(equalTo(1f)));
         assertThat(extractedTopicRef.requireValue().isSupervised(), is(true));
+        assertThat(extractedTopicRef.requireValue().getRelationship(), is(TopicRef.Relationship.ABOUT));
         
         assertThat(storedTopic.getValue(), is(equalTo(topicUri)));
         assertThat(storedTopic.getType(), is(equalTo(Type.PERSON)));
