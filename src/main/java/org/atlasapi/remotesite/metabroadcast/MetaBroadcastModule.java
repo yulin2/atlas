@@ -37,8 +37,7 @@ public class MetaBroadcastModule {
 	private @Value("${s3.access}") String s3access;
 	private @Value("${s3.secret}") String s3secret;
 	private @Value("${magpie.s3.bucket}") String s3Bucket;
-	private @Value("${magpie.s3.folder}") String magpieS3Folder;
-	private @Value("${magpie.namespace}") String magpieFolder;
+	private @Value("${magpie.s3.folder}") String s3folder;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
     private @Autowired @Qualifier("topicStore") TopicStore topicStore;
@@ -46,15 +45,24 @@ public class MetaBroadcastModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired AdapterLog log;
     
+    private static final String TWITTER_NS_FOR_PROGRAMMES = "twitter";
+    private static final String TWITTER_NS_FOR_AUDIENCE = "twitter:audience-related";
+    private static final String CONTENT_WORDS_FOR_PROGRAMMES = "contentWords";
+    private static final String CONTENT_WORDS_LIST_FOR_PROGRAMMES = "contentWordsList";
+    private static final String CONTENT_WORDS_FOR_AUDIENCE = "contentWordsForPeopleTalk";
+    private static final String CONTENT_WORDS_LIST_FOR_AUDIENCE = "contentWordsListForPeopleTalk";
+    
     @PostConstruct
     public void scheduleTasks() {
-        scheduler.schedule(twitterUpdaterTask(), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
-        scheduler.schedule(magpieUpdaterTask(), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
+        scheduler.schedule(twitterUpdaterTask().withName("Voila Twitter topics ingest"), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
+        scheduler.schedule(twitterPeopleTalkUpdaterTask().withName("Voila Twitter audience topics ingest"), RepetitionRules.every(Duration.standardHours(3)));
+        scheduler.schedule(magpieUpdaterTask().withName("Magpie ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
     }
 
     @Bean
     CannonTwitterTopicsUpdater twitterUpdaterTask() {
-		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), twitterUpdater());
+		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
+		        new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_PROGRAMMES, log));
 	}
     
     @Bean
@@ -63,21 +71,30 @@ public class MetaBroadcastModule {
 	}
 
 	@Bean
-	MetaBroadcastTwitterTopicsUpdater twitterUpdater() {
-		return new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver,
-				topicStore, topicResolver, contentWriter, log);
+	CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
+		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
+		        new MetaBroadcastTwitterTopicsUpdater(cannonPeopleTalkClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_AUDIENCE, log));
 	}
 	
     @Bean
     MetaBroadcastMagpieUpdater magpieUpdater() {
 		return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
-				topicResolver, contentWriter, awsService(), s3Bucket, magpieS3Folder, magpieFolder, log);
+				topicResolver, contentWriter, awsService(), s3Bucket, s3folder, log);
 	}
 
 	@Bean 
     CannonTwitterTopicsClient cannonTopicsClient() {
         try {
-            return new CannonTwitterTopicsClient(webserviceClient(), HostSpecifier.from(cannonHostName), Optional.fromNullable(cannonHostPort), log);
+            return new CannonTwitterTopicsClient(webserviceClient(), HostSpecifier.from(cannonHostName), Optional.fromNullable(cannonHostPort), log, CONTENT_WORDS_LIST_FOR_PROGRAMMES, CONTENT_WORDS_FOR_PROGRAMMES);
+        } catch (ParseException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+    
+    @Bean 
+    CannonTwitterTopicsClient cannonPeopleTalkClient() {
+        try {
+            return new CannonTwitterTopicsClient(webserviceClient(), HostSpecifier.from(cannonHostName), Optional.fromNullable(cannonHostPort), log, CONTENT_WORDS_LIST_FOR_AUDIENCE, CONTENT_WORDS_FOR_AUDIENCE);
         } catch (ParseException e) {
             throw Throwables.propagate(e);
         }
