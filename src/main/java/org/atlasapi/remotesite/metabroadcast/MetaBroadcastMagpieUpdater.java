@@ -196,4 +196,9 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
     protected String topicValueFromWordWeighting(WordWeighting weighting) {
         return weighting.getValue();
     }
+    
+    @Override
+    protected org.atlasapi.media.entity.TopicRef.Relationship topicRefRelationship() {
+        return org.atlasapi.media.entity.TopicRef.Relationship.ABOUT;
+    }
 }

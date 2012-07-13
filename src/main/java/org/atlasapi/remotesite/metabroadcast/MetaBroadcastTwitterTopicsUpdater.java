@@ -17,6 +17,8 @@ import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 
 import com.google.common.base.Optional;
+import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.entity.TopicRef.Relationship;
 
 public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastContentUpdater {
 
@@ -72,4 +74,10 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
     protected String topicValueFromWordWeighting(WordWeighting weighting) {
         return weighting.getUrl();
     }
+
+    @Override
+    protected Relationship topicRefRelationship() {
+        return TopicRef.Relationship.TWITTER_AUDIENCE;
+    }
+    
 }

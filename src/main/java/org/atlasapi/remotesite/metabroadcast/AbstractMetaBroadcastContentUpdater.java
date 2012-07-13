@@ -195,14 +195,15 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 	public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
 		Builder<TopicRef> topicRefs = ImmutableSet.builder();
 		for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-			Maybe<Topic> possibleTopic = topicStore.topicFor(publisher, namespace, topicValueFromWordWeighting(wordWeighting));
-			if (possibleTopic.hasValue()) {
-				Topic topic = possibleTopic.requireValue();
+			Topic topic = topicStore.topicFor(publisher, namespace, topicValueFromWordWeighting(wordWeighting)).valueOrNull();
+			if (topic == null) {
+            throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
+        } else {
 				topic.setTitle(wordWeighting.getContent());
 				topic.setPublisher(publisher);
 				topic.setType(topicTypeFromSource(wordWeighting.getType()));
 				topicStore.write(topic);
-				topicRefs.add(new TopicRef(topic, wordWeighting.getWeight()/100.0f, false));
+				topicRefs.add(new TopicRef(topic, wordWeighting.getWeight()/100.0f, false, topicRefRelationship()));
 			}
 		}
 		return topicRefs;
@@ -216,6 +217,8 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 			}
 		}));
 	}
+    
+    protected abstract TopicRef.Relationship topicRefRelationship();
 	
 	protected abstract Topic.Type topicTypeFromSource(String dbpedia);
 	
