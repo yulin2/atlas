@@ -10,7 +10,6 @@ import java.util.ArrayList;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -19,11 +18,9 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.jets3t.service.S3Service;
-import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
 import org.junit.Ignore;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 public class MetaBroadcastMagpieUpdaterTest {
@@ -36,24 +33,23 @@ public class MetaBroadcastMagpieUpdaterTest {
 	private TopicStore topicStoreMock = mock(TopicStore.class);
 	
 	@Ignore("Calls s3, only run locally")
-	public void testUpdatingContentTopics(){
+	public void testUpdatingContentTopics() throws Exception {
+	    S3Service s3service = new RestS3Service(new AWSCredentials(s3access, s3secret));
+	    MetaBroadcastMagpieUpdater updater = new MetaBroadcastMagpieUpdater( 
+                contentResolverMock, topicStoreMock, mock(TopicQueryResolver.class),
+                contentWriterMock, s3service, s3Bucket, "",
+                mock(AdapterLog.class));
+	    
 		// These depend on what the magpie JSON returns
-		Identified episode = (Episode) MetaBroadcastTwitterTopicsUpdater.getNewContent(new Episode() , "http://www.bbc.co.uk/programmes/b00sz5xg", "", Publisher.MAGPIE);
-		Identified mbEpisode = (Episode) MetaBroadcastTwitterTopicsUpdater.getNewContent(new Episode() , "http://metabroadcast.com/www.bbc.co.uk/programmes/b00sz5xg", "", Publisher.MAGPIE);
+		Identified episode = (Episode) updater.getNewContent(new Episode() , "http://www.bbc.co.uk/programmes/b00sz5xg", "");
+		Identified mbEpisode = (Episode) updater.getNewContent(new Episode() , "http://metabroadcast.com/www.bbc.co.uk/programmes/b00sz5xg", "");
 		
 		when(contentResolverMock.findByCanonicalUris(anyList())).thenReturn(ResolvedContent.builder()
 				.put("http://www.bbc.co.uk/programmes/b00sz5xg", episode)
 				.put("http://wwww.metabroadcast.com/www.bbc.co.uk/programmes/b00sz5xg", mbEpisode).build());
-		try {
-			S3Service s3service = new RestS3Service(new AWSCredentials(s3access, s3secret));
-			MetaBroadcastMagpieUpdater updater = new MetaBroadcastMagpieUpdater( 
-					contentResolverMock, topicStoreMock, mock(TopicQueryResolver.class),
-					contentWriterMock, s3service, s3Bucket, 
-					mock(AdapterLog.class));
-			updater.updateTopics(new ArrayList<String>());
-			verify(topicStoreMock, Mockito.atLeastOnce()).write((Topic) anyObject());
-		} catch (S3ServiceException e) {
-			e.printStackTrace();
-		}
+		
+		
+		updater.updateTopics(new ArrayList<String>());
+		verify(topicStoreMock, Mockito.atLeastOnce()).write((Topic) anyObject());
 	}
 }
