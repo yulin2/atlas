@@ -45,8 +45,6 @@ public class MetaBroadcastModule {
     private @Autowired SimpleScheduler scheduler;
     private @Autowired AdapterLog log;
     
-    private static final String TWITTER_NS_FOR_PROGRAMMES = "twitter";
-    private static final String TWITTER_NS_FOR_AUDIENCE = "twitter:audience-related";
     private static final String CONTENT_WORDS_FOR_PROGRAMMES = "contentWords";
     private static final String CONTENT_WORDS_LIST_FOR_PROGRAMMES = "contentWordsList";
     private static final String CONTENT_WORDS_FOR_AUDIENCE = "contentWordsForPeopleTalk";
@@ -62,7 +60,7 @@ public class MetaBroadcastModule {
     @Bean
     CannonTwitterTopicsUpdater twitterUpdaterTask() {
 		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
-		        new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_PROGRAMMES, log));
+		        new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, MetaBroadcastTwitterTopicsUpdater.TWITTER_NS_FOR_AUDIENCE, log));
 	}
     
     @Bean
@@ -73,7 +71,7 @@ public class MetaBroadcastModule {
 	@Bean
 	CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
 		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
-		        new MetaBroadcastTwitterTopicsUpdater(cannonPeopleTalkClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_AUDIENCE, log));
+		        new MetaBroadcastTwitterTopicsUpdater(cannonPeopleTalkClient(), contentResolver, topicStore, topicResolver, contentWriter, MetaBroadcastTwitterTopicsUpdater.TWITTER_NS_FOR_AUDIENCE_RELATED, log));
 	}
 	
     @Bean

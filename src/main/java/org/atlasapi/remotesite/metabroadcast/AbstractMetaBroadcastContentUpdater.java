@@ -45,13 +45,13 @@ import com.metabroadcast.common.base.Maybe;
 public abstract class AbstractMetaBroadcastContentUpdater {
 
     private final static Logger logger = LoggerFactory.getLogger(AbstractMetaBroadcastContentUpdater.class);
-	private final String namespace;
-	private final TopicStore topicStore;
-	private final TopicQueryResolver topicResolver;
-	private final ContentWriter contentWriter;
-    private final ContentResolver contentResolver;
+	protected final String namespace;
+	protected final TopicStore topicStore;
+	protected final TopicQueryResolver topicResolver;
+	protected final ContentWriter contentWriter;
+    protected final ContentResolver contentResolver;
     protected final AdapterLog log;
-    private final Publisher publisher;
+    protected final Publisher publisher;
 
 	public abstract UpdateProgress updateTopics(List<String> contentIds);
 

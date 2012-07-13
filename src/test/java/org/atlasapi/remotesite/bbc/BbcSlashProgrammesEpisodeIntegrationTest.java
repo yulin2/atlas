@@ -81,10 +81,10 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         }
         
         //topics are disabled currently
-        TopicRef topic1 = new TopicRef(3l, 1.0f, true);
-        TopicRef topic2 = new TopicRef(1l, 1.0f, true);
-        TopicRef topic3 = new TopicRef(2l, 1.0f, true);
-        TopicRef topic4 = new TopicRef(4l, 1.0f, true);
+        TopicRef topic1 = new TopicRef(3l, 1.0f, true, TopicRef.Relationship.ABOUT);
+        TopicRef topic2 = new TopicRef(1l, 1.0f, true, TopicRef.Relationship.ABOUT);
+        TopicRef topic3 = new TopicRef(2l, 1.0f, true, TopicRef.Relationship.ABOUT);
+        TopicRef topic4 = new TopicRef(4l, 1.0f, true, TopicRef.Relationship.ABOUT);
         
         assertEquals(ImmutableSet.of(topic1, topic2, topic3, topic4), ImmutableSet.copyOf(programme.getTopicRefs()));
         
@@ -130,6 +130,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         Topic topic = new Topic(id);
         topic.setNamespace(ns);
         topic.setValue(value);
+        topic.setPublisher(Publisher.DBPEDIA);
         return Maybe.just(topic);
     }
 }
