@@ -31,7 +31,7 @@ public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<Sla
 
     @Override
     public Maybe<TopicRef> extract(SlashProgrammesRdf source) {
-        String namespace = Publisher.DBPEDIA.title();
+        String namespace = Publisher.DBPEDIA.key();
         String uri = extractTopicUri(source);
         Topic topic = topicStore.topicFor(namespace, uri).valueOrNull();
         if (topic == null) {

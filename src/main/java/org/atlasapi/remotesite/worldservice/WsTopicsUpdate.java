@@ -40,7 +40,6 @@ public class WsTopicsUpdate extends ScheduledTask {
     private final ContentWriter contentWriter;
     private final AdapterLog log;
     private final ContentListingCriteria wsItemContentCriteria = defaultCriteria().forContent(ImmutableList.copyOf(ITEMS)).forPublisher(WORLD_SERVICE).build();
-    private final String namespace = "dbpedia";
 
     public WsTopicsUpdate(WsTopicsClient topicsClient, TopicStore topicStore, ContentLister contentLister, ContentWriter contentWriter, AdapterLog log) {
         this.topicsClient = topicsClient;
@@ -112,7 +111,7 @@ public class WsTopicsUpdate extends ScheduledTask {
     }
 
     private TopicRef topicRefFor(TopicWeighting topicWeighting) {
-        String namespace = Publisher.DBPEDIA.title();
+        String namespace = Publisher.DBPEDIA.key();
         String value = topicWeighting.getTopicValue().replace("%28", "(").replace("%29", ")").replace("%27", "'");
         Topic topic = topicStore.topicFor(namespace, value).valueOrNull();
         if (topic == null) {
