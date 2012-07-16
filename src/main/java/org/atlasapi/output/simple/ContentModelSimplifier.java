@@ -27,6 +27,7 @@ import com.google.common.collect.Maps;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.ContentGroupRef;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
@@ -60,7 +61,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
             simpleDescription.setClips(clipToSimple(content.getClips(), annotations, config));
         }
         if (annotations.contains(Annotation.TOPICS)) {
-            simpleDescription.setTopics(topicRefToSimple(content.getTopicRefs(), annotations, config));
+            simpleDescription.setTopics(topicRefToSimple(content, content.getTopicRefs(), annotations, config));
         }
         if (annotations.contains(Annotation.CONTENT_GROUPS)) {
             simpleDescription.setContentGroups(contentGroupRefToSimple(content.getContentGroupRefs(), annotations, config));
@@ -161,7 +162,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         });
     }
 
-    private List<org.atlasapi.media.entity.simple.TopicRef> topicRefToSimple(List<TopicRef> contentTopics, final Set<Annotation> annotations, final ApplicationConfiguration config) {
+    private List<org.atlasapi.media.entity.simple.TopicRef> topicRefToSimple(final Content content, List<TopicRef> contentTopics, final Set<Annotation> annotations, final ApplicationConfiguration config) {
 
         final Map<Long, Topic> topics = Maps.uniqueIndex(res(Iterables.transform(contentTopics, TOPICREF_TO_TOPIC_ID), annotations), TOPIC_TO_TO_TOPIC_ID);
 
@@ -172,7 +173,11 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
                 org.atlasapi.media.entity.simple.TopicRef tr = new org.atlasapi.media.entity.simple.TopicRef();
                 tr.setSupervised(topicRef.isSupervised());
                 tr.setWeighting(topicRef.getWeighting());
+                tr.setRelationship(topicRef.getRelationship().toString());
                 tr.setTopic(topicSimplifier.simplify(topics.get(topicRef.getTopic()), annotations, config));
+                if (annotations.contains(Annotation.PUBLISHER)) {
+                    tr.setPublisher(toPublisherDetails(content.getPublisher()));
+                }
                 return tr;
             }
         });

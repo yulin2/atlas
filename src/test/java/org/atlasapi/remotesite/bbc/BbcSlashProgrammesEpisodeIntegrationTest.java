@@ -56,14 +56,14 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         
 //        topics are disabled currently
         context.checking(new Expectations(){{
-            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic(1, "dbpedia", "http://dbpedia.org/resource/Religion")));
-            oneOf(topicStore).write(with(topicMatcher(1,"dbpedia", "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
-            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic(2, "dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah")));
-            oneOf(topicStore).write(with(topicMatcher(2,"dbpedia", "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
-            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic(3, "dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks")));
-            oneOf(topicStore).write(with(topicMatcher(3,"dbpedia", "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
-            oneOf(topicStore).topicFor("dbpedia", "http://dbpedia.org/resource/Debate"); will(returnValue(newTopic(4, "dbpedia", "http://dbpedia.org/resource/Debate")));
-            oneOf(topicStore).write(with(topicMatcher(4,"dbpedia", "http://dbpedia.org/resource/Debate", "Debate",Topic.Type.SUBJECT)));
+            oneOf(topicStore).topicFor(Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Religion"); will(returnValue(newTopic(1, Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Religion")));
+            oneOf(topicStore).write(with(topicMatcher(1,Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Religion", "Religion",Topic.Type.SUBJECT)));
+            oneOf(topicStore).topicFor(Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Rosh_Hashanah"); will(returnValue(newTopic(2, Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Rosh_Hashanah")));
+            oneOf(topicStore).write(with(topicMatcher(2,Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Rosh_Hashanah", "Rosh Hashanah",Topic.Type.SUBJECT)));
+            oneOf(topicStore).topicFor(Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Jonathan_Sacks"); will(returnValue(newTopic(3, Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Jonathan_Sacks")));
+            oneOf(topicStore).write(with(topicMatcher(3,Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Jonathan_Sacks", "Jonathan Sacks",Topic.Type.PERSON)));
+            oneOf(topicStore).topicFor(Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Debate"); will(returnValue(newTopic(4, Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Debate")));
+            oneOf(topicStore).write(with(topicMatcher(4,Publisher.DBPEDIA.key(), "http://dbpedia.org/resource/Debate", "Debate",Topic.Type.SUBJECT)));
         }});
 
         Content programme = (Content) adapter.fetch("http://www.bbc.co.uk/programmes/b015d4pt");
@@ -81,10 +81,10 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         }
         
         //topics are disabled currently
-        TopicRef topic1 = new TopicRef(3l, 1.0f, true);
-        TopicRef topic2 = new TopicRef(1l, 1.0f, true);
-        TopicRef topic3 = new TopicRef(2l, 1.0f, true);
-        TopicRef topic4 = new TopicRef(4l, 1.0f, true);
+        TopicRef topic1 = new TopicRef(3l, 1.0f, true, TopicRef.Relationship.ABOUT);
+        TopicRef topic2 = new TopicRef(1l, 1.0f, true, TopicRef.Relationship.ABOUT);
+        TopicRef topic3 = new TopicRef(2l, 1.0f, true, TopicRef.Relationship.ABOUT);
+        TopicRef topic4 = new TopicRef(4l, 1.0f, true, TopicRef.Relationship.ABOUT);
         
         assertEquals(ImmutableSet.of(topic1, topic2, topic3, topic4), ImmutableSet.copyOf(programme.getTopicRefs()));
         
@@ -130,6 +130,7 @@ public class BbcSlashProgrammesEpisodeIntegrationTest {
         Topic topic = new Topic(id);
         topic.setNamespace(ns);
         topic.setValue(value);
+        topic.setPublisher(Publisher.DBPEDIA);
         return Maybe.just(topic);
     }
 }

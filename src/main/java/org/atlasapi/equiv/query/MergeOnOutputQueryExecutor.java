@@ -151,7 +151,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		mergeKeyPhrases(chosen, notChosen);
 		mergeVersions(chosen, notChosen);
 		if (chosen instanceof Film) {
-		    mergeFilmProperties((Film)chosen, Iterables.filter(notChosen, Film.class));
+		    mergeFilmProperties(config, (Film)chosen, Iterables.filter(notChosen, Film.class));
 		}
 	}
 	
@@ -167,17 +167,17 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	}
 
     private <T extends Content> void mergeTopics(T chosen, Iterable<T> notChosen) {
-        chosen.setTopicRefs(Iterables.concat(chosen.getTopicRefs(),
+        chosen.setTopicRefs(Iterables.concat(Iterables.transform(chosen.getTopicRefs(), new TopicPublisherSetter(chosen)),
             Iterables.concat(Iterables.transform(notChosen, new Function<T, Iterable<TopicRef>>() {
                 @Override
                 public Iterable<TopicRef> apply(T input) {
-                    return input.getTopicRefs();
+                    return Iterables.transform(input.getTopicRefs(), new TopicPublisherSetter(input));
                 }
             }))
         ));
     }
 
-	private void mergeFilmProperties(Film chosen, Iterable<Film> notChosen) {
+	private void mergeFilmProperties(ApplicationConfiguration config, Film chosen, Iterable<Film> notChosen) {
 	    Builder<Subtitles> subtitles = ImmutableSet.<Subtitles>builder().addAll(chosen.getSubtitles());
 	    Builder<String> languages = ImmutableSet.<String>builder().addAll(chosen.getLanguages());
 	    Builder<Certificate> certs = ImmutableSet.<Certificate>builder().addAll(chosen.getCertificates());
@@ -194,6 +194,16 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	    chosen.setLanguages(languages.build());
 	    chosen.setCertificates(certs.build());
 	    chosen.setReleaseDates(releases.build());
+	    
+	    if (config.peoplePrecedenceEnabled()) {
+            Iterable<Film> all = Iterables.concat(ImmutableList.of(chosen), notChosen);
+            List<Film> topFilmMatches = toContentOrdering(config.peoplePrecedenceOrdering()).leastOf(Iterables.filter(all, HAS_PEOPLE), 1);
+            
+            if (!topFilmMatches.isEmpty()) {
+                Film top = topFilmMatches.get(0);
+                chosen.setPeople(top.getPeople());
+            }
+        }
     }
 
     private <T extends Content> void applyImagePrefs(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
@@ -225,6 +235,13 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			return content.getImage() != null;
 		}
 	};
+	
+    private static final Predicate<Film> HAS_PEOPLE = new Predicate<Film>() {
+        @Override
+        public boolean apply(Film film) {
+            return film.getPeople() != null && !film.getPeople().isEmpty();
+        }
+    };
 	
 	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container chosen, List<Container> notChosen) {
 	    mergeTopics(chosen, notChosen);
@@ -281,4 +298,20 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		
 		public abstract <T extends Item> Iterable<T> merge(List<T> items, List<T> matches);
 	}
+    
+    private final static class TopicPublisherSetter implements Function<TopicRef, TopicRef> {
+
+        private final Content publishedContent;
+
+        public TopicPublisherSetter(Content publishedContent) {
+            this.publishedContent = publishedContent;
+        }
+        
+        @Override
+        public TopicRef apply(TopicRef input) {
+            input.setPublisher(publishedContent.getPublisher());
+            return input;
+        }
+        
+    }
 }

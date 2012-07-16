@@ -42,11 +42,12 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         assertThat(extractedTopicRef.requireValue().getTopic(), is(equalTo(storedTopic.getId())));
         assertThat(extractedTopicRef.requireValue().getWeighting(), is(equalTo(1f)));
         assertThat(extractedTopicRef.requireValue().isSupervised(), is(true));
+        assertThat(extractedTopicRef.requireValue().getRelationship(), is(TopicRef.Relationship.ABOUT));
         
         assertThat(storedTopic.getValue(), is(equalTo(topicUri)));
         assertThat(storedTopic.getType(), is(equalTo(Type.PERSON)));
         assertThat(storedTopic.getPublisher(), is(equalTo(Publisher.DBPEDIA)));
-        assertThat(storedTopic.getNamespace(), is(equalTo("dbpedia")));
+        assertThat(storedTopic.getNamespace(), is(equalTo(Publisher.DBPEDIA.key())));
         assertThat(storedTopic.getTitle(), is(equalTo("Religion")));
         
     }
@@ -64,6 +65,11 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 			Preconditions.checkArgument(value == topicUri, "Unexpected URI");
 			
 			return Maybe.just(new Topic(100l));
+		}
+		
+		@Override
+		public Maybe<Topic> topicFor(Publisher publisher, String namespace, String value) {
+		    throw new UnsupportedOperationException();
 		}
 
 		@Override
