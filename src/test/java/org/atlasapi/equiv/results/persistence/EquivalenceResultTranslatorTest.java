@@ -6,6 +6,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.equiv.results.DefaultEquivalenceResultBuilder;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.AddingEquivalenceCombiner;
 import org.atlasapi.equiv.results.description.DefaultDescription;
@@ -18,7 +19,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Table.Cell;
 import com.mongodb.DBObject;
@@ -26,7 +26,7 @@ import com.mongodb.DBObject;
 public class EquivalenceResultTranslatorTest extends TestCase {
 
     private final EquivalenceResultTranslator translator = new EquivalenceResultTranslator();
-    private final EquivalenceResultBuilder<Item> resultBuilder = EquivalenceResultBuilder.<Item>resultBuilder(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
+    private final EquivalenceResultBuilder<Item> resultBuilder = DefaultEquivalenceResultBuilder.<Item>resultBuilder(AddingEquivalenceCombiner.<Item>create(), TopEquivalenceExtractor.<Item>create());
 
     public final Item target = target("target", "Target", Publisher.BBC);
     public final Item equivalent1 = target("equivalent1", "Equivalent1", Publisher.BBC);
@@ -47,7 +47,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -66,7 +66,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -80,9 +80,9 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         assertEquals("source1", Iterables.getOnlyElement(cells).getColumnKey());
         
         assertEquals(1, restoredResult.combinedResults().size());
-        assertEquals(equivalent1.getCanonicalUri(), Iterables.getOnlyElement(restoredResult.combinedResults().entrySet()).getKey().id());
-        assertEquals(5.0, Iterables.getOnlyElement(restoredResult.combinedResults().entrySet()).getValue());
-        assertTrue(Iterables.getOnlyElement(restoredResult.combinedResults().entrySet()).getKey().strong());
+        assertEquals(equivalent1.getCanonicalUri(), Iterables.getOnlyElement(restoredResult.combinedResults()).id());
+        assertEquals(5.0, Iterables.getOnlyElement(restoredResult.combinedResults()).score());
+        assertTrue(Iterables.getOnlyElement(restoredResult.combinedResults()).strong());
         
     }
 
@@ -97,7 +97,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -112,14 +112,10 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         assertEquals(5.0, restoredResult.sourceResults().get(eq2Uri, "source1"));
         assertEquals(Double.NaN, restoredResult.sourceResults().get(eq2Uri, "source2"));
         
-        EquivalenceIdentifier id1 = new EquivalenceIdentifier(eq1Uri, equivalent1.getTitle(), true, equivalent1.getPublisher().title());
-        EquivalenceIdentifier id2 = new EquivalenceIdentifier(eq2Uri, equivalent2.getTitle(), false, equivalent2.getPublisher().title());
-        
         assertEquals(2, restoredResult.combinedResults().size());
-        assertEquals(ImmutableMap.of(
-                id1, 15.0,
-                id2, 5.0 
-        ), restoredResult.combinedResults());
+        CombinedEquivalenceScore id1 = new CombinedEquivalenceScore(eq1Uri, equivalent1.getTitle(), 15.0, true, equivalent1.getPublisher().title());
+        CombinedEquivalenceScore id2 = new CombinedEquivalenceScore(eq2Uri, equivalent2.getTitle(), 5.0, false, equivalent2.getPublisher().title());
+        assertEquals(ImmutableList.of(id1, id2), restoredResult.combinedResults());
     }
 
     @Test
@@ -134,7 +130,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -156,14 +152,10 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source2"));
         assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source3"));
         
-        EquivalenceIdentifier id1 = new EquivalenceIdentifier(eq1Uri, equivalent1.getTitle(), true, equivalent1.getPublisher().title());
-        EquivalenceIdentifier id2 = new EquivalenceIdentifier(eq2Uri, equivalent2.getTitle(), false, equivalent2.getPublisher().title());
-        EquivalenceIdentifier id3 = new EquivalenceIdentifier(eq3Uri, equivalent3.getTitle(), true, equivalent3.getPublisher().title());
         assertEquals(3, restoredResult.combinedResults().size());
-        assertEquals(ImmutableMap.of(
-                id1, 15.0,
-                id2, 5.0, 
-                id3, 15.0
-        ), restoredResult.combinedResults());
+        CombinedEquivalenceScore id1 = new CombinedEquivalenceScore(eq1Uri, equivalent1.getTitle(), 15.0, true, equivalent1.getPublisher().title());
+        CombinedEquivalenceScore id2 = new CombinedEquivalenceScore(eq2Uri, equivalent2.getTitle(), 5.0, false, equivalent2.getPublisher().title());
+        CombinedEquivalenceScore id3 = new CombinedEquivalenceScore(eq3Uri, equivalent3.getTitle(), 15.0, true, equivalent3.getPublisher().title());
+        assertEquals(ImmutableList.of(id1, id2, id3), restoredResult.combinedResults());
     }
 }

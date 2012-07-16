@@ -1,8 +1,12 @@
 package org.atlasapi.output.simple;
 
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.EntityType;
@@ -12,21 +16,24 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.ReleaseDate;
+import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
+import org.atlasapi.media.entity.simple.Language;
 import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
@@ -35,47 +42,59 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
+import org.atlasapi.media.entity.Song;
+import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
     private final ContainerSummaryResolver containerSummaryResolver;
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
-    
+    private final Map<String, Locale> localeMap;
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
     
-    public ItemModelSimplifier(ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier, TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
-        this(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
+        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
     }
 
-    public ItemModelSimplifier(ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier, TopicQueryResolver topicResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
-        super(topicResolver, topicSimplifier);
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
+        super(localHostName, contentGroupResolver, topicResolver, productResolver);
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
+        this.localeMap = initLocalMap();
+    }
+
+    private Map<String, Locale> initLocalMap() {
+        ImmutableMap.Builder<String, Locale> builder = ImmutableMap.builder();
+        for (String code : Locale.getISOLanguages()) {
+            builder.put(code, new Locale(code));
+        }
+        return builder.build();
     }
 
     @Override
-    public org.atlasapi.media.entity.simple.Item simplify(Item full, final Set<Annotation> annotations) {
+    public org.atlasapi.media.entity.simple.Item simplify(Item full, final Set<Annotation> annotations, final ApplicationConfiguration config) {
 
         org.atlasapi.media.entity.simple.Item simple = new org.atlasapi.media.entity.simple.Item();
 
-        copyProperties(full, simple, annotations);
-        
+        copyProperties(full, simple, annotations, config);
+
         boolean doneSegments = false;
         for (Version version : full.getVersions()) {
             addTo(simple, version, full, annotations);
-            if(!doneSegments && !version.getSegmentEvents().isEmpty() && annotations.contains(Annotation.SEGMENT_EVENTS) && segmentSimplifier != null) {
-                simple.setSegments(segmentSimplifier.simplify(version.getSegmentEvents(), annotations));
+            if (!doneSegments && !version.getSegmentEvents().isEmpty() && annotations.contains(Annotation.SEGMENT_EVENTS) && segmentSimplifier != null) {
+                simple.setSegments(segmentSimplifier.simplify(version.getSegmentEvents(), annotations, config));
                 doneSegments = true;
             }
         }
 
         if (annotations.contains(Annotation.PEOPLE)) {
             simple.setPeople(Iterables.filter(Iterables.transform(full.people(), new Function<CrewMember, org.atlasapi.media.entity.simple.Person>() {
+
                 @Override
                 public org.atlasapi.media.entity.simple.Person apply(CrewMember input) {
-                    return crewSimplifier.simplify(input, annotations);
+                    return crewSimplifier.simplify(input, annotations, config);
                 }
             }), Predicates.notNull()));
         }
@@ -83,10 +102,10 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         return simple;
     }
 
-    private void copyProperties(Item fullItem, org.atlasapi.media.entity.simple.Item simpleItem, Set<Annotation> annotations) {
-        copyBasicContentAttributes(fullItem, simpleItem, annotations);
+    private void copyProperties(Item fullItem, org.atlasapi.media.entity.simple.Item simpleItem, Set<Annotation> annotations, ApplicationConfiguration config) {
+        copyBasicContentAttributes(fullItem, simpleItem, annotations, config);
         simpleItem.setType(EntityType.from(fullItem).toString());
-        
+
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
             simpleItem.setBlackAndWhite(fullItem.getBlackAndWhite());
             simpleItem.setCountriesOfOrigin(fullItem.getCountriesOfOrigin());
@@ -106,16 +125,83 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                     simpleItem.setSeriesSummary(seriesSummaryFromResolved(series, annotations));
                 }
             }
+            
+            if (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
+                simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
+            }
 
             if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
-                simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
                 simpleItem.setSeriesNumber(episode.getSeriesNumber());
             }
 
         } else if (fullItem instanceof Film && (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION))) {
             Film film = (Film) fullItem;
             simpleItem.setYear(film.getYear());
+            if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
+                simpleItem.setOriginalLanguages(languagesFrom(film.getLanguages()));
+                simpleItem.setSubtitles(simpleSubtitlesFrom(film.getSubtitles()));
+                simpleItem.setCertificates(simpleCertificates(film.getCertificates()));
+                simpleItem.setReleaseDates(simpleReleaseDate(film.getReleaseDates()));
+            }
+        } else if (fullItem instanceof Song) {
+            Song song = (Song) fullItem;
+            simpleItem.setIsrc(song.getIsrc());
+            if (song.getDuration() != null) {
+                simpleItem.setDuration(song.getDuration().getStandardSeconds());
+            }
         }
+    }
+
+    private Iterable<org.atlasapi.media.entity.simple.ReleaseDate> simpleReleaseDate(Set<ReleaseDate> releaseDates) {
+        return Iterables.transform(releaseDates, new Function<ReleaseDate, org.atlasapi.media.entity.simple.ReleaseDate>() {
+
+            @Override
+            public org.atlasapi.media.entity.simple.ReleaseDate apply(ReleaseDate input) {
+                return new org.atlasapi.media.entity.simple.ReleaseDate(
+                        input.date().toDateTimeAtStartOfDay(DateTimeZones.UTC).toDate(),
+                        input.country().code(),
+                        input.type().toString().toLowerCase());
+            }
+        });
+    }
+
+    private Iterable<org.atlasapi.media.entity.simple.Certificate> simpleCertificates(Set<Certificate> certificates) {
+        return Iterables.transform(certificates, new Function<Certificate, org.atlasapi.media.entity.simple.Certificate>() {
+
+            @Override
+            public org.atlasapi.media.entity.simple.Certificate apply(Certificate input) {
+                return new org.atlasapi.media.entity.simple.Certificate(input.classification(), input.country().code());
+            }
+        });
+    }
+
+    public Iterable<org.atlasapi.media.entity.simple.Subtitles> simpleSubtitlesFrom(Set<Subtitles> subtitles) {
+        return Iterables.filter(Iterables.transform(subtitles, new Function<Subtitles, org.atlasapi.media.entity.simple.Subtitles>() {
+
+            @Override
+            public org.atlasapi.media.entity.simple.Subtitles apply(Subtitles input) {
+                Language lang = languageForCode(input.code());
+                return lang == null ? null : new org.atlasapi.media.entity.simple.Subtitles(lang);
+            }
+        }), Predicates.notNull());
+    }
+
+    public Iterable<Language> languagesFrom(Set<String> languages) {
+        return Iterables.filter(Iterables.transform(languages, new Function<String, Language>() {
+
+            @Override
+            public Language apply(String input) {
+                return languageForCode(input);
+            }
+        }), Predicates.notNull());
+    }
+
+    public Language languageForCode(String input) {
+        Locale locale = localeMap.get(input);
+        if (locale == null) {
+            return null;
+        }
+        return new Language(locale.getLanguage(), locale.getDisplayLanguage());
     }
 
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Item item, Set<Annotation> annotations) {
@@ -176,6 +262,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private Iterable<Broadcast> filterInactive(Iterable<Broadcast> broadcasts) {
         return Iterables.filter(broadcasts, new Predicate<Broadcast>() {
+
             @Override
             public boolean apply(Broadcast input) {
                 return input.isActivelyPublished();
@@ -205,6 +292,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
         simpleLocation.setPublishedDuration(version.getPublishedDuration());
         simpleLocation.setDuration(durationFrom(item, version));
+        simpleLocation.set3d(version.is3d());
 
         Restriction restriction = new Restriction();
 
@@ -228,6 +316,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             return null;
         }
         return Ordering.natural().max(Iterables.transform(broadcasts, new Function<Broadcast, Integer>() {
+
             @Override
             public Integer apply(Broadcast input) {
                 Integer duration = input.getBroadcastDuration();
@@ -242,16 +331,16 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Item item, Set<Annotation> annotations) {
         DateTime now = new DateTime(DateTimeZones.UTC);
         for (Location location : encoding.getAvailableAt()) {
-            if(!annotations.contains(Annotation.AVAILABLE_LOCATIONS) || location.getPolicy() == null || available(location.getPolicy(), now)) {
+            if (!annotations.contains(Annotation.AVAILABLE_LOCATIONS) || location.getPolicy() == null || available(location.getPolicy(), now)) {
                 addTo(simpleItem, version, encoding, location, item);
             }
         }
     }
 
     private boolean available(Policy policy, DateTime now) {
-        return policy.getAvailabilityStart() == null 
-            || policy.getAvailabilityEnd() == null
-            || policy.getAvailabilityStart().isBefore(now) && policy.getAvailabilityEnd().isAfter(now);
+        return policy.getAvailabilityStart() == null
+                || policy.getAvailabilityEnd() == null
+                || policy.getAvailabilityStart().isBefore(now) && policy.getAvailabilityEnd().isAfter(now);
     }
 
     private void addTo(org.atlasapi.media.entity.simple.Item simpleItem, Version version, Encoding encoding, Location location, Item item) {

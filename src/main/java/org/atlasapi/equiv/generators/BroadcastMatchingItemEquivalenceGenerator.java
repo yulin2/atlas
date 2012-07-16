@@ -39,12 +39,15 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
         this.supportedPublishers = supportedPublishers;
         this.flexibility = flexibility;
     }
+    
+    public BroadcastMatchingItemEquivalenceGenerator(ScheduleResolver resolver, ChannelResolver channelResolver, Set<Publisher> supportedPublishers) {
+        this(resolver, channelResolver, supportedPublishers, Duration.standardMinutes(10));
+    }
 
     @Override
     public ScoredEquivalents<Item> generate(Item content, ResultDescription desc) {
 
         ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
-        desc.startStage("Broadcast-matching generator");
 
         Set<Publisher> validPublishers = Sets.difference(supportedPublishers, ImmutableSet.of(content.getPublisher()));
 
@@ -63,11 +66,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
 
         desc.appendText("Processed %s of %s broadcasts", processedBroadcasts, totalBroadcasts);
 
-        ScoredEquivalents<Item> scaledScores = scale(scores.build(), processedBroadcasts, desc);
-
-        desc.finishStage();
-
-        return scaledScores;
+        return scale(scores.build(), processedBroadcasts, desc);
     }
 
     public void findMatchesForBroadcast(ScoredEquivalentsBuilder<Item> scores, Broadcast broadcast, Set<Publisher> validPublishers) {

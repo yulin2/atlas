@@ -3,7 +3,6 @@ package org.atlasapi.remotesite;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.feeds.lakeview.LakeviewModule;
@@ -19,12 +18,19 @@ import org.atlasapi.remotesite.pa.PaModule;
 import org.atlasapi.remotesite.preview.PreviewNetworksModule;
 import org.atlasapi.remotesite.redux.ReduxModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
+import org.atlasapi.remotesite.voila.VoilaModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.hp.hpl.jena.graph.query.StageElement.PutBindings;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
+import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
+import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
+import org.atlasapi.remotesite.space.TheSpaceModule;
+import org.atlasapi.remotesite.music.emipub.EmiPubModule;
+import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
 
 public class RemoteSiteModuleConfigurer {
 
@@ -49,6 +55,13 @@ public class RemoteSiteModuleConfigurer {
         .put("worldservice", WorldServicesModule.class)
         .put("lakeview", LakeviewModule.class)
         .put("redux", ReduxModule.class)
+        .put("voila", VoilaModule.class)
+        .put("lovefilm", LoveFilmModule.class)
+        .put("bbc-products", BBCProductsModule.class)
+        .put("thespace", TheSpaceModule.class)
+        .put("musicbrainz", MusicBrainzModule.class)
+        .put("emipub", EmiPubModule.class)
+        .put("metabroadcast", MetaBroadcastModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {

@@ -7,10 +7,12 @@ import junit.framework.TestCase;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -30,6 +32,11 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 
 	private final Clip clip1 = new Clip("c1", "c:c1", Publisher.YOUTUBE);
 	
+	private final Film film1 = new Film("f1", "f:f1", Publisher.PA);
+	private final Film film2 = new Film("f2", "f:f2", Publisher.RADIO_TIMES);
+	
+	private final Actor actor = new Actor("a1", "a:a1", Publisher.RADIO_TIMES).withName("John Smith").withCharacter("Smith John");
+	
 	@Override
 	protected void setUp() throws Exception {
 	    item1.setContainer(brand1);
@@ -39,12 +46,18 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		item1.addEquivalentTo(item2);
 		item2.addClip(clip1);
 		
-		brand1.setId("one");
-		brand2.setId("two");
-		brand3.setId("three");
-		item1.setId("eyeone");
-		item2.setId("eyetwo");
-		clip1.setId("clipone");
+		brand1.setId(1l);
+		brand2.setId(2l);
+		brand3.setId(3l);
+		item1.setId(4l);
+		item2.setId(5l);
+		clip1.setId(6l);
+		
+		film1.setId(7l);
+		film2.setId(8l);
+		film2.addPerson(actor);
+		film1.addEquivalentTo(film2);
+		film2.addEquivalentTo(film1);
 	}
 	
 	public void dontTestMergingBrands() throws Exception {
@@ -70,6 +83,16 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		assertEquals(ImmutableList.of(item1), merged.get(item1.getCanonicalUri()));
 		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getCanonicalUri()))).getClips());
 	}
+	
+    public void testMergingPeople() throws Exception {
+        MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(film1, film2));
+
+        ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.PA, Publisher.RADIO_TIMES)));
+        Map<String, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(film1.getCanonicalUri()), query));
+        
+        assertEquals(ImmutableList.of(film1), merged.get(film1.getCanonicalUri()));
+        assertEquals(ImmutableList.of(actor), ((Film)Iterables.getOnlyElement(merged.get(film1.getCanonicalUri()))).getPeople());
+    }
 
 	private KnownTypeQueryExecutor delegate(final Content... respondWith) {
 		return new KnownTypeQueryExecutor() {
@@ -80,8 +103,8 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 			}
 
             @Override
-            public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, ContentQuery query) {
-                return ImmutableMap.<String, List<Identified>>of(respondWith[0].getStringId(), ImmutableList.<Identified>copyOf(respondWith));
+            public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
+                return ImmutableMap.<String, List<Identified>>of(respondWith[0].getCanonicalUri(), ImmutableList.<Identified>copyOf(respondWith));
             }
 		};
 	}

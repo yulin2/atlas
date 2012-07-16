@@ -21,6 +21,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
+import org.atlasapi.persistence.CassandraPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -40,7 +41,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 	}
 
     private void configure(Builder<Class<?>> builder) {
-        builder.add(AtlasModule.class, AtlasLoggingModule.class, AtlasWebModule.class, QueryModule.class, MongoContentPersistenceModule.class, 
+        builder.add(AtlasModule.class, AtlasLoggingModule.class, AtlasWebModule.class, QueryModule.class, MongoContentPersistenceModule.class, CassandraPersistenceModule.class, 
                 AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class, RadioPlayerModule.class, XmlTvModule.class, RemoteSiteHealthModule.class);
         
         if(runProcessingOnly()) {

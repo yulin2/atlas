@@ -20,10 +20,12 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
+
 
 public interface AtlasModelWriter<T> {
 	
-	public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations) throws IOException;
+	public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations, ApplicationConfiguration config) throws IOException;
 	
 	public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException;
 	

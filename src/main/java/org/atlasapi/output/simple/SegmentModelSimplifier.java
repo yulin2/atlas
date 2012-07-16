@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.media.segment.SegmentRef;
@@ -27,7 +28,7 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
     }
 
     @Override
-    public List<org.atlasapi.media.entity.simple.SegmentEvent> simplify(List<SegmentEvent> segmentEvents, Set<Annotation> annotations) {
+    public List<org.atlasapi.media.entity.simple.SegmentEvent> simplify(List<SegmentEvent> segmentEvents, Set<Annotation> annotations, ApplicationConfiguration config) {
         final Map<SegmentRef, Maybe<Segment>> resolvedSegs = segmentResolver.resolveById(Lists.transform(segmentEvents, SegmentEvent.TO_REF));
         return ImmutableList.copyOf(Iterables.filter(Iterables.transform(segmentEvents, new Function<SegmentEvent, org.atlasapi.media.entity.simple.SegmentEvent>(){
             @Override

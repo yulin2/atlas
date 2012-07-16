@@ -9,19 +9,25 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.ReleaseDate;
+import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -44,7 +50,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	}
 
 	@Override
-	public Map<String, List<Identified>> executeIdQuery(Iterable<String> ids, final ContentQuery query) {
+	public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
 	    return mergeResults(query, delegate.executeIdQuery(ids, query));
 	}
 
@@ -141,9 +147,41 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		}
 		applyImagePrefs(config, chosen, notChosen);
 		mergeVersions(chosen, notChosen);
+		if (chosen instanceof Film) {
+		    mergeFilmProperties(config, (Film)chosen, Iterables.filter(notChosen, Film.class));
+		}
 	}
 
-	private <T extends Content> void applyImagePrefs(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
+	private void mergeFilmProperties(ApplicationConfiguration config, Film chosen, Iterable<Film> notChosen) {
+	    Builder<Subtitles> subtitles = ImmutableSet.<Subtitles>builder().addAll(chosen.getSubtitles());
+	    Builder<String> languages = ImmutableSet.<String>builder().addAll(chosen.getLanguages());
+	    Builder<Certificate> certs = ImmutableSet.<Certificate>builder().addAll(chosen.getCertificates());
+	    Builder<ReleaseDate> releases = ImmutableSet.<ReleaseDate>builder().addAll(chosen.getReleaseDates());
+	    
+	    for (Film film : notChosen) {
+            subtitles.addAll(film.getSubtitles());
+            languages.addAll(film.getLanguages());
+            certs.addAll(film.getCertificates());
+            releases.addAll(film.getReleaseDates());
+	    }
+	    
+	    chosen.setSubtitles(subtitles.build());
+	    chosen.setLanguages(languages.build());
+	    chosen.setCertificates(certs.build());
+	    chosen.setReleaseDates(releases.build());
+	    
+	    if (config.peoplePrecedenceEnabled()) {
+            Iterable<Film> all = Iterables.concat(ImmutableList.of(chosen), notChosen);
+            List<Film> topFilmMatches = toContentOrdering(config.peoplePrecedenceOrdering()).leastOf(Iterables.filter(all, HAS_PEOPLE), 1);
+            
+            if (!topFilmMatches.isEmpty()) {
+                Film top = topFilmMatches.get(0);
+                chosen.setPeople(top.getPeople());
+            }
+        }
+    }
+
+    private <T extends Content> void applyImagePrefs(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
 		if (config.imagePrecedenceEnabled()) {
 			Iterable<T> all = Iterables.concat(ImmutableList.of(chosen), notChosen);
 			List<T> topImageMatches = toContentOrdering(config.imagePrecedenceOrdering()).leastOf(Iterables.filter(all, HAS_IMAGE_FIELD_SET), 1);
@@ -172,6 +210,13 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			return content.getImage() != null;
 		}
 	};
+	
+    private static final Predicate<Film> HAS_PEOPLE = new Predicate<Film>() {
+        @Override
+        public boolean apply(Film film) {
+            return film.getPeople() != null && !film.getPeople().isEmpty();
+        }
+    };
 	
 	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container chosen, List<Container> notChosen) {
 		applyImagePrefs(config, chosen, notChosen);

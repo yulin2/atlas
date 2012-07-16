@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 
 //TODO: split this into more cohesive parts
-public final class ResultProcessingScheduledTask<T, R extends Reducible<R>> extends ScheduledTask {
+public class ResultProcessingScheduledTask<T, R extends Reducible<R>> extends ScheduledTask {
 
     private final ProgressReporter<R> reporter;
 
@@ -115,7 +115,7 @@ public final class ResultProcessingScheduledTask<T, R extends Reducible<R>> exte
         }
     }
 
-    protected void cancelTasks(List<Future<T>> tasks) {
+    protected final void cancelTasks(List<Future<T>> tasks) {
         reporter.setProducerStatus("Cancelling submitted tasks.");
         int cancelled = 0;
         for (Future<T> task : tasks) {
@@ -127,7 +127,7 @@ public final class ResultProcessingScheduledTask<T, R extends Reducible<R>> exte
     }
     
     @Override
-    public String getCurrentStatusMessage() {
+    public final String getCurrentStatusMessage() {
         return reporter.toString();
     }
     

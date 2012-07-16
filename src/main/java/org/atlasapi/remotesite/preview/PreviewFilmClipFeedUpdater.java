@@ -13,7 +13,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.pa.film.PaFilmFeedUpdater;
+import org.atlasapi.remotesite.rt.RtFilmFeedUpdater;
 
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
@@ -66,7 +66,7 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
                     processor.process(element);
                 }
                 catch (Exception e) {
-                    log.record(new AdapterLogEntry(Severity.ERROR).withSource(PaFilmFeedUpdater.class).withCause(e).withDescription("Exception when processing film"));
+                    log.record(new AdapterLogEntry(Severity.ERROR).withSource(RtFilmFeedUpdater.class).withCause(e).withDescription("Exception when processing film"));
                 }
                 
                 return new Nodes();

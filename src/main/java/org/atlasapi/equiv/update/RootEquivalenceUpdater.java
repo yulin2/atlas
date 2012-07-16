@@ -1,9 +1,13 @@
 package org.atlasapi.equiv.update;
 
+import java.util.List;
+
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+
+import com.google.common.base.Optional;
 
 public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content> {
 
@@ -16,7 +20,7 @@ public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content
     }
 
     @Override
-    public EquivalenceResult<Content> updateEquivalences(Content content) {
+    public EquivalenceResult<Content> updateEquivalences(Content content, Optional<List<Content>> externalCandidates) {
         if(content instanceof Container) {
             return updateContainer((Container)content);
         }
@@ -28,13 +32,13 @@ public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content
 
     @SuppressWarnings("unchecked")
     private <Y extends Content> EquivalenceResult<Y> updateContainer(Container content) {
-        EquivalenceResult<Y> updateEquivalences = (EquivalenceResult<Y>) containerUpdater.updateEquivalences(content);
+        EquivalenceResult<Y> updateEquivalences = (EquivalenceResult<Y>) containerUpdater.updateEquivalences(content, Optional.<List<Container>>absent());
         return updateEquivalences;
     }
     
     @SuppressWarnings("unchecked")
     private <Y extends Content> EquivalenceResult<Y> updateItem(Item content) {
-        EquivalenceResult<Y> updateEquivalences = (EquivalenceResult<Y>) itemUpdater.updateEquivalences(content);
+        EquivalenceResult<Y> updateEquivalences = (EquivalenceResult<Y>) itemUpdater.updateEquivalences(content, Optional.<List<Item>>absent());
         return updateEquivalences;
     }
 

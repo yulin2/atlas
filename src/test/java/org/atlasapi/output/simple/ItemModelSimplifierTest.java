@@ -7,6 +7,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.TransportSubType;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Actor;
@@ -19,6 +20,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Restriction;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.Item;
+import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
@@ -33,23 +35,25 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
+import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifierTest {
 
     private final Mockery context = new Mockery();
+    private final ContentGroupResolver contentGroupResolver = context.mock(ContentGroupResolver.class);
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
+    private final ProductResolver productResolver = context.mock(ProductResolver.class);
     private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     
-    private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localHostName");
-    
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(topicSimplifier, topicResolver, segmentResolver, containerSummaryResolver );
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver );
     
     @Test
     @SuppressWarnings("unchecked")
     public void testCanCreateSimpleItemFromFullItem() throws Exception {
         
         context.checking(new Expectations(){{
+            allowing(contentGroupResolver).findByIds(with(any(Iterable.class)));will(returnValue(ImmutableList.of()));
             allowing(topicResolver).topicsForIds(with(any(Iterable.class)));will(returnValue(ImmutableList.of()));
             allowing(segmentResolver).resolveById(with(any(Iterable.class)));will(returnValue(ImmutableMap.of()));
         }});
@@ -82,7 +86,7 @@ public class ItemModelSimplifierTest {
         CrewMember person = Actor.actor("hisID", "Andrew Collings", "Dirt-bag Humperdink", Publisher.BBC);
         fullItem.addPerson(person);
         
-        Item simpleItem = itemSimplifier.simplify(fullItem, Annotation.defaultAnnotations());
+        Item simpleItem = itemSimplifier.simplify(fullItem, Annotation.defaultAnnotations(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         List<org.atlasapi.media.entity.simple.Person> people = simpleItem.getPeople();
         org.atlasapi.media.entity.simple.Person simpleActor = Iterables.getOnlyElement(people);
         assertThat(simpleActor.getCharacter(), is("Dirt-bag Humperdink"));

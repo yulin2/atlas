@@ -10,10 +10,11 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.media.MimeType;
@@ -61,10 +62,10 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
 	}
 
     @Override
-    public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations) throws IOException {
+    public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations, ApplicationConfiguration config) throws IOException {
         MappedWriter<T> writer = findWriterFor(request);
         if (writer != null) {
-            writer.writeTo(request, response, graph, annotations);
+            writer.writeTo(request, response, graph, annotations, config);
         } else {
             writeNotFound(response);
         }
@@ -103,11 +104,11 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
 		}
 		
         @Override
-        public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations) throws IOException {
+        public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations, final ApplicationConfiguration config) throws IOException {
             response.setStatus(HttpStatusCode.OK.code());
             response.setCharacterEncoding(Charsets.UTF_8.toString());
             response.setContentType(mimeType.toString());
-            writer.writeTo(request, response, graph, annotations);
+            writer.writeTo(request, response, graph, annotations, config);
         }
 
 		@Override

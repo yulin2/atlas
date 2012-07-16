@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.health;
 
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.channel.Channel;
@@ -17,7 +19,7 @@ import com.metabroadcast.common.health.ProbeResult;
 public class ScheduleLivenessHealthProbe implements HealthProbe {
 
 	private ScheduleResolver scheduleResolver;
-	private Iterable<Channel> channels;
+	private Set<Channel> channels;
 	
 	private static final int TWELVE_POINT_FIVE_DAYS_IN_HOURS = 300;
 	public static final String SCHEDULE_HEALTH_PROBE_SLUG = "schedule-liveness";
@@ -27,16 +29,19 @@ public class ScheduleLivenessHealthProbe implements HealthProbe {
 	
 	public ScheduleLivenessHealthProbe(ScheduleResolver scheduleResolver, Iterable<Channel> channels, Publisher publisher) {
 		this.scheduleResolver = scheduleResolver;
-		this.channels = channels;
+		this.channels = ImmutableSet.copyOf(channels);
 		this.publisher = publisher;
 	}
 
 	@Override
 	public ProbeResult probe() throws Exception {
-		
+	    
 		ProbeResult result = null;
 		try {
 			result = new ProbeResult(title());
+			if (channels.isEmpty()) {
+			    result.addInfo("Channels", "not configured");
+			}
 			
 			DateTime startTime = new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS);
 			DateTime endTime = startTime.plusHours(12);

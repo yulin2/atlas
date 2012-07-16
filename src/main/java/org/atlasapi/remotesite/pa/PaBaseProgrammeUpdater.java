@@ -1,8 +1,5 @@
 package org.atlasapi.remotesite.pa;
 
-import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-
 import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,16 +27,20 @@ import javax.xml.bind.Unmarshaller.Listener;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -57,7 +58,13 @@ import com.metabroadcast.common.time.Timestamp;
 
 public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
+    private static final Logger log = LoggerFactory.getLogger(PaBaseProgrammeUpdater.class);
+    
+    private static final DateTimeFormatter FILEDATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
+    private static final DateTimeFormatter CHANNELINTERVAL_FORMAT = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZones.LONDON);
+    protected static final String SERVICE = "PA";
+    
+    
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
     private final PaChannelMap channelMap;
@@ -68,18 +75,16 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     private final ExecutorService executor;
     private final PaProgrammeDataStore dataStore;
     private final PaChannelProcessor processor;
-    private final AdapterLog log;
 
-    public PaBaseProgrammeUpdater(ExecutorService executor, PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, AdapterLog log) {
+    public PaBaseProgrammeUpdater(ExecutorService executor, PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver) {
         this.executor = executor;
         this.processor = processor;
         this.dataStore = dataStore;
         this.channelMap = new PaChannelMap(channelResolver);
-        this.log = log;
     }
     
-    public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, AdapterLog log) {
-        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver, log);
+    public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver) {
+        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver);
     }
     
     public void supportChannels(Iterable<Channel> channels) {
@@ -130,8 +135,9 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         		}
         	}
             
+        	reportStatus(String.format("%s files processed.", filesProcessed));
         } catch (Exception e) {
-            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception running PA updater"));
+            log.error("Exception running PA updater", e);
         }
     }
 
@@ -158,6 +164,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		        Matcher matcher = FILEDATE.matcher(filename);
 		        
 		        if (matcher.matches()) {
+		            log.info("Processing file " + file.toString());
 		            final File fileToProcess = dataStore.copyForProcessing(file);
 		            final Timestamp lastModified = Timestamp.of(fileToProcess.lastModified());
 		            final String fileDate = matcher.group(1);
@@ -166,9 +173,15 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		            
 		            reader.parse(fileToProcess.toURI().toString());
 		        }
+		        else {
+		            log.info("Not processing file " + file.toString() + " as filename format is not recognised");
+		            storeResult(FileUploadResult.failedUpload(SERVICE, file.getName()).withMessage("Format not recognised"));
+		        }
 		    } catch (Exception e) {
-		        log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error processing file " + file.toString()));
+		        storeResult(FileUploadResult.failedUpload(SERVICE, file.getName()).withCause(e));
+		        log.error("Error processing file " + file.toString(), e);
 		    }
+		    storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
 		}
 		
 		if (!shouldContinue()) {
@@ -187,7 +200,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		                programmesProcessed += processed.get();
 		            }
 		        } catch (Exception e) {
-		            log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Exception processing PA updater results"));
+		            log.error("Exception processing PA updater results", e);
 		        }
 		        reportStatus(String.format("%s files. Processed %s/%s jobs. %s programmes processed", Iterables.size(files), i, submitCount, programmesProcessed));
 		    }
@@ -215,7 +228,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		    	filesByDay.get(fileDate).add(file);
 		    }
 		    else {
-		    	log.record(warnEntry().withDescription("Ignoring file " + file.toURI().toString() + " as we were unable to parse for date"));
+		        log.warn("Ignoring file " + file.toURI().toString() + " as we were unable to parse for date");
 		    }
     	}
     	
@@ -259,13 +272,24 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                     
                     ChannelData channelData = (ChannelData) target;
                     
+                    Interval schedulePeriod;
+                    if(channelData.getStartTime() == null) {
+                        // Old format channel file, we revert to guessing the 
+                        // schedule period
+                        DateTime startTime = FILEDATE_FORMAT.parseDateTime(fileDate+"-06:00");
+                        schedulePeriod = new Interval(startTime, startTime.plusDays(1));                       
+                    }
+                    else {
+                        schedulePeriod = new Interval(CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getStartTime()), CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getEndTime()));
+                    }
+                    
                     Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
                     if (channel.hasValue() && isSupported(channel.requireValue()) && shouldContinue()) {
                         try {
                             final PaChannelData data = new PaChannelData(
                                     channel.requireValue(),
                                     channelData.getProgData(), 
-                                    DATE_FORMAT.parseDateTime(fileDate+"-06:00"), 
+                                    schedulePeriod, 
                                     getTimeZone(fileDate), 
                                     lastModified
                             );
@@ -277,7 +301,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                             });
                             submitted.add(future);
                         } catch (Throwable e) {
-                            log.record(errorEntry().withCause(new Exception(e)).withSource(getClass()).withDescription("Exception submit PA channel update job in file " + filename));
+                            log.error("Exception submitting PA channel update job in file " + filename, e);
                         }
                     }
                 }
@@ -289,14 +313,14 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         
         private final Channel channel;
         private final Iterable<ProgData> programmes;
-        private final DateTime day;
+        private final Interval schedulePeriod;
         private final DateTimeZone zone;
         private final Timestamp lastUpdated;
 
-        public PaChannelData(Channel channel, Iterable<ProgData> programmes, DateTime day, DateTimeZone zone, Timestamp lastUpdated) {
+        public PaChannelData(Channel channel, Iterable<ProgData> programmes, Interval schedulePeriod, DateTimeZone zone, Timestamp lastUpdated) {
             this.channel = channel;
             this.programmes = programmes;
-            this.day = day;
+            this.schedulePeriod = schedulePeriod;
             this.zone = zone;
             this.lastUpdated = lastUpdated;
         }
@@ -309,8 +333,8 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             return programmes;
         }
 
-        public DateTime day() {
-            return day;
+        public Interval schedulePeriod() {
+            return schedulePeriod;
         }
 
         public DateTimeZone zone() {
@@ -321,6 +345,10 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             return lastUpdated;
         }
         
+    }
+    
+    protected void storeResult(FileUploadResult result) {
+        // do nothing. subclasses may choose to implement
     }
 
     /**
@@ -334,7 +362,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
      */
     protected static DateTimeZone getTimeZone(String date) {
         String timezoneDateString = date + "-11:00";
-        DateTime timezoneDateTime = DATE_FORMAT.parseDateTime(timezoneDateString);
+        DateTime timezoneDateTime = FILEDATE_FORMAT.parseDateTime(timezoneDateString);
         DateTimeZone zone = timezoneDateTime.getZone();
         return DateTimeZone.forOffsetMillis(zone.getOffset(timezoneDateTime));
     }

@@ -2,6 +2,7 @@ package org.atlasapi.output;
 
 import java.io.IOException;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Test;
@@ -29,10 +30,10 @@ public class DispatchingAtlasModelWriterTest {
         final String model = "Hello";
 
         context.checking(new Expectations(){{
-            one(delegate).writeTo(request, response, model, ImmutableSet.<Annotation>of());
+            one(delegate).writeTo(request, response, model, ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         }});
         
-        writer.writeTo(request, response, model, ImmutableSet.<Annotation>of());
+        writer.writeTo(request, response, model, ImmutableSet.<Annotation>of(), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         
         context.assertIsSatisfied();
     }

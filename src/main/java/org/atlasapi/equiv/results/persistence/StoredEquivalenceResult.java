@@ -1,23 +1,25 @@
 package org.atlasapi.equiv.results.persistence;
 
+import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Table;
 
-public class RestoredEquivalenceResult {
+public class StoredEquivalenceResult implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     private final String id;
     private final String title;
     private final Table<String, String, Double> results;
-    private final Map<EquivalenceIdentifier, Double> totals;
+    private final List<CombinedEquivalenceScore> totals;
     private final DateTime resultTime;
     private final List<Object> desc;
 
-    public RestoredEquivalenceResult(String targetId, String targetTitle, Table<String, String, Double> results, Map<EquivalenceIdentifier, Double> totals, DateTime resultTime, List<Object> desc) {
+    public StoredEquivalenceResult(String targetId, String targetTitle, Table<String, String, Double> results, List<CombinedEquivalenceScore> totals, DateTime resultTime, List<Object> desc) {
         this.id = targetId;
         this.title = targetTitle;
         this.results = results;
@@ -38,7 +40,7 @@ public class RestoredEquivalenceResult {
         return results;
     }
 
-    public Map<EquivalenceIdentifier, Double> combinedResults() {
+    public List<CombinedEquivalenceScore> combinedResults() {
         return totals;
     }
 
@@ -60,8 +62,8 @@ public class RestoredEquivalenceResult {
         if(this == that) {
             return true;
         }
-        if(that instanceof RestoredEquivalenceResult) {
-            RestoredEquivalenceResult other = (RestoredEquivalenceResult) that;
+        if(that instanceof StoredEquivalenceResult) {
+            StoredEquivalenceResult other = (StoredEquivalenceResult) that;
             return id.equals(other.id) && title.equals(other.title) && results.equals(other.results) && totals.equals(other.totals) && resultTime.equals(resultTime);
         }
         return super.equals(that);

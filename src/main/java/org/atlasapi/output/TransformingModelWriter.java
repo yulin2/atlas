@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
+
 public abstract class TransformingModelWriter<I, O> implements AtlasModelWriter<I> {
     
     private final AtlasModelWriter<O> delegate;
@@ -15,11 +17,11 @@ public abstract class TransformingModelWriter<I, O> implements AtlasModelWriter<
     }
     
     @Override
-    public void writeTo(HttpServletRequest request, HttpServletResponse response, I model, Set<Annotation> annotations) throws IOException {
-        delegate.writeTo(request, response, transform(model,annotations), annotations);
+    public void writeTo(HttpServletRequest request, HttpServletResponse response, I model, Set<Annotation> annotations, ApplicationConfiguration config) throws IOException {
+        delegate.writeTo(request, response, transform(model,annotations, config), annotations, config);
     }
 
-    protected abstract O transform(I model, Set<Annotation> annotations);
+    protected abstract O transform(I model, Set<Annotation> annotations, ApplicationConfiguration config);
 
     @Override
     public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException {

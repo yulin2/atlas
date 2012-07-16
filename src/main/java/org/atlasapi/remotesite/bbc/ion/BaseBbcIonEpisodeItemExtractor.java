@@ -29,7 +29,7 @@ import com.metabroadcast.common.base.Maybe;
 
 public abstract class BaseBbcIonEpisodeItemExtractor {
 
-    private static final String CURIE_BASE = "bbc:";
+    protected static final String CURIE_BASE = "bbc:";
 
     private final BbcIonContributorPersonExtractor personExtractor = new BbcIonContributorPersonExtractor();
     private final RemoteSiteClient<IonContainerFeed> containerClient;
@@ -44,7 +44,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         this.containerClient = containerClient;
     }
 
-    public Item extract(IonEpisode source) {
+    protected Item extract(IonEpisode source) {
         Item item = null;
         if (source.getIsFilm()) {
             item = new Film(BbcFeeds.slashProgrammesUriForPid(source.getId()), CURIE_BASE+source.getId(), BBC);
@@ -63,7 +63,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         return setItemDetails(item, source);
     }
 
-    private void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
+    protected void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
         if(!Strings.isNullOrEmpty(episodeDetail.getSeriesId())) {
             item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
         }
@@ -90,12 +90,13 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         }
     }
 
-    private Item setItemDetails(Item item, IonEpisode episode) {
+    protected Item setItemDetails(Item item, IonEpisode episode) {
         
         item.setTitle(getTitle(episode));
         item.setDescription(episode.getSynopsis());
         item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
         item.setIsLongForm(true);
+        item.setLastUpdated(episode.getUpdated());
         
         if (!Strings.isNullOrEmpty(episode.getId())) {
             BbcImageUrlCreator.addImagesTo(episode.getMyImageBaseUrl().toString(), episode.getId(), item);
@@ -115,26 +116,20 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         return item;
     }
 
-    private void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {
-        String masterbrand = episode.getMasterbrand();
-        if(!Strings.isNullOrEmpty(masterbrand)) {
-            Maybe<MediaType> maybeMediaType = BbcIonMediaTypeMapping.mediaTypeForService(masterbrand);
-            if(maybeMediaType.hasValue()) {
-                item.setMediaType(maybeMediaType.requireValue());
-            } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("No mediaType mapping for " + masterbrand));
-            }
-            
-            Maybe<Specialization> maybeSpecialisation = BbcIonMediaTypeMapping.specialisationForService(masterbrand);
-            if(maybeSpecialisation.hasValue()) {
-                item.setSpecialization(maybeSpecialisation.requireValue());
-            } else {
-                log.record(warnEntry().withSource(getClass()).withDescription("No specialisation mapping for " + masterbrand));
+    protected void setMediaTypeAndSpecialisation(Item item, IonEpisode episode) {
+        if(!Strings.isNullOrEmpty(episode.getMediaType())) {
+            String mediaType = episode.getMediaType();
+            if (mediaType.equals("audio")) {
+                item.setMediaType(MediaType.AUDIO);
+                item.setSpecialization(Specialization.RADIO);
+            } else if (mediaType.equals("video")) {
+                item.setMediaType(MediaType.VIDEO);
+                item.setSpecialization(Specialization.TV);
             }
         }
     }
-
-    private String getTitle(IonEpisode episode) {
+    
+    protected String getTitle(IonEpisode episode) {
         String title = !Strings.isNullOrEmpty(episode.getOriginalTitle()) ? episode.getOriginalTitle() : episode.getTitle();
         if(!Strings.isNullOrEmpty(episode.getSubseriesTitle())) {
             title = String.format("%s %s", episode.getSubseriesTitle(), title);

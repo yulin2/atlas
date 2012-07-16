@@ -2,7 +2,6 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
 import static org.atlasapi.remotesite.bbc.BbcFeeds.slashProgrammesUriForPid;
 
 import org.atlasapi.media.entity.Brand;
@@ -21,9 +20,11 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.Duration;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
@@ -35,19 +36,26 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final AdapterLog log;
+
     private final BbcIonEpisodeItemContentExtractor itemExtractor;
+    private BbcIonBroadcastExtractor broadcastExtractor;
     
     private final BbcIonItemMerger merger = new BbcIonItemMerger();
     
     private SiteSpecificAdapter<Item> itemClient;
     private BbcContainerFetcherClient containerClient;
     private ItemsPeopleWriter itemsPeopleWriter;
+
+    private final ContentLock lock;
+
     
-    public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log, ContentLock lock) {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
+        this.lock = lock;
         this.itemExtractor = new BbcIonEpisodeItemContentExtractor(log);
+        this.broadcastExtractor = new BbcIonBroadcastExtractor();
     }
 
     public DefaultBbcIonBroadcastHandler withItemFetcherClient(SiteSpecificAdapter<Item> client) {
@@ -69,7 +77,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     public void handle(IonBroadcast broadcast) {
         String itemUri = slashProgrammesUriForPid(broadcast.getEpisodeId());
         try {
-                
+            lock.lock(itemUri);
             Item item = resolveOrFetchItem(broadcast, itemUri);
                 
             if(item == null) {
@@ -109,12 +117,16 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass())
                     .withDescription("Schedule Updater failed for %s %s, processing broadcast %s of %s", broadcast.getService(), broadcast.getDate(), broadcast.getId(), itemUri));
+        } finally {
+            lock.unlock(itemUri);
         }
     }
 
     private Item resolveOrFetchItem(IonBroadcast broadcast, String itemUri) {
+        Item item = null;
+        
         //Get basic item from latest remote data.
-        Item item = itemExtractor.extract(broadcast.getEpisode()); 
+        Item basicItem = itemExtractor.extract(broadcast.getEpisode()); 
 
         // look for existing item, merge into latest remote data, else fetch complete.
         Maybe<Identified> possibleIdentified = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
@@ -124,16 +136,31 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
                 log.record(new AdapterLogEntry(Severity.WARN).withDescription("Updating %s, expecting Item, got %s", itemUri, ided.getClass().getSimpleName()).withSource(getClass()));
                 return null;
             }
-            item = merger.merge(item, (Item)ided);
-        } else if (itemClient != null) {
+            item = merger.merge(fetchedFullItemIfPermitted(broadcast, itemUri).or(basicItem), (Item)ided);
+        } else {
+            item = fetchFullItem(itemUri).or(basicItem);
+        }
+        return item;
+    }
+
+    private Optional<Item> fetchedFullItemIfPermitted(IonBroadcast broadcast, String itemUri) {
+        return fullFetchPermitted(broadcast, itemUri) ? fetchFullItem(itemUri) : Optional.<Item>absent();
+    }
+
+    protected boolean fullFetchPermitted(IonBroadcast broadcast, String itemUri) {
+        return false;
+    }
+
+    private Optional<Item> fetchFullItem(String itemUri) {
+        Item fetchedItem = null;
+        if (itemClient != null) {
             try {
-                Item fetchedItem = itemClient.fetch(itemUri);
-                item = fetchedItem != null ? fetchedItem : item;
+                fetchedItem = itemClient.fetch(itemUri);
             } catch (Exception e) {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to fetch ", itemUri));
             }
         }
-        return item;
+        return Optional.fromNullable(fetchedItem);
     }
 
 //    private void merge(Item fetchedItem, Item existing) {
@@ -249,9 +276,11 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             item.addVersion(broadcastVersion);
         }
 
-        Broadcast broadcast = atlasBroadcastFrom(ionBroadcast);
-        if (broadcast != null) {
-            broadcastVersion.addBroadcast(broadcast);
+        Maybe<Broadcast> broadcast = broadcastExtractor.extract(ionBroadcast);
+        if (broadcast.hasValue()) {
+            broadcastVersion.addBroadcast(broadcast.requireValue());
+        } else {
+            log.record(AdapterLogEntry.warnEntry().withSource(getClass()).withDescription("Couldn't find service URI for Ion Service %s", ionBroadcast.getService()));
         }
     }
 
@@ -275,16 +304,4 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         return null;
     }
 
-    private Broadcast atlasBroadcastFrom(IonBroadcast ionBroadcast) {
-        String serviceUri = BbcIonServices.get(ionBroadcast.getService());
-        if (serviceUri == null) {
-            log.record(new AdapterLogEntry(WARN).withSource(getClass()).withDescription("Couldn't find service URI for Ion Service %s", ionBroadcast.getService()));
-            return null;
-        } else {
-            Broadcast broadcast = new Broadcast(serviceUri, ionBroadcast.getStart(), ionBroadcast.getEnd());
-            broadcast.withId(BBC_CURIE_BASE + ionBroadcast.getId()).setScheduleDate(ionBroadcast.getDate().toLocalDate());
-            broadcast.setLastUpdated(ionBroadcast.getUpdated());
-            return broadcast;
-        }
-    }
 }

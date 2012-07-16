@@ -30,6 +30,7 @@ import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Serializer;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.simple.Broadcast;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.Item;
@@ -48,6 +49,8 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.metabroadcast.common.http.HttpHeaders;
 import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
+import org.atlasapi.media.entity.simple.ContentGroup;
+import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 
 /**
  * Outputs simple URIplay model in plain XML format using JAXB.
@@ -82,14 +85,16 @@ public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
                 Broadcast.class,
                 PublisherDetails.class, 
                 Topic.class, 
-                TopicQueryResult.class);
+                TopicQueryResult.class,
+                ContentGroup.class,
+                ContentGroupQueryResult.class);
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
     }
 
     @Override
-	public void writeTo(final HttpServletRequest request, final HttpServletResponse response, T result, Set<Annotation> annotations) throws IOException {
+	public void writeTo(final HttpServletRequest request, final HttpServletResponse response, T result, Set<Annotation> annotations, ApplicationConfiguration config) throws IOException {
 		try {
             writeOut(request, response, result);
         } catch (JAXBException e) {

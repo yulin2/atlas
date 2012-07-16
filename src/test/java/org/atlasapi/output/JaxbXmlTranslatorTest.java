@@ -31,6 +31,7 @@ import nu.xom.Element;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
@@ -246,7 +247,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
 	}
 
     private Document serializeToXml(ContentQueryResult result) throws IOException, ParsingException, ValidityException {
-        translator.writeTo(request, response, result, ImmutableSet.copyOf(Annotation.values()));
+        translator.writeTo(request, response, result, ImmutableSet.copyOf(Annotation.values()), ApplicationConfiguration.DEFAULT_CONFIGURATION);
         
         String output = response.getResponseAsString();
 

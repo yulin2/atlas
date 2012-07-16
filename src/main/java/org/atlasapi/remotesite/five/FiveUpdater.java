@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import nu.xom.Builder;
+import nu.xom.Document;
 import nu.xom.Element;
+import nu.xom.Elements;
 import nu.xom.NodeFactory;
 import nu.xom.Nodes;
 
@@ -16,6 +18,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.channel4.RequestLimitingRemoteSiteClient;
 
+import com.google.common.base.Throwables;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpResponsePrologue;
@@ -36,30 +39,32 @@ public class FiveUpdater extends ScheduledTask {
     private final FiveBrandProcessor processor;
     private final Timestamper timestamper = new SystemClock();
 
-    private final Builder parser = new Builder(new ShowProcessingNodeFactory());
+    private final Builder parser = new Builder();
     private SimpleHttpClient streamHttpClient;
 
     public FiveUpdater(ContentWriter contentWriter, AdapterLog log) {
         this.log = log;
         this.streamHttpClient = buildFetcher(log);
-        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(HttpClients.webserviceClient()), 4));
+        this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher(log)), 4));
     }
 
     private SimpleHttpClient buildFetcher(final AdapterLog log) {
         return new SimpleHttpClientBuilder()
             .withUserAgent(HttpClients.ATLAS_USER_AGENT)
             .withSocketTimeout(30, TimeUnit.SECONDS)
+            .withTrustUnverifiedCerts()
             .withRetries(3)
             .build();
     }
     
-    private final HttpResponseTransformer<Void> TRANSFORMER = new HttpResponseTransformer<Void>() {
+    private final HttpResponseTransformer<Document> TRANSFORMER = new HttpResponseTransformer<Document>() {
         @Override
-        public Void transform(HttpResponsePrologue response, InputStream in) throws HttpException, IOException {
+        public Document transform(HttpResponsePrologue response, InputStream in) throws HttpException, IOException {
             try {
-                parser.build(in);
+                return parser.build(in);
             } catch (Exception e) {
                 log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+                Throwables.propagate(e);
             }
             return null;
         }
@@ -71,22 +76,24 @@ public class FiveUpdater extends ScheduledTask {
             Timestamp start = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update started from " + BASE_API_URL).withSource(getClass()));
             
-            streamHttpClient.get(new SimpleHttpRequest<Void>(BASE_API_URL + "/shows", TRANSFORMER));
+            process(streamHttpClient.get(new SimpleHttpRequest<Document>(BASE_API_URL + "/shows", TRANSFORMER)));
             
             Timestamp end = timestamper.timestamp();
             log.record(new AdapterLogEntry(Severity.INFO).withDescription("Five update completed in " + start.durationTo(end).getStandardSeconds() + " seconds").withSource(getClass()));
         }
         catch (Exception e) {
             log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(getClass()).withDescription("Exception when processing shows document"));
+            Throwables.propagate(e);
         }
     }
     
-    private class ShowProcessingNodeFactory extends NodeFactory {
-
+    private void process(Document document) {
         int processed = 0, failed = 0;
         
-        @Override
-        public Nodes finishMakingElement(Element element) {
+        Elements elements = document.getRootElement().getFirstChildElement("shows").getChildElements();
+        for(int i = 0; i < elements.size(); i++) {
+            Element element = elements.get(i);
+        
             if (element.getLocalName().equalsIgnoreCase("show")) {
                 try {
                     processor.processShow(element);
@@ -96,12 +103,8 @@ public class FiveUpdater extends ScheduledTask {
                     failed++;
                 }
                 reportStatus(String.format("%s processed. %s failed", ++processed, failed));
-            } else if (element.getLocalName().equalsIgnoreCase("shows")){
-                processed = 0;
-                failed = 0;
             }
-            
-            return super.finishMakingElement(element);
         }
     }
+
 }

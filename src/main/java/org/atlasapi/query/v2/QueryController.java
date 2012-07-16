@@ -23,26 +23,29 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.HttpStatusCode;
-import com.metabroadcast.common.query.Selection;
 
 @Controller
-public class QueryController extends BaseController<Content> {
+public class QueryController extends BaseController<QueryResult<Content, ? extends Identified>> {
 	
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
 	private final KnownTypeQueryExecutor executor;
 	
-    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<Content>> outputter) {
+    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content, ? extends Identified>> outputter) {
 	    super(configFetcher, log, outputter);
         this.executor = executor;
 	}
@@ -66,17 +69,14 @@ public class QueryController extends BaseController<Content> {
 	public void content(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
 			ContentQuery filter = builder.build(request);
-
-			if (!Selection.ALL.equals(filter.getSelection())) {
-				throw new IllegalArgumentException("Cannot specifiy a limit or offset here");
-			}
+			
 			List<String> uris = getUriList(request);
 			if(!uris.isEmpty()) {
-			    modelAndViewFor(request, response, Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class));
+			    modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeUriQuery(uris, filter).values()),Content.class)),filter.getConfiguration());
 			} else {
 			    List<String> ids = getIdList(request);
 			    if(!ids.isEmpty()) {
-			        modelAndViewFor(request, response, Iterables.filter(Iterables.concat(executor.executeUriQuery(ids, filter).values()),Content.class));
+			        modelAndViewFor(request, response, QueryResult.of(Iterables.filter(Iterables.concat(executor.executeIdQuery(decode(ids), filter).values()),Content.class)),filter.getConfiguration());
 			    } else {
 			        throw new IllegalArgumentException("Must specify content uri or id");
 			    }
@@ -85,6 +85,15 @@ public class QueryController extends BaseController<Content> {
 			errorViewFor(request, response, AtlasErrorSummary.forException(e));
 		}
 	}
+
+    private Iterable<Long> decode(List<String> ids) {
+        return Lists.transform(ids, new Function<String, Long>() {
+            @Override
+            public Long apply(String input) {
+                return idCodec.decode(input).longValue();
+            }
+        });
+    }
 
     private List<String> getUriList(HttpServletRequest request) {
         return split(request.getParameter("uri"));
