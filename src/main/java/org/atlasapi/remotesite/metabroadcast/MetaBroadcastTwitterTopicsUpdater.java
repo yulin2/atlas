@@ -82,9 +82,9 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
     @Override
     protected Relationship topicRefRelationship() {
         if (namespace.equals(TWITTER_NS_FOR_AUDIENCE)) {
-        return TopicRef.Relationship.TWITTER_AUDIENCE;
+            return TopicRef.Relationship.TWITTER_AUDIENCE;
         } else {
-        return TopicRef.Relationship.TWITTER_AUDIENCE_RELATED;
+            return TopicRef.Relationship.TWITTER_AUDIENCE_RELATED;
         }
     }
     

@@ -112,12 +112,12 @@ public class ContentTwitterTopicsUpdater {
     public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
         Builder<TopicRef> topicRefs = ImmutableSet.builder();
         for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-            Topic topic = topicStore.topicFor(TWITTER_NS, wordWeighting.getUrl()).valueOrNull();
+            Topic topic = topicStore.topicFor(Publisher.DBPEDIA.key(), wordWeighting.getUrl()).valueOrNull();
             if (topic == null) {
                 throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
             } else {
                 topic.setTitle(wordWeighting.getContent());
-                topic.setPublisher(Publisher.METABROADCAST);
+                topic.setPublisher(Publisher.DBPEDIA);
                 topic.setType(Topic.Type.SUBJECT);
                 topicStore.write(topic);
                 topicRefs.add(new TopicRef(topic, wordWeighting.getWeight() / 100.0f, false, TopicRef.Relationship.ABOUT));
