@@ -171,6 +171,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
                 org.atlasapi.media.entity.simple.TopicRef tr = new org.atlasapi.media.entity.simple.TopicRef();
                 tr.setSupervised(topicRef.isSupervised());
                 tr.setWeighting(topicRef.getWeighting());
+                tr.setRelationship(topicRef.getRelationship().toString());
                 tr.setTopic(topicSimplifier.simplify(topics.get(topicRef.getTopic()), annotations, config));
                 return tr;
             }
