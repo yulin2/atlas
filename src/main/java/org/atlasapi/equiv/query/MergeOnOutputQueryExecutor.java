@@ -167,11 +167,11 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 	}
 
     private <T extends Content> void mergeTopics(T chosen, Iterable<T> notChosen) {
-        chosen.setTopicRefs(Iterables.concat(chosen.getTopicRefs(),
+        chosen.setTopicRefs(Iterables.concat(Iterables.transform(chosen.getTopicRefs(), new TopicPublisherSetter(chosen)),
             Iterables.concat(Iterables.transform(notChosen, new Function<T, Iterable<TopicRef>>() {
                 @Override
                 public Iterable<TopicRef> apply(T input) {
-                    return input.getTopicRefs();
+                    return Iterables.transform(input.getTopicRefs(), new TopicPublisherSetter(input));
                 }
             }))
         ));
@@ -298,4 +298,20 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 		
 		public abstract <T extends Item> Iterable<T> merge(List<T> items, List<T> matches);
 	}
+    
+    private final static class TopicPublisherSetter implements Function<TopicRef, TopicRef> {
+
+        private final Content publishedContent;
+
+        public TopicPublisherSetter(Content publishedContent) {
+            this.publishedContent = publishedContent;
+        }
+        
+        @Override
+        public TopicRef apply(TopicRef input) {
+            input.setPublisher(publishedContent.getPublisher());
+            return input;
+        }
+        
+    }
 }
