@@ -17,9 +17,11 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ReleaseDate;
 import org.atlasapi.media.entity.Subtitles;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
@@ -137,7 +139,6 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			}
 		};
 	}
-	
 
 	public <T extends Item> void mergeIn(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
 		for (Item notChosenItem : notChosen) {
@@ -146,11 +147,35 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
 			}
 		}
 		applyImagePrefs(config, chosen, notChosen);
+		mergeTopics(chosen, notChosen);
+		mergeKeyPhrases(chosen, notChosen);
 		mergeVersions(chosen, notChosen);
 		if (chosen instanceof Film) {
 		    mergeFilmProperties(config, (Film)chosen, Iterables.filter(notChosen, Film.class));
 		}
 	}
+	
+	private <T extends Content> void mergeKeyPhrases(T chosen, Iterable<T> notChosen) {
+	    chosen.setKeyPhrases(Iterables.concat(chosen.getKeyPhrases(),
+            Iterables.concat(Iterables.transform(notChosen, new Function<T, Iterable<KeyPhrase>>() {
+                @Override
+                public Set<KeyPhrase> apply(T input) {
+                    return input.getKeyPhrases();
+                }
+            }))
+        ));
+	}
+
+    private <T extends Content> void mergeTopics(T chosen, Iterable<T> notChosen) {
+        chosen.setTopicRefs(Iterables.concat(chosen.getTopicRefs(),
+            Iterables.concat(Iterables.transform(notChosen, new Function<T, Iterable<TopicRef>>() {
+                @Override
+                public Iterable<TopicRef> apply(T input) {
+                    return input.getTopicRefs();
+                }
+            }))
+        ));
+    }
 
 	private void mergeFilmProperties(ApplicationConfiguration config, Film chosen, Iterable<Film> notChosen) {
 	    Builder<Subtitles> subtitles = ImmutableSet.<Subtitles>builder().addAll(chosen.getSubtitles());
@@ -219,6 +244,8 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     };
 	
 	public <T extends Item> void mergeIn(ApplicationConfiguration config, Container chosen, List<Container> notChosen) {
+	    mergeTopics(chosen, notChosen);
+	    mergeKeyPhrases(chosen, notChosen);
 		applyImagePrefs(config, chosen, notChosen);
 	}
 	
