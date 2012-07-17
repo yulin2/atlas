@@ -26,18 +26,21 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.net.HostSpecifier;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class MetaBroadcastModule {
-	
+    
     private @Value("${cannon.host.name}") String cannonHostName;
     private @Value("${cannon.host.port}") Integer cannonHostPort;
-	private @Value("${s3.access}") String s3access;
-	private @Value("${s3.secret}") String s3secret;
-	private @Value("${magpie.s3.bucket}") String s3Bucket;
-	private @Value("${magpie.s3.folder}") String s3folder;
+    private @Value("${s3.access}") String s3access;
+    private @Value("${s3.secret}") String s3secret;
+    private @Value("${magpie.s3.bucket}") String s3Bucket;
+    private @Value("${magpie.s3.folder}") String s3folder;
+    
+    private @Autowired DatabasedMongo mongo;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
     private @Autowired @Qualifier("topicStore") TopicStore topicStore;
@@ -61,28 +64,33 @@ public class MetaBroadcastModule {
 
     @Bean
     CannonTwitterTopicsUpdater twitterUpdaterTask() {
-		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
-		        new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_PROGRAMMES, log));
-	}
+        return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
+                new MetaBroadcastTwitterTopicsUpdater(cannonTopicsClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_PROGRAMMES, log));
+    }
     
     @Bean
-	MagpieUpdaterTask magpieUpdaterTask() {
-		return new MagpieUpdaterTask(magpieUpdater());
-	}
+    MagpieUpdaterTask magpieUpdaterTask() {
+        return new MagpieUpdaterTask(magpieResultsSource(), magpieUpdater(), new MongoSchedulingStore(mongo));
+    }
+    
+    @Bean
+    RemoteMagpieResultsSource magpieResultsSource() {
+        return new S3MagpieResultsSource(awsService(), s3Bucket, s3folder);
+    }
 
-	@Bean
-	CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
-		return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
-		        new MetaBroadcastTwitterTopicsUpdater(cannonPeopleTalkClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_AUDIENCE, log));
-	}
-	
+    @Bean
+    CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
+        return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
+                new MetaBroadcastTwitterTopicsUpdater(cannonPeopleTalkClient(), contentResolver, topicStore, topicResolver, contentWriter, TWITTER_NS_FOR_AUDIENCE, log));
+    }
+    
     @Bean
     MetaBroadcastMagpieUpdater magpieUpdater() {
-		return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
-				topicResolver, contentWriter, awsService(), s3Bucket, s3folder, log);
-	}
+        return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
+                topicResolver, contentWriter);
+    }
 
-	@Bean 
+    @Bean 
     CannonTwitterTopicsClient cannonTopicsClient() {
         try {
             return new CannonTwitterTopicsClient(webserviceClient(), HostSpecifier.from(cannonHostName), Optional.fromNullable(cannonHostPort), log, CONTENT_WORDS_LIST_FOR_PROGRAMMES, CONTENT_WORDS_FOR_PROGRAMMES);
@@ -102,11 +110,11 @@ public class MetaBroadcastModule {
     
     @Bean
     S3Service awsService() {
-		try {
-			return new RestS3Service(new AWSCredentials(s3access, s3secret));
-		} catch (S3ServiceException e) {
+        try {
+            return new RestS3Service(new AWSCredentials(s3access, s3secret));
+        } catch (S3ServiceException e) {
             throw Throwables.propagate(e);
-		}
+        }
     }
     
 }
