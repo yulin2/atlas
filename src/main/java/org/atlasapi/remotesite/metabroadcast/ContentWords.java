@@ -17,14 +17,14 @@ public class ContentWords {
         private String type;
         
         public WordWeighting(){
-		}
+        }
         
         public WordWeighting(String content, int weight, String url, String value, String type){
-        	this.content = content;
-        	this.weight = weight;
-        	this.url = url;
-        	this.value = value;
-        	this.type = type;
+            this.content = content;
+            this.weight = weight;
+            this.url = url;
+            this.value = value;
+            this.type = type;
         }
         
         public String getContent() {
