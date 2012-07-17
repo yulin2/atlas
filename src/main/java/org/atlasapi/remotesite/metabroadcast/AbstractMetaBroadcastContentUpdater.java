@@ -22,8 +22,6 @@ import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.ContentWordsList;
@@ -44,61 +42,59 @@ import com.metabroadcast.common.base.Maybe;
 
 public abstract class AbstractMetaBroadcastContentUpdater {
 
-    private final static Logger logger = LoggerFactory.getLogger(AbstractMetaBroadcastContentUpdater.class);
+    private final static Logger log = LoggerFactory.getLogger(AbstractMetaBroadcastContentUpdater.class);
+
     protected final String namespace;
     protected final TopicStore topicStore;
     protected final TopicQueryResolver topicResolver;
     protected final ContentWriter contentWriter;
     protected final ContentResolver contentResolver;
-    protected final AdapterLog log;
     protected final Publisher publisher;
 
-    public abstract UpdateProgress updateTopics(List<String> contentIds);
-
-    protected AbstractMetaBroadcastContentUpdater(ContentResolver contentResolver, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log, String namespace, Publisher publisher) {
+    protected AbstractMetaBroadcastContentUpdater(ContentResolver contentResolver, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, String namespace, Publisher publisher) {
         this.contentResolver = contentResolver;
         this.topicStore = topicStore;
         this.topicResolver = topicResolver;
         this.contentWriter = contentWriter;
-        this.log = log;
         this.namespace = namespace;
         this.publisher = publisher;
     }
 
-    protected UpdateProgress createOrUpdateContent(ResolvedContent resolvedContent, ResolvedContent resolvedMetaBroadcastContent,
-            ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases) {
-        UpdateProgress result;
+    protected UpdateProgress createOrUpdateContent(ResolvedContent resolvedContent, ResolvedContent resolvedMetaBroadcastContent, ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases) {
         try {
             String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
-            logger.debug("Processing content {}", mbUri);
+            log.debug("Processing content {}", mbUri);
             Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.get(mbUri);
-            if (possibleMetaBroadcastContent.hasValue()) {
-                // Content exists, update it
+            if (possibleMetaBroadcastContent.hasValue()) { // Content exists,
+                                                           // update it
                 updateExistingContent(contentWordSet, possibleMetaBroadcastContent, keyPhrases);
-                result = SUCCESS;
-            } else {
-                // Generate new content
+            } else { // Generate new content
                 createThenUpdateContent(resolvedContent, contentWordSet, mbUri, keyPhrases);
-                result = SUCCESS;
             }
+            return SUCCESS;
         } catch (Exception e) {
-            log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to update topics for %s", contentWordSet.getUri()));
-            result = FAILURE;
+            log.error("Topic update failed", e);
+            return FAILURE;
         }
-        return result;
     }
 
-    private void createThenUpdateContent(ResolvedContent resolvedContent, ContentWords contentWordSet, String mbUri,
-            Optional<List<KeyPhrase>> keyPhrase) {
-        String newCuri = ""; // TODO define a curie at some point
-        Identified identified = resolvedContent.get(contentWordSet.getUri()).requireValue();
-        Content content = getNewContent(identified, mbUri, newCuri);
-        content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
-        if (keyPhrase.isPresent()) {
-            content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
+    private void createThenUpdateContent(ResolvedContent resolvedContent, ContentWords contentWordSet, String mbUri, Optional<List<KeyPhrase>> keyPhrase) {
+        String subjectUri = contentWordSet.getUri();
+        Maybe<Identified> possibleContent = resolvedContent.get(subjectUri);
+        if (possibleContent.hasValue()) {
+            Identified identified = possibleContent.requireValue();
+            String newCuri = ""; // TODO define a curie at some point
+            Content content = getNewContent(identified, mbUri, newCuri);
+            content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
+            if (keyPhrase.isPresent()) {
+                content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
+            }
+            content.addEquivalentTo((Described) identified); // TODO check
+                                                             // equivalent to
+            write(content);
+        } else {
+            throw new IllegalStateException("Couldn't resolve content " + subjectUri);
         }
-        content.addEquivalentTo((Described) identified); //TODO check equivalent to
-        write(content);
     }
 
     private void updateExistingContent(ContentWords contentWordSet, Maybe<Identified> possibleMetaBroadcastContent, Optional<List<KeyPhrase>> keyPhrase) {
@@ -141,7 +137,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
         Maybe<Identified> auxDataBrand = content.get(auxDataUri);
         if (auxDataBrand.isNothing()) {
             Brand brand = new Brand(auxDataUri, "", publisher);
-            auxDataBrand = Maybe.<Identified>just(brand);
+            auxDataBrand = Maybe.<Identified> just(brand);
         }
         Brand brand = (Brand) auxDataBrand.requireValue();
         brand.addEquivalentTo((Described) content.get(originalUri).requireValue());
@@ -170,7 +166,6 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 
     private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {
         return Iterables.filter(topicRefs, new Predicate<TopicRef>() {
-
             @Override
             public boolean apply(TopicRef input) {
                 return !input.getRelationship().equals(topicRefRelationship());
@@ -207,7 +202,6 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 
     public Iterable<String> urisForWords(ContentWordsList contentWords) {
         return ImmutableSet.copyOf(Iterables.transform(contentWords.getResults(), new Function<ContentWords, String>() {
-
             @Override
             public String apply(ContentWords input) {
                 return input.getUri();
