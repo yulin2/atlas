@@ -6,6 +6,8 @@ import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
+import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.entity.TopicRef.Relationship;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -17,48 +19,46 @@ import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 
 import com.google.common.base.Optional;
-import com.hp.hpl.jena.sparql.function.library.namespace;
-import org.atlasapi.media.entity.TopicRef;
-import org.atlasapi.media.entity.TopicRef.Relationship;
 
 public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastContentUpdater {
     
     public static final String TWITTER_NS_FOR_AUDIENCE = "twitter";
     public static final String TWITTER_NS_FOR_AUDIENCE_RELATED = "twitter:audience-related";
     //
-	private final ContentResolver contentResolver;
-	private final CannonTwitterTopicsClient cannonTopicsClient;
+    
+    private final ContentResolver contentResolver;
+    private final CannonTwitterTopicsClient cannonTopicsClient;
 
-	public MetaBroadcastTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, 
-			TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, String namespace, AdapterLog log) {
-		super(contentResolver, topicStore, topicResolver, contentWriter, log, namespace, Publisher.VOILA);
-		this.cannonTopicsClient = cannonTopicsClient;
-		this.contentResolver = contentResolver;
-	}
+    public MetaBroadcastTwitterTopicsUpdater(CannonTwitterTopicsClient cannonTopicsClient, ContentResolver contentResolver, 
+            TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, String namespace, AdapterLog log) {
+        super(contentResolver, topicStore, topicResolver, contentWriter, namespace, Publisher.VOILA);
+        this.cannonTopicsClient = cannonTopicsClient;
+        this.contentResolver = contentResolver;
+    }
 
-	public UpdateProgress updateTopics(List<String> contentIds) {
+    public UpdateProgress updateTopics(List<String> contentIds) {
 
-		Optional<ContentWordsList> possibleContentWords = cannonTopicsClient.getContentWordsForIds(contentIds);
+        Optional<ContentWordsList> possibleContentWords = cannonTopicsClient.getContentWordsForIds(contentIds);
 
-		if (!possibleContentWords.isPresent()) {
-			return new UpdateProgress(0, contentIds.size());
-		}
+        if (!possibleContentWords.isPresent()) {
+            return new UpdateProgress(0, contentIds.size());
+        }
 
-		ContentWordsList contentWords = possibleContentWords.get();
+        ContentWordsList contentWords = possibleContentWords.get();
 
-		Iterable<String> uris = urisForWords(contentWords);
-		List<String> uriToMetaBroadcastUri = generateMetaBroadcastUris(uris);
+        Iterable<String> uris = urisForWords(contentWords);
+        List<String> uriToMetaBroadcastUri = generateMetaBroadcastUris(uris);
 
-		ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
-		ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(uriToMetaBroadcastUri);
-		Optional<List<KeyPhrase>> key = Optional.absent();
-		
-		UpdateProgress result = UpdateProgress.START;
-		for (ContentWords contentWordSet : contentWords) {
-			result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, contentWordSet, key));
-		}
-		return result;
-	}
+        ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
+        ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(uriToMetaBroadcastUri);
+        Optional<List<KeyPhrase>> key = Optional.absent();
+        
+        UpdateProgress result = UpdateProgress.START;
+        for (ContentWords contentWordSet : contentWords) {
+            result = result.reduce(createOrUpdateContent(resolvedContent, resolvedMetaBroadcastContent, contentWordSet, key));
+        }
+        return result;
+    }
 
     @Override
     protected Type topicTypeFromSource(String source) {
