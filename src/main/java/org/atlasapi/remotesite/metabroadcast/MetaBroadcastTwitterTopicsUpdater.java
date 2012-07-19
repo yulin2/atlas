@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.metabroadcast;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
@@ -17,6 +18,7 @@ import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 
 public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastContentUpdater {
 
@@ -71,5 +73,15 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
     @Override
     protected String topicValueFromWordWeighting(WordWeighting weighting) {
         return weighting.getUrl();
+    }
+    
+
+    private Iterable<String> urisForWords(ContentWordsList contentWordsList) {
+        List<ContentWords> results = contentWordsList.getResults();
+        Set<String> uris = Sets.newHashSetWithExpectedSize(results.size());
+        for (ContentWords contentWords : results) {
+            uris.add(contentWords.getUri());
+        }
+        return uris;
     }
 }

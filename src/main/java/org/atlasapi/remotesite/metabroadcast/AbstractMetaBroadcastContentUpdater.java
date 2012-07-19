@@ -24,13 +24,11 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.remotesite.metabroadcast.ContentWords.ContentWordsList;
 import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
@@ -65,8 +63,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
             log.debug("Processing content {}", mbUri);
             Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.get(mbUri);
-            if (possibleMetaBroadcastContent.hasValue()) { // Content exists,
-                                                           // update it
+            if (possibleMetaBroadcastContent.hasValue()) { // Content exists, update it
                 updateExistingContent(contentWordSet, possibleMetaBroadcastContent, keyPhrases);
             } else { // Generate new content
                 createThenUpdateContent(resolvedContent, contentWordSet, mbUri, keyPhrases);
@@ -111,15 +108,17 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             return new Brand(newUri, newCuri, publisher);
         } else if (originalContent instanceof Series) {
             Series originalSeries = (Series) originalContent;
-            Brand brand = getOrCreateBrand(originalSeries.getParent().getUri());
             Series series = new Series(newUri, newCuri, publisher);
-            series.setParent(brand);
+            if (originalSeries.getParent() != null) {
+                Brand brand = (Brand) getOrCreateContainer(originalSeries.getParent().getUri());
+                series.setParent(brand);
+            }
             return series;
         } else if (originalContent instanceof Clip) {
             return new Clip(newUri, newCuri, publisher);
         } else if (originalContent instanceof Episode) {
             Episode originalEpisode = (Episode) originalContent;
-            Brand brand = getOrCreateBrand(originalEpisode.getContainer().getUri());
+            Container brand = getOrCreateContainer(originalEpisode.getContainer().getUri());
             Episode episode = new Episode(newUri, newCuri, publisher);
             episode.setContainer(brand);
             return episode;
@@ -131,19 +130,26 @@ public abstract class AbstractMetaBroadcastContentUpdater {
         throw new IllegalArgumentException("Unrecognised type of content: " + originalContent.getClass().getName());
     }
 
-    private Brand getOrCreateBrand(String originalUri) {
+    private Container getOrCreateContainer(String originalUri) {
         String auxDataUri = generateMetaBroadcastUri(originalUri);
         ResolvedContent content = contentResolver.findByCanonicalUris(ImmutableList.of(auxDataUri, originalUri));
-        Maybe<Identified> auxDataBrand = content.get(auxDataUri);
-        if (auxDataBrand.isNothing()) {
-            Brand brand = new Brand(auxDataUri, "", publisher);
-            auxDataBrand = Maybe.<Identified> just(brand);
+        Container originalContent = (Container) content.get(originalUri).requireValue();
+        Maybe<Identified> possibleAuxDataContainer = content.get(auxDataUri);
+        Container container;
+        if (possibleAuxDataContainer.hasValue()) {
+            container = (Container) possibleAuxDataContainer.requireValue();
+        } else {
+            if (originalContent instanceof Brand) {
+                container = new Brand(auxDataUri, "", publisher);
+            } else if (originalContent instanceof Series) {
+                container = new Series(auxDataUri, "", publisher);
+            } else {
+                throw new IllegalStateException(originalUri + " has unexpected type " + originalContent.getClass().getSimpleName());
+            }
         }
-        Brand brand = (Brand) auxDataBrand.requireValue();
-        brand.addEquivalentTo((Described) content.get(originalUri).requireValue());
-        contentWriter.createOrUpdate(brand);
-        return brand;
-
+        container.addEquivalentTo(originalContent);
+        contentWriter.createOrUpdate(container);
+        return container;
     }
 
     protected List<String> generateMetaBroadcastUris(Iterable<String> uris) {
@@ -200,15 +206,6 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             }
         }
         return topicRefs;
-    }
-
-    public Iterable<String> urisForWords(ContentWordsList contentWords) {
-        return ImmutableSet.copyOf(Iterables.transform(contentWords.getResults(), new Function<ContentWords, String>() {
-            @Override
-            public String apply(ContentWords input) {
-                return input.getUri();
-            }
-        }));
     }
 
     protected abstract Topic.Type topicTypeFromSource(String dbpedia);
