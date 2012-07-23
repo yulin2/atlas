@@ -29,6 +29,7 @@ import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
@@ -49,7 +50,6 @@ import org.joda.time.Interval;
 import org.joda.time.format.DateTimeFormat;
 
 import com.google.common.base.Function;
-import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -219,7 +219,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 contentWriter.createOrUpdate(item);
                 personWriter.createOrUpdatePeople(item);
             }
-            return new ItemRefAndBroadcast(itemAndBroadcast.requireValue().getItem(), itemAndBroadcast.requireValue().getBroadcast());
+            return new ItemRefAndBroadcast(itemAndBroadcast.requireValue().getItem(), itemAndBroadcast.requireValue().getBroadcast().requireValue());
         } catch (Exception e) {
         	e.printStackTrace();
         	log.record(new AdapterLogEntry(Severity.ERROR).withCause(e).withSource(PaProgrammeProcessor.class).withDescription(e.getMessage()));
@@ -295,8 +295,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         Broadcast broadcast = broadcast(progData, channel, timeZone, updatedAt);
         addBroadcast(version, broadcast);
-        
-        return new ItemAndBroadcast(item, broadcast);
+
+        return Maybe.just(new ItemAndBroadcast(item, Maybe.just(broadcast)));
     }
     
     private String getClosedOrTbcPostfix(Channel channel) {
@@ -408,7 +408,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             film.setYear(Integer.parseInt(progData.getFilmYear()));
         }
         
-        return Maybe.just(new ItemAndBroadcast(film, broadcast));
+        return Maybe.just(new ItemAndBroadcast(film, Maybe.just(broadcast)));
     }
     
     private Broadcast setCommonDetails(ProgData progData, Channel channel, DateTimeZone zone, Item episode, Timestamp updatedAt) {
@@ -522,7 +522,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             // sometimes we don't get valid numbers
         }
         
-        return Maybe.just(new ItemAndBroadcast(item, broadcast));
+        return Maybe.just(new ItemAndBroadcast(item, Maybe.just(broadcast)));
     }
 
     private Item convertItemToEpisode(Item item) {
@@ -695,38 +695,5 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             return value.equalsIgnoreCase(YES);
         }
         return null;
-    }
-    
-    public static final class ItemAndBroadcast {
-    	
-    	private final Item item;
-    	private final Broadcast broadcast;
-    	
-    	public ItemAndBroadcast(Item item, Broadcast broadcast) {
-    		this.item = item;
-    		this.broadcast = broadcast;
-    	}
-    	
-    	@Override 
-    	public int hashCode() {
-    		return Objects.hashCode(item, broadcast);
-    	}
-    	
-    	@Override
-    	public boolean equals(Object obj) {
-    		if(obj instanceof ItemAndBroadcast) {
-    			ItemAndBroadcast other = (ItemAndBroadcast) obj;
-    			return item.equals(other.item) && broadcast.equals(other.broadcast);
-    		}
-    		return false;
-    	}
-    	
-    	public Broadcast getBroadcast() {
-    		return broadcast;
-    	}
-    	
-    	public Item getItem() {
-    		return item;
-    	}
     }
 }

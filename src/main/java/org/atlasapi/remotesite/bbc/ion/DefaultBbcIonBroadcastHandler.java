@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
@@ -74,32 +75,32 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     }
 
     @Override
-    public void handle(IonBroadcast broadcast) {
-        String itemUri = slashProgrammesUriForPid(broadcast.getEpisodeId());
+    public Maybe<ItemAndBroadcast> handle(IonBroadcast ionBroadcast) {
+        String itemUri = slashProgrammesUriForPid(ionBroadcast.getEpisodeId());
         try {
             lock.lock(itemUri);
-            Item item = resolveOrFetchItem(broadcast, itemUri);
+            Item item = resolveOrFetchItem(ionBroadcast, itemUri);
                 
             if(item == null) {
-                return;
+                return Maybe.nothing();
             }
                 
-                //ensure broadcast is included.
-            addBroadcastToItem(item, broadcast);
+            //ensure broadcast is included.
+            Maybe<Broadcast> broadcast = addBroadcastToItem(item, ionBroadcast);
 
             String canonicalUri = item.getCanonicalUri();
 
-            Brand brand = !Strings.isNullOrEmpty(broadcast.getBrandId()) ? getOrCreateBrand(broadcast, canonicalUri) : null;
-            Series series = !Strings.isNullOrEmpty(broadcast.getSeriesId()) ? getOrCreateSeries(broadcast, canonicalUri) : null;
+            Brand brand = !Strings.isNullOrEmpty(ionBroadcast.getBrandId()) ? getOrCreateBrand(ionBroadcast, canonicalUri) : null;
+            Series series = !Strings.isNullOrEmpty(ionBroadcast.getSeriesId()) ? getOrCreateSeries(ionBroadcast, canonicalUri) : null;
 
             if (brand != null) {
-                updateBrand(brand, broadcast);
+                updateBrand(brand, ionBroadcast);
                 item.setContainer(brand);
                 writer.createOrUpdate(brand);
             }
 
             if (series != null) {
-                updateSeries(series, broadcast);
+                updateSeries(series, ionBroadcast);
                 updateEpisodeSeriesDetails(series, (Episode) item);
                 if (brand != null) {
                     series.setParent(brand);
@@ -113,13 +114,16 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
             writer.createOrUpdate(item);
             createOrUpdatePeople((Item) item);
+            
+            return Maybe.just(new ItemAndBroadcast(item, broadcast));
 
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass())
-                    .withDescription("Schedule Updater failed for %s %s, processing broadcast %s of %s", broadcast.getService(), broadcast.getDate(), broadcast.getId(), itemUri));
+                    .withDescription("Schedule Updater failed for %s %s, processing broadcast %s of %s", ionBroadcast.getService(), ionBroadcast.getDate(), ionBroadcast.getId(), itemUri));
         } finally {
             lock.unlock(itemUri);
         }
+        return Maybe.nothing();
     }
 
     private Item resolveOrFetchItem(IonBroadcast broadcast, String itemUri) {
@@ -269,7 +273,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         BbcImageUrlCreator.addImagesTo("http://www.bbc.co.uk/iplayer/images/progbrand/", broadcast.getBrandId(), brand);
     }
 
-    private void addBroadcastToItem(Item item, IonBroadcast ionBroadcast) {
+    private Maybe<Broadcast> addBroadcastToItem(Item item, IonBroadcast ionBroadcast) {
         Version broadcastVersion = getBroadcastVersion(item, ionBroadcast);
         if (broadcastVersion == null) {
             broadcastVersion = versionFrom(ionBroadcast);
@@ -282,6 +286,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         } else {
             log.record(AdapterLogEntry.warnEntry().withSource(getClass()).withDescription("Couldn't find service URI for Ion Service %s", ionBroadcast.getService()));
         }
+        return broadcast;
     }
 
     private Version versionFrom(IonBroadcast ionBroadcast) {

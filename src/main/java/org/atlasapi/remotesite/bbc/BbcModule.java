@@ -12,9 +12,12 @@ import java.lang.reflect.Field;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.segment.SegmentWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -47,6 +50,8 @@ import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeTaskBuilder;
 import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeUpdateBuilder;
 import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeUpdateController;
 import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeUpdater;
+import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
+import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +86,8 @@ public class BbcModule {
 	private @Autowired ItemsPeopleWriter itemsPeopleWriter;
 	private @Autowired DatabasedMongo mongo;
 	private @Autowired SegmentWriter segmentWriter;
+	private @Autowired ChannelResolver channelResolver;
+	private @Autowired ScheduleResolver scheduleResolver;
 	
     @PostConstruct
     public void scheduleTasks() {
@@ -103,24 +110,24 @@ public class BbcModule {
             .withItemFetcherClient(bbcIonEpisodeDetailItemAdapter())
             .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
             .withItemPeopleWriter(itemsPeopleWriter);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), broadcastHandler, log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), broadcastHandler, broadcastTrimmer(), channelResolver, log);
     }
 	
     private BbcIonScheduleUpdater bbcIonSegmentUpdater() {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 0, 2);
         final BbcIonSegmentAdapter segmentAdapter = new BbcIonSegmentAdapter(ionClient(HttpClients.webserviceClient(), IonSegmentEventFeed.class), segmentWriter);
         BbcIonBroadcastHandler broadcastHandler = new SegmentUpdatingIonBroadcastHandler(contentResolver, contentWriters, segmentAdapter);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), broadcastHandler, log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), broadcastHandler, broadcastTrimmer(), channelResolver, log);
     }
 
     private BbcIonScheduleUpdater bbcIonScheduleUpdater(int lookBack, int lookAhead) {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, lookAhead, lookBack);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), defaultBbcIonBroadcastHandler(), log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), defaultBbcIonBroadcastHandler(), broadcastTrimmer(), channelResolver, log);
     }
     
     private BbcIonScheduleUpdater bbcIonScheduleOndemandUpdater(int lookBack) {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_ONDEMAND_FORMAT, 0, lookBack);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonBroadcastHandler(contentResolver, contentWriters, log, contentLock()), log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), new OndemandBbcIonBroadcastHandler(contentResolver, contentWriters, log, contentLock()), broadcastTrimmer(), channelResolver, log);
     }
     
     private BbcIonScheduleUpdater bbcIonSocialDataUpdater(int ahead, int back) {
@@ -128,7 +135,11 @@ public class BbcModule {
         BbcExtendedDataContentAdapter extendedDataAdapter = extendedDataAdapter();
 
         BbcIonBroadcastHandler handler = new SocialDataFetchingIonBroadcastHandler(extendedDataAdapter, contentResolver, contentWriters, log);
-        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), handler, log);
+        return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), handler, broadcastTrimmer(), channelResolver, log);
+    }
+    
+    private BroadcastTrimmer broadcastTrimmer() {
+        return new ScheduleResolverBroadcastTrimmer(Publisher.BBC, scheduleResolver, contentResolver, contentWriters);
     }
 
     @Bean public BbcExtendedDataContentAdapter extendedDataAdapter() {

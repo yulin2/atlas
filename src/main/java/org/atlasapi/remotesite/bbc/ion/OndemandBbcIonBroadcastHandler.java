@@ -5,12 +5,14 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import java.util.Set;
 
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -42,30 +44,36 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     }
 
     @Override
-    public void handle(IonBroadcast broadcast) {
+    public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
+        Maybe<Item> item = null;
         try {
-            tryHandle(broadcast);
+            item = tryHandle(broadcast);
         } catch (Exception e) {
             log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to process ondemand for %s", broadcast.getEpisodeId()));
         }
+        if(item.hasValue()) {
+            return Maybe.just(new ItemAndBroadcast(item.requireValue(), Maybe.<Broadcast>nothing()));
+        }
+        return Maybe.nothing();
     }
 
-    private void tryHandle(IonBroadcast broadcast) {
+    private Maybe<Item> tryHandle(IonBroadcast broadcast) {
 
         String itemId = broadcast.getEpisodeId();
         String itemUri = BbcFeeds.slashProgrammesUriForPid(itemId);
+        Item item = null;
         
         try {
             lock.lock(itemUri);
-            Item item = resolve(itemUri);
+            item = resolve(itemUri);
             if (item == null) {
-                return;
+                return Maybe.nothing();
             }
     
             Version version = findVersion(item, BbcFeeds.slashProgrammesUriForPid(broadcast.getVersionId()));
             if (version == null) {
                 log.record(warnEntry().withSource(getClass()).withDescription("No version %s for %s", broadcast.getVersionId(), broadcast.getEpisodeId()));
-                return;
+                return Maybe.nothing();
             }
     
             String iplayerId = iplayerId(itemId);
@@ -105,6 +113,8 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         finally {
             lock.unlock(itemUri);
         }
+
+        return Maybe.just(item);
     }
 
     private void updateLocation(Location location, DateTime actualStart, DateTime availableUntil, String itemId) {
