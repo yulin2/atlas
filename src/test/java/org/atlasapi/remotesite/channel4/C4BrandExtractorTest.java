@@ -6,9 +6,6 @@ import static org.hamcrest.Matchers.is;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
@@ -26,7 +23,6 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.jmock.Expectations;
@@ -43,14 +39,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.http.HttpException;
-import com.metabroadcast.common.http.HttpStatusCodeException;
 import com.metabroadcast.common.http.SimpleHttpClient;
-import com.sun.syndication.feed.atom.Feed;
 
 @RunWith(JMock.class)
 public class C4BrandExtractorTest extends TestCase {
@@ -251,6 +243,7 @@ public class C4BrandExtractorTest extends TestCase {
 
 		RecordingContentWriter recordingWriter = new RecordingContentWriter();
         new C4AtomBackedBrandUpdater(feedClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+<<<<<<< HEAD
         assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
     }
     
@@ -292,6 +285,49 @@ public class C4BrandExtractorTest extends TestCase {
         new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
         assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
     }
+=======
+        assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
+    }
+    
+    @Test
+    public void testThatWhenTheEpisodeGuideRedirectsToSeries1TheSeriesIsRead() throws Exception {
+        
+        SimpleHttpClient client = new FixedResponseHttpClient(
+                ImmutableMap.<String,String>of(
+                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"), 
+                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-3.atom")));
+
+        C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
+
+        RecordingContentWriter recordingWriter = new RecordingContentWriter();
+        new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+        assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
+    }
+    
+    @Test
+    public void testThatWhenTheEpisodeGuideRedirectsToAnEpisodeFeedTheSeriesIsFetched() throws Exception {
+       
+        Feed episodeFeed = new Feed();
+        episodeFeed.setFeedType("atom_1.0");
+        episodeFeed.setId("tag:www.channel4.com,2009:/programmes/ramsays-kitchen-nightmares/episode-guide/series-3/episode-5");
+        WireFeedOutput output = new WireFeedOutput();
+        StringWriter os = new StringWriter();
+        output.output(episodeFeed, os);
+        String redirectingFeed = os.getBuffer().toString();
+        
+        SimpleHttpClient client = new FixedResponseHttpClient(
+                ImmutableMap.<String,String>of(
+                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares.atom", fileContentsFromResource("ramsays-kitchen-nightmares.atom"), 
+                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide.atom", redirectingFeed,
+                        "https://pmlsc.channel4.com/pmlsd/ramsays-kitchen-nightmares/episode-guide/series-3.atom", fileContentsFromResource("ramsays-kitchen-nightmares-series-3.atom")));
+        
+        C4AtomApiClient apiClient = new C4AtomApiClient(client, "https://pmlsc.channel4.com/pmlsd/", Optional.<String>absent());
+
+        RecordingContentWriter recordingWriter = new RecordingContentWriter();
+        new C4AtomBackedBrandUpdater(apiClient, Optional.<Platform>absent(), contentResolver, recordingWriter, channelResolver).createOrUpdateBrand("http://www.channel4.com/programmes/ramsays-kitchen-nightmares");
+        assertThat(recordingWriter.updatedItems.size(), is(greaterThan(1)));
+    }
+>>>>>>> mbst-1826-c4-ids
 
     */
 	
@@ -463,39 +499,6 @@ public class C4BrandExtractorTest extends TestCase {
          
         assertThat(episode.getDescription(), is("Jamie's in Morocco, dodging snake charmers to try out the street food of Marrakesh, like slow-roasted lamb in cumin, and almond and rose water cakes. Later he joins a family for some Moroccan home cooking, and makes his own versions of chicken and lemon tagine, Moroccan roast lamb, and a `snakey cake' made of filo pastry, almonds and rose petals."));
     }
-	
-	private static class StubC4AtomClient implements RemoteSiteClient<Feed> {
-
-		private Map<String, Object> respondsTo = Maps.newHashMap();
-
-		@Override
-		public Feed get(String uri) throws Exception {
-			// Remove API key
-			uri = removeQueryString(uri);
-			Object response = respondsTo.get(uri);
-			if (response == null) {
-				throw new HttpStatusCodeException(404, "Not found: " + uri);
-			} else if (response instanceof HttpException) {
-			    throw (HttpException) response;
-			}
-			return (Feed) response;
-		}
-
-		private String removeQueryString(String url) throws MalformedURLException {
-			String queryString = "?" + new URL(url).getQuery();
-			return url.replace(queryString, "");
-		}
-		
-		StubC4AtomClient respondTo(String url, Feed feed) {
-			respondsTo.put(url, feed);
-			return this;
-		}
-		
-		StubC4AtomClient respondTo(String url, HttpException exception) {
-		    respondsTo.put(url, exception);
-		    return this;
-		}
-	}
 	
 	private final <T extends Content> T find(String uri, Iterable<T> episodes) {
 		for (T episode : episodes) {
