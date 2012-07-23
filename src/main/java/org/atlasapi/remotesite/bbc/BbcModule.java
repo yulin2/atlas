@@ -168,7 +168,7 @@ public class BbcModule {
 	}
 	
 	@Bean BbcIonScheduleController bbcIonScheduleController() {
-        return new BbcIonScheduleController(bbcIonScheduleClient(), defaultBbcIonBroadcastHandler(), log);
+        return new BbcIonScheduleController(bbcIonScheduleClient(), defaultBbcIonBroadcastHandler(), broadcastTrimmer(), channelResolver, log);
     }
 
     @Bean HttpBackedBbcIonClient<IonSchedule> bbcIonScheduleClient() {

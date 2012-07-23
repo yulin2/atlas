@@ -15,7 +15,6 @@ import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
-import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
