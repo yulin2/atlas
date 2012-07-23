@@ -296,7 +296,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         Broadcast broadcast = broadcast(progData, channel, timeZone, updatedAt);
         addBroadcast(version, broadcast);
 
-        return Maybe.just(new ItemAndBroadcast(item, Maybe.just(broadcast)));
+        return new ItemAndBroadcast(item, Maybe.just(broadcast));
     }
     
     private String getClosedOrTbcPostfix(Channel channel) {
