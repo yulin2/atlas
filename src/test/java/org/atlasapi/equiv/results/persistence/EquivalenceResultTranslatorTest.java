@@ -47,7 +47,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -66,7 +66,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -97,7 +97,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());
@@ -130,7 +130,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
-        RestoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
+        StoredEquivalenceResult restoredResult = translator.fromDBObject(dbo);
         
         assertEquals(target.getCanonicalUri(), restoredResult.id());
         assertEquals(target.getTitle(), restoredResult.title());

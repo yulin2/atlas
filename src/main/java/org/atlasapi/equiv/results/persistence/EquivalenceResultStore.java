@@ -7,9 +7,9 @@ import org.atlasapi.media.entity.Content;
 
 public interface EquivalenceResultStore {
 
-    <T extends Content> RestoredEquivalenceResult store(EquivalenceResult<T> result);
+    <T extends Content> StoredEquivalenceResult store(EquivalenceResult<T> result);
     
-    RestoredEquivalenceResult forId(String canonicalUri);
+    StoredEquivalenceResult forId(String canonicalUri);
     
-    List<RestoredEquivalenceResult> forIds(Iterable<String> canonicalUris);
+    List<StoredEquivalenceResult> forIds(Iterable<String> canonicalUris);
 }

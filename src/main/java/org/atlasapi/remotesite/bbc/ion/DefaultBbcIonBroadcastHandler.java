@@ -21,9 +21,11 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.Duration;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
@@ -45,11 +47,14 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private BbcContainerFetcherClient containerClient;
     private ItemsPeopleWriter itemsPeopleWriter;
 
+    private final ContentLock lock;
+
     
-    public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public DefaultBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log, ContentLock lock) {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
+        this.lock = lock;
         this.itemExtractor = new BbcIonEpisodeItemContentExtractor(log);
         this.broadcastExtractor = new BbcIonBroadcastExtractor();
     }
@@ -73,14 +78,14 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     public Maybe<ItemAndBroadcast> handle(IonBroadcast ionBroadcast) {
         String itemUri = slashProgrammesUriForPid(ionBroadcast.getEpisodeId());
         try {
-                
+            lock.lock(itemUri);
             Item item = resolveOrFetchItem(ionBroadcast, itemUri);
                 
             if(item == null) {
                 return Maybe.nothing();
             }
                 
-                //ensure broadcast is included.
+            //ensure broadcast is included.
             Maybe<Broadcast> broadcast = addBroadcastToItem(item, ionBroadcast);
 
             String canonicalUri = item.getCanonicalUri();
@@ -115,13 +120,17 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass())
                     .withDescription("Schedule Updater failed for %s %s, processing broadcast %s of %s", ionBroadcast.getService(), ionBroadcast.getDate(), ionBroadcast.getId(), itemUri));
+        } finally {
+            lock.unlock(itemUri);
         }
         return Maybe.nothing();
     }
 
     private Item resolveOrFetchItem(IonBroadcast broadcast, String itemUri) {
+        Item item = null;
+        
         //Get basic item from latest remote data.
-        Item item = itemExtractor.extract(broadcast.getEpisode()); 
+        Item basicItem = itemExtractor.extract(broadcast.getEpisode()); 
 
         // look for existing item, merge into latest remote data, else fetch complete.
         Maybe<Identified> possibleIdentified = resolver.findByCanonicalUris(ImmutableList.of(itemUri)).get(itemUri);
@@ -131,16 +140,31 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
                 log.record(new AdapterLogEntry(Severity.WARN).withDescription("Updating %s, expecting Item, got %s", itemUri, ided.getClass().getSimpleName()).withSource(getClass()));
                 return null;
             }
-            item = merger.merge(item, (Item)ided);
-        } else if (itemClient != null) {
+            item = merger.merge(fetchedFullItemIfPermitted(broadcast, itemUri).or(basicItem), (Item)ided);
+        } else {
+            item = fetchFullItem(itemUri).or(basicItem);
+        }
+        return item;
+    }
+
+    private Optional<Item> fetchedFullItemIfPermitted(IonBroadcast broadcast, String itemUri) {
+        return fullFetchPermitted(broadcast, itemUri) ? fetchFullItem(itemUri) : Optional.<Item>absent();
+    }
+
+    protected boolean fullFetchPermitted(IonBroadcast broadcast, String itemUri) {
+        return false;
+    }
+
+    private Optional<Item> fetchFullItem(String itemUri) {
+        Item fetchedItem = null;
+        if (itemClient != null) {
             try {
-                Item fetchedItem = itemClient.fetch(itemUri);
-                item = fetchedItem != null ? fetchedItem : item;
+                fetchedItem = itemClient.fetch(itemUri);
             } catch (Exception e) {
                 log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Failed to fetch ", itemUri));
             }
         }
-        return item;
+        return Optional.fromNullable(fetchedItem);
     }
 
 //    private void merge(Item fetchedItem, Item existing) {

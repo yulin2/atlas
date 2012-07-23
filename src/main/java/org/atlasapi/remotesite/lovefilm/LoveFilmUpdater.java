@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.lovefilm;
 
 import com.google.common.base.Throwables;
+import com.metabroadcast.common.http.RequestLimitingSimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -12,7 +13,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.remotesite.HttpClients;
-import org.atlasapi.remotesite.channel4.RequestLimitingSimpleHttpClient;
 
 /**
  */

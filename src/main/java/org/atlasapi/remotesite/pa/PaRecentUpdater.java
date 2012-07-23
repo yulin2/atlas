@@ -2,21 +2,26 @@ package org.atlasapi.remotesite.pa;
 
 import java.io.File;
 
+import org.atlasapi.feeds.upload.FileUploadResult;
+import org.atlasapi.feeds.upload.FileUploadResult.FileUploadResultType;
+import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Predicate;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable {
-    
+       
     private final PaProgrammeDataStore fileManager;
-
-    public PaRecentUpdater(PaChannelProcessor channelProcessor, PaProgrammeDataStore fileManager, ChannelResolver channelResolver, AdapterLog log) {
-        super(channelProcessor, fileManager, channelResolver, log);
+    private final FileUploadResultStore fileUploadResultStore;
+    
+    public PaRecentUpdater(PaChannelProcessor channelProcessor, PaProgrammeDataStore fileManager, ChannelResolver channelResolver, FileUploadResultStore fileUploadResultStore) {
+        super(channelProcessor, fileManager, channelResolver);
         this.fileManager = fileManager;
+        this.fileUploadResultStore = fileUploadResultStore;
     }
     
     @Override
@@ -25,8 +30,15 @@ public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable 
         this.processFiles(fileManager.localFiles(new Predicate<File>() {
             @Override
             public boolean apply(File input) {
-                return input.lastModified() > since;
+                Maybe<FileUploadResult> result = fileUploadResultStore.latestResultFor(SERVICE, input.getName());
+                return input.lastModified() > since &&
+                        (result.isNothing() || !FileUploadResultType.SUCCESS.equals(result.requireValue().type()));
             }
         }));
+    }
+    
+    @Override 
+    protected void storeResult(FileUploadResult result) {
+        fileUploadResultStore.store(result.filename(), result);
     }
 }

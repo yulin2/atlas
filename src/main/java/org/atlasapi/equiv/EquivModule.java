@@ -25,7 +25,9 @@ import static org.atlasapi.media.entity.Publisher.ITV;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
+import static org.atlasapi.persistence.lookup.TransitiveLookupWriter.generatedTransitiveLookupWriter;
 
+import java.io.File;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -42,9 +44,9 @@ import org.atlasapi.equiv.handlers.LookupWritingEquivalenceHandler;
 import org.atlasapi.equiv.handlers.ResultWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.ConfiguredEquivalenceResultBuilder;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.InMemoryLiveEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
-import org.atlasapi.equiv.results.persistence.MongoEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
 import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
@@ -78,8 +80,6 @@ import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.lookup.LookupWriter;
-import org.atlasapi.persistence.lookup.TransitiveLookupWriter;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.schedule.ManualScheduleUpdateController;
 import org.joda.time.Duration;
@@ -103,7 +103,8 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 public class EquivModule {
 
 	private @Value("${equiv.updater.enabled}") String updaterEnabled;
-
+	private @Value("${equiv.results.directory}") String equivResultsDirectory;
+	
 	private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
     
     private @Autowired MongoScheduleStore scheduleResolver;
@@ -117,19 +118,15 @@ public class EquivModule {
     private @Autowired SimpleScheduler taskScheduler;
 
     public @Bean RecentEquivalenceResultStore equivalenceResultStore() {
-        return new RecentEquivalenceResultStore(new MongoEquivalenceResultStore(db));
+        return new RecentEquivalenceResultStore(new FileEquivalenceResultStore(new File(equivResultsDirectory)));
     }
     
     public @Bean LiveEquivalenceResultStore liveResultsStore() {
         return new InMemoryLiveEquivalenceResultStore();
     }
-    
-    public @Bean LookupWriter lookupWriter() {
-        return new TransitiveLookupWriter(new MongoLookupEntryStore(db));
-    }
 
     protected <T extends Content> LookupWritingEquivalenceHandler<T> lookupWritingEquivalenceHandler(Iterable<Publisher> publishers) {
-        return new LookupWritingEquivalenceHandler<T>(lookupWriter(), publishers);
+        return new LookupWritingEquivalenceHandler<T>(generatedTransitiveLookupWriter(new MongoLookupEntryStore(db)), publishers);
     }
 
     public @Bean MongoScheduleTaskProgressStore progressStore() {

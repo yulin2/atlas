@@ -449,6 +449,7 @@ public class MongoChannelInitialPopulate {
 			.put( OldChannel.BBC_RADIO_RADIONANGAIDHEAL, 641)
 			.put( OldChannel.BBC_RADIO_6MUSIC, 744)
 			.put( OldChannel.BBC_RADIO_5LIVESPORTSEXTRA, 745)
+			.put( OldChannel.BBC_RADIO_5LIVEOLYMPICSEXTRA, 1685)
 			.put( OldChannel.BBC_RADIO_1XTRA, 875)
 			.put( OldChannel.BBC_RADIO_RADIO4_EXTRA, 932)
 			.put( OldChannel.BBC_RADIO_SURREY, 360)
@@ -778,7 +779,7 @@ public class MongoChannelInitialPopulate {
 			.put( OldChannel.BBC_RADIO_THREECOUNTIES, 1191)
 			.put( OldChannel.BBC_RADIO_WM, 570)
 			.put( OldChannel.BBC_RADIO_LONDON, 462)
-	       
+	        .put( OldChannel.FOUR_SEVEN, 1684)
 	        .build();
 	  
 	private static final ImmutableMultimap<OldChannel, Integer> XMLTV_MAP = ImmutableMultimap.<OldChannel, Integer> builder()

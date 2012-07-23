@@ -1,5 +1,7 @@
 package org.atlasapi.query.v2;
 
+import static com.google.common.collect.Iterables.transform;
+
 import java.math.BigInteger;
 import java.util.List;
 
@@ -51,11 +53,12 @@ public class ChannelSimplifier {
         simple.setAliases(input.getAliases());
         simple.setPublisherDetails(toPublisherDetails(input.publisher()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
+        simple.setAvailableFrom(transform(input.availableFrom(), TO_PUBLISHER_DETAILS));
         simple.setTitle(input.title());
         simple.setMediaType(input.mediaType() != null ? input.mediaType().toString().toLowerCase() : null);
         
         if(showChannelGroups) {
-            simple.setGroups(simplify(ImmutableList.copyOf(channelGroupResolver.channelGroupsFor(input)),false));
+            simple.setChannelGroups(simplify(ImmutableList.copyOf(channelGroupResolver.channelGroupsFor(input)),false));
         }
 
         return simple;
@@ -74,7 +77,7 @@ public class ChannelSimplifier {
     public org.atlasapi.media.entity.simple.ChannelGroup simplify(ChannelGroup input, boolean showChannels) {
         org.atlasapi.media.entity.simple.ChannelGroup simple = new org.atlasapi.media.entity.simple.ChannelGroup();
         
-        simple.setType("channel");
+        simple.setType(input.getType().key());
         simple.setUri(input.getCanonicalUri());
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
@@ -82,8 +85,8 @@ public class ChannelSimplifier {
         simple.setAliases(input.getAliases());
         simple.setPublisherDetails(toPublisherDetails(input.getPublisher()));
         simple.setTitle(input.getTitle());
-        if (input.getCountries() != null) {
-            simple.setCountries(Countries.toCodes(input.getCountries()));
+        if (input.getAvailableCountries() != null) {
+            simple.setAvailableCountries(Countries.toCodes(input.getAvailableCountries()));
         }
         if(showChannels) {
             simple.setChannels(ImmutableSet.copyOf(simplify(channelResolver.forIds(input.getChannels()),false)));
@@ -91,6 +94,13 @@ public class ChannelSimplifier {
         
         return simple;
     }
+    
+    private static final Function<Publisher, PublisherDetails> TO_PUBLISHER_DETAILS = new Function<Publisher, PublisherDetails>() {
+        @Override
+        public PublisherDetails apply(Publisher input) {
+            return toPublisherDetails(input);
+        }
+    };
 
     private static PublisherDetails toPublisherDetails(Publisher publisher) {
 

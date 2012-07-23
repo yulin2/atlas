@@ -38,22 +38,26 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
+import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
 
 @Configuration
 public class QueryModule {
 
 	private @Autowired @Qualifier("remoteSiteContentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	
-	private @Autowired DatabasedMongo db;
+	private @Autowired DatabasedMongo mongo;
+    private @Autowired CassandraContentStore cassandra;
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	private @Value("${atlas.search.host}") String searchHost;
 
 	@Bean KnownTypeQueryExecutor queryExecutor() {
 	    
-	    KnownTypeContentResolver contentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(db));
+	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
+        KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
 		
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(contentResolver, new MongoLookupEntryStore(db));
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));
 		
 		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
 		

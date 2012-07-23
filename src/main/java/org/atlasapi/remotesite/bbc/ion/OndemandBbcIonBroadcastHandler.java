@@ -17,9 +17,11 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -32,11 +34,13 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private final ContentResolver resolver;
     private final ContentWriter writer;
     private final AdapterLog log;
+    private final ContentLock lock;
 
-    public OndemandBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log) {
+    public OndemandBbcIonBroadcastHandler(ContentResolver resolver, ContentWriter writer, AdapterLog log, ContentLock lock) {
         this.resolver = resolver;
         this.writer = writer;
         this.log = log;
+        this.lock = lock;
     }
 
     @Override
@@ -56,49 +60,60 @@ public class OndemandBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private Maybe<Item> tryHandle(IonBroadcast broadcast) {
 
         String itemId = broadcast.getEpisodeId();
-
-        Item item = resolve(BbcFeeds.slashProgrammesUriForPid(itemId));
-        if (item == null) {
-            return Maybe.nothing();
-        }
-
-        Version version = findVersion(item, BbcFeeds.slashProgrammesUriForPid(broadcast.getVersionId()));
-        if (version == null) {
-            log.record(warnEntry().withSource(getClass()).withDescription("No version %s for %s", broadcast.getVersionId(), broadcast.getEpisodeId()));
-            return Maybe.nothing();
-        }
-
-        String iplayerId = iplayerId(itemId);
-
-        Encoding encoding = findEncoding(version, iplayerId);
-
-        DateTime actualStart = broadcast.getEpisode().getActualStart();
-        DateTime availableUntil = broadcast.getEpisode().getAvailableUntil();
-
-        if ("CURRENT".equals(broadcast.getEpisode().getAvailability()) && actualStart != null && availableUntil != null) {
-            Location location = null;
-
-            if (encoding == null) {
-                encoding = new Encoding();
-                encoding.setCanonicalUri(iplayerId);
-                version.addManifestedAs(encoding);
-
-                location = new Location();
-                encoding.addAvailableAt(location);
+        String itemUri = BbcFeeds.slashProgrammesUriForPid(itemId);
+        Item item = null;
+        
+        try {
+            lock.lock(itemUri);
+            item = resolve(itemUri);
+            if (item == null) {
+                return Maybe.nothing();
             }
-            location = Iterables.getOnlyElement(encoding.getAvailableAt());
-
-
-            updateLocation(location, actualStart, availableUntil, itemId);
-        } else {
-            if (encoding != null) {
-                Set<Encoding> encodings = Sets.newHashSet(version.getManifestedAs());
-                encodings.remove(encoding);
-                version.setManifestedAs(encodings);
+    
+            Version version = findVersion(item, BbcFeeds.slashProgrammesUriForPid(broadcast.getVersionId()));
+            if (version == null) {
+                log.record(warnEntry().withSource(getClass()).withDescription("No version %s for %s", broadcast.getVersionId(), broadcast.getEpisodeId()));
+                return Maybe.nothing();
             }
+    
+            String iplayerId = iplayerId(itemId);
+    
+            Encoding encoding = findEncoding(version, iplayerId);
+    
+            DateTime actualStart = broadcast.getEpisode().getActualStart();
+            DateTime availableUntil = broadcast.getEpisode().getAvailableUntil();
+    
+            if ("CURRENT".equals(broadcast.getEpisode().getAvailability()) && actualStart != null && availableUntil != null) {
+                Location location = null;
+    
+                if (encoding == null) {
+                    encoding = new Encoding();
+                    encoding.setCanonicalUri(iplayerId);
+                    version.addManifestedAs(encoding);
+    
+                    location = new Location();
+                    encoding.addAvailableAt(location);
+                }
+                location = Iterables.getOnlyElement(encoding.getAvailableAt());
+    
+    
+                updateLocation(location, actualStart, availableUntil, itemId);
+            } else {
+                if (encoding != null) {
+                    Set<Encoding> encodings = Sets.newHashSet(version.getManifestedAs());
+                    encodings.remove(encoding);
+                    version.setManifestedAs(encodings);
+                }
+            }
+    
+            writer.createOrUpdate(item);
+        } catch (InterruptedException e) {
+            Throwables.propagate(e);
+        }
+        finally {
+            lock.unlock(itemUri);
         }
 
-        writer.createOrUpdate(item);
         return Maybe.just(item);
     }
 

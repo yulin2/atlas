@@ -10,6 +10,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
+import org.atlasapi.persistence.CassandraPersistenceModule;
 
 public class AtlasProcessingWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -29,7 +30,7 @@ public class AtlasProcessingWebApplicationContext extends AnnotationConfigWebApp
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(AtlasModule.class);        
-        builder.add(AtlasLoggingModule.class, MongoContentPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class);
+        builder.add(AtlasLoggingModule.class, MongoContentPersistenceModule.class, CassandraPersistenceModule.class, AtlasFetchModule.class, RemoteSiteModule.class);
         builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
     }
 }

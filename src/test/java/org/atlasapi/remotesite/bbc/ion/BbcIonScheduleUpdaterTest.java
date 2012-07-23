@@ -19,6 +19,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
+import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.hamcrest.Matcher;
@@ -49,8 +50,8 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
     private final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
-    private final BbcIonBroadcastHandler handler = new DefaultBbcIonBroadcastHandler(resolver, writer, log);
     private final Channel channel = new Channel();
+    private final BbcIonBroadcastHandler handler = new DefaultBbcIonBroadcastHandler(resolver, writer, log, new ContentLock());
     
     @SuppressWarnings("unchecked")
     public void testProcessNewItemWithNoBrandOrSeries() throws Exception {

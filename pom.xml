@@ -15,8 +15,10 @@
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
-                        <fork>true</fork>
-                        <compilerArguments><J>-Xss1M</J></compilerArguments>
+                    <fork>true</fork>
+                    <compilerArguments>
+                        <J>-Xss1M</J>
+                    </compilerArguments>
                 </configuration>
             </plugin>
             <plugin>
@@ -98,6 +100,9 @@
                             <classpathPrefix>/WEB-INF/lib</classpathPrefix>
                             <mainClass>org.atlasapi.AtlasMain</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Class-Path>ks</Class-Path>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -234,23 +239,23 @@
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
-                                	<pluginExecutionFilter>
-                                		<groupId>
-                                			org.jvnet.jaxb2.maven2
-                                		</groupId>
-                                		<artifactId>
-                                			maven-jaxb2-plugin
-                                		</artifactId>
-                                		<versionRange>
-                                			[0.8.1,)
-                                		</versionRange>
-                                		<goals>
-                                			<goal>generate</goal>
-                                		</goals>
-                                	</pluginExecutionFilter>
-                                	<action>
-                                		<ignore></ignore>
-                                	</action>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.jvnet.jaxb2.maven2
+                                        </groupId>
+                                        <artifactId>
+                                            maven-jaxb2-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [0.8.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>generate</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
                                 </pluginExecution>
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
@@ -274,6 +279,11 @@
             <groupId>org.atlasapi</groupId>
             <artifactId>atlas-persistence</artifactId>
             <version>${atlas.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>6.4.4</version>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -310,6 +320,11 @@
                     <groupId>com.sun.jmx</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.hp.hpl.jena</groupId>
@@ -359,7 +374,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>1.3</version>
+            <version>1.7.2</version>
         </dependency>
         <dependency>
             <groupId>com.metabroadcast.common.social</groupId>
@@ -394,12 +409,12 @@
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.5.7</version>
+            <version>1.9.5</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
-            <version>1.5.7</version>
+            <version>1.9.5</version>
         </dependency>
         <dependency>
             <groupId>org.jmock</groupId>

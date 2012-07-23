@@ -65,6 +65,11 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 			
 			return Maybe.just(new Topic(100l));
 		}
+		
+		@Override
+		public Maybe<Topic> topicFor(Publisher publisher, String namespace, String value) {
+		    throw new UnsupportedOperationException();
+		}
 
 		@Override
 		public void write(Topic topic) {

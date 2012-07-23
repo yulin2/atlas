@@ -4,6 +4,7 @@ import static org.atlasapi.media.entity.Publisher.BBC;
 
 import java.util.Set;
 
+import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
@@ -20,28 +21,31 @@ import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
 import org.joda.time.Duration;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.SystemClock;
 
 public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeItemExtractor implements ContentExtractor<IonEpisodeDetail, Item> {
 
     private final BbcProgrammeEncodingAndLocationCreator encodingCreator = new BbcProgrammeEncodingAndLocationCreator(new SystemClock());
+    private final ContentExtractor<IonEpisodeDetail, Iterable<Clip>> clipExtractor; 
     
     public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient) {
         super(log, containerClient);
+        this.clipExtractor = new BbcIonClipExtractor(log);
     }
 
     @Override
     public Item extract(IonEpisodeDetail source) {
         Item baseItem = super.extract(source);
         baseItem.setVersions(extractVersions(source));
+        baseItem.setClips(clipExtractor.extract(source));
         return baseItem;
     }
     
     private Set<Version> extractVersions(final IonEpisodeDetail source) {
-        return ImmutableSet.copyOf(Iterables.transform(source.getVersions(), new Function<IonVersion, Version>() {
+        return Sets.newHashSet(Iterables.transform(source.getVersions(), new Function<IonVersion, Version>() {
             @Override
             public Version apply(IonVersion input) {
                 return versionFrom(input, source.getId());
