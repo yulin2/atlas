@@ -94,7 +94,7 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
         for (SeriesAndEpisodes seriesAndEpisodes : brandHierarchy.getSeriesAndEpisodes()) {
             Series series = seriesAndEpisodes.getSeries();
             series.setParent(brandHierarchy.getBrand());
-            Series series = resolveAndUpdate(series);
+            series = resolveAndUpdate(series);
             writer.createOrUpdate(series);
             
             for (Episode episode : seriesAndEpisodes.getEpisodes()) {
