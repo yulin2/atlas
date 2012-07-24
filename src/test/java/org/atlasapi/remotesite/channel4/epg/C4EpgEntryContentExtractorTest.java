@@ -52,7 +52,7 @@ public class C4EpgEntryContentExtractorTest {
     
     private final C4EpgEntryContentExtractor extractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, clock );
     
-    private final Channel channel = new Channel(Publisher.C4, "Channel 4", "key", MediaType.VIDEO, "http://www.channel4.com");
+    private final Channel channel = new Channel(Publisher.C4, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
     
     @Test
     public void testCreatesBrandSeriesItemAndBroadcastForRelatedLinkEntryWhenNothingResolved() {
@@ -92,7 +92,7 @@ public class C4EpgEntryContentExtractorTest {
         
         Episode item = (Episode) extracted.getItem();
         assertThat(item.getCanonicalUri(), is(idUri));
-        assertThat(item.getAliases(), hasItem(hierarchyUri));
+        assertThat(item.getAliasUrls(), hasItem(hierarchyUri));
         assertThat(item.getContainer().getUri(), is(brandUri));
         assertThat(item.getSeriesRef().getUri(), is(seriesUri));
         
@@ -143,7 +143,7 @@ public class C4EpgEntryContentExtractorTest {
         ContentHierarchyAndBroadcast extracted = extractor.extract(source);
         
         assertThat(extracted.getItem().getCanonicalUri(), is(synthUri));
-        assertThat(extracted.getItem().getAliases(), is(hasItem(idUri)));
+        assertThat(extracted.getItem().getAliasUrls(), is(hasItem(idUri)));
     }
     
     @Test
