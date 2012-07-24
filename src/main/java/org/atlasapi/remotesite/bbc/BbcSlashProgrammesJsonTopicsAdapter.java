@@ -67,7 +67,7 @@ public class BbcSlashProgrammesJsonTopicsAdapter implements SiteSpecificAdapter<
     }
 
     public Maybe<Topic> resolveTopic(SlashProgrammesCategory category, Type topicType) {
-        String namespace = Publisher.DBPEDIA.key();
+        String namespace = Publisher.DBPEDIA.name().toLowerCase();
         Topic topic = topicStore.topicFor(namespace, category.getSameAs()).valueOrNull();
         if (topic == null) {
             throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");

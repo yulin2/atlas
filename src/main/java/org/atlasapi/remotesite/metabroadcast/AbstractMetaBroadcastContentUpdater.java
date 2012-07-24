@@ -193,13 +193,14 @@ public abstract class AbstractMetaBroadcastContentUpdater {
     }
 
     public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
+        String namespace = Publisher.DBPEDIA.name().toLowerCase();
         Builder<TopicRef> topicRefs = ImmutableSet.builder();
         for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-            Topic topic = topicStore.topicFor(Publisher.DBPEDIA, Publisher.DBPEDIA.key(), topicValueFromWordWeighting(wordWeighting)).valueOrNull();
+            Topic topic = topicStore.topicFor(Publisher.DBPEDIA, namespace, topicValueFromWordWeighting(wordWeighting)).valueOrNull();
             if (topic == null) {
                 throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
             } else {
-                topic.setNamespace(Publisher.DBPEDIA.key());
+                topic.setNamespace(namespace);
                 topic.setTitle(wordWeighting.getContent());
                 topic.setPublisher(Publisher.DBPEDIA);
                 topic.setType(topicTypeFromSource(wordWeighting.getType()));

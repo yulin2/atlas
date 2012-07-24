@@ -43,7 +43,7 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
     public void testWithValidTopic() throws Exception {
         
         final String value = "http://dbpedia.org/resource/Brighton";
-        final String namespace = Publisher.DBPEDIA.key();
+        final String namespace = Publisher.DBPEDIA.name().toLowerCase();
         final String title = "Brighton";
         final long id = 1234l;
         

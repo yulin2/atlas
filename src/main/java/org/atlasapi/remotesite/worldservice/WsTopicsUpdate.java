@@ -111,7 +111,7 @@ public class WsTopicsUpdate extends ScheduledTask {
     }
 
     private TopicRef topicRefFor(TopicWeighting topicWeighting) {
-        String namespace = Publisher.DBPEDIA.key();
+        String namespace = Publisher.DBPEDIA.name().toLowerCase();
         String value = topicWeighting.getTopicValue().replace("%28", "(").replace("%29", ")").replace("%27", "'");
         Topic topic = topicStore.topicFor(namespace, value).valueOrNull();
         if (topic == null) {

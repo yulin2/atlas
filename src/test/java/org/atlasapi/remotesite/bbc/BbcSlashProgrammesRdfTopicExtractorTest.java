@@ -47,7 +47,7 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         assertThat(storedTopic.getValue(), is(equalTo(topicUri)));
         assertThat(storedTopic.getType(), is(equalTo(Type.PERSON)));
         assertThat(storedTopic.getPublisher(), is(equalTo(Publisher.DBPEDIA)));
-        assertThat(storedTopic.getNamespace(), is(equalTo(Publisher.DBPEDIA.key())));
+        assertThat(storedTopic.getNamespace(), is(equalTo(Publisher.DBPEDIA.name().toLowerCase())));
         assertThat(storedTopic.getTitle(), is(equalTo("Religion")));
         
     }
