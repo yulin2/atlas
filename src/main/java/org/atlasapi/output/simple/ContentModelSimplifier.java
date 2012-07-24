@@ -175,7 +175,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
                 tr.setRelationship(topicRef.getRelationship().toString());
                 tr.setTopic(topicSimplifier.simplify(topics.get(topicRef.getTopic()), annotations, config));
                 if (annotations.contains(Annotation.PUBLISHER)) {
-                    tr.setPublisher(toPublisherDetails(content.getPublisher()));
+                    tr.setPublisher(toPublisherDetails(topicRef.getPublisher()));
                 }
                 return tr;
             }
