@@ -26,8 +26,6 @@ import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
-import org.atlasapi.persistence.media.product.ProductResolver;
-import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
 import org.atlasapi.output.JaxbXmlTranslator;
@@ -64,7 +62,12 @@ import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.product.ProductResolver;
+import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
@@ -90,6 +93,8 @@ import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
+import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
+import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -127,6 +132,8 @@ public class QueryWebModule {
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired AdapterLog log;
+    
+    private @Autowired ScheduleIndex scheduleIndex;
     
     @Bean ChannelController channelController() {
         return new ChannelController(configFetcher, log, channelModelWriter(), channelResolver, new SubstitutionTableNumberCodec());
@@ -210,6 +217,12 @@ public class QueryWebModule {
     ScheduleController schedulerController() {
         ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, scheduleOverlapListener(), log);
         return new ScheduleController(resolver, channelResolver, configFetcher, log, scheduleChannelModelOutputter());
+    }
+    
+    @Bean
+    org.atlasapi.query.v4.schedule.ScheduleController scheduleController() {
+        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, queryExecutor);
+        return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, scheduleChannelModelOutputter());
     }
 
     @Bean
