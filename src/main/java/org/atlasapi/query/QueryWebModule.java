@@ -1,6 +1,5 @@
 package org.atlasapi.query;
 
-import com.google.common.collect.Iterators;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -51,7 +50,9 @@ import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
 import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
+import org.atlasapi.persistence.output.MongoRecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.MongoUpcomingChildrenResolver;
+import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
@@ -179,7 +180,8 @@ public class QueryWebModule {
     ContainerModelSimplifier containerSimplifier() {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver);
+        RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren);
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
