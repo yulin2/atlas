@@ -3,9 +3,44 @@ package org.atlasapi.persistence;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import org.atlasapi.media.content.util.EventQueueingContentWriter;
+import org.atlasapi.messaging.AtlasMessagingModule;
+import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
+import org.atlasapi.persistence.content.IdSettingContentWriter;
+import org.atlasapi.persistence.content.LookupResolvingContentResolver;
+import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
+import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
+import org.atlasapi.persistence.content.elasticsearch.EsScheduleIndex;
+import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
+import org.atlasapi.persistence.content.mongo.MongoContentLister;
+import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoPersonStore;
+import org.atlasapi.persistence.content.mongo.MongoProductStore;
+import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
+import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
+import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
+import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
+import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
+import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.atlasapi.persistence.topic.TopicStore;
+import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jms.core.JmsTemplate;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
@@ -22,39 +57,6 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
-import javax.annotation.Resource;
-import org.atlasapi.media.content.util.EventQueueingContentWriter;
-import org.atlasapi.messaging.AtlasMessagingModule;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
-import org.atlasapi.persistence.content.IdSettingContentWriter;
-import org.atlasapi.persistence.content.LookupResolvingContentResolver;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
-import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
-import org.atlasapi.persistence.content.mongo.MongoContentLister;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoPersonStore;
-import org.atlasapi.persistence.content.mongo.MongoProductStore;
-import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
-import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
-import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
-import org.springframework.context.annotation.Primary;
-import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
-import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
-import org.atlasapi.persistence.media.channel.MongoChannelStore;
-import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
-import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
-import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.atlasapi.persistence.topic.TopicStore;
-import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
 public class AtlasPersistenceModule {
@@ -238,6 +240,12 @@ public class AtlasPersistenceModule {
     @Primary
     public ESContentIndexer contentIndexer() {
         return esContentIndexModule().contentIndexer();
+    }
+    
+    @Bean
+    @Primary
+    public EsScheduleIndex scheduleIndex() {
+        return esContentIndexModule().scheduleIndex();
     }
 
     @Bean
