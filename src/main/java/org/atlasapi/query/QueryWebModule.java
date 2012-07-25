@@ -37,6 +37,7 @@ import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
+import org.atlasapi.persistence.ContentIndexModule;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -68,6 +69,8 @@ import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
+import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
+import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -102,6 +105,8 @@ public class QueryWebModule {
     private @Autowired KnownTypeQueryExecutor queryExecutor;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired AdapterLog log;
+    
+    private @Autowired ContentIndexModule indexModule;
     
     @Bean ChannelController channelController() {
         return new ChannelController(channelResolver, channelGroupResolver, channelSimplifier(), new SubstitutionTableNumberCodec());
@@ -138,6 +143,12 @@ public class QueryWebModule {
     ScheduleController schedulerController() {
         ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, scheduleOverlapListener(), log);
         return new ScheduleController(resolver, channelResolver, configFetcher, log, scheduleChannelModelOutputter());
+    }
+    
+    @Bean
+    org.atlasapi.query.v4.schedule.ScheduleController scheduleController() {
+        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(indexModule.scheduleIndex(), queryExecutor);
+        return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, scheduleChannelModelOutputter());
     }
 
     @Bean
