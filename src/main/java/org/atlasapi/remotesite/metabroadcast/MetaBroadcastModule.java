@@ -6,6 +6,7 @@ import java.text.ParseException;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -37,8 +38,10 @@ public class MetaBroadcastModule {
     private @Value("${cannon.host.port}") Integer cannonHostPort;
     private @Value("${s3.access}") String s3access;
     private @Value("${s3.secret}") String s3secret;
-    private @Value("${magpie.s3.bucket}") String s3Bucket;
-    private @Value("${magpie.s3.folder}") String s3folder;
+    private @Value("${magpie.s3.bucket}") String s3MagpieBucket;
+    private @Value("${magpie.s3.folder}") String s3MagpieFolder;
+    private @Value("${sosalso.s3.bucket}") String s3SosalsoBucket;
+    private @Value("${sosalso.s3.folder}") String s3SosalsoFolder;
     
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentResolver contentResolver;
@@ -58,6 +61,7 @@ public class MetaBroadcastModule {
         scheduler.schedule(twitterUpdaterTask().withName("Voila Twitter topics ingest"), RepetitionRules.every(Duration.standardHours(12)).withOffset(Duration.standardHours(7)));
         scheduler.schedule(twitterPeopleTalkUpdaterTask().withName("Voila Twitter audience topics ingest"), RepetitionRules.every(Duration.standardHours(3)));
         scheduler.schedule(magpieUpdaterTask().withName("Magpie ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
+        scheduler.schedule(sosalsoUpdateTask().withName("London ALSO ingest"), RepetitionRules.NEVER);
     }
 
     @Bean
@@ -68,25 +72,27 @@ public class MetaBroadcastModule {
     
     @Bean
     MagpieUpdaterTask magpieUpdaterTask() {
-        return new MagpieUpdaterTask(magpieResultsSource(), magpieUpdater(), new MongoSchedulingStore(mongo));
+        return new MagpieUpdaterTask(
+            new S3MagpieResultsSource(awsService(), s3MagpieBucket, s3MagpieFolder), 
+            new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
+                topicResolver, contentWriter, "magpie", Publisher.MAGPIE),
+            new MongoSchedulingStore(mongo)
+        );
     }
     
-    @Bean
-    RemoteMagpieResultsSource magpieResultsSource() {
-        return new S3MagpieResultsSource(awsService(), s3Bucket, s3folder);
-    }
-
     @Bean
     CannonTwitterTopicsUpdater twitterPeopleTalkUpdaterTask() {
         return new CannonTwitterTopicsUpdater(cannonTopicsClient(), 
                 new MetaBroadcastTwitterTopicsUpdater(cannonPeopleTalkClient(), contentResolver, topicStore, topicResolver, contentWriter, MetaBroadcastTwitterTopicsUpdater.TWITTER_NS_FOR_AUDIENCE_RELATED, log));
     }
     
-    
-@Bean
-    MetaBroadcastMagpieUpdater magpieUpdater() {
-        return new MetaBroadcastMagpieUpdater(contentResolver, topicStore, 
-                topicResolver, contentWriter);
+    @Bean
+    MagpieUpdaterTask sosalsoUpdateTask() {
+        return new MagpieUpdaterTask(
+            new S3MagpieResultsSource(awsService(), s3SosalsoBucket, s3SosalsoFolder),
+            new MetaBroadcastMagpieUpdater(contentResolver, topicStore, topicResolver, contentWriter, "londonalso", Publisher.LONDON_ALSO),
+            new NullSchedulingStore()
+        );
     }
 
     @Bean 
