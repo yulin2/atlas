@@ -39,16 +39,16 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
 
 public abstract class AbstractMetaBroadcastContentUpdater {
-    
+
     private final static Logger log = LoggerFactory.getLogger(AbstractMetaBroadcastContentUpdater.class);
-    
+
     protected final String namespace;
     protected final TopicStore topicStore;
     protected final TopicQueryResolver topicResolver;
     protected final ContentWriter contentWriter;
     protected final ContentResolver contentResolver;
     protected final Publisher publisher;
-    
+
     protected AbstractMetaBroadcastContentUpdater(ContentResolver contentResolver, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, String namespace, Publisher publisher) {
         this.contentResolver = contentResolver;
         this.topicStore = topicStore;
