@@ -22,15 +22,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+//TODO: this does too much.
 public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(MetaBroadcastMagpieUpdater.class);
-    private static final String MAGPIE_NS = "magpie";
     private ContentResolver contentResolver;
 
     public MetaBroadcastMagpieUpdater(ContentResolver contentResolver, 
-            TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter) {
-        super(contentResolver, topicStore, topicResolver, contentWriter, MAGPIE_NS, Publisher.MAGPIE);
+            TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, String topicNamespace, Publisher publisher) {
+        super(contentResolver, topicStore, topicResolver, contentWriter, topicNamespace, publisher);
         this.contentResolver = contentResolver;
     }
 

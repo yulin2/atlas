@@ -73,13 +73,13 @@ public class S3MagpieResultsSource implements RemoteMagpieResultsSource {
         @Override
         protected RemoteMagpieResults computeNext() {
             if (objectsToProcess.hasNext()) {
+                S3Object nextObject = objectsToProcess.next();
                 try {
-                    S3Object nextObject = objectsToProcess.next();
                     Date lastModifiedDate = nextObject.getLastModifiedDate();
                     MagpieResults results = deserialize(retrieve(nextObject));
                     return RemoteMagpieResults.retrieved(results, Timestamp.of(lastModifiedDate));
                 } catch (Exception e) {
-                    return RemoteMagpieResults.missing(e);
+                    return RemoteMagpieResults.missing(nextObject.getName(), e);
                 }
             }
             return endOfData();
