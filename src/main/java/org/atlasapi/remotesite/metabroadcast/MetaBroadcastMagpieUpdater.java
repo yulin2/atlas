@@ -22,15 +22,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+//TODO: this does too much.
 public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpdater {
 
     private static final Logger log = LoggerFactory.getLogger(MetaBroadcastMagpieUpdater.class);
-    private static final String MAGPIE_NS = "magpie";
     private ContentResolver contentResolver;
 
     public MetaBroadcastMagpieUpdater(ContentResolver contentResolver, 
-            TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter) {
-        super(contentResolver, topicStore, topicResolver, contentWriter, MAGPIE_NS, Publisher.MAGPIE);
+            TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, String topicNamespace, Publisher publisher) {
+        super(contentResolver, topicStore, topicResolver, contentWriter, topicNamespace, publisher);
         this.contentResolver = contentResolver;
     }
 
@@ -69,7 +69,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
         List<org.atlasapi.media.entity.simple.KeyPhrase> keys = magpieItem.getKeyPhrases();
         List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = Lists.newArrayList();
         for (org.atlasapi.media.entity.simple.KeyPhrase simplePhrase : keys) {
-            transformedKeys.add(new KeyPhrase(simplePhrase.getPhrase(), Publisher.MAGPIE, simplePhrase.getWeighting()));
+            transformedKeys.add(new KeyPhrase(simplePhrase.getPhrase(), publisher, simplePhrase.getWeighting()));
         }
         return transformedKeys;
     }

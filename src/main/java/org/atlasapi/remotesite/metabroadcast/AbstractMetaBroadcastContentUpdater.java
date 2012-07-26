@@ -161,13 +161,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
     }
 
     protected String generateMetaBroadcastUri(String uri) {
-        if (Publisher.VOILA.equals(publisher)) {
-            return "http://voila.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
-        } else if (Publisher.MAGPIE.equals(publisher)) {
-            return "http://magpie.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
-        } else {
-            throw new IllegalArgumentException();
-        }
+        return String.format("http://%s/%s", publisher.key(), uri.replaceFirst("(http(s?)://)", ""));
     }
 
     private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {
