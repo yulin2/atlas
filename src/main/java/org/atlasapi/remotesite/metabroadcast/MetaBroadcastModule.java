@@ -40,8 +40,8 @@ public class MetaBroadcastModule {
     private @Value("${s3.secret}") String s3secret;
     private @Value("${magpie.s3.bucket}") String s3MagpieBucket;
     private @Value("${magpie.s3.folder}") String s3MagpieFolder;
-    private @Value("${sosalso.s3.bucket}") String s3SosalsoBucket;
-    private @Value("${sosalso.s3.folder}") String s3SosalsoFolder;
+    private @Value("${lalso.s3.bucket}") String s3SosalsoBucket;
+    private @Value("${lalso.s3.folder}") String s3SosalsoFolder;
     
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentResolver contentResolver;
