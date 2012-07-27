@@ -10,8 +10,8 @@ public abstract class RemoteMagpieResults {
         return new RetrievedResults(results, timestamp);
     }
 
-    public static RemoteMagpieResults missing(Throwable reason) {
-        return new MissingResults(reason);
+    public static RemoteMagpieResults missing(String context, Throwable reason) {
+        return new MissingResults(context, reason);
     }
 
     public abstract boolean retrieved();
@@ -20,6 +20,8 @@ public abstract class RemoteMagpieResults {
 
     public abstract MagpieResults getResults();
 
+    public abstract String context();
+    
     public abstract Throwable reason();
 
     private static class RetrievedResults extends RemoteMagpieResults {
@@ -46,6 +48,11 @@ public abstract class RemoteMagpieResults {
         public Throwable reason() {
             throw new IllegalStateException("Results were retrieved");
         }
+        
+        @Override
+        public String context() {
+            throw new IllegalStateException("Results were retrieved");
+        }
 
         @Override
         public boolean retrieved() {
@@ -56,8 +63,10 @@ public abstract class RemoteMagpieResults {
     private static class MissingResults extends RemoteMagpieResults {
 
         private Throwable reason;
+        private String context;
 
-        public MissingResults(Throwable reason) {
+        public MissingResults(String context, Throwable reason) {
+            this.context = context;
             this.reason = reason;
         }
 
@@ -74,6 +83,11 @@ public abstract class RemoteMagpieResults {
         @Override
         public Throwable reason() {
             return reason;
+        }
+        
+        @Override
+        public String context() {
+            return context;
         }
 
         @Override
