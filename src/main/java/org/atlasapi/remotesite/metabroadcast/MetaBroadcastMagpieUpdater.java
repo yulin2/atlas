@@ -69,7 +69,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
         List<org.atlasapi.media.entity.simple.KeyPhrase> keys = magpieItem.getKeyPhrases();
         List<org.atlasapi.media.entity.KeyPhrase> transformedKeys = Lists.newArrayList();
         for (org.atlasapi.media.entity.simple.KeyPhrase simplePhrase : keys) {
-            transformedKeys.add(new KeyPhrase(simplePhrase.getPhrase(), Publisher.MAGPIE, simplePhrase.getWeighting()));
+            transformedKeys.add(new KeyPhrase(simplePhrase.getPhrase(), publisher, simplePhrase.getWeighting()));
         }
         return transformedKeys;
     }
