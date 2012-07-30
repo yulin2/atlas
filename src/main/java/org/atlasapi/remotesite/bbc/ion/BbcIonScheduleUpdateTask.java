@@ -68,21 +68,23 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
         DateTime scheduleEndTime = null;
         Channel channel = null;
         
-        Builder<String, String> acceptableIds = ImmutableMap.builder();
-        for(ItemAndBroadcast itemAndBroadcast : itemAndBroadcasts) {
-            if(itemAndBroadcast.getBroadcast().hasValue()) {
-                Broadcast broadcast = itemAndBroadcast.getBroadcast().requireValue();
-                channel = channelResolver.fromUri(broadcast.getBroadcastOn()).requireValue();
-                if(scheduleStartTime == null || scheduleStartTime.isAfter(broadcast.getTransmissionTime())) {
-                    scheduleStartTime = broadcast.getTransmissionTime();
+        if(!itemAndBroadcasts.isEmpty()) {
+            Builder<String, String> acceptableIds = ImmutableMap.builder();
+            for(ItemAndBroadcast itemAndBroadcast : itemAndBroadcasts) {
+                if(itemAndBroadcast.getBroadcast().hasValue()) {
+                    Broadcast broadcast = itemAndBroadcast.getBroadcast().requireValue();
+                    channel = channelResolver.fromUri(broadcast.getBroadcastOn()).requireValue();
+                    if(scheduleStartTime == null || scheduleStartTime.isAfter(broadcast.getTransmissionTime())) {
+                        scheduleStartTime = broadcast.getTransmissionTime();
+                    }
+                    if(scheduleEndTime == null || scheduleEndTime.isBefore(broadcast.getTransmissionEndTime())) {
+                        scheduleEndTime = broadcast.getTransmissionEndTime();
+                    }
+                    acceptableIds.put(broadcast.getSourceId(), itemAndBroadcast.getItem().getCanonicalUri());
                 }
-                if(scheduleEndTime == null || scheduleEndTime.isBefore(broadcast.getTransmissionEndTime())) {
-                    scheduleEndTime = broadcast.getTransmissionEndTime();
-                }
-                acceptableIds.put(broadcast.getSourceId(), itemAndBroadcast.getItem().getCanonicalUri());
             }
+            
+            trimmer.trimBroadcasts(new Interval(scheduleStartTime, scheduleEndTime), channel, acceptableIds.build());
         }
-        
-        trimmer.trimBroadcasts(new Interval(scheduleStartTime, scheduleEndTime), channel, acceptableIds.build());
     }
 }
