@@ -53,7 +53,6 @@ import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.TimeMachine;
 import org.junit.Ignore;
 
-@Ignore
 @RunWith(JMock.class)
 public class PaBaseProgrammeUpdaterTest extends TestCase {
 

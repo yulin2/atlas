@@ -30,7 +30,6 @@ import org.junit.Ignore;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-@Ignore
 public class SpringTest extends TestCase {
 
     @Test
