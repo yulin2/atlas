@@ -1,5 +1,7 @@
 package org.atlasapi.output.simple;
 
+import static com.metabroadcast.common.base.MorePredicates.transformingPredicate;
+
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -13,14 +15,17 @@ import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
+import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+
 import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ContainerModelSimplifier extends ContentModelSimplifier<Container, Playlist> {
@@ -28,6 +33,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
     private final ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier;
     private final AvailableChildrenResolver availableChildrenResolver;
     private final UpcomingChildrenResolver upcomingChildrenResolver;
+    private final RecentlyBroadcastChildrenResolver recentlyBroadcastResolver;
     private final Function<ChildRef, ContentIdentifier> toContentIdentifier = new Function<ChildRef, ContentIdentifier>() {
 
         @Override
@@ -36,11 +42,12 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         }
     };
 
-    public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver) {
+    public ContainerModelSimplifier(ModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> itemSimplifier, String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, AvailableChildrenResolver availableChildren, UpcomingChildrenResolver upcomingChildren, ProductResolver productResolver, RecentlyBroadcastChildrenResolver recentChildren) {
         super(localHostName, contentGroupResolver, topicResolver, productResolver);
         this.itemSimplifier = itemSimplifier;
         this.availableChildrenResolver = availableChildren;
         this.upcomingChildrenResolver = upcomingChildren;
+        this.recentlyBroadcastResolver = recentChildren;
     }
 
     @Override
@@ -64,36 +71,38 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         }
 
         if (annotations.contains(Annotation.AVAILABLE_LOCATIONS)) {
-            simplePlaylist.setAvailableContent(Iterables.transform(Iterables.filter(fullPlayList.getChildRefs(), availableFilter(fullPlayList)), toContentIdentifier));
+            simplePlaylist.setAvailableContent(filterAndTransformChildRefs(fullPlayList, availableFilter(fullPlayList)));
         }
 
         if (annotations.contains(Annotation.UPCOMING)) {
-            simplePlaylist.setUpcomingContent(Iterables.transform(Iterables.filter(fullPlayList.getChildRefs(), upcomingFilter(fullPlayList)), toContentIdentifier));;
+            simplePlaylist.setUpcomingContent(filterAndTransformChildRefs(fullPlayList, upcomingFilter(fullPlayList)));;
+        }
+        
+        if (annotations.contains(Annotation.RECENTLY_BROADCAST)) {
+            simplePlaylist.setRecentContent(filterAndTransformChildRefs(fullPlayList, recentlyBroadcastFilter(fullPlayList)));
         }
 
         return simplePlaylist;
     }
 
-    private Predicate<ChildRef> availableFilter(Container fullPlayList) {
-        final ImmutableSet<String> availableChildren = ImmutableSet.copyOf(availableChildrenResolver.availableChildrenFor(fullPlayList));
-        return new Predicate<ChildRef>() {
+    private Iterable<ContentIdentifier> filterAndTransformChildRefs(Container fullPlayList, Predicate<ChildRef> filter) {
+        return Iterables.transform(Iterables.filter(fullPlayList.getChildRefs(), filter), toContentIdentifier);
+    }
 
-            @Override
-            public boolean apply(ChildRef input) {
-                return availableChildren.contains(input.getUri());
-            }
-        };
+    private Predicate<ChildRef> availableFilter(Container fullPlayList) {
+        return asChildRefFilter(availableChildrenResolver.availableChildrenFor(fullPlayList));
     }
 
     private Predicate<ChildRef> upcomingFilter(Container fullPlayList) {
-        final ImmutableSet<String> availableChildren = ImmutableSet.copyOf(upcomingChildrenResolver.availableChildrenFor(fullPlayList));
-        return new Predicate<ChildRef>() {
+        return asChildRefFilter(upcomingChildrenResolver.availableChildrenFor(fullPlayList));
+    }
 
-            @Override
-            public boolean apply(ChildRef input) {
-                return availableChildren.contains(input.getUri());
-            }
-        };
+    private Predicate<ChildRef> recentlyBroadcastFilter(Container fullPlayList) {
+        return asChildRefFilter(recentlyBroadcastResolver.recentlyBroadcastChildrenFor(fullPlayList, 3));
+    }
+    
+    private Predicate<ChildRef> asChildRefFilter(Iterable<String> childRefUris) {
+        return transformingPredicate(ChildRef.TO_URI, Predicates.in(ImmutableSet.copyOf(childRefUris)));
     }
 
     @Override
