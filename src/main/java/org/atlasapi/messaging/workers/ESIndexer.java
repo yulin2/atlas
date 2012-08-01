@@ -7,6 +7,7 @@ import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.messaging.EntityUpdatedMessage;
+import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
