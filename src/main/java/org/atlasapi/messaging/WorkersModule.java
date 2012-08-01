@@ -112,7 +112,7 @@ public class WorkersModule {
         if (enabled) {
             cassandraReplicator().start();
             esIndexer().start();
-            recentChangesLogger().start();
+            //recentChangesLogger().start();
         }
     }
 }
