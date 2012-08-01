@@ -2,18 +2,22 @@ package org.atlasapi.messaging.workers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.DateTimeZones;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.messaging.event.EntityUpdatedEvent;
-import org.atlasapi.persistence.messaging.event.Event;
+import org.atlasapi.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.event.Event;
 import org.atlasapi.serialization.json.JsonFactory;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
 
@@ -22,6 +26,7 @@ import static org.mockito.Mockito.*;
 public class CassandraReplicatorTest {
 
     private final static ObjectMapper MAPPER = JsonFactory.makeJsonMapper();
+    private final DateTime now = new DateTime(DateTimeZones.UTC);
     
     @Test
     public void testProcessContainer() throws IOException {
@@ -39,7 +44,7 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", uri, "")));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", now, uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(container));
     }
@@ -60,7 +65,7 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", uri, "")));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", now, uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(item));
     }

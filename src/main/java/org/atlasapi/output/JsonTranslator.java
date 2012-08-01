@@ -68,6 +68,7 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
 					.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 					.registerTypeAdapter(AtlasErrorSummary.class, new AtlasExceptionJsonSerializer())
 					.registerTypeAdapter(Date.class, new DateTimeSerializer())
+					.registerTypeAdapter(DateTime.class, new JodaDateTimeSerializer())
 					.registerTypeAdapter(Description.class, new DescriptionSerializer()));
 	}
 
@@ -185,4 +186,11 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
         }
     }
     
+    private static final class JodaDateTimeSerializer implements JsonSerializer<DateTime> {
+
+        @Override
+        public JsonElement serialize(DateTime date, Type type, JsonSerializationContext context) {
+            return new JsonPrimitive(date.toString(ISODateTimeFormat.dateTimeNoMillis()));
+        }
+    }
 }
