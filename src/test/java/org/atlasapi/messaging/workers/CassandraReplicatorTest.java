@@ -14,8 +14,8 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.messaging.event.EntityUpdatedEvent;
-import org.atlasapi.messaging.event.Event;
+import org.atlasapi.messaging.EntityUpdatedMessage;
+import org.atlasapi.messaging.Message;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -44,7 +44,7 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", now, uri, "", Publisher.BBC.key())));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now, uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(container));
     }
@@ -65,12 +65,12 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedEvent("0", now, uri, "", Publisher.BBC.key())));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now, uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(item));
     }
 
-    private String marshal(Event event) throws IOException {
+    private String marshal(Message event) throws IOException {
         return MAPPER.writeValueAsString(event);
     }
 }
