@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.JsonTranslator;
-import org.atlasapi.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.EntityUpdatedMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -21,20 +21,20 @@ import org.atlasapi.persistence.event.RecentChangeStore;
 public class RecentChangesController {
 
     private final RecentChangeStore store;
-    private final JsonTranslator<Iterable<EntityUpdatedEvent>> translator;
+    private final JsonTranslator<Iterable<EntityUpdatedMessage>> translator;
     private final ApplicationConfiguration configuration;
     private final SelectionBuilder selectionBuilder;
 
     public RecentChangesController(RecentChangeStore store) {
         this.store = store;
-        this.translator = new JsonTranslator<Iterable<EntityUpdatedEvent>>();
+        this.translator = new JsonTranslator<Iterable<EntityUpdatedMessage>>();
         this.configuration = ApplicationConfiguration.DEFAULT_CONFIGURATION;
         this.selectionBuilder = Selection.builder().withDefaultLimit(30).withMaxLimit(100);
     }
 
     @RequestMapping("system/update/changes")
     public void listChanges(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Iterable<EntityUpdatedEvent> model = store.changes();
+        Iterable<EntityUpdatedMessage> model = store.changes();
         model = selectionBuilder.build(req).apply(model);
         translator.writeTo(req, resp, model, ImmutableSet.<Annotation>of(), configuration);
     }

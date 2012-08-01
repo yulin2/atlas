@@ -11,7 +11,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.atlasapi.persistence.media.entity.ItemTranslator;
-import org.atlasapi.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.EntityUpdatedMessage;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +80,8 @@ public class EventQueueingContentWriter implements ContentWriter {
         });
     }
 
-    private EntityUpdatedEvent createEvent(Content content) {
-        return new EntityUpdatedEvent(
+    private EntityUpdatedMessage createEvent(Content content) {
+        return new EntityUpdatedMessage(
             null,
             clock.now(),
             content.getCanonicalUri(), 
@@ -90,7 +90,7 @@ public class EventQueueingContentWriter implements ContentWriter {
         );
     }
 
-    private String serialize(final EntityUpdatedEvent event) {
+    private String serialize(final EntityUpdatedMessage event) {
         String result = null;
         try {
              result = mapper.writeValueAsString(event);

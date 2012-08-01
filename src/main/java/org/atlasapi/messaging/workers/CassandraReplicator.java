@@ -7,7 +7,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.EntityUpdatedMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +27,12 @@ public class CassandraReplicator extends AbstractWorker {
     }
 
     @Override
-    public void process(EntityUpdatedEvent event) {
+    public void process(EntityUpdatedMessage message) {
         // TODO_SB : ResolvedContent should be eliminated or made way simpler:
-        ResolvedContent results = mongoContentResolver.findByCanonicalUris(Arrays.asList(event.getEntityId()));
+        ResolvedContent results = mongoContentResolver.findByCanonicalUris(Arrays.asList(message.getEntityId()));
         //
         if (results.getAllResolvedResults().size() > 1) {
-            throw new IllegalStateException("More than one content found for id: " + event.getEntityId());
+            throw new IllegalStateException("More than one content found for id: " + message.getEntityId());
         } else if (results.getAllResolvedResults().size() == 1) {
             Identified source = results.getFirstValue().requireValue();
             if (source instanceof Container) {
@@ -40,12 +40,12 @@ public class CassandraReplicator extends AbstractWorker {
             } else if (source instanceof Item) {
                 cassandraContentWriter.createOrUpdate((Item) source);
             } else {
-                log.warn("Unexpected type {} found for id {} on event of type {} and id {}.",
-                        new Object[]{source.getClass().getName(), event.getEntityId(), event.getClass().getName(), event.getChangeId()});
+                log.warn("Unexpected type {} found for id {} on message of type {} and id {}.",
+                        new Object[]{source.getClass().getName(), message.getEntityId(), message.getClass().getName(), message.getMessageId()});
             }
         } else {
-            log.warn("No content found for id {} on event of type {} and id {}.",
-                    new Object[]{event.getEntityId(), event.getClass().getName(), event.getChangeId()});
+            log.warn("No content found for id {} on message of type {} and id {}.",
+                    new Object[]{message.getEntityId(), message.getClass().getName(), message.getMessageId()});
         }
     }
 }
