@@ -1,7 +1,7 @@
 package org.atlasapi.messaging.workers;
 
 import org.atlasapi.persistence.event.RecentChangeStore;
-import org.atlasapi.messaging.event.EntityUpdatedEvent;
+import org.atlasapi.messaging.EntityUpdatedMessage;
 
 public class RecentChangesLogger extends AbstractWorker {
 
@@ -12,7 +12,7 @@ public class RecentChangesLogger extends AbstractWorker {
     }
 
     @Override
-    public void process(EntityUpdatedEvent command) {
-        store.logChange(command);
+    public void process(EntityUpdatedMessage message) {
+        store.logChange(message);
     }
 }
