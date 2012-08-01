@@ -19,6 +19,8 @@ import java.util.Map;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
@@ -45,8 +47,6 @@ import org.springframework.context.annotation.Configuration;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
 

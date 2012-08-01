@@ -17,10 +17,6 @@ package org.atlasapi;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import org.atlasapi.persistence.ContentPersistenceModule;
-import org.atlasapi.persistence.MongoContentPersistenceModule;
-import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -29,52 +25,20 @@ import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.ids.IdGenerator;
-import com.metabroadcast.common.ids.IdGeneratorBuilder;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.persistence.mongo.health.MongoIOProbe;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
-import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
-import com.mongodb.WriteConcern;
-import javax.annotation.PostConstruct;
-import org.atlasapi.persistence.ContentIndexModule;
-import org.atlasapi.persistence.ElasticSearchContentIndexModule;
 
 @Configuration
 public class AtlasModule {
 	
 	private final String mongoHost = Configurer.get("mongo.host").get();
 	private final String dbName = Configurer.get("mongo.dbName").get();
-    private final String esSeeds = Configurer.get("elasticsearch.seeds").get();
-    private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
 	private final Parameter processingConfig = Configurer.get("processing.config");
-	   
-    @Bean
-    MongoReplicaSetProbe mongoReplicaSetProbe() {
-        return new MongoReplicaSetProbe(mongo());
-    }
 
-    @Bean
-    MongoIOProbe mongoIoSetProbe() {
-        return new MongoIOProbe(mongo()).withWriteConcern(WriteConcern.REPLICAS_SAFE);
-    }
-    
-    // TODO_SB: is this "base" qualifier really needed?
-    
-    public @Bean @Qualifier("base") ContentIndexModule baseContentIndexModule() {
-        ElasticSearchContentIndexModule elasticSearchContentIndexModule = new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
-        elasticSearchContentIndexModule.init();
-        return elasticSearchContentIndexModule;
-    }
-    
-    public @Bean @Qualifier("base") ContentPersistenceModule baseContentPersistenceModule() {
-        return new MongoContentPersistenceModule(databasedMongo());
-    }
-	
 	public @Bean DatabasedMongo databasedMongo() {
 	    return new DatabasedMongo(mongo(), dbName);
 	}
@@ -86,17 +50,7 @@ public class AtlasModule {
         }
         return mongo;
     }
-    
-    public @Bean IdGeneratorBuilder idGeneratorBuilder() {
-        return new IdGeneratorBuilder() {
-            
-            @Override
-            public IdGenerator generator(String sequenceIdentifier) {
-                return new MongoSequentialIdGenerator(databasedMongo(), sequenceIdentifier);
-            }
-        };
-    }
-    
+
     private List<ServerAddress> mongoHosts() {
         Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
         return ImmutableList.copyOf(Iterables.filter(Iterables.transform(splitter.split(mongoHost), new Function<String, ServerAddress>() {
