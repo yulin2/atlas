@@ -32,7 +32,7 @@ public class CannonTwitterTopicsUpdater extends ScheduledTask {
         UpdateProgress updateProgress = UpdateProgress.START;
 
         ContentWordsIdList contentWordsIdList = idList.get();
-        for (List<String> idPart : Lists.partition(contentWordsIdList.contentIds, 10)) {
+        for (List<String> idPart : Lists.partition(contentWordsIdList.contentIds, 1)) {
             reportStatus(String.format("%s. %s total", updateProgress, contentWordsIdList.contentIds.size()));
             updateProgress = updateProgress.reduce(idUpdater.updateTopics(idPart));
         }
