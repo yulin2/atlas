@@ -6,7 +6,11 @@ public class PaHelper {
     private static final String PA_BASE_URL = "http://pressassociation.com";
     
     public static String getFilmUri(String id) {
-        return PA_BASE_URL + "/films/" + id;
+        return getEpisodeUri(id);
+    }
+    
+    public static String getFilmRtAlias(String rtFilmNumber) {
+        return PA_BASE_URL + "/films/" + rtFilmNumber;
     }
     
     public static String getEpisodeUri(String id) {
@@ -21,8 +25,8 @@ public class PaHelper {
         return PA_BASE_URL + "/series/" + id + "-" + seriesNumber;
     }
     
-    public static String getFilmCurie(String id) {
-        return "pa:f-" + id;
+    public static String getEpisodeCurie(String id) {
+        return "pa:e-" + id;
     }
     
     public static String getBroadcastId(String slotId) {
