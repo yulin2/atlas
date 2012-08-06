@@ -29,7 +29,7 @@ public class PaHelper {
         return "pa:e-" + id;
     }
     
-    public static String getEpisodeCurie(String id) {
+    public static String getFilmCurie(String id) {
         return "pa:e-" + id;
     }
     

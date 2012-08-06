@@ -681,7 +681,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private Item getBasicEpisode(ProgData progData, boolean isEpisode) {
         Item item = isEpisode ? new Episode() : new Item();
         item.setCanonicalUri(getEpisodeUri(programmeId(progData)));
-        item.setCurie(PaHelper.getFilmCurie(programmeId(progData)));
+        item.setCurie(PaHelper.getEpisodeCurie(programmeId(progData)));
         item.setPublisher(Publisher.PA);
         setBasicDetails(progData, item);
         return item;
