@@ -19,6 +19,7 @@ import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.mongo.LastUpdatedContentFinder;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
@@ -35,6 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
 import org.atlasapi.persistence.event.RecentChangeStore;
+import org.atlasapi.persistence.topic.TopicContentUriLister;
 
 @Configuration
 @Primary
@@ -158,6 +160,16 @@ public class AtlasPersistenceModule {
     @Primary
     public LastUpdatedContentFinder lastUpdatedContentFinder() {
         return persistenceDelegate.lastUpdatedContentFinder();
+    }
+    
+    @Bean
+    public TopicContentUriLister topicContentUriLister() {
+		return persistenceDelegate.topicContentUriLister();
+    }
+	
+    @Bean
+	public ContentLister contentLister() {
+		return persistenceDelegate.contentLister();
     }
 
     @Bean
