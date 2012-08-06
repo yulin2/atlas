@@ -12,6 +12,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
@@ -26,6 +27,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -52,6 +54,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.Timestamp;
 
@@ -320,12 +323,15 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Maybe<ItemAndBroadcast> getFilm(ProgData progData, Channel channel, DateTimeZone zone, Timestamp updatedAt) {
+        String rtFilmAlias = PaHelper.getFilmRtAlias(progData.getRtFilmnumber());
         String filmUri = PaHelper.getFilmUri(programmeId(progData));
-        Maybe<Identified> possiblePreviousData = contentResolver.findByCanonicalUris(ImmutableList.of(filmUri)).getFirstValue();
+        ResolvedContent possiblePreviousData = contentResolver.findByCanonicalUris(ImmutableList.of(rtFilmAlias, filmUri));
         
         Film film;
-        if (possiblePreviousData.hasValue()) {
-        	Identified previous = possiblePreviousData.requireValue();
+        Maybe<Identified> oldFilm = possiblePreviousData.get(rtFilmAlias);
+        Maybe<Identified> newFilm = possiblePreviousData.get(filmUri);
+        if (oldFilm.hasValue()) {
+        	Identified previous = oldFilm.requireValue();
             if (previous instanceof Film) {
                 film = (Film) previous;
             }
@@ -333,8 +339,25 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 film = new Film();
                 Item.copyTo((Episode) previous, film);
             }
+            film.addAlias(filmUri);
+        } else if (newFilm.hasValue()) {
+            Identified previous = newFilm.requireValue();
+            if (previous instanceof Film) {
+                film = (Film) previous;
+            }
+            else {
+                film = new Film();
+                Item.copyTo((Episode) previous, film);
+            }
+            film.addAlias(rtFilmAlias);
         } else {
             film = getBasicFilm(progData);
+        }
+
+        String certificateValue = progData.getCertificate();
+        if (!Strings.isNullOrEmpty(certificateValue)) {
+            Certificate certificate = new Certificate(certificateValue, Countries.GB);
+            film.setCertificates(ImmutableSet.of(certificate));
         }
         
         Broadcast broadcast = setCommonDetails(progData, channel, zone, film, updatedAt);
@@ -403,7 +426,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         episode.setPeople(people(progData));
 
         Version version = findBestVersion(episode.getVersions());
-
+        
         Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
         return broadcast;
@@ -582,7 +605,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private Film getBasicFilm(ProgData progData) {
-        Film film = new Film(PaHelper.getFilmUri(programmeId(progData)), PaHelper.getFilmCurie(programmeId(progData)), Publisher.PA);
+        Film film = new Film(PaHelper.getFilmUri(programmeId(progData)), PaHelper.getEpisodeCurie(programmeId(progData)), Publisher.PA);
+        film.addAlias(PaHelper.getFilmRtAlias(progData.getRtFilmnumber()));
         
         setBasicDetails(progData, film);
         
@@ -622,7 +646,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     protected static String programmeId(ProgData progData) {
-        return ! Strings.isNullOrEmpty(progData.getRtFilmnumber()) ? progData.getRtFilmnumber() : progData.getProgId();
+        return progData.getProgId();
     }
     
     private static Boolean getBooleanValue(String value) {
