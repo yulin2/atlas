@@ -19,6 +19,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.persistence.ContentPersistenceModule;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.uri.LocalOrRemoteFetcher;
@@ -41,12 +42,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.shorturls.ShortUrlSaver;
 
 @Configuration
 @Import({AtlasFetchModule.WriterModule.class})
@@ -63,22 +63,25 @@ public class AtlasFetchModule {
 	@Configuration
 	public static class WriterModule {
 	
-		private @Autowired ContentWriter contentWriter;
-        private @Autowired ContentResolver contentResolver;
-        private @Autowired ShortUrlSaver shortUrlSaver;
+		private @Autowired ContentPersistenceModule persistence;
 		private @Autowired RemoteSiteModule remote;
+	
+		@Primary
+		public @Bean ContentWriter contentWriter() {		
+			return persistence.contentWriter();
+		}
 		
 		public @PostConstruct void passWriterToReader() {
-		    savingFetcher().setStore(contentWriter);
+		    savingFetcher().setStore(contentWriter());
 		}
 		
 		public @Bean CanonicalisingFetcher remoteSiteContentResolver() {
-			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, savingFetcher());
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentResolver(), savingFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		
 		public @Bean CanonicalisingFetcher contentResolverThatDoesntSave() {
-			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, remote.remoteFetcher());
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(persistence.contentResolver(), remote.remoteFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		
@@ -93,7 +96,7 @@ public class AtlasFetchModule {
 			canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());
 			canonicalisers.add(new HuluItemAdapter.HuluItemCanonicaliser());
 			canonicalisers.add(new WritingHuluBrandAdapter.HuluBrandCanonicaliser());
-			canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), shortUrlSaver));
+			canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), persistence.shortUrlSaver()));
 			return canonicalisers;
 		}
 
