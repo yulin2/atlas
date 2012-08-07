@@ -58,7 +58,7 @@ public class QueryModule {
     private LookupEntryStore mongoStore;
     @Autowired
     private KnownTypeContentResolver mongoResolver;
-    @Resource(name="cassandraContentResolver")
+    @Resource(name="cassandraContentStore")
     private ContentResolver cassandraResolver;
     @Autowired
     private TopicContentUriLister topicContentUriLister;
