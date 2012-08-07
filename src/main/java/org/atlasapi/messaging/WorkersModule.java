@@ -48,7 +48,7 @@ public class WorkersModule {
     @Autowired
     private ConnectionFactory connectionFactory;
     
-    @Resource(name="cassandraContentWriter")
+    @Resource(name="cassandraContentStore")
     private ContentWriter cassandraContentWriter;
     @Autowired
     private ContentResolver mongoContentResolver;
