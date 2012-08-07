@@ -35,15 +35,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
+import org.atlasapi.persistence.AtlasPersistenceModule;
 
 @Configuration
-@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class})
+@Import({AtlasPersistenceModule.class, HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;
-	
 	private @Autowired Collection<SiteSpecificAdapter<? extends Identified>> remoteAdapters;
-//	private @Autowired YouTubeAdapterModule youTubeAdapterModule;
+    //
+    //private @Autowired YouTubeAdapterModule youTubeAdapterModule;
 
 	public @Bean Fetcher<Identified> remoteFetcher() {
 		
