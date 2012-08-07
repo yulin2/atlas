@@ -15,13 +15,10 @@ permissions and limitations under the License. */
 package org.atlasapi.query;
 
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
-import org.atlasapi.persistence.content.DummyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
@@ -38,43 +35,54 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
+import org.atlasapi.AtlasFetchModule;
+import org.atlasapi.persistence.AtlasPersistenceModule;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
+import org.springframework.context.annotation.Import;
 
 @Configuration
 public class QueryModule {
 
-	private @Autowired @Qualifier("remoteSiteContentResolver") CanonicalisingFetcher localOrRemoteFetcher;
-	
-	private @Autowired DatabasedMongo mongo;
-    private @Autowired CassandraContentStore cassandra;
-	
-	private @Value("${applications.enabled}") String applicationsEnabled;
-	private @Value("${atlas.search.host}") String searchHost;
+	@Autowired
+    @Qualifier("remoteSiteContentResolver")
+    private CanonicalisingFetcher localOrRemoteFetcher;
+    @Autowired
+    private LookupEntryStore mongoStore;
+    @Autowired
+    private KnownTypeContentResolver mongoResolver;
+    @Autowired @Qualifier(value="cassandra")
+    private ContentResolver cassandraResolver;
+    //
+    @Value("${applications.enabled}")
+    private String applicationsEnabled;
+    @Value("${atlas.search.host}")
+    private String searchHost;
 
-	@Bean KnownTypeQueryExecutor queryExecutor() {
-	    
-	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
-        KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
-		
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));
-		
-		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
-		
-	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
-		
-	    queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
-	    
-	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
-	}
-	
-	@Bean SearchResolver searchResolver() {
-	    if (! Strings.isNullOrEmpty(searchHost)) {
-    	    ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-    	    return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-	    }
-	    
-	    return new DummySearcher();
-	}
+    @Bean
+    public KnownTypeQueryExecutor queryExecutor() {
+
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandraResolver),
+                new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver),
+                mongoStore);
+
+        queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
+
+        queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
+
+        queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
+
+        return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
+    }
+
+    @Bean
+    public SearchResolver searchResolver() {
+        if (!Strings.isNullOrEmpty(searchHost)) {
+            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
+            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
+        }
+
+        return new DummySearcher();
+    }
 }
