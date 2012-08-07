@@ -48,7 +48,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
+import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 
 @Configuration
 public class QueryModule {
@@ -71,7 +71,7 @@ public class QueryModule {
     public KnownTypeQueryExecutor queryExecutor() {
 	    
 	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
-        KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
+        KnownTypeContentResolver cassandraContentResolver = new SimpleKnownTypeContentResolver(cassandra);
 		
         KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));
 		
@@ -87,7 +87,7 @@ public class QueryModule {
 	@Bean
     public TopicContentLister mergingTopicContentLister() {
 	    KnownTypeContentResolver contentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
-        final KnownTypeQueryExecutor queryExecutor = new MergeOnOutputQueryExecutor(new LookupResolvingQueryExecutor(new CassandraKnownTypeContentResolver(cassandra), contentResolver, new MongoLookupEntryStore(mongo)));
+        final KnownTypeQueryExecutor queryExecutor = new MergeOnOutputQueryExecutor(new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandra), contentResolver, new MongoLookupEntryStore(mongo)));
         
         return new TopicContentLister() {
             
