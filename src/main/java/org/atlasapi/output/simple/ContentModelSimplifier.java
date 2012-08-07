@@ -7,7 +7,10 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.ContentGroupRef;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
@@ -15,8 +18,9 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.entity.simple.RelatedLink;
 import org.atlasapi.media.product.Product;
-import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
@@ -26,10 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.ContentGroupRef;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
 

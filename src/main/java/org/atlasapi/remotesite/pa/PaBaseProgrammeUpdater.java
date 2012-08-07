@@ -29,7 +29,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;

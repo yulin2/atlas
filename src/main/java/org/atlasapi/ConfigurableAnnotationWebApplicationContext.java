@@ -12,8 +12,7 @@ import org.atlasapi.logging.HealthModule;
 import org.atlasapi.messaging.WorkersModule;
 import org.atlasapi.messaging.MessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
-import org.atlasapi.persistence.CassandraPersistenceModule;
-import org.atlasapi.persistence.ManualScheduleRebuildModule;
+import org.atlasapi.persistence.CassandraContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.SearchModule;
@@ -51,15 +50,16 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             AtlasWebModule.class,
             SearchModule.class,
             QueryModule.class,
-            MongoContentPersistenceModule.class,
-            CassandraPersistenceModule.class, 
             AtlasFetchModule.class,
+            AtlasPersistenceModule.class, 
+            CassandraContentPersistenceModule.class, 
+            AtlasFetchModule.class, 
             RemoteSiteModule.class, 
             HealthModule.class,
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class,
-            EquivModule.class,
+            EquivModule.class
         );
         
         if(runProcessingOnly()) {
