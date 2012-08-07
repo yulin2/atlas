@@ -48,6 +48,7 @@ import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class AtlasPersistenceModule {
@@ -227,7 +228,7 @@ public class AtlasPersistenceModule {
         return esContentIndexModule().contentIndexer();
     }
 
-    @Bean
+    @Bean @Qualifier(value="cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
     }
