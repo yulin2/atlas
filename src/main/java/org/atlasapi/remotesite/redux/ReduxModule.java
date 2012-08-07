@@ -26,7 +26,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Configuration
 public class ReduxModule {
 
-    private @Autowired @Qualifier("contentResolver") ContentResolver resolver;
+    private @Autowired ContentResolver resolver;
     private @Autowired ContentWriter writer;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired AdapterLog log;

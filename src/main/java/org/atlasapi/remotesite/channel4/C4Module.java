@@ -55,8 +55,8 @@ public class C4Module {
 	private @Value("${c4.lakeviewavailability.key}") String lakeviewAvailabilityFeedKey;
 	private @Value("${c4.lakeviewavailability.apiroot}") String lakeviewApiRoot;
 
-	private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
-	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
+	private @Autowired ContentResolver contentResolver;
+	private @Autowired ContentWriter contentWriter;
 	private @Autowired AdapterLog log;
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired ChannelResolver channelResolver;

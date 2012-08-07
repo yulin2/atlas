@@ -4,7 +4,6 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,35 +25,31 @@ import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import javax.annotation.Resource;
 import org.atlasapi.media.content.util.EventQueueingContentWriter;
-import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.content.ContentGroupWriter;
-import org.atlasapi.persistence.content.ContentIndexer;
-import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
-import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.ScheduleResolver;
+import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.listing.ContentLister;
-import org.atlasapi.persistence.content.mongo.LastUpdatedContentFinder;
-import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
-import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
-import org.atlasapi.persistence.event.RecentChangeStore;
-import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
-import org.atlasapi.persistence.media.product.IdSettingProductStore;
-import org.atlasapi.persistence.media.product.ProductResolver;
-import org.atlasapi.persistence.media.product.ProductStore;
+import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
+import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
+import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
+import org.atlasapi.persistence.content.mongo.MongoContentLister;
+import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.mongo.MongoPersonStore;
+import org.atlasapi.persistence.content.mongo.MongoProductStore;
+import org.atlasapi.persistence.content.mongo.MongoTopicStore;
+import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
+import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
-import org.atlasapi.persistence.media.segment.SegmentResolver;
-import org.atlasapi.persistence.media.segment.SegmentWriter;
-import org.atlasapi.persistence.shorturls.ShortUrlSaver;
-import org.atlasapi.persistence.topic.TopicContentLister;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
+import org.atlasapi.persistence.event.RecentChangeStore;
+import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
+import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
+import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class AtlasPersistenceModule {
@@ -74,7 +69,7 @@ public class AtlasPersistenceModule {
     private JmsTemplate changesProducer;
 
     @Bean
-    public ContentIndexModule esContentIndexModule() {
+    public ElasticSearchContentIndexModule esContentIndexModule() {
         ElasticSearchContentIndexModule elasticSearchContentIndexModule = new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
         elasticSearchContentIndexModule.init();
         return elasticSearchContentIndexModule;
@@ -88,11 +83,6 @@ public class AtlasPersistenceModule {
     @Bean
     public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
         return new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
-    }
-    
-    @Bean
-    public CassandraContentStore cassandraContentStore() {
-        return cassandraContentPersistenceModule().cassandraContentStore();
     }
 
     @Bean
@@ -126,16 +116,22 @@ public class AtlasPersistenceModule {
         c.init();
         return c;
     }
+    
+    @Bean
+    @Primary
+    public MongoContentLister contentLister() {
+        return mongoContentPersistenceModule().contentLister();
+    }
 
     @Bean
     @Primary
-    public ContentGroupWriter contentGroupWriter() {
+    public MongoContentGroupWriter contentGroupWriter() {
         return mongoContentPersistenceModule().contentGroupWriter();
     }
 
     @Bean
     @Primary
-    public ContentGroupResolver contentGroupResolver() {
+    public MongoContentGroupResolver contentGroupResolver() {
         return mongoContentPersistenceModule().contentGroupResolver();
     }
 
@@ -150,101 +146,83 @@ public class AtlasPersistenceModule {
         contentWriter = new EventQueueingContentWriter(changesProducer, contentWriter);
         return contentWriter;
     }
-
+    
     @Bean
     @Primary
-    public ItemsPeopleWriter itemsPeopleWriter() {
-        return mongoContentPersistenceModule().itemsPeopleWriter();
-    }
-
-    @Bean
-    @Primary
-    public ContentResolver contentResolver() {
+    public LookupResolvingContentResolver contentResolver() {
         return mongoContentPersistenceModule().contentResolver();
     }
 
     @Bean
     @Primary
-    public TopicStore topicStore() {
-        return mongoContentPersistenceModule().topicStore();
+    public QueuingItemsPeopleWriter itemsPeopleWriter() {
+        return mongoContentPersistenceModule().itemsPeopleWriter();
     }
 
     @Bean
     @Primary
-    public TopicQueryResolver topicQueryResolver() {
-        return mongoContentPersistenceModule().topicQueryResolver();
-    }
-
-    @Bean
-    @Primary
-    public ShortUrlSaver shortUrlSaver() {
-        return mongoContentPersistenceModule().shortUrlSaver();
-    }
-
-    @Bean
-    @Primary
-    public SegmentWriter segmentWriter() {
-        return new IdSettingSegmentWriter(mongoContentPersistenceModule().segmentWriter(), segmentResolver(), idGeneratorBuilder().generator("segment"));
-    }
-
-    @Bean
-    @Primary
-    public SegmentResolver segmentResolver() {
-        return mongoContentPersistenceModule().segmentResolver();
-    }
-
-    @Bean
-    @Primary
-    public ProductStore productStore() {
-        return new IdSettingProductStore(mongoContentPersistenceModule().productStore(), idGeneratorBuilder().generator("product"));
-    }
-
-    @Bean
-    @Primary
-    public ProductResolver productResolver() {
-        return mongoContentPersistenceModule().productResolver();
-    }
-
-    @Bean
-    @Primary
-    public LookupEntryStore lookupStore() {
-        return mongoContentPersistenceModule().lookupStore();
-    }
-
-    @Bean
-    @Primary
-    public ChannelResolver channelResolver() {
-        return mongoContentPersistenceModule().channelResolver();
-    }
-
-    @Bean
-    @Primary
-    public ScheduleResolver scheduleResolver() {
-        return mongoContentPersistenceModule().scheduleResolver();
-    }
-
-    @Bean
-    @Primary
-    public ScheduleWriter scheduleWriter() {
-        return mongoContentPersistenceModule().scheduleWriter();
-    }
-
-    @Bean
-    @Primary
-    public KnownTypeContentResolver knownTypeContentResolver() {
+    public MongoContentResolver knownTypeContentResolver() {
         return mongoContentPersistenceModule().knownTypeContentResolver();
     }
 
     @Bean
     @Primary
-    public LastUpdatedContentFinder lastUpdatedContentFinder() {
-        return mongoContentPersistenceModule().lastUpdatedContentFinder();
+    public MongoTopicStore topicStore() {
+        return mongoContentPersistenceModule().topicStore();
     }
 
     @Bean
     @Primary
-    public TopicContentLister topicContentLister() {
-        return mongoContentPersistenceModule().topicContentLister();
+    public MongoShortUrlSaver shortUrlSaver() {
+        return mongoContentPersistenceModule().shortUrlSaver();
+    }
+
+    @Bean
+    @Primary
+    public IdSettingSegmentWriter segmentWriter() {
+        return new IdSettingSegmentWriter(mongoContentPersistenceModule().segmentWriter(), segmentResolver(), idGeneratorBuilder().generator("segment"));
+    }
+
+    @Bean
+    @Primary
+    public MongoSegmentResolver segmentResolver() {
+        return mongoContentPersistenceModule().segmentResolver();
+    }
+
+    @Bean
+    @Primary
+    public MongoProductStore productStore() {
+        return mongoContentPersistenceModule().productStore();
+    }
+
+    @Bean
+    @Primary
+    public MongoLookupEntryStore lookupStore() {
+        return mongoContentPersistenceModule().lookupStore();
+    }
+
+    @Bean
+    @Primary
+    public MongoChannelStore channelStore() {
+        return mongoContentPersistenceModule().channelStore();
+    }
+    
+    @Bean
+    @Primary
+    public MongoChannelGroupStore channelGroupStore() {
+        return mongoContentPersistenceModule().channelGroupStore();
+    }
+    
+    @Bean
+    @Primary
+    public MongoPersonStore personStore() {
+        return mongoContentPersistenceModule().personStore();
+    }
+
+    @Bean
+    @Primary
+    public MongoScheduleStore scheduleStore() {
+        return mongoContentPersistenceModule().scheduleStore();
     }
 
     @Bean
@@ -255,26 +233,13 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public ContentIndexer contentIndexer() {
+    public ESContentIndexer contentIndexer() {
         return esContentIndexModule().contentIndexer();
     }
 
-    @Bean
-    @Qualifier("cassandra")
-    public ContentResolver cassandraContentResolver() {
-        return cassandraContentPersistenceModule().contentResolver();
-    }
-
-    @Bean
-    @Qualifier("cassandra")
-    public ContentWriter cassandraContentWriter() {
-        return cassandraContentPersistenceModule().contentWriter();
-    }
-
-    @Bean
-    @Qualifier("cassandra")
-    public ContentLister contentLister() {
-        return cassandraContentPersistenceModule().contentLister();
+    @Bean @Qualifier(value="cassandra")
+    public CassandraContentStore cassandraContentStore() {
+        return cassandraContentPersistenceModule().cassandraContentStore();
     }
 
     @Bean
