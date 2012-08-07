@@ -52,7 +52,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             AtlasWebModule.class, 
             QueryModule.class,
             AtlasPersistenceModule.class, 
-            CassandraContentPersistenceModule.class, 
             AtlasFetchModule.class, 
             RemoteSiteModule.class, 
             HealthModule.class, 
