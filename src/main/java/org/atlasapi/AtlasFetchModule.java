@@ -47,17 +47,20 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.shorturls.ShortUrlSaver;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 // FIXME Pretty confusing class, should be refactored to clarify its role and responsibilities
 @Configuration
 @Import({AtlasFetchModule.WriterModule.class})
 public class AtlasFetchModule {
 	
-	public @Bean SimpleScheduler scheduler() {
+    @Bean
+	public SimpleScheduler scheduler() {
 	    return new SimpleScheduler();
 	}
 	
-	public @Bean ManualTaskTrigger manualTaskTrigger() {
+    @Bean
+	public ManualTaskTrigger manualTaskTrigger() {
 	    return new ManualTaskTrigger(scheduler());
 	}
 	
@@ -73,17 +76,20 @@ public class AtlasFetchModule {
 		    savingFetcher().setStore(contentWriter);
 		}
 		
-		public @Bean CanonicalisingFetcher remoteSiteContentResolver() {
+        @Bean @Qualifier("remoteSiteContentResolver")
+		public CanonicalisingFetcher remoteSiteContentResolver() {
 			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, savingFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		
-		public @Bean CanonicalisingFetcher contentResolverThatDoesntSave() {
+        @Bean @Qualifier("contentResolverThatDoesntSave")
+		public CanonicalisingFetcher contentResolverThatDoesntSave() {
 			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, remote.remoteFetcher());
 			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
 		}
 		
-		public @Bean List<Canonicaliser> canonicalisers() {
+        @Bean
+		public List<Canonicaliser> canonicalisers() {
 			List<Canonicaliser> canonicalisers = Lists.newArrayList();
 			canonicalisers.add(new BbcUriCanonicaliser());
 			canonicalisers.add(new YoutubeUriCanonicaliser());
@@ -98,7 +104,8 @@ public class AtlasFetchModule {
 			return canonicalisers;
 		}
 
-		public @Bean SavingFetcher savingFetcher() {
+        @Bean
+		public SavingFetcher savingFetcher() {
 			return new SavingFetcher(remote.remoteFetcher(), null);
 		}
 	}

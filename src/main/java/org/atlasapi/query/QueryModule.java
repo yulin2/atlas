@@ -53,16 +53,22 @@ import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResol
 @Configuration
 public class QueryModule {
 
-	private @Autowired @Qualifier("remoteSiteContentResolver") CanonicalisingFetcher localOrRemoteFetcher;
-	
-	private @Autowired DatabasedMongo mongo;
-    private @Autowired CassandraContentStore cassandra;
-	private @Autowired TopicContentUriLister topicContentUriLister;
-	
-	private @Value("${applications.enabled}") String applicationsEnabled;
-	private @Value("${atlas.search.host}") String searchHost;
+    @Autowired @Qualifier("remoteSiteContentResolver")
+	private CanonicalisingFetcher localOrRemoteFetcher;
+    @Autowired
+	private DatabasedMongo mongo;
+    @Autowired
+    private CassandraContentStore cassandra;
+    @Autowired
+	private TopicContentUriLister topicContentUriLister;
+	//
+    @Value("${applications.enabled}")
+	private String applicationsEnabled;
+    @Value("${atlas.search.host}")
+	private String searchHost;
 
-	@Bean KnownTypeQueryExecutor queryExecutor() {
+	@Bean 
+    public KnownTypeQueryExecutor queryExecutor() {
 	    
 	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
         KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
@@ -78,7 +84,8 @@ public class QueryModule {
 	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
 	}
 	
-	@Bean TopicContentLister mergingTopicContentLister() {
+	@Bean
+    public TopicContentLister mergingTopicContentLister() {
 	    KnownTypeContentResolver contentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
         final KnownTypeQueryExecutor queryExecutor = new MergeOnOutputQueryExecutor(new LookupResolvingQueryExecutor(new CassandraKnownTypeContentResolver(cassandra), contentResolver, new MongoLookupEntryStore(mongo)));
         
@@ -98,7 +105,8 @@ public class QueryModule {
 	    
 	}
 	
-	@Bean SearchResolver searchResolver() {
+	@Bean 
+    public SearchResolver searchResolver() {
 	    if (! Strings.isNullOrEmpty(searchHost)) {
     	    ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
     	    return new ContentResolvingSearcher(titleSearcher, queryExecutor());
