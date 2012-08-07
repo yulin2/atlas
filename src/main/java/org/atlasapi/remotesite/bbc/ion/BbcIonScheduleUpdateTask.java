@@ -65,14 +65,20 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
     private void trimBroadcasts(List<ItemAndBroadcast> itemAndBroadcasts) {
         DateTime scheduleStartTime = null;
         DateTime scheduleEndTime = null;
-        Channel channel = null;
+        String broadcastOn = null;
         
         if(!itemAndBroadcasts.isEmpty()) {
             Builder<String, String> acceptableIds = ImmutableMap.builder();
             for(ItemAndBroadcast itemAndBroadcast : itemAndBroadcasts) {
                 if(itemAndBroadcast.getBroadcast().hasValue()) {
                     Broadcast broadcast = itemAndBroadcast.getBroadcast().requireValue();
-                    channel = channelResolver.fromUri(broadcast.getBroadcastOn()).requireValue();
+                    
+                    if(broadcastOn != null && !broadcastOn.equals(broadcast.getBroadcastOn())) {
+                        throw new IllegalStateException("Not expecting broadcasts on multiple channels from a single schedule URL");
+                    }
+                    
+                    broadcastOn = broadcast.getBroadcastOn();
+                    
                     if(scheduleStartTime == null || scheduleStartTime.isAfter(broadcast.getTransmissionTime())) {
                         scheduleStartTime = broadcast.getTransmissionTime();
                     }
@@ -83,6 +89,7 @@ public class BbcIonScheduleUpdateTask implements Callable<Integer> {
                 }
             }
             
+            Channel channel = channelResolver.fromUri(broadcastOn).requireValue();
             trimmer.trimBroadcasts(new Interval(scheduleStartTime, scheduleEndTime), channel, acceptableIds.build());
         }
     }
