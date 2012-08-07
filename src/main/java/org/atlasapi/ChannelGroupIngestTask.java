@@ -8,10 +8,10 @@ import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroup.ChannelGroupType;
-import org.atlasapi.media.channel.ChannelGroupStore;
-import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.channel.MongoChannelGroupStore;
-import org.atlasapi.media.channel.MongoChannelStore;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;

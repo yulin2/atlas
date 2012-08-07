@@ -14,7 +14,7 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.entity.simple.RelatedLink;
-import org.atlasapi.media.product.ProductResolver;
+import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 

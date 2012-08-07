@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -22,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 public class BbcIonScheduleUpdateTask implements Callable<Integer> {
 

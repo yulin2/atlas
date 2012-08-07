@@ -13,7 +13,7 @@ import java.util.Set;
 
 import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;

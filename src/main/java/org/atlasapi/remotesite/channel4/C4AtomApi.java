@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Content;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -21,6 +20,7 @@ import com.google.common.collect.Maps;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 import com.sun.syndication.feed.atom.Link;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 public class C4AtomApi {
 	

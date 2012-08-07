@@ -7,7 +7,6 @@ import java.net.URL;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -34,6 +33,7 @@ import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.time.DayRangeGenerator;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 @Configuration
 public class C4Module {

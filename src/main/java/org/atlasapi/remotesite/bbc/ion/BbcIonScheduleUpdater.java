@@ -7,7 +7,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
@@ -21,6 +20,7 @@ import org.joda.time.format.PeriodFormat;
 import com.google.common.base.Supplier;
 import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.DateTimeZones;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 public class BbcIonScheduleUpdater extends ScheduledTask {
 

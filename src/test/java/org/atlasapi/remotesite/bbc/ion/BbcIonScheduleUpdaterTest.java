@@ -7,7 +7,6 @@ import static org.hamcrest.core.AllOf.allOf;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -36,6 +35,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import com.metabroadcast.common.base.Maybe;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 public class BbcIonScheduleUpdaterTest extends TestCase {
 

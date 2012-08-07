@@ -5,13 +5,13 @@ import java.io.File;
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.feeds.upload.FileUploadResult.FileUploadResultType;
 import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Predicate;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable {
        

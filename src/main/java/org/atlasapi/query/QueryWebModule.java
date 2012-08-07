@@ -1,8 +1,8 @@
 package org.atlasapi.query;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.channel.ChannelGroupStore;
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
@@ -18,8 +18,8 @@ import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
-import org.atlasapi.media.product.ProductResolver;
-import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.persistence.media.product.ProductResolver;
+import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
 import org.atlasapi.output.JaxbXmlTranslator;

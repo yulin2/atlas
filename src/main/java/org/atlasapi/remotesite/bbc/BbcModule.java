@@ -12,9 +12,7 @@ import java.lang.reflect.Field;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.segment.SegmentWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
@@ -67,6 +65,8 @@ import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.time.DayRangeGenerator;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.segment.SegmentWriter;
 
 @Configuration
 public class BbcModule {

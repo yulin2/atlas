@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
@@ -39,6 +38,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sun.syndication.feed.atom.Feed;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 

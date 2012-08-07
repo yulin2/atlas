@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Episode;

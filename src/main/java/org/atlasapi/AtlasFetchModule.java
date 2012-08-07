@@ -48,6 +48,7 @@ import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.shorturls.ShortUrlSaver;
 
+// FIXME Pretty confusing class, should be refactored to clarify its role and responsibilities
 @Configuration
 @Import({AtlasFetchModule.WriterModule.class})
 public class AtlasFetchModule {

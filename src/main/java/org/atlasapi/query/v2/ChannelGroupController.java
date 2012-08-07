@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
 import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -8,7 +8,6 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.time.DateTimeZones;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 @Controller
 public class BbcIonScheduleController {

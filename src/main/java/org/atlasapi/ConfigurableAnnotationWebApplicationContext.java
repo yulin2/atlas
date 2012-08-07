@@ -11,7 +11,6 @@ import org.atlasapi.logging.HealthModule;
 import org.atlasapi.messaging.WorkersModule;
 import org.atlasapi.messaging.MessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
-import org.atlasapi.persistence.ManualScheduleRebuildModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
@@ -23,7 +22,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
-import org.atlasapi.persistence.CassandraPersistenceModule;
+import org.atlasapi.persistence.CassandraContentPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -44,12 +43,11 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(
-            AtlasModule.class, 
             AtlasLoggingModule.class, 
             AtlasWebModule.class, 
             QueryModule.class,
             AtlasPersistenceModule.class, 
-            CassandraPersistenceModule.class, 
+            CassandraContentPersistenceModule.class, 
             AtlasFetchModule.class, 
             RemoteSiteModule.class, 
             HealthModule.class, 

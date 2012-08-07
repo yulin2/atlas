@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -36,6 +35,7 @@ import org.mockito.stubbing.Answer;
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Timestamp;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaProgrammeProcessorTest {
