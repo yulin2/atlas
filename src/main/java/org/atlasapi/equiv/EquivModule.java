@@ -25,6 +25,7 @@ import static org.atlasapi.media.entity.Publisher.ITV;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
+import static org.atlasapi.media.entity.Publisher.FIVE;
 import static org.atlasapi.persistence.lookup.TransitiveLookupWriter.generatedTransitiveLookupWriter;
 
 import java.io.File;
@@ -232,11 +233,12 @@ public class EquivModule {
     @PostConstruct
     public void scheduleUpdater() {
         if(Boolean.parseBoolean(updaterEnabled)) {
-            taskScheduler.schedule(publisherUpdateTask(BBC, C4, ITV, BBC_REDUX, RADIO_TIMES).withName("BBC/C4/ITV/Redux/RT Equivalence Updater"), EQUIVALENCE_REPETITION);
+            taskScheduler.schedule(publisherUpdateTask(BBC, C4, ITV, FIVE, RADIO_TIMES, BBC_REDUX).withName("BBC/C4/ITV/Five/RT/Redux Equivalence Updater"), EQUIVALENCE_REPETITION);
             taskScheduler.schedule(publisherUpdateTask(PA).withName("PA Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(FIVE).withName("Five Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(ITUNES).withName("Itunes Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(RADIO_TIMES).withName("RT Equivalence Updater"), RepetitionRules.NEVER);
