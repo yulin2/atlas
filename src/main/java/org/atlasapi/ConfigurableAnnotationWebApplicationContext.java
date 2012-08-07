@@ -22,7 +22,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
-import org.atlasapi.persistence.CassandraContentPersistenceModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -47,7 +46,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             AtlasWebModule.class, 
             QueryModule.class,
             AtlasPersistenceModule.class, 
-            CassandraContentPersistenceModule.class, 
             AtlasFetchModule.class, 
             RemoteSiteModule.class, 
             HealthModule.class, 
