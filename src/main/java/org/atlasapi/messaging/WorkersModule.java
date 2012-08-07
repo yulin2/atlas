@@ -1,6 +1,7 @@
 package org.atlasapi.messaging;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.jms.ConnectionFactory;
 import org.atlasapi.messaging.workers.CassandraReplicator;
 import org.atlasapi.messaging.workers.ESIndexer;
@@ -47,8 +48,7 @@ public class WorkersModule {
     @Autowired
     private ConnectionFactory connectionFactory;
     
-    @Autowired
-    @Qualifier(value = "cassandra")
+    @Resource(name="cassandraContentWriter")
     private ContentWriter cassandraContentWriter;
     @Autowired
     private ContentResolver mongoContentResolver;

@@ -41,6 +41,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import javax.annotation.Resource;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -57,8 +58,7 @@ public class QueryModule {
     private LookupEntryStore mongoStore;
     @Autowired
     private KnownTypeContentResolver mongoResolver;
-    @Autowired
-    @Qualifier("cassandra")
+    @Resource(name="cassandraContentResolver")
     private ContentResolver cassandraResolver;
     @Autowired
     private TopicContentUriLister topicContentUriLister;
