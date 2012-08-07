@@ -8,9 +8,11 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
+import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -32,10 +34,14 @@ public class BbcIonScheduleController {
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("singleBBCIonScheduleUpdater").build());
 
     private final RemoteSiteClient<IonSchedule> scheduleClient;
+    private final BroadcastTrimmer scheduleTrimmer;
+    private final ChannelResolver channelResolver;
 
-    public BbcIonScheduleController(RemoteSiteClient<IonSchedule> scheduleClient, BbcIonBroadcastHandler handler, AdapterLog log) {
+    public BbcIonScheduleController(RemoteSiteClient<IonSchedule> scheduleClient, BbcIonBroadcastHandler handler, BroadcastTrimmer schedulerTrimmer, ChannelResolver channelResolver, AdapterLog log) {
         this.scheduleClient = scheduleClient;
         this.handler = handler;
+        this.scheduleTrimmer = schedulerTrimmer;
+        this.channelResolver = channelResolver;
         this.log = log;
     }
 
@@ -55,7 +61,7 @@ public class BbcIonScheduleController {
             return;
         }
         
-        executor.submit(new BbcIonScheduleUpdateTask(String.format(SCHEDULE_DEFAULT_FORMAT, service, localDate), scheduleClient, handler, log));
+        executor.submit(new BbcIonScheduleUpdateTask(String.format(SCHEDULE_DEFAULT_FORMAT, service, localDate), scheduleClient, handler, scheduleTrimmer, channelResolver, log));
 
         response.setStatus(HttpServletResponse.SC_OK);
     }

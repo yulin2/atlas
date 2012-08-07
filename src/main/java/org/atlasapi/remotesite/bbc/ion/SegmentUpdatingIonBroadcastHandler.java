@@ -2,10 +2,12 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import java.util.List;
 
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.segment.SegmentEvent;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
@@ -27,7 +29,7 @@ public class SegmentUpdatingIonBroadcastHandler implements BbcIonBroadcastHandle
     }
 
     @Override
-    public void handle(IonBroadcast broadcast) {
+    public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
         
         final String itemId = BbcFeeds.slashProgrammesUriForPid(broadcast.getEpisodeId());
         Maybe<Identified> possibleContent = contentResolver.findByCanonicalUris(ImmutableSet.of(itemId)).get(itemId);
@@ -43,9 +45,9 @@ public class SegmentUpdatingIonBroadcastHandler implements BbcIonBroadcastHandle
                 contentWriter.createOrUpdate(item);
             }
             
-            
+            return Maybe.just(new ItemAndBroadcast(item, Maybe.<Broadcast>nothing()));
         }
-        
+        return Maybe.nothing();
     }
 
     private Version versionFrom(String versionUri, Item item) {

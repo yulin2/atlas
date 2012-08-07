@@ -12,6 +12,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -37,7 +38,7 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
     }
 
     @Override
-    public void handle(IonBroadcast broadcast) {
+    public Maybe<ItemAndBroadcast> handle(IonBroadcast broadcast) {
 
         updateSocialDataFor(broadcast.getEpisodeId());
 
@@ -47,6 +48,7 @@ public class SocialDataFetchingIonBroadcastHandler implements BbcIonBroadcastHan
         if (broadcast.hasBrand()) {
             updateSocialDataFor(broadcast.getBrandId());
         }
+        return Maybe.nothing();
         
     }
 
