@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.segment.SegmentWriter;
+import org.atlasapi.persistence.media.segment.SegmentWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;

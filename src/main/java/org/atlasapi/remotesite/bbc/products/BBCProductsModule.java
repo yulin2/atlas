@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.scheduling.SimpleScheduler;
-import org.atlasapi.media.product.ProductStore;
+import org.atlasapi.persistence.media.product.ProductStore;
 
 @Configuration
 public class BBCProductsModule {

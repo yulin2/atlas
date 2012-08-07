@@ -2,7 +2,7 @@ package org.atlasapi;
 
 import java.util.List;
 
-import org.atlasapi.media.channel.MongoChannelStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.media.channel.OldChannel;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
