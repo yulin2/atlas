@@ -6,7 +6,7 @@ import com.metabroadcast.common.base.Maybe;
 import java.io.File;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.product.Product;
-import org.atlasapi.media.product.ProductStore;
+import org.atlasapi.persistence.media.product.ProductStore;
 import org.atlasapi.s3.S3Client;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

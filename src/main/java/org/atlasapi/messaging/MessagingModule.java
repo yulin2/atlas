@@ -29,6 +29,7 @@ public class MessagingModule {
     @Lazy(true)
     public JmsTemplate changesProducer() {
         JmsTemplate jmsTemplate = new JmsTemplate(activemqConnectionFactory());
+        jmsTemplate.setPubSubDomain(true);
         jmsTemplate.setDefaultDestinationName(changesDestination);
         return jmsTemplate;
     }

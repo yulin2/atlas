@@ -16,7 +16,7 @@ import nu.xom.Document;
 import nu.xom.Element;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;

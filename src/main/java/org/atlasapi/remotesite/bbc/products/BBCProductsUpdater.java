@@ -5,7 +5,7 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.time.SystemClock;
 import com.metabroadcast.common.time.Timestamp;
 import com.metabroadcast.common.time.Timestamper;
-import org.atlasapi.media.product.ProductStore;
+import org.atlasapi.persistence.media.product.ProductStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.s3.DefaultS3Client;

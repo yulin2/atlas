@@ -12,7 +12,7 @@ import nu.xom.Nodes;
 import nu.xom.XPathContext;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;

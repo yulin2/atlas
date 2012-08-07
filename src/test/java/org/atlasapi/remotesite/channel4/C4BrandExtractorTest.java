@@ -12,7 +12,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
