@@ -18,7 +18,6 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.query.uri.SavingFetcher;
@@ -38,7 +37,6 @@ import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.SimpleScheduler;

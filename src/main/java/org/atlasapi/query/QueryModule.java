@@ -18,34 +18,27 @@ import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.persistence.content.DummyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
-import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
-import org.atlasapi.query.content.search.ContentResolvingSearcher;
-import org.atlasapi.query.content.search.DummySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
-import org.atlasapi.search.ContentSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -66,7 +59,9 @@ public class QueryModule {
     @Autowired @Qualifier(value="cassandra")
     private ContentResolver cassandraResolver;
     @Autowired
-    private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
+    private org.atlasapi.media.content.ContentSearcher contentSearcher;
+    @Autowired @Qualifier("contentUpdater") 
+    private ContentEquivalenceUpdater<Content> equivUpdater;
     //
     @Value("${applications.enabled}")
     private String applicationsEnabled;
@@ -80,30 +75,12 @@ public class QueryModule {
                 new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver),
                 mongoStore);
 
-        queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
+        queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
 
         queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
 
         queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
 
         return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
-    }
-
-    @Bean
-    @Qualifier("v2")
-    public SearchResolver v2SearchResolver() {
-        if (!Strings.isNullOrEmpty(searchHost)) {
-            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-        }
-
-        return new DummySearcher();
-    }
-    
-    @Bean
-    @Qualifier("v4")
-    public SearchResolver v4SearchResolver() {
-        // FIXME externalize timeout
-        return new org.atlasapi.query.v4.search.support.ContentResolvingSearcher(contentSearcher, queryExecutor(), 60000);
     }
 }
