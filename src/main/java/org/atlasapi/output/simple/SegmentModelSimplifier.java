@@ -8,7 +8,7 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.segment.Segment;
 import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.media.segment.SegmentRef;
-import org.atlasapi.media.segment.SegmentResolver;
+import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
 
 import com.google.common.base.Function;
