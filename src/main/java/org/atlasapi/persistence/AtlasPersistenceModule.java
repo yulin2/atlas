@@ -28,6 +28,7 @@ import org.atlasapi.media.content.util.EventQueueingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
+import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
@@ -142,6 +143,12 @@ public class AtlasPersistenceModule {
         }
         contentWriter = new EventQueueingContentWriter(changesProducer, contentWriter);
         return contentWriter;
+    }
+    
+    @Bean
+    @Primary
+    public LookupResolvingContentResolver contentResolver() {
+        return mongoContentPersistenceModule().contentResolver();
     }
 
     @Bean
