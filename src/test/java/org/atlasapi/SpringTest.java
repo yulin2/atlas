@@ -15,14 +15,15 @@ permissions and limitations under the License. */
 
 package org.atlasapi;
 
-import junit.framework.TestCase;
 
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
 import org.junit.Test;
 
 import com.metabroadcast.common.properties.Configurer;
-import org.junit.Ignore;
+import org.atlasapi.persistence.content.elasticsearch.schema.ESSchema;
+import org.elasticsearch.node.NodeBuilder;
+import org.junit.BeforeClass;
 
 /**
  * Test that we can load beans from the Spring configuration - checks that the
@@ -30,10 +31,15 @@ import org.junit.Ignore;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class SpringTest extends TestCase {
+public class SpringTest {
+    
+    @BeforeClass
+    static public void before() throws InterruptedException {
+        NodeBuilder.nodeBuilder().clusterName(ESSchema.CLUSTER_NAME).build().start();
+    }
 
     @Test
-    public void testCanCreateQueryController() throws Exception {
+    public void testCanCreateWeb() throws Exception {
         System.setProperty(Configurer.PLATFORM_VARIABLE, "dev");
         Configurer.load();
         ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
@@ -43,7 +49,7 @@ public class SpringTest extends TestCase {
     }
 
     @Test
-    public void testCanCreatProcessing() throws Exception {
+    public void testCanCreateProcessing() throws Exception {
         System.setProperty("processing.config", "true");
         ConfigurableAnnotationWebApplicationContext applicationContext = new ConfigurableAnnotationWebApplicationContext();
         applicationContext.setConfigLocation(null);

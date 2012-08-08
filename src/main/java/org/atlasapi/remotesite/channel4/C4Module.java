@@ -46,8 +46,8 @@ public class C4Module {
 
 	private @Autowired SimpleScheduler scheduler;
 
-	private @Autowired @Qualifier("contentResolver") ContentResolver contentResolver;
-	private @Autowired @Qualifier("contentWriter") ContentWriter contentWriter;
+	private @Autowired ContentResolver contentResolver;
+	private @Autowired ContentWriter contentWriter;
 	private @Autowired AdapterLog log;
 	private @Autowired ScheduleResolver scheduleResolver;
 	private @Autowired ChannelResolver channelResolver;
