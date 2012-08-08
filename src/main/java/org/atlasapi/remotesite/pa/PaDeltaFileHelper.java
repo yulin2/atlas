@@ -19,7 +19,7 @@ public class PaDeltaFileHelper {
 
     private static final Logger log = LoggerFactory.getLogger(PaDeltaFileHelper.class);
     
-    private static final Pattern FILEVERSION_PATTERN = Pattern.compile("^.*/(\\d{12})_\\d{8}_tvdata.xml$");
+    private static final Pattern FILEVERSION_PATTERN = Pattern.compile("^(\\d{12})_\\d{8}_tvdata.xml$");
     private static final Pattern FILEDATE_PATTERN = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
     
     /**
@@ -29,8 +29,8 @@ public class PaDeltaFileHelper {
      * @param filename
      * @return version number
      */
-    public long versionNumber(String filename) {
-        Matcher versionMatcher = FILEVERSION_PATTERN.matcher(filename);
+    public long versionNumber(File file) {
+        Matcher versionMatcher = FILEVERSION_PATTERN.matcher(file.getName());
         if(versionMatcher.matches()) {
             return Long.valueOf(versionMatcher.group(1));
         }
