@@ -168,10 +168,9 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		        if (matcher.matches()) {
 		            log.info("Processing file " + file.toString());
 		            final File fileToProcess = dataStore.copyForProcessing(file);
-		            final Timestamp lastModified = Timestamp.of(fileToProcess.lastModified());
-		            final String fileDate = matcher.group(1);
+		            final String scheduleDay = matcher.group(1);
 
-		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, lastModified, fileDate, filename));
+		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, fileToProcess, scheduleDay));
 		            
 		            reader.parse(fileToProcess.toURI().toString());
 		        }
@@ -222,7 +221,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         reportStatus("Jobs cancelled");
     }
 
-    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final Timestamp lastModified, final String fileDate, final String filename) {
+    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final File fileToProcess, final String fileDate) {
         return new Unmarshaller.Listener() {
             public void beforeUnmarshal(Object target, Object parent) {
             }
@@ -246,7 +245,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                     Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
                     
                     LocalDate scheduleDay = LocalDate.parse(fileDate, FILEDATE_FORMAT);
-                    long version = deltaFileHelper.versionNumber(filename);
+                    long version = deltaFileHelper.versionNumber(fileToProcess);
                     if (channel.hasValue() 
                             && isSupported(channel.requireValue()) 
                             && shouldContinue()
@@ -259,7 +258,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                                     channelData.getProgData(), 
                                     schedulePeriod, 
                                     getTimeZone(fileDate), 
-                                    lastModified,
+                                    Timestamp.of(fileToProcess.lastModified()),
                                     scheduleDay,
                                     version
                             );
@@ -271,7 +270,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                             });
                             submitted.add(future);
                         } catch (Throwable e) {
-                            log.error("Exception submitting PA channel update job in file " + filename, e);
+                            log.error("Exception submitting PA channel update job in file " + fileToProcess.getName(), e);
                         }
                     }
                 }

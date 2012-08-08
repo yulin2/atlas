@@ -25,14 +25,14 @@ public class PaDeltaFileHelperTest {
     
     @Test
     public void testVersionNumberSnapshotFile() {
-        String filename = "20111227_tvdata.xml";
-        assertThat(deltaFileHelper.versionNumber(filename), is(1L));
+        File file = new File("/data/pa/20111227_tvdata.xml");
+        assertThat(deltaFileHelper.versionNumber(file), is(1L));
     }
     
     @Test
     public void testVersionNumberDeltaFile() {
-        String filename = "201111101545_20111110_tvdata.xml";
-        assertThat(deltaFileHelper.versionNumber(filename), is(201111101545L));
+        File file = new File("201111101545_20111110_tvdata.xml");
+        assertThat(deltaFileHelper.versionNumber(file), is(201111101545L));
     }
     
     @Test
