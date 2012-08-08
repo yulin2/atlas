@@ -1,16 +1,17 @@
 /* Copyright 2010 Meta Broadcast Ltd
 
- Licensed under the Apache License, Version 2.0 (the "License"); you
- may not use this file except in compliance with the License. You may
- obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you
+may not use this file except in compliance with the License. You may
+obtain a copy of the License at
 
- http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- implied. See the License for the specific language governing
- permissions and limitations under the License. */
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+implied. See the License for the specific language governing
+permissions and limitations under the License. */
+
 package org.atlasapi;
 
 import java.util.List;
@@ -44,71 +45,61 @@ import org.springframework.context.annotation.Import;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
-import javax.annotation.Resource;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.shorturls.ShortUrlSaver;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 // FIXME Pretty confusing class, should be refactored to clarify its role and responsibilities
 @Configuration
+@Import({AtlasFetchModule.WriterModule.class})
 public class AtlasFetchModule {
+	
+	public @Bean SimpleScheduler scheduler() {
+	    return new SimpleScheduler();
+	}
+	
+	public @Bean ManualTaskTrigger manualTaskTrigger() {
+	    return new ManualTaskTrigger(scheduler());
+	}
+	
+	@Configuration
+	public static class WriterModule {
+	
+		private @Autowired ContentWriter contentWriter;
+        private @Autowired ContentResolver contentResolver;
+        private @Autowired ShortUrlSaver shortUrlSaver;
+		private @Autowired RemoteSiteModule remote;
+		
+		public @PostConstruct void passWriterToReader() {
+		    savingFetcher().setStore(contentWriter);
+		}
+		
+		public @Bean CanonicalisingFetcher remoteSiteContentResolver() {
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, savingFetcher());
+			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
+		}
+		
+		public @Bean CanonicalisingFetcher contentResolverThatDoesntSave() {
+			Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, remote.remoteFetcher());
+			return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
+		}
+		
+		public @Bean List<Canonicaliser> canonicalisers() {
+			List<Canonicaliser> canonicalisers = Lists.newArrayList();
+			canonicalisers.add(new BbcUriCanonicaliser());
+			canonicalisers.add(new YoutubeUriCanonicaliser());
+			canonicalisers.add(new YouTubeFeedCanonicaliser());
+			canonicalisers.add(new FacebookCanonicaliser());
+			canonicalisers.add(new TedTalkAdapter.TedTalkCanonicaliser());
+			canonicalisers.add(new DailyMotionItemAdapter.DailyMotionItemCanonicaliser());
+			canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());
+			canonicalisers.add(new HuluItemAdapter.HuluItemCanonicaliser());
+			canonicalisers.add(new WritingHuluBrandAdapter.HuluBrandCanonicaliser());
+			canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), shortUrlSaver));
+			return canonicalisers;
+		}
 
-    @Resource(name="contentWriter")
-    private ContentWriter contentWriter;
-    @Resource(name="contentResolver")
-    private ContentResolver contentResolver;
-    @Autowired
-    private ShortUrlSaver shortUrlSaver;
-    @Autowired
-    private RemoteSiteModule remote;
-
-    @PostConstruct
-    public void passWriterToReader() {
-        savingFetcher().setStore(contentWriter);
-    }
-
-    @Bean
-    public SimpleScheduler scheduler() {
-        return new SimpleScheduler();
-    }
-
-    @Bean
-    public ManualTaskTrigger manualTaskTrigger() {
-        return new ManualTaskTrigger(scheduler());
-    }
-
-    @Bean
-    @Qualifier("remoteSiteContentResolver")
-    public CanonicalisingFetcher remoteSiteContentResolver() {
-        Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, savingFetcher());
-        return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
-    }
-
-    @Bean
-    @Qualifier("contentResolverThatDoesntSave")
-    public CanonicalisingFetcher contentResolverThatDoesntSave() {
-        Fetcher<Identified> localOrRemoteFetcher = new LocalOrRemoteFetcher(contentResolver, remote.remoteFetcher());
-        return new CanonicalisingFetcher(localOrRemoteFetcher, canonicalisers());
-    }
-
-    @Bean
-    public List<Canonicaliser> canonicalisers() {
-        List<Canonicaliser> canonicalisers = Lists.newArrayList();
-        canonicalisers.add(new BbcUriCanonicaliser());
-        canonicalisers.add(new YoutubeUriCanonicaliser());
-        canonicalisers.add(new YouTubeFeedCanonicaliser());
-        canonicalisers.add(new FacebookCanonicaliser());
-        canonicalisers.add(new TedTalkAdapter.TedTalkCanonicaliser());
-        canonicalisers.add(new DailyMotionItemAdapter.DailyMotionItemCanonicaliser());
-        canonicalisers.add(new BlipTvAdapter.BlipTvCanonicaliser());
-        canonicalisers.add(new HuluItemAdapter.HuluItemCanonicaliser());
-        canonicalisers.add(new WritingHuluBrandAdapter.HuluBrandCanonicaliser());
-        canonicalisers.add(new SavingShortUrlCanonicaliser(new ShortenedUrlCanonicaliser(), shortUrlSaver));
-        return canonicalisers;
-    }
-
-    @Bean
-    public SavingFetcher savingFetcher() {
-        return new SavingFetcher(remote.remoteFetcher(), null);
-    }
+		public @Bean SavingFetcher savingFetcher() {
+			return new SavingFetcher(remote.remoteFetcher(), null);
+		}
+	}
 }

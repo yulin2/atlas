@@ -47,7 +47,8 @@ public class WorkersModule {
     @Autowired
     private ConnectionFactory connectionFactory;
     
-    @Autowired @Qualifier(value="cassandra")
+    @Autowired
+    @Qualifier(value = "cassandra")
     private ContentWriter cassandraContentWriter;
     @Autowired
     private ContentResolver mongoContentResolver;
