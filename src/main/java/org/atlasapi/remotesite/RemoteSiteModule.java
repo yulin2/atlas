@@ -35,11 +35,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import com.google.common.collect.Lists;
-import org.atlasapi.persistence.AtlasPersistenceModule;
-
 @Configuration
-@Import({AtlasPersistenceModule.class, HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class})
+@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class})
 public class RemoteSiteModule {
 
     @Autowired

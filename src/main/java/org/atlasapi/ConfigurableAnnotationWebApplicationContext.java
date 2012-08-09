@@ -76,6 +76,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 QueryWebModule.class,
                 ApplicationModule.class
             );
+
         }
     }
 
