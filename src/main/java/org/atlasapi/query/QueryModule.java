@@ -35,12 +35,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
-import org.atlasapi.AtlasFetchModule;
-import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
-import org.springframework.context.annotation.Import;
 
 @Configuration
 public class QueryModule {

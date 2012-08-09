@@ -26,54 +26,51 @@ import com.google.common.collect.Lists;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
-	private static final Function<Class<?>, String> TO_FQN = new Function<Class<?>, String>() {
+    private static final Function<Class<?>, String> TO_FQN = new Function<Class<?>, String>() {
 
-		@Override
-		public String apply(Class<?> clazz) {
-			return clazz.getCanonicalName();
-		}
-	};
+        @Override
+        public String apply(Class<?> clazz) {
+            return clazz.getCanonicalName();
+        }
+    };
 
-	@Override
-	public final void setConfigLocation(String location) {
-		Builder<Class<?>> builder = ImmutableList.builder();
-		configure(builder);
-		super.setConfigLocations(Lists.transform(builder.build(), TO_FQN).toArray(new String[0]));
-	}
+    @Override
+    public final void setConfigLocation(String location) {
+        Builder<Class<?>> builder = ImmutableList.builder();
+        configure(builder);
+        super.setConfigLocations(Lists.transform(builder.build(), TO_FQN).toArray(new String[0]));
+    }
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(
-            AtlasLoggingModule.class, 
-            AtlasWebModule.class, 
-            QueryModule.class,
-            AtlasPersistenceModule.class, 
-            AtlasFetchModule.class, 
-            RemoteSiteModule.class, 
-            HealthModule.class, 
-            RadioPlayerModule.class, 
-            XmlTvModule.class, 
-            RemoteSiteHealthModule.class
-        );
-        
-        if(runProcessingOnly()) {
+                AtlasLoggingModule.class,
+                AtlasWebModule.class,
+                QueryModule.class,
+                AtlasPersistenceModule.class,
+                RemoteSiteModule.class,
+                AtlasFetchModule.class,
+                HealthModule.class,
+                RadioPlayerModule.class,
+                XmlTvModule.class,
+                RemoteSiteHealthModule.class);
+
+        if (runProcessingOnly()) {
             builder.add(
-                MessagingModule.class,
-                WorkersModule.class,
-                EquivModule.class, 
-                ManualScheduleRebuildModule.class, 
-                InterlinkingDeltaModule.class
-            );
+                    MessagingModule.class,
+                    WorkersModule.class,
+                    EquivModule.class,
+                    ManualScheduleRebuildModule.class,
+                    InterlinkingDeltaModule.class);
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
             builder.add(
-                AtlasFeedsModule.class, 
-                QueryWebModule.class, 
-                ApplicationModule.class
-            );
+                    AtlasFeedsModule.class,
+                    QueryWebModule.class,
+                    ApplicationModule.class);
         }
     }
 
-	private boolean runProcessingOnly() {
-		return Boolean.parseBoolean(System.getProperty("processing.config"));
-	}
+    private boolean runProcessingOnly() {
+        return Boolean.parseBoolean(System.getProperty("processing.config"));
+    }
 }

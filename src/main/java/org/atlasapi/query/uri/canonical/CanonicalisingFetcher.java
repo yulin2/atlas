@@ -6,15 +6,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.content.ResolvedContent.ResolvedContentBuilder;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.NoMatchingAdapterException;
 
 import com.google.common.collect.Sets;
 
-public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolver {
+public class CanonicalisingFetcher implements Fetcher<Identified> {
 
 	private static final int MAX_CANONICALISATIONS = 5;
 	private final Log log = LogFactory.getLog(getClass());
@@ -92,14 +89,5 @@ public class CanonicalisingFetcher implements Fetcher<Identified>, ContentResolv
 			}
 		}
 		return bean;
-	}
-
-	@Override
-	public ResolvedContent findByCanonicalUris(Iterable<String> uris) {
-	    ResolvedContentBuilder builder = ResolvedContent.builder();
-	    for (String uri : uris) {
-            builder.put(uri, fetch(uri));
-        }
-		return builder.build();
 	}
 }
