@@ -50,6 +50,7 @@ import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.SmartLifecycle;
 
 @Configuration
 public class AtlasPersistenceModule {
