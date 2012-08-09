@@ -31,20 +31,20 @@ import com.metabroadcast.common.properties.Configurer;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
-	private static final Function<Class<?>, String> TO_FQN = new Function<Class<?>, String>() {
+    private static final Function<Class<?>, String> TO_FQN = new Function<Class<?>, String>() {
 
-		@Override
-		public String apply(Class<?> clazz) {
-			return clazz.getCanonicalName();
-		}
-	};
+        @Override
+        public String apply(Class<?> clazz) {
+            return clazz.getCanonicalName();
+        }
+    };
 
-	@Override
-	public final void setConfigLocation(String location) {
-		Builder<Class<?>> builder = ImmutableList.builder();
-		configure(builder);
-		super.setConfigLocations(Lists.transform(builder.build(), TO_FQN).toArray(new String[0]));
-	}
+    @Override
+    public final void setConfigLocation(String location) {
+        Builder<Class<?>> builder = ImmutableList.builder();
+        configure(builder);
+        super.setConfigLocations(Lists.transform(builder.build(), TO_FQN).toArray(new String[0]));
+    }
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(
@@ -68,7 +68,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 EquivTaskModule.class,
                 ChildRefUpdateModule.class,
                 MessagingModule.class,
-                WorkersModule.class,
+                WorkersModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {
                 builder.add(YouViewUploadModule.class);
@@ -83,7 +83,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
         }
     }
 
-	private boolean runProcessingOnly() {
-		return Boolean.parseBoolean(System.getProperty("processing.config"));
-	}
+    private boolean runProcessingOnly() {
+        return Boolean.parseBoolean(System.getProperty("processing.config"));
+    }
 }

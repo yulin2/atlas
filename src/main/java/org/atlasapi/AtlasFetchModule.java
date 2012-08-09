@@ -23,7 +23,6 @@ import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.query.uri.SavingFetcher;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
-import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
@@ -43,6 +42,7 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.webapp.scheduling.ManualTaskTrigger;
 import org.atlasapi.persistence.AtlasPersistenceModule;
+import org.atlasapi.remotesite.RemoteSiteModule;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 // FIXME Pretty confusing class, should be refactored to clarify its role and responsibilities
