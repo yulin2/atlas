@@ -46,6 +46,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicContentUriLister;
+import org.springframework.context.SmartLifecycle;
 
 @Configuration
 public class QueryModule {

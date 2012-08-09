@@ -20,7 +20,6 @@ import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,24 +36,28 @@ import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 @Configuration
 public class C4Module {
-    
+
     private static final String ATOZ_BASE = "https://pmlsc.channel4.com/pmlsd/";
+    private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
+    private final static RepetitionRule XBOX_UPDATE_TIME = RepetitionRules.daily(new LocalTime(1, 0, 0));
+    private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
+    private @Autowired
+    SimpleScheduler scheduler;
+    private @Autowired
+    ContentResolver contentResolver;
+    private @Autowired
+    ContentWriter contentWriter;
+    private @Autowired
+    AdapterLog log;
+    private @Autowired
+    ScheduleResolver scheduleResolver;
+    private @Autowired
+    ChannelResolver channelResolver;
+    private @Value("${c4.keystore.path}")
+    String keyStorePath;
+    private @Value("${c4.keystore.password}")
+    String keyStorePass;
 
-	private final static RepetitionRule BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
-	private final static RepetitionRule XBOX_UPDATE_TIME = RepetitionRules.daily(new LocalTime(1, 0, 0));
-	private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
-
-	private @Autowired SimpleScheduler scheduler;
-
-	private @Autowired ContentResolver contentResolver;
-	private @Autowired ContentWriter contentWriter;
-	private @Autowired AdapterLog log;
-	private @Autowired ScheduleResolver scheduleResolver;
-	private @Autowired ChannelResolver channelResolver;
-	
-	private @Value("${c4.keystore.path}") String keyStorePath;
-	private @Value("${c4.keystore.password}") String keyStorePass;
-	
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(c4EpgUpdater(), TWO_HOURS);
@@ -63,45 +66,48 @@ public class C4Module {
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("C4 update scheduled tasks installed").withSource(getClass()));
     }
 
-    @Bean C4AtomApi atomApi() {
+    @Bean
+    C4AtomApi atomApi() {
         return new C4AtomApi(channelResolver);
     }
-    
-	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
-        return new C4EpgUpdater(atomApi(), httpsClient(), lastUpdatedSettingContentWriter(),
+
+    @Bean
+    public C4EpgUpdater c4EpgUpdater() {
+        LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter = new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter);
+        return new C4EpgUpdater(atomApi(), httpsClient(), lastUpdatedSettingContentWriter,
                 contentResolver, c4BrandFetcher(Optional.<Platform>absent()), trimmer, log, new DayRangeGenerator().withLookAhead(7).withLookBack(7));
     }
-	
-	@Bean protected C4AtoZAtomContentUpdateTask pcC4AtozUpdater() {
-		return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent()));
-	}
-	
-	@Bean protected C4AtoZAtomContentUpdateTask xboxC4AtozUpdater() {
-	    return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.of(Platform.XBOX)));
-	}
-	
-    @Bean protected SimpleHttpClient httpsClient() {
-	    try {
-	        URL jksFile = new File(keyStorePath).toURI().toURL();
+
+    @Bean
+    protected C4AtoZAtomContentUpdateTask pcC4AtozUpdater() {
+        return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.<Platform>absent()));
+    }
+
+    @Bean
+    protected C4AtoZAtomContentUpdateTask xboxC4AtozUpdater() {
+        return new C4AtoZAtomContentUpdateTask(httpsClient(), ATOZ_BASE, c4BrandFetcher(Optional.of(Platform.XBOX)));
+    }
+
+    @Bean
+    protected SimpleHttpClient httpsClient() {
+        try {
+            URL jksFile = new File(keyStorePath).toURI().toURL();
             return HttpClients.httpsClient(jksFile, keyStorePass);
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
-	}
-	
-	protected C4AtomBackedBrandUpdater c4BrandFetcher(Optional<Platform> platform) {
-	    Optional<String> platformParam = platform.isPresent() ? Optional.of(platform.get().toString().toLowerCase()) : Optional.<String>absent();
-	    C4AtomApiClient client = new C4AtomApiClient(httpsClient(), ATOZ_BASE, platformParam);
-		return new C4AtomBackedBrandUpdater(client, platform, contentResolver, lastUpdatedSettingContentWriter(), channelResolver);
-	}
-	
-	@Bean protected C4BrandUpdateController c4BrandUpdateController() {
-	    return new C4BrandUpdateController(c4BrandFetcher(Optional.<Platform>absent()), ImmutableMap.of(Platform.XBOX, c4BrandFetcher(Optional.of(Platform.XBOX))));
-	}
-	
-    @Bean protected LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
-        return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
     }
-    
+
+    protected C4AtomBackedBrandUpdater c4BrandFetcher(Optional<Platform> platform) {
+        LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter = new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
+        Optional<String> platformParam = platform.isPresent() ? Optional.of(platform.get().toString().toLowerCase()) : Optional.<String>absent();
+        C4AtomApiClient client = new C4AtomApiClient(httpsClient(), ATOZ_BASE, platformParam);
+        return new C4AtomBackedBrandUpdater(client, platform, contentResolver, lastUpdatedSettingContentWriter, channelResolver);
+    }
+
+    @Bean
+    protected C4BrandUpdateController c4BrandUpdateController() {
+        return new C4BrandUpdateController(c4BrandFetcher(Optional.<Platform>absent()), ImmutableMap.of(Platform.XBOX, c4BrandFetcher(Optional.of(Platform.XBOX))));
+    }
 }
