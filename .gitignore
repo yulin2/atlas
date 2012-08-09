@@ -2,5 +2,7 @@
 .project
 generated
 .settings
+/activemq-data
+/data
 /target
 /activemq-data
