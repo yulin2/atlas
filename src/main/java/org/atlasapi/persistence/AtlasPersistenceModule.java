@@ -18,7 +18,6 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.health.MongoIOProbe;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
-import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
@@ -38,7 +37,6 @@ import org.atlasapi.persistence.content.mongo.MongoContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.mongo.MongoProductStore;
-import org.atlasapi.persistence.content.mongo.MongoTopicStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
@@ -51,6 +49,7 @@ import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.atlasapi.persistence.topic.TopicStore;
+import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
@@ -165,7 +164,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public TopicStore topicStore() {
+    public TopicCreatingTopicResolver topicStore() {
         return mongoContentPersistenceModule().topicStore();
     }
 
