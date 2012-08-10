@@ -53,8 +53,6 @@ public class WorkersModule {
     private ContentResolver mongoContentResolver;
     @Autowired
     private ContentIndexer contentIndexer;
-    @Autowired
-    private RecentChangeStore recentChangesStore;
 
     @Bean
     @Lazy(true)
@@ -90,29 +88,11 @@ public class WorkersModule {
         return container;
     }
     
-    @Bean
-    @Lazy(true)
-    public DefaultMessageListenerContainer recentChangesLogger() {
-        RecentChangesLogger recentChangesLogger = new RecentChangesLogger(recentChangesStore);
-        MessageListenerAdapter adapter = new MessageListenerAdapter(recentChangesLogger);
-        DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
-
-        adapter.setDefaultListenerMethod("onMessage");
-        container.setConnectionFactory(connectionFactory);
-        container.setDestinationName(loggerDestination);
-        container.setConcurrentConsumers(loggerConsumers);
-        container.setMaxConcurrentConsumers(loggerConsumers);
-        container.setMessageListener(adapter);
-
-        return container;
-    }
-    
     @PostConstruct
     public void start() {
         if (enabled) {
             cassandraReplicator().start();
             esIndexer().start();
-            recentChangesLogger().start();
         }
     }
 }
