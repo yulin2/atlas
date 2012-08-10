@@ -48,6 +48,7 @@ import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
@@ -168,6 +169,11 @@ public class AtlasPersistenceModule {
     @Primary
     public TopicCreatingTopicResolver topicStore() {
         return mongoContentPersistenceModule().topicStore();
+    }
+    
+    @Bean
+    public TopicQueryResolver topicQueryResolver() {
+        return mongoContentPersistenceModule().topicQueryResolver();
     }
 
     @Bean
