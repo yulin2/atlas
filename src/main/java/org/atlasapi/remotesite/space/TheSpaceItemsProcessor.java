@@ -41,17 +41,20 @@ public class TheSpaceItemsProcessor {
             JsonNode item = null;
             try {
                 item = results.next();
-                String pid = item.get("pid").asText();
-                JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-                processor.process(node.get("programme"));
+                if (item.has("type") && item.has("pid")) {
+                    String pid = item.get("pid").asText();
+                    JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+                    processor.process(node.get("programme"));
+                }
             } catch (Exception ex) {
                 if (item != null) {
                     String pid = item.has("pid") ? item.get("pid").asText() : "";
                     String key = item.has("key") ? Long.toString(item.get("key").asLong()) : "";
                     String title = item.has("title") ? item.get("title").asText() : "";
-                    logger.warn("Failed to ingest item with pid " + pid + " and key " + key + " and title " + title, ex);
+                    logger.error("Failed to ingest item with pid " + pid + " and key " + key + " and title " + title, ex);
                 }
-                log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withCause(ex));
+                log.record(new AdapterLogEntry(AdapterLogEntry.Severity.ERROR).withCause(ex));
+                throw ex;
             }
         }
     }

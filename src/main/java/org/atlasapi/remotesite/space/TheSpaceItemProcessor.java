@@ -1,15 +1,21 @@
 package org.atlasapi.remotesite.space;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.intl.Countries;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.TransportType;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
@@ -24,6 +30,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.codehaus.jackson.JsonNode;
@@ -41,6 +48,8 @@ public class TheSpaceItemProcessor {
     private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
     private final String EPISODE_TYPE = "episode";
     //
+    private final Log logger = LogFactory.getLog(getClass());
+    //
     private final String url;
     private final SimpleHttpClient client;
     private final AdapterLog log;
@@ -57,29 +66,56 @@ public class TheSpaceItemProcessor {
 
     public void process(JsonNode node) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        //
-        String type = node.get("type").asText();
-        String pid = node.get("pid").asText();
-        //
-        if (type.equals(EPISODE_TYPE)) {
-            Item content = (Item) contentResolver.findByCanonicalUris(ImmutableSet.of(getItemsUri(pid))).getFirstValue().valueOrNull();
-            boolean isTopLevel = !node.has("parent");
-            if (content == null && isTopLevel) {
-                Item episode = new Item();
-                fillItem(episode, node, mapper);
-                contentWriter.createOrUpdate(episode);
-            } else if (content == null && !isTopLevel) {
-                Episode episode = new Episode();
-                fillItem(episode, node, mapper);
-                fillEpisode(episode, node, mapper);
-                contentWriter.createOrUpdate(episode);
-            } else {
-                fillItem(content, node, mapper);
-                if (content instanceof Episode) {
-                    fillEpisode((Episode) content, node, mapper);
+        if (node.has("type") && node.has("pid")) {
+            String type = node.get("type").asText();
+            String pid = node.get("pid").asText();
+            if (type.equals(EPISODE_TYPE)) {
+                Item content = (Item) contentResolver.findByCanonicalUris(ImmutableSet.of(getItemsUri(pid))).getFirstValue().valueOrNull();
+                boolean isTopLevel = !node.has("parent");
+                if (content == null && isTopLevel) {
+                    Item item = new Item();
+                    fillItem(item, node, mapper);
+                    contentWriter.createOrUpdate(item);
+                } else if (content == null && !isTopLevel) {
+                    Episode episode = new Episode();
+                    fillItem(episode, node, mapper);
+                    fillEpisode(episode, node, mapper);
+                    contentWriter.createOrUpdate(episode);
+                } else {
+                    if (content instanceof Episode && isTopLevel) {
+                        Item item = new Item();
+                        detachEpisodeFromSeries(content);
+                        fillItem(item, node, mapper);
+                        contentWriter.createOrUpdate(item);
+                    } else if (content instanceof Episode) {
+                        fillItem(content, node, mapper);
+                        fillEpisode((Episode) content, node, mapper);
+                        contentWriter.createOrUpdate(content);
+                    } else {
+                        fillItem(content, node, mapper);
+                        contentWriter.createOrUpdate(content);
+                    }
                 }
-                contentWriter.createOrUpdate(content);
             }
+        }
+    }
+
+    private void detachEpisodeFromSeries(Item content) {
+        final Episode episode = (Episode) content;
+        ParentRef parentRef = episode.getSeriesRef();
+        ResolvedContent parents = contentResolver.findByCanonicalUris(Arrays.asList(parentRef.getUri()));
+        if (!parents.isEmpty() && parents.getFirstValue().requireValue() instanceof Series) {
+            Series parent = (Series) parents.getFirstValue().requireValue();
+            parent.setChildRefs(Iterables.filter(parent.getChildRefs(), new Predicate<ChildRef>() {
+
+                @Override
+                public boolean apply(ChildRef input) {
+                    return !input.equals(episode.childRef());
+                }
+            }));
+            contentWriter.createOrUpdate(parent);
+        } else {
+            logger.warn("Cannot find parent for " + episode.getCanonicalUri());
         }
     }
 
