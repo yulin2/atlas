@@ -102,6 +102,7 @@ public class TheSpaceItemProcessor {
     }
 
     private void detachEpisodeFromParent(Item content) {
+<<<<<<< HEAD
         final Episode episode = (Episode) content;
         ParentRef parentRef = episode.getContainer();
         if (parentRef != null) {
@@ -124,20 +125,22 @@ public class TheSpaceItemProcessor {
 
     private void detachEpisodeFromSeries(Item content) {
         final Episode episode = (Episode) content;
-        ParentRef parentRef = episode.getSeriesRef();
-        ResolvedContent parents = contentResolver.findByCanonicalUris(Arrays.asList(parentRef.getUri()));
-        if (!parents.isEmpty() && parents.getFirstValue().requireValue() instanceof Series) {
-            Series parent = (Series) parents.getFirstValue().requireValue();
-            parent.setChildRefs(Iterables.filter(parent.getChildRefs(), new Predicate<ChildRef>() {
+        ParentRef parentRef = episode.getContainer();
+        if (parentRef != null) {
+            ResolvedContent parents = contentResolver.findByCanonicalUris(Arrays.asList(parentRef.getUri()));
+            if (!parents.isEmpty() && parents.getFirstValue().requireValue() instanceof Series) {
+                Container parent = (Container) parents.getFirstValue().requireValue();
+                parent.setChildRefs(Iterables.filter(parent.getChildRefs(), new Predicate<ChildRef>() {
 
-                @Override
-                public boolean apply(ChildRef input) {
-                    return !input.equals(episode.childRef());
-                }
-            }));
-            contentWriter.createOrUpdate(parent);
-        } else {
-            logger.warn("Cannot find parent for " + episode.getCanonicalUri());
+                    @Override
+                    public boolean apply(ChildRef input) {
+                        return !input.equals(episode.childRef());
+                    }
+                }));
+                contentWriter.createOrUpdate(parent);
+            } else {
+                logger.warn("Cannot find parent for " + episode.getCanonicalUri());
+            }
         }
     }
 
