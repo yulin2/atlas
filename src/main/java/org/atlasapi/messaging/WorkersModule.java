@@ -73,6 +73,7 @@ public class WorkersModule {
         return container;
     }
     
+    @Bean
     @Lazy(true)
     public DefaultMessageListenerContainer esIndexer() {
         ESIndexer esIndexer = new ESIndexer(mongoContentResolver, contentIndexer);
