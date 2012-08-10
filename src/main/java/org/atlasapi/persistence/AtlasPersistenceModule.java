@@ -49,6 +49,7 @@ import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
