@@ -12,7 +12,7 @@ import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
 import org.atlasapi.messaging.WorkersModule;
-import org.atlasapi.messaging.MessagingModule;
+import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.CassandraContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
@@ -67,7 +67,7 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
                 InterlinkingDeltaModule.class,
                 EquivTaskModule.class,
                 ChildRefUpdateModule.class,
-                MessagingModule.class,
+                AtlasMessagingModule.class,
                 WorkersModule.class
             );
             if (Configurer.get("youview.upload.enabled").toBoolean()) {

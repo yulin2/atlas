@@ -25,6 +25,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import javax.annotation.Resource;
 import org.atlasapi.media.content.util.EventQueueingContentWriter;
+import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
@@ -42,15 +43,17 @@ import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
 import org.springframework.context.annotation.Primary;
-import org.springframework.jms.core.JmsTemplate;
 import org.atlasapi.persistence.event.RecentChangeStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.SmartLifecycle;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
 public class AtlasPersistenceModule {
@@ -112,13 +115,6 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    public ContextConfigurer config() {
-        ContextConfigurer c = new ContextConfigurer();
-        c.init();
-        return c;
-    }
-    
-    @Bean
     @Primary
     public MongoContentLister contentLister() {
         return mongoContentPersistenceModule().contentLister();
@@ -147,7 +143,7 @@ public class AtlasPersistenceModule {
         contentWriter = new EventQueueingContentWriter(changesProducer, contentWriter);
         return contentWriter;
     }
-    
+
     @Bean
     @Primary
     public LookupResolvingContentResolver contentResolver() {
@@ -207,13 +203,13 @@ public class AtlasPersistenceModule {
     public MongoChannelStore channelStore() {
         return mongoContentPersistenceModule().channelStore();
     }
-    
+
     @Bean
     @Primary
     public MongoChannelGroupStore channelGroupStore() {
         return mongoContentPersistenceModule().channelGroupStore();
     }
-    
+
     @Bean
     @Primary
     public MongoPersonStore personStore() {
@@ -238,7 +234,8 @@ public class AtlasPersistenceModule {
         return esContentIndexModule().contentIndexer();
     }
 
-    @Bean @Qualifier(value="cassandra")
+    @Bean
+    @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
     }
