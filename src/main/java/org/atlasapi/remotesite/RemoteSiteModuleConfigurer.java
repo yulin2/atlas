@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.bbckiwisubtitles.KiwiSubtitlesModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
 import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
 import org.atlasapi.remotesite.music.emimusic.EmiMusicModule;
@@ -63,6 +64,7 @@ public class RemoteSiteModuleConfigurer {
         .put("emipub", EmiPubModule.class)
         .put("metabroadcast", MetaBroadcastModule.class)
         .put("emimusic", EmiMusicModule.class)
+        .put("kiwisubtitles", KiwiSubtitlesModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
