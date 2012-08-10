@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
@@ -84,7 +85,7 @@ public class TheSpaceItemProcessor {
                 } else {
                     if (content instanceof Episode && isTopLevel) {
                         Item item = new Item();
-                        detachEpisodeFromSeries(content);
+                        detachEpisodeFromParent(content);
                         fillItem(item, node, mapper);
                         contentWriter.createOrUpdate(item);
                     } else if (content instanceof Episode) {
@@ -100,22 +101,24 @@ public class TheSpaceItemProcessor {
         }
     }
 
-    private void detachEpisodeFromSeries(Item content) {
+    private void detachEpisodeFromParent(Item content) {
         final Episode episode = (Episode) content;
-        ParentRef parentRef = episode.getSeriesRef();
-        ResolvedContent parents = contentResolver.findByCanonicalUris(Arrays.asList(parentRef.getUri()));
-        if (!parents.isEmpty() && parents.getFirstValue().requireValue() instanceof Series) {
-            Series parent = (Series) parents.getFirstValue().requireValue();
-            parent.setChildRefs(Iterables.filter(parent.getChildRefs(), new Predicate<ChildRef>() {
+        ParentRef parentRef = episode.getContainer();
+        if (parentRef != null) {
+            ResolvedContent parents = contentResolver.findByCanonicalUris(Arrays.asList(parentRef.getUri()));
+            if (!parents.isEmpty() && parents.getFirstValue().requireValue() instanceof Series) {
+                Container parent = (Container) parents.getFirstValue().requireValue();
+                parent.setChildRefs(Iterables.filter(parent.getChildRefs(), new Predicate<ChildRef>() {
 
-                @Override
-                public boolean apply(ChildRef input) {
-                    return !input.equals(episode.childRef());
-                }
-            }));
-            contentWriter.createOrUpdate(parent);
-        } else {
-            logger.warn("Cannot find parent for " + episode.getCanonicalUri());
+                    @Override
+                    public boolean apply(ChildRef input) {
+                        return !input.equals(episode.childRef());
+                    }
+                }));
+                contentWriter.createOrUpdate(parent);
+            } else {
+                logger.warn("Cannot find parent for " + episode.getCanonicalUri());
+            }
         }
     }
 
