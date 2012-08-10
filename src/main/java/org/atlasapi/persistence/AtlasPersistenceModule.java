@@ -50,6 +50,7 @@ import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
@@ -166,6 +167,11 @@ public class AtlasPersistenceModule {
     @Primary
     public TopicCreatingTopicResolver topicStore() {
         return mongoContentPersistenceModule().topicStore();
+    }
+    
+    @Bean
+    public TopicQueryResolver topicQueryResolver() {
+        return mongoContentPersistenceModule().topicQueryResolver();
     }
 
     @Bean
