@@ -26,6 +26,7 @@ import com.hp.hpl.jena.graph.query.StageElement.PutBindings;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import org.atlasapi.remotesite.bbc.products.BBCProductsModule;
+import org.atlasapi.remotesite.bbckiwisubtitles.KiwiSubtitlesModule;
 import org.atlasapi.remotesite.lovefilm.LoveFilmModule;
 import org.atlasapi.remotesite.metabroadcast.MetaBroadcastModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
@@ -62,6 +63,8 @@ public class RemoteSiteModuleConfigurer {
         .put("musicbrainz", MusicBrainzModule.class)
         .put("emipub", EmiPubModule.class)
         .put("metabroadcast", MetaBroadcastModule.class)
+        .put("emimusic", EmiMusicModule.class)
+        .put("kiwisubtitles", KiwiSubtitlesModule.class)
     .build();
 
     public Iterable<? extends Class<?>> enabledModules() {
