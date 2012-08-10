@@ -10,7 +10,7 @@ import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
-public class MessagingModule {
+public class AtlasMessagingModule {
     
     @Value("${messaging.broker.url}")
     private String brokerUrl;

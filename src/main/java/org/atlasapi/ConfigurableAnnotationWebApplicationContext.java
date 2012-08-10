@@ -9,7 +9,7 @@ import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.logging.HealthModule;
 import org.atlasapi.messaging.WorkersModule;
-import org.atlasapi.messaging.MessagingModule;
+import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
@@ -42,10 +42,12 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(
+                AtlasModule.class,
+                AtlasMessagingModule.class,
+                AtlasPersistenceModule.class,
                 AtlasLoggingModule.class,
                 AtlasWebModule.class,
                 QueryModule.class,
-                AtlasPersistenceModule.class,
                 RemoteSiteModule.class,
                 AtlasFetchModule.class,
                 HealthModule.class,
@@ -55,7 +57,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 
         if (runProcessingOnly()) {
             builder.add(
-                    MessagingModule.class,
                     WorkersModule.class,
                     EquivModule.class,
                     ManualScheduleRebuildModule.class,
