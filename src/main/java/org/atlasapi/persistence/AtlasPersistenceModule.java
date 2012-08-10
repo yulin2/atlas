@@ -167,7 +167,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public MongoTopicStore topicStore() {
+    public TopicStore topicStore() {
         return mongoContentPersistenceModule().topicStore();
     }
 
