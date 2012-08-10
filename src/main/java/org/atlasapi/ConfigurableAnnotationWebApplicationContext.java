@@ -12,7 +12,6 @@ import org.atlasapi.logging.AtlasLoggingModule;
 import org.atlasapi.messaging.WorkersModule;
 import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
-import org.atlasapi.persistence.CassandraContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.SearchModule;
