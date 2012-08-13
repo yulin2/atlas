@@ -18,14 +18,12 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.mongo.health.MongoIOProbe;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
-import com.metabroadcast.common.webapp.properties.ContextConfigurer;
 import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import javax.annotation.Resource;
 import org.atlasapi.media.content.util.EventQueueingContentWriter;
-import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
@@ -38,7 +36,6 @@ import org.atlasapi.persistence.content.mongo.MongoContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.mongo.MongoProductStore;
-import org.atlasapi.persistence.content.mongo.MongoTopicStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
@@ -49,10 +46,9 @@ import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.jms.core.JmsTemplate;
 
 @Configuration
@@ -164,8 +160,14 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public MongoTopicStore topicStore() {
+    public TopicCreatingTopicResolver topicStore() {
         return mongoContentPersistenceModule().topicStore();
+    }
+
+    @Bean
+    @Primary
+    public TopicQueryResolver topicQueryResolver() {
+        return mongoContentPersistenceModule().topicQueryResolver();
     }
 
     @Bean
