@@ -12,6 +12,7 @@ import org.atlasapi.persistence.content.IdSettingContentWriter;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
+import org.atlasapi.persistence.content.elasticsearch.EsScheduleIndex;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
 import org.atlasapi.persistence.content.mongo.MongoContentLister;
@@ -19,6 +20,7 @@ import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.mongo.MongoProductStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
+import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.event.RecentChangeStore;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
@@ -234,6 +236,12 @@ public class AtlasPersistenceModule {
     @Primary
     public ESContentIndexer contentIndexer() {
         return esContentIndexModule().contentIndexer();
+    }
+    
+    @Bean
+    @Primary
+    public EsScheduleIndex scheduleIndex() {
+        return esContentIndexModule().scheduleIndex();
     }
 
     @Bean
