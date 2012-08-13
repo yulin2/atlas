@@ -168,6 +168,7 @@ public class AtlasPersistenceModule {
     }
     
     @Bean
+    @Primary
     public TopicQueryResolver topicQueryResolver() {
         return mongoContentPersistenceModule().topicQueryResolver();
     }
