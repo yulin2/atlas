@@ -10,6 +10,7 @@ import org.atlasapi.messaging.workers.CassandraReplicator;
 import org.atlasapi.messaging.workers.ESIndexer;
 import org.atlasapi.messaging.workers.MessageLogger;
 import org.atlasapi.messaging.workers.ReplayingWorker;
+import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.messaging.MessageStore;
