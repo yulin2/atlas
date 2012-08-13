@@ -4,11 +4,11 @@ import javax.annotation.PostConstruct;
 import javax.jms.ConnectionFactory;
 import org.atlasapi.messaging.workers.CassandraReplicator;
 import org.atlasapi.messaging.workers.ESIndexer;
-import org.atlasapi.messaging.workers.RecentChangesLogger;
+import org.atlasapi.messaging.workers.MessageLogger;
 import org.atlasapi.persistence.content.ContentIndexer;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.event.RecentChangeStore;
+import org.atlasapi.persistence.messaging.MessageStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,6 +52,8 @@ public class WorkersModule {
     @Autowired
     private ContentResolver mongoContentResolver;
     @Autowired
+    private MessageStore mongoMessageStore;
+    @Autowired
     private ContentIndexer contentIndexer;
 
     @Bean
@@ -88,11 +90,29 @@ public class WorkersModule {
         return container;
     }
     
+    @Bean
+    @Lazy(true)
+    public DefaultMessageListenerContainer messageLogger() {
+        MessageLogger messageLogger = new MessageLogger(mongoMessageStore);
+        MessageListenerAdapter adapter = new MessageListenerAdapter(messageLogger);
+        DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
+
+        adapter.setDefaultListenerMethod("onMessage");
+        container.setConnectionFactory(connectionFactory);
+        container.setDestinationName(loggerDestination);
+        container.setConcurrentConsumers(loggerConsumers);
+        container.setMaxConcurrentConsumers(loggerConsumers);
+        container.setMessageListener(adapter);
+
+        return container;
+    }
+    
     @PostConstruct
     public void start() {
         if (enabled) {
             cassandraReplicator().start();
             esIndexer().start();
+            messageLogger().start();
         }
     }
 }
