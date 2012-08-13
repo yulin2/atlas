@@ -1,8 +1,6 @@
 package org.atlasapi.query;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
@@ -11,6 +9,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
@@ -18,8 +17,6 @@ import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
-import org.atlasapi.persistence.media.product.ProductResolver;
-import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
 import org.atlasapi.output.JaxbXmlTranslator;
@@ -37,7 +34,6 @@ import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
-import org.atlasapi.persistence.ContentIndexModule;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -46,7 +42,12 @@ import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.product.ProductResolver;
+import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
@@ -82,7 +83,6 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 
 @Configuration
 public class QueryWebModule {
@@ -109,7 +109,7 @@ public class QueryWebModule {
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired AdapterLog log;
     
-    private @Autowired ContentIndexModule indexModule;
+    private @Autowired ScheduleIndex scheduleIndex;
     
     @Bean ChannelController channelController() {
         return new ChannelController(channelResolver, channelGroupResolver, channelSimplifier(), new SubstitutionTableNumberCodec());
@@ -151,7 +151,7 @@ public class QueryWebModule {
     
     @Bean
     org.atlasapi.query.v4.schedule.ScheduleController scheduleController() {
-        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(indexModule.scheduleIndex(), queryExecutor);
+        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, queryExecutor);
         return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, scheduleChannelModelOutputter());
     }
 
