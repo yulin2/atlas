@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.metabroadcast.common.time.DateTimeZones;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 @Controller
 public class BbcIonScheduleController {
