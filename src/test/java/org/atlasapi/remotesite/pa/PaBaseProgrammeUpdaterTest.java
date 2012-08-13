@@ -154,7 +154,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     
     @Test
     public void testShouldCreateTbc() throws Exception {
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), null);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), null, null);
         updater.run();
         Identified content = null;
 
@@ -164,6 +164,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     }
     
     @Test
+
     public void testBroadcastsTrimmerWindowNoTimesInFile() {
         final PaScheduleVersionStore scheduleVersionStore = context.mock(PaScheduleVersionStore.class);
         final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);        
@@ -200,7 +201,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
         private List<File> files;
 
         public TestPaProgrammeUpdater(PaProgDataProcessor processor, ChannelResolver channelResolver, AdapterLog log, MongoScheduleStore scheduleWriter, List<File> files, BroadcastTrimmer trimmer, PaScheduleVersionStore scheduleVersionStore) {
-            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, trimmer, scheduleWriter, scheduleVersionStore), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, Optional.of(scheduleVersionStore));
+            super(MoreExecutors.sameThreadExecutor(), new PaChannelProcessor(processor, trimmer, scheduleWriter, scheduleVersionStore), new DefaultPaProgrammeDataStore("/data/pa", null), channelResolver, Optional.fromNullable(scheduleVersionStore));
             this.files = files;
         }
 
