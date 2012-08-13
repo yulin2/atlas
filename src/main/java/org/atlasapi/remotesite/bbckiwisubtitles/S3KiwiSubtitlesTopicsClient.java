@@ -114,6 +114,7 @@ public class S3KiwiSubtitlesTopicsClient {
         private void nextTar() {
             if(!files.hasNext()) {
                 currentTar = Optional.absent();
+                return;
             }
             try {
                 S3Object basicS3Object = files.next();
@@ -159,13 +160,4 @@ public class S3KiwiSubtitlesTopicsClient {
             return topicWeightings;
         }
     };
-    
-    public static void main(String[] args) {
-        AWSCredentials credentials = new AWSCredentials("AKIAJLU42QB6GRSCCE2A", "/7uA17tSz7oJEqqc2kuW/gXQmoyIMfqdTOc4x5Uf");
-        S3KiwiSubtitlesTopicsClient client = new S3KiwiSubtitlesTopicsClient(credentials, "abcip-subtitles");
-        for(ItemTopics topics : client.getTopics()) {
-            System.out.println(topics.uri);
-        }
-        
-    }
 }
