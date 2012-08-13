@@ -41,11 +41,11 @@ import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
 import org.springframework.context.annotation.Primary;
-import org.atlasapi.persistence.event.RecentChangeStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
+import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.atlasapi.persistence.topic.TopicStore;
@@ -230,8 +230,8 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public RecentChangeStore recentChangesStore() {
-        return mongoContentPersistenceModule().recentChangesStore();
+    public MongoMessageStore messageStore() {
+        return mongoContentPersistenceModule().messageStore();
     }
 
     @Bean

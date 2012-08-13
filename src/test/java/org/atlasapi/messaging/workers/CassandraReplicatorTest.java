@@ -44,7 +44,7 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now, uri, "", Publisher.BBC.key())));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now.getMillis(), uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(container));
     }
@@ -65,7 +65,7 @@ public class CassandraReplicatorTest {
         ContentWriter writer = mock(ContentWriter.class);
 
         CassandraReplicator cassandraReplicator = new CassandraReplicator(resolver, writer);
-        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now, uri, "", Publisher.BBC.key())));
+        cassandraReplicator.onMessage(marshal(new EntityUpdatedMessage("0", now.getMillis(), uri, "", Publisher.BBC.key())));
 
         verify(writer).createOrUpdate(same(item));
     }

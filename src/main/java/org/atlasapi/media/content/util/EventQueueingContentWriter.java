@@ -83,7 +83,7 @@ public class EventQueueingContentWriter implements ContentWriter {
     private EntityUpdatedMessage createEvent(Content content) {
         return new EntityUpdatedMessage(
             null,
-            clock.now(),
+            clock.now().getMillis(),
             content.getCanonicalUri(), 
             content.getClass().getSimpleName().toLowerCase(),
             content.getPublisher().key()
