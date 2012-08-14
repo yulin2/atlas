@@ -95,7 +95,7 @@ public class ChannelController {
     @RequestMapping("/3.0/channels.json")
     public void listChannels(HttpServletRequest request, HttpServletResponse response, 
             @RequestParam(value = "key", required = false) String channelKey,
-            @RequestParam(value = "platform", required = false) String platformKey, 
+            @RequestParam(value = "platforms", required = false) String platformKey, 
             @RequestParam(value = "regions", required = false) String regionKeys, 
             @RequestParam(value = "broadcaster", required = false) String broadcasterKey,
             @RequestParam(value = "media_type", required = false) String mediaTypeKey, 
