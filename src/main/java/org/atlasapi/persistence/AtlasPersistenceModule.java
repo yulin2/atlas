@@ -5,8 +5,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.atlasapi.media.content.util.EventQueueingContentWriter;
 import org.atlasapi.messaging.AtlasMessagingModule;
+import org.atlasapi.media.content.util.MessageQueueingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
@@ -143,7 +143,7 @@ public class AtlasPersistenceModule {
         if (Boolean.valueOf(generateIds)) {
             contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
-        contentWriter = new EventQueueingContentWriter(changesProducer, contentWriter);
+        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter);
         return contentWriter;
     }
 

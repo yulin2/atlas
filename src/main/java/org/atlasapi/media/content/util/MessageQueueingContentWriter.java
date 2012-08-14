@@ -25,9 +25,9 @@ import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
 import java.util.UUID;
 
-public class EventQueueingContentWriter implements ContentWriter {
+public class MessageQueueingContentWriter implements ContentWriter {
 
-    private static final Logger log = LoggerFactory.getLogger(EventQueueingContentWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(MessageQueueingContentWriter.class);
     
     private final ObjectMapper mapper = JsonFactory.makeJsonMapper();
     
@@ -38,11 +38,11 @@ public class EventQueueingContentWriter implements ContentWriter {
     private final ItemTranslator itemTranslator;
     private final ContainerTranslator containerTranslator;
 
-    public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
+    public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
         this(template, delegate, new SystemClock());
     }
 	
-	public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate, Clock clock) {
+	public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate, Clock clock) {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
 		this.template = template;
 		this.delegate = delegate;
