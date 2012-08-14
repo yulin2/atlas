@@ -165,11 +165,6 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    public TopicQueryResolver topicQueryResolver() {
-        return mongoContentPersistenceModule().topicQueryResolver();
-    }
-
-    @Bean
     @Primary
     public MongoShortUrlSaver shortUrlSaver() {
         return mongoContentPersistenceModule().shortUrlSaver();
