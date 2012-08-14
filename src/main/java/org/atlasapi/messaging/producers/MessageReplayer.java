@@ -9,9 +9,9 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 import org.atlasapi.messaging.BeginReplayMessage;
 import org.atlasapi.messaging.EndReplayMessage;
-import org.atlasapi.messaging.EntityUpdatedMessage;
 import org.atlasapi.persistence.messaging.MessageStore;
 import org.atlasapi.messaging.Message;
+import org.atlasapi.messaging.ReplayMessage;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.joda.time.DateTime;
 import org.springframework.jms.core.JmsTemplate;
@@ -31,8 +31,8 @@ public class MessageReplayer {
 
     public void replay(String destination, DateTime from, DateTime to) {
         producer.send(destination, new JsonMessageCreator(new BeginReplayMessage(UUID.randomUUID().toString(), clock.now().getMillis(), null, null, null)));
-        for (final Message m : store.get(from, to)) {
-            producer.send(destination, new JsonMessageCreator(m));
+        for (final Message original : store.get(from, to)) {
+            producer.send(destination, new JsonMessageCreator(new ReplayMessage(UUID.randomUUID().toString(), clock.now().getMillis(), null, null, null, original)));
         }
         producer.send(destination, new JsonMessageCreator(new EndReplayMessage(UUID.randomUUID().toString(), clock.now().getMillis(), null, null, null)));
     }
