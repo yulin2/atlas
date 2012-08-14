@@ -154,7 +154,6 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     
     @Test
     public void testBroadcastsTrimmerWindowNoTimesInFile() {
-        final PaScheduleVersionStore scheduleVersionStore = context.mock(PaScheduleVersionStore.class);
         final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);        
         final Interval firstFileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 6, 0, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 16, 6, 0, 0, 0, DateTimeZones.LONDON));
          
@@ -162,13 +161,12 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
             oneOf (trimmer).trimBroadcasts(firstFileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118471", "http://pressassociation.com/episodes/1424497"));
         }});
         
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), trimmer, scheduleVersionStore);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("20110115_tvdata.xml").getFile())), trimmer, null);
         updater.run();
     }
 
     @Test
     public void testBroadcastTrimmerWindowTimesInFile() {
-        final PaScheduleVersionStore scheduleVersionStore = context.mock(PaScheduleVersionStore.class);
         final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
         final Interval fileInterval = new Interval(new DateTime(2011, DateTimeConstants.JANUARY, 15, 21, 40, 0, 0, DateTimeZones.LONDON), new DateTime(2011, DateTimeConstants.JANUARY, 15, 23, 30, 0, 0, DateTimeZones.LONDON));  
         
@@ -176,7 +174,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
             oneOf (trimmer).trimBroadcasts(fileInterval, channelResolver.fromUri("http://www.bbc.co.uk/bbcone").requireValue(), ImmutableMap.of("pa:71118472", "http://pressassociation.com/episodes/1424497"));
         }});
         
-        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), trimmer, scheduleVersionStore);
+        TestPaProgrammeUpdater updater = new TestPaProgrammeUpdater(programmeProcessor, channelResolver, log, scheduleWriter, ImmutableList.of(new File(Resources.getResource("201202251115_20110115_tvdata.xml").getFile())), trimmer, null);
         updater.run();
     }    
 
