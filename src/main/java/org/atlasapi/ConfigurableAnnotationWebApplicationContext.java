@@ -9,11 +9,9 @@ import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.feeds.youview.YouViewUploadModule;
 import org.atlasapi.logging.AtlasLoggingModule;
-import org.atlasapi.logging.HealthModule;
 import org.atlasapi.messaging.WorkersModule;
 import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
-import org.atlasapi.persistence.CassandraContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
 import org.atlasapi.query.SearchModule;
@@ -26,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
+import org.atlasapi.system.SystemModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -46,20 +45,21 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(
-            AtlasLoggingModule.class, 
-            AtlasWebModule.class, 
-            QueryModule.class,
-            AtlasPersistenceModule.class, 
-            AtlasFetchModule.class, 
-            RemoteSiteModule.class, 
-            HealthModule.class, 
-            RadioPlayerModule.class, 
-            XmlTvModule.class, 
-            RemoteSiteHealthModule.class,
-            EquivModule.class
-        );
-        
-        if(runProcessingOnly()) {
+                AtlasModule.class,
+                AtlasMessagingModule.class,
+                AtlasPersistenceModule.class,
+                AtlasLoggingModule.class,
+                AtlasWebModule.class,
+                QueryModule.class,
+                RemoteSiteModule.class,
+                AtlasFetchModule.class,
+                SystemModule.class,
+                RadioPlayerModule.class,
+                XmlTvModule.class,
+                RemoteSiteHealthModule.class,
+                EquivModule.class);
+
+        if (runProcessingOnly()) {
             builder.add(
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
