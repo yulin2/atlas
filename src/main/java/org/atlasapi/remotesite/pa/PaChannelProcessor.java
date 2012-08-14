@@ -10,6 +10,7 @@ import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.pa.PaBaseProgrammeUpdater.PaChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
+import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +25,13 @@ public class PaChannelProcessor {
     private final PaProgDataProcessor processor;
     private final BroadcastTrimmer trimmer;
     private final ScheduleWriter scheduleWriter;
+    private final PaScheduleVersionStore scheduleVersionStore;
 
-    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter) {
+    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, PaScheduleVersionStore scheduleVersionStore) {
         this.processor = processor;
         this.trimmer = trimmer;
         this.scheduleWriter = scheduleWriter;
+        this.scheduleVersionStore = scheduleVersionStore;
     }
 
     public int process(PaChannelData channelData, Set<String> currentlyProcessing) {
@@ -46,6 +49,7 @@ public class PaChannelProcessor {
 	                    broadcasts.add(itemAndBroadcast);
 	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
                     }
+                    scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
                     processed++;
                 } catch (Exception e) {
                     log.error(String.format("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));

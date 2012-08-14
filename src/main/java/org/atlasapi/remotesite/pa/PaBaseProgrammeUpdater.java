@@ -33,9 +33,12 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.bindings.ChannelData;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
+import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -44,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
@@ -60,10 +64,10 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 
     private static final Logger log = LoggerFactory.getLogger(PaBaseProgrammeUpdater.class);
     
-    private static final DateTimeFormatter FILEDATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
+    private static final DateTimeFormatter FILEDATETIME_FORMAT = DateTimeFormat.forPattern("yyyyMMdd-HH:mm").withZone(DateTimeZones.LONDON);
+    private static final DateTimeFormatter FILEDATE_FORMAT = DateTimeFormat.forPattern("yyyyMMdd");
     private static final DateTimeFormatter CHANNELINTERVAL_FORMAT = ISODateTimeFormat.dateTimeParser().withZone(DateTimeZones.LONDON);
     protected static final String SERVICE = "PA";
-    
     
     private static final Pattern FILEDATE = Pattern.compile("^.*(\\d{8})_tvdata.xml$");
 
@@ -75,16 +79,20 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     private final ExecutorService executor;
     private final PaProgrammeDataStore dataStore;
     private final PaChannelProcessor processor;
+    private final PaDeltaFileHelper deltaFileHelper;
+    private final Optional<PaScheduleVersionStore> paScheduleVersionStore;
 
-    public PaBaseProgrammeUpdater(ExecutorService executor, PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver) {
+    public PaBaseProgrammeUpdater(ExecutorService executor, PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, Optional<PaScheduleVersionStore> paScheduleVersionStore) {
         this.executor = executor;
         this.processor = processor;
         this.dataStore = dataStore;
+        this.paScheduleVersionStore = paScheduleVersionStore;
+        this.deltaFileHelper = new PaDeltaFileHelper();
         this.channelMap = new PaChannelMap(channelResolver);
     }
     
-    public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver) {
-        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver);
+    public PaBaseProgrammeUpdater(PaChannelProcessor processor, PaProgrammeDataStore dataStore, ChannelResolver channelResolver, Optional<PaScheduleVersionStore> paScheduleVersionStore) {
+        this(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder().setNameFormat("pa-updater-%s").build()), processor, dataStore, channelResolver, paScheduleVersionStore);
     }
     
     public void supportChannels(Iterable<Channel> channels) {
@@ -105,14 +113,8 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
     
     protected void processFiles(Iterable<File> files) {
     	
-        try {
-
-        	// Files for different days can be processed in parallel. However, files for a given
-        	// day must be processed sequentially, the full file followed by its deltas, in order. 
-        	// Therefore we produce a list of lists of files,
-        	// one per day, and we can process the head of each list in parallel.
-        	
-        	Set<Queue<File>> groupedFiles = groupAndOrderFilesByDay(files);
+        try {       	
+        	Set<Queue<File>> groupedFiles = deltaFileHelper.groupAndOrderFilesByDay(files);
 
         	boolean finished = false;
         	int filesProcessed = 0;
@@ -166,10 +168,9 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		        if (matcher.matches()) {
 		            log.info("Processing file " + file.toString());
 		            final File fileToProcess = dataStore.copyForProcessing(file);
-		            final Timestamp lastModified = Timestamp.of(fileToProcess.lastModified());
-		            final String fileDate = matcher.group(1);
+		            final String scheduleDay = matcher.group(1);
 
-		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, lastModified, fileDate, filename));
+		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, fileToProcess, scheduleDay));
 		            
 		            reader.parse(fileToProcess.toURI().toString());
 		        }
@@ -212,48 +213,6 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		}
 	}
 
-    public Set<Queue<File>> groupAndOrderFilesByDay(Iterable<File> files) {
-    	
-    	java.util.Map<String, LinkedList<File>> filesByDay = new HashMap<String, LinkedList<File> >();
-    	
-    	for(File file : files) {
-    		 Matcher matcher = FILEDATE.matcher(file.toURI().toString());
-		        
-		    if (matcher.matches()) {
-		    	final String fileDate = matcher.group(1);
-		    	
-		    	if(!filesByDay.containsKey(fileDate)) {
-	    			filesByDay.put(fileDate, new LinkedList<File>());
-	    		}
-		    	filesByDay.get(fileDate).add(file);
-		    }
-		    else {
-		        log.warn("Ignoring file " + file.toURI().toString() + " as we were unable to parse for date");
-		    }
-    	}
-    	
-    	// Files are to be processed by full file first, followed by deltas in time
-    	// sequence. Full files are named: YYYYMMDD_tvdata.xml, deltas 
-    	// yyyymmddhhmm_YYYYMMDD_tvdata.xml, where yyyymmddhhmm is the timestamp of
-    	// the delta, and YYYYMMDD is the schedule date.
-    	
-    	for(List<File> filesForDay : filesByDay.values()) {
-    		Collections.sort(filesForDay, new Comparator<File>() {
-
-				public int compare(File o1, File o2) {
-					if(o1.getName().length() != o2.getName().length()) {
-						return o1.getName().length() < o2.getName().length() ? -1 : 1;
-					}
-					else {
-						return o1.getName().compareTo(o2.getName());
-					}
-				}
-    			
-    		});
-    	}
-    	return new HashSet<Queue<File>>(filesByDay.values());
-	}
-
     private void cancelTasks(List<Future<Integer>> submitted) {
         reportStatus("Cancelling jobs");
         for (Future<Integer> future : submitted) {
@@ -262,7 +221,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         reportStatus("Jobs cancelled");
     }
 
-    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final Timestamp lastModified, final String fileDate, final String filename) {
+    private Listener channelDataProcessingListener(final CompletionService<Integer> completion, final List<Future<Integer>> submitted, final File fileToProcess, final String fileDate) {
         return new Unmarshaller.Listener() {
             public void beforeUnmarshal(Object target, Object parent) {
             }
@@ -276,22 +235,32 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                     if(channelData.getStartTime() == null) {
                         // Old format channel file, we revert to guessing the 
                         // schedule period
-                        DateTime startTime = FILEDATE_FORMAT.parseDateTime(fileDate+"-06:00");
+                        DateTime startTime = FILEDATETIME_FORMAT.parseDateTime(fileDate+"-06:00");
                         schedulePeriod = new Interval(startTime, startTime.plusDays(1));                       
                     }
                     else {
                         schedulePeriod = new Interval(CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getStartTime()), CHANNELINTERVAL_FORMAT.parseDateTime(channelData.getEndTime()));
                     }
-                    
+                   
                     Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
-                    if (channel.hasValue() && isSupported(channel.requireValue()) && shouldContinue()) {
+                    
+                    LocalDate scheduleDay = LocalDate.parse(fileDate, FILEDATE_FORMAT);
+                    long version = deltaFileHelper.versionNumber(fileToProcess);
+                    if (channel.hasValue() 
+                            && isSupported(channel.requireValue()) 
+                            && shouldContinue()
+                            && shouldUpdateVersion(channel.requireValue(), version, scheduleDay)) {
+                        
                         try {
+                            
                             final PaChannelData data = new PaChannelData(
                                     channel.requireValue(),
                                     channelData.getProgData(), 
                                     schedulePeriod, 
                                     getTimeZone(fileDate), 
-                                    lastModified
+                                    Timestamp.of(fileToProcess.lastModified()),
+                                    scheduleDay,
+                                    version
                             );
                             Future<Integer> future = completion.submit(new Callable<Integer>() {
                                 @Override
@@ -301,12 +270,24 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                             });
                             submitted.add(future);
                         } catch (Throwable e) {
-                            log.error("Exception submitting PA channel update job in file " + filename, e);
+                            log.error("Exception submitting PA channel update job in file " + fileToProcess.getName(), e);
                         }
                     }
                 }
             }
         };
+    }
+
+    protected boolean shouldUpdateVersion(Channel channel,
+            long fileVersionNumber, LocalDate scheduleDay) {
+        
+        if(!paScheduleVersionStore.isPresent()) {
+            return true;
+        }
+
+        Optional<Long> currentVersion = paScheduleVersionStore.get().get(channel, scheduleDay);
+        
+        return !currentVersion.isPresent() || currentVersion.get() < fileVersionNumber;
     }
 
     public static class PaChannelData {
@@ -316,13 +297,17 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
         private final Interval schedulePeriod;
         private final DateTimeZone zone;
         private final Timestamp lastUpdated;
+        private final LocalDate scheduleDay;
+        private final long version;
 
-        public PaChannelData(Channel channel, Iterable<ProgData> programmes, Interval schedulePeriod, DateTimeZone zone, Timestamp lastUpdated) {
+        public PaChannelData(Channel channel, Iterable<ProgData> programmes, Interval schedulePeriod, DateTimeZone zone, Timestamp lastUpdated, LocalDate scheduleDay, long version) {
             this.channel = channel;
             this.programmes = programmes;
             this.schedulePeriod = schedulePeriod;
             this.zone = zone;
             this.lastUpdated = lastUpdated;
+            this.scheduleDay = scheduleDay;
+            this.version = version;
         }
 
         public Channel channel() {
@@ -345,6 +330,14 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
             return lastUpdated;
         }
         
+        public LocalDate scheduleDay() {
+            return scheduleDay;
+        }
+        
+        public long version() {
+            return version;
+        }
+        
     }
     
     protected void storeResult(FileUploadResult result) {
@@ -362,7 +355,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
      */
     protected static DateTimeZone getTimeZone(String date) {
         String timezoneDateString = date + "-11:00";
-        DateTime timezoneDateTime = FILEDATE_FORMAT.parseDateTime(timezoneDateString);
+        DateTime timezoneDateTime = FILEDATETIME_FORMAT.parseDateTime(timezoneDateString);
         DateTimeZone zone = timezoneDateTime.getZone();
         return DateTimeZone.forOffsetMillis(zone.getOffset(timezoneDateTime));
     }

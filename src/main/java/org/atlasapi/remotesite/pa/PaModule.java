@@ -17,6 +17,8 @@ import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.persistence.MongoPaScheduleVersionStore;
+import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 import org.atlasapi.remotesite.rt.RtFilmModule;
 import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
@@ -27,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -48,6 +51,7 @@ public class PaModule {
     private @Autowired ScheduleWriter scheduleWriter;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired FileUploadResultStore fileUploadResultStore;
+    private @Autowired DatabasedMongo mongo;
     
     private @Value("${pa.ftp.username}") String ftpUsername;
     private @Value("${pa.ftp.password}") String ftpPassword;
@@ -81,14 +85,14 @@ public class PaModule {
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
         PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), scheduleWriter);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
         PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), channelResolver);
         return updater;
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter);
-        PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
+        PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore, paScheduleVersionStore());
         return updater;
     }
     
@@ -101,7 +105,11 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
         return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, channelResolver, log, paProgrammeDataStore());
+    }
+    
+    public @Bean PaScheduleVersionStore paScheduleVersionStore() {
+        return new MongoPaScheduleVersionStore(mongo);
     }
 }
