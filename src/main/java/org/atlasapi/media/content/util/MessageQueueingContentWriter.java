@@ -23,10 +23,11 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
+import java.util.UUID;
 
-public class EventQueueingContentWriter implements ContentWriter {
+public class MessageQueueingContentWriter implements ContentWriter {
 
-    private static final Logger log = LoggerFactory.getLogger(EventQueueingContentWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(MessageQueueingContentWriter.class);
     
     private final ObjectMapper mapper = JsonFactory.makeJsonMapper();
     
@@ -37,11 +38,11 @@ public class EventQueueingContentWriter implements ContentWriter {
     private final ItemTranslator itemTranslator;
     private final ContainerTranslator containerTranslator;
 
-    public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
+    public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
         this(template, delegate, new SystemClock());
     }
 	
-	public EventQueueingContentWriter(JmsTemplate template, ContentWriter delegate, Clock clock) {
+	public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate, Clock clock) {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
 		this.template = template;
 		this.delegate = delegate;
@@ -57,7 +58,7 @@ public class EventQueueingContentWriter implements ContentWriter {
             log.debug("{} not changed", item.getCanonicalUri());
             return;
         } 
-		enqueueMessageUpdatedEvent(item);
+		enqueueMessageUpdatedMessage(item);
 	}
 
 	@Override
@@ -67,35 +68,35 @@ public class EventQueueingContentWriter implements ContentWriter {
             log.debug("{} un-changed", container.getCanonicalUri());
             return;
         } 
-	    enqueueMessageUpdatedEvent(container);
+	    enqueueMessageUpdatedMessage(container);
 	}
 
-    private void enqueueMessageUpdatedEvent(final Content content) {
+    private void enqueueMessageUpdatedMessage(final Content content) {
         template.send(new MessageCreator() {
             @Override
             public Message createMessage(Session session) throws JMSException {
-                TextMessage message = session.createTextMessage(serialize(createEvent(content)));
+                TextMessage message = session.createTextMessage(serialize(createEntityUpdatedMessage(content)));
                 return message;
             }
         });
     }
 
-    private EntityUpdatedMessage createEvent(Content content) {
+    private EntityUpdatedMessage createEntityUpdatedMessage(Content content) {
         return new EntityUpdatedMessage(
-            null,
-            clock.now(),
+            UUID.randomUUID().toString(),
+            clock.now().getMillis(),
             content.getCanonicalUri(), 
             content.getClass().getSimpleName().toLowerCase(),
             content.getPublisher().key()
         );
     }
 
-    private String serialize(final EntityUpdatedMessage event) {
+    private String serialize(final EntityUpdatedMessage message) {
         String result = null;
         try {
-             result = mapper.writeValueAsString(event);
+             result = mapper.writeValueAsString(message);
         } catch (Exception e) {
-            log.error(event.getEntityId(), e);
+            log.error(message.getEntityId(), e);
         }
         return result;
     }
