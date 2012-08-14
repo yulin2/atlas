@@ -33,12 +33,10 @@ public class WorkersModule {
     private String replicatorDestination;
     @Value("${messaging.consumers.replicator}")
     private int replicatorConsumers;
-    
     @Value("${messaging.destination.indexer}")
     private String indexerDestination;
     @Value("${messaging.consumers.indexer}")
     private int indexerConsumers;
-    
     @Value("${messaging.destination.logger}")
     private String loggerDestination;
     @Value("${messaging.consumers.logger}")
@@ -81,7 +79,6 @@ public class WorkersModule {
         return makeContainer(cassandraReplicator(), replicatorReplayDestination, 1, 1);
     }
 
-    
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
