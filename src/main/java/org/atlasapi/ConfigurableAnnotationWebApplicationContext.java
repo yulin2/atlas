@@ -8,7 +8,6 @@ import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
 import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
 import org.atlasapi.feeds.xmltv.XmlTvModule;
 import org.atlasapi.logging.AtlasLoggingModule;
-import org.atlasapi.logging.HealthModule;
 import org.atlasapi.messaging.WorkersModule;
 import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.persistence.AtlasPersistenceModule;
@@ -24,6 +23,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Lists;
+import org.atlasapi.system.SystemModule;
 
 public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfigWebApplicationContext {
 
@@ -54,8 +54,8 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             AtlasFetchModule.class,
             AtlasPersistenceModule.class, 
             AtlasFetchModule.class, 
-            RemoteSiteModule.class, 
-            HealthModule.class,
+            RemoteSiteModule.class,
+            SystemModule.class,
             RadioPlayerModule.class,
             XmlTvModule.class, 
             RemoteSiteHealthModule.class,
