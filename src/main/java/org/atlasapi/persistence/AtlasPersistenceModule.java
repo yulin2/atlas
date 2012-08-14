@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.atlasapi.media.content.util.EventQueueingContentWriter;
-import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
@@ -31,13 +29,8 @@ import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -172,11 +165,6 @@ public class AtlasPersistenceModule {
         return mongoContentPersistenceModule().topicStore();
     }
     
-    @Bean
-    public TopicQueryResolver topicQueryResolver() {
-        return mongoContentPersistenceModule().topicQueryResolver();
-    }
-
     @Bean
     @Primary
     public MongoShortUrlSaver shortUrlSaver() {
