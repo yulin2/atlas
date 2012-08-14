@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
+import org.atlasapi.content.criteria.ContentQuery;
 
 public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
 
@@ -81,6 +82,21 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
     	public Topic getStoredTopic() {
     		return storedTopic;
     	}
+
+        @Override
+        public Maybe<Topic> topicForId(Long id) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Iterable<Topic> topicsForIds(Iterable<Long> ids) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        @Override
+        public Iterable<Topic> topicsFor(ContentQuery query) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
     
 }
