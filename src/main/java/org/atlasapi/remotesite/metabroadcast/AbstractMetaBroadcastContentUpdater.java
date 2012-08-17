@@ -173,12 +173,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
 
             @Override
             public boolean apply(TopicRef input) {
-                Maybe<Topic> possibleTopic = topicResolver.topicForId(input.getTopic());
-                if (possibleTopic.hasValue()) {
-                    Topic topic = possibleTopic.requireValue();
-                    return !namespace.equals(topic.getNamespace());
-                }
-                return false;
+                return !input.getRelationship().equals(topicRefRelationship());
             }
         });
     }
