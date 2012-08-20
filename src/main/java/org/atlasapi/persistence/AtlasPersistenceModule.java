@@ -57,6 +57,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
 public class AtlasPersistenceModule {
@@ -241,11 +242,17 @@ public class AtlasPersistenceModule {
     public ESContentIndexer contentIndexer() {
         return esContentIndexModule().contentIndexer();
     }
-    
+
     @Bean
     @Primary
     public EsScheduleIndex scheduleIndex() {
         return esContentIndexModule().scheduleIndex();
+    }
+
+    @Bean
+    @Primary
+    public ESTopicSearcher topicSearcher() {
+        return esContentIndexModule().topicSearcher();
     }
 
     @Bean
