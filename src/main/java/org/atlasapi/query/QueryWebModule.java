@@ -104,6 +104,7 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.SystemClock;
+import org.atlasapi.persistence.topic.TopicSearcher;
 
 @Configuration
 public class QueryWebModule {
