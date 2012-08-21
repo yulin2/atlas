@@ -152,6 +152,15 @@ public class PaGenreMap extends GenreMap {
 		genres.put("http://pressassociation.com/genres/4F4C", AtlasGenre.SPORT);
 		genres.put("http://pressassociation.com/genres/4F4D", AtlasGenre.SPORT);
 		genres.put("http://pressassociation.com/genres/4F4E", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F50", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F51", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F52", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F53", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F54", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F55", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F56", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F57", AtlasGenre.SPORT);
+		genres.put("http://pressassociation.com/genres/4F58", AtlasGenre.SPORT);
 
 		// children's/youth
 		genres.put("http://pressassociation.com/genres/5000", AtlasGenre.CHILDRENS);
