@@ -7,6 +7,7 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
 @Controller
@@ -16,7 +17,7 @@ public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     private final PaProgrammeDataStore fileManager;
 
     public PaSingleDateUpdater(PaChannelProcessor channelProcessor, AdapterLog log, PaProgrammeDataStore fileManager, ChannelResolver channelResolver, String dateString) {
-        super(channelProcessor, fileManager, channelResolver, null);
+        super(channelProcessor, fileManager, channelResolver, Optional.absent());
         this.fileManager = fileManager;
         this.dateString = dateString;
     }
