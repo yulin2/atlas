@@ -94,6 +94,15 @@ public class MetaBroadcastModule {
             new NullSchedulingStore()
         );
     }
+    
+    @Bean
+    MagpieUpdaterTask filmKeyPhraseUpdateTask() {
+        return new MagpieUpdaterTask(
+            new S3MagpieResultsSource(awsService(), s3filmBucket, s3filmFolder),
+            new MetaBroadcastMagpieUpdater(contentResolver, topicStore, topicResolver, contentWriter, "londonalso", Publisher.VOILA),
+            new NullSchedulingStore()
+        );
+    }
 
     @Bean 
     CannonTwitterTopicsClient cannonTopicsClient() {
