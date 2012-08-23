@@ -64,6 +64,7 @@ public class MetaBroadcastModule {
         scheduler.schedule(twitterPeopleTalkUpdaterTask().withName("Voila Twitter audience topics ingest"), RepetitionRules.every(Duration.standardHours(3)));
         scheduler.schedule(magpieUpdaterTask().withName("Magpie ingest"), RepetitionRules.daily(new LocalTime(3, 0 , 0)));
         scheduler.schedule(sosalsoUpdateTask().withName("London ALSO ingest"), RepetitionRules.NEVER);
+        scheduler.schedule(filmKeyPhraseUpdateTask().withName("Film key phrase ingest"), RepetitionRules.NEVER);
     }
 
     @Bean
