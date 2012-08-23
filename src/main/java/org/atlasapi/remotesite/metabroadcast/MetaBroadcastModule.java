@@ -42,6 +42,8 @@ public class MetaBroadcastModule {
     private @Value("${magpie.s3.folder}") String s3MagpieFolder;
     private @Value("${lalso.s3.bucket}") String s3SosalsoBucket;
     private @Value("${lalso.s3.folder}") String s3SosalsoFolder;
+    private @Value("${filmphrases.s3.bucket}") String s3filmBucket;
+    private @Value("${filmphrases.s3.folder}") String s3filmFolder;
     
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentResolver contentResolver;
@@ -99,7 +101,7 @@ public class MetaBroadcastModule {
     MagpieUpdaterTask filmKeyPhraseUpdateTask() {
         return new MagpieUpdaterTask(
             new S3MagpieResultsSource(awsService(), s3filmBucket, s3filmFolder),
-            new MetaBroadcastMagpieUpdater(contentResolver, topicStore, topicResolver, contentWriter, "londonalso", Publisher.VOILA),
+            new MetaBroadcastMagpieUpdater(contentResolver, topicStore, topicResolver, contentWriter, "film", Publisher.VOILA),
             new NullSchedulingStore()
         );
     }
