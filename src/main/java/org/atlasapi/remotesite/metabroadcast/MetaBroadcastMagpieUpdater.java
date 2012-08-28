@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.metabroadcast;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
@@ -45,11 +46,12 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
     
     private UpdateProgress processScheduleItems(List<MagpieScheduleItem> magpieItems) {
         UpdateProgress processingResults = UpdateProgress.START;
-        Iterable<String> uris = getUris(magpieItems);
-        List<String> mbUris = generateMetaBroadcastUris(uris);
         
-        ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
+        Set<String> uris = getUris(magpieItems);
+        Set<String> mbUris = generateMetaBroadcastUris(uris);
+        
         ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(mbUris);
+        ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
 
         for (MagpieScheduleItem magpieItem : magpieItems) {
             try{
@@ -79,6 +81,8 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
         // We don't have the voila content ID so use the Atlas URI
         contentWordSet.setContentId(magpieItem.getUri());
         contentWordSet.setUri(magpieItem.getUri());
+        contentWordSet.setTitle(magpieItem.getTitle());
+        contentWordSet.setImage(magpieItem.getImage());
         List<WordWeighting> words = Lists.newArrayList();
 
         for (TopicRef topic : magpieItem.getTopics()) {
@@ -93,7 +97,7 @@ public class MetaBroadcastMagpieUpdater extends AbstractMetaBroadcastContentUpda
         return new WordWeighting(topic.getTopic().getTitle(), StrictMath.round(topic.getWeighting() * 100), topic.getTopic().getUri(), topic.getTopic().getValue() , topic.getTopic().getType());
     }
 
-    private Iterable<String> getUris(List<MagpieScheduleItem> items){
+    private Set<String> getUris(List<MagpieScheduleItem> items){
         return ImmutableSet.copyOf(Iterables.transform(items, new Function<MagpieScheduleItem, String>() {
             @Override
             public String apply(MagpieScheduleItem input) {
