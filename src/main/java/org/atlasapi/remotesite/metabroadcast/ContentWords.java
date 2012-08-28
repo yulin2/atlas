@@ -84,6 +84,8 @@ public class ContentWords {
     private String contentId;
     private List<WordWeighting> words;
     private String uri;
+    private String title;
+    private String image;
 
     public String getContentId() {
         return this.contentId;
@@ -109,4 +111,19 @@ public class ContentWords {
         this.uri = uri;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
+    public String getTitle() {
+        return this.title;
+    }
+    
+    public void setImage(String image) {
+        this.image = image;
+    }
+    
+    public String getImage() {
+        return this.image;
+    }
 }

@@ -49,7 +49,7 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
         ContentWordsList contentWords = possibleContentWords.get();
 
         Iterable<String> uris = urisForWords(contentWords);
-        List<String> uriToMetaBroadcastUri = generateMetaBroadcastUris(uris);
+        Set<String> uriToMetaBroadcastUri = generateMetaBroadcastUris(uris);
 
         ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(uris);
         ResolvedContent resolvedMetaBroadcastContent = contentResolver.findByCanonicalUris(uriToMetaBroadcastUri);

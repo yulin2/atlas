@@ -1,0 +1,239 @@
+{
+	"results": [
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/archery/",
+			"title": "Paralympic Archery",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/28/38/1232838_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics archery", "weighting": 1.0},
+				{"phrase": "#paralympicarchery", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/athletics/",
+			"title": "Paralympic Athletics",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/21/14/1232114_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics athletics", "weighting": 1.0},
+				{"phrase": "#paralympicathletics", "weighting": 1.0},
+				{"phrase": "paralympics 100m", "weighting": 1.0},
+				{"phrase": "paralympics 200m", "weighting": 1.0},
+				{"phrase": "paralympics 400m", "weighting": 1.0},
+				{"phrase": "paralympics 800m", "weighting": 1.0},
+				{"phrase": "paralympics 1500m", "weighting": 1.0},
+				{"phrase": "paralympics 5000m", "weighting": 1.0},
+				{"phrase": "paralympics relay", "weighting": 1.0},
+				{"phrase": "paralympics marathon", "weighting": 1.0},
+				{"phrase": "paralympics javelin", "weighting": 1.0},
+				{"phrase": "paralympics shot put", "weighting": 1.0},
+				{"phrase": "paralympics discus", "weighting": 1.0},
+				{"phrase": "paralympics club throw", "weighting": 1.0},
+				{"phrase": "paralympics long jump", "weighting": 1.0},
+				{"phrase": "paralympics high jump", "weighting": 1.0},
+				{"phrase": "paralympics triple jump", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/boccia/",
+			"title": "Paralympic Boccia",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/33/05/1233305_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics boccia", "weighting": 1.0},
+				{"phrase": "#paralympicboccia", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/cycling-road/",
+			"title": "Paralympic Cycling (Road)",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/32/50/1233250_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics road cycling", "weighting": 1.0},
+				{"phrase": "#paralympicroadcycling", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/cycling-track/",
+			"title": "Paralympic Cycling (Track)",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/33/08/1233308_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics track cycling", "weighting": 1.0},
+				{"phrase": "#paralympictrackcycling", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/equestrian/",
+			"title": "Paralympic Equestrian",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/25/78/1232578_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics equestrian", "weighting": 1.0},
+				{"phrase": "paralympics dressage", "weighting": 1.0},
+				{"phrase": "#paralympicequestrian", "weighting": 1.0},
+				{"phrase": "#paralympicdressage", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/football-5-a-side/",
+			"title": "Paralympic Football (5 a-side)",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/28/63/1232863_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics football 5-a-side", "weighting": 1.0},
+				{"phrase": "#paralympic5aside", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/football-7-a-side/",
+			"title": "Paralympic Football (7 a-side)",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/30/48/1233048_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics football 7-a-side", "weighting": 1.0},
+				{"phrase": "#paralympic7aside", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/goalball/",
+			"title": "Paralympic Goalball",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/37/80/1233780_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics goalball", "weighting": 1.0},
+				{"phrase": "#paralympicgoalball", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/judo/",
+			"title": "Paralympic Judo",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/36/81/1233681_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics judo", "weighting": 1.0},
+				{"phrase": "#paralympicjudo", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/powerlifting/",
+			"title": "Paralympic Powerlifting",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/39/25/1233925_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics powerlifting", "weighting": 1.0},
+				{"phrase": "#paralympicpowerlifting", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/rowing/",
+			"title": "Paralympic Rowing",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/25/61/1232561_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics rowing", "weighting": 1.0},
+				{"phrase": "#paralympicrowing", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/sailing/",
+			"title": "Paralympic Sailing",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/43/71/1234371_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics sailing", "weighting": 1.0},
+				{"phrase": "#paralympicsailing", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/shooting/",
+			"title": "Paralympic Shooting",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/32/66/1233266_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics shooting", "weighting": 1.0},
+				{"phrase": "#paralympicshooting", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/swimming/",
+			"title": "Paralympic Swimming",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/24/61/1232461_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics swimming", "weighting": 1.0},
+				{"phrase": "#paralympicswimming", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/table-tennis/",
+			"title": "Paralympic Table Tennis",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/08/14/1230814_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics table tennis", "weighting": 1.0},
+				{"phrase": "#paralympictabletennis", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/volleyball-sitting/",
+			"title": "Paralympic Volleyball Sitting",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/32/78/1233278_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics volleyball", "weighting": 1.0},
+				{"phrase": "#paralympicvolleyball", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/wheelchair-basketball/",
+			"title": "Paralympic Wheelchair Basketball",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/30/13/1233013_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics basketball", "weighting": 1.0},
+				{"phrase": "wheelchair basketball", "weighting": 1.0},
+				{"phrase": "#paralympicbasketball", "weighting": 1.0},
+				{"phrase": "#wheelchairbasketball", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/wheelchair-fencing/",
+			"title": "Paralympic Wheelchair Fencing",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/39/35/1233935_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics fencing", "weighting": 1.0},
+				{"phrase": "wheelchair fencing", "weighting": 1.0},
+				{"phrase": "#paralympicfencing", "weighting": 1.0},
+				{"phrase": "#wheelchairfencing", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/wheelchair-rugby/",
+			"title": "Paralympic Wheelchair Rugby",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/26/67/1232667_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics rugby", "weighting": 1.0},
+				{"phrase": "wheelchair rugby", "weighting": 1.0},
+				{"phrase": "#paralympicrugby", "weighting": 1.0},
+				{"phrase": "#wheelchairrugby", "weighting": 1.0}
+			],
+			"topics": []
+		},
+		{
+			"uri": "http://london.metabroadcast.com/paralympics.channel4.com/the-sports/wheelchair-tennis/",
+			"title": "Paralympic Wheelchair Tennis",
+			"image": "http://paralympics.channel4.com/mm/photo/photo/general/01/23/33/18/1233318_divab.jpg",
+			"key_phrases": [
+				{"phrase": "paralympics tennis", "weighting": 1.0},
+				{"phrase": "wheelchair tennis", "weighting": 1.0},
+				{"phrase": "#paralympictennis", "weighting": 1.0},
+				{"phrase": "#wheelchairtennis", "weighting": 1.0}
+			],
+			"topics": []
+		}
+	]
+}

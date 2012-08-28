@@ -4,6 +4,7 @@ import static org.atlasapi.remotesite.redux.UpdateProgress.FAILURE;
 import static org.atlasapi.remotesite.redux.UpdateProgress.SUCCESS;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
@@ -36,6 +37,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 public abstract class AbstractMetaBroadcastContentUpdater {
@@ -78,7 +80,16 @@ public abstract class AbstractMetaBroadcastContentUpdater {
     private void createThenUpdateContent(ResolvedContent resolvedContent, ContentWords contentWordSet, String mbUri, Optional<List<KeyPhrase>> keyPhrase) {
         String subjectUri = contentWordSet.getUri();
         Maybe<Identified> possibleContent = resolvedContent.get(subjectUri);
-        if (possibleContent.hasValue()) {
+        if (isPublishersUri(subjectUri)) {
+            Content content = new Brand(subjectUri, "", publisher);
+            content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
+            content.setTitle(contentWordSet.getTitle());
+            content.setImage(contentWordSet.getImage());
+            if (keyPhrase.isPresent()) {
+                content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
+            }
+            write(content);
+        } else if (possibleContent.hasValue()) {
             Identified identified = possibleContent.requireValue();
             String newCuri = ""; // TODO define a curie at some point
             Content content = getNewContent(identified, mbUri, newCuri);
@@ -152,8 +163,8 @@ public abstract class AbstractMetaBroadcastContentUpdater {
         return container;
     }
 
-    protected List<String> generateMetaBroadcastUris(Iterable<String> uris) {
-        List<String> list = Lists.newArrayList();
+    protected Set<String> generateMetaBroadcastUris(Iterable<String> uris) {
+        Set<String> list = Sets.newHashSet();
         for (String uri : uris) {
             list.add(generateMetaBroadcastUri(uri));
         }
@@ -161,7 +172,14 @@ public abstract class AbstractMetaBroadcastContentUpdater {
     }
 
     protected String generateMetaBroadcastUri(String uri) {
+        if (isPublishersUri(uri)) {
+            return uri;
+        }
         return String.format("http://%s/%s", publisher.key(), uri.replaceFirst("(http(s?)://)", ""));
+    }
+
+    private boolean isPublishersUri(String uri) {
+        return uri.startsWith("http://"+publisher.key());
     }
 
     private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {

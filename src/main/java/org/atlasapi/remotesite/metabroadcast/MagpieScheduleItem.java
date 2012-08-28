@@ -12,6 +12,7 @@ public class MagpieScheduleItem {
     private final String uri;
     private final String title;
     private final String description;
+    private final String image;
     private final List<KeyPhrase> keyPhrases;
     private final List<TopicRef> topics;
     
@@ -19,6 +20,7 @@ public class MagpieScheduleItem {
         private String uri;
         private String title;
         private String description;
+        private String image;
         private List<KeyPhrase> keyPhrases = Lists.newArrayList();
         private List<TopicRef> topics = ImmutableList.of();
         
@@ -34,6 +36,11 @@ public class MagpieScheduleItem {
         
         public MagpieScheduleItemBuilder withDescription(String description) {
             this.description = description;
+            return this;
+        }
+        
+        public MagpieScheduleItemBuilder withImage(String image) {
+            this.image = image;
             return this;
         }
         
@@ -71,6 +78,10 @@ public class MagpieScheduleItem {
         public String getDescription() {
             return description;
         }
+        
+        public String getImage() {
+            return image;
+        }
 
         public void setDescription(String description) {
             this.description = description;
@@ -83,8 +94,6 @@ public class MagpieScheduleItem {
         public void setKeyPhrases(List<KeyPhrase> keyPhrases) {
             this.keyPhrases = keyPhrases;
         }
-        
-        
 
         public List<TopicRef> getTopics() {
             return topics;
@@ -119,6 +128,7 @@ public class MagpieScheduleItem {
         this.uri = builder.getUri();
         this.title = builder.getTitle();
         this.description = builder.getDescription();
+        this.image = builder.getImage();
         this.keyPhrases = ImmutableList.copyOf(builder.getKeyPhrases());
         this.topics  = ImmutableList.copyOf(builder.getTopics());
     }
@@ -137,7 +147,11 @@ public class MagpieScheduleItem {
     
     public String getDescription() {
         return description;
-    }    
+    }
+    
+    public String getImage() {
+        return this.image;
+    }
 
     public List<KeyPhrase> getKeyPhrases() {
         return keyPhrases;
