@@ -26,8 +26,6 @@ import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
 
@@ -43,26 +41,22 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
-import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.simple.DisplayTitle;
 import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.output.ContainerSummaryResolver;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
-    private final NumberToShortStringCodec idCodec;
-    private final ContainerSummaryResolver containerSummaryResolver;
-    private final ChannelResolver channelResolver;
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
-    
-    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec){
-        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, idCodec, new SystemClock());
+    private final Map<String, Locale> localeMap;
+    protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
+
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver) {
+        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, new SystemClock());
     }
 
-    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec, Clock clock) {
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, Clock clock) {
         super(localHostName, contentGroupResolver, topicResolver, productResolver);
-        this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
         this.channelResolver = channelResolver;

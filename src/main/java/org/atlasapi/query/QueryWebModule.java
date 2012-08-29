@@ -67,7 +67,6 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
-import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
 import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoRecentlyBroadcastChildrenResolver;
