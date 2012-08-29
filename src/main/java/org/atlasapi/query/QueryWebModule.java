@@ -9,7 +9,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
@@ -49,9 +48,7 @@ import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
-import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoAvailableChildrenResolver;
-import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoUpcomingChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
@@ -202,8 +199,7 @@ public class QueryWebModule {
 
     @Bean
     ItemModelSimplifier itemModelSimplifier() {
-        ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }

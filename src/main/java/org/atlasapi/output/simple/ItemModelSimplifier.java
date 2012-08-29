@@ -26,7 +26,6 @@ import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
 
@@ -43,23 +42,22 @@ import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
 import org.atlasapi.media.entity.Song;
+import org.atlasapi.media.entity.simple.DisplayTitle;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
-    private final ContainerSummaryResolver containerSummaryResolver;
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
     private final Map<String, Locale> localeMap;
     protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
-    
-    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
-        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver) {
+        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, new SystemClock());
     }
 
-    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, Clock clock) {
         super(localHostName, contentGroupResolver, topicResolver, productResolver);
-        this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
         this.localeMap = initLocalMap();
@@ -106,6 +104,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         copyBasicContentAttributes(fullItem, simpleItem, annotations, config);
         simpleItem.setType(EntityType.from(fullItem).toString());
 
+        if (annotations.contains(Annotation.DESCRIPTION)) {
+            simpleItem.setDisplayTitle(buildDisplayTitle(fullItem));
+        }
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
             simpleItem.setBlackAndWhite(fullItem.getBlackAndWhite());
             simpleItem.setCountriesOfOrigin(fullItem.getCountriesOfOrigin());
@@ -113,7 +114,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         }
 
         if (fullItem.getContainer() != null) {
-            simpleItem.setBrandSummary(summaryFromResolved(fullItem.getContainer(), annotations));
+            simpleItem.setBrandSummary(buildBrandSummary(fullItem, annotations));
         }
 
         if (fullItem instanceof Episode) {
@@ -122,7 +123,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             if (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION) || annotations.contains(Annotation.SERIES_SUMMARY)) {
                 ParentRef series = episode.getSeriesRef();
                 if (series != null) {
-                    simpleItem.setSeriesSummary(seriesSummaryFromResolved(series, annotations));
+                    simpleItem.setSeriesSummary(buildSeriesSummary(fullItem, annotations));
                 }
             }
 
@@ -351,18 +352,37 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleItem.addLocation(simpleLocation);
     }
 
-    private SeriesSummary seriesSummaryFromResolved(ParentRef seriesRef, Set<Annotation> annotations) {
-        SeriesSummary baseSummary = new SeriesSummary();
-        baseSummary.setUri(seriesRef.getUri());
-
-        return annotations.contains(Annotation.SERIES_SUMMARY) ? containerSummaryResolver.summarizeSeries(seriesRef).or(baseSummary) : baseSummary;
+    private DisplayTitle buildDisplayTitle(Item fullItem) {
+        String title = null;
+        String subtitle = null;
+        if (fullItem.getContainerSummary() != null) {
+            title = fullItem.getContainerSummary().getTitle();
+            subtitle = fullItem.getContainerSummary().getType().equals(EntityType.SERIES.name())
+                    ? fullItem.getContainerSummary().getTitle() + ":" + fullItem.getTitle()
+                    : fullItem.getTitle();
+        } else {
+            title = fullItem.getTitle();
+        }
+        return new DisplayTitle(title, subtitle);
     }
 
-    private BrandSummary summaryFromResolved(ParentRef container, Set<Annotation> annotations) {
-        BrandSummary baseSummary = new BrandSummary();
-        baseSummary.setUri(container.getUri());
+    private BrandSummary buildBrandSummary(Item fullItem, Set<Annotation> annotations) {
+        BrandSummary summary = new BrandSummary();
+        summary.setUri(fullItem.getContainer().getUri());
+        if (annotations.contains(Annotation.BRAND_SUMMARY) && fullItem.getContainerSummary() != null) {
+            summary.setTitle(fullItem.getContainerSummary().getTitle());
+            summary.setDescription(fullItem.getContainerSummary().getDescription());
+        }
+        return summary;
+    }
 
-        return annotations.contains(Annotation.BRAND_SUMMARY) ? containerSummaryResolver.summarizeTopLevelContainer(container).or(baseSummary) : baseSummary;
+    private SeriesSummary buildSeriesSummary(Item fullItem, Set<Annotation> annotations) {
+        SeriesSummary summary = new SeriesSummary();
+        summary.setUri(fullItem.getContainer().getUri());
+        if (annotations.contains(Annotation.SERIES_SUMMARY) && fullItem.getContainerSummary() != null) {
+            summary.setTitle(fullItem.getContainerSummary().getTitle());
+        }
+        return summary;
     }
 
     private void copyProperties(Encoding encoding, org.atlasapi.media.entity.simple.Location simpleLocation) {

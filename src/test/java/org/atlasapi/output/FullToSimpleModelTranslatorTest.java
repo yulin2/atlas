@@ -15,7 +15,6 @@ import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
-import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.hamcrest.Description;
@@ -46,14 +45,13 @@ public class FullToSimpleModelTranslatorTest {
     private final AvailableChildrenResolver availableChildren = context.mock(AvailableChildrenResolver.class);
     private final UpcomingChildrenResolver upcomingChildren = context.mock(UpcomingChildrenResolver.class);
     private @SuppressWarnings("unchecked") final AtlasModelWriter<ContentQueryResult> xmlOutputter = context.mock(AtlasModelWriter.class);
-    private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     
     private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localhostName");
 
     private ProductModelSimplifier productSimplifier = new ProductModelSimplifier("localhostName");
     private ProductResolver productResolver = context.mock(ProductResolver.class); 
 
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver, containerSummaryResolver);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver);
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver),topicSimplifier, productSimplifier);
     
 	private StubHttpServletRequest request;
