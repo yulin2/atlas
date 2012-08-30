@@ -142,14 +142,14 @@ public class FiveEpisodeProcessor {
         policy.setRevenueContract(RevenueContract.FREE_TO_VIEW);
         policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
 
-        String availabilityStart = childValue(element, "vod_start");
+        String availabilityStart = getAvailabilityStart(element);
         if (Strings.isNullOrEmpty(availabilityStart)) {
             location.setAvailable(false);
         } else {
             location.setAvailable(true);
             policy.setAvailabilityStart(dateParser.parseDateTime(availabilityStart));
 
-            String availabilityEnd = childValue(element, "vod_end");
+            String availabilityEnd = getAvailabilityEnd(element);
             if (!Strings.isNullOrEmpty(availabilityEnd)) {
                 policy.setAvailabilityEnd(dateParser.parseDateTime(availabilityEnd));
             }
@@ -158,7 +158,25 @@ public class FiveEpisodeProcessor {
         return location;
     }
     
-
+    private String getAvailabilityStart(Element element) {
+        // vod_start element will only be present if the item is currently available.
+        // If it's not, we fall back to the scheduled_vod_start element 
+        String availabilityStart = childValue(element, "vod_start");
+        if (Strings.isNullOrEmpty(availabilityStart)) {
+            availabilityStart = childValue(element, "scheduled_vod_start");
+        }
+        return availabilityStart;
+    }
+    
+    private String getAvailabilityEnd(Element element) {
+        // Same as vod_start, vod_end is only present if the item is currently available.
+        String availabilityEnd = childValue(element, "vod_end");
+        if (Strings.isNullOrEmpty(availabilityEnd)) {
+            availabilityEnd = childValue(element, "scheduled_vod_end");
+        }
+        return availabilityEnd;
+    }
+    
     private void processSeries(Episode episode, Element element) {
         Element seasonLinkElement = element.getFirstChildElement("season_link");
         if (seasonLinkElement != null) {
