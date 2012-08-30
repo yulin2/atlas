@@ -17,7 +17,7 @@ public class PercentThresholdEquivalenceExtractorTest extends TestCase {
     @Test
     public void testExtractsItemWith90PercentOfTotalWithNegatives() {
 
-        PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>extractorMoreThanPercent(90);
+        PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>moreThanPercent(90);
         
         ScoredEquivalent<Item> strong = ScoredEquivalent.equivalentScore(new Item("test1","cur1",Publisher.BBC), Score.valueOf(0.5));
         Maybe<ScoredEquivalent<Item>> extract = extractor.extract(null, ImmutableList.<ScoredEquivalent<Item>>of(
@@ -35,7 +35,7 @@ public class PercentThresholdEquivalenceExtractorTest extends TestCase {
     @Test
     public void testDoesntExtractItemWhenAllNegative() {
 
-        PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>extractorMoreThanPercent(90);
+        PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>moreThanPercent(90);
         
         Maybe<ScoredEquivalent<Item>> extract = extractor.extract(null, ImmutableList.<ScoredEquivalent<Item>>of(
                 ScoredEquivalent.equivalentScore(new Item("test1","cur1",Publisher.BBC), Score.valueOf(-0.5)),

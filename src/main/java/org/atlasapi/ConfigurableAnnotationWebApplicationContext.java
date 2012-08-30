@@ -2,6 +2,7 @@ package org.atlasapi;
 
 import org.atlasapi.application.ApplicationModule;
 import org.atlasapi.equiv.EquivModule;
+import org.atlasapi.equiv.EquivTaskModule;
 import org.atlasapi.feeds.AtlasFeedsModule;
 import org.atlasapi.feeds.interlinking.delta.InterlinkingDeltaModule;
 import org.atlasapi.feeds.radioplayer.RadioPlayerModule;
@@ -12,6 +13,7 @@ import org.atlasapi.persistence.ManualScheduleRebuildModule;
 import org.atlasapi.persistence.MongoContentPersistenceModule;
 import org.atlasapi.query.QueryModule;
 import org.atlasapi.query.QueryWebModule;
+import org.atlasapi.query.SearchModule;
 import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.RemoteSiteModuleConfigurer;
 import org.atlasapi.remotesite.health.RemoteSiteHealthModule;
@@ -41,14 +43,36 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 	}
 
     private void configure(Builder<Class<?>> builder) {
-        builder.add(AtlasModule.class, AtlasLoggingModule.class, AtlasWebModule.class, QueryModule.class, MongoContentPersistenceModule.class, CassandraPersistenceModule.class, 
-                AtlasFetchModule.class, RemoteSiteModule.class, HealthModule.class, RadioPlayerModule.class, XmlTvModule.class, RemoteSiteHealthModule.class);
+        builder.add(
+            AtlasModule.class,
+            AtlasLoggingModule.class,
+            AtlasWebModule.class,
+            SearchModule.class,
+            QueryModule.class,
+            MongoContentPersistenceModule.class,
+            CassandraPersistenceModule.class, 
+            AtlasFetchModule.class,
+            RemoteSiteModule.class, 
+            HealthModule.class,
+            RadioPlayerModule.class,
+            XmlTvModule.class, 
+            RemoteSiteHealthModule.class, 
+            EquivModule.class
+        );
         
         if(runProcessingOnly()) {
-            builder.add(EquivModule.class, ManualScheduleRebuildModule.class, InterlinkingDeltaModule.class);
+            builder.add(
+                ManualScheduleRebuildModule.class, 
+                InterlinkingDeltaModule.class,
+                EquivTaskModule.class
+            );
             builder.addAll(new RemoteSiteModuleConfigurer().enabledModules());
         } else {
-            builder.add(AtlasFeedsModule.class, QueryWebModule.class, ApplicationModule.class);
+            builder.add(
+                AtlasFeedsModule.class,
+                QueryWebModule.class,
+                ApplicationModule.class
+            );
         }
     }
 

@@ -19,10 +19,13 @@ import static org.hamcrest.Matchers.hasItems;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
 
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -36,6 +39,7 @@ import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * @author Robert Chatley (robert@metabroadcast.com)
@@ -50,10 +54,12 @@ public class UriFetchingQueryExecutorTest extends TestCase {
 	private static final Episode item2 = new Episode("item2", "curie:2", Publisher.BBC);
 
     private final Mockery context = new Mockery();
-	private Fetcher<Identified> fetcher = context.mock(Fetcher.class);
-	private KnownTypeQueryExecutor delegate = context.mock(KnownTypeQueryExecutor.class);
+	private final Fetcher<Identified> fetcher = context.mock(Fetcher.class);
+	private final KnownTypeQueryExecutor delegate = context.mock(KnownTypeQueryExecutor.class);
+	private final ContentEquivalenceUpdater<Content> equivUpdater = context.mock(ContentEquivalenceUpdater.class);
+	private final Set<Publisher> publishers = ImmutableSet.of();
 	
-	private UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate);
+	private UriFetchingQueryExecutor executor = new UriFetchingQueryExecutor(fetcher, delegate,equivUpdater, publishers);
 
     @Test
 	public void testThatWhenTheQueryIsSatisfiedByTheDatabaseThatTheFetcherIsNotUsed() throws Exception {
