@@ -13,41 +13,42 @@
  permissions and limitations under the License. */
 package org.atlasapi.query;
 
+import static org.atlasapi.media.entity.Publisher.FACEBOOK;
+
 import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Identified;
+import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.persistence.topic.TopicContentLister;
+import org.atlasapi.persistence.topic.TopicContentUriLister;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
 import org.atlasapi.query.content.CurieResolvingQueryExecutor;
 import org.atlasapi.query.content.LookupResolvingQueryExecutor;
 import org.atlasapi.query.content.UriFetchingQueryExecutor;
-import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
-import org.atlasapi.query.content.search.ContentResolvingSearcher;
-import org.atlasapi.query.content.search.DummySearcher;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
-import org.atlasapi.search.ContentSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
-import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
-import org.atlasapi.persistence.topic.TopicContentUriLister;
 
 @Configuration
+@Import(EquivModule.class)
 public class QueryModule {
 
     @Autowired
@@ -62,6 +63,9 @@ public class QueryModule {
     private ContentResolver cassandraResolver;
     @Autowired
     private TopicContentUriLister topicContentUriLister;
+
+    private @Autowired @Qualifier("contentUpdater") ContentEquivalenceUpdater<Content> equivUpdater;
+    
     //
     @Value("${applications.enabled}")
     private String applicationsEnabled;
@@ -75,7 +79,7 @@ public class QueryModule {
                 new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver),
                 mongoStore);
 
-        queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
+        queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
 
         queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
 
@@ -105,13 +109,14 @@ public class QueryModule {
 
     }
 
-    @Bean
-    public SearchResolver searchResolver() {
-        if (!Strings.isNullOrEmpty(searchHost)) {
-            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-        }
+//    @Bean
+//    public SearchResolver searchResolver() {
+//        if (!Strings.isNullOrEmpty(searchHost)) {
+//            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
+//            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
+//        }
+//
+//        return new DummySearcher();
+//    }
 
-        return new DummySearcher();
-    }
 }

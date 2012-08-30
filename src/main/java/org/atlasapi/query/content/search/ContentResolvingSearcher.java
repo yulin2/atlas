@@ -1,5 +1,7 @@
 package org.atlasapi.query.content.search;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -21,10 +23,10 @@ import com.metabroadcast.common.collect.DedupingIterator;
 
 public class ContentResolvingSearcher implements SearchResolver {
     private final ContentSearcher fuzzySearcher;
-    private final KnownTypeQueryExecutor contentResolver;
+    private KnownTypeQueryExecutor contentResolver;
 
     public ContentResolvingSearcher(ContentSearcher fuzzySearcher, KnownTypeQueryExecutor contentResolver) {
-        this.fuzzySearcher = fuzzySearcher;
+        this.fuzzySearcher = checkNotNull(fuzzySearcher);
         this.contentResolver = contentResolver;
     }
 
@@ -49,5 +51,9 @@ public class ContentResolvingSearcher implements SearchResolver {
         }
         
         return DedupingIterator.dedupeIterable(hydrated);
+    }
+
+    public void setExecutor(KnownTypeQueryExecutor queryExecutor) {
+        this.contentResolver = queryExecutor;
     }
 }

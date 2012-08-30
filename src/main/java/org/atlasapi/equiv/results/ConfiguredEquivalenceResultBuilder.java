@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.results;
 
 import static org.atlasapi.equiv.results.DefaultEquivalenceResultBuilder.resultBuilder;
-import static org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor.extractorMoreThanPercent;
+import static org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor.moreThanPercent;
 import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.ITEM_UPDATER_NAME;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class ConfiguredEquivalenceResultBuilder<T extends Content> implements Eq
     public ConfiguredEquivalenceResultBuilder() {
         
         EquivalenceCombiner<T> combiner = new ItemScoreFilteringCombiner<T>(new NullScoreAwareAveragingCombiner<T>(), ITEM_UPDATER_NAME);
-        EquivalenceExtractor<T> extractor = extractorMoreThanPercent(90);
+        EquivalenceExtractor<T> extractor = moreThanPercent(90);
         extractor = new MinimumScoreEquivalenceExtractor<T>(extractor, 0.2);
         extractor = new SpecializationMatchingEquivalenceExtractor<T>(extractor);
         extractor = new PublisherFilteringExtractor<T>(extractor);
