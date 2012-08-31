@@ -56,6 +56,7 @@ public class FacebookAdapter implements SiteSpecificAdapter<Brand> {
         page.setStarring((String)entity.get("starring"));
         page.setDirectedBy((String)entity.get("directed_by"));
         page.setWrittenBy((String)entity.get("written_by"));
+        page.setUsername((String)entity.get("username"));
         
         return page;
     }

@@ -10,6 +10,7 @@ public class FacebookPage {
     private String starring;
     private String directedBy;
     private String writtenBy;
+    private String username;
 
     public void setId(String id) {
         this.id = id;
@@ -42,6 +43,10 @@ public class FacebookPage {
     public void setWrittenBy(String writtenBy) {
         this.writtenBy = writtenBy;
     }
+    
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getId() {
         return this.id;
@@ -73,6 +78,10 @@ public class FacebookPage {
 
     public String getWrittenBy() {
         return this.writtenBy;
+    }
+
+    public String getUsername() {
+        return this.username;
     }
     
 }

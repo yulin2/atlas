@@ -34,6 +34,7 @@ public class FacebookBrandExtractorTest {
         page.setPlotOutline("plotoutline");
         page.setLink("a link");
         page.setWebsite("http://www.awebsite.com, http://anotherwebsite.com");
+        page.setUsername("username");
         
         
 //        page.setDirectedBy("A Director, Another Person");
@@ -48,7 +49,8 @@ public class FacebookBrandExtractorTest {
         assertThat(brand.getAliases(), hasItems(
             "a link", 
             "http://www.awebsite.com", 
-            "http://anotherwebsite.com"
+            "http://anotherwebsite.com",
+            "http://graph.facebook.com/username"
         ));
         
     }
