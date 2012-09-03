@@ -42,9 +42,10 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForUris(uris));
-        if (results.isEmpty()) {
-            results = resolveCassandraEntries(uris, query);
+        Map<String, List<Identified>> results = resolveCassandraEntries(uris, query);
+        if (results.size() < Iterables.size(uris)) {
+            results = Maps.newHashMap(results);
+            results.putAll(resolveMongoEntries(query, mongoLookupResolver.entriesForUris(Sets.difference(Sets.newHashSet(uris), results.keySet()))));
         }
         return results;
     }
@@ -132,6 +133,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     private Map<String, List<Identified>> resolveCassandraEntries(Iterable<String> uris, ContentQuery query) {
+        final ApplicationConfiguration configuration = query.getConfiguration();
         ResolvedContent result = cassandraContentResolver.findByLookupRefs(Iterables.transform(uris, new Function<String, LookupRef>() {
 
             @Override
@@ -139,7 +141,14 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 return new LookupRef(input, null, null);
             }
         }));
-        return Maps.transformValues(result.asResolvedMap(), new Function<Identified, List<Identified>>() {
+        return Maps.transformValues(Maps.filterValues(result.asResolvedMap(), new Predicate<Identified>() {
+
+            @Override
+            public boolean apply(Identified input) {
+                return ((input instanceof Described)
+                        && configuration.isEnabled(((Described) input).getPublisher()));
+            }
+        }), new Function<Identified, List<Identified>>() {
 
             @Override
             public List<Identified> apply(Identified input) {

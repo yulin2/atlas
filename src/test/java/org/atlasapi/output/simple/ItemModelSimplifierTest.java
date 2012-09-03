@@ -23,6 +23,7 @@ import org.atlasapi.media.entity.simple.Item;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -43,8 +44,9 @@ public class ItemModelSimplifierTest {
     private final TopicQueryResolver topicResolver = context.mock(TopicQueryResolver.class);
     private final SegmentResolver segmentResolver = context.mock(SegmentResolver.class);
     private final ProductResolver productResolver = context.mock(ProductResolver.class);
+    private final ContainerSummaryResolver containerSummaryResolver = context.mock(ContainerSummaryResolver.class);
     
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localHostName", contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver );
     
     @Test
     @SuppressWarnings("unchecked")
