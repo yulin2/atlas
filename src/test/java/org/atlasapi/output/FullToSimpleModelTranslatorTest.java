@@ -21,6 +21,7 @@ import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.hamcrest.Description;
@@ -47,13 +48,14 @@ public class FullToSimpleModelTranslatorTest {
     private final UpcomingChildrenResolver upcomingChildren = mock(UpcomingChildrenResolver.class);
     private final RecentlyBroadcastChildrenResolver recentChildren = mock(RecentlyBroadcastChildrenResolver.class);
     private @SuppressWarnings("unchecked") final AtlasModelWriter<ContentQueryResult> xmlOutputter = mock(AtlasModelWriter.class);
+    private final ContainerSummaryResolver containerSummaryResolver = mock(ContainerSummaryResolver.class);
     
     private final TopicModelSimplifier topicSimplifier = new TopicModelSimplifier("localhostName");
 
     private ProductModelSimplifier productSimplifier = new ProductModelSimplifier("localhostName");
     private ProductResolver productResolver = mock(ProductResolver.class); 
 
-    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver);
+    private final ItemModelSimplifier itemSimplifier = new ItemModelSimplifier("localhostName", contentGroupResolver, topicResolver, productResolver , segmentResolver, containerSummaryResolver);
     private final SimpleContentModelWriter translator = new SimpleContentModelWriter(xmlOutputter, itemSimplifier, new ContainerModelSimplifier(itemSimplifier, "localhostName", contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren),topicSimplifier, productSimplifier);
     
 	private StubHttpServletRequest request;

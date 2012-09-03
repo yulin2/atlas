@@ -82,6 +82,8 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicSearcher;
 
 @Configuration
@@ -205,7 +207,8 @@ public class QueryWebModule {
 
     @Bean
     ItemModelSimplifier itemModelSimplifier() {
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver);
+        ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
