@@ -46,14 +46,10 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForIdentifiers(uris, true));
-        if (results.isEmpty()) {
-            try {
-                results = resolveCassandraEntries(uris, query);
-            }
-            catch(Exception e) {
-                log.error(String.format("Cassandra resolution failed for URIS %s", uris), e);
-            }
+        Map<String, List<Identified>> results = resolveCassandraEntries(uris, query);
+        if (results.size() < Iterables.size(uris)) {
+            results = Maps.newHashMap(results);
+            results.putAll(resolveMongoEntries(query, mongoLookupResolver.entriesForUris(Sets.difference(Sets.newHashSet(uris), results.keySet()))));
         }
         return results;
     }
