@@ -49,7 +49,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
         Map<String, List<Identified>> results = resolveCassandraEntries(uris, query);
         if (results.size() < Iterables.size(uris)) {
             results = Maps.newHashMap(results);
-            results.putAll(resolveMongoEntries(query, mongoLookupResolver.entriesForUris(Sets.difference(Sets.newHashSet(uris), results.keySet()))));
+            results.putAll(resolveMongoEntries(query, mongoLookupResolver.entriesForIdentifiers(Sets.difference(Sets.newHashSet(uris), results.keySet()))));
         }
         return results;
     }

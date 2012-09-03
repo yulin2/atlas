@@ -22,6 +22,7 @@ import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.hamcrest.Description;
