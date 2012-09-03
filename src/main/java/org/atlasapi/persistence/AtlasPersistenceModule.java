@@ -57,6 +57,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import javax.annotation.PreDestroy;
 import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
@@ -75,6 +76,11 @@ public class AtlasPersistenceModule {
     //
     @Resource(name = "changesProducer")
     private JmsTemplate changesProducer;
+    
+    @PreDestroy
+    public void destroy() {
+        cassandraContentPersistenceModule().destroy();
+    }
 
     @Bean
     public ElasticSearchContentIndexModule esContentIndexModule() {
@@ -90,7 +96,9 @@ public class AtlasPersistenceModule {
 
     @Bean
     public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
-        return new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
+        CassandraContentPersistenceModule cassandraContentPersistenceModule = new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
+        cassandraContentPersistenceModule.init();
+        return cassandraContentPersistenceModule;
     }
 
     @Bean
