@@ -14,6 +14,8 @@ import com.metabroadcast.common.health.probes.MemoryInfoProbe;
 import com.metabroadcast.common.persistence.mongo.health.MongoConnectionPoolProbe;
 import com.metabroadcast.common.webapp.health.HealthController;
 import org.atlasapi.messaging.producers.MessageReplayer;
+import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
+import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -24,6 +26,8 @@ public class SystemModule {
 	private @Autowired Collection<HealthProbe> probes;
 	private @Autowired HealthController healthController;
     private @Autowired MessageReplayer messageReplayer;
+    private @Autowired ContentBootstrapper contentBootstrapper;
+    private @Autowired ESContentIndexer esContentIndexer;
 
 	public @Bean HealthController healthController() {
 		return new HealthController(systemProbes);
@@ -35,6 +39,10 @@ public class SystemModule {
     
     public @Bean ReplayController replayController() {
         return new ReplayController(messageReplayer);
+    }
+    
+    public @Bean BootstrapController bootstrapController() {
+        return new BootstrapController(contentBootstrapper, esContentIndexer);
     }
 	
 	@PostConstruct
