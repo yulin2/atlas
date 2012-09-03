@@ -106,6 +106,11 @@ public class AtlasPersistenceModule {
     public ContentBootstrapperModule contentBootstrapperModule() {
         return new ContentBootstrapperModule(cassandraContentPersistenceModule().cassandraContentStore());
     }
+    
+    @Bean
+    public ContentBootstrapperModule contentBootstrapperModule() {
+        return new ContentBootstrapperModule(cassandraContentPersistenceModule().cassandraContentStore());
+    }
 
     @Bean
     public DatabasedMongo databasedMongo() {
