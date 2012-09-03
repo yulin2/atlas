@@ -46,14 +46,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
 import com.google.common.base.Strings;
-<<<<<<< HEAD
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-=======
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
->>>>>>> Fixed Spring circular dependencies.
 
 @Configuration
 @Import(EquivModule.class)

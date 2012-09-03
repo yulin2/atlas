@@ -43,6 +43,10 @@ import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 import com.metabroadcast.common.time.SystemClock;
+import org.atlasapi.media.entity.Song;
+import org.atlasapi.media.entity.simple.DisplayTitle;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
@@ -58,6 +62,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec, Clock clock) {
         super(localHostName, contentGroupResolver, topicResolver, productResolver);
+        this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
         this.channelResolver = channelResolver;
@@ -337,6 +342,8 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         if (annotations.contains(Annotation.BRAND_SUMMARY) && fullItem.getContainerSummary() != null) {
             summary.setTitle(fullItem.getContainerSummary().getTitle());
             summary.setDescription(fullItem.getContainerSummary().getDescription());
+        } else if (fullItem.getContainerSummary() == null) {
+            summary = containerSummaryResolver.summarizeTopLevelContainer(fullItem.getContainer()).or(summary);
         }
         return summary;
     }
@@ -346,6 +353,8 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         summary.setUri(fullItem.getContainer().getUri());
         if (annotations.contains(Annotation.SERIES_SUMMARY) && fullItem.getContainerSummary() != null) {
             summary.setTitle(fullItem.getContainerSummary().getTitle());
+        } else if (fullItem.getContainerSummary() == null) {
+            summary = containerSummaryResolver.summarizeSeries(fullItem.getContainer()).or(summary);
         }
         return summary;
     }
