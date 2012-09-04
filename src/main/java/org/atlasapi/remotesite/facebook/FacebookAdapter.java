@@ -9,8 +9,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,9 @@ import com.metabroadcast.common.social.facebook.FacebookInteracter;
 
 public class FacebookAdapter implements SiteSpecificAdapter<Brand> {
     
+    private static final String CATEGORY_FIELD = "category";
+    private static final String TV_SHOW_CATEGORY = "Tv show";
+
     private static final Logger log = LoggerFactory.getLogger(FacebookAdapter.class);
 
     private final Pattern graphUriPattern = Pattern.compile("https?://graph.facebook.com/(.+)");
@@ -39,10 +40,16 @@ public class FacebookAdapter implements SiteSpecificAdapter<Brand> {
         checkArgument(matcher.matches(), "Invalid URI: %s", uri);
         
         String entityId = matcher.group(1);
-        
-        Map<String, Object> entity = facebookInteracter.get(token, entityId);
-        
-        return extractor.extract(facebookPage(entity));
+
+        try {
+            Map<String, Object> entity = facebookInteracter.get(token, entityId);
+            if (TV_SHOW_CATEGORY.equals(entity.get(CATEGORY_FIELD))) {
+                return extractor.extract(facebookPage(entity));
+            } 
+        } catch (Exception e) {
+            log.error(uri, e);
+        }
+        return null;
     }
 
     private FacebookPage facebookPage(Map<String, Object> entity) {
