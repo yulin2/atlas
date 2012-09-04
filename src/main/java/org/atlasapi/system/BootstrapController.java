@@ -70,7 +70,7 @@ public class BootstrapController {
     @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/es/status")
     public void esBootstrapStatus(HttpServletResponse response) throws IOException {
         Map result = new HashMap();
-        result.put("status", contentBootstrapper.isBootstrapping());
+        result.put("bootstrapping", contentBootstrapper.isBootstrapping());
         if (contentBootstrapper.isBootstrapping()) {
             result.put("destination", contentBootstrapper.getDestination());
         }
