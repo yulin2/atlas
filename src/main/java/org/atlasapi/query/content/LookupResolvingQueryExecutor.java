@@ -132,6 +132,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     private Map<String, List<Identified>> resolveCassandraEntries(Iterable<String> uris, ContentQuery query) {
+        final ApplicationConfiguration configuration = query.getConfiguration();
         ResolvedContent result = cassandraContentResolver.findByLookupRefs(Iterables.transform(uris, new Function<String, LookupRef>() {
 
             @Override
@@ -139,7 +140,14 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 return new LookupRef(input, null, null);
             }
         }));
-        return Maps.transformValues(result.asResolvedMap(), new Function<Identified, List<Identified>>() {
+        return Maps.transformValues(Maps.filterValues(result.asResolvedMap(), new Predicate<Identified>() {
+
+            @Override
+            public boolean apply(Identified input) {
+                return ((input instanceof Described)
+                        && configuration.isEnabled(((Described) input).getPublisher()));
+            }
+        }), new Function<Identified, List<Identified>>() {
 
             @Override
             public List<Identified> apply(Identified input) {
