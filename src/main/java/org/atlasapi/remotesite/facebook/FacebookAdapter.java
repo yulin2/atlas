@@ -46,7 +46,7 @@ public class FacebookAdapter implements SiteSpecificAdapter<Brand> {
                 return extractor.extract(facebookPage(entity));
             } 
         } catch (Exception e) {
-            log.warn(uri, e);
+            log.error(uri, e);
         }
         return null;
     }
