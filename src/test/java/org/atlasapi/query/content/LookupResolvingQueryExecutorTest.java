@@ -43,7 +43,15 @@ public class LookupResolvingQueryExecutorTest extends TestCase {
         final Item queryItem = new Item(query, "qcurie", Publisher.BBC);
         final Item equivItem = new Item("equiv", "ecurie", Publisher.YOUTUBE);
         
-        lookupStore.store(lookupEntryWithEquivalents(query, LookupRef.from(queryItem), LookupRef.from(equivItem)));
+        LookupEntry queryEntry = LookupEntry.lookupEntryFrom(queryItem);
+        LookupEntry equivEntry = LookupEntry.lookupEntryFrom(equivItem);
+        
+        lookupStore.store(queryEntry
+            .copyWithDirectEquivalents(ImmutableSet.of(equivEntry.lookupRef()))
+            .copyWithEquivalents(ImmutableSet.of(equivEntry.lookupRef())));
+        lookupStore.store(equivEntry
+            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef()))
+            .copyWithDirectEquivalents(ImmutableSet.of(queryEntry.lookupRef())));
         
         context.checking(new Expectations(){{
             one(mongoContentResolver).findByLookupRefs(with(hasItems(LookupRef.from(queryItem), LookupRef.from(equivItem))));
