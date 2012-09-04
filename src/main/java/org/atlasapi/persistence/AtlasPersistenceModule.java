@@ -69,6 +69,7 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
@@ -103,6 +104,11 @@ public class AtlasPersistenceModule {
     @Bean
     public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
         return new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
+    }
+    
+    @Bean
+    public ContentBootstrapperModule contentBootstrapperModule() {
+        return new ContentBootstrapperModule(cassandraContentPersistenceModule().cassandraContentStore());
     }
 
     @Bean
@@ -266,6 +272,11 @@ public class AtlasPersistenceModule {
     @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
+    }
+    
+    @Bean
+    public ContentBootstrapper contentBootstrapper() {
+        return contentBootstrapperModule().contentBootstrapper();
     }
 
     @Bean
