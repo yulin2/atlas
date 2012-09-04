@@ -1,7 +1,10 @@
 package org.atlasapi.system;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -25,7 +28,8 @@ public class BootstrapController {
 
     private static final Log log = LogFactory.getLog(BootstrapController.class);
     //
-    private final ExecutorService scheduler = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MICROSECONDS, new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.DiscardPolicy());
+    private final ExecutorService scheduler = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MICROSECONDS, new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.AbortPolicy());
+    private final ObjectMapper jsonMapper = new ObjectMapper();
     private final ContentBootstrapper contentBootstrapper;
     private final ESContentIndexer esContentIndexer;
 
@@ -61,5 +65,16 @@ public class BootstrapController {
         } catch (RejectedExecutionException ex) {
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Currently bootstrapping another component.");
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/es/status")
+    public void esBootstrapStatus(HttpServletResponse response) throws IOException {
+        Map result = new HashMap();
+        result.put("status", contentBootstrapper.isBootstrapping());
+        if (contentBootstrapper.isBootstrapping()) {
+            result.put("destination", contentBootstrapper.getDestination());
+        }
+        jsonMapper.writeValue(response.getOutputStream(), result);
+        response.flushBuffer();
     }
 }
