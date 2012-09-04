@@ -7,27 +7,29 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.ContentGroupRef;
+import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.KeyPhrase;
-import org.atlasapi.media.product.Product;
 import org.atlasapi.media.entity.simple.RelatedLink;
+import org.atlasapi.media.product.Product;
 import org.atlasapi.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.ContentGroupRef;
-import org.atlasapi.media.entity.Identified;
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
 
@@ -37,6 +39,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
     private final ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier;
     private final ProductResolver productResolver;
     private final ModelSimplifier<Product, org.atlasapi.media.entity.simple.Product> productSimplifier;
+    protected final CrewMemberSimplifier crewSimplifier = new CrewMemberSimplifier();
     private boolean exposeIds = false;
 
     public ContentModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver) {
@@ -48,7 +51,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         this.productSimplifier = new ProductModelSimplifier(localHostName);
     }
 
-    protected void copyBasicContentAttributes(F content, T simpleDescription, Set<Annotation> annotations, ApplicationConfiguration config) {
+    protected void copyBasicContentAttributes(F content, T simpleDescription, final Set<Annotation> annotations, final ApplicationConfiguration config) {
         copyBasicDescribedAttributes(content, simpleDescription, annotations);
 
         if(!exposeIds) {
@@ -72,6 +75,16 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         }
         if (annotations.contains(Annotation.PRODUCTS)) {
             simpleDescription.setProducts(resolveAndSimplifyProductsFor(content, annotations, config));
+        }
+        
+        if (annotations.contains(Annotation.PEOPLE)) {
+            simpleDescription.setPeople(Iterables.filter(Iterables.transform(content.people(), new Function<CrewMember, org.atlasapi.media.entity.simple.Person>() {
+
+                @Override
+                public org.atlasapi.media.entity.simple.Person apply(CrewMember input) {
+                    return crewSimplifier.simplify(input, annotations, config);
+                }
+            }), Predicates.notNull()));
         }
     }
 

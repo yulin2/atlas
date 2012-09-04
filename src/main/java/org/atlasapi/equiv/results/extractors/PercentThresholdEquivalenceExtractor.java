@@ -14,7 +14,7 @@ import com.metabroadcast.common.base.Maybe;
  */
 public class PercentThresholdEquivalenceExtractor<T extends Content> implements EquivalenceExtractor<T> {
     
-    public static <T extends Content> PercentThresholdEquivalenceExtractor<T> extractorMoreThanPercent(int percent) {
+    public static <T extends Content> PercentThresholdEquivalenceExtractor<T> moreThanPercent(int percent) {
         return new PercentThresholdEquivalenceExtractor<T>(percent/100.0);
     }
 

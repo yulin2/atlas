@@ -19,12 +19,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -45,10 +48,14 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 
 	private final Fetcher<Identified> fetcher;
 	private final KnownTypeQueryExecutor delegate;
+    private final ContentEquivalenceUpdater<Content> equivUpdater;
+    private final Set<Publisher> equivalablePublishers;
 	
-	public UriFetchingQueryExecutor(Fetcher<Identified> fetcher, KnownTypeQueryExecutor delegate) {
+	public UriFetchingQueryExecutor(Fetcher<Identified> fetcher, KnownTypeQueryExecutor delegate, ContentEquivalenceUpdater<Content> equivUpdater, Set<Publisher> equivalablePublishers) {
 		this.fetcher = fetcher;
 		this.delegate = delegate;
+        this.equivUpdater = equivUpdater;
+        this.equivalablePublishers = equivalablePublishers;
 	}
 	
 //	@Override
@@ -76,7 +83,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 			return found;
 		} 
 
-		List<String> fetchedUris = Lists.newArrayList();
+		Map<String, Identified> fetched = Maps.newHashMap();
 		Map<String, List<Identified>> youtubeContentGroups = Maps.newHashMap();
 		
 		for (String missingUri : missingUris) {
@@ -85,7 +92,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 			    if (remoteContent instanceof ContentGroup && ((ContentGroup) remoteContent).getPublisher().equals(Publisher.YOUTUBE)) {
 			        youtubeContentGroups.put(missingUri, ImmutableList.of(remoteContent));
 			    } else {
-			        fetchedUris.add(remoteContent.getCanonicalUri());
+			        fetched.put(remoteContent.getCanonicalUri(), remoteContent);
 			    }
 			}
 		}
@@ -93,13 +100,26 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		Builder<String, List<Identified>> results = ImmutableMap.<String, List<Identified>>builder().putAll(found).putAll(youtubeContentGroups);
 		
 		// If we couldn't resolve any of the missing uris then we should just return the results of the original query
-		if (fetchedUris.isEmpty()) {
+		if (fetched.isEmpty()) {
             return results.build();
 		}
 		
+		updateEquivalences(fetched);
+		
 		// re-attempt the query now the missing uris have been fetched
-		return results.putAll(delegate.executeUriQuery(fetchedUris, query)).build();
+		return results.putAll(delegate.executeUriQuery(fetched.keySet(), query)).build();
 	}
+
+    private void updateEquivalences(Map<String, Identified> fetched) {
+        for (Identified fetchedEntity : fetched.values()) {
+		    if (fetchedEntity instanceof Content) {
+		        Content fetchedContent = (Content) fetchedEntity;
+                if (equivalablePublishers.contains(fetchedContent.getPublisher())) {
+                    equivUpdater.updateEquivalences(fetchedContent, Optional.<List<Content>>absent());
+                }
+            }
+        }
+    }
 	
 	private static Set<String> missingUris(Iterable<String> content, Iterable<String> uris) {
 		return Sets.difference(ImmutableSet.copyOf(uris), ImmutableSet.copyOf(content));

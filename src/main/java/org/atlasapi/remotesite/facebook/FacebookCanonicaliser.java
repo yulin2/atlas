@@ -7,13 +7,14 @@ import org.atlasapi.query.uri.canonical.Canonicaliser;
 
 public class FacebookCanonicaliser implements Canonicaliser {
     
+    public static final String CANONICAL_PREFIX = "http://graph.facebook.com/";
     private final Pattern graphUriPattern = Pattern.compile("https?://graph.facebook.com/(.+)");
 
     @Override
     public String canonicalise(String uri) {
         Matcher matcher = graphUriPattern.matcher(uri);
         if (matcher.matches()) {
-            return "http://graph.facebook.com/"+matcher.group(1);
+            return CANONICAL_PREFIX+matcher.group(1);
         }
         return null;
     }

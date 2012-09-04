@@ -14,10 +14,17 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query;
 
+import static org.atlasapi.media.entity.Publisher.FACEBOOK;
+
+import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
+import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
+import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
@@ -35,19 +42,22 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Lazy;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraKnownTypeContentResolver;
 
 @Configuration
+@Import(EquivModule.class)
 public class QueryModule {
 
 	private @Autowired @Qualifier("remoteSiteContentResolver") CanonicalisingFetcher localOrRemoteFetcher;
 	
 	private @Autowired DatabasedMongo mongo;
     private @Autowired CassandraContentStore cassandra;
+    private @Autowired @Qualifier("contentUpdater") ContentEquivalenceUpdater<Content> equivUpdater;
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	private @Value("${atlas.search.host}") String searchHost;
@@ -59,7 +69,7 @@ public class QueryModule {
 		
         KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));
 		
-		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
+		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
 		
 	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
 		
@@ -67,13 +77,15 @@ public class QueryModule {
 	    
 	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
 	}
-	
-	@Bean SearchResolver searchResolver() {
-	    if (! Strings.isNullOrEmpty(searchHost)) {
-    	    ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-    	    return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-	    }
-	    
-	    return new DummySearcher();
-	}
+//	
+//	@Bean @Lazy SearchResolver searchResolver() {
+//	    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + applicationsEnabled);
+//	    if (! Strings.isNullOrEmpty(searchHost)) {
+//	        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + searchHost);
+//    	    ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
+//    	    return new ContentResolvingSearcher(titleSearcher, queryExecutor());
+//	    }
+//	    
+//	    return new DummySearcher();
+//	}
 }

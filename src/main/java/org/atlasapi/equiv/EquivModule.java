@@ -16,22 +16,18 @@ package org.atlasapi.equiv;
 
 import static com.google.common.base.Predicates.in;
 import static com.google.common.base.Predicates.not;
+import static org.atlasapi.equiv.generators.AliasResolvingEquivalenceGenerator.aliasResolvingGenerator;
 import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.containerUpdater;
-import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
-import static org.atlasapi.media.entity.Publisher.C4;
+import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
-import static org.atlasapi.media.entity.Publisher.ITV;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
-import static org.atlasapi.media.entity.Publisher.FIVE;
 import static org.atlasapi.persistence.lookup.TransitiveLookupWriter.generatedTransitiveLookupWriter;
 
 import java.io.File;
 import java.util.Set;
-
-import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerChildEquivalenceGenerator;
@@ -44,16 +40,16 @@ import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.LookupWritingEquivalenceHandler;
 import org.atlasapi.equiv.handlers.ResultWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.ConfiguredEquivalenceResultBuilder;
+import org.atlasapi.equiv.results.DefaultEquivalenceResultBuilder;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
+import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
+import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.SpecializationMatchingEquivalenceExtractor;
 import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.InMemoryLiveEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
-import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
-import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
-import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
-import org.atlasapi.equiv.results.www.EquivalenceResultController;
-import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.scorers.ContainerChildEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
@@ -66,10 +62,6 @@ import org.atlasapi.equiv.update.NullContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.PublisherSwitchingContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.ResultHandlingEquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
-import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
-import org.atlasapi.equiv.update.tasks.FilmEquivalenceUpdateTask;
-import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
-import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -78,13 +70,10 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
-import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
-import org.atlasapi.query.content.schedule.ManualScheduleUpdateController;
 import org.joda.time.Duration;
-import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -96,27 +85,18 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.scheduling.RepetitionRule;
-import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.SimpleScheduler;
 
 @Configuration
 public class EquivModule {
 
-	private @Value("${equiv.updater.enabled}") String updaterEnabled;
 	private @Value("${equiv.results.directory}") String equivResultsDirectory;
-	
-	private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
     
     private @Autowired MongoScheduleStore scheduleResolver;
     private @Autowired SearchResolver searchResolver;
-    private @Autowired ContentLister contentLister;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired DatabasedMongo db;
-
     private @Autowired AdapterLog log;
-    private @Autowired SimpleScheduler taskScheduler;
 
     public @Bean RecentEquivalenceResultStore equivalenceResultStore() {
         return new RecentEquivalenceResultStore(new FileEquivalenceResultStore(new File(equivResultsDirectory)));
@@ -130,10 +110,6 @@ public class EquivModule {
         return new LookupWritingEquivalenceHandler<T>(generatedTransitiveLookupWriter(new MongoLookupEntryStore(db)), publishers);
     }
 
-    public @Bean MongoScheduleTaskProgressStore progressStore() {
-        return new MongoScheduleTaskProgressStore(db);
-    }
-    
     private <T extends Content> EquivalenceResultHandler<T> standardResultHandlers(Iterable<Publisher> publishers) {
         return new BroadcastingEquivalenceResultHandler<T>(ImmutableList.of(
                 this.<T>lookupWritingEquivalenceHandler(publishers),
@@ -145,7 +121,7 @@ public class EquivModule {
         return new ResultHandlingEquivalenceUpdater<T>(delegate, this.<T>standardResultHandlers(publishers));
     }
     
-    public @Bean ItemEquivalenceUpdater<Item> standardItemUpdater() {
+    public ItemEquivalenceUpdater<Item> standardItemUpdater() {
         Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, channelResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
         );
@@ -164,7 +140,7 @@ public class EquivModule {
         return containerUpdater(contentResolver, liveResultsStore(), new ConfiguredEquivalenceResultBuilder<Container>(), this.<Item>standardResultHandlers(publishers), log);
     }
 
-    public @Bean PublisherSwitchingContentEquivalenceUpdater contentUpdater() {
+    public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
         //Generally acceptable publishers.
         Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES));
         
@@ -181,13 +157,14 @@ public class EquivModule {
                 .withScorer(titleScoringGenerator)
                 .build(), itemUpdater), acceptablePublishers);
         
-        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES);
+        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK);
         for (Publisher publisher : Iterables.filter(ImmutableList.copyOf(Publisher.values()), not(in(nonStandardPublishers)))) {
                 publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
         }
         
         publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(new RootEquivalenceUpdater(new NullContentEquivalenceUpdater<Container>(),
-                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log).withGenerator(new RadioTimesFilmEquivalenceGenerator(contentResolver)).build()),ImmutableSet.of(RADIO_TIMES,PA)));
+                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
+                    .withGenerator(new RadioTimesFilmEquivalenceGenerator(contentResolver)).build()),ImmutableSet.of(RADIO_TIMES,PA)));
         
         publisherUpdaters.put(BBC_REDUX, resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
                 .withGenerators(ImmutableSet.of(
@@ -206,21 +183,28 @@ public class EquivModule {
                     .build(), 
                 itemUpdater),acceptablePublishers));
         
+        publisherUpdaters.put(FACEBOOK, resultHandlingUpdater(new RootEquivalenceUpdater(
+            containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK)))
+                .withResultBuilder(DefaultEquivalenceResultBuilder.<Container>resultBuilder(
+                    new NullScoreAwareAveragingCombiner<Container>(),
+                    new SpecializationMatchingEquivalenceExtractor<Container>(
+                        new MinimumScoreEquivalenceExtractor<Container>(
+                            PercentThresholdEquivalenceExtractor.<Container>moreThanPercent(90), 
+                            0.2
+                        )
+                    )
+                ))
+                .withGenerators(ImmutableSet.of(
+                    titleScoringGenerator,
+                    aliasResolvingGenerator(contentResolver, Container.class)
+                ))
+                .build(),
+            new NullContentEquivalenceUpdater<Item>()
+        ), Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK))));
+        
         return new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build());
     }
 
-    public TitleMatchingEquivalenceScoringGenerator defaultScaledTitleScoringGenerator() {
-        return new TitleMatchingEquivalenceScoringGenerator(searchResolver);
-    }
-    
-    private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
-        return new ContentEquivalenceUpdateTask(contentLister, contentUpdater(), log, progressStore()).forPublishers(publishers);
-    }
-    
-    public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
-        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater(), log, progressStore());
-    }
-    
     public @Bean ContentEquivalenceUpdater<Film> filmUpdater() {
         Set<ContentEquivalenceGenerator<Film>> generators = ImmutableSet.<ContentEquivalenceGenerator<Film>>of(new FilmEquivalenceGenerator(searchResolver));
         Set<ContentEquivalenceScorer<Film>> scorers = ImmutableSet.<ContentEquivalenceScorer<Film>>of();
@@ -228,66 +212,6 @@ public class EquivModule {
         
         ContentEquivalenceUpdater<Film> updater = new ItemEquivalenceUpdater<Film>(generators, scorers, resultBuilder, log);
         return resultHandlingUpdater(updater, ImmutableSet.of(PREVIEW_NETWORKS, RADIO_TIMES));
-    }
-    
-    @PostConstruct
-    public void scheduleUpdater() {
-        if(Boolean.parseBoolean(updaterEnabled)) {
-            taskScheduler.schedule(publisherUpdateTask(BBC, C4, ITV, FIVE, RADIO_TIMES, BBC_REDUX).withName("BBC/C4/ITV/Five/RT/Redux Equivalence Updater"), EQUIVALENCE_REPETITION);
-            taskScheduler.schedule(publisherUpdateTask(PA).withName("PA Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(BBC).withName("BBC Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(C4).withName("C4 Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(ITV).withName("ITV Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(FIVE).withName("Five Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(ITUNES).withName("Itunes Equivalence Updater"), RepetitionRules.NEVER);
-            taskScheduler.schedule(publisherUpdateTask(RADIO_TIMES).withName("RT Equivalence Updater"), RepetitionRules.NEVER);
-            
-            taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
-            
-            //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.BBC).withName("BBC Child Ref Update"), RepetitionRules.NEVER);
-            //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.PA).withName("PA Child Ref Update"), RepetitionRules.NEVER);
-            //taskScheduler.schedule(childRefUpdateTask().forPublishers(publishersApartFrom(Publisher.BBC, Publisher.PA)).withName("Other Publishers Child Ref Update"), RepetitionRules.NEVER);
-        }
-    }
-
-    /*private Publisher[] publishersApartFrom(Publisher...publishers) {
-        SetView<Publisher> remainingPublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.copyOf(publishers));
-        return remainingPublishers.toArray(new Publisher[remainingPublishers.size()]);
-    }*/
-
-    protected @Bean ChildRefUpdateController childRefUpdateController() {
-        return new ChildRefUpdateController(childRefUpdateTask(), contentResolver);
-    }
-    
-    protected ChildRefUpdateTask childRefUpdateTask() {
-        return new ChildRefUpdateTask(contentLister, contentResolver, db, progressStore(), log);
-    }
-    
-    //Controllers...
-    public @Bean ContentEquivalenceUpdateController contentEquivalenceUpdateController() {
-        return new ContentEquivalenceUpdateController(contentUpdater(), filmUpdater(), contentResolver, log);
-    }
-    
-    public @Bean EquivalenceResultController resultEquivalenceResultController() {
-        return new EquivalenceResultController(equivalenceResultStore(), equivProbeStore(), contentResolver);
-    }
-    
-    public @Bean RecentResultController recentEquivalenceResultController() {
-        return new RecentResultController(equivalenceResultStore());
-    }
-    
-    //Probes...
-    public @Bean EquivalenceProbeStore equivProbeStore() { 
-        return new MongoEquivalenceProbeStore(db);
-    }
-    
-    public @Bean EquivalenceResultProbeController equivProbeController() {
-        return new EquivalenceResultProbeController(equivalenceResultStore(), equivProbeStore());
-    }
-
-    @Bean ManualScheduleUpdateController scheduleUpdateController() {
-        return new ManualScheduleUpdateController(scheduleResolver, contentResolver, channelResolver);
     }
     
 }

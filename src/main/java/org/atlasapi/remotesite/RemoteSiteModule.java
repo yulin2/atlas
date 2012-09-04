@@ -24,6 +24,7 @@ import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.remotesite.archiveorg.ArchiveOrgAdapterModule;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
+import org.atlasapi.remotesite.facebook.FacebookAdapterModule;
 import org.atlasapi.remotesite.hulu.HuluAdapterModule;
 import org.atlasapi.remotesite.oembed.OembedXmlAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
@@ -36,7 +37,7 @@ import org.springframework.context.annotation.Import;
 import com.google.common.collect.Lists;
 
 @Configuration
-@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class})
+@Import({HuluAdapterModule.class, ArchiveOrgAdapterModule.class, FacebookAdapterModule.class})
 public class RemoteSiteModule {
 
 	private @Autowired AdapterLog log;

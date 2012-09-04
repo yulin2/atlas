@@ -46,12 +46,12 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
 
         private final ContentResolver contentResolver;
         private final LiveEquivalenceResultStore resultStore;
-        private final EquivalenceResultBuilder<Container> containerResultBuilder;
         private final EquivalenceResultHandler<Item> itemResultHandler;
         private final AdapterLog log; 
         
-        private Iterable<ContentEquivalenceGenerator<Container>> generators; 
-        private Iterable<ContentEquivalenceScorer<Container>> scorers;
+        private EquivalenceResultBuilder<Container> containerResultBuilder;
+        private Iterable<ContentEquivalenceGenerator<Container>> generators = ImmutableSet.of(); 
+        private Iterable<ContentEquivalenceScorer<Container>> scorers = ImmutableSet.of();
 
         public Builder(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
                 EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, AdapterLog log) {
@@ -60,6 +60,11 @@ public class ContainerEquivalenceUpdater implements ContentEquivalenceUpdater<Co
                     this.containerResultBuilder = containerResultBuilder;
                     this.itemResultHandler = itemResultHandler;
                     this.log = log;
+        }
+        
+        public Builder withResultBuilder(EquivalenceResultBuilder<Container> builder) {
+            this.containerResultBuilder = builder;
+            return this;
         }
      
         public Builder withGenerator(ContentEquivalenceGenerator<Container> generator) {
