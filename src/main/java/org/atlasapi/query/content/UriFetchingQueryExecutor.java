@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
@@ -27,12 +29,13 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.system.Fetcher;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -46,6 +49,13 @@ import com.google.common.collect.Sets;
  */
 public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 
+    private static final Function<Identified, Set<String>> TO_ALL_URIS = new Function<Identified, Set<String>>() {
+        @Override
+        public Set<String> apply(@Nullable Identified input) {
+            return input.getAllUris();
+        }
+    };
+    
 	private final Fetcher<Identified> fetcher;
 	private final KnownTypeQueryExecutor delegate;
     private final ContentEquivalenceUpdater<Content> equivUpdater;
@@ -57,11 +67,6 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
         this.equivUpdater = equivUpdater;
         this.equivalablePublishers = equivalablePublishers;
 	}
-	
-//	@Override
-//	public List<Content> discover(ContentQuery query) {
-//		return delegate.discover(query);
-//	}
 	
 	@Override
 	public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
@@ -77,7 +82,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 
 		Map<String, List<Identified>> found = delegate.executeUriQuery(uris, query);
 		
-		Set<String> missingUris = missingUris(found.keySet(), uris);
+		Set<String> missingUris = missingUris(Iterables.concat(Iterables.transform(Iterables.concat(found.values()),TO_ALL_URIS)), uris);
 		
 		if (missingUris.isEmpty()) {
 			return found;
