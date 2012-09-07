@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
+import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())
-                    .addEntry(item.getCanonicalUri(), dateTime(25), dateTime(75), "bid")
+                    .addEntry(new ScheduleRefEntry(item.getCanonicalUri(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
                     .build()
             ));
         
@@ -107,8 +108,8 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())
-                    .addEntry(item.getCanonicalUri(), dateTime(25), dateTime(75), "bid")
-                    .addEntry(item.getCanonicalUri(), dateTime(125), dateTime(175), "bid2")
+                    .addEntry(new ScheduleRefEntry(item.getCanonicalUri(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
+                    .addEntry(new ScheduleRefEntry(item.getCanonicalUri(), channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2"))
                     .build()
             ));
         
