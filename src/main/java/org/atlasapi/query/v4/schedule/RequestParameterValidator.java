@@ -15,7 +15,7 @@ import com.google.common.collect.Sets;
 
 public class RequestParameterValidator {
     
-    private static final MapJoiner suggestionJoiner = Joiner.on("?), ").withKeyValueSeparator("(");
+    private static final MapJoiner suggestionJoiner = Joiner.on("?), ").withKeyValueSeparator(" (");
     private static final Joiner commaJoiner = Joiner.on(", ");
 
     private final Set<String> requiredParams;
@@ -66,7 +66,7 @@ public class RequestParameterValidator {
 
         int invalidCount = invalidParams.size();
         if (suggestions.size() == invalidCount) {
-            return String.format("Invalid parameters: %s.", suggestionJoiner.join(suggestions.entrySet()));
+            return String.format("Invalid parameters: %s?).", suggestionJoiner.join(suggestions.entrySet()));
         }
 
         return String.format("Invalid parameters: %s. Valid params: %s.", commaJoiner.join(invalidParams), commaJoiner.join(allParams));
