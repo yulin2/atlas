@@ -28,7 +28,7 @@ import com.google.inject.internal.Lists;
 
 public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
-    private static final long QUERY_TIMEOUT = 10000;
+    private static final long QUERY_TIMEOUT = 60000;
     
     private KnownTypeQueryExecutor contentQueryExecutor;
     private ScheduleIndex index;
@@ -73,9 +73,12 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
             /* copy the item here because it may appear in the same schedule
              * twice but will only appear in resolvedContent once.
              */
-            Item item = findRequestSourceItem(query, resolved).copy();
-            if (item != null && trimBroadcasts(entry, item)) {
-                contentList.add(item);
+            Item item = findRequestSourceItem(query, resolved);
+            if (item != null) {
+                item = item.copy();
+                if (trimBroadcasts(entry, item)) {
+                    contentList.add(item);
+                }
             }
         }
         return contentList.build();

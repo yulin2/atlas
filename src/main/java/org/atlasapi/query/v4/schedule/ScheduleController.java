@@ -10,6 +10,7 @@ import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -21,13 +22,17 @@ import com.google.common.collect.ImmutableSet;
 public class ScheduleController {
 
     private static Logger log = LoggerFactory.getLogger(ScheduleController.class);
+
+    private static final Duration MAX_REQUEST_DURATION = Duration.standardDays(1);
     
     private final ScheduleRequestParser requestParser;
     private final ScheduleQueryExecutor queryExecutor;
     private final AtlasModelWriter<Iterable<ScheduleChannel>> modelWriter;
 
+    private final RequestParameterValidator validator = new RequestParameterValidator(ImmutableSet.of("from","to","source"),ImmutableSet.of("annotations","apiKey"));
+
     public ScheduleController(ScheduleQueryExecutor queryExecutor, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, AtlasModelWriter<Iterable<ScheduleChannel>> modelWriter) {
-        this.requestParser = new ScheduleRequestParser(channelResolver, appFetcher);
+        this.requestParser = new ScheduleRequestParser(channelResolver, appFetcher, MAX_REQUEST_DURATION);
         this.queryExecutor = queryExecutor;
         this.modelWriter = modelWriter;
     }
@@ -36,6 +41,7 @@ public class ScheduleController {
     public void writeChannelSchedule(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         try {
+            validator.validateParameters(request);
             ScheduleQuery scheduleQuery = requestParser.queryFrom(request);
             ScheduleChannel channelSchedule = queryExecutor.execute(scheduleQuery);
             modelWriter.writeTo(request, response, ImmutableSet.of(channelSchedule), scheduleQuery.getAnnotations(), scheduleQuery.getApplicationConfiguration());
@@ -46,5 +52,5 @@ public class ScheduleController {
         }
 
     }
-    
+
 }

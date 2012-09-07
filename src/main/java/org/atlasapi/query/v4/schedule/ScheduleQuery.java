@@ -1,5 +1,7 @@
 package org.atlasapi.query.v4.schedule;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -25,11 +27,11 @@ public final class ScheduleQuery {
     }
 
     public ScheduleQuery(Publisher source, Channel channel, Interval interval, ApplicationConfiguration appConfig, Set<Annotation> annotations) {
-        this.source = source;
-        this.channel = channel;
-        this.interval = interval;
-        this.appConfig = appConfig;
-        this.annotations = annotations;
+        this.source = checkNotNull(source);
+        this.channel = checkNotNull(channel);
+        this.interval = checkNotNull(interval);
+        this.appConfig = checkNotNull(appConfig);
+        this.annotations = checkNotNull(annotations);
     }
 
     public Publisher getPublisher() {
