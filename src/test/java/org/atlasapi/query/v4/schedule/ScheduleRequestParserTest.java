@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +36,7 @@ public class ScheduleRequestParserTest {
 
     private final ApplicationConfigurationFetcher applicationFetcher = mock(ApplicationConfigurationFetcher.class);
     private final ChannelResolver channelResolver = mock(ChannelResolver.class);
-    private final ScheduleRequestParser builder = new ScheduleRequestParser(channelResolver, applicationFetcher);
+    private final ScheduleRequestParser builder = new ScheduleRequestParser(channelResolver, applicationFetcher, Duration.standardDays(1));
 
     private final NumberToShortStringCodec codec = new SubstitutionTableNumberCodec();
     
@@ -54,10 +55,8 @@ public class ScheduleRequestParserTest {
         
         StubHttpServletRequest request = scheduleRequest(channel, from, to, publisher, appKey, annotations);
         
-        when(channelResolver.fromId(channel.getId()))
-            .thenReturn(Maybe.just(channel));
-        when(applicationFetcher.configurationFor(request))
-            .thenReturn(Maybe.just(appConfig));
+        when(channelResolver.fromId(channel.getId())).thenReturn(Maybe.just(channel));
+        when(applicationFetcher.configurationFor(request)).thenReturn(Maybe.just(appConfig));
         
         ScheduleQuery query = builder.queryFrom(request);
         
@@ -67,16 +66,38 @@ public class ScheduleRequestParserTest {
         assertThat(query.getAnnotations(), is(annotations));
         assertThat(query.getApplicationConfiguration(), is(appConfig));
     }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testDoesntAcceptQueryDurationGreaterThanMax() {
+        
+        Channel channel = new Channel(BBC, "Channel", "cbbc", VIDEO, "uri");
+        channel.setId(1234L);
+        Publisher publisher = BBC;
+        Set<Annotation> annotations = Annotation.defaultAnnotations();
+        ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION;
+        String appKey = "key";
+        
+        DateTime from = new DateTime(DateTimeZones.UTC);
+        DateTime to = from.plusHours(25);
+
+        StubHttpServletRequest request = scheduleRequest(channel, from, to, publisher, appKey, annotations);
+        
+        when(channelResolver.fromId(channel.getId())).thenReturn(Maybe.just(channel));
+        when(applicationFetcher.configurationFor(request)).thenReturn(Maybe.just(appConfig));
+
+        builder.queryFrom(request);
+
+    }
 
     private StubHttpServletRequest scheduleRequest(Channel channel, DateTime from, DateTime to, Publisher publisher, String appKey, Set<Annotation> annotations) {
         String uri = String.format(
             "http://localhost/4.0/schedules/%s.json",
             codec.encode(BigInteger.valueOf(channel.getId()))
         );
-        return new StubHttpServletRequest().withRequestUri(uri )
+        return new StubHttpServletRequest().withRequestUri(uri)
                 .withParam("from", from.toString())
                 .withParam("to", to.toString())
-                .withParam("publisher", publisher.key())
+                .withParam("source", publisher.key())
                 .withParam("annotations", Joiner.on(',').join(Iterables.transform(annotations, Annotation.TO_KEY)))
                 .withParam("apiKey", appKey);
     }
