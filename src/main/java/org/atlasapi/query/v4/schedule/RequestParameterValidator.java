@@ -22,10 +22,13 @@ public class RequestParameterValidator {
     private final Set<String> allParams;
     private final Set<String> optionalParams;
 
+    private final String validParamMsg;
+
     public RequestParameterValidator(Set<String> requiredParams, Set<String> validParams) {
         this.requiredParams = ImmutableSet.copyOf(requiredParams);
         this.optionalParams = ImmutableSet.copyOf(validParams);
         this.allParams = Sets.union(this.requiredParams, this.optionalParams);
+        this.validParamMsg = "Valid params: " + commaJoiner.join(allParams);
     }
 
     public HttpServletRequest validateParameters(HttpServletRequest request) {
@@ -66,10 +69,10 @@ public class RequestParameterValidator {
 
         int invalidCount = invalidParams.size();
         if (suggestions.size() == invalidCount) {
-            return String.format("Invalid parameters: %s?).", suggestionJoiner.join(suggestions.entrySet()));
+            return String.format("Invalid parameters: %s?). %s.", suggestionJoiner.join(suggestions.entrySet()), validParamMsg);
         }
 
-        return String.format("Invalid parameters: %s. Valid params: %s.", commaJoiner.join(invalidParams), commaJoiner.join(allParams));
+        return String.format("Invalid parameters: %s. %s.", commaJoiner.join(invalidParams), validParamMsg);
     }
 
     private String findSuggestion(String invalid, Set<String> validParams) {

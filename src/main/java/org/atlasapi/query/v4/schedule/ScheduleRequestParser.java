@@ -30,7 +30,7 @@ import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 class ScheduleRequestParser {
     
     private static final Pattern CHANNEL_ID_PATTERN = Pattern.compile(
-        ".*/([^.]+)(.[\\w\\d.]+)?$"
+        ".*schedules/([^.]+)(.[\\w\\d.]+)?$"
     );
     
     private final ChannelResolver channelResolver;
@@ -71,13 +71,30 @@ class ScheduleRequestParser {
 
     private Channel extractChannel(HttpServletRequest request) {
         String channelId = getChannelId(request.getRequestURI());
-        long cid = idCodec.decode(channelId).longValue();
+        long cid = decodeId(channelId);
         Maybe<Channel> channel = channelResolver.fromId(cid);
         
-        checkArgument(channel.hasValue(), "Unknown channel %s", channelId);
+        checkArgument(channel.hasValue(), "Unknown channel '%s'", channelId);
         return channel.requireValue();
     }
 
+    private long decodeId(String cid) {
+        try {
+            return idCodec.decode(cid).longValue();
+        } catch (Exception e) {
+            String msg = String.format("Invalid identifier '%s': %s", cid, e.getMessage());
+            throw new IllegalArgumentException(msg, e);
+        }
+    }
+
+    private String getChannelId(String requestUri) {
+        Matcher matcher = CHANNEL_ID_PATTERN.matcher(requestUri);
+        if (matcher.matches()) {
+            return matcher.group(1);
+        }
+        throw new IllegalArgumentException("Channel identifier missing");
+    }
+    
     private Interval extractInterval(HttpServletRequest request) {
         DateTime from = dateTimeParser.parse(getParameter(request, "from"));
         DateTime to = dateTimeParser.parse(getParameter(request, "to"));
@@ -111,14 +128,6 @@ class ScheduleRequestParser {
         String paramValue = request.getParameter(param);
         checkArgument(!Strings.isNullOrEmpty(paramValue), "Missing required parameter %s", param);
         return paramValue;
-    }
-
-    private String getChannelId(String requestUri) {
-        Matcher matcher = CHANNEL_ID_PATTERN.matcher(requestUri);
-        if (matcher.matches()) {
-            return matcher.group(1);
-        }
-        return "";
     }
 
 }

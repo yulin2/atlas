@@ -37,7 +37,7 @@ public class ScheduleController {
         this.modelWriter = modelWriter;
     }
     
-    @RequestMapping("/4.0/schedules/{cid}.*")
+    @RequestMapping("/4.0/schedules/{cid}")
     public void writeChannelSchedule(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         try {
