@@ -1,8 +1,8 @@
 package org.atlasapi.query.v4.schedule;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.metabroadcast.common.webapp.query.DateTimeInQueryParser.queryDateTimeParser;
 import static org.atlasapi.output.Annotation.defaultAnnotations;
-import static org.elasticsearch.common.Preconditions.checkArgument;
 
 import java.util.Set;
 import java.util.regex.Matcher;

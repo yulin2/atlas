@@ -19,12 +19,12 @@ import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.inject.internal.ImmutableList;
-import com.google.inject.internal.ImmutableList.Builder;
-import com.google.inject.internal.Lists;
 
 public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
