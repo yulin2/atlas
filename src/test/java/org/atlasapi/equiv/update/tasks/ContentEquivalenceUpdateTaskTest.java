@@ -27,6 +27,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 
@@ -79,7 +80,7 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
             one(progressStore).storeProgress(with(any(String.class)), with(ContentListingProgress.START));
         }});
         
-        new ContentEquivalenceUpdateTask(contentLister, updater, log, progressStore ).forPublishers(PA, BBC, C4).run();
+        new ContentEquivalenceUpdateTask(contentLister, updater, log, progressStore, ImmutableSet.<String>of()).forPublishers(PA, BBC, C4).run();
         
         context.assertIsSatisfied();
         

@@ -8,6 +8,7 @@ import static org.atlasapi.persistence.content.listing.ContentListingCriteria.de
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
@@ -27,13 +28,16 @@ public class ContentEquivalenceUpdateTask extends AbstractContentEquivalenceUpda
     
     private String schedulingKey = "equivalence";
     private List<Publisher> publishers;
+    private Set<String> ignored;
 
     private final ContentEquivalenceUpdater<Content> rootUpdater;
+
     
-    public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, ScheduleTaskProgressStore progressStore) {
+    public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, ScheduleTaskProgressStore progressStore, Set<String> ignored) {
         super(log, progressStore);
         this.contentStore = contentStore;
         this.rootUpdater = rootUpdater;
+        this.ignored = ignored;
     }
     
     @Override
@@ -54,7 +58,9 @@ public class ContentEquivalenceUpdateTask extends AbstractContentEquivalenceUpda
 
     @Override
     protected void handle(Content content) {
-        rootUpdater.updateEquivalences(content, Optional.<List<Content>>absent());
+        if (!ignored.contains(content.getCanonicalUri())) {
+            rootUpdater.updateEquivalences(content, Optional.<List<Content>>absent());
+        }
     }
 
 }
