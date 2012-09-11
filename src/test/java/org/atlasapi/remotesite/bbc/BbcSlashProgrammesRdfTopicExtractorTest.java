@@ -61,8 +61,8 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
     	}
 		@Override
 		public Maybe<Topic> topicFor(String namespace, String value) {
-			Preconditions.checkArgument(namespace == "dbpedia", "Unexpected namespace");
-			Preconditions.checkArgument(value == topicUri, "Unexpected URI");
+			Preconditions.checkArgument(namespace.equals("dbpedia"), "Unexpected namespace");
+			Preconditions.checkArgument(value.equals(topicUri), "Unexpected URI");
 			
 			return Maybe.just(new Topic(100l));
 		}
