@@ -52,22 +52,22 @@ public class ContentTwitterTopicsUpdater {
     }
 
     public UpdateProgress updateTopics(List<String> contentIds) {
-        
+
         Optional<ContentWordsList> possibleContentWords = cannonTopicsClient.getContentWordsForIds(contentIds);
-        
+
         if (!possibleContentWords.isPresent()) {
             return new UpdateProgress(0, contentIds.size());
         }
 
         ContentWordsList contentWords = possibleContentWords.get();
-        
+
         ResolvedContent resolvedContent = contentResolver.findByCanonicalUris(urisForWords(contentWords));
-        
+
         UpdateProgress result = UpdateProgress.START;
         for (ContentWords contentWordSet : contentWords) {
             try {
                 Maybe<Identified> possibleContent = resolvedContent.get(contentWordSet.getUri());
-                if(possibleContent.hasValue()) {
+                if (possibleContent.hasValue()) {
                     Content content = (Content) possibleContent.requireValue();
                     content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
                     write(content);
@@ -81,12 +81,13 @@ public class ContentTwitterTopicsUpdater {
                 result = result.reduce(FAILURE);
             }
         }
-        
+
         return result;
     }
 
     private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {
         return Iterables.filter(topicRefs, new Predicate<TopicRef>() {
+
             @Override
             public boolean apply(TopicRef input) {
                 Maybe<Topic> possibleTopic = topicResolver.topicForId(input.getTopic());
@@ -110,14 +111,15 @@ public class ContentTwitterTopicsUpdater {
     public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
         Builder<TopicRef> topicRefs = ImmutableSet.builder();
         for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-            Maybe<Topic> possibleTopic = topicStore.topicFor(TWITTER_NS, wordWeighting.getUrl());
-            if (possibleTopic.hasValue()) {
-                Topic topic = possibleTopic.requireValue();
+            Topic topic = topicStore.topicFor(TWITTER_NS, wordWeighting.getUrl()).valueOrNull();
+            if (topic == null) {
+                throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
+            } else {
                 topic.setTitle(wordWeighting.getContent());
                 topic.setPublisher(Publisher.METABROADCAST);
                 topic.setType(Topic.Type.SUBJECT);
                 topicStore.write(topic);
-                topicRefs.add(new TopicRef(topic, wordWeighting.getWeight()/100.0f, false));
+                topicRefs.add(new TopicRef(topic, wordWeighting.getWeight() / 100.0f, false, TopicRef.Relationship.ABOUT));
             }
         }
         return topicRefs;
@@ -125,11 +127,11 @@ public class ContentTwitterTopicsUpdater {
 
     public Iterable<String> urisForWords(ContentWordsList contentWords) {
         return ImmutableSet.copyOf(Iterables.transform(contentWords.getResults(), new Function<ContentWords, String>() {
+
             @Override
             public String apply(ContentWords input) {
                 return input.getUri();
             }
         }));
     }
-
 }

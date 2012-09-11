@@ -17,10 +17,10 @@ import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesType;
 
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
+import org.atlasapi.media.entity.Publisher;
 
 public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<SlashProgrammesRdf, Maybe<TopicRef>> {
 
-    private static final String DBPEDIA_NAMESPACE = "dbpedia";
     private final TopicStore topicStore;
     private final AdapterLog log;
 
@@ -28,48 +28,40 @@ public class BbcSlashProgrammesRdfTopicExtractor implements ContentExtractor<Sla
         this.topicStore = topicStore;
         this.log = log;
     }
-    
+
     @Override
     public Maybe<TopicRef> extract(SlashProgrammesRdf source) {
-        
-        String topicUri = extractTopicUri(source);
-        
-        if (topicUri != null) {
-            Maybe<Topic> possibleTopic = topicStore.topicFor(DBPEDIA_NAMESPACE, topicUri);
-            if(possibleTopic.isNothing()) {
-                log.record(warnEntry().withSource(getClass()).withDescription("Couldn't get Topic for %s, can't create new one", topicUri));
-            } else {
-                Topic topic = possibleTopic.requireValue();
-                topic.setValue(topicUri);
-                topic.setNamespace(DBPEDIA_NAMESPACE);
-                topic.setPublisher(DBPEDIA);
-                topic.setTitle(titleFrom(topicUri));
-                topic.setType(Type.fromKey(typeKeyFrom(source.description()), SUBJECT));
-                topicStore.write(topic);
-                
-                TopicRef contentTopic = new TopicRef(topic.getId(), 1.0f, true);
-                return Maybe.just(contentTopic);
-            }
+        String namespace = Publisher.DBPEDIA.name().toLowerCase();
+        String uri = extractTopicUri(source);
+        Topic topic = topicStore.topicFor(namespace, uri).valueOrNull();
+        if (topic == null) {
+            throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
+        } else {
+            topic.setValue(uri);
+            topic.setNamespace(namespace);
+            topic.setPublisher(DBPEDIA);
+            topic.setTitle(titleFrom(uri));
+            topic.setType(Type.fromKey(typeKeyFrom(source.description()), SUBJECT));
+            topicStore.write(topic);
         }
-        return Maybe.nothing();
+        return Maybe.just(new TopicRef(topic.getId(), 1.0f, true, TopicRef.Relationship.ABOUT));
     }
-    
+
     private String typeKeyFrom(SlashProgrammesDescription description) {
         Set<SlashProgrammesType> type = description.getType();
-        if(!(type == null || type.isEmpty())) {
+        if (!(type == null || type.isEmpty())) {
             String uri = Iterables.get(type, 0).resourceUri();
-            return uri.substring(uri.lastIndexOf("/")+1).toLowerCase();
+            return uri.substring(uri.lastIndexOf("/") + 1).toLowerCase();
         }
         return Type.SUBJECT.key();
     }
 
     private String titleFrom(String dbpediaUri) {
-        return dbpediaUri.substring(28).replaceAll("_", " ").replace("%28","(").replace("%29",")").replace("%27","'");
+        return dbpediaUri.substring(28).replaceAll("_", " ").replace("%28", "(").replace("%29", ")").replace("%27", "'");
     }
 
     private String extractTopicUri(SlashProgrammesRdf source) {
         SlashProgrammesDescription desc = source.description();
         return desc.getSameAs() != null && !desc.getSameAs().isEmpty() ? Iterables.get(desc.getSameAs(), 0).resourceUri() : null;
     }
-
 }

@@ -39,10 +39,8 @@ public class WsTopicsUpdate extends ScheduledTask {
     private final ContentLister contentLister;
     private final ContentWriter contentWriter;
     private final AdapterLog log;
-    
     private final ContentListingCriteria wsItemContentCriteria = defaultCriteria().forContent(ImmutableList.copyOf(ITEMS)).forPublisher(WORLD_SERVICE).build();
-    private final String namespace = "dbpedia";
-    
+
     public WsTopicsUpdate(WsTopicsClient topicsClient, TopicStore topicStore, ContentLister contentLister, ContentWriter contentWriter, AdapterLog log) {
         this.topicsClient = topicsClient;
         this.topicStore = topicStore;
@@ -50,39 +48,39 @@ public class WsTopicsUpdate extends ScheduledTask {
         this.contentWriter = contentWriter;
         this.log = log;
     }
-    
+
     @Override
     protected void runTask() {
-        
+
         log.record(infoEntry().withSource(getClass()).withDescription("Starting WS Topics Update"));
-        
+
         Maybe<Map<String, WsTopics>> possibleTopics = topicsClient.getLatestTopics();
-        
-        if(possibleTopics.isNothing()) {
+
+        if (possibleTopics.isNothing()) {
             reportStatus("Got no topics");
             return;
         }
-        
+
         Map<String, WsTopics> topics = possibleTopics.requireValue();
-        
+
         log.record(infoEntry().withSource(getClass()).withDescription("Retrieved %s topic sets", topics.size()));
         reportStatus(String.format("%s topic sets", topics.size()));
-        
+
         Iterator<Content> wsContent = contentLister.listContent(wsItemContentCriteria);
-     
+
         int seen = 0;
         int updated = 0;
-        while(wsContent.hasNext()) {
+        while (wsContent.hasNext()) {
             Item content = (Item) wsContent.next();
             try {
                 updated += updateTopicsFor(topics, content);
                 reportStatus(String.format("%s topic sets. %s items seen, %s updated", topics.size(), ++seen, updated));
             } catch (Exception e) {
-                log.record(errorEntry().withCause(e).withDescription("Error updating topics of %s",content.getCanonicalUri()).withSource(getClass()));
+                log.record(errorEntry().withCause(e).withDescription("Error updating topics of %s", content.getCanonicalUri()).withSource(getClass()));
                 throw Throwables.propagate(e);
             }
         }
-        
+
         log.record(infoEntry().withSource(getClass()).withDescription("Updated topics of %s items", updated));
         reportStatus(String.format("Updated topics of %s items", updated));
     }
@@ -97,7 +95,7 @@ public class WsTopicsUpdate extends ScheduledTask {
                         if (itemTopics != null) {
                             for (TopicWeighting topicWeighting : itemTopics.getTopics()) {
                                 TopicRef topicRef = topicRefFor(topicWeighting);
-                                if(topicRef != null) {
+                                if (topicRef != null) {
                                     topicRefs.add(topicRef);
                                 }
                             }
@@ -113,17 +111,19 @@ public class WsTopicsUpdate extends ScheduledTask {
     }
 
     private TopicRef topicRefFor(TopicWeighting topicWeighting) {
-        String value = topicWeighting.getTopicValue().replace("%28","(").replace("%29",")").replace("%27","'");
-        Maybe<Topic> possibleTopic = topicStore.topicFor(namespace, value);
-        if (possibleTopic.hasValue()) {
-            Topic topic = possibleTopic.requireValue();
+        String namespace = Publisher.DBPEDIA.name().toLowerCase();
+        String value = topicWeighting.getTopicValue().replace("%28", "(").replace("%29", ")").replace("%27", "'");
+        Topic topic = topicStore.topicFor(namespace, value).valueOrNull();
+        if (topic == null) {
+            throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
+        } else {
+            topic.setNamespace(namespace);
+            topic.setValue(value);
             topic.setPublisher(Publisher.DBPEDIA);
             topic.setTitle(value.substring(28).replace("_", " "));
             topic.setType(Topic.Type.SUBJECT);
             topicStore.write(topic);
-            return new TopicRef(topic, topicWeighting.getWeighting(), false);
         }
-        return null;
+        return new TopicRef(topic, topicWeighting.getWeighting(), false, TopicRef.Relationship.TRANSCRIPTION);
     }
-
 }

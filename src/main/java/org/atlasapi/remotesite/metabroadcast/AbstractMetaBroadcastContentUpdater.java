@@ -45,179 +45,179 @@ import com.metabroadcast.common.base.Maybe;
 public abstract class AbstractMetaBroadcastContentUpdater {
 
     private final static Logger logger = LoggerFactory.getLogger(AbstractMetaBroadcastContentUpdater.class);
-	private final String namespace;
-	private final TopicStore topicStore;
-	private final TopicQueryResolver topicResolver;
-	private final ContentWriter contentWriter;
-    private final ContentResolver contentResolver;
+    protected final String namespace;
+    protected final TopicStore topicStore;
+    protected final TopicQueryResolver topicResolver;
+    protected final ContentWriter contentWriter;
+    protected final ContentResolver contentResolver;
     protected final AdapterLog log;
-    private final Publisher publisher;
+    protected final Publisher publisher;
 
-	public abstract UpdateProgress updateTopics(List<String> contentIds);
+    public abstract UpdateProgress updateTopics(List<String> contentIds);
 
-	protected AbstractMetaBroadcastContentUpdater(ContentResolver contentResolver, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log, String namespace, Publisher publisher){
-		this.contentResolver = contentResolver;
+    protected AbstractMetaBroadcastContentUpdater(ContentResolver contentResolver, TopicStore topicStore, TopicQueryResolver topicResolver, ContentWriter contentWriter, AdapterLog log, String namespace, Publisher publisher) {
+        this.contentResolver = contentResolver;
         this.topicStore = topicStore;
-		this.topicResolver = topicResolver;
-		this.contentWriter = contentWriter;
-		this.log = log;
-		this.namespace = namespace;
+        this.topicResolver = topicResolver;
+        this.contentWriter = contentWriter;
+        this.log = log;
+        this.namespace = namespace;
         this.publisher = publisher;
-	}
-	
-	protected UpdateProgress createOrUpdateContent(ResolvedContent resolvedContent, ResolvedContent resolvedMetaBroadcastContent,
-			ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases) {
-		UpdateProgress result;
-		try {
-			String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
-			logger.debug("Processing content {}", mbUri);
-			Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.get(mbUri);
-			if(possibleMetaBroadcastContent.hasValue()) {
-				// Content exists, update it
-				updateExistingContent(contentWordSet, possibleMetaBroadcastContent, keyPhrases);
-				result = SUCCESS;
-			} else {
-				// Generate new content
-				createThenUpdateContent(resolvedContent, contentWordSet, mbUri, keyPhrases);
-				result = SUCCESS;
-			}
-		} catch (Exception e) {
-			log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to update topics for %s", contentWordSet.getUri()));
-			result = FAILURE;
-		}
-		return result;
-	}
+    }
 
-	private void createThenUpdateContent(ResolvedContent resolvedContent, ContentWords contentWordSet, String mbUri, 
-			Optional<List<KeyPhrase>> keyPhrase) {
-		String newCuri = ""; // TODO define a curie at some point
-		Identified identified = resolvedContent.get(contentWordSet.getUri()).requireValue();
-		Content content = getNewContent(identified, mbUri, newCuri);
-		content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
-		if(keyPhrase.isPresent()){
-			content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
-		}
-		content.addEquivalentTo((Described) identified); //TODO check equivalent to
-		write(content);
-	}
+    protected UpdateProgress createOrUpdateContent(ResolvedContent resolvedContent, ResolvedContent resolvedMetaBroadcastContent,
+            ContentWords contentWordSet, Optional<List<KeyPhrase>> keyPhrases) {
+        UpdateProgress result;
+        try {
+            String mbUri = generateMetaBroadcastUri(contentWordSet.getUri());
+            logger.debug("Processing content {}", mbUri);
+            Maybe<Identified> possibleMetaBroadcastContent = resolvedMetaBroadcastContent.get(mbUri);
+            if (possibleMetaBroadcastContent.hasValue()) {
+                // Content exists, update it
+                updateExistingContent(contentWordSet, possibleMetaBroadcastContent, keyPhrases);
+                result = SUCCESS;
+            } else {
+                // Generate new content
+                createThenUpdateContent(resolvedContent, contentWordSet, mbUri, keyPhrases);
+                result = SUCCESS;
+            }
+        } catch (Exception e) {
+            log.record(AdapterLogEntry.errorEntry().withCause(e).withSource(getClass()).withDescription("Failed to update topics for %s", contentWordSet.getUri()));
+            result = FAILURE;
+        }
+        return result;
+    }
 
-	private void updateExistingContent(ContentWords contentWordSet, Maybe<Identified> possibleMetaBroadcastContent, Optional<List<KeyPhrase>> keyPhrase) {
-		Content content = (Content) possibleMetaBroadcastContent.requireValue();
-		content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
-		if(keyPhrase.isPresent()){
-			content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
-		}
-		write(content);
-	}
+    private void createThenUpdateContent(ResolvedContent resolvedContent, ContentWords contentWordSet, String mbUri,
+            Optional<List<KeyPhrase>> keyPhrase) {
+        String newCuri = ""; // TODO define a curie at some point
+        Identified identified = resolvedContent.get(contentWordSet.getUri()).requireValue();
+        Content content = getNewContent(identified, mbUri, newCuri);
+        content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
+        if (keyPhrase.isPresent()) {
+            content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
+        }
+        content.addEquivalentTo((Described) identified); //TODO check equivalent to
+        write(content);
+    }
 
-	protected Content getNewContent(Identified originalContent, String newUri, String newCuri) {
-		if (originalContent instanceof Brand){
-			return new Brand(newUri, newCuri, publisher);
-		} else if (originalContent instanceof Series){
-		    Series originalSeries = (Series) originalContent;
-		    Brand brand = getOrCreateBrand(originalSeries.getParent().getUri());
-		    Series series = new Series(newUri, newCuri, publisher);
-		    series.setParent(brand);
-			return series;
-		} else if (originalContent instanceof Clip){
-			return new Clip(newUri, newCuri, publisher);
-		} else if (originalContent instanceof Episode){
-		    Episode originalEpisode = (Episode) originalContent;
-		    Brand brand = getOrCreateBrand(originalEpisode.getContainer().getUri());
-		    Episode episode = new Episode(newUri, newCuri, publisher);
-		    episode.setContainer(brand);
-		    return episode;
-		} else if (originalContent instanceof Item) {
-		    return new Item(newUri, newCuri, publisher);
-		} else if (originalContent instanceof Film){
-			return new Film(newUri, newCuri, publisher);
-		}
-		throw new IllegalArgumentException("Unrecognised type of content: " + originalContent.getClass().getName());
-	}
+    private void updateExistingContent(ContentWords contentWordSet, Maybe<Identified> possibleMetaBroadcastContent, Optional<List<KeyPhrase>> keyPhrase) {
+        Content content = (Content) possibleMetaBroadcastContent.requireValue();
+        content.setTopicRefs(getTopicRefsFor(contentWordSet).addAll(filter(content.getTopicRefs())).build());
+        if (keyPhrase.isPresent()) {
+            content.setKeyPhrases(Lists.newArrayList(keyPhrase.get()));
+        }
+        write(content);
+    }
 
-	private Brand getOrCreateBrand(String originalUri) {
-	    String auxDataUri = generateMetaBroadcastUri(originalUri);
-	    ResolvedContent content = contentResolver.findByCanonicalUris(ImmutableList.of(auxDataUri, originalUri));
+    protected Content getNewContent(Identified originalContent, String newUri, String newCuri) {
+        if (originalContent instanceof Brand) {
+            return new Brand(newUri, newCuri, publisher);
+        } else if (originalContent instanceof Series) {
+            Series originalSeries = (Series) originalContent;
+            Brand brand = getOrCreateBrand(originalSeries.getParent().getUri());
+            Series series = new Series(newUri, newCuri, publisher);
+            series.setParent(brand);
+            return series;
+        } else if (originalContent instanceof Clip) {
+            return new Clip(newUri, newCuri, publisher);
+        } else if (originalContent instanceof Episode) {
+            Episode originalEpisode = (Episode) originalContent;
+            Brand brand = getOrCreateBrand(originalEpisode.getContainer().getUri());
+            Episode episode = new Episode(newUri, newCuri, publisher);
+            episode.setContainer(brand);
+            return episode;
+        } else if (originalContent instanceof Item) {
+            return new Item(newUri, newCuri, publisher);
+        } else if (originalContent instanceof Film) {
+            return new Film(newUri, newCuri, publisher);
+        }
+        throw new IllegalArgumentException("Unrecognised type of content: " + originalContent.getClass().getName());
+    }
+
+    private Brand getOrCreateBrand(String originalUri) {
+        String auxDataUri = generateMetaBroadcastUri(originalUri);
+        ResolvedContent content = contentResolver.findByCanonicalUris(ImmutableList.of(auxDataUri, originalUri));
         Maybe<Identified> auxDataBrand = content.get(auxDataUri);
-        if(auxDataBrand.isNothing()) {
+        if (auxDataBrand.isNothing()) {
             Brand brand = new Brand(auxDataUri, "", publisher);
             auxDataBrand = Maybe.<Identified>just(brand);
         }
         Brand brand = (Brand) auxDataBrand.requireValue();
-        brand.addEquivalentTo((Described)content.get(originalUri).requireValue());
+        brand.addEquivalentTo((Described) content.get(originalUri).requireValue());
         contentWriter.createOrUpdate(brand);
         return brand;
-        
+
     }
 
     protected List<String> generateMetaBroadcastUris(Iterable<String> uris) {
-		List<String> list = Lists.newArrayList();
-		for (String uri : uris) {	
-			list.add(generateMetaBroadcastUri(uri));
-		}
-		return list;
-	}
-	
-	protected String generateMetaBroadcastUri(String uri){
-		if (Publisher.VOILA.equals(publisher)){
-			return "http://voila.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
-		}
-		else if (Publisher.MAGPIE.equals(publisher)){
-			return "http://magpie.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
-		}
-		else {
-			throw new IllegalArgumentException();
-		}
-	}
+        List<String> list = Lists.newArrayList();
+        for (String uri : uris) {
+            list.add(generateMetaBroadcastUri(uri));
+        }
+        return list;
+    }
 
-	private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {
-		return Iterables.filter(topicRefs, new Predicate<TopicRef>() {
-			@Override
-			public boolean apply(TopicRef input) {
-				Maybe<Topic> possibleTopic = topicResolver.topicForId(input.getTopic());
-				if (possibleTopic.hasValue()) {
-					Topic topic = possibleTopic.requireValue();
-					return !namespace.equals(topic.getNamespace());
-				}
-				return false;
-			}
-		});
-	}
+    protected String generateMetaBroadcastUri(String uri) {
+        if (Publisher.VOILA.equals(publisher)) {
+            return "http://voila.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
+        } else if (Publisher.MAGPIE.equals(publisher)) {
+            return "http://magpie.metabroadcast.com/" + uri.replaceFirst("(http(s?)://)", "");
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
 
-	public void write(Content content) {
-		if (content instanceof Container) {
-			contentWriter.createOrUpdate((Container) content);
-		} else {
-			contentWriter.createOrUpdate((Item) content);
-		}
-	}
+    private Iterable<? extends TopicRef> filter(List<TopicRef> topicRefs) {
+        return Iterables.filter(topicRefs, new Predicate<TopicRef>() {
 
-	public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
-		Builder<TopicRef> topicRefs = ImmutableSet.builder();
-		for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
-			Maybe<Topic> possibleTopic = topicStore.topicFor(publisher, namespace, topicValueFromWordWeighting(wordWeighting));
-			if (possibleTopic.hasValue()) {
-				Topic topic = possibleTopic.requireValue();
-				topic.setTitle(wordWeighting.getContent());
-				topic.setPublisher(publisher);
-				topic.setType(topicTypeFromSource(wordWeighting.getType()));
-				topicStore.write(topic);
-				topicRefs.add(new TopicRef(topic, wordWeighting.getWeight()/100.0f, false));
-			}
-		}
-		return topicRefs;
-	}
+            @Override
+            public boolean apply(TopicRef input) {
+                return !input.getRelationship().equals(topicRefRelationship());
+            }
+        });
+    }
 
-	public Iterable<String> urisForWords(ContentWordsList contentWords) {
-		return ImmutableSet.copyOf(Iterables.transform(contentWords.getResults(), new Function<ContentWords, String>() {
-			@Override
-			public String apply(ContentWords input) {
-				return input.getUri();
-			}
-		}));
-	}
-	
-	protected abstract Topic.Type topicTypeFromSource(String dbpedia);
-	
-	protected abstract String topicValueFromWordWeighting(WordWeighting weighting);
+    public void write(Content content) {
+        if (content instanceof Container) {
+            contentWriter.createOrUpdate((Container) content);
+        } else {
+            contentWriter.createOrUpdate((Item) content);
+        }
+    }
+
+    public Builder<TopicRef> getTopicRefsFor(ContentWords contentWordSet) {
+        String namespace = Publisher.DBPEDIA.name().toLowerCase();
+        Builder<TopicRef> topicRefs = ImmutableSet.builder();
+        for (WordWeighting wordWeighting : ImmutableSet.copyOf(contentWordSet.getWords())) {
+            Topic topic = topicStore.topicFor(Publisher.DBPEDIA, namespace, topicValueFromWordWeighting(wordWeighting)).valueOrNull();
+            if (topic == null) {
+                throw new IllegalStateException("This should never happen, as topic is either found or created by the topic store, so failing fast.");
+            } else {
+                topic.setNamespace(namespace);
+                topic.setTitle(wordWeighting.getContent());
+                topic.setPublisher(Publisher.DBPEDIA);
+                topic.setType(topicTypeFromSource(wordWeighting.getType()));
+                topicStore.write(topic);
+                topicRefs.add(new TopicRef(topic, wordWeighting.getWeight() / 100.0f, false, topicRefRelationship()));
+            }
+        }
+        return topicRefs;
+    }
+
+    public Iterable<String> urisForWords(ContentWordsList contentWords) {
+        return ImmutableSet.copyOf(Iterables.transform(contentWords.getResults(), new Function<ContentWords, String>() {
+
+            @Override
+            public String apply(ContentWords input) {
+                return input.getUri();
+            }
+        }));
+    }
+
+    protected abstract TopicRef.Relationship topicRefRelationship();
+
+    protected abstract Topic.Type topicTypeFromSource(String dbpedia);
+
+    protected abstract String topicValueFromWordWeighting(WordWeighting weighting);
 }

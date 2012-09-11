@@ -17,9 +17,15 @@ import org.atlasapi.remotesite.metabroadcast.ContentWords.WordWeighting;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 
 import com.google.common.base.Optional;
+import com.hp.hpl.jena.sparql.function.library.namespace;
+import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.entity.TopicRef.Relationship;
 
 public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastContentUpdater {
-
+    
+    public static final String TWITTER_NS_FOR_AUDIENCE = "twitter";
+    public static final String TWITTER_NS_FOR_AUDIENCE_RELATED = "twitter:audience-related";
+    //
 	private final ContentResolver contentResolver;
 	private final CannonTwitterTopicsClient cannonTopicsClient;
 
@@ -72,4 +78,14 @@ public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastCont
     protected String topicValueFromWordWeighting(WordWeighting weighting) {
         return weighting.getUrl();
     }
+
+    @Override
+    protected Relationship topicRefRelationship() {
+        if (namespace.equals(TWITTER_NS_FOR_AUDIENCE)) {
+        return TopicRef.Relationship.TWITTER_AUDIENCE;
+        } else {
+        return TopicRef.Relationship.TWITTER_AUDIENCE_RELATED;
+        }
+    }
+    
 }
