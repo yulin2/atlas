@@ -56,40 +56,54 @@ import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 @Import(EquivModule.class)
 public class QueryModule {
 
-	private @Autowired @Qualifier("remoteSiteContentResolver") CanonicalisingFetcher localOrRemoteFetcher;
-	
-	private @Autowired DatabasedMongo mongo;
-    private @Autowired CassandraContentStore cassandra;
-    private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
-	
-	private @Value("${applications.enabled}") String applicationsEnabled;
-	private @Value("${atlas.search.host}") String searchHost;
+	@Autowired
+    @Qualifier("remoteSiteContentResolver")
+    private CanonicalisingFetcher localOrRemoteFetcher;
+    @Autowired
+    private LookupEntryStore mongoStore;
+    @Autowired
+    private KnownTypeContentResolver mongoResolver;
+    @Autowired @Qualifier(value="cassandra")
+    private ContentResolver cassandraResolver;
+    @Autowired
+    private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
+    //
+    @Value("${applications.enabled}")
+    private String applicationsEnabled;
+    @Value("${atlas.search.host}")
+    private String searchHost;
 
-	@Bean KnownTypeQueryExecutor queryExecutor() {
-	    
-	    KnownTypeContentResolver mongoContentResolver = new FilterScheduleOnlyKnownTypeContentResolver(new MongoContentResolver(mongo));
-        KnownTypeContentResolver cassandraContentResolver = new CassandraKnownTypeContentResolver(cassandra);
-		
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraContentResolver, mongoContentResolver, new MongoLookupEntryStore(mongo));
-		
-		queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
-		
-	    queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
-		
-	    queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
-	    
-	    return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
-	}
-//	
-//	@Bean @Lazy SearchResolver searchResolver() {
-//	    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + applicationsEnabled);
-//	    if (! Strings.isNullOrEmpty(searchHost)) {
-//	        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" + searchHost);
-//    	    ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-//    	    return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-//	    }
-//	    
-//	    return new DummySearcher();
-//	}
+    @Bean
+    public KnownTypeQueryExecutor queryExecutor() {
 
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandraResolver),
+                new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver),
+                mongoStore);
+
+        queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
+
+        queryExecutor = new CurieResolvingQueryExecutor(queryExecutor);
+
+        queryExecutor = new MergeOnOutputQueryExecutor(queryExecutor);
+
+        return Boolean.parseBoolean(applicationsEnabled) ? new ApplicationConfigurationQueryExecutor(queryExecutor) : queryExecutor;
+    }
+
+    @Bean
+    @Qualifier("v2")
+    public SearchResolver v2SearchResolver() {
+        if (!Strings.isNullOrEmpty(searchHost)) {
+            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
+            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
+        }
+
+        return new DummySearcher();
+    }
+    
+    @Bean
+    @Qualifier("v4")
+    public SearchResolver v4SearchResolver() {
+        // FIXME externalize timeout
+        return new org.atlasapi.query.v4.search.support.ContentResolvingSearcher(contentSearcher, queryExecutor(), 60000);
+    }
 }

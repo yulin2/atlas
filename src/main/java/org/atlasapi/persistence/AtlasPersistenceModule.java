@@ -57,8 +57,10 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
+import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
 import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
@@ -78,16 +80,15 @@ public class AtlasPersistenceModule {
     @Resource(name = "changesProducer")
     private JmsTemplate changesProducer;
     
-    @PreDestroy
+    @PostConstruct
     public void destroy() {
-        cassandraContentPersistenceModule().destroy();
+        cassandraContentPersistenceModule().init();
+        esContentIndexModule().init();
     }
 
     @Bean
     public ElasticSearchContentIndexModule esContentIndexModule() {
-        ElasticSearchContentIndexModule elasticSearchContentIndexModule = new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
-        elasticSearchContentIndexModule.init();
-        return elasticSearchContentIndexModule;
+        return new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
     }
 
     @Bean
@@ -97,9 +98,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
-        CassandraContentPersistenceModule cassandraContentPersistenceModule = new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
-        cassandraContentPersistenceModule.init();
-        return cassandraContentPersistenceModule;
+        return new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
     }
     
     @Bean
@@ -272,6 +271,12 @@ public class AtlasPersistenceModule {
     @Primary
     public ESTopicSearcher topicSearcher() {
         return esContentIndexModule().topicSearcher();
+    }
+    
+    @Bean
+    @Primary
+    public ESContentSearcher contentSearcher() {
+        return esContentIndexModule().contentSearcher();
     }
 
     @Bean
