@@ -63,14 +63,12 @@ public class QueryModule {
     private ContentResolver cassandraResolver;
     @Autowired
     private TopicContentUriLister topicContentUriLister;
-
-    private @Autowired @Qualifier("contentUpdater") ContentEquivalenceUpdater<Content> equivUpdater;
-    
+    @Autowired
+    @Qualifier("contentUpdater")
+    private ContentEquivalenceUpdater<Content> equivUpdater;
     //
     @Value("${applications.enabled}")
     private String applicationsEnabled;
-    @Value("${atlas.search.host}")
-    private String searchHost;
 
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
@@ -108,15 +106,4 @@ public class QueryModule {
         };
 
     }
-
-//    @Bean
-//    public SearchResolver searchResolver() {
-//        if (!Strings.isNullOrEmpty(searchHost)) {
-//            ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
-//            return new ContentResolvingSearcher(titleSearcher, queryExecutor());
-//        }
-//
-//        return new DummySearcher();
-//    }
-
 }

@@ -21,7 +21,6 @@ import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.mongo.MongoProductStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
-import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
@@ -31,25 +30,8 @@ import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jms.core.JmsTemplate;
-import com.google.common.base.Function;
-import com.google.common.base.Predicates;
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.metabroadcast.common.ids.IdGenerator;
-import com.metabroadcast.common.ids.IdGeneratorBuilder;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.persistence.mongo.health.MongoIOProbe;
-import com.metabroadcast.common.properties.Configurer;
-import com.metabroadcast.common.properties.Parameter;
-import com.mongodb.Mongo;
-import com.mongodb.MongoReplicaSetProbe;
-import com.mongodb.ServerAddress;
-import com.mongodb.WriteConcern;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,7 +51,9 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
+import javax.annotation.PostConstruct;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
+import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
 import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
@@ -88,12 +72,16 @@ public class AtlasPersistenceModule {
     //
     @Resource(name = "changesProducer")
     private JmsTemplate changesProducer;
+    
+    @PostConstruct
+    public void init() {
+        cassandraContentPersistenceModule().init();
+        esContentIndexModule().init();
+    }
 
     @Bean
     public ElasticSearchContentIndexModule esContentIndexModule() {
-        ElasticSearchContentIndexModule elasticSearchContentIndexModule = new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
-        elasticSearchContentIndexModule.init();
-        return elasticSearchContentIndexModule;
+        return new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
     }
 
     @Bean
@@ -266,6 +254,12 @@ public class AtlasPersistenceModule {
     @Primary
     public ESTopicSearcher topicSearcher() {
         return esContentIndexModule().topicSearcher();
+    }
+    
+    @Bean
+    @Primary
+    public ESContentSearcher contentSearcher() {
+        return esContentIndexModule().contentSearcher();
     }
 
     @Bean

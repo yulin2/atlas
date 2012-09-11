@@ -14,30 +14,45 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class SearchModule {
 
-    private @Value("${atlas.search.host}") String searchHost;
-    
-    private @Autowired KnownTypeQueryExecutor queryExecutor;
-    
+    private @Value("${atlas.search.host}")
+    String searchHost;
+    private @Autowired
+    org.atlasapi.persistence.content.ContentSearcher contentSearcher;
+    private @Autowired
+    KnownTypeQueryExecutor queryExecutor;
+
     @PostConstruct
-    public void setExecutor() {
-        SearchResolver searchResolver = searchResolver();
+    public void setKnownTypeQueryExecutor() {
+        SearchResolver searchResolver = v2SearchResolver();
         if (searchResolver instanceof ContentResolvingSearcher) {
-            ((ContentResolvingSearcher)searchResolver).setExecutor(queryExecutor);
+            ((ContentResolvingSearcher) searchResolver).setExecutor(queryExecutor);
+        }
+        searchResolver = v4SearchResolver();
+        if (searchResolver instanceof org.atlasapi.query.v4.search.support.ContentResolvingSearcher) {
+            ((org.atlasapi.query.v4.search.support.ContentResolvingSearcher) searchResolver).setResolver(queryExecutor);
         }
     }
-    
+
     @Bean
-    SearchResolver searchResolver() {
+    @Qualifier("v2")
+    public SearchResolver v2SearchResolver() {
         if (!Strings.isNullOrEmpty(searchHost)) {
             ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
             return new ContentResolvingSearcher(titleSearcher, null);
+        } else {
+            return new DummySearcher();
         }
-
-        return new DummySearcher();
     }
 
+    @Bean
+    @Qualifier("v4")
+    public SearchResolver v4SearchResolver() {
+        // FIXME externalize timeout
+        return new org.atlasapi.query.v4.search.support.ContentResolvingSearcher(contentSearcher, null, 60000);
+    }
 }
