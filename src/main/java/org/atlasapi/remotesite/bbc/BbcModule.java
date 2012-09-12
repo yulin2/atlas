@@ -9,6 +9,7 @@ import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.joda.time.Duration.standardMinutes;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
@@ -190,7 +191,7 @@ public class BbcModule {
     }
 
     @Bean Runnable bbcFeedsUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(new MongoProgressStore(mongo), bbcProgrammeAdapter(), log);
+		return new BbcSlashProgrammesAtoZUpdater(Executors.newFixedThreadPool(3), new MongoProgressStore(mongo), bbcProgrammeAdapter());
 	}
 	
 	@Bean BbcSlashProgrammesController bbcFeedsController() {
