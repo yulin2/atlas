@@ -9,6 +9,8 @@ import static org.atlasapi.media.entity.Publisher.ITV;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
 
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
@@ -36,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
@@ -45,6 +48,7 @@ import com.metabroadcast.common.scheduling.SimpleScheduler;
 @Import(EquivModule.class)
 public class EquivTaskModule {
 
+    private static final Set<String> ignored = ImmutableSet.of("http://www.bbc.co.uk/programmes/b006mgyl"); 
     private static final RepetitionRule EQUIVALENCE_REPETITION = RepetitionRules.daily(new LocalTime(9, 00));
     
     private @Value("${equiv.updater.enabled}") String updaterEnabled;
@@ -86,7 +90,7 @@ public class EquivTaskModule {
     }
     
     private ContentEquivalenceUpdateTask publisherUpdateTask(final Publisher... publishers) {
-        return new ContentEquivalenceUpdateTask(contentLister, contentUpdater, log, progressStore()).forPublishers(publishers);
+        return new ContentEquivalenceUpdateTask(contentLister, contentUpdater, log, progressStore(), ignored).forPublishers(publishers);
     }
     
     public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
