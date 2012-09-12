@@ -54,7 +54,7 @@ public class SearchController extends BaseController<QueryResult<Content, ? exte
         this.searcher = searcher;
     }
 
-    @RequestMapping("/4.0/search.*")
+    @RequestMapping({"/4.0/search.*", "/4.0/search"})
     public void search(@RequestParam(QUERY_PARAM) String q,
             @RequestParam(value = SPECIALIZATION_PARAM, required = false) String specialization,
             @RequestParam(value = PUBLISHER_PARAM, required = false) String publisher,

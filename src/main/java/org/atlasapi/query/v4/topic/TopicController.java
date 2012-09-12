@@ -37,7 +37,7 @@ public class TopicController {
         this.configurationFetcher = configurationFetcher;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/4.0/topics/popular.*")
+    @RequestMapping({"/4.0/topics/popular.*", "/4.0/topics/popular"})
     public void popularTopics(@RequestParam(required = true) String from, @RequestParam(required = true) String to, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (Strings.isNullOrEmpty(from) || Strings.isNullOrEmpty(to)) {
             throw new IllegalArgumentException("Request parameters 'from' and 'to' are required!");
