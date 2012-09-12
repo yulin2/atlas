@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class SearchModule {
@@ -39,6 +40,7 @@ public class SearchModule {
     }
 
     @Bean
+    @Primary
     @Qualifier("v2")
     public SearchResolver v2SearchResolver() {
         if (!Strings.isNullOrEmpty(searchHost)) {
