@@ -1,6 +1,7 @@
 package org.atlasapi.messaging.workers;
 
 import java.util.Arrays;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.messaging.EntityUpdatedMessage;
@@ -33,6 +34,8 @@ public class ESIndexer extends AbstractWorker {
             Identified source = results.getFirstValue().requireValue();
             if (source instanceof Item) {
                 contentIndexer.index((Item) source);
+            } else if (source instanceof Container) {
+                contentIndexer.index((Container) source);
             } else {
                 log.warn("Unexpected type {} found for id {} on message of type {} and id {}.",
                         new Object[]{source.getClass().getName(), message.getEntityId(), message.getClass().getName(), message.getMessageId()});
