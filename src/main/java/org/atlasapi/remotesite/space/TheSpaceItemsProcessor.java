@@ -44,7 +44,11 @@ public class TheSpaceItemsProcessor {
                 if (item.has("type") && item.has("pid")) {
                     String pid = item.get("pid").asText();
                     JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-                    processor.process(node.get("programme"));
+                    if (node.has("programme")) {
+                        processor.process(node.get("programme"));
+                    } else {
+                        logger.warn("Unknown item type " + item.get("type").asText() + " with pid " + pid);
+                    }
                 }
             } catch (Exception ex) {
                 if (item != null) {
