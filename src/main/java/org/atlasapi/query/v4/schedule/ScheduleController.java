@@ -28,9 +28,7 @@ public class ScheduleController {
     private final ScheduleRequestParser requestParser;
     private final ScheduleQueryExecutor queryExecutor;
     private final AtlasModelWriter<Iterable<ScheduleChannel>> modelWriter;
-
-    private final RequestParameterValidator validator = new RequestParameterValidator(ImmutableSet.of("from","to","source"),ImmutableSet.of("annotations","apiKey"));
-
+    
     public ScheduleController(ScheduleQueryExecutor queryExecutor, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, AtlasModelWriter<Iterable<ScheduleChannel>> modelWriter) {
         this.requestParser = new ScheduleRequestParser(channelResolver, appFetcher, MAX_REQUEST_DURATION);
         this.queryExecutor = queryExecutor;
@@ -41,7 +39,6 @@ public class ScheduleController {
     public void writeChannelSchedule(HttpServletRequest request, HttpServletResponse response) throws IOException {
         
         try {
-            validator.validateParameters(request);
             ScheduleQuery scheduleQuery = requestParser.queryFrom(request);
             ScheduleChannel channelSchedule = queryExecutor.execute(scheduleQuery);
             modelWriter.writeTo(request, response, ImmutableSet.of(channelSchedule), scheduleQuery.getAnnotations(), scheduleQuery.getApplicationConfiguration());

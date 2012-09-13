@@ -22,6 +22,7 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
@@ -35,6 +36,8 @@ class ScheduleRequestParser {
     
     private final ChannelResolver channelResolver;
     private final ApplicationConfigurationFetcher applicationStore;
+
+    private final RequestParameterValidator validator = new RequestParameterValidator(ImmutableSet.of("from","to","source"),ImmutableSet.of("annotations","apiKey"));
     
     private final NumberToShortStringCodec idCodec;
     private final DateTimeInQueryParser dateTimeParser;
@@ -56,9 +59,13 @@ class ScheduleRequestParser {
     }
 
     public ScheduleQuery queryFrom(HttpServletRequest request) {
-
-        Publisher publisher = extractPublisher(request);
+        // Attempt to extract channel first so we can 404 if missing before
+        // 400ing from bad params.
         Channel channel = extractChannel(request);
+
+        validator.validateParameters(request);
+        
+        Publisher publisher = extractPublisher(request);
         Interval queryInterval = extractInterval(request);
         
         ApplicationConfiguration appConfig = getConfiguration(request);
@@ -71,20 +78,21 @@ class ScheduleRequestParser {
 
     private Channel extractChannel(HttpServletRequest request) {
         String channelId = getChannelId(request.getRequestURI());
-        long cid = decodeId(channelId);
-        Maybe<Channel> channel = channelResolver.fromId(cid);
+        Maybe<Channel> channel = resolveChannel(channelId);
         
+        //Exception thrown should be translated to 404 not 400.
         checkArgument(channel.hasValue(), "Unknown channel '%s'", channelId);
         return channel.requireValue();
     }
 
-    private long decodeId(String cid) {
+    private Maybe<Channel> resolveChannel(String channelId) {
+        long cid;
         try {
-            return idCodec.decode(cid).longValue();
-        } catch (Exception e) {
-            String msg = String.format("Invalid identifier '%s': %s", cid, e.getMessage());
-            throw new IllegalArgumentException(msg, e);
+            cid = idCodec.decode(channelId).longValue();
+        } catch (IllegalArgumentException e) {
+            return Maybe.nothing();
         }
+        return channelResolver.fromId(cid);
     }
 
     private String getChannelId(String requestUri) {
@@ -116,12 +124,13 @@ class ScheduleRequestParser {
         if (config.hasValue()) {
             return config.requireValue();
         }
+        String apiKeyParam = request.getParameter("apiKey");
         // request doesn't specify apiKey so use default configuration.
-        if (request.getParameter("apiKey") == null) {
+        if (apiKeyParam == null) {
             return ApplicationConfiguration.DEFAULT_CONFIGURATION;
         }
         // the request has an apiKey param but no config is found.
-        throw new IllegalArgumentException("Uknown application " + request);
+        throw new IllegalArgumentException("Unknown API key " + apiKeyParam);
     }
 
     private String getParameter(HttpServletRequest request, String param) {
