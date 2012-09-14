@@ -10,8 +10,8 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.equiv.scorers.EquivalenceScorer;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -25,7 +25,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.query.Selection;
 
-public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivalenceGenerator<Container>, ContentEquivalenceScorer<Container> {
+public class TitleMatchingEquivalenceScoringGenerator implements EquivalenceGenerator<Container>, EquivalenceScorer<Container> {
 
     private final static float TITLE_WEIGHTING = 1.0f;
     private final static float BROADCAST_WEIGHTING = 0.0f;
@@ -48,16 +48,16 @@ public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivale
     }
 
     @Override
-    public ScoredEquivalents<Container> generate(Container content, ResultDescription desc) {
+    public ScoredCandidates<Container> generate(Container content, ResultDescription desc) {
         return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
     }
 
     @Override
-    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
+    public ScoredCandidates<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
         return scoreSuggestions(content, suggestions, desc);
     }
 
-    private ScoredEquivalents<Container> scoreSuggestions(Container content, Iterable<Container> suggestions, ResultDescription desc) {
+    private ScoredCandidates<Container> scoreSuggestions(Container content, Iterable<Container> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Container> equivalents = DefaultScoredEquivalents.fromSource("Title");
         desc.appendText("Scoring %s suggestions", Iterables.size(suggestions));
         

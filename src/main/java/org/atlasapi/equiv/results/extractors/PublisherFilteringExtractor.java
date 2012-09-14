@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
@@ -28,8 +28,8 @@ public class PublisherFilteringExtractor<T extends Content> extends FilteringEqu
                     Publisher.FIVE, ImmutableSet.of(Publisher.BBC, Publisher.C4, Publisher.ITV));
             
             @Override
-            public boolean apply(ScoredEquivalent<T> input, T subject, ResultDescription desc) {
-                if (input.equivalent().getPublisher() == subject.getPublisher()) {
+            public boolean apply(ScoredCandidate<T> input, T subject, ResultDescription desc) {
+                if (input.candidate().getPublisher() == subject.getPublisher()) {
                     return false;
                 }
                 Set<Publisher> unacceptable = unacceptablePublishers.get(subject.getPublisher());
@@ -37,9 +37,9 @@ public class PublisherFilteringExtractor<T extends Content> extends FilteringEqu
                     return true;
                 }
                 
-                boolean passes = !unacceptable.contains(input.equivalent().getPublisher());
+                boolean passes = !unacceptable.contains(input.candidate().getPublisher());
                 if (!passes) {
-                    desc.appendText("%s removed. %s ∈ %s", input, input.equivalent().getPublisher(), unacceptable);
+                    desc.appendText("%s removed. %s ∈ %s", input, input.candidate().getPublisher(), unacceptable);
                 }
                 return passes;
             }

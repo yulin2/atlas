@@ -4,16 +4,16 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 
 import com.google.common.collect.Iterables;
 
-public class AliasResolvingEquivalenceGenerator<T extends Content> implements ContentEquivalenceGenerator<T> {
+public class AliasResolvingEquivalenceGenerator<T extends Content> implements EquivalenceGenerator<T> {
 
-    public static final <T extends Content> ContentEquivalenceGenerator<T> aliasResolvingGenerator(ContentResolver resolver, Class<T> cls) {
+    public static final <T extends Content> EquivalenceGenerator<T> aliasResolvingGenerator(ContentResolver resolver, Class<T> cls) {
         return new AliasResolvingEquivalenceGenerator<T>(resolver,cls);
     }
     
@@ -26,7 +26,7 @@ public class AliasResolvingEquivalenceGenerator<T extends Content> implements Co
     }
 
     @Override
-    public ScoredEquivalents<T> generate(T content, ResultDescription desc) {
+    public ScoredCandidates<T> generate(T content, ResultDescription desc) {
         ScoredEquivalentsBuilder<T> equivalents = DefaultScoredEquivalents.fromSource("Alias");
         desc.startStage("Resolving aliases:");
         for (String alias : content.getAliases()) {

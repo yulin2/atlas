@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer.TitleType;
 import org.atlasapi.media.entity.Item;
@@ -90,8 +90,8 @@ public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
         
     }
     
-    private void score(double expected, ScoredEquivalents<Item> scores) {
-        Score value = Iterables.getOnlyElement(scores.equivalents().entrySet()).getValue();
+    private void score(double expected, ScoredCandidates<Item> scores) {
+        Score value = Iterables.getOnlyElement(scores.candidates().entrySet()).getValue();
         assertTrue(String.format("expected %s got %s", expected, value), value.equals(expected > 0 ? Score.valueOf(expected) : Score.NULL_SCORE));
     }
 

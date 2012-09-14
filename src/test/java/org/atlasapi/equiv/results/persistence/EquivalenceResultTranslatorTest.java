@@ -13,7 +13,7 @@ import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.extractors.TopEquivalenceExtractor;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     @Test
     public void testCodecForEmptyResult() {
         
-        List<ScoredEquivalents<Item>> scores = ImmutableList.of();
+        List<ScoredCandidates<Item>> scores = ImmutableList.of();
         EquivalenceResult<Item> itemResult = resultBuilder.resultFor(target, scores, desc);
         
         DBObject dbo = translator.toDBObject(itemResult);
@@ -59,7 +59,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     @Test
     public void testCodecForTrivialResult() {
         
-        List<ScoredEquivalents<Item>> scores = ImmutableList.of(
+        List<ScoredCandidates<Item>> scores = ImmutableList.of(
                 DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, Score.valueOf(5.0)).build()
         );
         
@@ -89,7 +89,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     @Test
     public void testCodecForSinglePublisherResult() {
         
-        List<ScoredEquivalents<Item>> scores = ImmutableList.of(
+        List<ScoredCandidates<Item>> scores = ImmutableList.of(
                 DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, Score.valueOf(5.0)).addEquivalent(equivalent2, Score.valueOf(5.0)).addEquivalent(equivalent1, Score.valueOf(5.0)).build(),
                 DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, Score.valueOf(5.0)).build()
         );
@@ -121,7 +121,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
     @Test
     public void testCodecForTwoPublisherResult() {
         
-        List<ScoredEquivalents<Item>> scores = ImmutableList.of(
+        List<ScoredCandidates<Item>> scores = ImmutableList.of(
                 DefaultScoredEquivalents.<Item>fromSource("source1").addEquivalent(equivalent1, Score.valueOf(5.0)).addEquivalent(equivalent2, Score.valueOf(5.0)).addEquivalent(equivalent3, Score.valueOf(5.0)).addEquivalent(equivalent1, Score.valueOf(5.0)).build(),
                 DefaultScoredEquivalents.<Item>fromSource("source2").addEquivalent(equivalent1, Score.valueOf(5.0)).addEquivalent(equivalent3, Score.valueOf(5.0)).build(),
                 DefaultScoredEquivalents.<Item>fromSource("source3").addEquivalent(equivalent3, Score.valueOf(5.0)).build()

@@ -4,15 +4,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 
-import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
+import org.atlasapi.equiv.generators.EquivalenceGenerator;
 import org.atlasapi.equiv.generators.EquivalenceGenerators;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ReadableDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.equiv.results.scores.ScoredEquivalentsMerger;
-import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.scorers.EquivalenceScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -22,9 +22,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
-public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenceUpdater<T> {
+public class ItemEquivalenceUpdater<T extends Item> implements EquivalenceUpdater<T> {
 
     public static <T extends Item> Builder<T> builder(EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
         return new Builder<T>(resultBuilder, log);
@@ -34,30 +33,30 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
         
         private final EquivalenceResultBuilder<T> resultBuilder;
         private final AdapterLog log;
-        private ImmutableSet<ContentEquivalenceGenerator<T>> generators = ImmutableSet.of();
-        private ImmutableSet<ContentEquivalenceScorer<T>> scorers = ImmutableSet.of();
+        private ImmutableSet<EquivalenceGenerator<T>> generators = ImmutableSet.of();
+        private ImmutableSet<EquivalenceScorer<T>> scorers = ImmutableSet.of();
 
         public Builder(EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
             this.resultBuilder = checkNotNull(resultBuilder);
             this.log = checkNotNull(log);
         }
 
-        public Builder<T> withGenerator(ContentEquivalenceGenerator<T> generator) {
+        public Builder<T> withGenerator(EquivalenceGenerator<T> generator) {
             this.generators = ImmutableSet.of(generator);
             return this;
         }
         
-        public Builder<T> withGenerators(Iterable<ContentEquivalenceGenerator<T>> generators) {
+        public Builder<T> withGenerators(Iterable<EquivalenceGenerator<T>> generators) {
             this.generators = ImmutableSet.copyOf(generators);
             return this;
         }
         
-        public Builder<T> withScorer(ContentEquivalenceScorer<T> scorer) {
+        public Builder<T> withScorer(EquivalenceScorer<T> scorer) {
             this.scorers = ImmutableSet.of(scorer);
             return this;
         }
         
-        public Builder<T> withScorers(Iterable<ContentEquivalenceScorer<T>> scorers) {
+        public Builder<T> withScorers(Iterable<EquivalenceScorer<T>> scorers) {
             this.scorers = ImmutableSet.copyOf(scorers);
             return this;
         }
@@ -71,9 +70,17 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
     private final EquivalenceGenerators<T> generators;
     private final EquivalenceScorers<T> scorers;
     private final EquivalenceResultBuilder<T> resultBuilder;
-    private final ScoredEquivalentsMerger merger = new ScoredEquivalentsMerger();
 
-    public ItemEquivalenceUpdater(Iterable<ContentEquivalenceGenerator<T>> generators, Iterable<ContentEquivalenceScorer<T>> scorers, EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
+    private final ScoredEquivalentsMerger merger = new ScoredEquivalentsMerger();
+    private final List<T> NONE = ImmutableList.of();
+    private final Function<ScoredCandidates<T>, Iterable<T>> extractCandidates = new Function<ScoredCandidates<T>, Iterable<T>>() {
+        @Override
+        public Iterable<T> apply(ScoredCandidates<T> input) {
+            return input.candidates().keySet();
+        }
+    };
+
+    public ItemEquivalenceUpdater(Iterable<EquivalenceGenerator<T>> generators, Iterable<EquivalenceScorer<T>> scorers, EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
         this.generators = EquivalenceGenerators.from(generators,log);
         this.scorers = EquivalenceScorers.from(scorers,log);
         this.resultBuilder = resultBuilder;
@@ -84,25 +91,20 @@ public class ItemEquivalenceUpdater<T extends Item> implements ContentEquivalenc
         
         ReadableDescription desc = new DefaultDescription();
         
-        List<ScoredEquivalents<T>> generatedScores = generators.generate(content, desc);
+        List<ScoredCandidates<T>> generatedScores = generators.generate(content, desc);
         
         List<T> suggestions = ImmutableList.<T>builder()
-                .addAll(extractGeneratedSuggestions(generatedScores))
-                .addAll(externalCandidates.or(ImmutableList.<T>of()))
+                .addAll(extractCandidates(generatedScores))
+                .addAll(externalCandidates.or(NONE))
                 .build();
         
-        List<ScoredEquivalents<T>> scoredScores = scorers.score(content, suggestions, desc);
+        List<ScoredCandidates<T>> scoredScores = scorers.score(content, suggestions, desc);
         
         return resultBuilder.resultFor(content, ImmutableList.copyOf(merger.merge(generatedScores, scoredScores)), desc);
     }
 
-    private List<T> extractGeneratedSuggestions(Iterable<ScoredEquivalents<T>> generatedScores) {
-        return Lists.newArrayList(Iterables.concat(Iterables.transform(generatedScores, new Function<ScoredEquivalents<T>, Iterable<T>>() {
-            @Override
-            public Iterable<T> apply(ScoredEquivalents<T> input) {
-                return input.equivalents().keySet();
-            }
-        })));
+    private Iterable<T> extractCandidates(Iterable<ScoredCandidates<T>> generatedScores) {
+        return Iterables.concat(Iterables.transform(generatedScores, extractCandidates));
     }
 
 }

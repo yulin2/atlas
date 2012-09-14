@@ -7,7 +7,7 @@ import java.util.Set;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -41,21 +41,21 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
     public void handle(EquivalenceResult<Item> result) {
 
         ReadableDescription desc = (ReadableDescription) result.description().startStage(String.format("Episode parent filter: %s", containerRefs));
-        Map<Publisher, ScoredEquivalent<Item>> strongEquivalences = filter(result.strongEquivalences(), desc);
+        Map<Publisher, ScoredCandidate<Item>> strongEquivalences = filter(result.strongEquivalences(), desc);
         desc.finishStage();
         delegate.handle(new EquivalenceResult<Item>(result.target(), result.rawScores(), result.combinedEquivalences(), strongEquivalences, desc));
 
     }
 
-    private Map<Publisher, ScoredEquivalent<Item>> filter(Map<Publisher, ScoredEquivalent<Item>> strongItems, final ResultDescription desc) {
-        return ImmutableMap.copyOf(Maps.filterValues(strongItems, new Predicate<ScoredEquivalent<Item>>() {
+    private Map<Publisher, ScoredCandidate<Item>> filter(Map<Publisher, ScoredCandidate<Item>> strongItems, final ResultDescription desc) {
+        return ImmutableMap.copyOf(Maps.filterValues(strongItems, new Predicate<ScoredCandidate<Item>>() {
             @Override
-            public boolean apply(ScoredEquivalent<Item> input) {
-                Collection<String> validContainers = containerRefs.get(input.equivalent().getPublisher());
-                if (validContainers == null || validContainers.isEmpty() || input.equivalent().getContainer() == null || validContainers.contains(input.equivalent().getContainer().getUri())) {
+            public boolean apply(ScoredCandidate<Item> input) {
+                Collection<String> validContainers = containerRefs.get(input.candidate().getPublisher());
+                if (validContainers == null || validContainers.isEmpty() || input.candidate().getContainer() == null || validContainers.contains(input.candidate().getContainer().getUri())) {
                     return true;
                 }
-                desc.appendText("%s removed. Unacceptable container: %s", input, input.equivalent().getContainer().getUri());
+                desc.appendText("%s removed. Unacceptable container: %s", input, input.candidate().getContainer().getUri());
                 return false;
             }
         }));

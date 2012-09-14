@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.collect.ImmutableSet;
@@ -18,13 +18,13 @@ public class AddingEquivalenceCombiner<T extends Content> extends FoldingEquival
     }
 
     @Override
-    public ScoredEquivalents<T> combine(ScoredEquivalents<T> combined, ScoredEquivalents<T> scoredEquivalents) {
+    public ScoredCandidates<T> combine(ScoredCandidates<T> combined, ScoredCandidates<T> scoredEquivalents) {
         if(combined == null) {
             return scoredEquivalents;
         }
         
-        Map<T, Score> combinedMappedEquivalents = combined.equivalents();
-        Map<T, Score> scoredMappedEquivalents = scoredEquivalents.equivalents();
+        Map<T, Score> combinedMappedEquivalents = combined.candidates();
+        Map<T, Score> scoredMappedEquivalents = scoredEquivalents.candidates();
         
         Map<T, Score> result = Maps.newHashMap();
         for (T content : ImmutableSet.copyOf(Iterables.concat(combinedMappedEquivalents.keySet(), scoredMappedEquivalents.keySet()))) {

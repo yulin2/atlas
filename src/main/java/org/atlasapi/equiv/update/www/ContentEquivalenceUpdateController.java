@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Publisher;
@@ -32,13 +32,13 @@ public class ContentEquivalenceUpdateController {
     
     private final Splitter commaSplitter = Splitter.on(',').trimResults().omitEmptyStrings();
 
-    private final ContentEquivalenceUpdater<Content> contentUpdater;
+    private final EquivalenceUpdater<Content> contentUpdater;
     private final ContentResolver contentResolver;
     private final ExecutorService executor;
     private final AdapterLog log;
 
 
-    public ContentEquivalenceUpdateController(ContentEquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver, AdapterLog log) {
+    public ContentEquivalenceUpdateController(EquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver, AdapterLog log) {
         this.contentUpdater = contentUpdater;
         this.contentResolver = contentResolver;
         this.log = log;

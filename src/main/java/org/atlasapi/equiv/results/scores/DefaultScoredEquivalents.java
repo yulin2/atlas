@@ -2,19 +2,17 @@ package org.atlasapi.equiv.results.scores;
 
 import java.util.Map;
 
-import org.atlasapi.media.entity.Content;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-public class DefaultScoredEquivalents<T extends Content> implements ScoredEquivalents<T> {
+public class DefaultScoredEquivalents<T> implements ScoredCandidates<T> {
 
-    public static final <T extends Content> ScoredEquivalentsBuilder<T> fromSource(String source) {
+    public static final <T> ScoredEquivalentsBuilder<T> fromSource(String source) {
         return new ScoredEquivalentsBuilder<T>(source);
     }
 
-    public static final class ScoredEquivalentsBuilder<T extends Content> {
+    public static final class ScoredEquivalentsBuilder<T> {
 
         private final String source;
         private final Map<T, Score> equivs;
@@ -30,21 +28,21 @@ public class DefaultScoredEquivalents<T extends Content> implements ScoredEquiva
             return this;
         }
 
-        public ScoredEquivalents<T> build() {
+        public ScoredCandidates<T> build() {
             return fromMappedEquivs(source, equivs);
         }
     }
     
-    public static <T extends Content> ScoredEquivalents<T> fromMappedEquivs(String source, Map<T, Score> equivs) {
+    public static <T> ScoredCandidates<T> fromMappedEquivs(String source, Map<T, Score> equivs) {
         return new DefaultScoredEquivalents<T>(source, ImmutableMap.copyOf(equivs));
     }
     
     private final String source;
-    private final Map<T, Score> equivs;
+    private final Map<T, Score> candidates;
 
     private DefaultScoredEquivalents(String source, Map<T, Score> equivs) {
         this.source = source;
-        this.equivs = equivs;
+        this.candidates = equivs;
     }
 
     @Override
@@ -53,8 +51,8 @@ public class DefaultScoredEquivalents<T extends Content> implements ScoredEquiva
     }
 
     @Override
-    public Map<T, Score> equivalents() {
-        return equivs;
+    public Map<T, Score> candidates() {
+        return candidates;
     }
 
     @Override
@@ -64,19 +62,19 @@ public class DefaultScoredEquivalents<T extends Content> implements ScoredEquiva
         }
         if (that instanceof DefaultScoredEquivalents) {
             DefaultScoredEquivalents<?> other = (DefaultScoredEquivalents<?>) that;
-            return Objects.equal(source, other.source) && Objects.equal(equivs, other.equivs);
+            return Objects.equal(source, other.source) && Objects.equal(candidates, other.candidates);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(source, equivs);
+        return Objects.hashCode(source, candidates);
     }
 
     @Override
     public String toString() {
-        return String.format("%s: %s", source, equivs);
+        return String.format("%s: %s", source, candidates);
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -30,10 +30,10 @@ public class ContentEquivalenceUpdateTask extends AbstractContentEquivalenceUpda
     private List<Publisher> publishers;
     private Set<String> ignored;
 
-    private final ContentEquivalenceUpdater<Content> rootUpdater;
+    private final EquivalenceUpdater<Content> rootUpdater;
 
     
-    public ContentEquivalenceUpdateTask(ContentLister contentStore, ContentEquivalenceUpdater<Content> rootUpdater, AdapterLog log, ScheduleTaskProgressStore progressStore, Set<String> ignored) {
+    public ContentEquivalenceUpdateTask(ContentLister contentStore, EquivalenceUpdater<Content> rootUpdater, AdapterLog log, ScheduleTaskProgressStore progressStore, Set<String> ignored) {
         super(log, progressStore);
         this.contentStore = contentStore;
         this.rootUpdater = rootUpdater;

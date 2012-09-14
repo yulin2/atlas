@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.results.scores;
 
-import static org.atlasapi.equiv.results.scores.ScoredEquivalents.TO_SOURCE;
+import static org.atlasapi.equiv.results.scores.ScoredCandidates.TO_SOURCE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +16,12 @@ import com.google.common.collect.Maps;
 
 public class ScoredEquivalentsMerger {
 
-    public <T extends Content> List<ScoredEquivalents<T>> merge(List<ScoredEquivalents<T>> lefts, List<ScoredEquivalents<T>> rights) {
+    public <T extends Content> List<ScoredCandidates<T>> merge(List<ScoredCandidates<T>> lefts, List<ScoredCandidates<T>> rights) {
         
-        Map<String,ScoredEquivalents<T>> left = Maps.uniqueIndex(lefts, TO_SOURCE);
-        ImmutableMap<String, ScoredEquivalents<T>> right = Maps.uniqueIndex(rights, TO_SOURCE);
+        Map<String,ScoredCandidates<T>> left = Maps.uniqueIndex(lefts, TO_SOURCE);
+        ImmutableMap<String, ScoredCandidates<T>> right = Maps.uniqueIndex(rights, TO_SOURCE);
         
-        Map<String, ScoredEquivalents<T>> merged = Maps.newHashMap();
+        Map<String, ScoredCandidates<T>> merged = Maps.newHashMap();
         
         for (String source : ImmutableSet.copyOf(Iterables.concat(left.keySet(), right.keySet()))) {
             if(!left.containsKey(source)) {
@@ -37,9 +37,9 @@ public class ScoredEquivalentsMerger {
         
     }
 
-    private <T extends Content> ScoredEquivalents<T> merge(ScoredEquivalents<T> left, ScoredEquivalents<T> right) {
-        HashMap<T, Score> rightMap = Maps.newHashMap(right.equivalents());
-        rightMap.putAll(left.equivalents());
+    private <T extends Content> ScoredCandidates<T> merge(ScoredCandidates<T> left, ScoredCandidates<T> right) {
+        HashMap<T, Score> rightMap = Maps.newHashMap(right.candidates());
+        rightMap.putAll(left.candidates());
         return DefaultScoredEquivalents.fromMappedEquivs(left.source(), rightMap);
     }
    

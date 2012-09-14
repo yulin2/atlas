@@ -3,23 +3,23 @@ package org.atlasapi.equiv.results.combining;
 import java.util.List;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 
-public abstract class FoldingEquivalenceCombiner<T extends Content> implements EquivalenceCombiner<T> {
+public abstract class FoldingEquivalenceCombiner<T extends Content> implements ScoreCombiner<T> {
 
     @Override
-    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents, ResultDescription desc) {
+    public ScoredCandidates<T> combine(List<ScoredCandidates<T>> scoredEquivalents, ResultDescription desc) {
         if(scoredEquivalents == null || scoredEquivalents.isEmpty()) {
             return null;
         }
-        ScoredEquivalents<T> head = scoredEquivalents.get(0);
-        for (ScoredEquivalents<T> tailElem : scoredEquivalents.subList(1, scoredEquivalents.size())) {
+        ScoredCandidates<T> head = scoredEquivalents.get(0);
+        for (ScoredCandidates<T> tailElem : scoredEquivalents.subList(1, scoredEquivalents.size())) {
             head = combine(head, tailElem);
         }
         return head;
     }
 
-    protected abstract ScoredEquivalents<T> combine(ScoredEquivalents<T> head, ScoredEquivalents<T> tailElem);
+    protected abstract ScoredCandidates<T> combine(ScoredCandidates<T> head, ScoredCandidates<T> tailElem);
 
 }

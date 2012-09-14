@@ -13,7 +13,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
@@ -76,9 +76,9 @@ public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
                 will(returnValue(Schedule.fromChannelMap(ImmutableMap.of(BBC_ONE, (List<Item>)ImmutableList.<Item>of(item2)), interval(40000, 260000))));
         }});
         
-        ScoredEquivalents<Item> equivalents = generator.generate(item1, new DefaultDescription());
+        ScoredCandidates<Item> equivalents = generator.generate(item1, new DefaultDescription());
         
-        Map<Item, Score> scoreMap = equivalents.equivalents();
+        Map<Item, Score> scoreMap = equivalents.candidates();
         
         assertThat(scoreMap.size(), is(1));
         assertThat(scoreMap.get(item2).asDouble(), is(equalTo(1.0)));

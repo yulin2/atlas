@@ -9,8 +9,8 @@ import junit.framework.TestCase;
 
 import org.atlasapi.equiv.handlers.LookupWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -102,8 +102,8 @@ public class LookupWritingEquivalenceHandlerTest extends TestCase {
     }
     
     private EquivalenceResult<Item> equivResultFor(Item content, Iterable<Item> equivalents) {
-        Map<Publisher, ScoredEquivalent<Item>> strong = Maps.transformValues(Maps.uniqueIndex(equivalents, TO_PUBLISHER),RANDOM_SCORE);
-        return new EquivalenceResult<Item>(content, ImmutableList.<ScoredEquivalents<Item>>of(), null, strong , null);
+        Map<Publisher, ScoredCandidate<Item>> strong = Maps.transformValues(Maps.uniqueIndex(equivalents, TO_PUBLISHER),RANDOM_SCORE);
+        return new EquivalenceResult<Item>(content, ImmutableList.<ScoredCandidates<Item>>of(), null, strong , null);
     }
     
     private static final Function<Content, Publisher> TO_PUBLISHER = new Function<Content, Publisher>() {
@@ -114,11 +114,11 @@ public class LookupWritingEquivalenceHandlerTest extends TestCase {
         }
     };
 
-    private static final Function<Item, ScoredEquivalent<Item>> RANDOM_SCORE = new Function<Item, ScoredEquivalent<Item>>() {
+    private static final Function<Item, ScoredCandidate<Item>> RANDOM_SCORE = new Function<Item, ScoredCandidate<Item>>() {
         @Override
-        public ScoredEquivalent<Item> apply(Item input) {
+        public ScoredCandidate<Item> apply(Item input) {
             //Chosen by fair dice roll / 10. Guaranteed to be random.
-            return ScoredEquivalent.equivalentScore(input, Score.valueOf(0.4));
+            return ScoredCandidate.valueOf(input, Score.valueOf(0.4));
         }
     };
 }

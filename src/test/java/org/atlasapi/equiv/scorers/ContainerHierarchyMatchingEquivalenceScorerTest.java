@@ -9,7 +9,7 @@ import java.util.Map;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
@@ -49,9 +49,9 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
             never(contentResolver).findByCanonicalUris((Iterable<String>) with(anything()));
         }});
 
-        ScoredEquivalents<Container> score = scorer.score(brandWithChildren(5), ImmutableSet.<Container>of(brandWithChildren(7)), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(brandWithChildren(5), ImmutableSet.<Container>of(brandWithChildren(7)), new DefaultDescription());
         
-        assertThat(Iterables.getOnlyElement(score.equivalents().values()), is(Score.NULL_SCORE));
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.NULL_SCORE));
     }
     
     @Test
@@ -62,9 +62,9 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
             never(contentResolver).findByCanonicalUris((Iterable<String>) with(anything()));
         }});
 
-        ScoredEquivalents<Container> score = scorer.score(brandWithChildren(7), ImmutableSet.<Container>of(brandWithChildren(7)), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(brandWithChildren(7), ImmutableSet.<Container>of(brandWithChildren(7)), new DefaultDescription());
         
-        assertThat(Iterables.getOnlyElement(score.equivalents().values()), is(Score.ONE));
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.ONE));
     }
     
     @Test
@@ -77,9 +77,9 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
                 will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
         }});
 
-        ScoredEquivalents<Container> score = scorer.score(subject, ImmutableSet.<Container>of(brandWithSeries(7)), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.<Container>of(brandWithSeries(7)), new DefaultDescription());
         
-        assertThat(Iterables.getOnlyElement(score.equivalents().values()), is(Score.NULL_SCORE));
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.NULL_SCORE));
     }
     
     @Test
@@ -95,9 +95,9 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
                 will(returnValue(ResolvedContent.builder().putAll(series(6)).build()));
         }});
 
-        ScoredEquivalents<Container> score = scorer.score(subject, ImmutableSet.<Container>of(suggestion), new DefaultDescription());
+        ScoredCandidates<Container> score = scorer.score(subject, ImmutableSet.<Container>of(suggestion), new DefaultDescription());
         
-        assertThat(Iterables.getOnlyElement(score.equivalents().values()), is(Score.ONE));
+        assertThat(Iterables.getOnlyElement(score.candidates().values()), is(Score.ONE));
     }
     
     @Test

@@ -31,7 +31,7 @@ import java.util.Set;
 
 import org.atlasapi.equiv.generators.BroadcastMatchingItemEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContainerChildEquivalenceGenerator;
-import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
+import org.atlasapi.equiv.generators.EquivalenceGenerator;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.RadioTimesFilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
@@ -52,20 +52,19 @@ import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.scorers.ContainerChildEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingEquivalenceScorer;
-import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.scorers.EquivalenceScorer;
 import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.ItemEquivalenceUpdater;
-import org.atlasapi.equiv.update.NullContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.NullEquivalenceUpdater;
 import org.atlasapi.equiv.update.PublisherSwitchingContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.ResultHandlingEquivalenceUpdater;
 import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -117,16 +116,16 @@ public class EquivModule {
         ));
     }
     
-    private <T extends Content> ResultHandlingEquivalenceUpdater<T> resultHandlingUpdater(ContentEquivalenceUpdater<T> delegate, Iterable<Publisher> publishers) {
+    private <T extends Content> ResultHandlingEquivalenceUpdater<T> resultHandlingUpdater(EquivalenceUpdater<T> delegate, Iterable<Publisher> publishers) {
         return new ResultHandlingEquivalenceUpdater<T>(delegate, this.<T>standardResultHandlers(publishers));
     }
     
     public ItemEquivalenceUpdater<Item> standardItemUpdater() {
-        Set<ContentEquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<ContentEquivalenceGenerator<Item>>of(
+        Set<EquivalenceGenerator<Item>> itemGenerators = ImmutableSet.<EquivalenceGenerator<Item>>of(
                 new BroadcastMatchingItemEquivalenceGenerator(scheduleResolver, channelResolver, ImmutableSet.copyOf(Publisher.values()), Duration.standardMinutes(10))
         );
         
-        Set<ContentEquivalenceScorer<Item>> itemScorers = ImmutableSet.<ContentEquivalenceScorer<Item>>of(
+        Set<EquivalenceScorer<Item>> itemScorers = ImmutableSet.of(
                 new TitleMatchingItemEquivalenceScorer(),
                 new SequenceItemEquivalenceScorer()
         );
@@ -140,7 +139,7 @@ public class EquivModule {
         return containerUpdater(contentResolver, liveResultsStore(), new ConfiguredEquivalenceResultBuilder<Container>(), this.<Item>standardResultHandlers(publishers), log);
     }
 
-    public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
+    public @Bean EquivalenceUpdater<Content> contentUpdater() {
         //Generally acceptable publishers.
         Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES));
         
@@ -148,9 +147,9 @@ public class EquivModule {
         
         ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
         
-        ImmutableMap.Builder<Publisher, ContentEquivalenceUpdater<Content>> publisherUpdaters = ImmutableMap.builder();
+        ImmutableMap.Builder<Publisher, EquivalenceUpdater<Content>> publisherUpdaters = ImmutableMap.builder();
         
-        ContentEquivalenceUpdater<Content> standardContainerEquivalenceUpdater = resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
+        EquivalenceUpdater<Content> standardContainerEquivalenceUpdater = resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
                 .withGenerators(ImmutableSet.of(
                         titleScoringGenerator,
                         new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
@@ -162,7 +161,7 @@ public class EquivModule {
                 publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
         }
         
-        publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(new RootEquivalenceUpdater(new NullContentEquivalenceUpdater<Container>(),
+        publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(new RootEquivalenceUpdater(NullEquivalenceUpdater.<Container>get(),
                 ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
                     .withGenerators(ImmutableSet.of(new RadioTimesFilmEquivalenceGenerator(contentResolver), new FilmEquivalenceGenerator(searchResolver)))
                     .build()),ImmutableSet.of(RADIO_TIMES,PA,PREVIEW_NETWORKS)));
@@ -187,7 +186,7 @@ public class EquivModule {
         publisherUpdaters.put(FACEBOOK, resultHandlingUpdater(new RootEquivalenceUpdater(
             containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK)))
                 .withResultBuilder(DefaultEquivalenceResultBuilder.<Container>resultBuilder(
-                    new NullScoreAwareAveragingCombiner<Container>(),
+                    NullScoreAwareAveragingCombiner.<Container>get(),
                     new SpecializationMatchingEquivalenceExtractor<Container>(
                         new MinimumScoreEquivalenceExtractor<Container>(
                             PercentThresholdEquivalenceExtractor.<Container>moreThanPercent(90), 
@@ -200,7 +199,7 @@ public class EquivModule {
                     aliasResolvingGenerator(contentResolver, Container.class)
                 ))
                 .build(),
-            new NullContentEquivalenceUpdater<Item>()
+            NullEquivalenceUpdater.<Item>get()
         ), Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK))));
         
         return new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build());

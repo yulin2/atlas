@@ -10,15 +10,15 @@ import org.atlasapi.media.entity.Publisher;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
-public class PublisherSwitchingContentEquivalenceUpdater implements ContentEquivalenceUpdater<Content> {
+public class PublisherSwitchingContentEquivalenceUpdater implements EquivalenceUpdater<Content> {
 
-    private Map<Publisher, ContentEquivalenceUpdater<Content>> backingMap;
+    private Map<Publisher, EquivalenceUpdater<Content>> backingMap;
 
-    public PublisherSwitchingContentEquivalenceUpdater(Map<Publisher, ContentEquivalenceUpdater<Content>> publisherUpdaters) {
+    public PublisherSwitchingContentEquivalenceUpdater(Map<Publisher, EquivalenceUpdater<Content>> publisherUpdaters) {
         this.backingMap = ImmutableMap.copyOf(publisherUpdaters);
     }
     
-    public ContentEquivalenceUpdater<Content> updaterFor(Publisher publisher) {
+    public EquivalenceUpdater<Content> updaterFor(Publisher publisher) {
         return backingMap.get(publisher);
     }
 
