@@ -44,9 +44,14 @@ import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.simple.DisplayTitle;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
+    private static final Logger log = LoggerFactory.getLogger(ItemModelSimplifier.class);
+    //
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
     private final Map<String, Locale> localeMap;
@@ -118,7 +123,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                     simpleItem.setSeriesSummary(buildSeriesSummary(fullItem, annotations));
                 }
             }
-            
+
             if (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
                 simpleItem.setEpisodeNumber(episode.getEpisodeNumber());
             }
@@ -348,17 +353,22 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     }
 
     private DisplayTitle buildDisplayTitle(Item fullItem) {
-        String title = null;
-        String subtitle = null;
-        if (fullItem.getContainerSummary() != null) {
-            title = fullItem.getContainerSummary().getTitle();
-            subtitle = fullItem.getContainerSummary().getType().equals(EntityType.SERIES.name())
-                    ? fullItem.getContainerSummary().getTitle() + ":" + fullItem.getTitle()
-                    : fullItem.getTitle();
-        } else {
-            title = fullItem.getTitle();
+        try {
+            String title = null;
+            String subtitle = null;
+            if (fullItem.getContainerSummary() != null) {
+                title = fullItem.getContainerSummary().getTitle();
+                subtitle = fullItem.getContainerSummary().getType().equals(EntityType.SERIES.name())
+                        ? fullItem.getContainerSummary().getTitle() + ":" + fullItem.getTitle()
+                        : fullItem.getTitle();
+            } else {
+                title = fullItem.getTitle();
+            }
+            return new DisplayTitle(title, subtitle);
+        } catch (Exception ex) {
+            log.warn(ex.getMessage(), ex);
+            return null;
         }
-        return new DisplayTitle(title, subtitle);
     }
 
     private BrandSummary buildBrandSummary(Item fullItem, Set<Annotation> annotations) {

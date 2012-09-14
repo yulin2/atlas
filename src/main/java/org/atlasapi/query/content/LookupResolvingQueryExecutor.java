@@ -27,9 +27,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
+    private static final Logger log = LoggerFactory.getLogger(LookupResolvingQueryExecutor.class);
+    //
     private final KnownTypeContentResolver cassandraContentResolver;
     private final KnownTypeContentResolver mongoContentResolver;
     private final LookupEntryStore mongoLookupResolver;
@@ -42,18 +46,28 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        Map<String, List<Identified>> results = resolveCassandraEntries(uris, query);
-        if (results.size() < Iterables.size(uris)) {
-            results = Maps.newHashMap(results);
-            results.putAll(resolveMongoEntries(query, mongoLookupResolver.entriesForCanonicalUris(Sets.difference(Sets.newHashSet(uris), results.keySet()))));
+        try {
+            Map<String, List<Identified>> results = resolveCassandraEntries(uris, query);
+            if (results.size() < Iterables.size(uris)) {
+                results = Maps.newHashMap(results);
+                results.putAll(resolveMongoEntries(query, mongoLookupResolver.entriesForCanonicalUris(Sets.difference(Sets.newHashSet(uris), results.keySet()))));
+            }
+            return results;
+        } catch (RuntimeException ex) {
+            log.error(ex.getMessage(), ex);
+            throw ex;
         }
-        return results;
     }
 
     @Override
     public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
-        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForIds(ids));
-        return mongoResults;
+        try {
+            Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForIds(ids));
+            return mongoResults;
+        } catch (RuntimeException ex) {
+            log.error(ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     private Map<String, List<Identified>> resolveMongoEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
