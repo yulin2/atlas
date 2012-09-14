@@ -5,8 +5,8 @@ import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.media.entity.ContainerTranslator;

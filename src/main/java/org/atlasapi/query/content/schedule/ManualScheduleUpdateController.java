@@ -8,7 +8,7 @@ import java.util.concurrent.Future;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ScheduleEntry;
 import org.atlasapi.persistence.content.ContentResolver;

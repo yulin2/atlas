@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite;
 
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;

@@ -3,8 +3,8 @@ package org.atlasapi.equiv.results.persistence;
 import java.util.List;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.cache.Cache;

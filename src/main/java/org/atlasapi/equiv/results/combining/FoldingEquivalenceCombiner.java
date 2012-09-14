@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 public abstract class FoldingEquivalenceCombiner<T extends Content> implements ScoreCombiner<T> {
 

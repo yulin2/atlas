@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.topic.TopicContentLister;

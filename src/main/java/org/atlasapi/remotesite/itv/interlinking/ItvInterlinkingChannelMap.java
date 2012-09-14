@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.itv.interlinking;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelResolver;
 
 import com.google.common.collect.Maps;
 

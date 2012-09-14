@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.update;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.collect.HashBasedTable;

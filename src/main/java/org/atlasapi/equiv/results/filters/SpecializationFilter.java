@@ -2,7 +2,7 @@ package org.atlasapi.equiv.results.filters;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Specialization;
 
 import com.google.common.base.Objects;

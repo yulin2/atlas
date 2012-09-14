@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.output.AtlasErrorSummary;

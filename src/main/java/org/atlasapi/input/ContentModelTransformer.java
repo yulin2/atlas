@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Actor;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Described;

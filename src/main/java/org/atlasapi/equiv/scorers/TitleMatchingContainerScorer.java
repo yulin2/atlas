@@ -5,7 +5,7 @@ import java.util.Set;
 import org.atlasapi.equiv.generators.ContentTitleScorer;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.content.Container;
 
 import com.google.common.base.Functions;
 

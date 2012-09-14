@@ -20,8 +20,8 @@
 //import java.util.concurrent.TimeUnit;
 //
 //import org.apache.commons.lang.StringUtils;
-//import org.atlasapi.media.entity.Container;
-//import org.atlasapi.media.entity.Content;
+//import org.atlasapi.media.content.Container;
+//import org.atlasapi.media.content.Content;
 //import org.atlasapi.media.entity.ContentGroup;
 //import org.atlasapi.media.entity.Encoding;
 //import org.atlasapi.media.entity.Identified;

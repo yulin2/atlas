@@ -14,7 +14,7 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.uri;
 
-  import org.atlasapi.media.entity.Container;
+  import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentWriter;

@@ -2,7 +2,7 @@
 //
 //import java.util.List;
 //
-//import org.atlasapi.media.entity.Content;
+//import org.atlasapi.media.content.Content;
 //import org.atlasapi.media.entity.ContentGroup;
 //import org.atlasapi.media.entity.Item;
 //import org.atlasapi.persistence.content.ContentWriter;

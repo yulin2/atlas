@@ -9,12 +9,12 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
@@ -77,7 +77,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
         if (schedule == null) {
             return;
         }
-        for (ScheduleChannel channel : schedule.scheduleChannels()) {
+        for (ChannelSchedule channel : schedule.channelSchedules()) {
             for (Item scheduleItem : channel.items()) {
                 if (scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
                     scores.addEquivalent((Item) scheduleItem, Score.valueOf(1.0));

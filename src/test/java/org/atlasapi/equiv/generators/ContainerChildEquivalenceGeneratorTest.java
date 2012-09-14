@@ -14,11 +14,14 @@ import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -26,11 +29,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
+import com.metabroadcast.common.time.DateTimeZones;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ContainerChildEquivalenceGeneratorTest extends TestCase {
 
-    private static final ImmutableSet<String> NO_CANDIDATES = ImmutableSet.<String>of();
+    private static final ImmutableSet<Id> NO_CANDIDATES = ImmutableSet.<Id>of();
     
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final EquivalenceSummaryStore equivSummaryStore = mock(EquivalenceSummaryStore.class);
@@ -40,31 +44,41 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
     @Test
     public void testExtractsContainerFromStrongItemEquivalents() {
         
-        Container subject = new Container("subject","s",Publisher.BBC);
-        subject.setChildRefs(ImmutableSet.of(
-            new Episode("child1","c1",Publisher.BBC).childRef(),
-            new Episode("child2","c2",Publisher.BBC).childRef()
-        ));
-        Container equiv1 = new Container("equivalent1","e1",Publisher.PA);
-        Container equiv2 = new Container("equivalent2","e2",Publisher.ITV);
+        Container subject = new Brand("subject","s",Publisher.BBC);
+        subject.setId(1);
         
-        when(equivSummaryStore.summariesForUris(argThat(hasItems("child1","child2")))).thenReturn(
+        Episode child1 = new Episode("child1","c1",Publisher.BBC);
+        child1.setId(2);
+        child1.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
+        
+        Episode child2 = new Episode("child2","c2",Publisher.BBC);
+        child2.setId(3);
+        child2.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
+        
+        subject.setChildRefs(ImmutableSet.of(child1.childRef(), child2.childRef()));
+        
+        Container equiv1 = new Brand("equivalent1","e1",Publisher.PA);
+        equiv1.setId(4);
+        Container equiv2 = new Brand("equivalent2","e2",Publisher.ITV);
+        equiv2.setId(5);
+        
+        when(equivSummaryStore.summariesForIds(argThat(hasItems(child1.getId(),child2.getId())))).thenReturn(
             ImmutableOptionalMap.fromMap(ImmutableMap.of(
-                "child1",
-                new EquivalenceSummary("child1","subject",NO_CANDIDATES,ImmutableMap.of(
-                    Publisher.BBC, new ContentRef("equivItem",Publisher.BBC,""),
-                    Publisher.PA, new ContentRef("equivC1", Publisher.PA, "equivalent1"))),
-                "child2",
-                new EquivalenceSummary("child2","subject",NO_CANDIDATES,ImmutableMap.of(
-                    Publisher.BBC, new ContentRef("equivC2",Publisher.BBC,"equivalent2"),
-                    Publisher.PA, new ContentRef("equivC1",Publisher.PA, "equivalent1"))
+                child1.getId(),
+                new EquivalenceSummary(child1.getId(), subject.getId(),NO_CANDIDATES,ImmutableMap.of(
+                    Publisher.BBC, new ContentRef(Id.valueOf(6),Publisher.BBC,null),
+                    Publisher.PA, new ContentRef(Id.valueOf(7), Publisher.PA, equiv1.getId()))),
+                child2.getId(),
+                new EquivalenceSummary(child1.getId(), subject.getId(),NO_CANDIDATES,ImmutableMap.of(
+                    Publisher.BBC, new ContentRef(Id.valueOf(8),Publisher.BBC, equiv2.getId()),
+                    Publisher.PA, new ContentRef(Id.valueOf(7),Publisher.PA,  equiv1.getId()))
                 )
             ))
         );
         
         ResolvedContent content = ResolvedContent.builder()
-                .put(equiv1.getCanonicalUri(), equiv1)
-                .put(equiv2.getCanonicalUri(), equiv2)
+                .put(equiv1.getId(), equiv1)
+                .put(equiv2.getId(), equiv2)
                 .build();
         
         when(resolver.findByCanonicalUris(argThat(hasItems("equivalent1","equivalent2")))).thenReturn(

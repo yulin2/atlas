@@ -14,7 +14,7 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import org.atlasapi.media.entity.Certificate;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Encoding;

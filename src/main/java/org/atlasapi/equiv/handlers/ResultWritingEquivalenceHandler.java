@@ -2,7 +2,7 @@ package org.atlasapi.equiv.handlers;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 public class ResultWritingEquivalenceHandler<T extends Content> implements EquivalenceResultHandler<T> {
 
