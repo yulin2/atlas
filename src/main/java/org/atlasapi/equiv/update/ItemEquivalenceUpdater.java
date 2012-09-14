@@ -15,7 +15,6 @@ import org.atlasapi.equiv.results.scores.ScoredEquivalentsMerger;
 import org.atlasapi.equiv.scorers.EquivalenceScorer;
 import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -25,20 +24,18 @@ import com.google.common.collect.Iterables;
 
 public class ItemEquivalenceUpdater<T extends Item> implements EquivalenceUpdater<T> {
 
-    public static <T extends Item> Builder<T> builder(EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
-        return new Builder<T>(resultBuilder, log);
+    public static <T extends Item> Builder<T> builder(EquivalenceResultBuilder<T> resultBuilder) {
+        return new Builder<T>(resultBuilder);
     }
     
     public static class Builder<T extends Item> {
         
         private final EquivalenceResultBuilder<T> resultBuilder;
-        private final AdapterLog log;
         private ImmutableSet<EquivalenceGenerator<T>> generators = ImmutableSet.of();
         private ImmutableSet<EquivalenceScorer<T>> scorers = ImmutableSet.of();
 
-        public Builder(EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
+        public Builder(EquivalenceResultBuilder<T> resultBuilder) {
             this.resultBuilder = checkNotNull(resultBuilder);
-            this.log = checkNotNull(log);
         }
 
         public Builder<T> withGenerator(EquivalenceGenerator<T> generator) {
@@ -62,7 +59,7 @@ public class ItemEquivalenceUpdater<T extends Item> implements EquivalenceUpdate
         }
         
         public ItemEquivalenceUpdater<T> build() {
-            return new ItemEquivalenceUpdater<T>(generators, scorers, resultBuilder, log);
+            return new ItemEquivalenceUpdater<T>(generators, scorers, resultBuilder);
         }
         
     }
@@ -80,9 +77,9 @@ public class ItemEquivalenceUpdater<T extends Item> implements EquivalenceUpdate
         }
     };
 
-    public ItemEquivalenceUpdater(Iterable<EquivalenceGenerator<T>> generators, Iterable<EquivalenceScorer<T>> scorers, EquivalenceResultBuilder<T> resultBuilder, AdapterLog log) {
-        this.generators = EquivalenceGenerators.from(generators,log);
-        this.scorers = EquivalenceScorers.from(scorers,log);
+    public ItemEquivalenceUpdater(Iterable<EquivalenceGenerator<T>> generators, Iterable<EquivalenceScorer<T>> scorers, EquivalenceResultBuilder<T> resultBuilder) {
+        this.generators = EquivalenceGenerators.from(generators);
+        this.scorers = EquivalenceScorers.from(scorers);
         this.resultBuilder = resultBuilder;
     }
     

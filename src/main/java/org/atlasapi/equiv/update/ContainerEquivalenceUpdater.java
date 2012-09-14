@@ -29,7 +29,6 @@ import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -47,19 +46,17 @@ public class ContainerEquivalenceUpdater implements EquivalenceUpdater<Container
         private final ContentResolver contentResolver;
         private final LiveEquivalenceResultStore resultStore;
         private final EquivalenceResultHandler<Item> itemResultHandler;
-        private final AdapterLog log; 
         
         private EquivalenceResultBuilder<Container> containerResultBuilder;
         private Iterable<EquivalenceGenerator<Container>> generators = ImmutableSet.of(); 
         private Iterable<EquivalenceScorer<Container>> scorers = ImmutableSet.of();
 
         public Builder(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
-                EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, AdapterLog log) {
+                EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler) {
                     this.contentResolver = contentResolver;
                     this.resultStore = resultStore;
                     this.containerResultBuilder = containerResultBuilder;
                     this.itemResultHandler = itemResultHandler;
-                    this.log = log;
         }
         
         public Builder withResultBuilder(EquivalenceResultBuilder<Container> builder) {
@@ -88,15 +85,15 @@ public class ContainerEquivalenceUpdater implements EquivalenceUpdater<Container
         }
         
         public ContainerEquivalenceUpdater build() {
-            EquivalenceGenerators<Container> generatorSet = new EquivalenceGenerators<Container>(ImmutableSet.copyOf(generators), log);
-            EquivalenceScorers<Container> scorerSet = new EquivalenceScorers<Container>(ImmutableSet.copyOf(scorers), log);
+            EquivalenceGenerators<Container> generatorSet = new EquivalenceGenerators<Container>(ImmutableSet.copyOf(generators));
+            EquivalenceScorers<Container> scorerSet = new EquivalenceScorers<Container>(ImmutableSet.copyOf(scorers));
             return new ContainerEquivalenceUpdater(contentResolver, resultStore, containerResultBuilder, itemResultHandler, generatorSet, scorerSet);
         }
     }
     
     public static Builder containerUpdater(ContentResolver contentResolver, LiveEquivalenceResultStore resultStore, 
-            EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler, AdapterLog log) {
-        return new Builder(contentResolver, resultStore, containerResultBuilder, itemResultHandler, log);
+            EquivalenceResultBuilder<Container> containerResultBuilder, EquivalenceResultHandler<Item> itemResultHandler) {
+        return new Builder(contentResolver, resultStore, containerResultBuilder, itemResultHandler);
     }
     
     public static final String ITEM_UPDATER_NAME = ContainerChildEquivalenceGenerator.NAME;
