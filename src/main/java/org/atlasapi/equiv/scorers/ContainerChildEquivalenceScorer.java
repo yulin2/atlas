@@ -16,7 +16,6 @@ import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -35,21 +34,21 @@ public class ContainerChildEquivalenceScorer implements EquivalenceScorer<Contai
     private final ContentResolver resolver;
     private final ItemResultContainerResolver itemResultContainerResolver;
 
-    public ContainerChildEquivalenceScorer(EquivalenceUpdater<Item> itemUpdater, LiveEquivalenceResultStore childResultStore, ContentResolver resolver, AdapterLog log) {
+    public ContainerChildEquivalenceScorer(EquivalenceUpdater<Item> itemUpdater, LiveEquivalenceResultStore childResultStore, ContentResolver resolver) {
         this.itemUpdater = itemUpdater;
         this.childResultStore = childResultStore;
         this.resolver = resolver;
-        this.itemResultContainerResolver = new ItemResultContainerResolver(resolver, NAME, log);
+        this.itemResultContainerResolver = new ItemResultContainerResolver(resolver, NAME);
     }
     
     @Override
-    public ScoredCandidates<Container> score(Container subject, Iterable<Container> suggestions, ResultDescription desc) {
-        List<Item> childrenOfSuggestedContainers = childrenOf(suggestions);
+    public ScoredCandidates<Container> score(Container subject, Iterable<Container> candidates, ResultDescription desc) {
+        List<Item> childrenOfCanidates = childrenOf(candidates);
         List<Item> childrenOfSubject = childrenOf(ImmutableList.of(subject));
         
         Builder<EquivalenceResult<Item>> childResults = ImmutableSet.builder();
         for (Item item : childrenOfSubject) {
-            childResults.add(childResultStore.store(itemUpdater.updateEquivalences(item, Optional.of(childrenOfSuggestedContainers))));
+            childResults.add(childResultStore.store(itemUpdater.updateEquivalences(item, Optional.of(childrenOfCanidates))));
         }
         return extractContainersFrom(childResults.build(), desc);
     }

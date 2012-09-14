@@ -76,7 +76,6 @@ import org.atlasapi.media.entity.Song;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +100,6 @@ public class EquivModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired DatabasedMongo db;
-    private @Autowired AdapterLog log;
 
     public @Bean RecentEquivalenceResultStore equivalenceResultStore() {
         return new RecentEquivalenceResultStore(new FileEquivalenceResultStore(new File(equivResultsDirectory)));
@@ -138,11 +136,11 @@ public class EquivModule {
         
         EquivalenceResultBuilder<Item> resultBuilder = new ConfiguredEquivalenceResultBuilder<Item>();
         
-        return new ItemEquivalenceUpdater<Item>(itemGenerators, itemScorers, resultBuilder, log);
+        return new ItemEquivalenceUpdater<Item>(itemGenerators, itemScorers, resultBuilder);
     }
     
     public ContainerEquivalenceUpdater.Builder containerUpdaterBuilder(Iterable<Publisher> publishers) {
-        return containerUpdater(contentResolver, liveResultsStore(), new ConfiguredEquivalenceResultBuilder<Container>(), this.<Item>standardResultHandlers(publishers), log);
+        return containerUpdater(contentResolver, liveResultsStore(), new ConfiguredEquivalenceResultBuilder<Container>(), this.<Item>standardResultHandlers(publishers));
     }
 
     public @Bean EquivalenceUpdater<Content> contentUpdater() {
@@ -160,9 +158,8 @@ public class EquivModule {
         TitleMatchingEquivalenceScoringGenerator<Container> titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, acceptablePublishers);
         EquivalenceUpdater<Content> standardContainerEquivalenceUpdater = resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
                 .withGenerators(ImmutableSet.of(
-                    titleScoringGenerator,
-                    new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)
-                ))
+                        titleScoringGenerator,
+                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore())))
                 .withScorer(titleScoringGenerator)
                 .build(), 
             itemUpdater), 
@@ -174,28 +171,26 @@ public class EquivModule {
         }
         
         publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(new RootEquivalenceUpdater(NullEquivalenceUpdater.<Container>get(),
-                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
+                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>())
                     .withGenerators(ImmutableSet.of(new RadioTimesFilmEquivalenceGenerator(contentResolver), new FilmEquivalenceGenerator(searchResolver)))
                     .build()),ImmutableSet.of(RADIO_TIMES,PA,PREVIEW_NETWORKS)));
         
         publisherUpdaters.put(BBC_REDUX, resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
                 .withGenerators(ImmutableSet.of(
                         titleScoringGenerator,
-                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
+                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore())))
                 .withScorer(titleScoringGenerator)
                 .build(), itemUpdater),Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
         );
         
         publisherUpdaters.put(ITUNES, resultHandlingUpdater(new RootEquivalenceUpdater(
-            containerUpdaterBuilder(acceptablePublishers)
-                .withGenerator(titleScoringGenerator)
-                .withScorers(ImmutableSet.of(
-                    titleScoringGenerator, 
-                    new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
-                    new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
-                ))
-                .build(), 
-        itemUpdater),acceptablePublishers));
+                containerUpdaterBuilder(acceptablePublishers)
+                    .withGenerator(titleScoringGenerator)
+                    .withScorers(ImmutableSet.of(titleScoringGenerator, 
+                            new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver),
+                            new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)))
+                    .build(), 
+                itemUpdater),acceptablePublishers));
         
         Set<Publisher> facebookPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK));
         publisherUpdaters.put(FACEBOOK, resultHandlingUpdater(new RootEquivalenceUpdater(
@@ -220,7 +215,7 @@ public class EquivModule {
         publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(
             new RootEquivalenceUpdater(
                 NullEquivalenceUpdater.<Container>get(),
-                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
+                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>())
                     .withGenerators(ImmutableSet.of(
                         new RadioTimesFilmEquivalenceGenerator(contentResolver), 
                         new FilmEquivalenceGenerator(searchResolver)
@@ -235,7 +230,7 @@ public class EquivModule {
             new RootEquivalenceUpdater(containerUpdaterBuilder(reduxPublishers)
                 .withGenerators(ImmutableSet.of(
                     titleScoringGenerator,
-                    new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)
+                    new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore())
                 ))
                 .withScorer(titleScoringGenerator)
                 .build(), 
@@ -249,7 +244,7 @@ public class EquivModule {
                 .withGenerator(titleScoringGenerator)
                 .withScorers(ImmutableSet.of(
                     titleScoringGenerator, 
-                    new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
+                    new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver),
                     new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
                 ))
                 .build(), 
@@ -262,7 +257,7 @@ public class EquivModule {
                     ItemEquivalenceUpdater.builder(DefaultEquivalenceResultBuilder.resultBuilder(
                         NullScoreAwareAveragingCombiner.<Item>get(), 
                         new MusicEquivalenceExtractor()
-                    ), log)
+                    ))
                     .withGenerator(
                         new TitleMatchingEquivalenceScoringGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform(), 100) 
                     )
