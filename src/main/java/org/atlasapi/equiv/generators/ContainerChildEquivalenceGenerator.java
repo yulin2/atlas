@@ -18,7 +18,6 @@ import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -37,11 +36,11 @@ public class ContainerChildEquivalenceGenerator implements EquivalenceGenerator<
     private final LiveEquivalenceResultStore resultStore;
     private ItemResultContainerResolver itemResultContainerResolver;
     
-    public ContainerChildEquivalenceGenerator(ContentResolver contentResolver, EquivalenceUpdater<Item> itemUpdater, LiveEquivalenceResultStore resultStore, AdapterLog log) {
+    public ContainerChildEquivalenceGenerator(ContentResolver contentResolver, EquivalenceUpdater<Item> itemUpdater, LiveEquivalenceResultStore resultStore) {
         this.contentResolver = contentResolver;
         this.itemUpdater = itemUpdater;
         this.resultStore = resultStore;
-        this.itemResultContainerResolver = new ItemResultContainerResolver(contentResolver, NAME, log);
+        this.itemResultContainerResolver = new ItemResultContainerResolver(contentResolver, NAME);
     }
     
     @Override

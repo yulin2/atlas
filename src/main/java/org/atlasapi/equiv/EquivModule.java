@@ -70,7 +70,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
-import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +94,6 @@ public class EquivModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired DatabasedMongo db;
-    private @Autowired AdapterLog log;
 
     public @Bean RecentEquivalenceResultStore equivalenceResultStore() {
         return new RecentEquivalenceResultStore(new FileEquivalenceResultStore(new File(equivResultsDirectory)));
@@ -132,11 +130,11 @@ public class EquivModule {
         
         EquivalenceResultBuilder<Item> resultBuilder = new ConfiguredEquivalenceResultBuilder<Item>();
         
-        return new ItemEquivalenceUpdater<Item>(itemGenerators, itemScorers, resultBuilder, log);
+        return new ItemEquivalenceUpdater<Item>(itemGenerators, itemScorers, resultBuilder);
     }
     
     public ContainerEquivalenceUpdater.Builder containerUpdaterBuilder(Iterable<Publisher> publishers) {
-        return containerUpdater(contentResolver, liveResultsStore(), new ConfiguredEquivalenceResultBuilder<Container>(), this.<Item>standardResultHandlers(publishers), log);
+        return containerUpdater(contentResolver, liveResultsStore(), new ConfiguredEquivalenceResultBuilder<Container>(), this.<Item>standardResultHandlers(publishers));
     }
 
     public @Bean EquivalenceUpdater<Content> contentUpdater() {
@@ -152,7 +150,7 @@ public class EquivModule {
         EquivalenceUpdater<Content> standardContainerEquivalenceUpdater = resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
                 .withGenerators(ImmutableSet.of(
                         titleScoringGenerator,
-                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
+                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore())))
                 .withScorer(titleScoringGenerator)
                 .build(), itemUpdater), acceptablePublishers);
         
@@ -162,14 +160,14 @@ public class EquivModule {
         }
         
         publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(new RootEquivalenceUpdater(NullEquivalenceUpdater.<Container>get(),
-                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
+                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>())
                     .withGenerators(ImmutableSet.of(new RadioTimesFilmEquivalenceGenerator(contentResolver), new FilmEquivalenceGenerator(searchResolver)))
                     .build()),ImmutableSet.of(RADIO_TIMES,PA,PREVIEW_NETWORKS)));
         
         publisherUpdaters.put(BBC_REDUX, resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
                 .withGenerators(ImmutableSet.of(
                         titleScoringGenerator,
-                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
+                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore())))
                 .withScorer(titleScoringGenerator)
                 .build(), itemUpdater),Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
         );
@@ -178,7 +176,7 @@ public class EquivModule {
                 containerUpdaterBuilder(acceptablePublishers)
                     .withGenerator(titleScoringGenerator)
                     .withScorers(ImmutableSet.of(titleScoringGenerator, 
-                            new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
+                            new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver),
                             new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)))
                     .build(), 
                 itemUpdater),acceptablePublishers));

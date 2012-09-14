@@ -24,7 +24,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.logging.NullAdapterLog;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -49,7 +48,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
     private final ContentResolver contentResolver = context.mock(ContentResolver.class);
     private final LiveEquivalenceResultStore resultStore = context.mock(LiveEquivalenceResultStore.class);
     
-    private final ContainerChildEquivalenceGenerator generator = new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, resultStore, new NullAdapterLog());
+    private final ContainerChildEquivalenceGenerator generator = new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, resultStore);
     
     @Test
     public void testAttemptsToResolveAllChildrenOfContainer() {

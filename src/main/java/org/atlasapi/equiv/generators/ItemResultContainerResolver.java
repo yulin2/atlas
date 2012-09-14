@@ -1,7 +1,5 @@
 package org.atlasapi.equiv.generators;
 
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -16,22 +14,23 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.logging.AdapterLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 
 public class ItemResultContainerResolver {
+    
+    private static final Logger log = LoggerFactory.getLogger(ItemResultContainerResolver.class);
 
     private final ContentResolver contentResolver;
-    private final AdapterLog log;
     private final String source;
 
-    public ItemResultContainerResolver(ContentResolver contentResolver, String source, AdapterLog log) {
+    public ItemResultContainerResolver(ContentResolver contentResolver, String source) {
         this.contentResolver = contentResolver;
         this.source = source;
-        this.log = log;
     }
     
     /* Calculates equivalence scores for the containers of items that are strongly equivalent to the items of the subject container.
@@ -79,7 +78,7 @@ public class ItemResultContainerResolver {
         Maybe<Identified> resolved = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
         
         if(resolved.isNothing() || !(resolved.requireValue() instanceof Container)) {
-            log.record(warnEntry().withSource(getClass()).withDescription("Couldn't resolve container" + uri));
+            log.warn("Couldn't resolve container {}", uri);
             return Maybe.nothing();
         }
         
