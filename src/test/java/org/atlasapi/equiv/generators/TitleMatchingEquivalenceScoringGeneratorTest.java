@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.DefaultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
@@ -44,9 +44,9 @@ public class TitleMatchingEquivalenceScoringGeneratorTest {
         };
         
         TitleMatchingEquivalenceScoringGenerator generator = new TitleMatchingEquivalenceScoringGenerator(searchResolver);
-        ScoredEquivalents<Container> generated = generator.generate(subject, new DefaultDescription());
+        ScoredCandidates<Container> generated = generator.generate(subject, new DefaultDescription());
         
-        assertTrue(generated.equivalents().keySet().size() == 1);
+        assertTrue(generated.candidates().keySet().size() == 1);
         
     }
 

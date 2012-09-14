@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -65,8 +65,8 @@ public class FilmEquivalenceGeneratorTest extends TestCase {
                 will(returnValue(ImmutableList.<Identified> of(anotherFilm)));
         }});
         
-        ScoredEquivalents<Item> scoredEquivalents = generator.generate(subjectFilm , new DefaultDescription());
-        Map<Item, Score> equivalentsScores = scoredEquivalents.equivalents();
+        ScoredCandidates<Item> scoredEquivalents = generator.generate(subjectFilm , new DefaultDescription());
+        Map<Item, Score> equivalentsScores = scoredEquivalents.candidates();
         assertThat(equivalentsScores.get(anotherFilm), is(equalTo(score)));
     }
 

@@ -21,7 +21,7 @@ import java.util.Map;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -65,7 +65,7 @@ public class QueryModule {
     private TopicContentUriLister topicContentUriLister;
     @Autowired
     @Qualifier("contentUpdater")
-    private ContentEquivalenceUpdater<Content> equivUpdater;
+    private EquivalenceUpdater<Content> equivUpdater;
     //
     @Value("${applications.enabled}")
     private String applicationsEnabled;
@@ -106,4 +106,5 @@ public class QueryModule {
         };
 
     }
+
 }

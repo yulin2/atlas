@@ -9,12 +9,12 @@ import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Optional;
 
-public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content> {
+public class RootEquivalenceUpdater implements EquivalenceUpdater<Content> {
 
-    private final ContentEquivalenceUpdater<Container> containerUpdater;
-    private final ContentEquivalenceUpdater<Item> itemUpdater;
+    private final EquivalenceUpdater<Container> containerUpdater;
+    private final EquivalenceUpdater<Item> itemUpdater;
 
-    public RootEquivalenceUpdater(ContentEquivalenceUpdater<Container> containerUpdater, ContentEquivalenceUpdater<Item> itemUpdater) {
+    public RootEquivalenceUpdater(EquivalenceUpdater<Container> containerUpdater, EquivalenceUpdater<Item> itemUpdater) {
         this.containerUpdater = containerUpdater;
         this.itemUpdater = itemUpdater;
     }

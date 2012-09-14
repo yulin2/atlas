@@ -3,7 +3,7 @@ package org.atlasapi.equiv.scorers;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -12,10 +12,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
-public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<Item> {
+public class SequenceItemEquivalenceScorer implements EquivalenceScorer<Item> {
 
     @Override
-    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
+    public ScoredCandidates<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Sequence");
 
         desc.appendText("%s suggestions", Iterables.size(suggestions));

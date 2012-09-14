@@ -11,8 +11,8 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
 import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
@@ -27,17 +27,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGenerator<Container> {
+public class ContainerChildEquivalenceGenerator implements EquivalenceGenerator<Container> {
     
     private static final int ITEM_SCORE_SCALER = 20;
     public static final String NAME = "Item";
     
     private final ContentResolver contentResolver;
-    private final ContentEquivalenceUpdater<Item> itemUpdater;
+    private final EquivalenceUpdater<Item> itemUpdater;
     private final LiveEquivalenceResultStore resultStore;
     private ItemResultContainerResolver itemResultContainerResolver;
     
-    public ContainerChildEquivalenceGenerator(ContentResolver contentResolver, ContentEquivalenceUpdater<Item> itemUpdater, LiveEquivalenceResultStore resultStore, AdapterLog log) {
+    public ContainerChildEquivalenceGenerator(ContentResolver contentResolver, EquivalenceUpdater<Item> itemUpdater, LiveEquivalenceResultStore resultStore, AdapterLog log) {
         this.contentResolver = contentResolver;
         this.itemUpdater = itemUpdater;
         this.resultStore = resultStore;
@@ -45,7 +45,7 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
     }
     
     @Override
-    public ScoredEquivalents<Container> generate(Container content, ResultDescription desc) {
+    public ScoredCandidates<Container> generate(Container content, ResultDescription desc) {
         return extractContainersFrom(calculateContainerChildResults(content, desc), desc);
     }
 
@@ -76,11 +76,11 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
     /* Calculates equivalence scores for the containers of items that are strongly equivalent to the items of the subject container.
      * Scores are normalized by the number of items in the container. 
      */
-    private ScoredEquivalents<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults, ResultDescription desc) {
+    private ScoredCandidates<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults, ResultDescription desc) {
 
         desc.startStage("Extracting containers from child results");
         
-        ScoredEquivalents<Container> containerScores = itemResultContainerResolver.extractContainersFrom(childResults);
+        ScoredCandidates<Container> containerScores = itemResultContainerResolver.extractContainersFrom(childResults);
         
         ScaledScoredEquivalents<Container> scaled = ScaledScoredEquivalents.scale(containerScores, new Function<Double, Double>() {
             @Override
@@ -89,7 +89,7 @@ public class ContainerChildEquivalenceGenerator implements ContentEquivalenceGen
             }
         });
         
-        for (Entry<Container, Score> result : scaled.equivalents().entrySet()) {
+        for (Entry<Container, Score> result : scaled.candidates().entrySet()) {
             desc.appendText("%s (%s) scored %s", result.getKey().getTitle(), result.getKey().getCanonicalUri(), result.getValue());
         }
         desc.finishStage();

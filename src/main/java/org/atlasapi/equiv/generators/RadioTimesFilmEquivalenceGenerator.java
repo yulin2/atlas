@@ -9,7 +9,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -18,7 +18,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 
-public class RadioTimesFilmEquivalenceGenerator implements ContentEquivalenceGenerator<Item> {
+public class RadioTimesFilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
 
     private final Pattern rtFilmUriPattern = Pattern.compile("http://radiotimes.com/films/(\\d+)");
     private final String paFilmUriPrefix = "http://pressassociation.com/films/";
@@ -30,7 +30,7 @@ public class RadioTimesFilmEquivalenceGenerator implements ContentEquivalenceGen
     }
     
     @Override
-    public ScoredEquivalents<Item> generate(Item content, ResultDescription desc) {
+    public ScoredCandidates<Item> generate(Item content, ResultDescription desc) {
         checkArgument(content instanceof Film, "Content not Film:" + content.getCanonicalUri());
         
         ScoredEquivalentsBuilder<Item> results = DefaultScoredEquivalents.fromSource("Film");

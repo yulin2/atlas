@@ -6,7 +6,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
@@ -26,7 +26,7 @@ import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.time.DateTimeZones;
 
-public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquivalenceGenerator<Item>{
+public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGenerator<Item>{
 
     private final ScheduleResolver resolver;
     private final Set<Publisher> supportedPublishers;
@@ -45,7 +45,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
     }
 
     @Override
-    public ScoredEquivalents<Item> generate(Item content, ResultDescription desc) {
+    public ScoredCandidates<Item> generate(Item content, ResultDescription desc) {
 
         ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
 
@@ -115,8 +115,8 @@ public class BroadcastMatchingItemEquivalenceGenerator implements ContentEquival
 		.add("http://www.bbc.co.uk/services/radio4/lw")
      .build();
 
-    private ScoredEquivalents<Item> scale(ScoredEquivalents<Item> scores, final int broadcasts, final ResultDescription desc) {
-        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformEntries(scores.equivalents(), new EntryTransformer<Item, Score, Score>() {
+    private ScoredCandidates<Item> scale(ScoredCandidates<Item> scores, final int broadcasts, final ResultDescription desc) {
+        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformEntries(scores.candidates(), new EntryTransformer<Item, Score, Score>() {
             @Override
             public Score transformEntry(Item key, Score value) {
                 desc.appendText("%s matched %s broadcasts", key.getCanonicalUri(), value);

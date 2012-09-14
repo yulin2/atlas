@@ -10,7 +10,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -37,7 +37,7 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
     private final Mockery context = new Mockery();
     
     @SuppressWarnings("unchecked") 
-    private final ContentEquivalenceUpdater<Content> updater = context.mock(ContentEquivalenceUpdater.class);
+    private final EquivalenceUpdater<Content> updater = context.mock(EquivalenceUpdater.class);
     private final ScheduleTaskProgressStore progressStore = context.mock(ScheduleTaskProgressStore.class);
 
     private final Item paItemOne = new Item("pa1", "pa1c", Publisher.PA);

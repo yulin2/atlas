@@ -5,22 +5,22 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.lookup.LookupWriter;
 import org.joda.time.Duration;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 public class LookupWritingEquivalenceHandler<T extends Content> implements EquivalenceResultHandler<T> {
  
     private final LookupWriter writer;
-    private final Cache<String, String> seenAsEquiv;
+    private final LoadingCache<String, String> seenAsEquiv;
     private final Set<Publisher> publishers;
     
     public LookupWritingEquivalenceHandler(LookupWriter writer, Iterable<Publisher> publishers) {
@@ -41,7 +41,7 @@ public class LookupWritingEquivalenceHandler<T extends Content> implements Equiv
     @Override
     public void handle(EquivalenceResult<T> result) {
         
-        Iterable<T> equivs = Iterables.transform(result.strongEquivalences().values(),ScoredEquivalent.<T>toEquivalent());
+        Iterable<T> equivs = Iterables.transform(result.strongEquivalences().values(),ScoredCandidate.<T>toEquivalent());
         
         //abort writing if seens as equiv and not equiv to anything
         if(seenAsEquiv.asMap().containsKey(result.target().getCanonicalUri()) && Iterables.isEmpty(equivs)) {

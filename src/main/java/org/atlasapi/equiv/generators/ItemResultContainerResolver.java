@@ -9,8 +9,8 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -37,7 +37,7 @@ public class ItemResultContainerResolver {
     /* Calculates equivalence scores for the containers of items that are strongly equivalent to the items of the subject container.
      * Scores are normalized by the number of items in the container. 
      */
-    public ScoredEquivalents<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults) {
+    public ScoredCandidates<Container> extractContainersFrom(Set<EquivalenceResult<Item>> childResults) {
 
         //Local cache, hopefully the same containers will be resolved multiple times.
         Map<String, Maybe<Container>> containerCache = Maps.newHashMap();
@@ -45,10 +45,10 @@ public class ItemResultContainerResolver {
         ScoredEquivalentsBuilder<Container> results = DefaultScoredEquivalents.fromSource(source);
         
         for (EquivalenceResult<Item> equivalenceResult : childResults) {
-            for (ScoredEquivalent<Item> strongEquivalent : equivalenceResult.strongEquivalences().values()) {
+            for (ScoredCandidate<Item> strongEquivalent : equivalenceResult.strongEquivalences().values()) {
                 Score score = strongEquivalent.score();
                 if (score.isRealScore()) {
-                    ParentRef parentEquivalent = strongEquivalent.equivalent().getContainer();
+                    ParentRef parentEquivalent = strongEquivalent.candidate().getContainer();
                     Maybe<Container> resolvedContainer = resolve(parentEquivalent, containerCache);
 
                     if (resolvedContainer.hasValue()) {

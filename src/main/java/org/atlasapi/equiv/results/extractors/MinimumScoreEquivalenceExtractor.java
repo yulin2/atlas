@@ -1,7 +1,7 @@
 package org.atlasapi.equiv.results.extractors;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Content;
 
 public class MinimumScoreEquivalenceExtractor<T extends Content> extends FilteringEquivalenceExtractor<T> {
@@ -17,10 +17,10 @@ public class MinimumScoreEquivalenceExtractor<T extends Content> extends Filteri
         super(link, 
         new EquivalenceFilter<T>() {
             @Override
-            public boolean apply(ScoredEquivalent<T> input, T target, ResultDescription desc) {
+            public boolean apply(ScoredCandidate<T> input, T target, ResultDescription desc) {
                 boolean result = input.score().isRealScore() && input.score().asDouble() > minimum;
                 if(!result) {
-                    desc.appendText("%s (%s) removed", input.equivalent().getTitle(), input.equivalent().getCanonicalUri());
+                    desc.appendText("%s (%s) removed", input.candidate().getTitle(), input.candidate().getCanonicalUri());
                 }
                 return result;
             }
