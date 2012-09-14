@@ -7,7 +7,6 @@ import org.atlasapi.equiv.results.scores.ScoredCandidate;
 
 import com.google.common.base.Optional;
 
-
 public interface EquivalenceExtractor<T> {
 
     /**

@@ -2,7 +2,7 @@ package org.atlasapi.equiv.results.filters;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 
 public class MinimumScoreFilter<T extends Content>  extends AbstractEquivalenceFilter<T> {
 

@@ -11,7 +11,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 

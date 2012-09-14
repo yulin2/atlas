@@ -15,7 +15,7 @@
 //
 //package org.atlasapi.remotesite.bbc;
 //
-//import org.atlasapi.media.entity.Container;
+//import org.atlasapi.media.content.Container;
 //import org.atlasapi.media.entity.Item;
 //import org.atlasapi.persistence.system.RemoteSiteClient;
 //import org.atlasapi.remotesite.ContentExtractor;

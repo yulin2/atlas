@@ -9,7 +9,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

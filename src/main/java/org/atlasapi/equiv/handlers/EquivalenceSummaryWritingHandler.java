@@ -11,7 +11,7 @@ import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;

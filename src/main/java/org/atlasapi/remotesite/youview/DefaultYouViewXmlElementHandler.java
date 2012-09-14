@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.youview;
 
 import nu.xom.Element;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;

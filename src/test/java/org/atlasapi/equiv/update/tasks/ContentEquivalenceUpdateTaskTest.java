@@ -16,7 +16,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -25,6 +25,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -35,6 +36,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimap;
+import com.metabroadcast.common.time.DateTimeZones;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ContentEquivalenceUpdateTaskTest extends TestCase {
@@ -71,6 +73,8 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
         
         Brand paBrand = new Brand("paBrand", "paBrand", Publisher.PA);
         Episode paEp = new Episode("episode", "episode", Publisher.PA);
+        paEp.setId(1);
+        paEp.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
         paBrand.setChildRefs(ImmutableList.of(paEp.childRef()));
 
         ContentLister contentLister = listerForContent(ImmutableMultimap.<Publisher,Content>builder()
@@ -84,7 +88,7 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
             .thenReturn(ContentListingProgress.START);
         
         when(contentResolver.findByCanonicalUris(argThat(hasItem("episode"))))
-            .thenReturn(ResolvedContent.builder().put(paEp.getCanonicalUri(), paEp).build());
+            .thenReturn(ResolvedContent.builder().put(paEp.getId(), paEp).build());
         
         new ContentEquivalenceUpdateTask(contentLister, contentResolver, progressStore, updater, ImmutableSet.<String>of()).forPublishers(PA, BBC, C4).run();
         

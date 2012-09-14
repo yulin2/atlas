@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;

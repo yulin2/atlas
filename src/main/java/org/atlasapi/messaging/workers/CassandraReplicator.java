@@ -1,7 +1,7 @@
 package org.atlasapi.messaging.workers;
 
 import java.util.Arrays;
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.persistence.content.ContentResolver;

@@ -7,7 +7,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
