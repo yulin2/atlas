@@ -10,7 +10,7 @@ import java.util.List;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Item;
 import org.junit.Test;
@@ -93,12 +93,12 @@ public class CrewMemberScorerTest {
         return new CrewMember().withName(name);
     }
 
-    protected ScoredEquivalents<Item> score(Item subject, Item candidate) {
+    protected ScoredCandidates<Item> score(Item subject, Item candidate) {
         return scorer.score(subject, ImmutableSet.of(candidate), desc);
     }
 
-    protected Score scoreFrom(ScoredEquivalents<Item> scored) {
-        return Iterables.getOnlyElement(scored.equivalents().values());
+    protected Score scoreFrom(ScoredCandidates<Item> scored) {
+        return Iterables.getOnlyElement(scored.candidates().values());
     }
 
     private Item itemWithCrew(CrewMember...crew) {

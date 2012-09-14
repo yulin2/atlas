@@ -9,9 +9,9 @@ import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-public class ScaledScoredEquivalents<T extends Content> implements ScoredEquivalents<T> {
+public class ScaledScoredEquivalents<T extends Content> implements ScoredCandidates<T> {
     
-    public static <T extends Content> ScaledScoredEquivalents<T> scale(ScoredEquivalents<T> input, final double scaler) {
+    public static <T extends Content> ScaledScoredEquivalents<T> scale(ScoredCandidates<T> input, final double scaler) {
         return scale(input, new Function<Double, Double>() {
             @Override
             public Double apply(Double input) {
@@ -20,7 +20,7 @@ public class ScaledScoredEquivalents<T extends Content> implements ScoredEquival
         });
     }
 
-    public static <T extends Content> ScaledScoredEquivalents<T> scale(ScoredEquivalents<T> input, Function<Double, Double> basicScale) {
+    public static <T extends Content> ScaledScoredEquivalents<T> scale(ScoredCandidates<T> input, Function<Double, Double> basicScale) {
         if(input instanceof ScaledScoredEquivalents) {
             ScaledScoredEquivalents<T> scaledInput = (ScaledScoredEquivalents<T>) input;
             return new ScaledScoredEquivalents<T>(scaledInput.base, Functions.compose(basicScale, scaledInput.scaler));
@@ -29,10 +29,10 @@ public class ScaledScoredEquivalents<T extends Content> implements ScoredEquival
         }
     }
     
-    private final ScoredEquivalents<T> base;
+    private final ScoredCandidates<T> base;
     private final Function<Double, Double> scaler;
 
-    private ScaledScoredEquivalents(ScoredEquivalents<T> base, Function<Double, Double> scaler) {
+    private ScaledScoredEquivalents(ScoredCandidates<T> base, Function<Double, Double> scaler) {
         this.base = base;
         this.scaler = scaler;
     }
@@ -43,8 +43,8 @@ public class ScaledScoredEquivalents<T extends Content> implements ScoredEquival
     }
 
     @Override
-    public Map<T, Score> equivalents() {
-        return scale(base.equivalents());
+    public Map<T, Score> candidates() {
+        return scale(base.candidates());
     }
 
     private Map<T, Score> scale(Map<T, Score> equivalents) {

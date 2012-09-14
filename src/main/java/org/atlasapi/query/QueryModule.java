@@ -18,7 +18,7 @@ import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
@@ -57,7 +57,7 @@ public class QueryModule {
 	
 	private @Autowired DatabasedMongo mongo;
     private @Autowired CassandraContentStore cassandra;
-    private @Autowired @Qualifier("contentUpdater") ContentEquivalenceUpdater<Content> equivUpdater;
+    private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> equivUpdater;
 	
 	private @Value("${applications.enabled}") String applicationsEnabled;
 	private @Value("${atlas.search.host}") String searchHost;

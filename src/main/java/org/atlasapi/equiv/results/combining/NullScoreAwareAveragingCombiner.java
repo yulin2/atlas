@@ -7,8 +7,8 @@ import java.util.Map.Entry;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Publisher;
 
 import com.google.common.base.Joiner;
@@ -16,10 +16,16 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 
-public class NullScoreAwareAveragingCombiner<T extends Content> implements EquivalenceCombiner<T> {
+public class NullScoreAwareAveragingCombiner<T extends Described> implements ScoreCombiner<T> {
 
+    public static final <T extends Described> NullScoreAwareAveragingCombiner<T> get() {
+        return new NullScoreAwareAveragingCombiner<T>();
+    }
+    
+    private NullScoreAwareAveragingCombiner() {}
+    
     @Override
-    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents, ResultDescription desc) {
+    public ScoredCandidates<T> combine(List<ScoredCandidates<T>> scoredEquivalents, ResultDescription desc) {
         
         desc.startStage("Null-score-aware combining");
         
@@ -29,10 +35,10 @@ public class NullScoreAwareAveragingCombiner<T extends Content> implements Equiv
         
         // For each equivalent, count the sources that produced a non-null Score 
         // and total those Scores.
-        for (ScoredEquivalents<T> sourceEquivalents : scoredEquivalents) {
+        for (ScoredCandidates<T> sourceEquivalents : scoredEquivalents) {
             source.add(sourceEquivalents.source());
             
-            for (Entry<T, Score> equivScore : sourceEquivalents.equivalents().entrySet()) {
+            for (Entry<T, Score> equivScore : sourceEquivalents.candidates().entrySet()) {
                 
                 addCount(counts, equivScore);
                 addScore(tempResults, equivScore);

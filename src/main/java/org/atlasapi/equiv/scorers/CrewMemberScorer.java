@@ -11,7 +11,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Item;
@@ -19,7 +19,7 @@ import org.atlasapi.media.entity.Item;
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 
-public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
+public class CrewMemberScorer implements EquivalenceScorer<Item> {
 
     private Function<Item, List<CrewMember>> peopleExtractor;
 
@@ -38,7 +38,7 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
     
     
     @Override
-    public final ScoredEquivalents<Item> score(Item content, Iterable<Item> candidates, ResultDescription desc) {
+    public final ScoredCandidates<Item> score(Item content, Iterable<Item> candidates, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> scored = DefaultScoredEquivalents.fromSource("crew");
 
         List<CrewMember> contentCrew = peopleExtractor.apply(content);

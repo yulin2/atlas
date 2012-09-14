@@ -12,9 +12,9 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
@@ -45,7 +45,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
 
     private final Mockery context = new Mockery();
     @SuppressWarnings("unchecked")
-    private final ContentEquivalenceUpdater<Item> itemUpdater = context.mock(ContentEquivalenceUpdater.class);
+    private final EquivalenceUpdater<Item> itemUpdater = context.mock(EquivalenceUpdater.class);
     private final ContentResolver contentResolver = context.mock(ContentResolver.class);
     private final LiveEquivalenceResultStore resultStore = context.mock(LiveEquivalenceResultStore.class);
     
@@ -79,7 +79,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         
         final ImmutableList<ChildRef> childRefs = ImmutableList.of(ep.childRef());
 
-        final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.<Publisher,ScoredEquivalent<Item>>of());
+        final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.<Publisher,ScoredCandidate<Item>>of());
 
         context.checking(new Expectations(){{
             one(contentResolver).findByCanonicalUris(Lists.transform(childRefs, ChildRef.TO_URI));
@@ -109,7 +109,7 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         equiv.setContainer(equivParent);
         equivParent.setChildRefs(ImmutableList.of(equiv.childRef()));
         
-        final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.of(Publisher.PA, ScoredEquivalent.<Item>equivalentScore(equiv, Score.ONE)));
+        final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.of(Publisher.PA, ScoredCandidate.<Item>valueOf(equiv, Score.ONE)));
 
         context.checking(new Expectations(){{
             one(contentResolver);
@@ -124,12 +124,12 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         Container container = new Container();
         container.setChildRefs(childRefs);
         
-        ScoredEquivalents<Container> scores = generator.generate(container, new DefaultDescription());
+        ScoredCandidates<Container> scores = generator.generate(container, new DefaultDescription());
         
-        assertThat(scores.equivalents(), hasEntry(equivParent, Score.ONE));
+        assertThat(scores.candidates(), hasEntry(equivParent, Score.ONE));
     }
 
-    private EquivalenceResult<Item> resultFor(final Episode ep, Map<Publisher, ScoredEquivalent<Item>> strong) {
-        return new EquivalenceResult<Item>(ep, ImmutableList.<ScoredEquivalents<Item>> of(), null, strong, null);
+    private EquivalenceResult<Item> resultFor(final Episode ep, Map<Publisher, ScoredCandidate<Item>> strong) {
+        return new EquivalenceResult<Item>(ep, ImmutableList.<ScoredCandidates<Item>> of(), null, strong, null);
     }
 }

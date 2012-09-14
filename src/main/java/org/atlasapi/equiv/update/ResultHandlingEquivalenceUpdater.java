@@ -8,12 +8,12 @@ import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Optional;
 
-public class ResultHandlingEquivalenceUpdater<T extends Content> implements ContentEquivalenceUpdater<T> {
+public class ResultHandlingEquivalenceUpdater<T extends Content> implements EquivalenceUpdater<T> {
 
-    private final ContentEquivalenceUpdater<T> delegate;
+    private final EquivalenceUpdater<T> delegate;
     private final EquivalenceResultHandler<T> handler;
 
-    public ResultHandlingEquivalenceUpdater(ContentEquivalenceUpdater<T> delegate, EquivalenceResultHandler<T> handler) {
+    public ResultHandlingEquivalenceUpdater(EquivalenceUpdater<T> delegate, EquivalenceResultHandler<T> handler) {
         this.delegate = delegate;
         this.handler = handler;
     }

@@ -5,7 +5,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.lookup.LookupWriter;
@@ -41,7 +41,7 @@ public class LookupWritingEquivalenceHandler<T extends Content> implements Equiv
     @Override
     public void handle(EquivalenceResult<T> result) {
         
-        Iterable<T> equivs = Iterables.transform(result.strongEquivalences().values(),ScoredEquivalent.<T>toEquivalent());
+        Iterable<T> equivs = Iterables.transform(result.strongEquivalences().values(),ScoredCandidate.<T>toEquivalent());
         
         //abort writing if seens as equiv and not equiv to anything
         if(seenAsEquiv.asMap().containsKey(result.target().getCanonicalUri()) && Iterables.isEmpty(equivs)) {

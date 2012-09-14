@@ -10,8 +10,8 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Episode;
@@ -39,8 +39,8 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
     private final @SuppressWarnings("unchecked") EquivalenceResultHandler<Item> delegateHandler = context.mock(EquivalenceResultHandler.class);
     
     private final Episode target = new Episode("episode","episodeCurie", Publisher.PA);
-    private final List<ScoredEquivalents<Item>> scores = ImmutableList.of();
-    private final ScoredEquivalents<Item> combined = DefaultScoredEquivalents.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
+    private final List<ScoredCandidates<Item>> scores = ImmutableList.of();
+    private final ScoredCandidates<Item> combined = DefaultScoredEquivalents.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
     
     private final Set<Container> strongContainers = ImmutableSet.<Container>of(
             new Brand("bbcbrand", "bbcbrandCurie", Publisher.BBC),
@@ -56,7 +56,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
 
             @Override
             public boolean matchesSafely(EquivalenceResult<Item> result) {
-                return result.strongEquivalences().get(publisher).equivalent().getCanonicalUri().equals(uri);
+                return result.strongEquivalences().get(publisher).candidate().getCanonicalUri().equals(uri);
             }
         };
     }
@@ -85,8 +85,8 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
         Episode goodEquiv = new Episode("bequiv", "bequivCurie", Publisher.PA);
         goodEquiv.setParentRef(new ParentRef("weakpabrand"));
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.PA, ScoredEquivalent.<Item>equivalentScore(goodEquiv, Score.ONE)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+                Publisher.PA, ScoredCandidate.<Item>valueOf(goodEquiv, Score.ONE)
         );
         
         EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());
@@ -110,8 +110,8 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
         Episode goodEquiv = new Episode("gequiv", "gequivCurie", Publisher.BBC);
         goodEquiv.setContainer(Iterables.getOnlyElement(strongContainers));
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.BBC, ScoredEquivalent.<Item>equivalentScore(goodEquiv, Score.ONE)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+                Publisher.BBC, ScoredCandidate.<Item>valueOf(goodEquiv, Score.ONE)
         );
         
         EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());
@@ -130,8 +130,8 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
         Episode ignoredEquiv = new Episode("ignoredequiv", "ignoredequiv", Publisher.C4);
         ignoredEquiv.setParentRef(new ParentRef("weakbutignoredbrand"));
 
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.C4, ScoredEquivalent.<Item>equivalentScore(ignoredEquiv, Score.ONE)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+                Publisher.C4, ScoredCandidate.<Item>valueOf(ignoredEquiv, Score.ONE)
         );
         
         EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());
@@ -149,8 +149,8 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
         
         Item noBrand = new Item("nobrand", "nobrandCurie", Publisher.FIVE);
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.FIVE, ScoredEquivalent.<Item>equivalentScore(noBrand, Score.ONE)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+                Publisher.FIVE, ScoredCandidate.<Item>valueOf(noBrand, Score.ONE)
         );
         
         EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());

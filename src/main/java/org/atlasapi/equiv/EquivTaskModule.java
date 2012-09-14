@@ -20,7 +20,7 @@ import org.atlasapi.equiv.results.probe.EquivalenceResultProbeController;
 import org.atlasapi.equiv.results.probe.MongoEquivalenceProbeStore;
 import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
 import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
@@ -59,9 +59,8 @@ public class EquivTaskModule {
     private @Autowired DatabasedMongo db;
     private @Autowired AdapterLog log;
     
-    private @Autowired @Qualifier("contentUpdater") ContentEquivalenceUpdater<Content> contentUpdater;
+    private @Autowired @Qualifier("contentUpdater") EquivalenceUpdater<Content> contentUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
-    
     
     @PostConstruct
     public void scheduleUpdater() {

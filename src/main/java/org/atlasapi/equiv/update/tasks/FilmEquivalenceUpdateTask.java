@@ -7,7 +7,7 @@ import static org.atlasapi.persistence.content.listing.ContentListingCriteria.de
 import java.util.Iterator;
 import java.util.List;
 
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -22,9 +22,9 @@ public class FilmEquivalenceUpdateTask extends AbstractContentEquivalenceUpdateT
 
     private static final String schedulingKey = "film-equivalence";
     private final ContentLister contentLister;
-    private final ContentEquivalenceUpdater<Film> updater;
+    private final EquivalenceUpdater<Film> updater;
     
-    public FilmEquivalenceUpdateTask(ContentLister contentLister, ContentEquivalenceUpdater<Film> updater, AdapterLog log, ScheduleTaskProgressStore progressStore) {
+    public FilmEquivalenceUpdateTask(ContentLister contentLister, EquivalenceUpdater<Film> updater, AdapterLog log, ScheduleTaskProgressStore progressStore) {
         super(log, progressStore);
         this.contentLister = contentLister;
         this.updater = updater;

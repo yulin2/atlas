@@ -7,9 +7,9 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
@@ -22,19 +22,19 @@ import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
 
 @Deprecated
-public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenceGenerator<Container> {
+public class ItemBasedContainerEquivalenceGenerator implements EquivalenceGenerator<Container> {
 
     public static final String NAME = "Item";
-    private final ContentEquivalenceUpdater<Item> itemUpdater;
+    private final EquivalenceUpdater<Item> itemUpdater;
     private final ContentResolver resolver;
 
-    public ItemBasedContainerEquivalenceGenerator(ContentEquivalenceUpdater<Item> itemUpdater, ContentResolver resolver) {
+    public ItemBasedContainerEquivalenceGenerator(EquivalenceUpdater<Item> itemUpdater, ContentResolver resolver) {
         this.itemUpdater = itemUpdater;
         this.resolver = resolver;
     }
     
     @Override
-    public ScoredEquivalents<Container> generate(Container container, ResultDescription desc) {
+    public ScoredCandidates<Container> generate(Container container, ResultDescription desc) {
         
         ScoredEquivalentsBuilder<Container> containerEquivalents = DefaultScoredEquivalents.fromSource(NAME);
         
@@ -49,8 +49,8 @@ public class ItemBasedContainerEquivalenceGenerator implements ContentEquivalenc
                 
                 EquivalenceResult<Item> itemEquivalences = itemUpdater.updateEquivalences(item, Optional.<List<Item>>absent());
                 
-                for (ScoredEquivalent<Item> strongEquivalent : itemEquivalences.strongEquivalences().values()) {
-                    ParentRef parentEquivalent = strongEquivalent.equivalent().getContainer();
+                for (ScoredCandidate<Item> strongEquivalent : itemEquivalences.strongEquivalences().values()) {
+                    ParentRef parentEquivalent = strongEquivalent.candidate().getContainer();
                     if (resolve(parentEquivalent) != null) {
                         containerEquivalents.addEquivalent(resolve(parentEquivalent), normalize(strongEquivalent.score(), container.getChildRefs().size()));
                     }

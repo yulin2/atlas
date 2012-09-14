@@ -1,16 +1,16 @@
 package org.atlasapi.equiv.generators;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.equiv.scorers.EquivalenceScorer;
 import org.atlasapi.equiv.scorers.ScalingEquivalenceScorer;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Function;
 
-public class ScalingScoringGenerator<T extends Content> implements ContentEquivalenceGenerator<T>, ContentEquivalenceScorer<T> {
+public class ScalingScoringGenerator<T extends Content> implements EquivalenceGenerator<T>, EquivalenceScorer<T> {
     
-    public static <T extends Content, SG extends ContentEquivalenceGenerator<T>&ContentEquivalenceScorer<T>> ScalingScoringGenerator<T> from(SG scoringGenerator, Function<Double, Double> scaler) {
+    public static <T extends Content, SG extends EquivalenceGenerator<T>&EquivalenceScorer<T>> ScalingScoringGenerator<T> from(SG scoringGenerator, Function<Double, Double> scaler) {
         return new ScalingScoringGenerator<T>(ScalingEquivalenceGenerator.scale(scoringGenerator, scaler), ScalingEquivalenceScorer.scale(scoringGenerator, scaler));
     }
 
@@ -24,12 +24,12 @@ public class ScalingScoringGenerator<T extends Content> implements ContentEquiva
 
 
     @Override
-    public ScoredEquivalents<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {
+    public ScoredCandidates<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {
         return scorer.score(content, suggestions, desc);
     }
 
     @Override
-    public ScoredEquivalents<T> generate(T content, ResultDescription desc) {
+    public ScoredCandidates<T> generate(T content, ResultDescription desc) {
         return generator.generate(content, desc);
     }
     
