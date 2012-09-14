@@ -33,8 +33,9 @@ public class ESIndexer extends AbstractWorker {
         } else if (results.getAllResolvedResults().size() == 1) {
             Identified source = results.getFirstValue().requireValue();
             if (source instanceof Item) {
-                contentIndexer.index((Item) source);
+                contentIndexer.index((Item) source, contentResolver);
             } else if (source instanceof Container) {
+                // TODO: needs to reindex children too due to denormalized data there!
                 contentIndexer.index((Container) source);
             } else {
                 log.warn("Unexpected type {} found for id {} on message of type {} and id {}.",
