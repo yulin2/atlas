@@ -76,8 +76,6 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(ITUNES).withName("Itunes Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(RADIO_TIMES).withName("RT Equivalence Updater"), RepetitionRules.NEVER);
             
-            taskScheduler.schedule(filmUpdateTask().withName("Film Equivalence Updater"), EQUIVALENCE_REPETITION);
-            
             //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.BBC).withName("BBC Child Ref Update"), RepetitionRules.NEVER);
             //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.PA).withName("PA Child Ref Update"), RepetitionRules.NEVER);
             //taskScheduler.schedule(childRefUpdateTask().forPublishers(publishersApartFrom(Publisher.BBC, Publisher.PA)).withName("Other Publishers Child Ref Update"), RepetitionRules.NEVER);
@@ -92,10 +90,6 @@ public class EquivTaskModule {
         return new ContentEquivalenceUpdateTask(contentLister, contentUpdater, log, progressStore(), ignored).forPublishers(publishers);
     }
     
-    public @Bean FilmEquivalenceUpdateTask filmUpdateTask() {
-        return new FilmEquivalenceUpdateTask(contentLister, filmUpdater, log, progressStore());
-    }
-
     /*private Publisher[] publishersApartFrom(Publisher...publishers) {
         SetView<Publisher> remainingPublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.copyOf(publishers));
         return remainingPublishers.toArray(new Publisher[remainingPublishers.size()]);
@@ -103,7 +97,7 @@ public class EquivTaskModule {
 
     //Controllers...
     public @Bean ContentEquivalenceUpdateController contentEquivalenceUpdateController() {
-        return new ContentEquivalenceUpdateController(contentUpdater, filmUpdater, contentResolver, log);
+        return new ContentEquivalenceUpdateController(contentUpdater, contentResolver, log);
     }
     
     public @Bean EquivalenceResultController resultEquivalenceResultController() {
