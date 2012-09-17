@@ -60,7 +60,6 @@ public class EquivTaskModule {
     private @Autowired AdapterLog log;
     
     private @Autowired @Qualifier("contentUpdater") ContentEquivalenceUpdater<Content> contentUpdater;
-    private @Autowired @Qualifier("filmUpdater") ContentEquivalenceUpdater<Film> filmUpdater;
     private @Autowired RecentEquivalenceResultStore equivalenceResultStore;
     
     
