@@ -7,10 +7,7 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.media.entity.ContentGroupRef;
 import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.TopicRef;
@@ -30,6 +27,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.atlasapi.media.entity.ContentGroup;
+import org.atlasapi.media.entity.ContentGroupRef;
+import org.atlasapi.media.entity.Identified;
 
 public abstract class ContentModelSimplifier<F extends Content, T extends Description> extends DescribedModelSimplifier<F, T> {
 

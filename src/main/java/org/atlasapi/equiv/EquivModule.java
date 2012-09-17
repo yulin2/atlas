@@ -164,7 +164,8 @@ public class EquivModule {
         
         publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(new RootEquivalenceUpdater(new NullContentEquivalenceUpdater<Container>(),
                 ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
-                    .withGenerator(new RadioTimesFilmEquivalenceGenerator(contentResolver)).build()),ImmutableSet.of(RADIO_TIMES,PA)));
+                    .withGenerators(ImmutableSet.of(new RadioTimesFilmEquivalenceGenerator(contentResolver), new FilmEquivalenceGenerator(searchResolver)))
+                    .build()),ImmutableSet.of(RADIO_TIMES,PA,PREVIEW_NETWORKS)));
         
         publisherUpdaters.put(BBC_REDUX, resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
                 .withGenerators(ImmutableSet.of(
@@ -203,15 +204,6 @@ public class EquivModule {
         ), Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK))));
         
         return new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build());
-    }
-
-    public @Bean ContentEquivalenceUpdater<Film> filmUpdater() {
-        Set<ContentEquivalenceGenerator<Film>> generators = ImmutableSet.<ContentEquivalenceGenerator<Film>>of(new FilmEquivalenceGenerator(searchResolver));
-        Set<ContentEquivalenceScorer<Film>> scorers = ImmutableSet.<ContentEquivalenceScorer<Film>>of();
-        EquivalenceResultBuilder<Film> resultBuilder = new ConfiguredEquivalenceResultBuilder<Film>();
-        
-        ContentEquivalenceUpdater<Film> updater = new ItemEquivalenceUpdater<Film>(generators, scorers, resultBuilder, log);
-        return resultHandlingUpdater(updater, ImmutableSet.of(PREVIEW_NETWORKS, RADIO_TIMES));
     }
     
 }

@@ -3,6 +3,8 @@ package org.atlasapi.remotesite.space;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import java.util.Iterator;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -16,6 +18,8 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public class TheSpacePlaylistsProcessor {
 
+    private final Log logger = LogFactory.getLog(getClass());
+    //
     private final String url;
     private final SimpleHttpClient client;
     private final AdapterLog log;
@@ -42,12 +46,18 @@ public class TheSpacePlaylistsProcessor {
         Iterator<JsonNode> results = items.get("results").getElements();
         while (results.hasNext()) {
             JsonNode item = results.next();
-            String pid = item.get("pid").asText();
-            try {
-                JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-                processor.process(node.get("programme"));
-            } catch (Exception ex) {
-                log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withCause(ex));
+            if (item.has("type") && item.has("pid")) {
+                String pid = item.get("pid").asText();
+                try {
+                    JsonNode node = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + pid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+                    if (node.has("programme")) {
+                        processor.process(node.get("programme"));
+                    } else {
+                        logger.warn("Unknown item type " + item.get("type").asText() + " with pid " + pid);
+                    }
+                } catch (Exception ex) {
+                    log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withCause(ex));
+                }
             }
         }
     }
