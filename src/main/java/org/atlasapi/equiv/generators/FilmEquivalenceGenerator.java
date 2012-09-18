@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Film;
@@ -45,9 +45,13 @@ public class FilmEquivalenceGenerator implements EquivalenceGenerator<Item> {
 
     @Override
     public ScoredCandidates<Item> generate(Item item, ResultDescription desc) {
+        Builder<Item> scores = DefaultScoredCandidates.fromSource("Film");
+
+        if (!(item instanceof Film)) {
+            return scores.build();
+        }
         
         Film film = (Film) item;
-        ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("Film");
         
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
             desc.appendText("Can't continue: year '%s', title '%s'", film.getYear(), film.getTitle()).finishStage();

@@ -2,7 +2,7 @@ package org.atlasapi.equiv.results.combining;
 
 import java.util.Map;
 
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
@@ -30,7 +30,7 @@ public class AddingEquivalenceCombiner<T extends Content> extends FoldingEquival
         for (T content : ImmutableSet.copyOf(Iterables.concat(combinedMappedEquivalents.keySet(), scoredMappedEquivalents.keySet()))) {
             result.put(content, add(combinedMappedEquivalents.get(content), scoredMappedEquivalents.get(content)));
         }
-        return DefaultScoredEquivalents.fromMappedEquivs(String.format("%s/%s", combined.source(), scoredEquivalents.source()), result);
+        return DefaultScoredCandidates.fromMappedEquivs(String.format("%s/%s", combined.source(), scoredEquivalents.source()), result);
     }
     
     private Score add(Score left, Score right) {

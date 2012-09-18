@@ -1,17 +1,37 @@
 package org.atlasapi.equiv.generators;
 
+import org.atlasapi.equiv.results.description.ResultDescription;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 
-public class ContentTitleScorer {
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 
+public final class ContentTitleScorer<T extends Content> {
+
+    public ScoredCandidates<T> scoreCandidates(T content, Iterable<T> candidates, ResultDescription desc) {
+        Builder<T> equivalents = DefaultScoredCandidates.fromSource("Title");
+        desc.appendText("Scoring %s candidates", Iterables.size(candidates));
+        
+        for (T found : ImmutableSet.copyOf(candidates)) {
+            Score score = score(content, found);
+            desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
+            equivalents.addEquivalent(found, score);
+        }
+
+        return equivalents.build();
+    }
+    
     /**
      * Calculates a score representing the similarity of the candidate's title compared to the subject's title.
      * @param subject - subject content
      * @param candidate - candidate content
      * @return score representing how closely candidate's title matches subject's title.
      */
-    public Score score(Content subject, Content candidate) {
+    private Score score(T subject, T candidate) {
         return Score.valueOf(score(sanitize(subject.getTitle()), sanitize(candidate.getTitle())));
     }
     

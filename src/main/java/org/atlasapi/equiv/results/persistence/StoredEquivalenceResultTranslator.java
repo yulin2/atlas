@@ -44,7 +44,7 @@ public class StoredEquivalenceResultTranslator {
             }
         });
         
-        Set<String> strongEquivalences = copyOf(transform(transform(result.strongEquivalences().values(), ScoredCandidate.<T>toEquivalent()), TO_URI));
+        Set<String> strongEquivalences = copyOf(transform(transform(result.strongEquivalences().values(), ScoredCandidate.<T>toCandidate()), TO_URI));
         
         for (Entry<T, Score> combinedEquiv : equivalenceResultOrdering.sortedCopy(result.combinedEquivalences().candidates().entrySet())) {
             
@@ -61,6 +61,6 @@ public class StoredEquivalenceResultTranslator {
             
         }
         
-        return new StoredEquivalenceResult(result.target().getCanonicalUri(), result.target().getTitle(), results, totals.build(), new DateTime(DateTimeZones.UTC), result.description().parts());  
+        return new StoredEquivalenceResult(result.subject().getCanonicalUri(), result.subject().getTitle(), results, totals.build(), new DateTime(DateTimeZones.UTC), result.description().parts());  
     }
 }

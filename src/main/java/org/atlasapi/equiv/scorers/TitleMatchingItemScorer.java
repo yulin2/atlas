@@ -4,10 +4,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;
@@ -15,7 +15,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class TitleMatchingItemEquivalenceScorer implements EquivalenceScorer<Item> {
+public class TitleMatchingItemScorer implements EquivalenceScorer<Item> {
     
     public enum TitleType {
         
@@ -52,7 +52,7 @@ public class TitleMatchingItemEquivalenceScorer implements EquivalenceScorer<Ite
     
     @Override
     public ScoredCandidates<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
-        ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Title");
+        Builder<Item> equivalents = DefaultScoredCandidates.fromSource("Title");
         
         if(!Strings.isNullOrEmpty(subject.getTitle())) {
             for (Item suggestion : Iterables.filter(suggestions, Item.class)) {

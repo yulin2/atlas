@@ -1,12 +1,19 @@
 package org.atlasapi.equiv.results;
 
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.Map;
 import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.equiv.ContentRef;
 import org.atlasapi.equiv.handlers.LookupWritingEquivalenceHandler;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
@@ -15,66 +22,51 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.lookup.LookupWriter;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.joda.time.Duration;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 
-@RunWith(JMock.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LookupWritingEquivalenceHandlerTest extends TestCase {
     
-    private final Mockery context = new Mockery();
-
-    private final LookupWriter lookupWriter = context.mock(LookupWriter.class);
+    private final LookupWriter lookupWriter = mock(LookupWriter.class);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.BBC,Publisher.PA, Publisher.ITV);
+    private final LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers);
 
+    private final Item content = new Item("item","c:item", Publisher.BBC);
+    private final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
+    private final Item equiv2 = new Item("equiv2","c:equiv2",Publisher.ITV);
+    
+    private final ContentRef contentRef = ContentRef.valueOf(content);
+    private final ContentRef equiv1Ref = ContentRef.valueOf(equiv1);
+    private final ContentRef equiv2Ref = ContentRef.valueOf(equiv2);
+    
     @Test
     public void testWritesLookups() {
         
-        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers);
+        updater.handle(equivResultFor(content, ImmutableList.of(equiv1,equiv2)));
         
-        final Item content = new Item("item","c:item", Publisher.BBC);
-        final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
-        final Item equiv2 = new Item("equiv2","c:equiv2",Publisher.ITV);
-        
-        final EquivalenceResult<Item> equivResult = equivResultFor(content, ImmutableList.of(equiv1,equiv2));
-        
-        context.checking(new Expectations(){{
-            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)), with(publishers));
-        }});
-        
-        updater.handle(equivResult);
-        
+        verify(lookupWriter).writeLookup(argThat(is(contentRef)), argThat(hasItems(equiv1Ref,equiv2Ref)), argThat(is(publishers)));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testDoesntWriteLookupsForItemWhichWasSeenAsEquivalentButDoesntAssertAnyEquivalences() {
         
-        LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers);
-        
-        final Item content = new Item("item","c:item", Publisher.BBC);
-        final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
-        final Item equiv2 = new Item("equiv2","c:equiv2",Publisher.ITV);
-        
         final EquivalenceResult<Item> equivResult = equivResultFor(content, ImmutableList.of(equiv1,equiv2));
         final EquivalenceResult<Item> noEquivalences = equivResultFor(equiv1, ImmutableList.<Item>of());
-        
-        context.checking(new Expectations(){{
-            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)), with(publishers));
-            never(lookupWriter).writeLookup(with(equiv1), with(any(Iterable.class)), with(publishers));
-        }});
         
         updater.handle(equivResult);
         updater.handle(noEquivalences);
         
+        verify(lookupWriter).writeLookup(argThat(is(contentRef)), argThat(hasItems(equiv1Ref,equiv2Ref)), argThat(is(publishers)));
+        verify(lookupWriter, never()).writeLookup(argThat(is(equiv1Ref)), argThat(any(Iterable.class)), argThat(is(publishers)));
     }
 
     @Test
@@ -83,21 +75,15 @@ public class LookupWritingEquivalenceHandlerTest extends TestCase {
         Duration cacheDuration = new Duration(5);
         LookupWritingEquivalenceHandler<Item> updater = new LookupWritingEquivalenceHandler<Item>(lookupWriter, publishers, cacheDuration);
         
-        final Item content = new Item("item","c:item", Publisher.BBC);
-        final Item equiv1 = new Item("equiv1","c:equiv1",Publisher.PA);
-        final Item equiv2 = new Item("equiv2","c:equiv2",Publisher.ITV);
-        
         final EquivalenceResult<Item> equivResult1 = equivResultFor(content, ImmutableList.of(equiv1,equiv2));
         final EquivalenceResult<Item> equivResult2 = equivResultFor(equiv1, ImmutableList.<Item>of(content));
-        
-        context.checking(new Expectations(){{
-            one(lookupWriter).writeLookup(with(content), with(hasItems(equiv1,equiv2)), with(publishers));
-            one(lookupWriter).writeLookup(with(equiv1), with(hasItems(content)), with(publishers));
-        }});
         
         updater.handle(equivResult1);
         Thread.sleep(cacheDuration.getMillis()*2);
         updater.handle(equivResult2);
+
+        verify(lookupWriter).writeLookup(argThat(is(contentRef)), argThat(hasItems(equiv1Ref,equiv2Ref)), argThat(is(publishers)));
+        verify(lookupWriter).writeLookup(argThat(is(equiv1Ref)), argThat(hasItems(contentRef)), argThat(is(publishers)));
         
     }
     

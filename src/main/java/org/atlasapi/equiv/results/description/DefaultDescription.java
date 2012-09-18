@@ -46,4 +46,9 @@ public class DefaultDescription implements ReadableDescription {
     public List<Object> parts() {
         return parts;
     }
+    
+    @Override
+    public String toString() {
+        return parts.toString();
+    }
 }

@@ -9,7 +9,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoreThreshold;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -131,7 +131,7 @@ public class ItemScoreFilteringCombinerTest extends TestCase {
     }
     
     private ScoredCandidates<Item> scoredEquivs(String source, Map<Item, Score> scoreMap) {
-        return DefaultScoredEquivalents.fromMappedEquivs(source, scoreMap);
+        return DefaultScoredCandidates.fromMappedEquivs(source, scoreMap);
     }
 
 }

@@ -37,7 +37,7 @@ public class FileEquivalenceResultStore implements EquivalenceResultStore {
             EquivalenceResult<T> result) {
         StoredEquivalenceResult storedEquivalenceResult = translator.toStoredEquivalenceResult(result);
         try {
-            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(fileFromCanonicalUri(result.target().getCanonicalUri())));
+            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(fileFromCanonicalUri(result.subject().getCanonicalUri())));
             os.writeObject(storedEquivalenceResult);
             os.close();
         } catch (FileNotFoundException e) {

@@ -9,8 +9,8 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.metabroadcast.common.base.Maybe;
 
 public class PercentThresholdEquivalenceExtractorTest extends TestCase {
 
@@ -20,15 +20,15 @@ public class PercentThresholdEquivalenceExtractorTest extends TestCase {
         PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>moreThanPercent(90);
         
         ScoredCandidate<Item> strong = ScoredCandidate.valueOf(new Item("test1","cur1",Publisher.BBC), Score.valueOf(0.5));
-        Maybe<ScoredCandidate<Item>> extract = extractor.extract(null, ImmutableList.<ScoredCandidate<Item>>of(
+        Optional<ScoredCandidate<Item>> extract = extractor.extract(ImmutableList.<ScoredCandidate<Item>>of(
                 strong,
                 ScoredCandidate.valueOf(new Item("test2","cur2",Publisher.BBC), Score.valueOf(-0.5)),
                 ScoredCandidate.valueOf(new Item("test3","cur3",Publisher.BBC), Score.valueOf(-0.5)),
                 ScoredCandidate.valueOf(new Item("test4","cur4",Publisher.BBC), Score.valueOf(-0.5))
-        ), new DefaultDescription());
+        ), null, new DefaultDescription());
         
-        assertTrue("Nothing strong extracted", extract.hasValue());
-        assertEquals(extract.requireValue(), strong);
+        assertTrue("Nothing strong extracted", extract.isPresent());
+        assertEquals(extract.get(), strong);
         
     }
 
@@ -37,14 +37,14 @@ public class PercentThresholdEquivalenceExtractorTest extends TestCase {
 
         PercentThresholdEquivalenceExtractor<Item> extractor = PercentThresholdEquivalenceExtractor.<Item>moreThanPercent(90);
         
-        Maybe<ScoredCandidate<Item>> extract = extractor.extract(null, ImmutableList.<ScoredCandidate<Item>>of(
+        Optional<ScoredCandidate<Item>> extract = extractor.extract(ImmutableList.<ScoredCandidate<Item>>of(
                 ScoredCandidate.valueOf(new Item("test1","cur1",Publisher.BBC), Score.valueOf(-0.5)),
                 ScoredCandidate.valueOf(new Item("test2","cur2",Publisher.BBC), Score.valueOf(-0.5)),
                 ScoredCandidate.valueOf(new Item("test3","cur3",Publisher.BBC), Score.valueOf(-0.5)),
                 ScoredCandidate.valueOf(new Item("test4","cur4",Publisher.BBC), Score.valueOf(-0.5))
-        ), new DefaultDescription());
+        ), null, new DefaultDescription());
         
-        assertTrue("Something strong extracted", extract.isNothing());
+        assertTrue("Something strong extracted", !extract.isPresent());
     }
 
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.results.description.DefaultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Item;
@@ -32,18 +32,18 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
     public void testCombine() {
         
         List<ScoredCandidates<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource("source2")
+                DefaultScoredCandidates.<Item>fromSource("source2")
                     .addEquivalent(equivalent1, Score.valueOf(5.0))
                     .addEquivalent(equivalent2, Score.NULL_SCORE)
                     .addEquivalent(equivalent3, Score.valueOf(5.0))
                     .build(),
-                DefaultScoredEquivalents.<Item>fromSource("source1")
+                DefaultScoredCandidates.<Item>fromSource("source1")
                     .addEquivalent(equivalent1, Score.valueOf(5.0))
                     .addEquivalent(equivalent2, Score.valueOf(5.0))
                     .addEquivalent(equivalent3, Score.valueOf(5.0))
                     .addEquivalent(equivalent1, Score.valueOf(5.0))
                     .build(),
-                DefaultScoredEquivalents.<Item>fromSource("source3")
+                DefaultScoredCandidates.<Item>fromSource("source3")
                     .addEquivalent(equivalent3, Score.valueOf(5.0))
                     .addEquivalent(equivalent1, Score.NULL_SCORE)
                     .build()
@@ -60,15 +60,15 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
     public void testCombineNulls() {
         
         List<ScoredCandidates<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource("source2")
+                DefaultScoredCandidates.<Item>fromSource("source2")
                     .addEquivalent(equivalent1, Score.NULL_SCORE)
                     .addEquivalent(equivalent2, Score.NULL_SCORE)
                     .build(),
-                DefaultScoredEquivalents.<Item>fromSource("source1")
+                DefaultScoredCandidates.<Item>fromSource("source1")
                     .addEquivalent(equivalent2, Score.valueOf(5.0))
                     .addEquivalent(equivalent3, Score.valueOf(5.0))
                     .build(),
-                DefaultScoredEquivalents.<Item>fromSource("source3")
+                DefaultScoredCandidates.<Item>fromSource("source3")
                     .addEquivalent(equivalent3, Score.NULL_SCORE)
                     .build()
         );
@@ -91,18 +91,18 @@ public class NullScoreAwareAveragingCombinerTest extends TestCase {
          * as they're all from the same publisher.
          */
         List<ScoredCandidates<Item>> scores = ImmutableList.of(
-                DefaultScoredEquivalents.<Item>fromSource("source2")
+                DefaultScoredCandidates.<Item>fromSource("source2")
                     .addEquivalent(equivalent4, Score.valueOf(5.0))
                     .addEquivalent(equivalent5, Score.NULL_SCORE)
                     .addEquivalent(equivalent6, Score.valueOf(5.0))
                     .build(),
-                DefaultScoredEquivalents.<Item>fromSource("source1")
+                DefaultScoredCandidates.<Item>fromSource("source1")
                     .addEquivalent(equivalent4, Score.valueOf(5.0))
                     .addEquivalent(equivalent5, Score.valueOf(6.0))
                     .addEquivalent(equivalent6, Score.valueOf(5.0))
                     .addEquivalent(equivalent4, Score.valueOf(5.0))
                     .build(),
-                DefaultScoredEquivalents.<Item>fromSource("source3")
+                DefaultScoredCandidates.<Item>fromSource("source3")
                     .addEquivalent(equivalent6, Score.valueOf(5.0))
                     .addEquivalent(equivalent4, Score.NULL_SCORE)
                     .build()

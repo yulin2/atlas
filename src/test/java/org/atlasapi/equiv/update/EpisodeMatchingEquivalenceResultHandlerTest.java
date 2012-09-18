@@ -9,7 +9,7 @@ import org.atlasapi.equiv.handlers.EpisodeMatchingEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -40,7 +40,7 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
         Score score = Score.valueOf(1.0);
         
         List<ScoredCandidates<Item>> scores = ImmutableList.of();
-        ScoredCandidates<Item> combined = DefaultScoredEquivalents.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
+        ScoredCandidates<Item> combined = DefaultScoredCandidates.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
         
         Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
                 Publisher.BBC, ScoredCandidate.<Item>valueOf(strongEpisode, score)
@@ -86,7 +86,7 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
         Score score = Score.valueOf(1.0);
         
         List<ScoredCandidates<Item>> scores = ImmutableList.of();
-        ScoredCandidates<Item> combined = DefaultScoredEquivalents.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
+        ScoredCandidates<Item> combined = DefaultScoredCandidates.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
         
         Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
                 Publisher.C4, ScoredCandidate.<Item>valueOf(goodEquivalent, score)

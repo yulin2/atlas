@@ -1,5 +1,8 @@
 package org.atlasapi.equiv.generators;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -7,11 +10,7 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.equiv.scorers.EquivalenceScorer;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -19,14 +18,13 @@ import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
-public class TitleMatchingEquivalenceScoringGenerator implements EquivalenceGenerator<Container>, EquivalenceScorer<Container> {
+public class TitleSearchGenerator implements EquivalenceGenerator<Container> {
 
     private final static float TITLE_WEIGHTING = 1.0f;
     private final static float BROADCAST_WEIGHTING = 0.0f;
@@ -41,37 +39,21 @@ public class TitleMatchingEquivalenceScoringGenerator implements EquivalenceGene
     );
     
     private final SearchResolver searchResolver;
-    private final ContentTitleScorer titleScorer;
+    private final ContentTitleScorer<Container> scorer;
 
-    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver) {
+    public TitleSearchGenerator(SearchResolver searchResolver) {
         this.searchResolver = searchResolver;
-        this.titleScorer = new ContentTitleScorer();
+        this.scorer = new ContentTitleScorer<Container>();
     }
 
     @Override
     public ScoredCandidates<Container> generate(Container content, ResultDescription desc) {
-        return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
+        List<Identified> candidates = searchForCandidates(content);
+        Iterable<Container> candidateContainers = Iterables.filter(candidates, Container.class);
+        return scorer.scoreCandidates(content, candidateContainers, desc);
     }
 
-    @Override
-    public ScoredCandidates<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        return scoreSuggestions(content, suggestions, desc);
-    }
-
-    private ScoredCandidates<Container> scoreSuggestions(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        ScoredEquivalentsBuilder<Container> equivalents = DefaultScoredEquivalents.fromSource("Title");
-        desc.appendText("Scoring %s suggestions", Iterables.size(suggestions));
-        
-        for (Container found : ImmutableSet.copyOf(suggestions)) {
-            Score score = titleScorer.score(content, found);
-            desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
-            equivalents.addEquivalent(found, score);
-        }
-
-        return equivalents.build();
-    }
-
-    private List<Identified> searchForEquivalents(Container content) {
+    private List<Identified> searchForCandidates(Container content) {
         Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
 
@@ -80,7 +62,7 @@ public class TitleMatchingEquivalenceScoringGenerator implements EquivalenceGene
     }
 
     private Map<Publisher, SourceStatus> enabledPublishers(Set<Publisher> enabledSources) {
-        Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
+        ImmutableMap.Builder<Publisher, SourceStatus> builder = ImmutableMap.builder();
         for (Publisher publisher : Publisher.values()) {
             if (enabledSources.contains(publisher)) {
                 builder.put(publisher, SourceStatus.AVAILABLE_ENABLED);
@@ -93,6 +75,11 @@ public class TitleMatchingEquivalenceScoringGenerator implements EquivalenceGene
     
     @Override
     public String toString() {
-        return "Title-matching Scorer/Generator";
+        return "Title-matching Generator";
+    }
+    
+    public static void main(String[] args) throws IOException {
+        URL url = new URL(null);
+        System.out.println(url);
     }
 }

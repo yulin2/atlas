@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Described;
@@ -17,12 +17,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 
 public class NullScoreAwareAveragingCombiner<T extends Described> implements ScoreCombiner<T> {
-
+    
     public static final <T extends Described> NullScoreAwareAveragingCombiner<T> get() {
         return new NullScoreAwareAveragingCombiner<T>();
     }
     
-    private NullScoreAwareAveragingCombiner() {}
+    public NullScoreAwareAveragingCombiner() {}
     
     @Override
     public ScoredCandidates<T> combine(List<ScoredCandidates<T>> scoredEquivalents, ResultDescription desc) {
@@ -53,7 +53,7 @@ public class NullScoreAwareAveragingCombiner<T extends Described> implements Sco
         Map<T, Score> scaledScores = scaleResultsByCounts(tempResults, publisherCounts);
         
         desc.finishStage();
-        return DefaultScoredEquivalents.fromMappedEquivs(Joiner.on("/").join(source), scaledScores);
+        return DefaultScoredCandidates.fromMappedEquivs(Joiner.on("/").join(source), scaledScores);
     }
 
     private void addScore(Map<T, Score> tempResults, Entry<T, Score> equivScore) {

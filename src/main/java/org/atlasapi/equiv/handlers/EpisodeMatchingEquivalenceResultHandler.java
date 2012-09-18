@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -27,12 +27,12 @@ public class EpisodeMatchingEquivalenceResultHandler implements EquivalenceResul
     
     @Override
     public void handle(EquivalenceResult<Item> result) {
-        if (!(result.target() instanceof Episode)) {
+        if (!(result.subject() instanceof Episode)) {
             delegate.handle(result);
             return;
         }
         
-        Episode target = (Episode) result.target();
+        Episode target = (Episode) result.subject();
         
         ResultDescription desc = result.description().startStage("Episode sequence stitching");
         
@@ -49,7 +49,7 @@ public class EpisodeMatchingEquivalenceResultHandler implements EquivalenceResul
         }
         desc.finishStage();
 
-        result = new EquivalenceResult<Item>(target, rawScores, DefaultScoredEquivalents.fromMappedEquivs(combinedSource, combinedEquivalences), strongEquivalences, result.description());
+        result = new EquivalenceResult<Item>(target, rawScores, DefaultScoredCandidates.fromMappedEquivs(combinedSource, combinedEquivalences), strongEquivalences, result.description());
         
         delegate.handle(result);
     }
