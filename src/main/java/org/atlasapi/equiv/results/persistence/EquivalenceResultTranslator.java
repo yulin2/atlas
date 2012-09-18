@@ -64,11 +64,11 @@ public class EquivalenceResultTranslator {
             }
         });
         
-        T target = result.target();
+        T target = result.subject();
         TranslatorUtils.from(dbo, ID, target.getCanonicalUri());
         TranslatorUtils.from(dbo, TITLE, target.getTitle());
         
-        TranslatorUtils.fromSet(dbo, copyOf(transform(transform(result.strongEquivalences().values(), ScoredCandidate.<T>toEquivalent()), TO_URI)), STRONG);
+        TranslatorUtils.fromSet(dbo, copyOf(transform(transform(result.strongEquivalences().values(), ScoredCandidate.<T>toCandidate()), TO_URI)), STRONG);
         
         BasicDBList equivList = new BasicDBList();
         
@@ -109,8 +109,6 @@ public class EquivalenceResultTranslator {
         if(dbo == null) {
             return null;
         }
-        
-        
         
         String targetId = TranslatorUtils.toString(dbo, ID);
         String targetTitle = TranslatorUtils.toString(dbo, TITLE);

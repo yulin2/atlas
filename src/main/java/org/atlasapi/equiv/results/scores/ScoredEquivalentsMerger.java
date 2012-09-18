@@ -40,7 +40,7 @@ public class ScoredEquivalentsMerger {
     private <T extends Content> ScoredCandidates<T> merge(ScoredCandidates<T> left, ScoredCandidates<T> right) {
         HashMap<T, Score> rightMap = Maps.newHashMap(right.candidates());
         rightMap.putAll(left.candidates());
-        return DefaultScoredEquivalents.fromMappedEquivs(left.source(), rightMap);
+        return DefaultScoredCandidates.fromMappedEquivs(left.source(), rightMap);
     }
    
 }

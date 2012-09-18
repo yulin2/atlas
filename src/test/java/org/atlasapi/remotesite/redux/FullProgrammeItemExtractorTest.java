@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.redux;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
@@ -23,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.time.DateTimeZones;
-import com.mongodb.util.TestCase;
 
 @RunWith(JMock.class)
 public class FullProgrammeItemExtractorTest extends TestCase {

@@ -1,8 +1,5 @@
 package org.atlasapi.equiv.results;
 
-import static com.google.common.collect.Ordering.natural;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,77 +8,101 @@ import org.atlasapi.equiv.results.combining.ScoreCombiner;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.filters.EquivalenceFilter;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-import com.metabroadcast.common.base.Maybe;
+import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.SortedSetMultimap;
+import com.google.common.collect.TreeMultimap;
 
 public class DefaultEquivalenceResultBuilder<T extends Content> implements EquivalenceResultBuilder<T> {
 
-    public static <T extends Content> EquivalenceResultBuilder<T> resultBuilder(ScoreCombiner<T> combiner, EquivalenceExtractor<T> marker) {
-        return new DefaultEquivalenceResultBuilder<T>(combiner, marker);
+    public static <T extends Content> EquivalenceResultBuilder<T> create(ScoreCombiner<T> combiner, EquivalenceFilter<T> filter, EquivalenceExtractor<T> marker) {
+        return new DefaultEquivalenceResultBuilder<T>(combiner, filter, marker);
     }
 
     private final ScoreCombiner<T> combiner;
     private final EquivalenceExtractor<T> extractor;
-    
-    public DefaultEquivalenceResultBuilder(ScoreCombiner<T> combiner, EquivalenceExtractor<T> extractor) {
+    private final EquivalenceFilter<T> filter;
+
+    public DefaultEquivalenceResultBuilder(ScoreCombiner<T> combiner, EquivalenceFilter<T> filter, EquivalenceExtractor<T> extractor) {
         this.combiner = combiner;
+        this.filter = filter;
         this.extractor = extractor;
     }
 
     @Override
     public EquivalenceResult<T> resultFor(T target, List<ScoredCandidates<T>> equivalents, ReadableDescription desc) {
-        desc.startStage("Combining scores");
         ScoredCandidates<T> combined = combine(equivalents, desc);
-        
-        desc.finishStage().startStage("Extracting strong equivalents");
-        Map<Publisher, ScoredCandidate<T>> extractedScores = extract(target, combined, desc);
-        
-        desc.finishStage();
+        List<ScoredCandidate<T>> filteredCandidates = filter(target, desc, combined);
+        Map<Publisher, ScoredCandidate<T>> extractedScores = extract(target, filteredCandidates, desc);
         return new EquivalenceResult<T>(target, equivalents, combined, extractedScores, desc);
     }
+    
+    private ScoredCandidates<T> combine(List<ScoredCandidates<T>> equivalents, ResultDescription desc) {
+        desc.startStage("Combining scores");
+        ScoredCandidates<T> combination;
+        if (!equivalents.isEmpty()) {
+            combination = combiner.combine(equivalents, desc);
+        } else {
+            combination = DefaultScoredCandidates.<T>fromSource("empty combination").build();
+        }
+        desc.finishStage();
+        return combination;
+    }
 
-    private Map<Publisher, ScoredCandidate<T>> extract(T target, ScoredCandidates<T> combined, ResultDescription desc) {
-        Map<Publisher, Collection<ScoredCandidate<T>>> publisherBins = publisherBin(combined.candidates());
+    private List<ScoredCandidate<T>> filter(T target, ReadableDescription desc, ScoredCandidates<T> combined) {
+        desc.startStage("Filtering candidates");
+        ImmutableList.Builder<ScoredCandidate<T>> filteredCandidates = ImmutableList.builder();
+        for (Entry<T, Score> entry : combined.candidates().entrySet()) {
+            ScoredCandidate<T> candidate = ScoredCandidate.valueOf(entry.getKey(), entry.getValue());
+            if (filter.apply(candidate, target, desc)) {
+                filteredCandidates.add(candidate);
+            }
+        }
+        desc.finishStage();
+        return filteredCandidates.build();
+    }
+
+    private Map<Publisher, ScoredCandidate<T>> extract(T target, List<ScoredCandidate<T>> filteredCandidates, ResultDescription desc) {
+        desc.startStage("Extracting strong equivalents");
+        SortedSetMultimap<Publisher, ScoredCandidate<T>> publisherBins = publisherBin(filteredCandidates);
         
         Builder<Publisher, ScoredCandidate<T>> builder = ImmutableMap.builder();
         
-        for (Entry<Publisher, Collection<ScoredCandidate<T>>> publisherBin : publisherBins.entrySet()) {
-            desc.startStage(String.format("Publisher: %s", publisherBin.getKey()));
+        for (Publisher publisher : publisherBins.keySet()) {
+            desc.startStage(String.format("Publisher: %s", publisher));
             
-            Maybe<ScoredCandidate<T>> extracted = extractor.extract(target, natural().reverse().immutableSortedCopy(publisherBin.getValue()), desc);
+            ImmutableSortedSet<ScoredCandidate<T>> copyOfSorted = ImmutableSortedSet.copyOfSorted(publisherBins.get(publisher));
             
-            if(extracted.hasValue()) {
-                builder.put(publisherBin.getKey(), extracted.requireValue());
+            Optional<ScoredCandidate<T>> extracted = extractor.extract(copyOfSorted.asList().reverse(), target, desc);
+            if(extracted.isPresent()) {
+                builder.put(publisher, extracted.get());
             }
             
             desc.finishStage();
         }
         
+        desc.finishStage();
         return builder.build();
     }
     
-    private Map<Publisher, Collection<ScoredCandidate<T>>> publisherBin(Map<T, Score> equivalents) {
-        Multimap<Publisher, ScoredCandidate<T>> publisherBins = LinkedListMultimap.create();
+    private SortedSetMultimap<Publisher, ScoredCandidate<T>> publisherBin(List<ScoredCandidate<T>> filteredCandidates) {
+        SortedSetMultimap<Publisher, ScoredCandidate<T>> publisherBins = TreeMultimap.create();
         
-        for (Entry<T, Score> equivalentScore : equivalents.entrySet()) {
-            T key = equivalentScore.getKey();
-            publisherBins.put(key.getPublisher(), ScoredCandidate.valueOf(key, equivalentScore.getValue()));
+        for (ScoredCandidate<T> candidate : filteredCandidates) {
+            publisherBins.put(candidate.candidate().getPublisher(), candidate);
         }
         
-        return publisherBins.asMap();
-    }
-
-    private ScoredCandidates<T> combine(List<ScoredCandidates<T>> equivalents, ResultDescription desc) {
-        return !equivalents.isEmpty() ? combiner.combine(equivalents, desc) : DefaultScoredEquivalents.<T>fromSource("empty combination").build();
+        return publisherBins;
     }
 }

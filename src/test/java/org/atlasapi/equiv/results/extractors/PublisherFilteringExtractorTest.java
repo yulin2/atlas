@@ -1,34 +1,35 @@
 package org.atlasapi.equiv.results.extractors;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.atlasapi.equiv.results.description.DefaultDescription;
+import org.atlasapi.equiv.results.filters.PublisherFilter;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-import com.metabroadcast.common.base.Maybe;
+public class PublisherFilteringExtractorTest {
 
-import junit.framework.TestCase;
-
-public class PublisherFilteringExtractorTest extends TestCase {
-
+    @Test
     public void testFiltersUnacceptablePublishers() {
         
-        PublisherFilteringExtractor<Item> extractor = new PublisherFilteringExtractor<Item>(new TopEquivalenceExtractor<Item>());
+        PublisherFilter<Item> filter = new PublisherFilter<Item>();
         
         ScoredCandidate<Item> paScore = scoreOneFor(Publisher.PA);
         
-        assertEquals(Maybe.nothing(), extractor.extract(itemWithPublisher(Publisher.PA), ImmutableList.of(paScore), new DefaultDescription()));
-        assertEquals(Maybe.just(paScore), extractor.extract(itemWithPublisher(Publisher.BBC), ImmutableList.of(paScore), new DefaultDescription()));
-        assertEquals(Maybe.just(paScore), extractor.extract(itemWithPublisher(Publisher.C4), ImmutableList.of(paScore), new DefaultDescription()));
+        assertFalse(filter.apply(paScore, itemWithPublisher(Publisher.PA), new DefaultDescription()));
+        assertTrue(filter.apply(paScore, itemWithPublisher(Publisher.BBC), new DefaultDescription()));
+        assertTrue(filter.apply(paScore, itemWithPublisher(Publisher.C4), new DefaultDescription()));
         
         ScoredCandidate<Item> BbcScore = scoreOneFor(Publisher.BBC);
-        assertEquals(Maybe.nothing(), extractor.extract(itemWithPublisher(Publisher.C4), ImmutableList.of(BbcScore), new DefaultDescription()));
-        assertEquals(Maybe.just(BbcScore), extractor.extract(itemWithPublisher(Publisher.SEESAW), ImmutableList.of(BbcScore), new DefaultDescription()));
+        assertFalse(filter.apply(BbcScore, itemWithPublisher(Publisher.C4), new DefaultDescription()));
+        assertTrue(filter.apply(BbcScore, itemWithPublisher(Publisher.SEESAW), new DefaultDescription()));
         
         ScoredCandidate<Item> dmScore = scoreOneFor(Publisher.DAILYMOTION);
-        assertEquals(Maybe.just(dmScore), extractor.extract(itemWithPublisher(Publisher.C4), ImmutableList.of(dmScore), new DefaultDescription()));
+        assertTrue(filter.apply(dmScore, itemWithPublisher(Publisher.C4), new DefaultDescription()));
         
     }
 

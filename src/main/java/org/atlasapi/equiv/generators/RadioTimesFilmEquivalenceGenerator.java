@@ -6,8 +6,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Film;
@@ -33,7 +33,7 @@ public class RadioTimesFilmEquivalenceGenerator implements EquivalenceGenerator<
     public ScoredCandidates<Item> generate(Item content, ResultDescription desc) {
         checkArgument(content instanceof Film, "Content not Film:" + content.getCanonicalUri());
         
-        ScoredEquivalentsBuilder<Item> results = DefaultScoredEquivalents.fromSource("Film");
+        Builder<Item> results = DefaultScoredCandidates.fromSource("RT->PA");
         
         Matcher uriMatcher = rtFilmUriPattern.matcher(content.getCanonicalUri());
         if (uriMatcher.matches()) {
@@ -49,6 +49,6 @@ public class RadioTimesFilmEquivalenceGenerator implements EquivalenceGenerator<
 
     @Override
     public String toString() {
-        return "RadioTimes Film Generator";
+        return "RT->PA Film Generator";
     }
 }

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.atlasapi.equiv.generators.EquivalenceGenerator;
 import org.atlasapi.equiv.generators.EquivalenceGenerators;
-import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ReadableDescription;
@@ -17,11 +16,11 @@ import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
+@Deprecated
 public class ItemEquivalenceUpdater<T extends Item> implements EquivalenceUpdater<T> {
 
     public static <T extends Item> Builder<T> builder(EquivalenceResultBuilder<T> resultBuilder) {
@@ -84,7 +83,7 @@ public class ItemEquivalenceUpdater<T extends Item> implements EquivalenceUpdate
     }
     
     @Override
-    public EquivalenceResult<T> updateEquivalences(T content, Optional<List<T>> externalCandidates) {
+    public void updateEquivalences(T content) {
         
         ReadableDescription desc = new DefaultDescription();
         
@@ -92,12 +91,12 @@ public class ItemEquivalenceUpdater<T extends Item> implements EquivalenceUpdate
         
         List<T> suggestions = ImmutableList.<T>builder()
                 .addAll(extractCandidates(generatedScores))
-                .addAll(externalCandidates.or(NONE))
+//                .addAll(externalCandidates.or(NONE))
                 .build();
         
         List<ScoredCandidates<T>> scoredScores = scorers.score(content, suggestions, desc);
         
-        return resultBuilder.resultFor(content, ImmutableList.copyOf(merger.merge(generatedScores, scoredScores)), desc);
+        resultBuilder.resultFor(content, ImmutableList.copyOf(merger.merge(generatedScores, scoredScores)), desc);
     }
 
     private Iterable<T> extractCandidates(Iterable<ScoredCandidates<T>> generatedScores) {

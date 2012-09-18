@@ -11,7 +11,7 @@ public final class ScoredCandidate<T> implements Comparable<ScoredCandidate<?>> 
         return new ScoredCandidate<T>(equivalent, score);
     }
     
-    public static final <T extends Content> Function<ScoredCandidate<T>, T> toEquivalent() {
+    public static final <T extends Content> Function<ScoredCandidate<T>, T> toCandidate() {
         return new Function<ScoredCandidate<T>, T>() {
             @Override
             public T apply(ScoredCandidate<T> input) {

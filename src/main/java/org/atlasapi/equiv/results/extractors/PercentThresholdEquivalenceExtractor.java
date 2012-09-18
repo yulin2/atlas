@@ -6,7 +6,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 
-import com.metabroadcast.common.base.Maybe;
+import com.google.common.base.Optional;
 
 /**
  * Selects the equivalent with the highest score given its score is above a given percentage threshold of the total of all equivalents' scores
@@ -26,24 +26,24 @@ public class PercentThresholdEquivalenceExtractor<T> implements EquivalenceExtra
     private static final String NAME = "Percent Extractor";
     
     @Override
-    public Maybe<ScoredCandidate<T>> extract(T target, List<ScoredCandidate<T>> equivalents, ResultDescription desc) {
+    public Optional<ScoredCandidate<T>> extract(List<ScoredCandidate<T>> candidates, T subject, ResultDescription desc) {
         desc.startStage(NAME);
         
-        if (equivalents.isEmpty()) {
+        if (candidates.isEmpty()) {
             desc.appendText("no equivalents").finishStage();
-            return Maybe.nothing();
+            return Optional.absent();
         }
         
-        Double total = sum(equivalents);
+        Double total = sum(candidates);
 
-        ScoredCandidate<T> strongest = equivalents.get(0);
+        ScoredCandidate<T> strongest = candidates.get(0);
         if (strongest.score().isRealScore() && strongest.score().asDouble() / total > threshold) {
             desc.appendText("%s extracted. %s / %s > %s", strongest.candidate(), strongest.score(), total, threshold).finishStage();
-            return Maybe.just(strongest);
+            return Optional.of(strongest);
         }
         
         desc.appendText("%s not extracted. %s / %s < %s", strongest.candidate(), strongest.score(), total, threshold).finishStage();
-        return Maybe.nothing();
+        return Optional.absent();
     }
 
     private Double sum(List<ScoredCandidate<T>> equivalents) {
@@ -58,5 +58,5 @@ public class PercentThresholdEquivalenceExtractor<T> implements EquivalenceExtra
         
         return total;
     }
-
+    
 }

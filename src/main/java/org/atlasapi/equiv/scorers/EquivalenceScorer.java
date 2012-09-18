@@ -5,6 +5,6 @@ import org.atlasapi.equiv.results.scores.ScoredCandidates;
 
 public interface EquivalenceScorer<T> {
 
-    ScoredCandidates<T> score(T subject, Iterable<T> suggestions, ResultDescription desc);
+    ScoredCandidates<T> score(T subject, Iterable<T> candidates, ResultDescription desc);
     
 }

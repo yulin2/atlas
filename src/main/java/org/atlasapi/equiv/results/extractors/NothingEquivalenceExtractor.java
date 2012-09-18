@@ -6,13 +6,13 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Content;
 
-import com.metabroadcast.common.base.Maybe;
+import com.google.common.base.Optional;
 
 public class NothingEquivalenceExtractor<T extends Content> implements EquivalenceExtractor<T> {
 
     @Override
-    public Maybe<ScoredCandidate<T>> extract(T target, List<ScoredCandidate<T>> equivalents, ResultDescription desc) {
-        return Maybe.nothing();
+    public Optional<ScoredCandidate<T>> extract(List<ScoredCandidate<T>> equivalents, T sujbect, ResultDescription desc) {
+        return Optional.absent();
     }
 
 }
