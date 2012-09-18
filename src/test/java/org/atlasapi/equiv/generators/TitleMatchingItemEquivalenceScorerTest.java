@@ -6,8 +6,8 @@ import junit.framework.TestCase;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
-import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer.TitleType;
+import org.atlasapi.equiv.scorers.TitleMatchingItemScorer;
+import org.atlasapi.equiv.scorers.TitleMatchingItemScorer.TitleType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import com.google.common.collect.Iterables;
 
 public class TitleMatchingItemEquivalenceScorerTest extends TestCase {
 
-    private final TitleMatchingItemEquivalenceScorer scorer = new TitleMatchingItemEquivalenceScorer();
+    private final TitleMatchingItemScorer scorer = new TitleMatchingItemScorer();
 
     @Test
     public void testTitleTyping() {

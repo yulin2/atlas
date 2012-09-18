@@ -23,7 +23,7 @@ public class InMemoryLiveEquivalenceResultStore implements LiveEquivalenceResult
     
     @Override
     public EquivalenceResult<Item> store(EquivalenceResult<Item> result) {
-        cache.put(result.target().getCanonicalUri(), result);
+        cache.put(result.subject().getCanonicalUri(), result);
         return result;
     }
 

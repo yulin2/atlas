@@ -6,23 +6,23 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 
-public class DefaultScoredEquivalents<T> implements ScoredCandidates<T> {
+public class DefaultScoredCandidates<T> implements ScoredCandidates<T> {
 
-    public static final <T> ScoredEquivalentsBuilder<T> fromSource(String source) {
-        return new ScoredEquivalentsBuilder<T>(source);
+    public static final <T> Builder<T> fromSource(String source) {
+        return new Builder<T>(source);
     }
 
-    public static final class ScoredEquivalentsBuilder<T> {
+    public static final class Builder<T> {
 
         private final String source;
         private final Map<T, Score> equivs;
 
-        public ScoredEquivalentsBuilder(String source) {
+        public Builder(String source) {
             this.source = source;
             this.equivs = Maps.newHashMap();
         }
 
-        public ScoredEquivalentsBuilder<T> addEquivalent(T equivalent, Score score) {
+        public Builder<T> addEquivalent(T equivalent, Score score) {
             Score current = equivs.get(equivalent);
             equivs.put(equivalent, current == null ? score : score.add(current));
             return this;
@@ -34,13 +34,13 @@ public class DefaultScoredEquivalents<T> implements ScoredCandidates<T> {
     }
     
     public static <T> ScoredCandidates<T> fromMappedEquivs(String source, Map<T, Score> equivs) {
-        return new DefaultScoredEquivalents<T>(source, ImmutableMap.copyOf(equivs));
+        return new DefaultScoredCandidates<T>(source, ImmutableMap.copyOf(equivs));
     }
     
     private final String source;
     private final Map<T, Score> candidates;
 
-    private DefaultScoredEquivalents(String source, Map<T, Score> equivs) {
+    private DefaultScoredCandidates(String source, Map<T, Score> equivs) {
         this.source = source;
         this.candidates = equivs;
     }
@@ -60,8 +60,8 @@ public class DefaultScoredEquivalents<T> implements ScoredCandidates<T> {
         if (this == that) {
             return true;
         }
-        if (that instanceof DefaultScoredEquivalents) {
-            DefaultScoredEquivalents<?> other = (DefaultScoredEquivalents<?>) that;
+        if (that instanceof DefaultScoredCandidates) {
+            DefaultScoredCandidates<?> other = (DefaultScoredCandidates<?>) that;
             return Objects.equal(source, other.source) && Objects.equal(candidates, other.candidates);
         }
         return false;

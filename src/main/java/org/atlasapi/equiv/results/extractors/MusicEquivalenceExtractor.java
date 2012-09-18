@@ -6,8 +6,8 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Item;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.metabroadcast.common.base.Maybe;
 
 public class MusicEquivalenceExtractor implements EquivalenceExtractor<Item> {
 
@@ -15,16 +15,16 @@ public class MusicEquivalenceExtractor implements EquivalenceExtractor<Item> {
     private static final double MULTI_THRESHOLD = 0.7;
 
     @Override
-    public Maybe<ScoredCandidate<Item>> extract(Item target, List<ScoredCandidate<Item>> candidates, ResultDescription desc) {
+    public Optional<ScoredCandidate<Item>> extract(List<ScoredCandidate<Item>> candidates, Item subject, ResultDescription desc) {
         if (candidates.isEmpty()) {
-            return Maybe.nothing();
+            return Optional.absent();
         }
         
         desc.startStage(toString());
         
         List<ScoredCandidate<Item>> positiveScores = removeNonPositiveScores(candidates, desc);
         
-        Maybe<ScoredCandidate<Item>> result = Maybe.nothing();
+        Optional<ScoredCandidate<Item>> result = Optional.absent();
         
         if (positiveScores.size() == 1) {
             ScoredCandidate<Item> only = positiveScores.get(0);
@@ -50,13 +50,13 @@ public class MusicEquivalenceExtractor implements EquivalenceExtractor<Item> {
         return positiveScores;
     }
 
-    private Maybe<ScoredCandidate<Item>> candidateIfOverThreshold(ScoredCandidate<Item> only, double threshold, ResultDescription desc) {
+    private Optional<ScoredCandidate<Item>> candidateIfOverThreshold(ScoredCandidate<Item> only, double threshold, ResultDescription desc) {
         if (only.score().asDouble() > threshold) {
             desc.appendText("%s beats %s threshold", only.candidate(), threshold);
-            return Maybe.just(only);
+            return Optional.of(only);
         } else {
             desc.appendText("%s under %s threshold", only.candidate(), threshold);
-            return Maybe.nothing();
+            return Optional.absent();
         }
     }
 

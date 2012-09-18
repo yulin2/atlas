@@ -4,44 +4,40 @@ import static com.metabroadcast.common.http.HttpStatusCode.NOT_FOUND;
 import static com.metabroadcast.common.http.HttpStatusCode.OK;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.equiv.update.EquivalenceUpdater;
+import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Film;
-import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.logging.AdapterLogEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
 @Controller
 public class ContentEquivalenceUpdateController {
     
+    private static final Logger log = LoggerFactory.getLogger(ContentEquivalenceUpdateController.class);
+    
     private final Splitter commaSplitter = Splitter.on(',').trimResults().omitEmptyStrings();
 
     private final EquivalenceUpdater<Content> contentUpdater;
     private final ContentResolver contentResolver;
     private final ExecutorService executor;
-    private final AdapterLog log;
 
-
-    public ContentEquivalenceUpdateController(EquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver, AdapterLog log) {
-        this.contentUpdater = contentUpdater;
+    public ContentEquivalenceUpdateController(EquivalenceUpdater<Content> contentUpdater, ContentResolver contentResolver) {
+        this.contentUpdater = new RootEquivalenceUpdater(contentResolver, contentUpdater);
         this.contentResolver = contentResolver;
-        this.log = log;
         this.executor = Executors.newFixedThreadPool(5);
     }
 
@@ -67,10 +63,11 @@ public class ContentEquivalenceUpdateController {
         return new Runnable() {
             @Override
             public void run() {
-                try{
-                    contentUpdater.updateEquivalences(content, Optional.<List<Content>>absent());
+                try {
+                    contentUpdater.updateEquivalences(content);
+                    log.info("Finished updating {}",content);
                 } catch (Exception e) {
-                    log.record(AdapterLogEntry.errorEntry().withSource(getClass()).withCause(e).withDescription("Equivalence Update failed for "+content.getCanonicalUri()));
+                    log.error(content.toString(), e);
                 }
             }
         };

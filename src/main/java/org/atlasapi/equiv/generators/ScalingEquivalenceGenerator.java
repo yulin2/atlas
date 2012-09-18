@@ -15,6 +15,11 @@ public class ScalingEquivalenceGenerator<T extends Content> implements Equivalen
             public Double apply(Double input) {
                 return input * scaler;
             }
+            
+            @Override
+            public String toString() {
+                return String.valueOf(scaler);
+            }
         });
     }
     

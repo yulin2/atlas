@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoreThreshold;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -59,7 +59,7 @@ public class ItemScoreFilteringCombiner<T extends Content> implements ScoreCombi
             }
         }));
         desc.finishStage();
-        return DefaultScoredEquivalents.fromMappedEquivs(combined.source(), transformedCombined);
+        return DefaultScoredCandidates.fromMappedEquivs(combined.source(), transformedCombined);
     }
     
     private ScoredCandidates<T> findItemScores(List<ScoredCandidates<T>> scoredEquivalents) {

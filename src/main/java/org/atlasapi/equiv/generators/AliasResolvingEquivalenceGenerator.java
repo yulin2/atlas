@@ -1,8 +1,8 @@
 package org.atlasapi.equiv.generators;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
@@ -27,7 +27,7 @@ public class AliasResolvingEquivalenceGenerator<T extends Content> implements Eq
 
     @Override
     public ScoredCandidates<T> generate(T content, ResultDescription desc) {
-        ScoredEquivalentsBuilder<T> equivalents = DefaultScoredEquivalents.fromSource("Alias");
+        Builder<T> equivalents = DefaultScoredCandidates.fromSource("Alias");
         desc.startStage("Resolving aliases:");
         for (String alias : content.getAliases()) {
             desc.appendText(alias);

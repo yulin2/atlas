@@ -3,8 +3,8 @@ package org.atlasapi.equiv.generators;
 import java.util.Set;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.channel.Channel;
@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGenerator<Item>{
@@ -47,7 +48,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
     @Override
     public ScoredCandidates<Item> generate(Item content, ResultDescription desc) {
 
-        ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("broadcast");
+        Builder<Item> scores = DefaultScoredCandidates.fromSource("broadcast");
 
         Set<Publisher> validPublishers = Sets.difference(supportedPublishers, ImmutableSet.of(content.getPublisher()));
 
@@ -69,8 +70,11 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
         return scale(scores.build(), processedBroadcasts, desc);
     }
 
-    public void findMatchesForBroadcast(ScoredEquivalentsBuilder<Item> scores, Broadcast broadcast, Set<Publisher> validPublishers) {
+    public void findMatchesForBroadcast(Builder<Item> scores, Broadcast broadcast, Set<Publisher> validPublishers) {
         Schedule schedule = scheduleAround(broadcast, validPublishers);
+        if (schedule == null) {
+            return;
+        }
         for (ScheduleChannel channel : schedule.scheduleChannels()) {
             for (Item scheduleItem : channel.items()) {
                 if (scheduleItem instanceof Item && hasQualifyingBroadcast(scheduleItem, broadcast)) {
@@ -116,7 +120,7 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
      .build();
 
     private ScoredCandidates<Item> scale(ScoredCandidates<Item> scores, final int broadcasts, final ResultDescription desc) {
-        return DefaultScoredEquivalents.fromMappedEquivs(scores.source(), Maps.transformEntries(scores.candidates(), new EntryTransformer<Item, Score, Score>() {
+        return DefaultScoredCandidates.fromMappedEquivs(scores.source(), Maps.transformEntries(scores.candidates(), new EntryTransformer<Item, Score, Score>() {
             @Override
             public Score transformEntry(Item key, Score value) {
                 desc.appendText("%s matched %s broadcasts", key.getCanonicalUri(), value);
@@ -152,9 +156,11 @@ public class BroadcastMatchingItemEquivalenceGenerator implements EquivalenceGen
     private Schedule scheduleAround(Broadcast broadcast, Set<Publisher> publishers) {
         DateTime start = broadcast.getTransmissionTime().minus(flexibility);
         DateTime end = broadcast.getTransmissionEndTime().plus(flexibility);
-        Channel channel = channelResolver.fromUri(broadcast.getBroadcastOn()).requireValue();
-
-        return resolver.schedule(start, end, ImmutableSet.of(channel), publishers);
+        Maybe<Channel> channel = channelResolver.fromUri(broadcast.getBroadcastOn());
+        if (channel.hasValue()) {
+            return resolver.schedule(start, end, ImmutableSet.of(channel.requireValue()), publishers);
+        }
+        return null;
     }
     
     @Override

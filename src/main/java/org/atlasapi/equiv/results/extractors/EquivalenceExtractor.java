@@ -5,17 +5,18 @@ import java.util.List;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 
-import com.metabroadcast.common.base.Maybe;
+import com.google.common.base.Optional;
+
 
 public interface EquivalenceExtractor<T> {
 
     /**
-     * Extracts a single 'strongly' equivalent piece of content from an ordered list of weighted suggestions.
-     * @param target the subject content
-     * @param equivalents - list of ordered equivalence suggestions for a single publisher.
+     * Extracts a single 'strongly' equivalent piece of content from an ordered list of weighted candidates.
+     * @param candidates - equivalence candidates for a single publisher, ordered from highest scoring to lowest.
+     * @param subject - the subject content
      * @param desc TODO
-     * @return maybe a strong equivalent or nothing if none of the suggestions  
+     * @return strong equivalent or absent if none of the candidates  
      */
-    Maybe<ScoredCandidate<T>> extract(T target, List<ScoredCandidate<T>> equivalents, ResultDescription desc);
+    Optional<ScoredCandidate<T>> extract(List<ScoredCandidate<T>> candidates, T subject, ResultDescription desc);
     
 }

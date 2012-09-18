@@ -3,8 +3,8 @@ package org.atlasapi.equiv.scorers;
 import java.util.List;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
@@ -35,7 +35,7 @@ public class ContainerHierarchyMatchingEquivalenceScorer implements EquivalenceS
     
     @Override
     public ScoredCandidates<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        ScoredEquivalentsBuilder<Container> results = DefaultScoredEquivalents.fromSource("Hierarchy");
+        Builder<Container> results = DefaultScoredCandidates.fromSource("Hierarchy");
 
         // Brands can have full Series hierarchy so compare its Series' hierarchies if present. 
         // If there are no Series treat it as a flat container
