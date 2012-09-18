@@ -96,7 +96,7 @@ public class AtlasPersistenceModule {
     
     @Bean
     public ContentBootstrapperModule contentBootstrapperModule() {
-        return new ContentBootstrapperModule(cassandraContentPersistenceModule().cassandraContentStore());
+        return new ContentBootstrapperModule(contentLister(), cassandraContentPersistenceModule().cassandraContentStore());
     }
 
     @Bean
