@@ -22,7 +22,7 @@ import org.atlasapi.query.v2.QueryController;
 import org.junit.Test;
 
 import com.metabroadcast.common.properties.Configurer;
-import org.atlasapi.persistence.content.elasticsearch.schema.ESSchema;
+import org.atlasapi.persistence.content.elasticsearch.schema.EsSchema;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.Before;
@@ -39,7 +39,7 @@ public class SpringTest {
     
     @BeforeClass
     static public void before() throws InterruptedException {
-        NodeBuilder.nodeBuilder().clusterName(ESSchema.CLUSTER_NAME).build().start();
+        NodeBuilder.nodeBuilder().clusterName("Atlas").build().start();
     }
 
     @Test

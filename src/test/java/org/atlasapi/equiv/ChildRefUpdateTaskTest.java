@@ -1,247 +1,270 @@
-package org.atlasapi.equiv;
-
-import static com.metabroadcast.common.persistence.mongo.MongoBuilders.update;
-import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
-import static org.atlasapi.media.entity.Publisher.BBC;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-
-import java.util.Iterator;
-
-import junit.framework.TestCase;
-
-import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
-import org.atlasapi.equiv.update.tasks.ScheduleTaskProgressStore;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.content.Container;
-import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
-import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.entity.Series;
-import org.atlasapi.media.entity.SeriesRef;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.LookupResolvingContentResolver;
-import org.atlasapi.persistence.content.listing.ContentLister;
-import org.atlasapi.persistence.content.mongo.MongoContentLister;
-import org.atlasapi.persistence.content.mongo.MongoContentResolver;
-import org.atlasapi.persistence.content.mongo.MongoContentWriter;
-import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
-import org.atlasapi.persistence.media.entity.ContainerTranslator;
-import org.atlasapi.persistence.media.entity.ItemTranslator;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
-import com.metabroadcast.common.persistence.MongoTestHelper;
-import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import com.metabroadcast.common.time.SystemClock;
-
-public class ChildRefUpdateTaskTest extends TestCase {
-
-    DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
-
-    ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
-    MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo);
-    ContentResolver resolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo), lookupStore);
-    ContentWriter writer = new MongoContentWriter(mongo, lookupStore, new SystemClock());
-    ContentLister lister = new MongoContentLister(mongo);
-    
-    ChildRefUpdateTask task = new ChildRefUpdateTask(lister, resolver, mongo, progressStore).forPublishers(BBC);
-    
-    ContainerTranslator containerTranslator = new ContainerTranslator(new SubstitutionTableNumberCodec());
-    ItemTranslator itemTranslator = new ItemTranslator(new SubstitutionTableNumberCodec());
-    
-    @Before
-    public void clear() {
-        mongo.collection("containers").drop();
-        mongo.collection("programmeGroups").drop();
-        mongo.collection("children").drop();
-    }
-    
-    @Test
-    public void testUpdatesParentChildReferencesInBrandAndSeries() {
-        
-        Brand brand = new Brand("brandUri", "cBrandUri", BBC);
-        Series series1 = seriesWithParent("series1Uri", brand);
-        Series series2 = seriesWithParent("series2Uri", brand);
-        Episode episode1 = episodeWithContainers("ep1", series1, brand);
-        Item item1 = itemWithContainer("item1", brand);
-        Episode episode2 = episodeWithContainers("ep2", series2, brand);
-
-        write(brand, series1, series2, episode1, item1, episode2);
-        
-        setId("containers", brand.getCanonicalUri(), 1L);
-        setId("programmeGroups", series1.getCanonicalUri(), 2L);
-        setId("programmeGroups", series2.getCanonicalUri(), 3L);
-        setId("children", episode1.getCanonicalUri(), 4L);
-        setId("children", item1.getCanonicalUri(), 5L);
-        setId("children", episode2.getCanonicalUri(), 6L);
-        
-        Brand resolvedBrand = resolve(brand);
-        assertThat(resolvedBrand.getId(), is(1L));
-        checkSeriesIds(resolvedBrand.getSeriesRefs(), null, null);
-        checkIds(resolvedBrand.getChildRefs(), null, null, null);
-        
-        checkSeries(resolve(series1), 2L, null, null, null);
-        checkSeries(resolve(series2), 3L, null, (Long)null);
-        
-        checkEpisode(resolve(episode1), 4L, null, null);
-        checkEpisode(resolve(item1), 5L, null, null);
-        checkEpisode(resolve(episode2), 6L, null, null);
-        
-        task.run();
-        
-        resolvedBrand = resolve(brand);
-        assertThat(resolvedBrand.getId(), is(1L));
-        checkSeriesIds(resolvedBrand.getSeriesRefs(), 2L, 3L);
-        checkIds(resolvedBrand.getChildRefs(), 4L, 5L, 6L);
-        
-        checkSeries(resolve(series1), 2L, 1L, 4L, 5L);
-        checkSeries(resolve(series2), 3L, 1L, 6L);
-        
-        checkEpisode(resolve(episode1), 4L, 1L, 2L);
-        checkEpisode(resolve(item1), 5L, 1L, null);
-        checkEpisode(resolve(episode2), 6L, 1L, 3L);
-    }
-    
-    private void write(Content...contents) {
-        for (Content content : contents) {
-            if (content instanceof Container) {
-                writer.createOrUpdate((Container) content);
-            }
-            if (content instanceof Item) {
-                writer.createOrUpdate((Item) content);
-            }
-        }
-    }
-
-    @Test
-    public void testUpdatesReferencesInTopLevelSeries() {
-        Series series = seriesWithParent("seriesUri", null);
-        Episode episode1 = episodeWithContainers("ep1", series, series);
-        Item item1 = itemWithContainer("ep2", series);
-        
-        write(series, episode1, item1);
-        
-        setId("containers", series.getCanonicalUri(), 1L);
-        setId("children", episode1.getCanonicalUri(), 2L);
-        setId("children", item1.getCanonicalUri(), 3L);
-        
-        checkTopLevelSeries(resolve(series), 1L, null, null);
-        checkEpisode(resolve(episode1), 2L, null, null);
-        checkEpisode(resolve(item1), 3L, null, null);
-        
-        task.run();
-        
-        checkTopLevelSeries(resolve(series), 1L, 2L, 3L);
-        checkEpisode(resolve(episode1), 2L, 1L, 1L);
-        checkEpisode(resolve(item1), 3L, 1L, null);
-        
-    }
-    
-    @Test
-    public void testUpdatesReferencesInBrandAndNoSeries() {
-        Brand brand = new Brand("brandUri", "cBrandUri", BBC);
-        Episode episode1 = episodeWithContainers("ep1", null, brand);
-        Item item1 = itemWithContainer("ep2", brand);
-        
-        write(brand, episode1, item1);
-        
-        setId("containers", brand.getCanonicalUri(), 1L);
-        setId("children", episode1.getCanonicalUri(), 2L);
-        setId("children", item1.getCanonicalUri(), 3L);
-        
-        assertThat(resolve(brand).getId(), is(1L));
-        checkEpisode(resolve(episode1), 2L, null, null);
-        checkEpisode(resolve(item1), 3L, null, null);
-        
-        task.run();
-        
-        assertThat(resolve(brand).getId(), is(1L));
-        checkEpisode(resolve(episode1), 2L, 1L, null);
-        checkEpisode(resolve(item1), 3L, 1L, null);
-        
-    }
-
-
-    private void checkEpisode(Item resolvedItem, Long episodeId, Long brandId, Long seriesId) {
-        assertThat(resolvedItem.getId(), is(episodeId));
-        assertThat(resolvedItem.getContainer().getId(), is(brandId));
-        if (resolvedItem instanceof Episode) {
-            ParentRef seriesRef = ((Episode)resolvedItem).getSeriesRef();
-            if (seriesRef != null) {
-                assertThat(seriesRef.getId(), is(seriesId));
-            } else {
-                assertThat(seriesId, is(nullValue()));
-            }
-        }
-    }
-
-    private void checkSeries(Series resolvedSeries, long seriesId, Long brandId, Long...childIds) {
-        checkTopLevelSeries(resolvedSeries, seriesId, childIds);
-        assertThat(resolvedSeries.getParent().getId(), is(brandId));
-    }
-
-    private void checkTopLevelSeries(Series resolvedSeries, long seriesId, Long...childIds) {
-        assertThat(resolvedSeries.getId(), is(seriesId));
-        checkIds(resolvedSeries.getChildRefs(), childIds);
-    }
-
-    private void checkIds(ImmutableList<ChildRef> childRefs, Long... ids) {
-        Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
-        for (ChildRef childRef : childRefs) {
-            assertThat(childRef.toString(), childRef.getId(), is(idIter.next()));
-        }
-    }
-    
-    private void checkSeriesIds(ImmutableList<SeriesRef> seriesRefs, Long... ids) {
-        Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
-        for (SeriesRef seriesRef : seriesRefs) {
-            assertThat(seriesRef.toString(), seriesRef.getId(), is(idIter.next()));
-        }
-    }
-    
-    private Item itemWithContainer(String uri, Container container) {
-        Item item = new Item(uri, "c"+uri, BBC);
-        if (container != null) {
-            item.setContainer(container);
-        }
-        return item;
-    }
-
-    private Episode episodeWithContainers(String uri, Series series, Container container) {
-        Episode episode1 = new Episode(uri, "c"+uri, BBC);
-        episode1.setContainer(container);
-        if (series != null) {
-            episode1.setSeries(series);
-        }
-        return episode1;
-    }
-
-    private Series seriesWithParent(String uri, final Brand brand) {
-        final Series series;
-        series = new Series(uri, "c"+uri, BBC);
-        if (brand != null) {
-            series.setParent(brand);
-        }
-        return series;
-    }
-
-    private void setId(String collection, String id, long aid) {
-        mongo.collection(collection).update(where().idEquals(id).build(), update().setField("aid", aid).build());
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T extends Content> T resolve(T content) {
-        String uri = content.getCanonicalUri();
-        return (T) resolver.findByCanonicalUris(ImmutableList.of(uri))
-            .get(uri).requireValue();
-    }
-
-}
+//package org.atlasapi.equiv;
+//
+//import static com.metabroadcast.common.persistence.mongo.MongoBuilders.update;
+//import static com.metabroadcast.common.persistence.mongo.MongoBuilders.where;
+//import static org.atlasapi.media.entity.Publisher.BBC;
+//import static org.hamcrest.MatcherAssert.assertThat;
+//import static org.hamcrest.Matchers.is;
+//import static org.hamcrest.Matchers.nullValue;
+//
+//import java.util.Iterator;
+//
+//import junit.framework.TestCase;
+//
+//import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
+//import org.atlasapi.equiv.update.tasks.ScheduleTaskProgressStore;
+//import org.atlasapi.media.entity.Brand;
+//import org.atlasapi.media.entity.ChildRef;
+//import org.atlasapi.media.content.Container;
+//import org.atlasapi.media.entity.Episode;
+//import org.atlasapi.media.entity.Item;
+//import org.atlasapi.media.entity.ParentRef;
+//import org.atlasapi.media.entity.Series;
+//import org.atlasapi.media.entity.SeriesRef;
+//import org.atlasapi.persistence.content.ContentResolver;
+//import org.atlasapi.persistence.content.ContentWriter;
+//import org.atlasapi.persistence.content.LookupResolvingContentResolver;
+//import org.atlasapi.persistence.content.listing.ContentLister;
+//import org.atlasapi.persistence.content.mongo.MongoContentLister;
+//import org.atlasapi.persistence.content.mongo.MongoContentResolver;
+//import org.atlasapi.persistence.content.mongo.MongoContentWriter;
+//import org.atlasapi.persistence.logging.NullAdapterLog;
+//import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+//import org.atlasapi.persistence.media.entity.ContainerTranslator;
+//import org.atlasapi.persistence.media.entity.ItemTranslator;
+//import org.junit.Before;
+//import org.junit.Test;
+//
+//import com.google.common.collect.ImmutableList;
+//import com.google.common.collect.Lists;
+//import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+//import com.metabroadcast.common.persistence.MongoTestHelper;
+//import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+//import com.metabroadcast.common.time.SystemClock;
+//import com.metabroadcast.common.time.DateTimeZones;
+//
+//public class ChildRefUpdateTaskTest extends TestCase {
+//
+//    DatabasedMongo mongo = MongoTestHelper.anEmptyTestDatabase();
+//
+//    ScheduleTaskProgressStore progressStore = new MongoScheduleTaskProgressStore(mongo);
+//    MongoLookupEntryStore lookupStore = new MongoLookupEntryStore(mongo);
+//    ContentResolver resolver = new LookupResolvingContentResolver(new MongoContentResolver(mongo), lookupStore);
+//    ContentWriter writer = new MongoContentWriter(mongo, lookupStore, new SystemClock());
+//    ContentLister lister = new MongoContentLister(mongo);
+//    
+//    ChildRefUpdateTask task = new ChildRefUpdateTask(lister, resolver, mongo, progressStore).forPublishers(BBC);
+//    
+//    ContainerTranslator containerTranslator = new ContainerTranslator(new SubstitutionTableNumberCodec());
+//    ItemTranslator itemTranslator = new ItemTranslator(new SubstitutionTableNumberCodec());
+//    
+//    @Before
+//    public void clear() {
+//        mongo.collection("containers").drop();
+//        mongo.collection("programmeGroups").drop();
+//        mongo.collection("children").drop();
+//    }
+//    
+//    @Test
+//    public void testUpdatesParentChildReferencesInBrandAndSeries() {
+//        
+//        Brand brand = new Brand("brandUri", "cBrandUri", BBC);
+//        Series series1 = seriesWithParent("series1Uri", brand);
+//        Series series2 = seriesWithParent("series2Uri", brand);
+//        Episode episode1 = episodeWithContainers("ep1", series1, brand);
+//        Item item1 = itemWithContainer("item1", brand);
+//        Episode episode2 = episodeWithContainers("ep2", series2, brand);
+//
+//        write(brand, series1, series2, episode1, item1, episode2);
+//        
+//        setId("containers", brand.getCanonicalUri(), 1L);
+//        setId("programmeGroups", series1.getCanonicalUri(), 2L);
+//        setId("programmeGroups", series2.getCanonicalUri(), 3L);
+//        setId("children", episode1.getCanonicalUri(), 4L);
+//        setId("children", item1.getCanonicalUri(), 5L);
+//        setId("children", episode2.getCanonicalUri(), 6L);
+//        
+//        Brand resolvedBrand = resolve(brand);
+//        assertThat(resolvedBrand.getId(), is(1L));
+//        checkSeriesIds(resolvedBrand.getSeriesRefs(), null, null);
+//        checkIds(resolvedBrand.getChildRefs(), null, null, null);
+//        
+//        checkSeries(resolve(series1), 2L, null, null, null);
+//        checkSeries(resolve(series2), 3L, null, (Long)null);
+//        
+//        checkEpisode(resolve(episode1), 4L, null, null);
+//        checkEpisode(resolve(item1), 5L, null, null);
+//        checkEpisode(resolve(episode2), 6L, null, null);
+//        
+//        task.run();
+//        
+//<<<<<<< HEAD
+//        resolvedBrand = resolve(brand);
+//        assertThat(resolvedBrand.getId(), is(1L));
+//        checkSeriesIds(resolvedBrand.getSeriesRefs(), 2L, 3L);
+//        checkIds(resolvedBrand.getChildRefs(), 4L, 5L, 6L);
+//        
+//        checkSeries(resolve(series1), 2L, 1L, 4L, 5L);
+//        checkSeries(resolve(series2), 3L, 1L, 6L);
+//        
+//        checkEpisode(resolve(episode1), 4L, 1L, 2L);
+//        checkEpisode(resolve(item1), 5L, 1L, null);
+//        checkEpisode(resolve(episode2), 6L, 1L, 3L);
+//    }
+//    
+//    private void write(Content...contents) {
+//        for (Content content : contents) {
+//            if (content instanceof Container) {
+//                writer.createOrUpdate((Container) content);
+//            }
+//            if (content instanceof Item) {
+//                writer.createOrUpdate((Item) content);
+//            }
+//        }
+//    }
+//=======
+//        final String ep1Uri = "ep1";
+//        final Episode ep1 = new Episode(ep1Uri, "c"+ep1Uri, BBC);
+//        ep1.setId(1);
+//        ep1.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
+//        ep1.setSeriesNumber(5);
+//        ep1.setEpisodeNumber(5);
+//        
+//        final String ep2Uri = "ep2";
+//        final Episode ep2 = new Episode(ep2Uri, "c"+ep2Uri, BBC);
+//        ep2.setId(2);
+//        ep2.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
+//        ep2.setSeriesNumber(5);
+//        ep2.setEpisodeNumber(6);
+//        
+//        context.checking(new Expectations(){{
+//            ignoring(progressStore);
+//            one(lister).listContent(with(any(ContentListingCriteria.class))); will(returnValue(Iterators.forArray(aContainer(containerUri, ep1.childRef(), ep2.childRef()))));
+//            one(resolver).findByCanonicalUris(with(hasItems(ep1Uri, ep2Uri))); will(returnValue(ResolvedContent.builder().put(ep1.getId(), ep1).put(ep2.getId(), ep2).build()));
+//        }});
+//>>>>>>> Equivalence Refactor
+//
+//    @Test
+//    public void testUpdatesReferencesInTopLevelSeries() {
+//        Series series = seriesWithParent("seriesUri", null);
+//        Episode episode1 = episodeWithContainers("ep1", series, series);
+//        Item item1 = itemWithContainer("ep2", series);
+//        
+//        write(series, episode1, item1);
+//        
+//        setId("containers", series.getCanonicalUri(), 1L);
+//        setId("children", episode1.getCanonicalUri(), 2L);
+//        setId("children", item1.getCanonicalUri(), 3L);
+//        
+//        checkTopLevelSeries(resolve(series), 1L, null, null);
+//        checkEpisode(resolve(episode1), 2L, null, null);
+//        checkEpisode(resolve(item1), 3L, null, null);
+//        
+//        task.run();
+//        
+//        checkTopLevelSeries(resolve(series), 1L, 2L, 3L);
+//        checkEpisode(resolve(episode1), 2L, 1L, 1L);
+//        checkEpisode(resolve(item1), 3L, 1L, null);
+//        
+//    }
+//    
+//    @Test
+//    public void testUpdatesReferencesInBrandAndNoSeries() {
+//        Brand brand = new Brand("brandUri", "cBrandUri", BBC);
+//        Episode episode1 = episodeWithContainers("ep1", null, brand);
+//        Item item1 = itemWithContainer("ep2", brand);
+//        
+//        write(brand, episode1, item1);
+//        
+//        setId("containers", brand.getCanonicalUri(), 1L);
+//        setId("children", episode1.getCanonicalUri(), 2L);
+//        setId("children", item1.getCanonicalUri(), 3L);
+//        
+//        assertThat(resolve(brand).getId(), is(1L));
+//        checkEpisode(resolve(episode1), 2L, null, null);
+//        checkEpisode(resolve(item1), 3L, null, null);
+//        
+//        task.run();
+//        
+//        assertThat(resolve(brand).getId(), is(1L));
+//        checkEpisode(resolve(episode1), 2L, 1L, null);
+//        checkEpisode(resolve(item1), 3L, 1L, null);
+//        
+//    }
+//
+//
+//    private void checkEpisode(Item resolvedItem, Long episodeId, Long brandId, Long seriesId) {
+//        assertThat(resolvedItem.getId(), is(episodeId));
+//        assertThat(resolvedItem.getContainer().getId(), is(brandId));
+//        if (resolvedItem instanceof Episode) {
+//            ParentRef seriesRef = ((Episode)resolvedItem).getSeriesRef();
+//            if (seriesRef != null) {
+//                assertThat(seriesRef.getId(), is(seriesId));
+//            } else {
+//                assertThat(seriesId, is(nullValue()));
+//            }
+//        }
+//    }
+//
+//    private void checkSeries(Series resolvedSeries, long seriesId, Long brandId, Long...childIds) {
+//        checkTopLevelSeries(resolvedSeries, seriesId, childIds);
+//        assertThat(resolvedSeries.getParent().getId(), is(brandId));
+//    }
+//
+//    private void checkTopLevelSeries(Series resolvedSeries, long seriesId, Long...childIds) {
+//        assertThat(resolvedSeries.getId(), is(seriesId));
+//        checkIds(resolvedSeries.getChildRefs(), childIds);
+//    }
+//
+//    private void checkIds(ImmutableList<ChildRef> childRefs, Long... ids) {
+//        Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
+//        for (ChildRef childRef : childRefs) {
+//            assertThat(childRef.toString(), childRef.getId(), is(idIter.next()));
+//        }
+//    }
+//    
+//    private void checkSeriesIds(ImmutableList<SeriesRef> seriesRefs, Long... ids) {
+//        Iterator<Long> idIter = Lists.newArrayList(ids).iterator();
+//        for (SeriesRef seriesRef : seriesRefs) {
+//            assertThat(seriesRef.toString(), seriesRef.getId(), is(idIter.next()));
+//        }
+//    }
+//    
+//    private Item itemWithContainer(String uri, Container container) {
+//        Item item = new Item(uri, "c"+uri, BBC);
+//        if (container != null) {
+//            item.setContainer(container);
+//        }
+//        return item;
+//    }
+//
+//    private Episode episodeWithContainers(String uri, Series series, Container container) {
+//        Episode episode1 = new Episode(uri, "c"+uri, BBC);
+//        episode1.setContainer(container);
+//        if (series != null) {
+//            episode1.setSeries(series);
+//        }
+//        return episode1;
+//    }
+//
+//    private Series seriesWithParent(String uri, final Brand brand) {
+//        final Series series;
+//        series = new Series(uri, "c"+uri, BBC);
+//        if (brand != null) {
+//            series.setParent(brand);
+//        }
+//        return series;
+//    }
+//
+//    private void setId(String collection, String id, long aid) {
+//        mongo.collection(collection).update(where().idEquals(id).build(), update().setField("aid", aid).build());
+//    }
+//
+//    @SuppressWarnings("unchecked")
+//    private <T extends Content> T resolve(T content) {
+//        String uri = content.getCanonicalUri();
+//        return (T) resolver.findByCanonicalUris(ImmutableList.of(uri))
+//            .get(uri).requireValue();
+//    }
+//
+//}

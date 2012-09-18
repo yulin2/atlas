@@ -11,12 +11,13 @@ import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.util.Identifiables;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -38,30 +39,30 @@ public class EquivalenceSummaryWritingHandler<T extends Content> implements Equi
     }
 
     private EquivalenceSummary summaryOf(EquivalenceResult<T> result) {
-        String canonicalUri = result.subject().getCanonicalUri();
-        String parent = parentOf(result.subject());
-        List<String> candidates = candidatesFrom(result.combinedEquivalences());
+        Id id = result.subject().getId();
+        Id parent = parentOf(result.subject());
+        List<Id> candidates = candidatesFrom(result.combinedEquivalences());
         Map<Publisher, ContentRef> equivalents = equivalentsFrom(result.strongEquivalences());
-        return new EquivalenceSummary(canonicalUri,parent,candidates,equivalents);
+        return new EquivalenceSummary(id,parent,candidates,equivalents);
     }
 
-    private String parentOf(T subject) {
+    private Id parentOf(T subject) {
         if (subject instanceof Item) {
             ParentRef container = ((Item)subject).getContainer();
             if (container != null) {
-                return container.getUri();
+                return container.getId();
             }
         } else if (subject instanceof Series) {
             ParentRef container = ((Series)subject).getParent();
             if (container != null) {
-                return container.getUri();
+                return container.getId();
             }
         }
         return null;
     }
 
-    private List<String> candidatesFrom(ScoredCandidates<T> combinedEquivalences) {
-        return ImmutableList.copyOf(Iterables.transform(combinedEquivalences.candidates().keySet(), Identified.TO_URI));
+    private List<Id> candidatesFrom(ScoredCandidates<T> combinedEquivalences) {
+        return ImmutableList.copyOf(Iterables.transform(combinedEquivalences.candidates().keySet(), Identifiables.toId()));
     }
 
     private Map<Publisher, ContentRef> equivalentsFrom(Map<Publisher, ScoredCandidate<T>> strongEquivalences) {
@@ -74,10 +75,10 @@ public class EquivalenceSummaryWritingHandler<T extends Content> implements Equi
     }
     
     private ContentRef contentRefFrom(T candidate) {
-        String canonicalUri = candidate.getCanonicalUri();
+        Id id = candidate.getId();
         Publisher publisher = candidate.getPublisher();
-        String parent = parentOf(candidate);
-        return new ContentRef(canonicalUri, publisher, parent);
+        Id parent = parentOf(candidate);
+        return new ContentRef(id, publisher, parent);
     }
 
 }

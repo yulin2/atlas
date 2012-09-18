@@ -3,8 +3,6 @@ package org.atlasapi.equiv.results.extractors;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.filters.PublisherFilter;
 import org.atlasapi.equiv.results.scores.Score;
@@ -13,8 +11,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
-
 public class PublisherFilteringExtractorTest {
 
     @Test
@@ -22,18 +18,18 @@ public class PublisherFilteringExtractorTest {
         
         PublisherFilter<Item> filter = new PublisherFilter<Item>();
         
-        List<ScoredCandidate<Item>> paScore = ImmutableList.of(scoreOneFor(Publisher.PA));
+        ScoredCandidate<Item> paScore = scoreOneFor(Publisher.PA);
         
-        assertFalse(filter.apply(paScore, itemWithPublisher(Publisher.PA), new DefaultDescription()).iterator().hasNext());
-        assertTrue(filter.apply(paScore, itemWithPublisher(Publisher.BBC), new DefaultDescription()).iterator().hasNext());
-        assertTrue(filter.apply(paScore, itemWithPublisher(Publisher.C4), new DefaultDescription()).iterator().hasNext());
+        assertFalse(filter.apply(paScore, itemWithPublisher(Publisher.PA), new DefaultDescription()));
+        assertTrue(filter.apply(paScore, itemWithPublisher(Publisher.BBC), new DefaultDescription()));
+        assertTrue(filter.apply(paScore, itemWithPublisher(Publisher.C4), new DefaultDescription()));
         
-        List<ScoredCandidate<Item>> BbcScore = ImmutableList.of(scoreOneFor(Publisher.BBC));
-        assertFalse(filter.apply(BbcScore, itemWithPublisher(Publisher.C4), new DefaultDescription()).iterator().hasNext());
-        assertTrue(filter.apply(BbcScore, itemWithPublisher(Publisher.SEESAW), new DefaultDescription()).iterator().hasNext());
+        ScoredCandidate<Item> BbcScore = scoreOneFor(Publisher.BBC);
+        assertFalse(filter.apply(BbcScore, itemWithPublisher(Publisher.C4), new DefaultDescription()));
+        assertTrue(filter.apply(BbcScore, itemWithPublisher(Publisher.SEESAW), new DefaultDescription()));
         
-        List<ScoredCandidate<Item>> dmScore = ImmutableList.of(scoreOneFor(Publisher.DAILYMOTION));
-        assertTrue(filter.apply(dmScore, itemWithPublisher(Publisher.C4), new DefaultDescription()).iterator().hasNext());
+        ScoredCandidate<Item> dmScore = scoreOneFor(Publisher.DAILYMOTION);
+        assertTrue(filter.apply(dmScore, itemWithPublisher(Publisher.C4), new DefaultDescription()));
         
     }
 

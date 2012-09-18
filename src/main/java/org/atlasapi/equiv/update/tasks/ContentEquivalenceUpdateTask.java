@@ -110,7 +110,7 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
         } else {
             if (content != null) {
                 updateProgress(progressFrom(content));
-                log.info("Stopped: {}", schedulingKey, content);
+                log.info("Stopped: {} at {}", schedulingKey, content);
             }
         }
     }

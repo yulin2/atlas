@@ -10,6 +10,7 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
@@ -66,10 +67,10 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
             return;
         }
         
-        String containerUri = container.getUri();
+        Id containerId = container.getId();
         Optional<EquivalenceSummary> possibleSummary = summaryStore
-            .summariesForUris(ImmutableSet.of(containerUri))
-            .get(containerUri);
+            .summariesForIds(ImmutableSet.of(containerId))
+            .get(containerId);
         
         if (!possibleSummary.isPresent()) {
             desc.appendText("Item Container summary not found").finishStage();
@@ -112,23 +113,23 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
 
     private boolean filter(final Map<Publisher, ContentRef> containerEquivalents,
                               Item candidate) {
-        String candidateContainerUri = containerUri(candidate);
-        if (candidateContainerUri == null) {
+        Id candidateContainerId = containerUri(candidate);
+        if (candidateContainerId == null) {
             return true;
         } 
         ContentRef validContainer = containerEquivalents.get(candidate.getPublisher());
         if (validContainer == null) {
             return !strict;
-        } else if (validContainer.getCanonicalUri().equals(candidateContainerUri)) {
+        } else if (validContainer.getId().equals(candidateContainerId)) {
             return true;
         }
         return false;
     }
 
-    private String containerUri(Item candidate) {
+    private Id containerUri(Item candidate) {
         ParentRef container = candidate.getContainer();
         return container == null ? null 
-                                 : candidate.getContainer().getUri();
+                                 : candidate.getContainer().getId();
     }
 
 }

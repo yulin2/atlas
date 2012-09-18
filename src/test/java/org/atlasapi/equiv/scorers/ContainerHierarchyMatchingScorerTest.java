@@ -12,6 +12,7 @@ import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Identified;
@@ -74,7 +75,7 @@ public class ContainerHierarchyMatchingScorerTest {
         final Brand subject = brandWithSeries(5);
 
         context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))));
+            one(contentResolver).findByIds(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),Identifiables.toId()))));
                 will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
         }});
 
@@ -90,9 +91,9 @@ public class ContainerHierarchyMatchingScorerTest {
         final Brand suggestion = brandWithSeries(6);
 
         context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),SeriesRef.TO_URI))));
+            one(contentResolver).findByIds(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),Identifiables.toId()))));
                 will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(suggestion.getSeriesRefs(),SeriesRef.TO_URI))));
+            one(contentResolver).findByIds(with(ImmutableList.copyOf(Iterables.transform(suggestion.getSeriesRefs(),Identifiables.toId()))));
                 will(returnValue(ResolvedContent.builder().putAll(series(6)).build()));
         }});
 
@@ -120,18 +121,20 @@ public class ContainerHierarchyMatchingScorerTest {
         return ImmutableList.copyOf(is);
     }
 
-    private Map<String, ? extends Identified> series(int i) {
-        Builder<String, Series> builder = ImmutableMap.builder();
+    private Map<Id, ? extends Identified> series(int i) {
+        Builder<Id, Series> builder = ImmutableMap.builder();
         for (int j = 0; j < i; j++) {
             Series series = new Series("uri"+j, "curie", Publisher.BBC);
-            builder.put(series.getCanonicalUri(), series);
+            series.setId(j);
+            builder.put(series.getId(), series);
         };
         return builder.build();
     }
     
     private Brand brandWithSeries(int series) {
         Brand brand = new Brand();
-        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new SeriesRef(1234L, "uri", "sk", 1, new DateTime(DateTimeZones.UTC))), series));
+        int i = 0;
+        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new SeriesRef(i++, "sk", i, new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), series));
         return brand;
     }
 
@@ -142,7 +145,8 @@ public class ContainerHierarchyMatchingScorerTest {
     }
 
     public void setChildren(int children, Container brand) {
-        brand.setChildRefs(Iterables.limit(Iterables.cycle(new ChildRef(1234L, "uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), children));
+        int i = 0;
+        brand.setChildRefs(Iterables.limit(Iterables.cycle(new ChildRef(i++, "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), children));
     }
 
 }

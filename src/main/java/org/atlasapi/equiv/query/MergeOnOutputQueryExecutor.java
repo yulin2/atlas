@@ -6,6 +6,7 @@ import java.util.Map;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.OutputContentMerger;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -28,22 +29,22 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     @Override
-    public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         return mergeResults(query, delegate.executeUriQuery(uris, query));
     }
 
     @Override
-    public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, final ContentQuery query) {
         return mergeResults(query, delegate.executeIdQuery(ids, query));
     }
 
     @Override
     public Map<String, List<Identified>> executeAliasQuery(Optional<String> namespace, Iterable<String> values,
             ContentQuery query) {
-        return mergeResults(query, delegate.executeAliasQuery(namespace, values, query));
+        return delegate.executeAliasQuery(namespace, values, query);
     }
 
-    private Map<String, List<Identified>> mergeResults(final ContentQuery query, Map<String, List<Identified>> unmergedResult) {
+    private Map<Id, List<Identified>> mergeResults(final ContentQuery query, Map<Id, List<Identified>> unmergedResult) {
         final ApplicationConfiguration config = query.getConfiguration();
         if (!config.precedenceEnabled()) {
             return unmergedResult;

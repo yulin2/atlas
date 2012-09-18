@@ -34,7 +34,12 @@ public class ConjunctiveFilterTest {
         
         DefaultDescription desc = new DefaultDescription();
         Iterable<ScoredCandidate<Integer>> candidates = candidatesFor(Ranges.closed(0, 20));
-        List<ScoredCandidate<Integer>> filtered = filter.apply(candidates, null, desc);
+        List<ScoredCandidate<Integer>> filtered = Lists.newArrayList();
+        for(ScoredCandidate<Integer> scoredCandidate : candidates) {
+            if (filter.apply(scoredCandidate, null, desc)) {
+                filtered.add(scoredCandidate);
+            }
+        }
         
         assertThat(Lists.transform(filtered, ScoredCandidate.<Integer>toCandidate()), is(hasItems(6,12,18)));
     }
