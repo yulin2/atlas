@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Functions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -44,7 +45,7 @@ public class EquivGraphController {
         );
         
         if (subj != null) {
-            Iterable<LookupEntry> equivs = lookupStore.entriesForCanonicalUris(
+            Iterable<LookupEntry> equivs = lookupStore.entriesForIds(
                 Iterables.transform(subj.equivalents(), LookupRef.TO_ID));
             
             List<SimpleModel> nodes = Lists.newLinkedList(); 
@@ -69,11 +70,11 @@ public class EquivGraphController {
             .put("uri", equiv.uri())
             .put("source", equiv.lookupRef().publisher().key())
             .putStrings("direct", Collections2.filter(
-                    Collections2.transform(equiv.directEquivalents(), LookupRef.TO_ID),
+                    Collections2.transform(equiv.directEquivalents(), Functions.compose(Functions.toStringFunction(), LookupRef.TO_ID)),
                     Predicates.not(Predicates.equalTo(equiv.uri()))
             ))
             .putStrings("explicit", Collections2.filter(
-                    Collections2.transform(equiv.explicitEquivalents(), LookupRef.TO_ID),
+                    Collections2.transform(equiv.explicitEquivalents(),  Functions.compose(Functions.toStringFunction(), LookupRef.TO_ID)),
                     Predicates.not(Predicates.equalTo(equiv.uri()))
             ));
     }

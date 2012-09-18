@@ -9,6 +9,7 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
 import org.atlasapi.equiv.results.filters.EquivalenceFilter;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.content.Content;
@@ -61,11 +62,15 @@ public class DefaultEquivalenceResultBuilder<T extends Content> implements Equiv
 
     private List<ScoredCandidate<T>> filter(T target, ReadableDescription desc, ScoredCandidates<T> combined) {
         desc.startStage("Filtering candidates");
-        List<ScoredCandidate<T>> filteredCandidates = ImmutableList.copyOf(
-            filter.apply(combined.orderedCandidates(Ordering.usingToString()), target, desc)
-        );
+        ImmutableList.Builder<ScoredCandidate<T>> filteredCandidates = ImmutableList.builder();
+        for (Map.Entry<T, Score> entry : combined.candidates().entrySet()) {
+            ScoredCandidate<T> candidate = ScoredCandidate.valueOf(entry.getKey(), entry.getValue());
+            if (filter.apply(candidate, target, desc)) {
+                filteredCandidates.add(candidate);
+            }
+        }
         desc.finishStage();
-        return filteredCandidates;
+        return filteredCandidates.build();
     }
 
     private Map<Publisher, ScoredCandidate<T>> extract(T target, List<ScoredCandidate<T>> filteredCandidates, ResultDescription desc) {

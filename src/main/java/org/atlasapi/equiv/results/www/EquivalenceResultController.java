@@ -12,6 +12,7 @@ import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
 import org.atlasapi.media.entity.ChildRef;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -63,7 +64,7 @@ public class EquivalenceResultController {
     @RequestMapping(value = "/system/equivalence/results", method = RequestMethod.GET)
     public String showSubResults(Map<String, Object> model, HttpServletResponse response, @RequestParam(value = "uri", required = true) String uri) throws IOException {
 
-        Maybe<Identified> ided = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).get(uri);
+        Maybe<Identified> ided = contentResolver.findByCanonicalUris(ImmutableList.of(uri)).getFirstValue();
 
         if (ided.isNothing()) {
             response.sendError(NOT_FOUND.code(), "Unknown URI");
@@ -72,20 +73,20 @@ public class EquivalenceResultController {
 
         SimpleModelList resultModelList = new SimpleModelList();
 
-        if (ided.requireValue() instanceof Container) {
-
-            List<StoredEquivalenceResult> results = store.forIds(Iterables.transform(((Container) ided.requireValue()).getChildRefs(), new Function<ChildRef, String>() {
-                @Override
-                public String apply(ChildRef input) {
-                    return input.getUri();
-                }
-            }));
-
-            for (StoredEquivalenceResult result : results) {
-                resultModelList.add(resultModelBuilder.build(result, probeStore.probeFor(uri)));
-            }
-
-        }
+//        if (ided.requireValue() instanceof Container) {
+//
+//            List<StoredEquivalenceResult> results = store.forIds(Iterables.transform(((Container) ided.requireValue()).getChildRefs(), new Function<ChildRef, Id>() {
+//                @Override
+//                public Id apply(ChildRef input) {
+//                    return input.getId();
+//                }
+//            }));
+//
+//            for (StoredEquivalenceResult result : results) {
+//                resultModelList.add(resultModelBuilder.build(result, probeStore.probeFor(uri)));
+//            }
+//
+//        }
         model.put("results", resultModelList);
         return "equivalence.results";
     }

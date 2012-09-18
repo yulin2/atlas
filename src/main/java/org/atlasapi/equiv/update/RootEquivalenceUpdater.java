@@ -1,12 +1,12 @@
 package org.atlasapi.equiv.update;
 
-import static org.atlasapi.media.entity.ChildRef.TO_URI;
-
 import java.util.List;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
@@ -50,8 +50,8 @@ public class RootEquivalenceUpdater implements EquivalenceUpdater<Content> {
     }
 
     protected Iterable<Item> childrenOf(Container content) {
-        List<String> childUris = Lists.transform(content.getChildRefs(), TO_URI);
-        ResolvedContent children = contentResolver.findByCanonicalUris(childUris);
+        List<Id> childUris = Lists.transform(content.getChildRefs(), Identifiables.toId());
+        ResolvedContent children = contentResolver.findByIds(childUris);
         return Iterables.filter(children.getAllResolvedResults(), Item.class);
     }
 }

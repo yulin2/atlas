@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentCategory;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -114,7 +115,7 @@ public class ChildRefUpdateTask extends ScheduledTask {
     }
 
     public void updateChildRefs(Container container) {
-        ResolvedContent children = resolver.findByCanonicalUris(Iterables.transform(container.getChildRefs(), ChildRef.TO_URI));
+        ResolvedContent children = resolver.findByIds(Iterables.transform(container.getChildRefs(), Identifiables.toId()));
         List<ChildRef> refs = Lists.newArrayList();
         for (Identified child : children.getAllResolvedResults()) {
             refs.add(((Item)child).childRef());

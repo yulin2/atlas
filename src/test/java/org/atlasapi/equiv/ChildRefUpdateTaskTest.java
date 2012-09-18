@@ -22,6 +22,7 @@ import org.atlasapi.persistence.media.entity.ContainerTranslator;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -30,6 +31,7 @@ import com.google.common.collect.Iterators;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.time.DateTimeZones;
 
 @RunWith(JMock.class)
 public class ChildRefUpdateTaskTest extends TestCase {
@@ -52,18 +54,22 @@ public class ChildRefUpdateTaskTest extends TestCase {
         
         final String ep1Uri = "ep1";
         final Episode ep1 = new Episode(ep1Uri, "c"+ep1Uri, BBC);
+        ep1.setId(1);
+        ep1.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
         ep1.setSeriesNumber(5);
         ep1.setEpisodeNumber(5);
         
         final String ep2Uri = "ep2";
         final Episode ep2 = new Episode(ep2Uri, "c"+ep2Uri, BBC);
+        ep2.setId(2);
+        ep2.setThisOrChildLastUpdated(new DateTime(DateTimeZones.UTC));
         ep2.setSeriesNumber(5);
         ep2.setEpisodeNumber(6);
         
         context.checking(new Expectations(){{
             ignoring(progressStore);
             one(lister).listContent(with(any(ContentListingCriteria.class))); will(returnValue(Iterators.forArray(aContainer(containerUri, ep1.childRef(), ep2.childRef()))));
-            one(resolver).findByCanonicalUris(with(hasItems(ep1Uri, ep2Uri))); will(returnValue(ResolvedContent.builder().put(ep1Uri, ep1).put(ep2Uri, ep2).build()));
+            one(resolver).findByCanonicalUris(with(hasItems(ep1Uri, ep2Uri))); will(returnValue(ResolvedContent.builder().put(ep1.getId(), ep1).put(ep2.getId(), ep2).build()));
         }});
 
         task.run();

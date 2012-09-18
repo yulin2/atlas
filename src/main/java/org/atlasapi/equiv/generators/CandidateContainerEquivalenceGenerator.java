@@ -12,10 +12,12 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.ChildRef;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 
@@ -30,11 +32,12 @@ public class CandidateContainerEquivalenceGenerator implements EquivalenceGenera
 
     private final ContentResolver contentResolver;
     private final EquivalenceSummaryStore equivSummaryStore;
+    
     private final Function<Container, Iterable<Item>> TO_CHILD_REFS = new Function<Container, Iterable<Item>>() {
         @Override
         public Iterable<Item> apply(@Nullable Container input) {
-            Iterable<String> childUris = Iterables.transform(input.getChildRefs(), ChildRef.TO_URI);
-            ResolvedContent children = contentResolver.findByCanonicalUris(childUris);
+            Iterable<Id> childIds = Iterables.transform(input.getChildRefs(), Identifiables.toId());
+            ResolvedContent children = contentResolver.findByIds(childIds);
             return Iterables.filter(children.getAllResolvedResults(), Item.class);
         }
     };
@@ -50,9 +53,9 @@ public class CandidateContainerEquivalenceGenerator implements EquivalenceGenera
 
         ParentRef parent = subject.getContainer();
         if (parent != null) {
-            String parentUri = parent.getUri();
-            OptionalMap<String, EquivalenceSummary> containerSummary = parentSummary(parentUri);
-            Optional<EquivalenceSummary> optional = containerSummary.get(parentUri);
+            Id parentId = parent.getId();
+            OptionalMap<Id, EquivalenceSummary> containerSummary = parentSummary(parentId);
+            Optional<EquivalenceSummary> optional = containerSummary.get(parentId);
             if (optional.isPresent()) {
                 EquivalenceSummary summary = optional.get();
                 for (Item child : childrenOf(summary.getCandidates(), result)) {
@@ -64,14 +67,14 @@ public class CandidateContainerEquivalenceGenerator implements EquivalenceGenera
         return result.build();
     }
 
-    private Iterable<Item> childrenOf(ImmutableList<String> candidates, Builder<Item> result) {
-        List<Identified> resolvedContent = contentResolver.findByCanonicalUris(candidates).getAllResolvedResults();
+    private Iterable<Item> childrenOf(ImmutableList<Id> candidates, Builder<Item> result) {
+        List<Identified> resolvedContent = contentResolver.findByIds(candidates).getAllResolvedResults();
         Iterable<Container> resolvedContainers = Iterables.filter(resolvedContent, Container.class);
         return Iterables.concat(Iterables.transform(resolvedContainers, TO_CHILD_REFS));
     }
 
-    private OptionalMap<String, EquivalenceSummary> parentSummary(String parentUri) {
-        return equivSummaryStore.summariesForUris(ImmutableSet.of(parentUri));
+    private OptionalMap<Id, EquivalenceSummary> parentSummary(Id parentId) {
+        return equivSummaryStore.summariesForIds(ImmutableSet.of(parentId));
     }
 
 }

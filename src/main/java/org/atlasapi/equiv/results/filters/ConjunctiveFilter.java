@@ -7,31 +7,30 @@ import org.atlasapi.equiv.results.scores.ScoredCandidate;
 
 import com.google.common.collect.ImmutableList;
 
-public class ConjunctiveFilter<T> implements EquivalenceFilter<T> {
-
+public class ConjunctiveFilter<T> extends AbstractEquivalenceFilter<T> {
+    
     public static final <T> EquivalenceFilter<T> valueOf(Iterable<? extends EquivalenceFilter<T>> filters) {
         return new ConjunctiveFilter<T>(filters);
     }
     
     private final List<EquivalenceFilter<T>> filters;
 
-    private ConjunctiveFilter(Iterable<? extends EquivalenceFilter<T>> filters) {
+    public ConjunctiveFilter(Iterable<? extends EquivalenceFilter<T>> filters) {
         this.filters = ImmutableList.copyOf(filters);
     }
-
+    
     @Override
-    public List<ScoredCandidate<T>> apply(Iterable<ScoredCandidate<T>> candidate, T subject, ResultDescription desc) {
-        desc.startStage(toString());
-        Iterable<ScoredCandidate<T>> result = candidate;
+    boolean doFilter(ScoredCandidate<T> candidate, T subject, ResultDescription desc) {
+        boolean result = true;
         for (EquivalenceFilter<T> filter : filters) {
-            result = filter.apply(result, subject, desc);
+            result &= filter.apply(candidate, subject, desc);
         }
-        desc.finishStage();
-        return ImmutableList.copyOf(result);
+        return result;
     }
-
+    
     @Override
     public String toString() {
         return "all of: " + filters;
     }
+
 }

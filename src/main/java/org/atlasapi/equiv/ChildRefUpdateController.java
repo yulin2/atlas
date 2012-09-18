@@ -36,7 +36,7 @@ public class ChildRefUpdateController {
         Future<?> submit = executor.submit(new Runnable() {
             @Override
             public void run() {
-                updater.updateChildRefs((Container) resolver.findByCanonicalUris(ImmutableSet.of(uri)).get(uri).requireValue());
+                updater.updateChildRefs((Container) resolver.findByCanonicalUris(ImmutableSet.of(uri)).getFirstValue().requireValue());
             }
         });
         
