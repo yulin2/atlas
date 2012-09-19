@@ -14,6 +14,7 @@ import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
@@ -25,7 +26,7 @@ import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
-public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Film> {
+public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Item> {
     
     private static final Pattern IMDB_REF = Pattern.compile("http://imdb.com/title/[\\d\\w]+");
 
@@ -43,8 +44,10 @@ public class FilmEquivalenceGenerator implements ContentEquivalenceGenerator<Fil
     }
 
     @Override
-    public ScoredEquivalents<Film> generate(Film film, ResultDescription desc) {
-        ScoredEquivalentsBuilder<Film> scores = DefaultScoredEquivalents.<Film> fromSource("Film");
+    public ScoredEquivalents<Item> generate(Item item, ResultDescription desc) {
+        
+        Film film = (Film) item;
+        ScoredEquivalentsBuilder<Item> scores = DefaultScoredEquivalents.fromSource("Film");
         
         if (film.getYear() == null || Strings.isNullOrEmpty(film.getTitle())) {
             desc.appendText("Can't continue: year '%s', title '%s'", film.getYear(), film.getTitle()).finishStage();

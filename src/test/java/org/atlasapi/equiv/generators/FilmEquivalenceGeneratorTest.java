@@ -14,6 +14,7 @@ import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
@@ -64,8 +65,8 @@ public class FilmEquivalenceGeneratorTest extends TestCase {
                 will(returnValue(ImmutableList.<Identified> of(anotherFilm)));
         }});
         
-        ScoredEquivalents<Film> scoredEquivalents = generator.generate(subjectFilm , new DefaultDescription());
-        Map<Film, Score> equivalentsScores = scoredEquivalents.equivalents();
+        ScoredEquivalents<Item> scoredEquivalents = generator.generate(subjectFilm , new DefaultDescription());
+        Map<Item, Score> equivalentsScores = scoredEquivalents.equivalents();
         assertThat(equivalentsScores.get(anotherFilm), is(equalTo(score)));
     }
 
