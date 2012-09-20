@@ -11,6 +11,8 @@ import com.metabroadcast.common.intl.Countries;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +21,7 @@ import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -41,9 +44,8 @@ import org.joda.time.format.ISODateTimeFormat;
 
 /**
  */
-//TODO Lots of duplicated code, some refactoring needed.
 public class TheSpaceItemProcessor {
-
+    
     private final String BASE_CANONICAL_URI = "http://thespace.org";
     private final String BASE_ITEMS_URI = "http://thespace.org/items/";
     private final String BASE_CATEGORY_URI = "http://thespace.org/by/genre/";
@@ -56,7 +58,7 @@ public class TheSpaceItemProcessor {
     private final AdapterLog log;
     private final ContentResolver contentResolver;
     private final ContentWriter contentWriter;
-
+    
     public TheSpaceItemProcessor(String url, SimpleHttpClient client, AdapterLog log, ContentResolver contentResolver, ContentWriter contentWriter) {
         this.url = url;
         this.client = client;
@@ -64,7 +66,7 @@ public class TheSpaceItemProcessor {
         this.contentResolver = contentResolver;
         this.contentWriter = contentWriter;
     }
-
+    
     public void process(JsonNode node) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         if (node.has("type") && node.has("pid")) {
@@ -121,87 +123,109 @@ public class TheSpaceItemProcessor {
             }
         }
     }
-
+    
     private void fillItem(Item episode, JsonNode node, ObjectMapper mapper) throws Exception {
         try {
             JsonNode pid = node.get("pid");
             episode.setCanonicalUri(getItemsUri(pid.asText()));
             episode.setPublisher(Publisher.THESPACE);
-
+            
             JsonNode title = node.get("title");
             if (title != null && !title.isNull()) {
                 episode.setTitle(title.asText());
             }
-
+            
             JsonNode mediaType = node.get("media_type");
             if (mediaType != null && mediaType.asText().toLowerCase().equals("audio")) {
                 episode.setMediaType(MediaType.AUDIO);
             } else if (mediaType != null && mediaType.asText().toLowerCase().equals("audio_video")) {
                 episode.setMediaType(MediaType.VIDEO);
             }
-
-            JsonNode long_synopsis = node.get("long_synopsis");
-            JsonNode medium_synopsis = node.get("medium_synopsis");
-            JsonNode short_synopsis = node.get("short_synopsis");
-            String synopsis = null;
-            if (long_synopsis != null && !long_synopsis.isNull()) {
-                synopsis = long_synopsis.asText();
-            } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
-                synopsis = medium_synopsis.asText();
-            } else if (short_synopsis != null && !short_synopsis.isNull()) {
-                synopsis = short_synopsis.asText();
-            }
-            episode.setDescription(synopsis);
-
-            JsonNode image = node.get("image");
-            if (image != null && !image.isNull()) {
-                JsonNode smallImage = image.get("depiction_320");
-                if (smallImage != null && !smallImage.isNull()) {
-                    episode.setThumbnail(getImagesUri(smallImage.asText()));
-                }
-                JsonNode bigImage = image.get("depiction_640");
-                if (bigImage != null && !bigImage.isNull()) {
-                    episode.setImage(getImagesUri(bigImage.asText()));
-                }
-            }
-
-            Iterator<JsonNode> categories = node.get("categories").getElements();
-            Set<String> genres = new HashSet<String>();
-            while (categories.hasNext()) {
-                String id = BASE_CATEGORY_URI + categories.next().get("id").asText();
-                genres.add(id);
-            }
-            episode.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
-
-            Iterator<JsonNode> clips = node.get("available_clips").getElements();
-            while (clips.hasNext()) {
-                String cPid = clips.next().get("pid").asText();
-                JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-                episode.addClip(getClip(mapper, clip.get("programme"), episode));
-            }
-
-            JsonNode versions = node.get("versions");
-            Set<Version> versionsObj = new HashSet<Version>();
-            if (versions != null && !versions.isNull()) {
-                Iterator<JsonNode> it = versions.getElements();
-                while (it.hasNext()) {
-                    versionsObj.add(getVersion(it.next(), episode));
-                }
-            }
-            episode.setVersions(versionsObj);
+            
+            fillSynopsis(node, episode);
+            
+            fillImage(node, episode);
+            
+            fillGenres(node, episode);
+            
+            fillClips(node, mapper, episode);
+            
+            fillVersions(node, episode);
         } catch (Exception ex) {
             log.record(new AdapterLogEntry(AdapterLogEntry.Severity.WARN).withDescription("Failed ingesting episode: " + episode.getCanonicalUri()).withSource(getClass()));
             throw ex;
         }
     }
-
+    
+    private void fillVersions(JsonNode node, Item episode) {
+        JsonNode versions = node.get("versions");
+        Set<Version> versionsObj = new HashSet<Version>();
+        if (versions != null && !versions.isNull()) {
+            Iterator<JsonNode> it = versions.getElements();
+            while (it.hasNext()) {
+                versionsObj.add(getVersion(it.next(), episode));
+            }
+        }
+        episode.setVersions(versionsObj);
+    }
+    
+    private void fillClips(JsonNode node, ObjectMapper mapper, Content content) throws Exception {
+        Iterator<JsonNode> clips = node.get("available_clips").getElements();
+        List<Clip> clipsObj = new LinkedList<Clip>();
+        while (clips.hasNext()) {
+            String cPid = clips.next().get("pid").asText();
+            JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
+            clipsObj.add(getClip(clip.get("programme")));
+        }
+        content.setClips(clipsObj);
+    }
+    
+    private void fillGenres(JsonNode node, Described described) {
+        Iterator<JsonNode> categories = node.get("categories").getElements();
+        Set<String> genres = new HashSet<String>();
+        while (categories.hasNext()) {
+            String id = BASE_CATEGORY_URI + categories.next().get("id").asText();
+            genres.add(id);
+        }
+        described.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
+    }
+    
+    private void fillImage(JsonNode node, Described described) {
+        JsonNode image = node.get("image");
+        if (image != null && !image.isNull()) {
+            JsonNode smallImage = image.get("depiction_320");
+            if (smallImage != null && !smallImage.isNull()) {
+                described.setThumbnail(getImagesUri(smallImage.asText()));
+            }
+            JsonNode bigImage = image.get("depiction_640");
+            if (bigImage != null && !bigImage.isNull()) {
+                described.setImage(getImagesUri(bigImage.asText()));
+            }
+        }
+    }
+    
+    private void fillSynopsis(JsonNode node, Described described) {
+        JsonNode long_synopsis = node.get("long_synopsis");
+        JsonNode medium_synopsis = node.get("medium_synopsis");
+        JsonNode short_synopsis = node.get("short_synopsis");
+        String synopsis = null;
+        if (long_synopsis != null && !long_synopsis.isNull()) {
+            synopsis = long_synopsis.asText();
+        } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
+            synopsis = medium_synopsis.asText();
+        } else if (short_synopsis != null && !short_synopsis.isNull()) {
+            synopsis = short_synopsis.asText();
+        }
+        described.setDescription(synopsis);
+    }
+    
     private void fillEpisode(Episode episode, JsonNode node, ObjectMapper mapper) throws Exception {
         try {
             JsonNode position = node.get("position");
             if (position != null && !position.isNull()) {
                 episode.setEpisodeNumber(position.asInt());
             }
-
+            
             JsonNode parent = node.get("parent").get("programme");
             if (parent != null && !parent.isNull()) {
                 String pPid = parent.get("pid").asText();
@@ -219,122 +243,61 @@ public class TheSpaceItemProcessor {
             throw ex;
         }
     }
-
+    
     private Series fillSeries(Series series, ObjectMapper mapper, JsonNode node) throws Exception {
         JsonNode pid = node.get("pid");
         series.setCanonicalUri(getItemsUri(pid.asText()));
         series.setPublisher(Publisher.THESPACE);
-
+        
         JsonNode title = node.get("title");
         series.setTitle(title.asText());
-
+        
         JsonNode episodes = node.get("expected_child_count");
         if (episodes != null && !episodes.isNull()) {
             series.setTotalEpisodes(episodes.asInt());
         }
-
-        JsonNode long_synopsis = node.get("long_synopsis");
-        JsonNode medium_synopsis = node.get("medium_synopsis");
-        JsonNode short_synopsis = node.get("short_synopsis");
-        String synopsis = null;
-        if (long_synopsis != null && !long_synopsis.isNull()) {
-            synopsis = long_synopsis.asText();
-        } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
-            synopsis = medium_synopsis.asText();
-        } else if (short_synopsis != null && !short_synopsis.isNull()) {
-            synopsis = short_synopsis.asText();
-        }
-        series.setDescription(synopsis);
-
-        JsonNode image = node.get("image");
-        if (image != null && !image.isNull()) {
-            JsonNode smallImage = image.get("depiction_320");
-            if (smallImage != null && !smallImage.isNull()) {
-                series.setThumbnail(getImagesUri(smallImage.asText()));
-            }
-            JsonNode bigImage = image.get("depiction_640");
-            if (bigImage != null && !bigImage.isNull()) {
-                series.setImage(getImagesUri(bigImage.asText()));
-            }
-        }
-
-        Iterator<JsonNode> categories = node.get("categories").getElements();
-        Set<String> genres = new HashSet<String>();
-        while (categories.hasNext()) {
-            String id = BASE_CATEGORY_URI + categories.next().get("id").asText();
-            genres.add(id);
-        }
-        series.setGenres(new TheSpaceGenreMap().mapRecognised(genres));
-
-        Iterator<JsonNode> clips = node.get("available_clips").getElements();
-        while (clips.hasNext()) {
-            String cPid = clips.next().get("pid").asText();
-            JsonNode clip = client.get(new SimpleHttpRequest<JsonNode>(url + "/items/" + cPid + ".json", new JSonNodeHttpResponseTransformer(mapper)));
-            series.addClip(getClip(mapper, clip.get("programme"), series));
-        }
-
+        
+        fillSynopsis(node, series);
+        
+        fillImage(node, series);
+        
+        fillGenres(node, series);
+        
+        fillClips(node, mapper, series);
+        
         return series;
     }
-
-    private Clip getClip(ObjectMapper mapper, JsonNode node, Content parent) throws Exception {
+    
+    private Clip getClip(JsonNode node) throws Exception {
         Clip clip = new Clip();
-
+        
         JsonNode pid = node.get("pid");
         clip.setCanonicalUri(getItemsUri(pid.asText()));
         clip.setPublisher(Publisher.THESPACE);
-
+        
         JsonNode title = node.get("title");
         clip.setTitle(title.asText());
-
-        JsonNode long_synopsis = node.get("long_synopsis");
-        JsonNode medium_synopsis = node.get("medium_synopsis");
-        JsonNode short_synopsis = node.get("short_synopsis");
-        String synopsis = null;
-        if (long_synopsis != null && !long_synopsis.isNull()) {
-            synopsis = long_synopsis.asText();
-        } else if (medium_synopsis != null && !medium_synopsis.isNull()) {
-            synopsis = medium_synopsis.asText();
-        } else if (short_synopsis != null && !short_synopsis.isNull()) {
-            synopsis = short_synopsis.asText();
-        }
-        clip.setDescription(synopsis);
-
-        JsonNode image = node.get("image");
-        if (image != null && !image.isNull()) {
-            JsonNode smallImage = image.get("depiction_320");
-            if (smallImage != null && !smallImage.isNull()) {
-                clip.setThumbnail(getImagesUri(smallImage.asText()));
-            }
-            JsonNode bigImage = image.get("depiction_640");
-            if (bigImage != null && !bigImage.isNull()) {
-                clip.setImage(getImagesUri(bigImage.asText()));
-            }
-        }
-
-        JsonNode versions = node.get("versions");
-        Set<Version> versionsObj = new HashSet<Version>();
-        if (versions != null && !versions.isNull()) {
-            Iterator<JsonNode> it = versions.getElements();
-            while (it.hasNext()) {
-                versionsObj.add(getVersion(it.next(), clip));
-            }
-        }
-        clip.setVersions(versionsObj);
-
+        
+        fillSynopsis(node, clip);
+        
+        fillImage(node, clip);
+        
+        fillVersions(node, clip);
+        
         return clip;
     }
-
+    
     private Version getVersion(JsonNode node, Content parent) {
         Version version = new Version();
-
+        
         JsonNode pid = node.get("pid");
         version.setCanonicalUri(getItemsUri(pid.asText()));
-
+        
         JsonNode duration = node.get("duration");
         if (duration != null && !duration.isNull()) {
             version.setDuration(Duration.standardSeconds(Integer.parseInt(duration.asText())));
         }
-
+        
         Encoding encoding = new Encoding();
         Location location = new Location();
         Policy policy = new Policy();
@@ -357,14 +320,14 @@ public class TheSpaceItemProcessor {
             policy.setAvailabilityEnd(ISODateTimeFormat.dateTimeParser().parseDateTime(end.asText()));
         }
         version.addManifestedAs(encoding);
-
+        
         return version;
     }
-
+    
     private String getImagesUri(String image) {
         return BASE_CANONICAL_URI + image;
     }
-
+    
     private String getItemsUri(String pid) {
         return BASE_ITEMS_URI + pid;
     }
