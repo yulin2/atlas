@@ -34,4 +34,12 @@ public class ScheduleBasedItemUpdatingBroadcastHandler extends DefaultBbcIonBroa
         }
     }
     
+    @Override 
+    protected boolean segmentFetchPermitted(IonBroadcast broadcast, String itemUri) {
+        LocalDate today = new DateTime(DateTimeZones.UTC).toLocalDate();
+        LocalDate broadcastDay = broadcast.getStart().toLocalDate();
+        
+        return today.minusDays(2).isBefore(broadcastDay);
+    }
+    
 }
