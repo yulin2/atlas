@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
@@ -272,6 +273,11 @@ public class AtlasPersistenceModule {
     @Bean
     public ContentBootstrapper contentBootstrapper() {
         return contentBootstrapperModule().contentBootstrapper();
+    }
+    
+    @Bean
+    public EquivalenceSummaryStore equivalenceSummaryStore() {
+        return cassandraContentPersistenceModule().cassandraEquivalenceSummaryStore();
     }
 
     @Bean
