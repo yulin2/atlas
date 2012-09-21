@@ -3,11 +3,14 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.media.entity.Publisher.BBC;
 
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.segment.Segment;
+import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.ContentExtractor;
@@ -17,6 +20,7 @@ import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
+import org.atlasapi.remotesite.bbc.ion.model.IonSegmentEvent;
 import org.atlasapi.remotesite.bbc.ion.model.IonVersion;
 import org.joda.time.Duration;
 
@@ -30,10 +34,12 @@ public class BbcIonEpisodeDetailItemContentExtractor extends BaseBbcIonEpisodeIt
 
     private final BbcProgrammeEncodingAndLocationCreator encodingCreator = new BbcProgrammeEncodingAndLocationCreator(new SystemClock());
     private final ContentExtractor<IonEpisodeDetail, Iterable<Clip>> clipExtractor; 
+    private final ContentExtractor<IonSegmentEvent, Entry<SegmentEvent, Segment>> segmentExtractor;
     
     public BbcIonEpisodeDetailItemContentExtractor(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerClient) {
         super(log, containerClient);
         this.clipExtractor = new BbcIonClipExtractor(log);
+        this.segmentExtractor = new BbcIonSegmentExtractor();
     }
 
     @Override

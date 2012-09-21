@@ -109,13 +109,14 @@ public class BbcModule {
         DefaultBbcIonBroadcastHandler broadcastHandler = new ScheduleBasedItemUpdatingBroadcastHandler(contentResolver, contentWriters, log, contentLock())
             .withItemFetcherClient(bbcIonEpisodeDetailItemAdapter())
             .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
-            .withItemPeopleWriter(itemsPeopleWriter);
+            .withItemPeopleWriter(itemsPeopleWriter)
+            .withSegmentAdapter(segmentAdapter());
         return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), broadcastHandler, broadcastTrimmer(), channelResolver, log);
     }
 	
     private BbcIonScheduleUpdater bbcIonSegmentUpdater() {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 0, 2);
-        final BbcIonSegmentAdapter segmentAdapter = new BbcIonSegmentAdapter(ionClient(HttpClients.webserviceClient(), IonSegmentEventFeed.class), segmentWriter);
+        final BbcIonSegmentAdapter segmentAdapter = segmentAdapter();
         BbcIonBroadcastHandler broadcastHandler = new SegmentUpdatingIonBroadcastHandler(contentResolver, contentWriters, segmentAdapter);
         return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), broadcastHandler, broadcastTrimmer(), channelResolver, log);
     }
@@ -210,6 +211,10 @@ public class BbcModule {
 	
 	@Bean BbcIonOndemandChangeUpdateController bbcIonOndemandChangeController() {
 	    return new BbcIonOndemandChangeUpdateController(bbcIonOndemandChangeUpdateBuilder());
+	}
+	
+	BbcIonSegmentAdapter segmentAdapter() {
+	    return new BbcIonSegmentAdapter(ionClient(HttpClients.webserviceClient(), IonSegmentEventFeed.class), segmentWriter);
 	}
 	
 	@Bean ContentLock contentLock() {

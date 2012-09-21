@@ -4,6 +4,9 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.remotesite.bbc.BbcFeeds.slashProgrammesUriForPid;
 
+import java.util.List;
+import java.util.Map.Entry;
+
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Episode;
@@ -12,6 +15,8 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.media.segment.Segment;
+import org.atlasapi.media.segment.SegmentEvent;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -19,10 +24,12 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
+import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ContentLock;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
+import org.atlasapi.remotesite.bbc.ion.model.IonSegmentEvent;
 import org.joda.time.Duration;
 
 import com.google.common.base.Optional;
@@ -46,6 +53,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private SiteSpecificAdapter<Item> itemClient;
     private BbcContainerFetcherClient containerClient;
     private ItemsPeopleWriter itemsPeopleWriter;
+    private SiteSpecificAdapter<List<SegmentEvent>> segmentAdapter;
 
     private final ContentLock lock;
 
@@ -73,6 +81,11 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         this.itemsPeopleWriter = itemsPeopleWriter;
         return this;
     }
+    
+    public DefaultBbcIonBroadcastHandler withSegmentAdapter(SiteSpecificAdapter<List<SegmentEvent>> segmentAdapter) {
+        this.segmentAdapter = segmentAdapter;
+        return this;
+    }
 
     @Override
     public Maybe<ItemAndBroadcast> handle(IonBroadcast ionBroadcast) {
@@ -88,6 +101,9 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             //ensure broadcast is included.
             Maybe<Broadcast> broadcast = addBroadcastToItem(item, ionBroadcast);
 
+            if(broadcast.hasValue() && segmentFetchPermitted(ionBroadcast, itemUri)) {
+                addSegmentEventsToItemIfPermitted(item, ionBroadcast);
+            }
             String canonicalUri = item.getCanonicalUri();
 
             Brand brand = !Strings.isNullOrEmpty(ionBroadcast.getBrandId()) ? getOrCreateBrand(ionBroadcast, canonicalUri) : null;
@@ -124,6 +140,14 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             lock.unlock(itemUri);
         }
         return Maybe.nothing();
+    }
+
+    private void addSegmentEventsToItemIfPermitted(Item item, IonBroadcast ionBroadcast) {
+        if(segmentFetchPermitted(ionBroadcast, item.getCanonicalUri())) {
+            Version version = getBroadcastVersion(item, ionBroadcast);
+            version.setSegmentEvents(segmentAdapter.fetch(item.getCanonicalUri()));
+        }
+        
     }
 
     private Item resolveOrFetchItem(IonBroadcast broadcast, String itemUri) {
@@ -307,6 +331,10 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             }
         }
         return null;
+    }
+
+    protected boolean segmentFetchPermitted(IonBroadcast broadcast, String itemUri) {
+        return this.segmentAdapter != null;
     }
 
 }
