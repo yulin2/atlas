@@ -1,7 +1,5 @@
 package org.atlasapi.equiv.generators;
 
-import java.util.Set;
-
 import org.atlasapi.equiv.ContentRef;
 import org.atlasapi.equiv.EquivalenceSummary;
 import org.atlasapi.equiv.EquivalenceSummaryStore;
@@ -10,17 +8,20 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multiset;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.collect.OptionalMap;
 
 public class ContainerChildEquivalenceGenerator implements EquivalenceGenerator<Container> {
     
@@ -43,9 +44,9 @@ public class ContainerChildEquivalenceGenerator implements EquivalenceGenerator<
     
     @Override
     public ScoredCandidates<Container> generate(Container content, ResultDescription desc) {
-        Set<EquivalenceSummary> childSummaries = summaryStore.summariesForChildren(content.getCanonicalUri());
+        OptionalMap<String,EquivalenceSummary> childSummaries = summaryStore.summariesForUris(Iterables.transform(content.getChildRefs(), ChildRef.TO_URI));
         Multiset<String> parents = HashMultiset.create();
-        for (EquivalenceSummary summary : childSummaries) {
+        for (EquivalenceSummary summary : Optional.presentInstances(childSummaries.values())) {
             Iterables.addAll(parents, Iterables.filter(Iterables.transform(summary.getEquivalents().values(), TO_PARENT), Predicates.notNull()));
         }
         return scoreContainers(parents, childSummaries.size(), desc);
