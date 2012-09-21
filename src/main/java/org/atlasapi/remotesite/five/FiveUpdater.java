@@ -8,8 +8,6 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
-import nu.xom.NodeFactory;
-import nu.xom.Nodes;
 
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -38,12 +36,14 @@ public class FiveUpdater extends ScheduledTask {
     private final AdapterLog log;
     private final FiveBrandProcessor processor;
     private final Timestamper timestamper = new SystemClock();
+    private final int socketTimeout;
 
     private final Builder parser = new Builder();
     private SimpleHttpClient streamHttpClient;
 
-    public FiveUpdater(ContentWriter contentWriter, AdapterLog log) {
+    public FiveUpdater(ContentWriter contentWriter, AdapterLog log, int socketTimeout) {
         this.log = log;
+        this.socketTimeout = socketTimeout;
         this.streamHttpClient = buildFetcher(log);
         this.processor = new FiveBrandProcessor(contentWriter, log, BASE_API_URL, new RequestLimitingRemoteSiteClient<HttpResponse>(new HttpRemoteSiteClient(buildFetcher(log)), 4));
     }
@@ -51,7 +51,7 @@ public class FiveUpdater extends ScheduledTask {
     private SimpleHttpClient buildFetcher(final AdapterLog log) {
         return new SimpleHttpClientBuilder()
             .withUserAgent(HttpClients.ATLAS_USER_AGENT)
-            .withSocketTimeout(30, TimeUnit.SECONDS)
+            .withSocketTimeout(socketTimeout, TimeUnit.SECONDS)
             .withTrustUnverifiedCerts()
             .withRetries(3)
             .build();
