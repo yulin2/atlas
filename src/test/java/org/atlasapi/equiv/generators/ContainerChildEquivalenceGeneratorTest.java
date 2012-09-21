@@ -15,6 +15,7 @@ import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -24,6 +25,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ContainerChildEquivalenceGeneratorTest extends TestCase {
@@ -39,19 +41,25 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
     public void testExtractsContainerFromStrongItemEquivalents() {
         
         Container subject = new Container("subject","s",Publisher.BBC);
+        subject.setChildRefs(ImmutableSet.of(
+            new Episode("child1","c1",Publisher.BBC).childRef(),
+            new Episode("child2","c2",Publisher.BBC).childRef()
+        ));
         Container equiv1 = new Container("equivalent1","e1",Publisher.PA);
         Container equiv2 = new Container("equivalent2","e2",Publisher.ITV);
         
-        when(equivSummaryStore.summariesForChildren("subject")).thenReturn(
-            ImmutableSet.of(
+        when(equivSummaryStore.summariesForUris(argThat(hasItems("child1","child2")))).thenReturn(
+            ImmutableOptionalMap.fromMap(ImmutableMap.of(
+                "child1",
                 new EquivalenceSummary("child1","subject",NO_CANDIDATES,ImmutableMap.of(
                     Publisher.BBC, new ContentRef("equivItem",Publisher.BBC,""),
                     Publisher.PA, new ContentRef("equivC1", Publisher.PA, "equivalent1"))),
+                "child2",
                 new EquivalenceSummary("child2","subject",NO_CANDIDATES,ImmutableMap.of(
                     Publisher.BBC, new ContentRef("equivC2",Publisher.BBC,"equivalent2"),
                     Publisher.PA, new ContentRef("equivC1",Publisher.PA, "equivalent1"))
                 )
-            )
+            ))
         );
         
         ResolvedContent content = ResolvedContent.builder()

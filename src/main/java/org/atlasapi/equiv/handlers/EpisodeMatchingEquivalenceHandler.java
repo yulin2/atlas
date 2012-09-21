@@ -24,6 +24,8 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.lookup.LookupWriter;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -33,6 +35,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.metabroadcast.common.collect.OptionalMap;
 
 public class EpisodeMatchingEquivalenceHandler implements EquivalenceResultHandler<Container> {
 
@@ -58,7 +61,7 @@ public class EpisodeMatchingEquivalenceHandler implements EquivalenceResultHandl
         Collection<Container> equivalentContainers = Collections2.transform(result.strongEquivalences().values(), TO_CONTAINER);
         Iterable<Episode> subjectsChildren = childrenOf(result.subject());
         Multimap<Container, Episode> equivalentsChildren = childrenOf(equivalentContainers);
-        Set<EquivalenceSummary> childSummaries = summaryStore.summariesForChildren(result.subject().getCanonicalUri());
+        OptionalMap<String,EquivalenceSummary> childSummaries = summaryStore.summariesForUris(Iterables.transform(result.subject().getChildRefs(), ChildRef.TO_URI));
         Map<String, EquivalenceSummary> summaryMap = summaryMap(childSummaries);
         
         stitch(subjectsChildren, summaryMap, equivalentsChildren, result.description());
@@ -113,13 +116,13 @@ public class EpisodeMatchingEquivalenceHandler implements EquivalenceResultHandl
             && target.getSeriesNumber().equals(ep.getSeriesNumber());
     }
 
-    private Map<String, EquivalenceSummary> summaryMap(Set<EquivalenceSummary> summaries) {
-        return Maps.uniqueIndex(summaries, new Function<EquivalenceSummary, String>() {
+    private Map<String, EquivalenceSummary> summaryMap(OptionalMap<String, EquivalenceSummary> childSummaries) {
+        return Maps.filterValues(Maps.transformValues(childSummaries, new Function<Optional<EquivalenceSummary>, EquivalenceSummary>() {
             @Override
-            public String apply(@Nullable EquivalenceSummary input) {
-                return input.getSubject();
+            public EquivalenceSummary apply(@Nullable Optional<EquivalenceSummary> input) {
+                return input.orNull();
             }
-        });
+        }), Predicates.notNull());
     }
 
     private Multimap<Container, Episode> childrenOf(Iterable<Container> equivalentContainers) {
