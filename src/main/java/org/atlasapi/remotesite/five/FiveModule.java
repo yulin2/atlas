@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
@@ -22,7 +23,7 @@ private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0)
     private @Autowired SimpleScheduler scheduler;
     private @Autowired ContentWriter contentWriter;
     private @Autowired AdapterLog log;
-    
+
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(fiveUpdater().withName("Five Updater"), DAILY);
@@ -31,6 +32,7 @@ private final static Daily DAILY = RepetitionRules.daily(new LocalTime(4, 30, 0)
     
     @Bean
     public FiveUpdater fiveUpdater() {
-        return new FiveUpdater(contentWriter, log);
+        Integer soTimeout = Configurer.get("five.timeout.socket", "60").toInt();
+        return new FiveUpdater(contentWriter, log, soTimeout);
     }
 }
