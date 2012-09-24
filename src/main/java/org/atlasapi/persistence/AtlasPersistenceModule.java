@@ -60,6 +60,7 @@ public class AtlasPersistenceModule {
 
     private final String mongoHost = Configurer.get("mongo.host").get();
     private final String mongoDbName = Configurer.get("mongo.dbName").get();
+    private final String cassandraEnv = Configurer.get("cassandra.env").get();
     private final String cassandraSeeds = Configurer.get("cassandra.seeds").get();
     private final String cassandraPort = Configurer.get("cassandra.port").get();
     private final String cassandraConnectionTimeout = Configurer.get("cassandra.connectionTimeout").get();
@@ -91,7 +92,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
-        CassandraContentPersistenceModule cassandraContentPersistenceModule = new CassandraContentPersistenceModule(cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
+        CassandraContentPersistenceModule cassandraContentPersistenceModule = new CassandraContentPersistenceModule(cassandraEnv, cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout));
         cassandraContentPersistenceModule.init();
         return cassandraContentPersistenceModule;
     }
