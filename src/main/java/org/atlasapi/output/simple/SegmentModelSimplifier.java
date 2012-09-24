@@ -47,9 +47,7 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
         
         final org.atlasapi.media.entity.Description description = event.getDescription();
         segmentEvent.setTitle(description.getTitle());
-        segmentEvent.setShortSynopsis(description.getShortSynopsis());
-        segmentEvent.setMediumSynopsis(description.getMediumSynopsis());
-        segmentEvent.setLongSynopsis(description.getLongSynopsis());
+        segmentEvent.setDescription(description.getSynopsis());
         
         segmentEvent.setUri(event.getCanonicalUri());
         segmentEvent.setIsChapter(event.getIsChapter());
@@ -68,9 +66,7 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
         
         final org.atlasapi.media.entity.Description description = segment.getDescription();
         seg.setTitle(description.getTitle());
-        seg.setShortSynopsis(description.getShortSynopsis());
-        seg.setMediumSynopsis(description.getMediumSynopsis());
-        seg.setLongSynopsis(description.getLongSynopsis());
+        seg.setDescription(description.getSynopsis());
         
         seg.setDuration(Ints.saturatedCast(segment.getDuration().getStandardSeconds()));
         seg.setType(segment.getType().toString());
