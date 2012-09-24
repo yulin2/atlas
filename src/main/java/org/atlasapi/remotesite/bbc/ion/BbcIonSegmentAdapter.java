@@ -50,7 +50,7 @@ public class BbcIonSegmentAdapter implements SiteSpecificAdapter<List<SegmentEve
             
             return segmentEvents.build();
         } catch (Exception e) {
-            throw new FetchException("",e);
+            throw new FetchException(e.getMessage(), e);
         }
     }
 

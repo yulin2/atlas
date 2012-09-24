@@ -16,6 +16,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonSegment;
 import org.atlasapi.remotesite.bbc.ion.model.IonSegmentEvent;
 import org.joda.time.Duration;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 public class BbcIonSegmentExtractor implements ContentExtractor<IonSegmentEvent, Entry<SegmentEvent, Segment>> {
@@ -39,10 +40,17 @@ public class BbcIonSegmentExtractor implements ContentExtractor<IonSegmentEvent,
     }
 
     private Description descriptionOf(IonSegmentEvent ionSegmentEvent) {
+        String synopsis;
+        if(!Strings.isNullOrEmpty(ionSegmentEvent.getLongSynopsis())) {
+            synopsis = ionSegmentEvent.getLongSynopsis();
+        } else if(!Strings.isNullOrEmpty(ionSegmentEvent.getMediumSynopsis())) {
+            synopsis = ionSegmentEvent.getMediumSynopsis();
+        } else {
+            synopsis = ionSegmentEvent.getShortSynopsis();
+        }
         return description().withTitle(ionSegmentEvent.getTitle())
-                .withShortSynopsis(ionSegmentEvent.getShortSynopsis())
-                .withMediumSynopsis(ionSegmentEvent.getMediumSynopsis())
-                .withLongSynopsis(ionSegmentEvent.getLongSynopsis()).build();
+                .withSynopsis(synopsis)
+                .build();
     }
 
     private Segment segmentFrom(IonSegment ionSegment) {
@@ -58,10 +66,17 @@ public class BbcIonSegmentExtractor implements ContentExtractor<IonSegmentEvent,
     }
 
     private Description descriptionOf(IonSegment ionSegment) {
+        String synopsis;
+        if(!Strings.isNullOrEmpty(ionSegment.getLongSynopsis())) {
+            synopsis = ionSegment.getLongSynopsis();
+        } else if(!Strings.isNullOrEmpty(ionSegment.getMediumSynopsis())) {
+            synopsis = ionSegment.getMediumSynopsis();
+        } else {
+            synopsis = ionSegment.getShortSynopsis();
+        }
         return description().withTitle(ionSegment.getTitle())
-                .withShortSynopsis(ionSegment.getShortSynopsis())
-                .withMediumSynopsis(ionSegment.getMediumSynopsis())
-                .withLongSynopsis(ionSegment.getLongSynopsis()).build();
+                .withSynopsis(synopsis)
+                .build();
     }
 
 }
