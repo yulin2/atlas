@@ -39,7 +39,7 @@ public class ScheduleBasedItemUpdatingBroadcastHandler extends DefaultBbcIonBroa
         LocalDate today = new DateTime(DateTimeZones.UTC).toLocalDate();
         LocalDate broadcastDay = broadcast.getStart().toLocalDate();
         
-        return today.minusDays(2).isBefore(broadcastDay);
+        return today.minusDays(3).isBefore(broadcastDay);
     }
     
 }
