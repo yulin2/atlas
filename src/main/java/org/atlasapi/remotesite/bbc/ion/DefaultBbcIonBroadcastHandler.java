@@ -101,9 +101,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
             //ensure broadcast is included.
             Maybe<Broadcast> broadcast = addBroadcastToItem(item, ionBroadcast);
 
-            if(broadcast.hasValue() && segmentFetchPermitted(ionBroadcast, itemUri)) {
-                addSegmentEventsToItemIfPermitted(item, ionBroadcast);
-            }
+            addSegmentEventsToItemIfPermitted(item, ionBroadcast);
             String canonicalUri = item.getCanonicalUri();
 
             Brand brand = !Strings.isNullOrEmpty(ionBroadcast.getBrandId()) ? getOrCreateBrand(ionBroadcast, canonicalUri) : null;
@@ -145,7 +143,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private void addSegmentEventsToItemIfPermitted(Item item, IonBroadcast ionBroadcast) {
         if(segmentFetchPermitted(ionBroadcast, item.getCanonicalUri())) {
             Version version = getBroadcastVersion(item, ionBroadcast);
-            version.setSegmentEvents(segmentAdapter.fetch(item.getCanonicalUri()));
+            version.setSegmentEvents(segmentAdapter.fetch(version.getCanonicalUri()));
         }
         
     }
