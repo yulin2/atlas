@@ -8,8 +8,8 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
