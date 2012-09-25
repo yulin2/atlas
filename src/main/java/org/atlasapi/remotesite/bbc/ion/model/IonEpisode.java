@@ -6,6 +6,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 
 public class IonEpisode {
 
@@ -74,6 +75,12 @@ public class IonEpisode {
     private Boolean isHdOnly;
     private URL myMediaselectorXmlUrl;
     private List<IonContributor> contributors;
+    private List<IonGenre> genres;
+    
+    public void setGenres(List<IonGenre> genres) {
+        this.genres = ImmutableList.copyOf(genres);
+    }
+    
 
     public List<IonContributor> getContributors() {
         return contributors;
@@ -345,6 +352,10 @@ public class IonEpisode {
     
     public static class IonTagScheme {
         //not used
+    }
+    
+    public List<IonGenre> getGenres() {
+        return genres;
     }
 
     public static class IonCategory {

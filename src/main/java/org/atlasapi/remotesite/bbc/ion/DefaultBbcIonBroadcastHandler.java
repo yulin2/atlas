@@ -103,7 +103,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
             addSegmentEventsToItemIfPermitted(item, ionBroadcast);
             String canonicalUri = item.getCanonicalUri();
-
+            
             Brand brand = !Strings.isNullOrEmpty(ionBroadcast.getBrandId()) ? getOrCreateBrand(ionBroadcast, canonicalUri) : null;
             Series series = !Strings.isNullOrEmpty(ionBroadcast.getSeriesId()) ? getOrCreateSeries(ionBroadcast, canonicalUri) : null;
 
@@ -244,6 +244,15 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
 
         Identified ided = maybeIdentified.requireValue();
         if (ided instanceof Brand) {
+            Brand brand = (Brand) ided;
+            if(brand.getGenres().isEmpty()) {
+                // genres were not being ingested previously, so we should go get them if we don't 
+                // have any for this brand
+                Maybe<Brand> fetchedBrand = containerClient.createBrand(broadcast.getBrandId());
+                if(fetchedBrand.hasValue()) {
+                    brand.setGenres(fetchedBrand.requireValue().getGenres());
+                }
+            }
             return (Brand) ided;
         } else if (ided instanceof Series) {
             Brand brand = brandFromSeries((Series) ided); //Handle remote conversion of series to brand
