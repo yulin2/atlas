@@ -74,6 +74,7 @@ public class IonEpisode {
     private Boolean isHdOnly;
     private URL myMediaselectorXmlUrl;
     private List<IonContributor> contributors;
+    private List<IonGenre> genres;
 
     public List<IonContributor> getContributors() {
         return contributors;
@@ -345,6 +346,10 @@ public class IonEpisode {
     
     public static class IonTagScheme {
         //not used
+    }
+    
+    public List<IonGenre> getGenres() {
+        return genres;
     }
 
     public static class IonCategory {

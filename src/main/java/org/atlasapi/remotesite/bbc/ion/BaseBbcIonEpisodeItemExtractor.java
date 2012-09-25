@@ -17,6 +17,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.BbcAliasCompiler;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.BbcProgrammesGenreMap;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonContributor;
@@ -32,6 +33,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
     protected static final String CURIE_BASE = "bbc:";
 
     private final BbcIonContributorPersonExtractor personExtractor = new BbcIonContributorPersonExtractor();
+    private final BbcIonGenreMap genreMap = new BbcIonGenreMap(new BbcProgrammesGenreMap());
     private final RemoteSiteClient<IonContainerFeed> containerClient;
     private final AdapterLog log;
     
@@ -97,7 +99,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
         item.setAliases(BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri()));
         item.setIsLongForm(true);
         item.setLastUpdated(episode.getUpdated());
-        
+        item.setGenres(genreMap.fromIon(episode.getGenres()));
         if (!Strings.isNullOrEmpty(episode.getId())) {
             BbcImageUrlCreator.addImagesTo(episode.getMyImageBaseUrl().toString(), episode.getId(), item);
         }
