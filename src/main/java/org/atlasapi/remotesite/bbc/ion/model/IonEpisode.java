@@ -76,11 +76,6 @@ public class IonEpisode {
     private URL myMediaselectorXmlUrl;
     private List<IonContributor> contributors;
     private List<IonGenre> genres;
-    
-    public void setGenres(List<IonGenre> genres) {
-        this.genres = ImmutableList.copyOf(genres);
-    }
-    
 
     public List<IonContributor> getContributors() {
         return contributors;

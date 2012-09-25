@@ -24,10 +24,6 @@ public class IonContainer {
     private String title;
     private List<IonGenre> genres;
     
-    public void setGenres(List<IonGenre> genres) {
-        this.genres = ImmutableList.copyOf(genres);
-    }
-    
     public String getMediumSynopsis() {
         return mediumSynopsis;
     }
