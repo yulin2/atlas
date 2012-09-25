@@ -10,6 +10,8 @@ import com.google.common.collect.ImmutableSet;
 
 public class BbcIonGenreMap {
 
+    private static final int INGEST_GENRE_LEVELS_LESS_THAN = 3;
+    
     private final static String PREFIX = "http://www.bbc.co.uk/programmes/genres/";
     private final BbcProgrammesGenreMap bbcProgrammesGenreMap;
     
@@ -23,7 +25,9 @@ public class BbcIonGenreMap {
         }
         Builder<String> genres = ImmutableSet.builder();
         for(IonGenre genre : ionGenres) {
-            if(genre.getLevel() < 3) {
+            // We're only interested in the top 2 levels of genres, e.g. factual and factual/consumer,
+            // not factual/consumer/x
+            if(genre.getLevel() < INGEST_GENRE_LEVELS_LESS_THAN) {
                 String g = PREFIX + genre.getPath().replace("_", "");
                 genres.add(g);
             }
