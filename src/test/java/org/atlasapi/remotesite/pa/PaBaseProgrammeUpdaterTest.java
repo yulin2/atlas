@@ -231,7 +231,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 		}
 
 		@Override
-		public Maybe<Channel> fromId(long id) {
+		public Maybe<Channel> fromId(Long id) {
 			throw new UnsupportedOperationException();
 		}
 
