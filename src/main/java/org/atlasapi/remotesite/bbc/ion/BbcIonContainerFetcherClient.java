@@ -16,6 +16,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
+import org.atlasapi.remotesite.bbc.BbcProgrammesGenreMap;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
@@ -35,9 +36,10 @@ import com.metabroadcast.common.http.SimpleHttpRequest;
 public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
 
     private static final String CURIE_BASE = "bbc:";
-    public static final String CONTAINER_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/container/container/%s/format/json";
+    public static final String CONTAINER_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/container/container/%s/category_type/pips/format/json";
 
     private final BbcIonDeserializer<IonContainerFeed> ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonContainerFeed>(){});
+    private final BbcIonGenreMap genreMap = new BbcIonGenreMap(new BbcProgrammesGenreMap());
     
     private final SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
         .withUserAgent(HttpClients.ATLAS_USER_AGENT)
@@ -84,7 +86,7 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
         
         String pid = ionContainer.getId();
         Brand brand = new Brand(BbcFeeds.slashProgrammesUriForPid(pid), CURIE_BASE+pid, Publisher.BBC);
-        
+        brand.setGenres(genreMap.fromIon(ionContainer.getGenres()));
         setCommonFields(ionContainer, brand);
         BbcImageUrlCreator.addIplayerImagesTo(ionContainer.getId(), brand);
         
@@ -144,4 +146,5 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
     public Maybe<IonContainer> getSubseries(String subseriesId) {
         return getIonContainer(subseriesId);
     }
+    
 }

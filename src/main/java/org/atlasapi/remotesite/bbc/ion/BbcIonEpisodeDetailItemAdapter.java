@@ -14,7 +14,7 @@ import com.google.common.collect.Iterables;
 
 public class BbcIonEpisodeDetailItemAdapter implements SiteSpecificAdapter<Item> {
 
-    private static final String EPISODE_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/episodedetail/episode/%s/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/format/json";
+    private static final String EPISODE_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/episodedetail/episode/%s/include_broadcasts/1/clips/include/next_broadcasts/1/allow_unavailable/1/category_type/pips/format/json";
 
     private final RemoteSiteClient<IonEpisodeDetailFeed> client;
     private final ContentExtractor<IonEpisodeDetail, Item> extractor;

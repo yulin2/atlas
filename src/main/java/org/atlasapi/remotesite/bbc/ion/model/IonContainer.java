@@ -1,8 +1,11 @@
 package org.atlasapi.remotesite.bbc.ion.model;
 
 import java.net.URL;
+import java.util.List;
 
 import org.joda.time.DateTime;
+
+import com.google.common.collect.ImmutableList;
 
 public class IonContainer {
 
@@ -19,6 +22,11 @@ public class IonContainer {
     private String shortSynopsis;
     private String type;
     private String title;
+    private List<IonGenre> genres;
+    
+    public void setGenres(List<IonGenre> genres) {
+        this.genres = ImmutableList.copyOf(genres);
+    }
     
     public String getMediumSynopsis() {
         return mediumSynopsis;
@@ -58,6 +66,9 @@ public class IonContainer {
     }
     public String getTitle() {
         return title;
+    }
+    public List<IonGenre> getGenres() {
+        return genres;
     }
     
 }
