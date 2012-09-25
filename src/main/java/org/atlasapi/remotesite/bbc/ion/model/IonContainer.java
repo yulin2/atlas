@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
-import com.google.common.collect.ImmutableList;
-
 public class IonContainer {
 
     private String mediumSynopsis;
