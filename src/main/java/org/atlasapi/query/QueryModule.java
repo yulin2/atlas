@@ -21,9 +21,7 @@ import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.FilterScheduleOnlyKnownTypeContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.atlasapi.query.content.ApplicationConfigurationQueryExecutor;
@@ -48,7 +46,7 @@ public class QueryModule {
     @Qualifier("remoteSiteContentResolver")
     private CanonicalisingFetcher localOrRemoteFetcher;
     @Autowired
-    private LookupEntryStore mongoStore;
+    private LookupEntryStore lookupEntry;
     @Autowired
     private KnownTypeContentResolver mongoResolver;
     @Autowired @Qualifier(value="cassandra")
@@ -64,9 +62,8 @@ public class QueryModule {
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
 
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandraResolver),
-                new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver),
-                mongoStore);
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraResolver,
+            lookupEntry);
 
         queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
 
