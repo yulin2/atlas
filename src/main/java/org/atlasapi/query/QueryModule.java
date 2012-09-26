@@ -66,7 +66,9 @@ public class QueryModule {
     @Autowired @Qualifier(value="cassandra")
     private ContentResolver cassandraResolver;
     @Autowired
-    private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
+    private org.atlasapi.media.content.ContentSearcher contentSearcher;
+    @Qualifier("contentUpdater")
+    private EquivalenceUpdater<Content> equivUpdater;
     //
     @Value("${applications.enabled}")
     private String applicationsEnabled;
