@@ -18,7 +18,6 @@ import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 
 import org.atlasapi.equiv.EquivModule;
 import org.atlasapi.equiv.query.MergeOnOutputQueryExecutor;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
@@ -37,6 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.ImmutableSet;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
 import org.atlasapi.query.content.search.ContentResolvingSearcher;
@@ -59,7 +59,7 @@ public class QueryModule {
     private ContentResolver cassandraResolver;
     @Autowired
     @Qualifier("contentUpdater")
-    private ContentEquivalenceUpdater<Content> equivUpdater;
+    private EquivalenceUpdater<Content> equivUpdater;
     @Autowired
     private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
     //
