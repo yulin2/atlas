@@ -97,6 +97,11 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
         public Iterable<Topic> topicsFor(ContentQuery query) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        @Override
+        public Iterable<Topic> topics() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
     
 }
