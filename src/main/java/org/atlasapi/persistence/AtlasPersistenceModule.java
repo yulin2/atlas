@@ -323,6 +323,7 @@ public class AtlasPersistenceModule {
         bootstrapper.withChannelListers(channelStore());
         bootstrapper.withContentGroupListers(contentGroupResolver());
         bootstrapper.withContentListers(contentLister());
+        bootstrapper.withLookupEntryListers(lookupStore());
         bootstrapper.withPeopleListers(personStore());
         bootstrapper.withProductListers(productStore());
         bootstrapper.withSegmentListers(segmentResolver());
