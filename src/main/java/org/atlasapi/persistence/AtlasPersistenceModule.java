@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
@@ -22,6 +23,7 @@ import org.atlasapi.persistence.content.mongo.MongoProductStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
@@ -263,6 +265,18 @@ public class AtlasPersistenceModule {
     @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
+    }
+    
+    @Bean
+    @Qualifier(value = "cassandra")
+    public CassandraLookupEntryStore cassandraLookupEntryStore() {
+        return cassandraContentPersistenceModule().cassandraLookupEntryStore();
+    }
+
+    @Bean
+    @Qualifier(value = "cassandra")
+    public CassandraEquivalenceSummaryStore cassandraEquivalenceSummaryStore() {
+        return cassandraContentPersistenceModule().cassandraEquivalenceSummaryStore();
     }
     
     @Bean

@@ -36,11 +36,11 @@ public class RecentEquivalenceResultStore implements EquivalenceResultStore {
     @Override
     public <T extends Content> StoredEquivalenceResult store(EquivalenceResult<T> result) {
         StoredEquivalenceResult restoredResult = delegate.store(result);
-        if(result.target() instanceof Item) {
-            mrwItemCache.put(result.target().getCanonicalUri(), restoredResult);
+        if(result.subject() instanceof Item) {
+            mrwItemCache.put(result.subject().getCanonicalUri(), restoredResult);
         }
-        if(result.target() instanceof Container) {
-            mrwContainerCache.put(result.target().getCanonicalUri(), restoredResult);
+        if(result.subject() instanceof Container) {
+            mrwContainerCache.put(result.subject().getCanonicalUri(), restoredResult);
         }
         return restoredResult;
     }

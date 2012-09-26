@@ -9,10 +9,10 @@ import org.atlasapi.equiv.handlers.EpisodeMatchingEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
@@ -39,11 +39,11 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
         
         Score score = Score.valueOf(1.0);
         
-        List<ScoredEquivalents<Item>> scores = ImmutableList.of();
-        ScoredEquivalents<Item> combined = DefaultScoredEquivalents.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
+        List<ScoredCandidates<Item>> scores = ImmutableList.of();
+        ScoredCandidates<Item> combined = DefaultScoredCandidates.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.BBC, ScoredEquivalent.<Item>equivalentScore(strongEpisode, score)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+                Publisher.BBC, ScoredCandidate.<Item>valueOf(strongEpisode, score)
         );
         
         EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong, new DefaultDescription());
@@ -52,7 +52,7 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
             @Override
             public void handle(EquivalenceResult<Item> result) {
                 assertTrue(result.strongEquivalences().get(Publisher.BBC)!= null);
-                assertEquals("strongEp", result.strongEquivalences().get(Publisher.BBC).equivalent().getCanonicalUri());
+                assertEquals("strongEp", result.strongEquivalences().get(Publisher.BBC).candidate().getCanonicalUri());
                 assertEquals(1.0, result.strongEquivalences().get(Publisher.BBC).score().asDouble());
             }
         };
@@ -85,11 +85,11 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
         
         Score score = Score.valueOf(1.0);
         
-        List<ScoredEquivalents<Item>> scores = ImmutableList.of();
-        ScoredEquivalents<Item> combined = DefaultScoredEquivalents.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
+        List<ScoredCandidates<Item>> scores = ImmutableList.of();
+        ScoredCandidates<Item> combined = DefaultScoredCandidates.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.C4, ScoredEquivalent.<Item>equivalentScore(goodEquivalent, score)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+                Publisher.C4, ScoredCandidate.<Item>valueOf(goodEquivalent, score)
         );
         
         EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores , combined , strong, new DefaultDescription());
@@ -98,9 +98,9 @@ public class EpisodeMatchingEquivalenceResultHandlerTest extends TestCase {
             @Override
             public void handle(EquivalenceResult<Item> result) {
                 assertTrue(result.strongEquivalences().get(Publisher.C4) != null);
-                assertTrue(result.strongEquivalences().get(Publisher.C4).equivalent().getCanonicalUri().equals("gequiv"));
+                assertTrue(result.strongEquivalences().get(Publisher.C4).candidate().getCanonicalUri().equals("gequiv"));
                 assertTrue(result.strongEquivalences().get(Publisher.BBC)!= null);
-                assertTrue(result.strongEquivalences().get(Publisher.BBC).equivalent().getCanonicalUri().equals("strongEp"));
+                assertTrue(result.strongEquivalences().get(Publisher.BBC).candidate().getCanonicalUri().equals("strongEp"));
                 assertTrue(result.strongEquivalences().get(Publisher.BBC).score().asDouble() == 2.0);
             }
         };

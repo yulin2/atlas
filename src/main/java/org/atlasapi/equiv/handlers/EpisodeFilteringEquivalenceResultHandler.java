@@ -1,61 +1,75 @@
 package org.atlasapi.equiv.handlers;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
+import org.atlasapi.equiv.ContentRef;
+import org.atlasapi.equiv.EquivalenceSummary;
+import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Identified;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 
-import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 
 public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResultHandler<Item> {
 
     private final EquivalenceResultHandler<Item> delegate;
-    private final Multimap<Publisher,String> containerRefs;
-    
-    private static final Function<Container,Publisher> toPublisher = new Function<Container,Publisher>() {
-        @Override
-        public Publisher apply(Container input) {
-            return input.getPublisher();
-        }
-    };
+    private final EquivalenceSummaryStore summaryStore;
 
-    public EpisodeFilteringEquivalenceResultHandler(EquivalenceResultHandler<Item> delegate, Set<Container> strongContainers) {
+    public EpisodeFilteringEquivalenceResultHandler(EquivalenceResultHandler<Item> delegate, EquivalenceSummaryStore summaryStore) {
         this.delegate = delegate;
-        this.containerRefs = Multimaps.transformValues(Multimaps.index(strongContainers, toPublisher), Identified.TO_URI);
+        this.summaryStore = summaryStore;
     }
 
     @Override
     public void handle(EquivalenceResult<Item> result) {
 
-        ReadableDescription desc = (ReadableDescription) result.description().startStage(String.format("Episode parent filter: %s", containerRefs));
-        Map<Publisher, ScoredEquivalent<Item>> strongEquivalences = filter(result.strongEquivalences(), desc);
+        ReadableDescription desc = (ReadableDescription) result.description().startStage(String.format("Episode parent filter"));
+        
+        ParentRef container = result.subject().getContainer();
+        if (container == null) {
+            desc.appendText("Item has no Container").finishStage();
+            return;
+        }
+        
+        String containerUri = container.getUri();
+        Optional<EquivalenceSummary> possibleSummary = summaryStore.summariesForUris(ImmutableSet.of(containerUri)).get(containerUri);
+        if (!possibleSummary.isPresent()) {
+            desc.appendText("Item Container summary not found").finishStage();
+            return;
+        }
+
+        ImmutableMap<Publisher,ContentRef> equivalents = possibleSummary.get().getEquivalents();
+        Map<Publisher, ScoredCandidate<Item>> strongEquivalences = filter(result.strongEquivalences(), equivalents, desc);
         desc.finishStage();
-        delegate.handle(new EquivalenceResult<Item>(result.target(), result.rawScores(), result.combinedEquivalences(), strongEquivalences, desc));
+        delegate.handle(new EquivalenceResult<Item>(result.subject(), result.rawScores(), result.combinedEquivalences(), strongEquivalences, desc));
 
     }
 
-    private Map<Publisher, ScoredEquivalent<Item>> filter(Map<Publisher, ScoredEquivalent<Item>> strongItems, final ResultDescription desc) {
-        return ImmutableMap.copyOf(Maps.filterValues(strongItems, new Predicate<ScoredEquivalent<Item>>() {
+    private Map<Publisher, ScoredCandidate<Item>> filter(Map<Publisher, ScoredCandidate<Item>> strongItems, final Map<Publisher,ContentRef> containerEquivalents, final ResultDescription desc) {
+        return ImmutableMap.copyOf(Maps.filterValues(strongItems, new Predicate<ScoredCandidate<Item>>() {
             @Override
-            public boolean apply(ScoredEquivalent<Item> input) {
-                Collection<String> validContainers = containerRefs.get(input.equivalent().getPublisher());
-                if (validContainers == null || validContainers.isEmpty() || input.equivalent().getContainer() == null || validContainers.contains(input.equivalent().getContainer().getUri())) {
+            public boolean apply(ScoredCandidate<Item> scoredCandidate) {
+                Item candidate = scoredCandidate.candidate();
+                ParentRef candidateContainer = candidate.getContainer();
+                if (candidateContainer == null) {
                     return true;
                 }
-                desc.appendText("%s removed. Unacceptable container: %s", input, input.equivalent().getContainer().getUri());
+
+                String candidateContainerUri = candidateContainer.getUri();
+                ContentRef validContainer = containerEquivalents.get(candidate.getPublisher());
+                if (validContainer == null || validContainer.getCanonicalUri().equals(candidateContainerUri)) {
+                    return true;
+                }
+                desc.appendText("%s removed. Unacceptable container: %s", scoredCandidate, candidateContainerUri);
                 return false;
             }
         }));
