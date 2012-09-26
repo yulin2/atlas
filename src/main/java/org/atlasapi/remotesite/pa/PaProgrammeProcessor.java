@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
@@ -42,6 +43,7 @@ import org.atlasapi.remotesite.pa.bindings.Attr;
 import org.atlasapi.remotesite.pa.bindings.Billing;
 import org.atlasapi.remotesite.pa.bindings.CastMember;
 import org.atlasapi.remotesite.pa.bindings.Category;
+import org.atlasapi.remotesite.pa.bindings.Person;
 import org.atlasapi.remotesite.pa.bindings.PictureUsage;
 import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.bindings.StaffMember;
@@ -488,7 +490,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             episode.setImage(bestImage);
         }
         
-        episode.setPeople(people(progData));
+        episode.setPeople(people(progData, episode.getPeople()));
 
         Version version = findBestVersion(episode.getVersions());
         
@@ -634,19 +636,25 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
     }
     
-    private List<CrewMember> people(ProgData progData) {
+    private List<CrewMember> people(ProgData progData, List<CrewMember> currentCrew) {
         List<CrewMember> people = Lists.newArrayList();
         
-        for (CastMember cast: progData.getCastMember()) {
-            if (!Strings.isNullOrEmpty(cast.getActor().getPersonId())) {
-                Actor actor = Actor.actor(cast.getActor().getPersonId(), cast.getActor().getvalue(), cast.getCharacter(), Publisher.PA);
+        for (CastMember cast : progData.getCastMember()) {
+            Person person = cast.getPerson();
+            if (person != null && !Strings.isNullOrEmpty(person.getPersonId())) {
+                Actor actor = Actor.actor(person.getPersonId(), person.getvalue(), cast.getCharacter(), Publisher.PA);
+                actor.withRole(Role.fromKey(cast.getRole().toLowerCase().replace(' ', '_')));
                 if (! people.contains(actor)) {
                     people.add(actor);
                 }
             }
         }
         
-        for (StaffMember staffMember: progData.getStaffMember()) {
+        if (people.isEmpty()) {
+            Iterables.addAll(people, Iterables.filter(currentCrew, Actor.class));
+        }
+        
+        for (StaffMember staffMember : progData.getStaffMember()) {
             if (!Strings.isNullOrEmpty(staffMember.getPerson().getPersonId())) {
                 String roleKey = staffMember.getRole().toLowerCase().replace(' ', '_');
                 CrewMember crewMember = CrewMember.crewMember(staffMember.getPerson().getPersonId(), staffMember.getPerson().getvalue(), roleKey, Publisher.PA);
