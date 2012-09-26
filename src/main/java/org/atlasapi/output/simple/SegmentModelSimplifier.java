@@ -14,8 +14,10 @@ import org.atlasapi.output.Annotation;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 
@@ -29,7 +31,7 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
 
     @Override
     public List<org.atlasapi.media.entity.simple.SegmentEvent> simplify(List<SegmentEvent> segmentEvents, Set<Annotation> annotations, ApplicationConfiguration config) {
-        final Map<SegmentRef, Maybe<Segment>> resolvedSegs = segmentResolver.resolveById(Lists.transform(segmentEvents, SegmentEvent.TO_REF));
+        final Map<SegmentRef, Maybe<Segment>> resolvedSegs = segmentResolver.resolveById(ImmutableSet.copyOf(Lists.transform(segmentEvents, SegmentEvent.TO_REF)));
         return ImmutableList.copyOf(Iterables.filter(Iterables.transform(segmentEvents, new Function<SegmentEvent, org.atlasapi.media.entity.simple.SegmentEvent>(){
             @Override
             public org.atlasapi.media.entity.simple.SegmentEvent apply(SegmentEvent input) {
