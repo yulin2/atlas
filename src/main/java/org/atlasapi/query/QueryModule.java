@@ -60,6 +60,8 @@ public class QueryModule {
     @Autowired
     @Qualifier("contentUpdater")
     private ContentEquivalenceUpdater<Content> equivUpdater;
+    @Autowired
+    private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
     //
     @Value("${applications.enabled}")
     private String applicationsEnabled;
@@ -82,11 +84,19 @@ public class QueryModule {
     }
 
     @Bean
-    public SearchResolver searchResolver() {
+    @Qualifier("v2")
+    public SearchResolver v2SearchResolver() {
         if (!Strings.isNullOrEmpty(searchHost)) {
             ContentSearcher titleSearcher = new RemoteFuzzySearcher(searchHost);
             return new ContentResolvingSearcher(titleSearcher, queryExecutor());
         }
         return new DummySearcher();
+    }
+    
+    @Bean
+    @Qualifier("v4")
+    public SearchResolver v4SearchResolver() {
+        // FIXME externalize timeout
+        return new org.atlasapi.query.v4.search.support.ContentResolvingSearcher(contentSearcher, queryExecutor(), 60000);
     }
 }

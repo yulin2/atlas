@@ -54,10 +54,10 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
-import javax.annotation.PreDestroy;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
+import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
@@ -82,17 +82,12 @@ public class AtlasPersistenceModule {
     //
     @Resource(name = "changesProducer")
     private JmsTemplate changesProducer;
-    
-    @PreDestroy
-    public void destroy() {
-        cassandraContentPersistenceModule().destroy();
-    }
 
     @Bean
     public ElasticSearchContentIndexModule esContentIndexModule() {
-        ElasticSearchContentIndexModule elasticSearchContentIndexModule = new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
-        elasticSearchContentIndexModule.init();
-        return elasticSearchContentIndexModule;
+        ElasticSearchContentIndexModule module = new ElasticSearchContentIndexModule(esSeeds, Long.parseLong(esRequestTimeout));
+        module.init();
+        return module;
     }
 
     @Bean
@@ -264,6 +259,12 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
+    @Primary
+    public ESContentSearcher contentSearcher() {
+        return esContentIndexModule().contentSearcher();
+    }
+
+    @Bean
     @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
@@ -310,13 +311,13 @@ public class AtlasPersistenceModule {
     public CassandraTopicStore cassandraTopicStore() {
         return cassandraContentPersistenceModule().cassandraTopicStore();
     }
-    
+
     @Bean
     @Qualifier(value = "cassandra")
     public CassandraLookupEntryStore cassandraLookupEntryStore() {
         return cassandraContentPersistenceModule().cassandraLookupEntryStore();
     }
-    
+
     @Bean
     @Qualifier(value = "cassandra")
     public CassandraEquivalenceSummaryStore cassandraEquivalenceSummaryStore() {

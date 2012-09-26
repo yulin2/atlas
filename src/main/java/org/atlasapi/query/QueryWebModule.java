@@ -84,6 +84,7 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicSearcher;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class QueryWebModule {
@@ -99,7 +100,8 @@ public class QueryWebModule {
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ChannelGroupStore channelGroupResolver;
     private @Autowired ScheduleResolver scheduleResolver;
-    private @Autowired SearchResolver searchResolver;
+    private @Autowired @Qualifier("v2") SearchResolver v2SearchResolver;
+    private @Autowired @Qualifier("v4") SearchResolver v4SearchResolver;
     private @Autowired PeopleResolver peopleResolver;
     private @Autowired TopicQueryResolver topicResolver;
     private @Autowired TopicContentLister topicContentLister;
@@ -169,7 +171,12 @@ public class QueryWebModule {
 
     @Bean
     SearchController searchController() {
-        return new SearchController(searchResolver, configFetcher, log, contentModelOutputter());
+        return new SearchController(v2SearchResolver, configFetcher, log, contentModelOutputter());
+    }
+    
+    @Bean
+    org.atlasapi.query.v4.search.SearchController v4SearchController() {
+        return new org.atlasapi.query.v4.search.SearchController(v4SearchResolver, configFetcher, log, contentModelOutputter());
     }
 
     @Bean
