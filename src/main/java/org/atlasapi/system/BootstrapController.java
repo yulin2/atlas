@@ -22,6 +22,7 @@ import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
 import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
+import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
 import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
@@ -54,6 +55,7 @@ public class BootstrapController {
     private CassandraProductStore cassandraProductStore;
     private CassandraSegmentStore cassandraSegmentStore;
     private CassandraTopicStore cassandraTopicStore;
+    private CassandraLookupEntryStore cassandraLookupEntryStore;
     private ESContentIndexer esContentIndexer;
     
     public void setCassandraContentBootstrapper(ContentBootstrapper cassandraContentBootstrapper) {
@@ -95,6 +97,10 @@ public class BootstrapController {
     public void setCassandraTopicStore(CassandraTopicStore cassandraTopicStore) {
         this.cassandraTopicStore = cassandraTopicStore;
     }
+
+    public void setCassandraLookupEntryStore(CassandraLookupEntryStore cassandraLookupEntryStore) {
+        this.cassandraLookupEntryStore = cassandraLookupEntryStore;
+    }
     
     public void setEsContentIndexer(ESContentIndexer esContentIndexer) {
         this.esContentIndexer = esContentIndexer;
@@ -111,6 +117,7 @@ public class BootstrapController {
         cassandraChangeListener.setCassandraProductStore(cassandraProductStore);
         cassandraChangeListener.setCassandraSegmentStore(cassandraSegmentStore);
         cassandraChangeListener.setCassandraTopicStore(cassandraTopicStore);
+        cassandraChangeListener.setCassandraLookupEntryStore(cassandraLookupEntryStore);
         doBootstrap(cassandraContentBootstrapper, cassandraChangeListener, response);
     }
     
