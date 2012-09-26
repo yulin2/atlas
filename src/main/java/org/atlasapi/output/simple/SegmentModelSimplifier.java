@@ -52,7 +52,9 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
         segmentEvent.setUri(event.getCanonicalUri());
         segmentEvent.setIsChapter(event.getIsChapter());
         segmentEvent.setPosition(event.getPosition());
-        segmentEvent.setOffset(Ints.saturatedCast(event.getOffset().getStandardSeconds()));
+        if(event.getOffset() != null) {
+            segmentEvent.setOffset(Ints.saturatedCast(event.getOffset().getStandardSeconds()));
+        }
         segmentEvent.setSegment(simplify(segment));
         
         return segmentEvent;
@@ -68,7 +70,9 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
         seg.setTitle(description.getTitle());
         seg.setDescription(description.getSynopsis());
         
-        seg.setDuration(Ints.saturatedCast(segment.getDuration().getStandardSeconds()));
+        if(seg.getDuration() != null) {
+            seg.setDuration(Ints.saturatedCast(segment.getDuration().getStandardSeconds()));
+        }
         seg.setType(segment.getType().toString());
         
         return seg;
