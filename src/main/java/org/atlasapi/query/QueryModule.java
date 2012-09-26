@@ -60,7 +60,7 @@ public class QueryModule {
     @Qualifier("remoteSiteContentResolver")
     private CanonicalisingFetcher localOrRemoteFetcher;
     @Autowired
-    private LookupEntryStore mongoStore;
+    private LookupEntryStore lookupEntry;
     @Autowired
     private KnownTypeContentResolver mongoResolver;
     @Autowired @Qualifier(value="cassandra")
@@ -76,9 +76,8 @@ public class QueryModule {
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
 
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(new SimpleKnownTypeContentResolver(cassandraResolver),
-                new FilterScheduleOnlyKnownTypeContentResolver(mongoResolver),
-                mongoStore);
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraResolver,
+            lookupEntry);
 
         queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor);
 
