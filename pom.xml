@@ -4,7 +4,7 @@
     <groupId>org.atlasapi</groupId>
     <artifactId>atlas</artifactId>
     <packaging>war</packaging>
-    <version>5.0-SNAPSHOT</version>
+    <version>6.0-SNAPSHOT</version>
     <description>Atlas 3.0 API</description>
     <build>
         <finalName>atlas</finalName>
@@ -272,13 +272,13 @@
         </dependency>
         <dependency>
             <groupId>org.atlasapi</groupId>
-            <artifactId>atlas-applications</artifactId>
+            <artifactId>atlas-persistence</artifactId>
             <version>${atlas.version}</version>
         </dependency>
         <dependency>
             <groupId>org.atlasapi</groupId>
-            <artifactId>atlas-persistence</artifactId>
-            <version>${atlas.version}</version>
+            <artifactId>atlas-applications</artifactId>
+            <version>5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>
