@@ -41,27 +41,47 @@ import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.time.DayRangeGenerator;
 import com.sun.syndication.feed.atom.Feed;
+import java.util.concurrent.Callable;
 
 @Configuration
 public class C4Module {
 
-	private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
-	private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
-	private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
+    private final static Daily BRAND_UPDATE_TIME = RepetitionRules.daily(new LocalTime(2, 0, 0));
+    private final static Daily HIGHLIGHTS_UPDATE_TIME = RepetitionRules.daily(new LocalTime(10, 0, 0));
+    private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
+    private @Autowired
+    SimpleScheduler scheduler;
+    private @Value("${c4.apiKey}")
+    String c4ApiKey;
+    private @Value("${c4.lakeviewavailability.key}")
+    String lakeviewAvailabilityFeedKey;
+    private @Value("${c4.lakeviewavailability.apiroot}")
+    String lakeviewApiRoot;
+    private @Autowired
+    ContentResolver contentResolver;
+    private @Autowired
+    ContentWriter contentWriter;
+    private @Autowired
+    AdapterLog log;
+    private @Autowired
+    ScheduleResolver scheduleResolver;
+    private @Autowired
+    ChannelResolver channelResolver;
+    private Callable<LastUpdatedSettingContentWriter> lastUpdatedSettingContentWriter = new Callable<LastUpdatedSettingContentWriter>() {
 
-	private @Autowired SimpleScheduler scheduler;
-	private @Value("${c4.apiKey}") String c4ApiKey;
-	private @Value("${c4.lakeviewavailability.key}") String lakeviewAvailabilityFeedKey;
-	private @Value("${c4.lakeviewavailability.apiroot}") String lakeviewApiRoot;
+        private LastUpdatedSettingContentWriter writer;
 
-	private @Autowired ContentResolver contentResolver;
-	private @Autowired ContentWriter contentWriter;
-	private @Autowired AdapterLog log;
-	private @Autowired ScheduleResolver scheduleResolver;
-	private @Autowired ChannelResolver channelResolver;
-	
+        @Override
+        public synchronized LastUpdatedSettingContentWriter call() throws Exception {
+            if (writer == null) {
+                writer = new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
+            }
+            return writer;
+        }
+    };
+
     @PostConstruct
-    public void startBackgroundTasks() {
+    public void configure() throws Exception {
         if ("DISABLED".equals(c4ApiKey)) {
             log.record(new AdapterLogEntry(Severity.INFO).withSource(getClass()).withDescription("API key required for C4 updaters"));
             return;
@@ -72,57 +92,59 @@ public class C4Module {
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("C4 update scheduled tasks installed").withSource(getClass()));
     }
 
-	@Bean public C4EpgUpdater c4EpgUpdater() {
-	    ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter());
+    @Bean
+    public C4EpgUpdater c4EpgUpdater() throws Exception {
+        ScheduleResolverBroadcastTrimmer trimmer = new ScheduleResolverBroadcastTrimmer(C4, scheduleResolver, contentResolver, lastUpdatedSettingContentWriter.call());
         return new C4EpgUpdater(
-                c4EpgAtomClient(), 
-                new C4EpgEntryProcessor(lastUpdatedSettingContentWriter(), contentResolver, c4BrandFetcher(), log), 
-                new C4EpgBrandlessEntryProcessor(lastUpdatedSettingContentWriter(), contentResolver, c4BrandFetcher(), log), 
+                c4EpgAtomClient(),
+                new C4EpgEntryProcessor(lastUpdatedSettingContentWriter.call(), contentResolver, c4BrandFetcher(), log),
+                new C4EpgBrandlessEntryProcessor(lastUpdatedSettingContentWriter.call(), contentResolver, c4BrandFetcher(), log),
                 trimmer,
                 log,
                 new DayRangeGenerator().withLookAhead(7).withLookBack(7), channelResolver);
     }
-	
-	@Bean public RemoteSiteClient<Document> c4EpgAtomClient() {
-        return new ApiKeyAwareClient<Document>(c4ApiKey, new XmlClient(requestLimitedHttpClient(), new Builder(new C4EpgElementFactory())));
-	}
 
-    @Bean C4AtoZAtomContentLoader c4AtozUpdater() {
-		return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), log);
-	}
-    
-    @Bean C4LakeviewOnDemandFetcher c4LakeviewOnDemandFetcher() {
-    	return new C4LakeviewOnDemandFetcher(c4XBoxAtomFetcher(), lakeviewApiRoot, log); 
+    @Bean
+    public RemoteSiteClient<Document> c4EpgAtomClient() {
+        return new ApiKeyAwareClient<Document>(c4ApiKey, new XmlClient(requestLimitedHttpClient(), new Builder(new C4EpgElementFactory())));
     }
 
-	protected @Bean RemoteSiteClient<Feed> c4AtomFetcher() {
-	    return new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient(requestLimitedHttpClient()));
-	}
-	
-	protected @Bean SimpleHttpClient requestLimitedHttpClient() {
-	    return new RequestLimitingSimpleHttpClient(HttpClients.webserviceClient(), 4);
-	}
+    @Bean
+    C4AtoZAtomContentLoader c4AtozUpdater() throws Exception {
+        return new C4AtoZAtomContentLoader(c4AtomFetcher(), c4BrandFetcher(), log);
+    }
 
-	protected @Bean C4AtomBackedBrandUpdater c4BrandFetcher() {
-		return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter(), channelResolver, c4LakeviewOnDemandFetcher(), log);
-	}
-	
-	protected @Bean RemoteSiteClient<Feed> c4XBoxAtomFetcher() {
-	    return new AtomClient(requestLimitedAuthHeaderSettingHttpClient());
-	}
-	
-	protected @Bean SimpleHttpClient requestLimitedAuthHeaderSettingHttpClient() {
-	    return new RequestLimitingSimpleHttpClient(new SimpleHttpClientBuilder()
-        .withUserAgent("C4oD_iPad")
-        .withSocketTimeout(50, TimeUnit.SECONDS)
-        .withConnectionTimeout(10, TimeUnit.SECONDS)
-        .withAcceptHeader(MimeType.TEXT_HTML)
-        .withRetries(3)
-        .withHeader("X-C4-API-Key", lakeviewAvailabilityFeedKey)
-    .build(), 4);
-	}
-	
-    @Bean protected LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
-        return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
+    @Bean
+    C4LakeviewOnDemandFetcher c4LakeviewOnDemandFetcher() {
+        return new C4LakeviewOnDemandFetcher(c4XBoxAtomFetcher(), lakeviewApiRoot, log);
+    }
+
+    protected @Bean
+    RemoteSiteClient<Feed> c4AtomFetcher() {
+        return new ApiKeyAwareClient<Feed>(c4ApiKey, new AtomClient(requestLimitedHttpClient()));
+    }
+
+    protected @Bean
+    SimpleHttpClient requestLimitedHttpClient() {
+        return new RequestLimitingSimpleHttpClient(HttpClients.webserviceClient(), 4);
+    }
+
+    protected @Bean
+    C4AtomBackedBrandUpdater c4BrandFetcher() throws Exception {
+        return new C4AtomBackedBrandUpdater(c4AtomFetcher(), contentResolver, lastUpdatedSettingContentWriter.call(), channelResolver, c4LakeviewOnDemandFetcher(), log);
+    }
+
+    protected @Bean
+    RemoteSiteClient<Feed> c4XBoxAtomFetcher() {
+        return new AtomClient(requestLimitedAuthHeaderSettingHttpClient());
+    }
+
+    protected @Bean
+    SimpleHttpClient requestLimitedAuthHeaderSettingHttpClient() {
+        return new RequestLimitingSimpleHttpClient(new SimpleHttpClientBuilder().withUserAgent("C4oD_iPad").withSocketTimeout(50, TimeUnit.SECONDS).withConnectionTimeout(10, TimeUnit.SECONDS).withAcceptHeader(MimeType.TEXT_HTML).withRetries(3).withHeader("X-C4-API-Key", lakeviewAvailabilityFeedKey).build(), 4);
+    }
+
+    public Callable<LastUpdatedSettingContentWriter> getLastUpdatedSettingContentWriter() {
+        return lastUpdatedSettingContentWriter;
     }
 }
