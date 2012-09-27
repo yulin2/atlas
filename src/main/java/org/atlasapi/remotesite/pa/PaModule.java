@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.pa;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
+import org.atlasapi.feeds.upload.persistence.MongoFileUploadResultStore;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -50,7 +50,6 @@ public class PaModule {
     private @Autowired ItemsPeopleWriter peopleWriter;
     private @Autowired ScheduleWriter scheduleWriter;
     private @Autowired ChannelResolver channelResolver;
-    private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
     
     private @Value("${pa.ftp.username}") String ftpUsername;
@@ -92,7 +91,7 @@ public class PaModule {
     
     @Bean PaRecentUpdater paRecentUpdater() {
         PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
-        PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore, paScheduleVersionStore());
+        PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, new MongoFileUploadResultStore(mongo), paScheduleVersionStore());
         return updater;
     }
     
