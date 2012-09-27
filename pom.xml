@@ -319,7 +319,7 @@
         <dependency>
             <groupId>org.atlasapi</groupId>
             <artifactId>atlas-applications</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>${atlas.version}</version>
         </dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>
