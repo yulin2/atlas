@@ -148,25 +148,21 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    @Primary
     public MongoContentLister contentLister() {
         return mongoContentPersistenceModule().contentLister();
     }
 
     @Bean
-    @Primary
     public MongoContentGroupWriter contentGroupWriter() {
         return mongoContentPersistenceModule().contentGroupWriter();
     }
 
     @Bean
-    @Primary
     public MongoContentGroupResolver contentGroupResolver() {
         return mongoContentPersistenceModule().contentGroupResolver();
     }
 
     @Bean
-    @Primary
     public ContentWriter contentWriter() {
         ContentWriter contentWriter = mongoContentPersistenceModule().contentWriter();
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, lookupStore());
@@ -178,25 +174,21 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    @Primary
     public LookupResolvingContentResolver contentResolver() {
         return mongoContentPersistenceModule().contentResolver();
     }
 
     @Bean
-    @Primary
     public QueuingItemsPeopleWriter itemsPeopleWriter() {
         return mongoContentPersistenceModule().itemsPeopleWriter();
     }
 
     @Bean
-    @Primary
     public MongoContentResolver knownTypeContentResolver() {
         return mongoContentPersistenceModule().knownTypeContentResolver();
     }
 
     @Bean
-    @Primary
     public TopicCreatingTopicResolver topicStore() {
         return mongoContentPersistenceModule().topicStore();
     }
@@ -213,73 +205,61 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    @Primary
     public IdSettingSegmentWriter segmentWriter() {
         return new IdSettingSegmentWriter(mongoContentPersistenceModule().segmentWriter(), segmentResolver(), idGeneratorBuilder().generator("segment"));
     }
 
     @Bean
-    @Primary
     public MongoSegmentResolver segmentResolver() {
         return mongoContentPersistenceModule().segmentResolver();
     }
 
     @Bean
-    @Primary
     public MongoProductStore productStore() {
         return mongoContentPersistenceModule().productStore();
     }
 
     @Bean
-    @Primary
     public MongoLookupEntryStore lookupStore() {
         return mongoContentPersistenceModule().lookupStore();
     }
 
     @Bean
-    @Primary
     public MongoChannelStore channelStore() {
         return mongoContentPersistenceModule().channelStore();
     }
 
     @Bean
-    @Primary
     public MongoChannelGroupStore channelGroupStore() {
         return mongoContentPersistenceModule().channelGroupStore();
     }
 
     @Bean
-    @Primary
     public MongoPersonStore personStore() {
         return mongoContentPersistenceModule().personStore();
     }
 
     @Bean
-    @Primary
     public MongoScheduleStore scheduleStore() {
         return mongoContentPersistenceModule().scheduleStore();
     }
 
     @Bean
-    @Primary
     public MongoMessageStore messageStore() {
         return mongoContentPersistenceModule().messageStore();
     }
 
     @Bean
-    @Primary
     public ESContentIndexer contentIndexer() {
         return esContentIndexModule().contentIndexer();
     }
 
     @Bean
-    @Primary
     public EsScheduleIndex scheduleIndex() {
         return esContentIndexModule().scheduleIndex();
     }
 
     @Bean
-    @Primary
     public ESTopicSearcher topicSearcher() {
         return esContentIndexModule().topicSearcher();
     }
@@ -291,51 +271,78 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
+    public ESContentSearcher contentSearcher() {
+        return esContentIndexModule().contentSearcher();
+    }
+
+    @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraChannelGroupStore cassandraChannelGroupStore() {
         return cassandraContentPersistenceModule().cassandraChannelGroupStore();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraChannelStore cassandraChannelStore() {
         return cassandraContentPersistenceModule().cassandraChannelStore();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraContentGroupStore cassandraContentGroupStore() {
         return cassandraContentPersistenceModule().cassandraContentGroupStore();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraPersonStore cassandraPersonStore() {
         return cassandraContentPersistenceModule().cassandraPersonStore();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraProductStore cassandraProductStore() {
         return cassandraContentPersistenceModule().cassandraProductStore();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraSegmentStore cassandraSegmentStore() {
         return cassandraContentPersistenceModule().cassandraSegmentStore();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraTopicStore cassandraTopicStore() {
         return cassandraContentPersistenceModule().cassandraTopicStore();
+    }
+
+    @Bean
+    @Primary
+    @Qualifier(value = "cassandra")
+    public CassandraLookupEntryStore cassandraLookupEntryStore() {
+        return cassandraContentPersistenceModule().cassandraLookupEntryStore();
+    }
+
+    @Bean
+    @Primary
+    @Qualifier(value = "cassandra")
+    public CassandraEquivalenceSummaryStore cassandraEquivalenceSummaryStore() {
+        return cassandraContentPersistenceModule().cassandraEquivalenceSummaryStore();
     }
 
     @Bean
