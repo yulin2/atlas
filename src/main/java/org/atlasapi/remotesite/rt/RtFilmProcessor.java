@@ -30,6 +30,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.PaCountryMap;
 import org.atlasapi.remotesite.pa.PaHelper;
+import org.atlasapi.remotesite.util.EnglishLanguageCodeMap;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
@@ -55,7 +56,7 @@ public class RtFilmProcessor {
     private final AdapterLog log;
     
     private final PaCountryMap countryMapper = new PaCountryMap();
-    private final RtLanguageMap languageMap = new RtLanguageMap();
+    private final EnglishLanguageCodeMap languageMap = new EnglishLanguageCodeMap();
     
     private final Splitter csvSplitter = Splitter.on(",").omitEmptyStrings().trimResults();
     private final Splitter slashSplitter = Splitter.on("/").omitEmptyStrings().trimResults();

@@ -1,4 +1,4 @@
-package org.atlasapi.remotesite.rt;
+package org.atlasapi.remotesite.util;
 
 import java.util.Locale;
 import java.util.Map;
@@ -6,11 +6,11 @@ import java.util.Map;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 
-public class RtLanguageMap {
+public class EnglishLanguageCodeMap {
 
     private Map<String, Optional<String>> languageMap;
 
-    public RtLanguageMap() {
+    public EnglishLanguageCodeMap() {
         this.languageMap = initializeMap();
     }
 
