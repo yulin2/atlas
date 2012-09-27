@@ -35,6 +35,7 @@ import org.junit.Ignore;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Ignore(value = "Enable if running a local Cassandra instance with Atlas schema.")
 public class SpringTest {
     
     @BeforeClass
