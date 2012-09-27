@@ -33,6 +33,7 @@ import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -225,7 +226,7 @@ public class RtFilmProcessor {
     
     private String normalize(String imdbRef) {
         String httpRef = imdbRef.replace("www.", "http://");
-        return httpRef.substring(0, httpRef.length()-1);
+        return CharMatcher.is('/').trimTrailingFrom(httpRef);
     }
 
     private List<CrewMember> getOtherPublisherPeople(Film film) {
