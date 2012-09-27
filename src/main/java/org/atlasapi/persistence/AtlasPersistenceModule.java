@@ -62,13 +62,17 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
+import org.atlasapi.persistence.content.KnownTypeContentResolver;
+import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
+import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
+import org.atlasapi.persistence.content.people.QueuingPersonWriter;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
+import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
 import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
-import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
 import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
@@ -93,6 +97,11 @@ public class AtlasPersistenceModule {
     public void destroy() {
         cassandraContentPersistenceModule().init();
         esContentIndexModule().init();
+    }
+
+    @Bean
+    public IdGenerator idGenerator() {
+        return new UUIDGenerator();
     }
 
     @Bean
@@ -285,6 +294,34 @@ public class AtlasPersistenceModule {
     @Bean
     @Primary
     @Qualifier(value = "cassandra")
+    public ContentWriter cassandraContentWriter() {
+        ContentWriter contentWriter = cassandraContentPersistenceModule().cassandraContentStore();
+        if (Boolean.valueOf(generateIds)) {
+            contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
+        }
+        contentWriter = new EquivalenceWritingContentWriter(contentWriter, cassandraContentPersistenceModule().cassandraLookupEntryStore());
+        return contentWriter;
+    }
+
+    @Bean
+    @Primary
+    @Qualifier(value = "cassandra")
+    public LookupResolvingContentResolver cassandraContentResolver() {
+        return new LookupResolvingContentResolver(
+                new SimpleKnownTypeContentResolver(cassandraContentPersistenceModule().cassandraContentStore()),
+                cassandraContentPersistenceModule().cassandraLookupEntryStore());
+    }
+
+    @Bean
+    @Primary
+    @Qualifier(value = "cassandra")
+    public KnownTypeContentResolver cassandraKnownTypeContentResolver() {
+        return new SimpleKnownTypeContentResolver(cassandraContentPersistenceModule().cassandraContentStore());
+    }
+
+    @Bean
+    @Primary
+    @Qualifier(value = "cassandra")
     public CassandraChannelGroupStore cassandraChannelGroupStore() {
         return cassandraContentPersistenceModule().cassandraChannelGroupStore();
     }
@@ -313,6 +350,14 @@ public class AtlasPersistenceModule {
     @Bean
     @Primary
     @Qualifier(value = "cassandra")
+    public QueuingItemsPeopleWriter cassandraItemsPeopleWriter() {
+        SystemOutAdapterLog log = new SystemOutAdapterLog();
+        return new QueuingItemsPeopleWriter(new QueuingPersonWriter(cassandraContentPersistenceModule().cassandraPersonStore(), log), log);
+    }
+
+    @Bean
+    @Primary
+    @Qualifier(value = "cassandra")
     public CassandraProductStore cassandraProductStore() {
         return cassandraContentPersistenceModule().cassandraProductStore();
     }
@@ -327,8 +372,8 @@ public class AtlasPersistenceModule {
     @Bean
     @Primary
     @Qualifier(value = "cassandra")
-    public CassandraTopicStore cassandraTopicStore() {
-        return cassandraContentPersistenceModule().cassandraTopicStore();
+    public TopicCreatingTopicResolver cassandraTopicStore() {
+        return new TopicCreatingTopicResolver(cassandraContentPersistenceModule().cassandraTopicStore(), idGenerator());
     }
 
     @Bean
