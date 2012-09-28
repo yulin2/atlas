@@ -17,7 +17,7 @@ public class RtLanguageMap {
     private Map<String, Optional<String>> initializeMap() {
         Map<String, Optional<String>> languageCode = Maps.newHashMap();
         for (String code : Locale.getISOLanguages()) {
-            languageCode.put(new Locale(code).getDisplayLanguage(Locale.ENGLISH),Optional.of(code));
+            languageCode.put(new Locale(code).getDisplayLanguage(Locale.ENGLISH).toLowerCase(),Optional.of(code));
         }
         return languageCode;
     }

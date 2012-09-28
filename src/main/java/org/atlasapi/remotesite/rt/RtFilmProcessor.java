@@ -181,7 +181,7 @@ public class RtFilmProcessor {
     public Iterable<String> extractOriginalLanguages(Element originalLanguages) {
         List<String> languageCodes = Lists.newArrayList();
         for (String originalLanguage : splitLanguages(originalLanguages.getValue())) {
-            Optional<String> code = languageMap.codeForEnglishLanguageName(originalLanguage);
+            Optional<String> code = languageMap.codeForEnglishLanguageName(originalLanguage.toLowerCase());
             if (code.isPresent()) {
                 languageCodes.add(code.get());
             } else {
@@ -201,7 +201,7 @@ public class RtFilmProcessor {
         String csvLanguages = subtitlesElement.getValue().substring(0, subtitlesElement.getValue().indexOf('+'));
         List<Subtitles> subtitles = Lists.newArrayList();
         for (String subtitleLanguage : csvSplitter.split(csvLanguages)) {
-            Optional<String> code = languageMap.codeForEnglishLanguageName(subtitleLanguage);
+            Optional<String> code = languageMap.codeForEnglishLanguageName(subtitleLanguage.toLowerCase());
             if (code.isPresent()) {
                 subtitles.add(new Subtitles(code.get()));
             } else {
