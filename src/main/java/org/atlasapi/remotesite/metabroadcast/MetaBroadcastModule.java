@@ -43,8 +43,8 @@ public class MetaBroadcastModule {
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentWriter contentWriter;
-    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
-    private @Autowired @Qualifier("topicQueryResolver") TopicQueryResolver topicResolver;
+    private @Autowired TopicStore topicStore;
+    private @Autowired TopicQueryResolver topicResolver;
     private @Autowired SimpleScheduler scheduler;
     private @Autowired AdapterLog log;
     
