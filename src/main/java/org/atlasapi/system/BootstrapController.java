@@ -27,7 +27,6 @@ import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupSto
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
 import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
 import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
-import org.atlasapi.serialization.json.JsonFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,7 +39,7 @@ public class BootstrapController {
     
     private static final Log log = LogFactory.getLog(BootstrapController.class);
     //
-    private final ObjectMapper jsonMapper = JsonFactory.makeJsonMapper();
+    private final ObjectMapper jsonMapper = new ObjectMapper();
     //
     private final ExecutorService scheduler = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MICROSECONDS, new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.DiscardPolicy());
     //
