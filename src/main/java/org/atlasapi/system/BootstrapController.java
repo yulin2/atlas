@@ -37,8 +37,9 @@ public class BootstrapController {
 
     private static final Log log = LogFactory.getLog(BootstrapController.class);
     //
-    private final ExecutorService scheduler = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MICROSECONDS, new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.AbortPolicy());
+    private final ExecutorService scheduler = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MICROSECONDS, new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.DiscardPolicy());
     private final ObjectMapper jsonMapper = new ObjectMapper();
+    //
     //
     private ContentBootstrapper cassandraContentBootstrapper;
     private ContentBootstrapper esContentBootstrapper;
