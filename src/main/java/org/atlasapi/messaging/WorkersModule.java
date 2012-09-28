@@ -110,11 +110,9 @@ public class WorkersModule {
     @PostConstruct
     public void start() {
         if (enabled) {
-            cassandraReplicator().init();
             esIndexer().init();
-
-            cassandraReplicatorMessageListener().start();
             esIndexerMessageListener().start();
+            
             messageLoggerMessageListener().start();
         }
     }
@@ -122,7 +120,6 @@ public class WorkersModule {
     @PreDestroy
     public void stop() {
         if (enabled) {
-            cassandraReplicator().destroy();
             esIndexer().destroy();
         }
     }
