@@ -29,9 +29,11 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.pa.PaCountryMap;
+import org.atlasapi.remotesite.util.EnglishLanguageCodeMap;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
@@ -53,7 +55,7 @@ public class RtFilmProcessor {
     private final AdapterLog log;
     
     private final PaCountryMap countryMapper = new PaCountryMap();
-    private final RtLanguageMap languageMap = new RtLanguageMap();
+    private final EnglishLanguageCodeMap languageMap = new EnglishLanguageCodeMap();
     
     private final Splitter csvSplitter = Splitter.on(",").omitEmptyStrings().trimResults();
     private final Splitter slashSplitter = Splitter.on("/").omitEmptyStrings().trimResults();
@@ -179,7 +181,7 @@ public class RtFilmProcessor {
     public Iterable<String> extractOriginalLanguages(Element originalLanguages) {
         List<String> languageCodes = Lists.newArrayList();
         for (String originalLanguage : splitLanguages(originalLanguages.getValue())) {
-            Optional<String> code = languageMap.codeForEnglishLanguageName(originalLanguage);
+            Optional<String> code = languageMap.codeForEnglishLanguageName(originalLanguage.toLowerCase());
             if (code.isPresent()) {
                 languageCodes.add(code.get());
             } else {
@@ -205,7 +207,7 @@ public class RtFilmProcessor {
 
         List<Subtitles> subtitles = Lists.newArrayList();
         for (String subtitleLanguage : csvSplitter.split(csvLanguages)) {
-            Optional<String> code = languageMap.codeForEnglishLanguageName(subtitleLanguage);
+            Optional<String> code = languageMap.codeForEnglishLanguageName(subtitleLanguage.toLowerCase());
             if (code.isPresent()) {
                 subtitles.add(new Subtitles(code.get()));
             } else {
@@ -230,7 +232,7 @@ public class RtFilmProcessor {
     
     private String normalize(String imdbRef) {
         String httpRef = imdbRef.replace("www.", "http://");
-        return httpRef.substring(0, httpRef.length()-1);
+        return CharMatcher.is('/').trimTrailingFrom(httpRef);
     }
 
     private List<CrewMember> getOtherPublisherPeople(Film film) {

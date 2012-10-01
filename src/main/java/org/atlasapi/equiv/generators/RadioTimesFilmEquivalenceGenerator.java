@@ -33,7 +33,7 @@ public class RadioTimesFilmEquivalenceGenerator implements EquivalenceGenerator<
     public ScoredCandidates<Item> generate(Item content, ResultDescription desc) {
         checkArgument(content instanceof Film, "Content not Film:" + content.getCanonicalUri());
         
-        Builder<Item> results = DefaultScoredCandidates.fromSource("RT->PA");
+        Builder<Item> results = DefaultScoredCandidates.fromSource("RTtoPA");
         
         Matcher uriMatcher = rtFilmUriPattern.matcher(content.getCanonicalUri());
         if (uriMatcher.matches()) {

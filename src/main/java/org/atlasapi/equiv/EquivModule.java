@@ -20,6 +20,7 @@ import static org.atlasapi.equiv.generators.AliasResolvingEquivalenceGenerator.a
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
 import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
+import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
@@ -170,13 +171,14 @@ public class EquivModule {
     public EquivalenceUpdater<Content> contentUpdater() {
         
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES));
+        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM));
         
         EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers);
         EquivalenceUpdater<Container> standardContainerUpdater = standardContainerUpdater(acceptablePublishers);
 
-        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK);
+        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM);
         final EquivalenceUpdaters updaters = new EquivalenceUpdaters();
+
         for (Publisher publisher : Iterables.filter(ImmutableList.copyOf(Publisher.values()), not(in(nonStandardPublishers)))) {
             updaters.register(publisher, Item.class, standardItemUpdater);    
             updaters.register(publisher, Container.class, standardContainerUpdater);
@@ -211,6 +213,25 @@ public class EquivModule {
         ));
         updaters.register(ITUNES, Container.class, standardContainerUpdater(
             acceptablePublishers,
+            ImmutableSet.of(titleGenerator), 
+            ImmutableSet.of(titleScorer, 
+                new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
+            ))
+        );
+
+        Set<Publisher> lfPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(LOVEFILM));
+        updaters.register(LOVEFILM, Item.class, standardItemUpdater(
+            lfPublishers,
+            ImmutableSet.<EquivalenceGenerator<Item>>of(
+                new CandidateContainerEquivalenceGenerator(contentResolver, equivSummaryStore)
+                    ), 
+                    ImmutableSet.of(
+                        new TitleMatchingItemScorer(),
+                        new SequenceItemEquivalenceScorer()
+                            )
+                ));
+        updaters.register(LOVEFILM, Container.class, standardContainerUpdater(
+            lfPublishers,
             ImmutableSet.of(titleGenerator), 
             ImmutableSet.of(titleScorer, 
                 new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
