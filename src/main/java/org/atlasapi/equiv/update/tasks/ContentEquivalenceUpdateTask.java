@@ -4,6 +4,8 @@ import static org.atlasapi.persistence.content.ContentCategory.CONTAINER;
 import static org.atlasapi.persistence.content.ContentCategory.TOP_LEVEL_ITEM;
 import static org.atlasapi.persistence.content.listing.ContentListingCriteria.defaultCriteria;
 import static org.atlasapi.persistence.content.listing.ContentListingProgress.progressFrom;
+import static org.atlasapi.remotesite.redux.UpdateProgress.FAILURE;
+import static org.atlasapi.remotesite.redux.UpdateProgress.SUCCESS;
 
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +21,7 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.listing.ContentListingCriteria;
 import org.atlasapi.persistence.content.listing.ContentListingProgress;
+import org.atlasapi.remotesite.redux.UpdateProgress;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
@@ -33,6 +36,7 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
     private String schedulingKey = "equivalence";
     private List<Publisher> publishers;
     private int processed = 0;
+    private UpdateProgress progress = UpdateProgress.START;
     
     public ContentEquivalenceUpdateTask(ContentLister contentLister, ContentResolver contentResolver, ScheduleTaskProgressStore progressStore, EquivalenceUpdater<Content> updater, Set<String> ignored) {
         super(contentLister);
@@ -66,6 +70,7 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
     protected void onStart(ContentListingProgress progress) {
         log.info("Started: {} from {}", schedulingKey, describe(progress));
         processed  = 0;
+        this.progress = UpdateProgress.START;
     }
 
     private String describe(ContentListingProgress progress) {
@@ -78,15 +83,16 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
     @Override
     protected boolean handle(Content content) {
         if (!ignored.contains(content.getCanonicalUri())) {
+            reportStatus(String.format("%s. Processing %s.", progress, content));
             try {
-                reportStatus(String.format("Processed %d. Processing %s.", processed, content));
                 updater.updateEquivalences(content);
-                if (++processed % 10 == 0) {
-                    updateProgress(progressFrom(content));
-                }
+                progress = progress.reduce(SUCCESS);
             } catch (Exception e) {
                 log.error(content.toString(), e);
-                return false;
+                progress = progress.reduce(FAILURE);
+            }
+            if (++processed % 10 == 0) {
+                updateProgress(progressFrom(content));
             }
         }
         return true;
@@ -104,7 +110,7 @@ public final class ContentEquivalenceUpdateTask extends AbstractContentListingTa
         } else {
             if (content != null) {
                 updateProgress(progressFrom(content));
-                log.info("Stopped: %s at %s", schedulingKey, content);
+                log.info("Stopped: {}", schedulingKey, content);
             }
         }
     }
