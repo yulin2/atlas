@@ -20,6 +20,7 @@ import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
 import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
+import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
 import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
@@ -43,6 +44,7 @@ public class SystemModule {
     private @Autowired CassandraProductStore cassandraProductStore;
     private @Autowired CassandraSegmentStore cassandraSegmentStore;
     private @Autowired CassandraTopicStore cassandraTopicStore;
+    private @Autowired CassandraLookupEntryStore cassandraLookupEntryStore;
     private @Autowired ESContentIndexer esContentIndexer;
     private @Autowired @Qualifier("cassandra") ContentBootstrapper cassandraContentBootstrapper;
     private @Autowired @Qualifier("es") ContentBootstrapper esContentBootstrapper;
@@ -69,6 +71,7 @@ public class SystemModule {
         bootstrapController.setCassandraProductStore(cassandraProductStore);
         bootstrapController.setCassandraSegmentStore(cassandraSegmentStore);
         bootstrapController.setCassandraTopicStore(cassandraTopicStore);
+        bootstrapController.setCassandraLookupEntryStore(cassandraLookupEntryStore);
         bootstrapController.setEsContentIndexer(esContentIndexer);
         bootstrapController.setCassandraContentBootstrapper(cassandraContentBootstrapper);
         bootstrapController.setEsContentBootstrapper(esContentBootstrapper);
