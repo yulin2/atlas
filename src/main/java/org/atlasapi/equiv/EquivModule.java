@@ -21,6 +21,7 @@ import static org.atlasapi.equiv.update.ContainerEquivalenceUpdater.containerUpd
 import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
 import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
+import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
@@ -65,7 +66,6 @@ import org.atlasapi.equiv.update.RootEquivalenceUpdater;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -142,7 +142,7 @@ public class EquivModule {
 
     public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES));
+        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM));
         
         TitleMatchingEquivalenceScoringGenerator titleScoringGenerator = new TitleMatchingEquivalenceScoringGenerator(searchResolver);
         
@@ -157,7 +157,7 @@ public class EquivModule {
                 .withScorer(titleScoringGenerator)
                 .build(), itemUpdater), acceptablePublishers);
         
-        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK);
+        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM);
         for (Publisher publisher : Iterables.filter(ImmutableList.copyOf(Publisher.values()), not(in(nonStandardPublishers)))) {
                 publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
         }
@@ -183,6 +183,16 @@ public class EquivModule {
                             new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)))
                     .build(), 
                 itemUpdater),acceptablePublishers));
+
+        Set<Publisher> lfPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(LOVEFILM));
+        publisherUpdaters.put(LOVEFILM, resultHandlingUpdater(new RootEquivalenceUpdater(
+            containerUpdaterBuilder(lfPublishers)
+                .withGenerator(titleScoringGenerator)
+                .withScorers(ImmutableSet.of(titleScoringGenerator, 
+                    new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
+                    new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)))
+                .build(), 
+            itemUpdater),lfPublishers));
         
         publisherUpdaters.put(FACEBOOK, resultHandlingUpdater(new RootEquivalenceUpdater(
             containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK)))
