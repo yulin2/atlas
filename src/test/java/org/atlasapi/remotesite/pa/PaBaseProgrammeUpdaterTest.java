@@ -122,6 +122,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 
         Version version = item.getVersions().iterator().next();
         assertFalse(version.getBroadcasts().isEmpty());
+        assertTrue(version.is3d());
 
         Broadcast broadcast = version.getBroadcasts().iterator().next();
         assertEquals("pa:71118472", broadcast.getSourceId());

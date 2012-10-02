@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.08 28/02/2012 mj -->
+<!-- listings Radio Times DTD v2.08 16/08/2012 mj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
@@ -201,51 +201,53 @@ person_id: A unique id for this person
     premiere: this a broadcast premiere.
     new_episode: this is the first showing of this programme on this channel.
     new_series: this is the first episode of a news series of this programme.
-    last_in_series: this is the last in a series of showings of this programme.
-    surround: the programme is being broadcast in surround sound.
-    widescreen: the programme being shown in widescreen format.
-    film: the programme a film.
-    sign_lang: the programme have sign language.
-    in_vision:  the programme has in vision subtitles.
-    audio_des: the programme is audio described.
-    interactive: the programme has interactive content.
-    hd: the programme is also showing on the High Definition channel
-    live: this is a live broadcast
-    as_live: this programme is being shown as-live
-    follow_on: this is a follow_on programme. (The programme follows the previous 
-    programme but doesn't have an exact broadcast time). In the xml, the time
-    field will contain the time of the previous programme. 
-    tv_movie: this programme is a made-for-tv movie
-    web_choice: RT web choice
-    special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
-     
+	last_in_series: this is the last in a series of showings of this programme.
+	surround: the programme is being broadcast in surround sound.
+	widescreen: the programme being shown in widescreen format.
+	film: the programme a film.
+	sign_lang: the programme have sign language.
+	in_vision:  the programme has in vision subtitles.
+	audio_des: the programme is audio described.
+	interactive: the programme has interactive content.
+	hd: the programme is also showing on the High Definition channel
+	live: this is a live broadcast
+	as_live: this programme is being shown as-live
+	follow_on: this is a follow_on programme. (The programme follows the previous 
+	programme but doesn't have an exact broadcast time). In the xml, the time
+	field will contain the time of the previous programme. 
+	tv_movie: this programme is a made-for-tv movie
+	web_choice: RT web choice
+	special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
+	three_d: the programme employs techniques of 3D presentation.
+	 
 -->
 <!ELEMENT attr EMPTY>
 <!ATTLIST attr
-    stereo (yes | no) "no"
-    subtitles (yes | no) "no"
-    repeat (yes | no) "no"
-    bw (yes | no) "no"
-    premiere (yes | no) "no"
-    new_episode (yes | no) "no"
-    new_series (yes | no) "no"
-    last_in_series (yes | no) "no"
-    surround (yes | no) "no"
-    widescreen (yes | no) "no"
-    film (yes | no) "no"
-    sign_lang (yes | no) "no"
-    in_vision (yes | no) "no"
-    audio_des (yes | no) "no"
-    interactive (yes | no) "no"
-    hd (yes | no) "no"
-    live (yes | no) "no"
-    as_live (yes | no) "no"
-    follow_on (yes | no) "no"
-    choice (yes | no) "no"
-    familychoice (yes | no) "no"
-    tv_movie (yes | no) "no"
-    web_choice (yes | no) "no"
-    special (yes | no) "no"
+	stereo (yes | no) "no"
+	subtitles (yes | no) "no"
+	repeat (yes | no) "no"
+	bw (yes | no) "no"
+	premiere (yes | no) "no"
+	new_episode (yes | no) "no"
+	new_series (yes | no) "no"
+	last_in_series (yes | no) "no"
+	surround (yes | no) "no"
+	widescreen (yes | no) "no"
+	film (yes | no) "no"
+	sign_lang (yes | no) "no"
+	in_vision (yes | no) "no"
+	audio_des (yes | no) "no"
+	interactive (yes | no) "no"
+	hd (yes | no) "no"
+	live (yes | no) "no"
+	as_live (yes | no) "no"
+	follow_on (yes | no) "no"
+	choice (yes | no) "no"
+	familychoice (yes | no) "no"
+	tv_movie (yes | no) "no"
+	web_choice (yes | no) "no"
+	special (yes | no) "no"
+	three_d (yes | no) "no"
 >
 
 

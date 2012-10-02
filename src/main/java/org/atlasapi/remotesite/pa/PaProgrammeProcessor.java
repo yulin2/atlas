@@ -698,6 +698,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private void setBasicDetails(ProgData progData, Item item) {
         Version version = new Version();
         version.setProvider(Publisher.PA);
+        version.set3d(getBooleanValue(progData.getAttr().getThreeD()));
         item.addVersion(version);
 
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
