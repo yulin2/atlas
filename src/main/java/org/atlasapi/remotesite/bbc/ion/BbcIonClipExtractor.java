@@ -2,9 +2,6 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.media.entity.Publisher.BBC;
 
-import java.util.List;
-import java.util.Set;
-
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Encoding;
@@ -15,30 +12,20 @@ import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
-import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.intl.Countries;
 
 public class BbcIonClipExtractor extends BaseBbcIonEpisodeItemExtractor implements
-        ContentExtractor<IonEpisodeDetail, Iterable<Clip>> {
+        ContentExtractor<IonEpisode, Clip> {
 
     public BbcIonClipExtractor(AdapterLog log) {
         super(log);
     }
 
     @Override
-    public Iterable<Clip> extract(IonEpisodeDetail source) {
-        return extractClips(source.getClips());
-    }
-
-    private Iterable<Clip> extractClips(List<IonEpisode> clips) {
-        Set<Clip> extractedClips = Sets.newHashSet();
-        for (IonEpisode ionClip : clips) {
-            extractedClips.add(extractClip(ionClip));
-        }
-        return extractedClips;
+    public Clip extract(IonEpisode source) {
+        return extractClip(source);
     }
 
     private Clip extractClip(IonEpisode ionClip) {

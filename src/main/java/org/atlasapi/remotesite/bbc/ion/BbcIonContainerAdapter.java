@@ -3,66 +3,42 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.concurrent.TimeUnit;
-
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.persistence.system.RemoteSiteClient;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
 import org.atlasapi.remotesite.bbc.BbcFeeds;
 import org.atlasapi.remotesite.bbc.BbcProgrammesGenreMap;
-import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Ints;
-import com.google.gson.reflect.TypeToken;
 import com.metabroadcast.common.base.Maybe;
-import com.metabroadcast.common.http.HttpException;
-import com.metabroadcast.common.http.HttpResponsePrologue;
-import com.metabroadcast.common.http.HttpResponseTransformer;
-import com.metabroadcast.common.http.SimpleHttpClient;
-import com.metabroadcast.common.http.SimpleHttpClientBuilder;
-import com.metabroadcast.common.http.SimpleHttpRequest;
 
-public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
+public class BbcIonContainerAdapter implements BbcContainerAdapter, SiteSpecificAdapter<Container> {
 
     private static final String CURIE_BASE = "bbc:";
     public static final String CONTAINER_DETAIL_PATTERN = "http://www.bbc.co.uk/iplayer/ion/container/container/%s/category_type/pips/format/json";
 
-    private final BbcIonDeserializer<IonContainerFeed> ionDeserialiser = BbcIonDeserializers.deserializerForType(new TypeToken<IonContainerFeed>(){});
     private final BbcIonGenreMap genreMap = new BbcIonGenreMap(new BbcProgrammesGenreMap());
-    
-    private final SimpleHttpClient httpClient = new SimpleHttpClientBuilder()
-        .withUserAgent(HttpClients.ATLAS_USER_AGENT)
-        .withSocketTimeout(30, TimeUnit.SECONDS)
-        .build();
-    
+    private final RemoteSiteClient<IonContainerFeed> containerFeedClient;
     private final AdapterLog log;
     
-    private final HttpResponseTransformer<IonContainerFeed> ION_TRANSLATOR = new HttpResponseTransformer<IonContainerFeed>() {
-
-        @Override
-        public IonContainerFeed transform(HttpResponsePrologue response, InputStream in) throws HttpException {
-            return ionDeserialiser.deserialise(new InputStreamReader(in, response.getCharsetOrDefault(Charsets.UTF_8)));
-        }
-    };
-    
-    public BbcIonContainerFetcherClient(AdapterLog log) {
+    public BbcIonContainerAdapter(AdapterLog log, RemoteSiteClient<IonContainerFeed> containerFeedClient) {
         this.log = log;
+        this.containerFeedClient = containerFeedClient;
     }
     
     private Maybe<IonContainer> getIonContainer(String pid) {
         try {
-            return Maybe.firstElementOrNothing((httpClient.get(new SimpleHttpRequest<IonContainerFeed>(String.format(CONTAINER_DETAIL_PATTERN, pid), ION_TRANSLATOR))).getBlocklist());
+            return Maybe.firstElementOrNothing(containerFeedClient.get(String.format(CONTAINER_DETAIL_PATTERN, pid)).getBlocklist());
         } catch (Exception e) {
             log.record(errorEntry().withCause(e).withSource(getClass()).withDescription("Error fetching container info for " + pid));
             return Maybe.nothing();
@@ -77,8 +53,10 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
             return Maybe.nothing();
         }
         
-        IonContainer ionContainer = maybeIonContainer.requireValue();
-        
+        return extractBrand(brandId, maybeIonContainer.requireValue());
+    }
+
+    protected Maybe<Brand> extractBrand(String brandId, IonContainer ionContainer) {
         if(!ionContainer.getType().equals("brand")) {
             log.record(errorEntry().withSource(getClass()).withDescription("Expecting brand for %s, got %s ", brandId, ionContainer.getType()));
             return Maybe.nothing();
@@ -101,8 +79,11 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
             return Maybe.nothing();
         }
         
-        IonContainer ionContainer = maybeIonContainer.requireValue();
+        return extractSeries(seriesId, maybeIonContainer.requireValue());
         
+    }
+
+    protected Maybe<Series> extractSeries(String seriesId, IonContainer ionContainer) {
         if(!ionContainer.getType().equals("series")) {
             log.record(errorEntry().withSource(getClass()).withDescription("Expecting series for %s, got %s ", seriesId, ionContainer.getType()));
             return Maybe.nothing();
@@ -111,12 +92,15 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
         String pid = ionContainer.getId();
         Series series = new Series(BbcFeeds.slashProgrammesUriForPid(pid), CURIE_BASE+pid, Publisher.BBC);
         
+        if (!Strings.isNullOrEmpty(ionContainer.getParentId())) {
+            series.setParentRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(ionContainer.getParentId())));
+        }
+        
         setCommonFields(ionContainer, series);
         series.withSeriesNumber(Ints.saturatedCast(ionContainer.getPosition()));
         BbcImageUrlCreator.addIplayerImagesTo(ionContainer.getId(), series);
 
         return Maybe.just(series);
-        
     }
     
     private void setCommonFields(IonContainer src, Container dst) {
@@ -145,6 +129,28 @@ public class BbcIonContainerFetcherClient implements BbcContainerFetcherClient {
     @Override
     public Maybe<IonContainer> getSubseries(String subseriesId) {
         return getIonContainer(subseriesId);
+    }
+
+    @Override
+    public Container fetch(String uri) {
+        String pid = BbcFeeds.pidFrom(uri);
+        Maybe<IonContainer> ionContainer = getIonContainer(pid);
+        if (ionContainer.isNothing()) {
+            return null;
+        }
+        IonContainer container = ionContainer.requireValue();
+        if("brand".equals(container.getType())) {
+            return extractBrand(pid, container).valueOrNull();
+        }
+        if("series".equals(container.getType())) {
+            return extractSeries(pid, container).valueOrNull();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean canFetch(String uri) {
+        return BbcFeeds.isACanonicalSlashProgrammesUri(uri);
     }
     
 }

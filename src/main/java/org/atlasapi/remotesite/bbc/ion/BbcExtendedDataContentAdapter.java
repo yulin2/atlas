@@ -23,19 +23,19 @@ public class BbcExtendedDataContentAdapter {
         this.phraseAdapter = phraseAdapter;
         this.topicsAdapter = topicsAdapter;
     }
-    
+
     public Content fetch(String uri) {
         Preconditions.checkArgument(canFetch(uri), "Invalid URI %s", uri);
-            List<RelatedLink> links = linkAdapter.fetch(uri);
-            List<KeyPhrase> phrases = phraseAdapter.fetch(uri);
-            List<TopicRef> topics = topicsAdapter.fetch(uri);
+        List<RelatedLink> links = linkAdapter.fetch(uri);
+        List<KeyPhrase> phrases = phraseAdapter.fetch(uri);
+        List<TopicRef> topics = topicsAdapter.fetch(uri);
 
-            Content content = new Item();
-            content.setRelatedLinks(links);
-            content.setKeyPhrases(phrases);
-            content.setTopicRefs(topics);
-            return content;
-            
+        Content content = new Item();
+        content.setRelatedLinks(links);
+        content.setKeyPhrases(phrases);
+        content.setTopicRefs(topics);
+        return content;
+
     }
 
     public boolean canFetch(String uri) {

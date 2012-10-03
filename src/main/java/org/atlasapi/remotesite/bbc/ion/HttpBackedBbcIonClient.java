@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
 import org.atlasapi.remotesite.bbc.ion.model.IonFeed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.gson.reflect.TypeToken;
@@ -26,6 +28,7 @@ public class HttpBackedBbcIonClient<T extends IonFeed> implements RemoteSiteClie
         return new HttpBackedBbcIonClient<T>(backingClient, type);
     }
     
+    private static final Logger log = LoggerFactory.getLogger(HttpBackedBbcIonClient.class);
     
     private final SimpleHttpClient backingClient;
     private BbcIonDeserializer<T> deserialiser;
@@ -37,6 +40,7 @@ public class HttpBackedBbcIonClient<T extends IonFeed> implements RemoteSiteClie
 
     @Override
     public T get(String uri) throws HttpException, Exception {
+        log.trace(uri);
         return backingClient.get(httpRequestFrom(uri, new HttpResponseTransformer<T>() {
 
             @Override

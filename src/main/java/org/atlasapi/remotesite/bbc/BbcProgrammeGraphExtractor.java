@@ -50,7 +50,6 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.bbc.BbcProgrammeSource.ClipAndVersion;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesContainerRef;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesEpisode;
 import org.atlasapi.remotesite.bbc.SlashProgrammesRdf.SlashProgrammesSeriesContainer;
@@ -59,6 +58,7 @@ import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonClipExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDeserializers.BbcIonDeserializer;
+import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetail;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
@@ -133,6 +133,10 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
                     return SLASH_PROGRAMMES_ROOT+input.getId();
                 }
             });
+            
+            for (IonEpisode clip : episodeDetail.getClips()) {
+                item.addClip(clipExtractor.extract(clip));
+            }
         }
 
         if (source.versions() != null && !source.versions().isEmpty()) {
@@ -160,10 +164,7 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
             }
 
         }
-        
-        for (Clip clip : clipExtractor.extract(episodeDetail)) {
-            item.addClip(clip);
-        }
+    
         
         addExtendedData(item);
 
@@ -233,9 +234,9 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
     }
 
     private Maybe<Integer> seriesNumber(SlashProgrammesRdf episode) {
-        if (episode.series() != null && episode.series().uri() != null) {
-            return seriesResolver.seriesNumberFor(episode.series().uri());
-        }
+//        if (episode.series() != null && episode.series().uri() != null) {
+//            return seriesResolver.seriesNumberFor(episode.series().uri());
+//        }
         return Maybe.nothing();
     }
 
@@ -343,15 +344,15 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
         } else {
             item = new Episode(episodeUri, curie, Publisher.BBC);
 
-            SlashProgrammesSeriesContainer series = episode.series();
-            if (series != null) {
-                String seriesUri = series.uri();
-                if (seriesUri != null) {
-                    ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
-                    // This will get over written below if there's a brand.
-                    ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
-                }
-            }
+//            SlashProgrammesSeriesContainer series = episode.series();
+//            if (series != null) {
+//                String seriesUri = series.uri();
+//                if (seriesUri != null) {
+//                    ((Episode) item).setSeriesRef(new ParentRef(seriesUri));
+//                    // This will get over written below if there's a brand.
+//                    ((Episode) item).setContainer(new Series(seriesUri, PerPublisherCurieExpander.CurieAlgorithm.BBC.compact(seriesUri), Publisher.BBC));
+//                }
+//            }
             
             SlashProgrammesContainerRef brand = episode.brand();
             if(brand != null && brand.uri() != null) {

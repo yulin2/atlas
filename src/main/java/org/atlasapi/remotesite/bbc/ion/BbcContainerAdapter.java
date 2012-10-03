@@ -6,7 +6,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 
 import com.metabroadcast.common.base.Maybe;
 
-public interface BbcContainerFetcherClient {
+public interface BbcContainerAdapter {
 
     Maybe<Brand> createBrand(String brandId);
 
