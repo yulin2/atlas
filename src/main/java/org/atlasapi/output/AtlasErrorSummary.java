@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.webapp.query.DateTimeInQueryParser.MalformedDateTimeException;
 
 public class AtlasErrorSummary {
 	
@@ -55,7 +56,8 @@ public class AtlasErrorSummary {
 	
 	private static Map<Class<? extends Exception>, AtlasExceptionBuilder> exceptionMap() {
 		return ImmutableMap.<Class<? extends Exception>, AtlasExceptionBuilder>of(
-			IllegalArgumentException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST)
+			IllegalArgumentException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST),
+			MalformedDateTimeException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_DATE_TIME_VALUE", HttpStatusCode.BAD_REQUEST)
 		);
 	}
 
