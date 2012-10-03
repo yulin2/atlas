@@ -27,6 +27,7 @@ import org.atlasapi.remotesite.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.metabroadcast.common.http.HttpResponseTransformer;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 
@@ -42,6 +43,13 @@ public class BbcSlashProgrammesAtoZRdfClient implements RemoteSiteClient<SlashPr
 
 	private final SimpleHttpClient httpClient;
 	private final JAXBContext context;
+    private final HttpResponseTransformer<SlashProgrammesAtoZRdf> rdfResponseTransformer = new AbstractHttpResponseTransformer<SlashProgrammesAtoZRdf>() {
+        @Override
+        protected SlashProgrammesAtoZRdf transform(InputStreamReader bodyReader) throws Exception {
+            Unmarshaller u = context.createUnmarshaller();
+            return (SlashProgrammesAtoZRdf) u.unmarshal(bodyReader);
+        }
+    };
 
 	public BbcSlashProgrammesAtoZRdfClient() {
 		this(HttpClients.webserviceClient());
@@ -55,13 +63,6 @@ public class BbcSlashProgrammesAtoZRdfClient implements RemoteSiteClient<SlashPr
 			throw new RuntimeException(e);
 		}
 	}
-
-	AbstractHttpResponseTransformer<SlashProgrammesAtoZRdf> rdfResponseTransformer = new AbstractHttpResponseTransformer<SlashProgrammesAtoZRdf>(){
-	    protected SlashProgrammesAtoZRdf transform(InputStreamReader in) throws Exception {
-	        Unmarshaller u = context.createUnmarshaller();
-	        return (SlashProgrammesAtoZRdf) u.unmarshal(in);
-	    };
-	};
 
 	public SlashProgrammesAtoZRdf get(String uri) throws Exception {
         log.info(uri);

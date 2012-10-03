@@ -105,10 +105,10 @@ public class BbcProgrammeAdapter implements SiteSpecificAdapter<Identified> {
             if (content.episode() != null) {
                 return createOrUpdateTopLevelItem(uri, content);
             }
-            SlashProgrammesSeriesContainer rdfSeries = content.series();
-			if (rdfSeries != null) {
-            	return brandExtractor.writeSeries(rdfSeries, parentBrand);
-            }
+//            SlashProgrammesSeriesContainer rdfSeries = content.series();
+//			if (rdfSeries != null) {
+//            	return brandExtractor.writeSeries(rdfSeries, parentBrand);
+//            }
             if (content.brand() != null) {
                 return brandExtractor.writeBrand(content.brand());
             }

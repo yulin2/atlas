@@ -51,7 +51,7 @@ class SlashProgrammesRdf {
     private SlashProgrammesContainerRef brand;
 
     @XmlElement(namespace = PO.NS, name = "Series")
-    private SlashProgrammesSeriesContainer series;
+    private List<SlashProgrammesSeriesContainer> series;
 
     @XmlElement(namespace = RDF.NS, name = "Description")
     private SlashProgrammesDescription description;
@@ -277,6 +277,9 @@ class SlashProgrammesRdf {
 
         @XmlElement(namespace = PO.NS, name = "episode")
         private List<SlashProgrammesEpisodeWrapper> wrappedEpisodes;
+        
+        @XmlElement(namespace = PO.NS, name = "series")
+        protected List<SlashProgrammesSeriesWrapper> series;
 
         public List<SlashProgrammesContainerRef> episodes() {
             if (wrappedEpisodes == null) {
@@ -296,6 +299,18 @@ class SlashProgrammesRdf {
                 }
             });
         }
+
+        public List<String> seriesResourceUris() {
+            if (series == null) {
+                return ImmutableList.of();
+            }
+            return Lists.transform(series, new Function<SlashProgrammesSeriesWrapper, String>() {
+                @Override
+                public String apply(SlashProgrammesSeriesWrapper from) {
+                    return from.series.uri;
+                }
+            });
+        }
     }
 
     static class SlashProgrammesEpisodeWrapper {
@@ -309,6 +324,20 @@ class SlashProgrammesRdf {
 
         @XmlElement(name = "Episode", namespace = PO.NS)
         private SlashProgrammesContainerRef episode;
+
+    }
+    
+    static class SlashProgrammesSeriesWrapper {
+
+        static Function<SlashProgrammesSeriesWrapper, SlashProgrammesContainerRef> UNWRAP = new Function<SlashProgrammesSeriesWrapper, SlashProgrammesContainerRef>() {
+            @Override
+            public SlashProgrammesContainerRef apply(SlashProgrammesSeriesWrapper from) {
+                return from.series;
+            }
+        };
+
+        @XmlElement(name = "Series", namespace = PO.NS)
+        private SlashProgrammesContainerRef series;
 
     }
 
@@ -491,7 +520,7 @@ class SlashProgrammesRdf {
         return brand;
     }
 
-    public SlashProgrammesSeriesContainer series() {
+    public List<SlashProgrammesSeriesContainer> series() {
         return series;
     }
 
