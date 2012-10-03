@@ -46,12 +46,8 @@ public class BbcSlashProgrammesAtoZUpdater extends ScheduledTask {
 
     private final AtomicReference<ChannelAndPid> lastSaved = new AtomicReference<ChannelAndPid>();
 
-    public BbcSlashProgrammesAtoZUpdater(ExecutorService executor, ProgressStore progressStore, SiteSpecificAdapter<Identified> programmeAdapter) {
-        this(new BbcSlashProgrammesAtoZRdfClient(), executor, programmeAdapter, progressStore);
-    }
-
     public BbcSlashProgrammesAtoZUpdater(RemoteSiteClient<SlashProgrammesAtoZRdf> client, ExecutorService executor, SiteSpecificAdapter<? extends Identified> programmeAdapter, ProgressStore progressStore) {
-        this.pidSource = new BbcSlashProgrammesPidSource(client,CHANNELS);
+        this.pidSource = new BbcSlashProgrammesPidSource(client, CHANNELS);
         this.fetcher = programmeAdapter;
         this.progressStore = progressStore;
         this.executor = MoreExecutors.listeningDecorator(executor);

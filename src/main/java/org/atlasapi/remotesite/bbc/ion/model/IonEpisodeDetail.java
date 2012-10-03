@@ -6,7 +6,6 @@ public class IonEpisodeDetail extends IonEpisode {
 
     private List<IonVersion> versions;
     private List<IonEpisode> clips;
-    
     public void setVersions(List<IonVersion> versions) {
         this.versions = versions;
     }

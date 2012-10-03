@@ -51,7 +51,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
     private final BbcIonItemMerger merger = new BbcIonItemMerger();
     
     private SiteSpecificAdapter<Item> itemClient;
-    private BbcContainerFetcherClient containerClient;
+    private BbcContainerAdapter containerClient;
     private ItemsPeopleWriter itemsPeopleWriter;
     private SiteSpecificAdapter<List<SegmentEvent>> segmentAdapter;
 
@@ -72,7 +72,7 @@ public class DefaultBbcIonBroadcastHandler implements BbcIonBroadcastHandler {
         return this;
     }
 
-    public DefaultBbcIonBroadcastHandler withContainerFetcherClient(BbcContainerFetcherClient containerClient) {
+    public DefaultBbcIonBroadcastHandler withContainerFetcherClient(BbcContainerAdapter containerClient) {
         this.containerClient = containerClient;
         return this;
     }

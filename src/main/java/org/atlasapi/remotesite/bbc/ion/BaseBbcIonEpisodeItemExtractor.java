@@ -3,7 +3,7 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.Severity.WARN;
-import static org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient.CONTAINER_DETAIL_PATTERN;
+import static org.atlasapi.remotesite.bbc.ion.BbcIonContainerAdapter.CONTAINER_DETAIL_PATTERN;
 
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
@@ -22,6 +22,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonContainer;
 import org.atlasapi.remotesite.bbc.ion.model.IonContainerFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonContributor;
 import org.atlasapi.remotesite.bbc.ion.model.IonEpisode;
+import org.atlasapi.remotesite.bbc.ion.model.IonFormat;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
@@ -29,6 +30,8 @@ import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 
 public abstract class BaseBbcIonEpisodeItemExtractor {
+
+    private static final String FILM_FORMAT_ID = "PT007";
 
     protected static final String CURIE_BASE = "bbc:";
 
@@ -48,7 +51,7 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
 
     protected Item extract(IonEpisode source) {
         Item item = null;
-        if (source.getIsFilm()) {
+        if (source.getIsFilm() || isFilmFormat(source)) {
             item = new Film(BbcFeeds.slashProgrammesUriForPid(source.getId()), CURIE_BASE+source.getId(), BBC);
             item.setMediaType(MediaType.VIDEO);
             item.setSpecialization(Specialization.FILM);
@@ -63,6 +66,17 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
             setMediaTypeAndSpecialisation(item, source);
         }
         return setItemDetails(item, source);
+    }
+
+    private boolean isFilmFormat(IonEpisode source) {
+        if (source.getFormats() != null) {
+            for (IonFormat format : source.getFormats()) {
+                if (FILM_FORMAT_ID.equals(format.getId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     protected void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
@@ -113,6 +127,10 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
                     log.record(new AdapterLogEntry(WARN).withSource(getClass()).withDescription("Unknown person: " + contributor.getRoleName()));
                 }
             }
+        }
+        
+        if (!Strings.isNullOrEmpty(episode.getToplevelContainerId())) {
+            item.setParentRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episode.getToplevelContainerId())));
         }
 
         return item;
