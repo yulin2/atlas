@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.lovefilm;
 
+import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
+
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.slf4j.Logger;
@@ -48,7 +50,7 @@ public class LoveFilmCsvUpdateTask extends ScheduledTask {
                     dataHandler.handle(row);
                     progress = progress.reduce(UpdateProgress.SUCCESS);
                 } catch (Exception e) {
-                    log.warn(e.getMessage(), e);
+                    log.warn("Row: " + SKU.valueFrom(row), e);
                     progress = progress.reduce(UpdateProgress.FAILURE);
                 }
                 reportStatus(progress.toString());
