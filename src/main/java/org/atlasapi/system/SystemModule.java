@@ -46,8 +46,14 @@ public class SystemModule {
     private @Autowired CassandraTopicStore cassandraTopicStore;
     private @Autowired CassandraLookupEntryStore cassandraLookupEntryStore;
     private @Autowired ESContentIndexer esContentIndexer;
-    private @Autowired @Qualifier("cassandra") ContentBootstrapper cassandraContentBootstrapper;
-    private @Autowired @Qualifier("es") ContentBootstrapper esContentBootstrapper;
+    private @Autowired @Qualifier("cassandraContentBootstrapper") ContentBootstrapper cassandraContentBootstrapper;
+    private @Autowired @Qualifier("cassandraChannelBootstrapper") ContentBootstrapper cassandraChannelBootstrapper;
+    private @Autowired @Qualifier("cassandraContentGroupBootstrapper") ContentBootstrapper cassandraContentGroupBootstrapper;
+    private @Autowired @Qualifier("cassandraPeopleBootstrapper") ContentBootstrapper cassandraPeopleBootstrapper;
+    private @Autowired @Qualifier("cassandraProductBootstrapper") ContentBootstrapper cassandraProductBootstrapper;
+    private @Autowired @Qualifier("cassandraSegmentBootstrapper") ContentBootstrapper cassandraSegmentBootstrapper;
+    private @Autowired @Qualifier("cassandraTopicBootstrapper") ContentBootstrapper cassandraTopicBootstrapper;
+    private @Autowired @Qualifier("esContentBootstrapper") ContentBootstrapper esContentBootstrapper;
 
 	public @Bean HealthController healthController() {
 		return new HealthController(systemProbes);
@@ -74,6 +80,12 @@ public class SystemModule {
         bootstrapController.setCassandraLookupEntryStore(cassandraLookupEntryStore);
         bootstrapController.setEsContentIndexer(esContentIndexer);
         bootstrapController.setCassandraContentBootstrapper(cassandraContentBootstrapper);
+        bootstrapController.setCassandraChannelBootstrapper(cassandraChannelBootstrapper);
+        bootstrapController.setCassandraContentGroupBootstrapper(cassandraContentGroupBootstrapper);
+        bootstrapController.setCassandraPeopleBootstrapper(cassandraPeopleBootstrapper);
+        bootstrapController.setCassandraProductBootstrapper(cassandraProductBootstrapper);
+        bootstrapController.setCassandraSegmentBootstrapper(cassandraSegmentBootstrapper);
+        bootstrapController.setCassandraTopicBootstrapper(cassandraTopicBootstrapper);
         bootstrapController.setEsContentBootstrapper(esContentBootstrapper);
         return bootstrapController;
     }
