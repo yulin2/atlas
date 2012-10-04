@@ -406,23 +406,65 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    @Qualifier("cassandra")
+    @Qualifier("cassandraContentBootstrapper")
     public ContentBootstrapper cassandraContentBootstrapper() {
+        ContentBootstrapper bootstrapper = new ContentBootstrapper();
+        bootstrapper.withContentListers(contentLister());
+        bootstrapper.withLookupEntryListers(lookupStore());
+        return bootstrapper;
+    }
+    
+    @Bean
+    @Qualifier("cassandraContentGroupBootstrapper")
+    public ContentBootstrapper cassandraContentGroupBootstrapper() {
+        ContentBootstrapper bootstrapper = new ContentBootstrapper();
+        bootstrapper.withContentGroupListers(contentGroupResolver());
+        return bootstrapper;
+    }
+    
+    @Bean
+    @Qualifier("cassandraChannelBootstrapper")
+    public ContentBootstrapper cassandraChannelBootstrapper() {
         ContentBootstrapper bootstrapper = new ContentBootstrapper();
         bootstrapper.withChannelGroupListers(channelGroupStore());
         bootstrapper.withChannelListers(channelStore());
-        bootstrapper.withContentGroupListers(contentGroupResolver());
-        bootstrapper.withContentListers(contentLister());
-        bootstrapper.withLookupEntryListers(lookupStore());
+        return bootstrapper;
+    }
+    
+    @Bean
+    @Qualifier("cassandraPeopleBootstrapper")
+    public ContentBootstrapper cassandraPeopleBootstrapper() {
+        ContentBootstrapper bootstrapper = new ContentBootstrapper();
         bootstrapper.withPeopleListers(personStore());
+        return bootstrapper;
+    }
+    
+    @Bean
+    @Qualifier("cassandraProductBootstrapper")
+    public ContentBootstrapper cassandraProductBootstrapper() {
+        ContentBootstrapper bootstrapper = new ContentBootstrapper();
         bootstrapper.withProductListers(productStore());
+        return bootstrapper;
+    }
+    
+    @Bean
+    @Qualifier("cassandraSegmentBootstrapper")
+    public ContentBootstrapper cassandraSegmentBootstrapper() {
+        ContentBootstrapper bootstrapper = new ContentBootstrapper();
         bootstrapper.withSegmentListers(segmentResolver());
+        return bootstrapper;
+    }
+    
+    @Bean
+    @Qualifier("cassandraTopicBootstrapper")
+    public ContentBootstrapper cassandraTopicBootstrapper() {
+        ContentBootstrapper bootstrapper = new ContentBootstrapper();
         bootstrapper.withTopicListers(topicStore());
         return bootstrapper;
     }
 
     @Bean
-    @Qualifier("es")
+    @Qualifier("esContentBootstrapper")
     public ContentBootstrapper esContentBootstrapper() {
         ContentBootstrapper bootstrapper = new ContentBootstrapper();
         bootstrapper.withContentListers(contentLister(), cassandraContentLister());
