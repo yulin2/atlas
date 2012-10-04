@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,15 +37,12 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class BootstrapController {
-    
+
     private static final Log log = LogFactory.getLog(BootstrapController.class);
     //
     private final ObjectMapper jsonMapper = new ObjectMapper();
     //
-    private final ExecutorService scheduler = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MICROSECONDS, new SynchronousQueue<Runnable>(), new ThreadPoolExecutor.DiscardPolicy());
-    //
-    private ContentBootstrapper cassandraContentBootstrapper;
-    private ContentBootstrapper esContentBootstrapper;
+    private final ExecutorService scheduler = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 10);
     //
     private CassandraContentStore cassandraContentStore;
     private CassandraChannelGroupStore cassandraChannelGroupStore;
@@ -56,43 +54,44 @@ public class BootstrapController {
     private CassandraTopicStore cassandraTopicStore;
     private CassandraLookupEntryStore cassandraLookupEntryStore;
     private ESContentIndexer esContentIndexer;
-    
-    public void setCassandraContentBootstrapper(ContentBootstrapper cassandraContentBootstrapper) {
-        this.cassandraContentBootstrapper = cassandraContentBootstrapper;
-    }
-    
-    public void setEsContentBootstrapper(ContentBootstrapper esContentBootstrapper) {
-        this.esContentBootstrapper = esContentBootstrapper;
-    }
-    
+    //
+    private ContentBootstrapper cassandraContentBootstrapper;
+    private ContentBootstrapper cassandraChannelBootstrapper;
+    private ContentBootstrapper cassandraContentGroupBootstrapper;
+    private ContentBootstrapper cassandraPeopleBootstrapper;
+    private ContentBootstrapper cassandraProductBootstrapper;
+    private ContentBootstrapper cassandraSegmentBootstrapper;
+    private ContentBootstrapper cassandraTopicBootstrapper;
+    private ContentBootstrapper esContentBootstrapper;
+
     public void setCassandraChannelGroupStore(CassandraChannelGroupStore cassandraChannelGroupStore) {
         this.cassandraChannelGroupStore = cassandraChannelGroupStore;
     }
-    
+
     public void setCassandraChannelStore(CassandraChannelStore cassandraChannelStore) {
         this.cassandraChannelStore = cassandraChannelStore;
     }
-    
+
     public void setCassandraContentGroupStore(CassandraContentGroupStore cassandraContentGroupStore) {
         this.cassandraContentGroupStore = cassandraContentGroupStore;
     }
-    
+
     public void setCassandraContentStore(CassandraContentStore cassandraContentStore) {
         this.cassandraContentStore = cassandraContentStore;
     }
-    
+
     public void setCassandraPersonStore(CassandraPersonStore cassandraPersonStore) {
         this.cassandraPersonStore = cassandraPersonStore;
     }
-    
+
     public void setCassandraProductStore(CassandraProductStore cassandraProductStore) {
         this.cassandraProductStore = cassandraProductStore;
     }
-    
+
     public void setCassandraSegmentStore(CassandraSegmentStore cassandraSegmentStore) {
         this.cassandraSegmentStore = cassandraSegmentStore;
     }
-    
+
     public void setCassandraTopicStore(CassandraTopicStore cassandraTopicStore) {
         this.cassandraTopicStore = cassandraTopicStore;
     }
@@ -100,64 +99,150 @@ public class BootstrapController {
     public void setCassandraLookupEntryStore(CassandraLookupEntryStore cassandraLookupEntryStore) {
         this.cassandraLookupEntryStore = cassandraLookupEntryStore;
     }
-    
+
     public void setEsContentIndexer(ESContentIndexer esContentIndexer) {
         this.esContentIndexer = esContentIndexer;
     }
-    
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra")
-    public void bootstrapCassandra(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+
+    public void setCassandraChannelBootstrapper(ContentBootstrapper cassandraChannelBootstrapper) {
+        this.cassandraChannelBootstrapper = cassandraChannelBootstrapper;
+    }
+
+    public void setCassandraContentBootstrapper(ContentBootstrapper cassandraContentBootstrapper) {
+        this.cassandraContentBootstrapper = cassandraContentBootstrapper;
+    }
+
+    public void setCassandraContentGroupBootstrapper(ContentBootstrapper cassandraContentGroupBootstrapper) {
+        this.cassandraContentGroupBootstrapper = cassandraContentGroupBootstrapper;
+    }
+
+    public void setCassandraPeopleBootstrapper(ContentBootstrapper cassandraPeopleBootstrapper) {
+        this.cassandraPeopleBootstrapper = cassandraPeopleBootstrapper;
+    }
+
+    public void setCassandraProductBootstrapper(ContentBootstrapper cassandraProductBootstrapper) {
+        this.cassandraProductBootstrapper = cassandraProductBootstrapper;
+    }
+
+    public void setCassandraSegmentBootstrapper(ContentBootstrapper cassandraSegmentBootstrapper) {
+        this.cassandraSegmentBootstrapper = cassandraSegmentBootstrapper;
+    }
+
+    public void setCassandraTopicBootstrapper(ContentBootstrapper cassandraTopicBootstrapper) {
+        this.cassandraTopicBootstrapper = cassandraTopicBootstrapper;
+    }
+
+    public void setEsContentBootstrapper(ContentBootstrapper esContentBootstrapper) {
+        this.esContentBootstrapper = esContentBootstrapper;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/content")
+    public void bootstrapCassandraContent(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
         CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
-        cassandraChangeListener.setCassandraChannelGroupStore(cassandraChannelGroupStore);
-        cassandraChangeListener.setCassandraChannelStore(cassandraChannelStore);
-        cassandraChangeListener.setCassandraContentGroupStore(cassandraContentGroupStore);
         cassandraChangeListener.setCassandraContentStore(cassandraContentStore);
-        cassandraChangeListener.setCassandraPersonStore(cassandraPersonStore);
-        cassandraChangeListener.setCassandraProductStore(cassandraProductStore);
-        cassandraChangeListener.setCassandraSegmentStore(cassandraSegmentStore);
-        cassandraChangeListener.setCassandraTopicStore(cassandraTopicStore);
         cassandraChangeListener.setCassandraLookupEntryStore(cassandraLookupEntryStore);
         doBootstrap(cassandraContentBootstrapper, cassandraChangeListener, response);
     }
-    
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/es")
-    public void bootstrapES(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/contentGroup")
+    public void bootstrapCassandraContentGroup(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
+        cassandraChangeListener.setCassandraContentGroupStore(cassandraContentGroupStore);
+        doBootstrap(cassandraContentGroupBootstrapper, cassandraChangeListener, response);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/channel")
+    public void bootstrapCassandraChannel(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
+        cassandraChangeListener.setCassandraChannelGroupStore(cassandraChannelGroupStore);
+        cassandraChangeListener.setCassandraChannelStore(cassandraChannelStore);
+        doBootstrap(cassandraChannelBootstrapper, cassandraChangeListener, response);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/people")
+    public void bootstrapCassandraPeople(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
+        cassandraChangeListener.setCassandraPersonStore(cassandraPersonStore);
+        doBootstrap(cassandraPeopleBootstrapper, cassandraChangeListener, response);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/product")
+    public void bootstrapCassandra(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
+        cassandraChangeListener.setCassandraProductStore(cassandraProductStore);
+        doBootstrap(cassandraProductBootstrapper, cassandraChangeListener, response);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/segment")
+    public void bootstrapCassandraSegment(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
+        cassandraChangeListener.setCassandraSegmentStore(cassandraSegmentStore);
+        doBootstrap(cassandraSegmentBootstrapper, cassandraChangeListener, response);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/cassandra/topic")
+    public void bootstrapCassandraTopic(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        CassandraChangeListener cassandraChangeListener = new CassandraChangeListener(getConcurrencyLevel(concurrency, response));
+        cassandraChangeListener.setCassandraTopicStore(cassandraTopicStore);
+        doBootstrap(cassandraTopicBootstrapper, cassandraChangeListener, response);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/es/content")
+    public void bootstrapESContent(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
         ESChangeListener esChangeListener = new ESChangeListener(getConcurrencyLevel(concurrency, response));
         esChangeListener.setESContentIndexer(esContentIndexer);
         doBootstrap(esContentBootstrapper, esChangeListener, response);
     }
-    
-    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/status")
-    public void cassandraBootstrapStatus(HttpServletResponse response) throws IOException {
-        Map result = new HashMap();
-        result.put("bootstrapping", cassandraContentBootstrapper.isBootstrapping());
-        if (cassandraContentBootstrapper.isBootstrapping()) {
-            result.put("destination", cassandraContentBootstrapper.getDestination());
-        }
-        jsonMapper.writeValue(response.getOutputStream(), result);
-        response.flushBuffer();
+
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/content/status")
+    public void cassandraContentBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraContentBootstrapper, response);
     }
     
-    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/es/status")
-    public void esBootstrapStatus(HttpServletResponse response) throws IOException {
-        Map result = new HashMap();
-        result.put("bootstrapping", esContentBootstrapper.isBootstrapping());
-        if (esContentBootstrapper.isBootstrapping()) {
-            result.put("destination", esContentBootstrapper.getDestination());
-        }
-        jsonMapper.writeValue(response.getOutputStream(), result);
-        response.flushBuffer();
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/channel/status")
+    public void cassandraChannelBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraChannelBootstrapper, response);
     }
     
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/contentGroup/status")
+    public void cassandraContentGroupBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraContentGroupBootstrapper, response);
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/people/status")
+    public void cassandraPeopleBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraPeopleBootstrapper, response);
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/product/status")
+    public void cassandraProductBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraProductBootstrapper, response);
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/segment/status")
+    public void cassandraSegmentBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraSegmentBootstrapper, response);
+    }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/cassandra/topic/status")
+    public void cassandraTopicBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(cassandraTopicBootstrapper, response);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/system/bootstrap/es/content/status")
+    public void esContentBootstrapStatus(HttpServletResponse response) throws IOException {
+        writeBootstrapStatus(esContentBootstrapper, response);
+    }
+
     private void doBootstrap(final ContentBootstrapper contentBootstrapper, final ChangeListener changeListener, HttpServletResponse response) throws IOException {
         try {
             scheduler.submit(new Runnable() {
-                
+
                 @Override
                 public void run() {
                     boolean bootstrapping = contentBootstrapper.loadAllIntoListener(changeListener);
                     if (!bootstrapping) {
-                        log.warn("Bootstrapping failed unexpectedly because apparently busy bootstrapping something else.");
+                        log.warn("Bootstrapping failed because apparently busy bootstrapping something else.");
                     }
                 }
             });
@@ -165,7 +250,18 @@ public class BootstrapController {
             response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Currently bootstrapping another component.");
         }
     }
-    
+
+    public void writeBootstrapStatus(ContentBootstrapper contentBootstrapper, HttpServletResponse response) throws IOException {
+        Map result = new HashMap();
+        result.put("bootstrapping", contentBootstrapper.isBootstrapping());
+        result.put("lastStatus", contentBootstrapper.getLastStatus());
+        if (contentBootstrapper.isBootstrapping()) {
+            result.put("destination", contentBootstrapper.getDestination());
+        }
+        jsonMapper.writeValue(response.getOutputStream(), result);
+        response.flushBuffer();
+    }
+
     private int getConcurrencyLevel(String concurrency, HttpServletResponse response) throws IOException {
         int concurrencyLevel = 0;
         if (Strings.isNullOrEmpty(concurrency)) {
