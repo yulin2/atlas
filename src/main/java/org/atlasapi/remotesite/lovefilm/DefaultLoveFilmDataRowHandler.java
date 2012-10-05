@@ -184,8 +184,9 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         ParentRef parent = item.getContainer();
         if (parent != null && !seen.contains(parent.getUri())) {
             cached.put(parent.getUri(), item);
+        } else {
+            writer.createOrUpdate((Item) content);
         }
-        writer.createOrUpdate((Item) content);
     }
 
     private void cacheOrWriteEpisode(Episode episode) {
