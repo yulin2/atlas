@@ -51,7 +51,6 @@ public class DefaultLoveFilmDataRowHandlerTest {
         
         for(List<Content> contentOrdering : Collections2.permutations(ImmutableList.of(brand,series,episode))) {
             
-            handler.prepare();
             
             OngoingStubbing<Optional<Content>> stubbing = when(extractor.extract(EMPTY_ROW));
             for (Content content : contentOrdering) {
@@ -59,9 +58,13 @@ public class DefaultLoveFilmDataRowHandlerTest {
             }
             when(resolver.findByCanonicalUris(Matchers.<Iterable<String>>any())).thenReturn(NOTHING_RESOLVED);
             
+            handler.prepare();
+
             for (int i = 0; i < contentOrdering.size(); i++) {
                 handler.handle(EMPTY_ROW);
             }
+            
+            handler.finish();
             
             InOrder inOrder = inOrder(writer);
             inOrder.verify(writer, times(1)).createOrUpdate(brand);
