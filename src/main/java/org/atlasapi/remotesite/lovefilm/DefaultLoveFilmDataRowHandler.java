@@ -1,7 +1,7 @@
 package org.atlasapi.remotesite.lovefilm;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.atlasapi.media.entity.Brand;
@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 
 /**
@@ -46,7 +46,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private final ContentWriter writer;
     private final ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor;
 
-    private final HashSet<String> seen = Sets.newHashSet();
+    private final Map<String, Container> seen = Maps.newHashMap();
     private final SetMultimap<String, Content> cached = HashMultimap.create();
 
     public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer) {
@@ -159,7 +159,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private void writeBrandAndCachedSubContents(Brand brand) {
         writer.createOrUpdate(brand);
         String brandUri = brand.getCanonicalUri();
-        seen.add(brandUri);
+        seen.put(brandUri, brand);
         for (Content subContent : cached.removeAll(brandUri)) {
             write(subContent);
         }
@@ -167,22 +167,22 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private void cacheOrWriteSeriesAndSubContents(Series series) {
         ParentRef parent = series.getParent();
-        if (parent != null && !seen.contains(parent.getUri())) {
+        if (parent != null && !seen.containsKey(parent.getUri())) {
             cached.put(parent.getUri(), series);
         } else {
             String seriesUri = series.getCanonicalUri();
             writer.createOrUpdate(series);
-            seen.add(seriesUri);
+            seen.put(seriesUri, series);
             for (Content episode : cached.removeAll(seriesUri)) {
                 write(episode);
             }
         }
     }
 
-    protected void cacheOrWriteItem(Content content) {
+    private void cacheOrWriteItem(Content content) {
         Item item = (Item) content;
         ParentRef parent = item.getContainer();
-        if (parent != null && !seen.contains(parent.getUri())) {
+        if (parent != null && !seen.containsKey(parent.getUri())) {
             cached.put(parent.getUri(), item);
         } else {
             writer.createOrUpdate((Item) content);
@@ -192,11 +192,13 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private void cacheOrWriteEpisode(Episode episode) {
         String brandUri = episode.getContainer().getUri();
         String seriesUri = episode.getSeriesRef().getUri();
-        if (!seen.contains(brandUri)) {
+        if (!seen.containsKey(brandUri)) {
             cached.put(brandUri, episode);
-        } else if (!seen.contains(seriesUri)) {
+        } else if (!seen.containsKey(seriesUri)) {
             cached.put(seriesUri, episode);
         } else {
+            Series series = (Series)seen.get(seriesUri);
+            episode.setSeriesNumber(series.getSeriesNumber());
             writer.createOrUpdate(episode);
         }
     }
