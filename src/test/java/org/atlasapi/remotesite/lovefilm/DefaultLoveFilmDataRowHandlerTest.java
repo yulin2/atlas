@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.lovefilm;
 
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -45,6 +47,7 @@ public class DefaultLoveFilmDataRowHandlerTest {
         Brand brand = new Brand("brand", "b", LOVEFILM);
         Series series = new Series("series", "s", LOVEFILM);
         series.setParent(brand);
+        series.withSeriesNumber(4);
         Episode episode = new Episode("episode", "e", LOVEFILM);
         episode.setContainer(brand);
         episode.setSeries(series);
@@ -72,6 +75,9 @@ public class DefaultLoveFilmDataRowHandlerTest {
             inOrder.verify(writer, times(1)).createOrUpdate(episode);
             inOrder.verifyNoMoreInteractions();
             reset(writer);
+            
+            assertThat(episode.getSeriesNumber(), is(4));
+            episode.setSeriesNumber(null);
         }
     }
 

@@ -191,16 +191,23 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private void cacheOrWriteEpisode(Episode episode) {
         String brandUri = episode.getContainer().getUri();
-        String seriesUri = episode.getSeriesRef().getUri();
+        
         if (!seen.containsKey(brandUri)) {
             cached.put(brandUri, episode);
-        } else if (!seen.containsKey(seriesUri)) {
-            cached.put(seriesUri, episode);
-        } else {
+            return;
+        } 
+        
+        String seriesUri = episode.getSeriesRef() != null ? episode.getSeriesRef().getUri() : null;
+        if (seriesUri != null) {
+            if (!seen.containsKey(seriesUri)) {
+                cached.put(seriesUri, episode);
+                return;
+            }
             Series series = (Series)seen.get(seriesUri);
             episode.setSeriesNumber(series.getSeriesNumber());
-            writer.createOrUpdate(episode);
         }
+        
+        writer.createOrUpdate(episode);
     }
 
     private Container asContainer(Identified identified) {
