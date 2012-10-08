@@ -6,6 +6,7 @@ import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.media.entity.Publisher.FIVE;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
 import static org.atlasapi.media.entity.Publisher.ITV;
+import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
 
@@ -21,11 +22,9 @@ import org.atlasapi.equiv.results.www.EquivalenceResultController;
 import org.atlasapi.equiv.results.www.RecentResultController;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.tasks.ContentEquivalenceUpdateTask;
-import org.atlasapi.equiv.update.tasks.FilmEquivalenceUpdateTask;
 import org.atlasapi.equiv.update.tasks.MongoScheduleTaskProgressStore;
 import org.atlasapi.equiv.update.www.ContentEquivalenceUpdateController;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.listing.ContentLister;
@@ -75,6 +74,7 @@ public class EquivTaskModule {
             taskScheduler.schedule(publisherUpdateTask(BBC_REDUX).withName("Redux Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(ITUNES).withName("Itunes Equivalence Updater"), RepetitionRules.NEVER);
             taskScheduler.schedule(publisherUpdateTask(RADIO_TIMES).withName("RT Equivalence Updater"), RepetitionRules.NEVER);
+            taskScheduler.schedule(publisherUpdateTask(LOVEFILM).withName("Lovefilm Equivalence Updater"), RepetitionRules.NEVER);
             
             //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.BBC).withName("BBC Child Ref Update"), RepetitionRules.NEVER);
             //taskScheduler.schedule(childRefUpdateTask().forPublishers(Publisher.PA).withName("PA Child Ref Update"), RepetitionRules.NEVER);

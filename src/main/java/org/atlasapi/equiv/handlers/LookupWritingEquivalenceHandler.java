@@ -11,16 +11,16 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.lookup.LookupWriter;
 import org.joda.time.Duration;
 
-import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 public class LookupWritingEquivalenceHandler<T extends Content> implements EquivalenceResultHandler<T> {
  
     private final LookupWriter writer;
-    private final Cache<String, String> seenAsEquiv;
+    private final LoadingCache<String, String> seenAsEquiv;
     private final Set<Publisher> publishers;
     
     public LookupWritingEquivalenceHandler(LookupWriter writer, Iterable<Publisher> publishers) {
