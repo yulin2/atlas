@@ -22,6 +22,7 @@ public class IonBroadcast {
     private Boolean isAudiodescribed;
     private String versionId;
     private String service;
+    private String broadcastService;
     private DateTime end;
     private Boolean onNow;
     private Boolean isBlanked;
@@ -95,6 +96,10 @@ public class IonBroadcast {
 
     public String getService() {
         return service;
+    }
+    
+    public String getBroadcastService() {
+        return broadcastService;
     }
 
     public DateTime getEnd() {
@@ -231,6 +236,10 @@ public class IonBroadcast {
 
     public void setService(String service) {
         this.service = service;
+    }
+    
+    public void setBroadcastService(String broadcastService) {
+        this.broadcastService = broadcastService;
     }
 
     public void setEnd(DateTime end) {

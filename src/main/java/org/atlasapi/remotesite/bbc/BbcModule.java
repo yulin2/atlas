@@ -9,9 +9,13 @@ import static org.atlasapi.remotesite.bbc.ion.HttpBackedBbcIonClient.ionClient;
 import static org.joda.time.Duration.standardMinutes;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.Executors;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -23,12 +27,15 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.remotesite.HttpClients;
+import org.atlasapi.remotesite.SiteSpecificAdapter;
+import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZRdfClient;
 import org.atlasapi.remotesite.bbc.atoz.BbcSlashProgrammesAtoZUpdater;
 import org.atlasapi.remotesite.bbc.ion.BbcExtendedDataContentAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonBroadcastHandler;
-import org.atlasapi.remotesite.bbc.ion.BbcIonContainerFetcherClient;
+import org.atlasapi.remotesite.bbc.ion.BbcIonClipExtractor;
+import org.atlasapi.remotesite.bbc.ion.BbcIonContainerAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonDayRangeUrlSupplier;
-import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemAdapter;
+import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeItemAdapter;
 import org.atlasapi.remotesite.bbc.ion.BbcIonEpisodeDetailItemContentExtractor;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleController;
 import org.atlasapi.remotesite.bbc.ion.BbcIonScheduleUpdater;
@@ -44,6 +51,7 @@ import org.atlasapi.remotesite.bbc.ion.model.IonEpisodeDetailFeed;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
 import org.atlasapi.remotesite.bbc.ion.model.IonSegmentEventFeed;
+import org.atlasapi.remotesite.bbc.ion.model.IonVersionListFeed;
 import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeTaskBuilder;
 import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeUpdateBuilder;
 import org.atlasapi.remotesite.bbc.ion.ondemand.BbcIonOndemandChangeUpdateController;
@@ -59,6 +67,7 @@ import org.springframework.context.annotation.Configuration;
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.metabroadcast.common.http.RequestLimitingSimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
@@ -91,7 +100,7 @@ public class BbcModule {
 	
     @PostConstruct
     public void scheduleTasks() {
-        scheduler.schedule(bbcFeedsUpdater(), BRAND_UPDATE_TIME);
+        scheduler.schedule(bbcAtoZUpdater(), BRAND_UPDATE_TIME);
         
         scheduler.schedule(bbcIonScheduleUpdater(0, 0).withName("BBC Ion schedule update (today only)"), TEN_MINUTES);
         scheduler.schedule(fifteenDayIonScheduleUpdate().withName("BBC Ion schedule update (14 days)"), ONE_HOUR);
@@ -108,7 +117,7 @@ public class BbcModule {
         BbcIonDayRangeUrlSupplier urlSupplier = dayRangeUrlSupplier(SCHEDULE_DEFAULT_FORMAT, 7, 7);
         DefaultBbcIonBroadcastHandler broadcastHandler = new ScheduleBasedItemUpdatingBroadcastHandler(contentResolver, contentWriters, log, contentLock())
             .withItemFetcherClient(bbcIonEpisodeDetailItemAdapter())
-            .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
+            .withContainerFetcherClient(ionContainerAdapter())
             .withItemPeopleWriter(itemsPeopleWriter)
             .withSegmentAdapter(segmentAdapter());
         return new BbcIonScheduleUpdater(urlSupplier, bbcIonScheduleClient(), broadcastHandler, broadcastTrimmer(), channelResolver, log);
@@ -179,26 +188,47 @@ public class BbcModule {
     @Bean DefaultBbcIonBroadcastHandler defaultBbcIonBroadcastHandler() {
         return new DefaultBbcIonBroadcastHandler(contentResolver, contentWriters, log, contentLock())
             .withItemFetcherClient(bbcIonEpisodeDetailItemAdapter())
-            .withContainerFetcherClient(new BbcIonContainerFetcherClient(log))
+            .withContainerFetcherClient(ionContainerAdapter())
             .withItemPeopleWriter(itemsPeopleWriter);
     }
     
-    private BbcIonEpisodeDetailItemAdapter bbcIonEpisodeDetailItemAdapter() {
-        return new BbcIonEpisodeDetailItemAdapter(
+    BbcIonContainerAdapter ionContainerAdapter() {
+        return new BbcIonContainerAdapter(log, ionClient(HttpClients.webserviceClient(),IonContainerFeed.class));
+    }
+    
+    private BbcIonEpisodeItemAdapter<Item> bbcIonEpisodeDetailItemAdapter() {
+        return new BbcIonEpisodeItemAdapter<Item>(
                 ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
                 new BbcIonEpisodeDetailItemContentExtractor(log, ionClient(HttpClients.webserviceClient(), IonContainerFeed.class)));
     }
 
-    @Bean Runnable bbcFeedsUpdater() {
-		return new BbcSlashProgrammesAtoZUpdater(new MongoProgressStore(mongo), bbcProgrammeAdapter(), log);
+    @Bean Runnable bbcAtoZUpdater() {
+		return new BbcSlashProgrammesAtoZUpdater(new BbcSlashProgrammesAtoZRdfClient(), Executors.newFixedThreadPool(5), bbcProgrammeAdapter(), new MongoProgressStore(mongo));
 	}
-	
+    
 	@Bean BbcSlashProgrammesController bbcFeedsController() {
 	    return new BbcSlashProgrammesController(bbcProgrammeAdapter());
 	}
 	
-	BbcProgrammeAdapter bbcProgrammeAdapter() {
-	    return new BbcProgrammeAdapter(contentWriters, extendedDataAdapter(), log);
+	SiteSpecificAdapter<Content> bbcProgrammeAdapter() {
+	    BbcIonEpisodeItemAdapter<Item> detailAdapter = new BbcIonEpisodeItemAdapter<Item>(
+            ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
+            new BbcIonEpisodeDetailItemContentExtractor(log, 
+                ionClient(HttpClients.webserviceClient(), IonContainerFeed.class), 
+                ionClient(HttpClients.webserviceClient(), IonVersionListFeed.class)
+            )
+        );
+	    BbcExtendedDataContentAdapter extendedDataAdapter = extendedDataAdapter();
+	    BbcIonSegmentAdapter segmentAdapter = segmentAdapter();
+	    BbcIonContainerAdapter containerAdapter = ionContainerAdapter();
+	    BbcIonEpisodeItemAdapter<Clip> clipAdapter = new BbcIonEpisodeItemAdapter<Clip>(
+            ionClient(HttpClients.webserviceClient(), IonEpisodeDetailFeed.class), 
+            new BbcIonClipExtractor(log));
+	    RemoteSiteClient<SlashProgrammesRdf> rdfClient = BbcSlashProgrammesRdfClient.slashProgrammesClient(
+	        new RequestLimitingSimpleHttpClient(HttpClients.webserviceClient(), 3), SlashProgrammesRdf.class
+        );
+        return new BbcIonProgrammeAdapter(contentWriters, detailAdapter, extendedDataAdapter, segmentAdapter, 
+	        rdfClient, containerAdapter, clipAdapter, Executors.newFixedThreadPool(5));
 	}
 	
 	@Bean BbcIonOndemandChangeUpdater bbcIonOndemandChangeUpdater() {
