@@ -22,9 +22,12 @@ import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SERIES_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SHOW_ID;
 import static org.atlasapi.remotesite.lovefilm.LoveFilmCsvColumn.SKU;
 
+import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -60,6 +63,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.collect.ImmutableOptionalMap;
 import com.metabroadcast.common.collect.OptionalMap;
+import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.intl.Countries;
 
 public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFilmDataRow, Optional<Content>> {
@@ -132,7 +136,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             Series series = createSeason(source);
             
             String episodeSequence = EPISODE_SEQUENCE.valueFrom(source);
-            if (Strings.emptyToNull(episodeSequence) != null) {
+            if (!Strings.isNullOrEmpty(episodeSequence)) {
                 series.withSeriesNumber(Integer.valueOf(episodeSequence));
             }
             series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source),SHOW_RESOURCE_TYPE)));
@@ -146,23 +150,57 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         String parentId = SHOW_ID.valueFrom(source);
         Item item = createItem(source);
         
-        if (Strings.emptyToNull(parentId) != null && !SERIES_ID.valueIs(source, parentId)) {
+        String episodeSequence = EPISODE_SEQUENCE.valueFrom(source);
+        if (!Strings.isNullOrEmpty(parentId) && !Strings.isNullOrEmpty(episodeSequence)) {
             Episode episode = createEpisode(source);
-            String episodeSequence = EPISODE_SEQUENCE.valueFrom(source);
             if (Strings.emptyToNull(episodeSequence) != null) {
                 episode.setEpisodeNumber(Integer.valueOf(episodeSequence));
             }
-            episode.setSeriesRef(new ParentRef(uri(SERIES_ID.valueFrom(source), SEASON_RESOURCE_TYPE)));
+            if (!SERIES_ID.valueIs(source, parentId)) {
+                episode.setSeriesRef(new ParentRef(uri(SERIES_ID.valueFrom(source), SEASON_RESOURCE_TYPE)));
+            }
             item = episode;
         } 
 
-        if (Strings.emptyToNull(parentId) != null) {
+        if (!Strings.isNullOrEmpty(parentId)) {
             item.setParentRef(new ParentRef(uri(parentId, SHOW_RESOURCE_TYPE)));
         }
         
         item.setVersions(versionAndLocationFrom(source));
         
-        return Optional.of(setCommonFields(item, source));
+        Content itemWithCommonFields = setCommonFields(item, source);
+        itemWithCommonFields.setTitle(episodeTitle(source, item));
+        return Optional.of(itemWithCommonFields);
+    }
+    
+    private String episodeTitle(LoveFilmDataRow source, Item item) {
+        String sourceTitle = ITEM_NAME.valueFrom(source);
+        String extractedTitle = extractTitle(sourceTitle);
+        Integer episodeNumber = episodeNumber(item);
+        if (Strings.isNullOrEmpty(extractedTitle)) {
+            if (episodeNumber != null) {
+                return "Episode " + episodeNumber;
+            }
+            return sourceTitle;
+        }
+        return extractedTitle;
+    }
+
+    protected Integer episodeNumber(Item item) {
+        if (item instanceof Episode) {
+            return ((Episode)item).getEpisodeNumber();
+        }
+        return null;
+    }
+
+    private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^[\\S ]+ - (E\\d+ - |S\\d+ E\\d+|)( - )?(.*)$");
+
+    private String extractTitle(String title) {
+        Matcher matcher = EPISODE_TITLE_PATTERN.matcher(title);
+        if (matcher.matches() && matcher.groupCount() >= 3) {
+            return matcher.group(3);
+        }
+        return title;
     }
 
     private Brand createBrand(LoveFilmDataRow source) {
@@ -211,7 +249,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     }
     
     private Integer yearFrom(String pubDate) {
-        if (Strings.emptyToNull(pubDate) == null) {
+        if (Strings.isNullOrEmpty(pubDate)) {
             return null;
         }
         return dateMonthYearFormat.parseDateTime(pubDate).getYear();
@@ -223,7 +261,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             @Override
             public String apply(@Nullable String input) {
                 input = input.toLowerCase();
-                return LOVEFILM_GENRES_PREFIX + input.replace('/', '-');
+                return LOVEFILM_GENRES_PREFIX + input.replace('/', '-').replace(" ", "");
             }
         });
     }
@@ -280,7 +318,11 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         policy.setAvailabilityEnd(dateTimeFrom(windowEndDate));
         
         String drmRights = DRM_RIGHTS.valueFrom(source);
-        policy.setRevenueContract(revenueContractMap.get(drmRights));
+        RevenueContract revenueContract = revenueContractMap.get(drmRights);
+        if (SUBSCRIPTION.equals(revenueContract)) {
+            policy.setPrice(new Price(Currency.getInstance("GBP"), 4.99));
+        }
+        policy.setRevenueContract(revenueContract);
         
         policy.setAvailableCountries(ImmutableSet.of(Countries.GB));
         
@@ -288,7 +330,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     }
 
     private DateTime dateTimeFrom(String date) {
-        if (Strings.emptyToNull(date) == null) {
+        if (Strings.isNullOrEmpty(date)) {
             return null;
         }
         return dateMonthYearFormat.parseDateTime(date);
