@@ -193,7 +193,7 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         return null;
     }
 
-    private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^[\\S ]+ - (E\\d+ - |S\\d+ E\\d+|)( - )?(.*)$");
+    private static final Pattern EPISODE_TITLE_PATTERN = Pattern.compile("^[\\S ]+ - (E\\d+|S\\d+ E\\d+|)( - )?(.*)$");
 
     private String extractTitle(String title) {
         Matcher matcher = EPISODE_TITLE_PATTERN.matcher(title);
