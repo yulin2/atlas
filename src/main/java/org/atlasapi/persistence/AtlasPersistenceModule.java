@@ -467,7 +467,7 @@ public class AtlasPersistenceModule {
     @Qualifier("esContentBootstrapper")
     public ContentBootstrapper esContentBootstrapper() {
         ContentBootstrapper bootstrapper = new ContentBootstrapper();
-        bootstrapper.withContentListers(contentLister(), cassandraContentLister());
+        bootstrapper.withContentListers(contentLister());
         return bootstrapper;
     }
 
