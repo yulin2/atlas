@@ -1,9 +1,13 @@
 package org.atlasapi.equiv.results.scores;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class DefaultScoredCandidates<T> implements ScoredCandidates<T> {
@@ -55,6 +59,20 @@ public class DefaultScoredCandidates<T> implements ScoredCandidates<T> {
         return candidates;
     }
 
+    @Override
+    public List<ScoredCandidate<T>> orderedCandidates(final Comparator<? super T> tieBreak) {
+        List<ScoredCandidate<T>> candidateList = Lists.newArrayListWithCapacity(candidates.size());
+        for (Entry<T, Score> candidateScore : candidates.entrySet()) {
+            candidateList.add(ScoredCandidate.valueOf(candidateScore.getKey(), candidateScore.getValue()));
+        }
+        return ScoredCandidate.SCORE_ORDERING.compound(new Comparator<ScoredCandidate<T>>() {
+            @Override
+            public int compare(ScoredCandidate<T> o1, ScoredCandidate<T> o2) {
+                return tieBreak.compare(o1.candidate(), o2.candidate());
+            }
+        }).immutableSortedCopy(candidateList); 
+    }
+    
     @Override
     public boolean equals(Object that) {
         if (this == that) {

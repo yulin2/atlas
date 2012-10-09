@@ -1,11 +1,21 @@
 package org.atlasapi.equiv.results.scores;
 
+import java.util.Comparator;
+
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.collect.Ordering;
 
-public final class ScoredCandidate<T> implements Comparable<ScoredCandidate<?>> {
+public final class ScoredCandidate<T> {
+    
+    public static final Ordering<ScoredCandidate<?>> SCORE_ORDERING = Ordering.from(new Comparator<ScoredCandidate<?>>() {
+        @Override
+        public int compare(ScoredCandidate<?> o1, ScoredCandidate<?> o2) {
+            return Score.SCORE_ORDERING.compare(o1.score(), o2.score());
+        }
+    });
 
     public static final <T> ScoredCandidate<T> valueOf(T equivalent, Score score) {
         return new ScoredCandidate<T>(equivalent, score);
@@ -58,8 +68,4 @@ public final class ScoredCandidate<T> implements Comparable<ScoredCandidate<?>> 
         return String.format("%s : %s", candidate, score);
     }
 
-    @Override
-    public int compareTo(ScoredCandidate<?> o) {
-        return Score.SCORE_ORDERING.compare(score, o.score);
-    }
 }
