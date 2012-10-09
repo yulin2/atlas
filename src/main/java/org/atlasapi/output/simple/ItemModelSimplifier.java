@@ -336,11 +336,14 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private SeriesSummary buildSeriesSummary(Item fullItem, Set<Annotation> annotations) {
         SeriesSummary summary = new SeriesSummary();
-        summary.setUri(fullItem.getContainer().getUri());
-        if (annotations.contains(Annotation.SERIES_SUMMARY) && fullItem.getContainerSummary() != null) {
-            summary.setTitle(fullItem.getContainerSummary().getTitle());
-        } else if (fullItem.getContainerSummary() == null) {
-            summary = containerSummaryResolver.summarizeSeries(fullItem.getContainer()).or(summary);
+        if (fullItem instanceof Episode) {
+            Episode episode = (Episode) fullItem;
+            summary.setUri(episode.getSeriesRef().getUri());
+            if (annotations.contains(Annotation.SERIES_SUMMARY) && episode.getContainerSummary() != null) {
+                summary.setTitle(episode.getContainerSummary().getTitle());
+            } else if (episode.getContainerSummary() == null) {
+                summary = containerSummaryResolver.summarizeSeries(episode.getContainer()).or(summary);
+            }
         }
         return summary;
     }
