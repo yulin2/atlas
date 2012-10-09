@@ -79,12 +79,12 @@ public class ContainerChildEquivalenceScorer implements ContentEquivalenceScorer
     }
 
     public ImmutableList<Item> childrenOf(Iterable<Container> suggestions) {
-        Iterable<String> childUris = Iterables.transform(Iterables.concat(Iterables.transform(suggestions, new Function<Container, Iterable<ChildRef>>() {
+        Iterable<String> childUris = ImmutableSet.copyOf(Iterables.transform(Iterables.concat(Iterables.transform(suggestions, new Function<Container, Iterable<ChildRef>>() {
             @Override
             public Iterable<ChildRef> apply(Container input) {
                 return input.getChildRefs();
             }
-        })), ChildRef.TO_URI);
+        })), ChildRef.TO_URI));
         return ImmutableList.copyOf(Iterables.filter(resolver.findByCanonicalUris(childUris).getAllResolvedResults(), Item.class));
     }
 
