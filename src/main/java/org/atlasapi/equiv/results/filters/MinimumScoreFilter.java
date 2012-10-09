@@ -15,7 +15,7 @@ public class MinimumScoreFilter<T extends Content>  extends AbstractEquivalenceF
     public boolean doFilter(ScoredCandidate<T> candidate, T subject, ResultDescription desc) {
         boolean result = candidate.score().isRealScore() && candidate.score().asDouble() > minimum;
         if (!result) {
-            desc.appendText("%s (%s) removed", candidate.candidate().getTitle(), candidate.candidate().getCanonicalUri());
+            desc.appendText("removed %s (%s)", candidate.candidate().getTitle(), candidate.candidate().getCanonicalUri());
         }
         return result;
     }
