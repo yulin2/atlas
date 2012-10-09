@@ -19,7 +19,7 @@ public class PublisherFilter<T extends Content> extends AbstractEquivalenceFilte
         Publisher.ITV,  ImmutableSet.of(Publisher.BBC, Publisher.C4, Publisher.FIVE),
         Publisher.FIVE, ImmutableSet.of(Publisher.BBC, Publisher.C4, Publisher.ITV));
     
-    public boolean doFilter(ScoredCandidate<T> candidate, T subject, ResultDescription desc) {
+    protected boolean doFilter(ScoredCandidate<T> candidate, T subject, ResultDescription desc) {
         if (candidate.candidate().getPublisher() == subject.getPublisher()) {
             return false;
         }

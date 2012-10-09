@@ -5,6 +5,6 @@ import org.atlasapi.equiv.results.scores.ScoredCandidate;
 
 public interface EquivalenceFilter<T> {
     
-    boolean apply(ScoredCandidate<T> candidate, T subject, ResultDescription desc);
+    Iterable<ScoredCandidate<T>> apply(Iterable<ScoredCandidate<T>> candidate, T subject, ResultDescription desc);
     
 }

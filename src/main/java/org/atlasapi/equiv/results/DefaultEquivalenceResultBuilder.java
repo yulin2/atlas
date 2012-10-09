@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Nullable;
+
 import org.atlasapi.equiv.results.combining.ScoreCombiner;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
@@ -16,11 +18,13 @@ import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 
@@ -60,17 +64,21 @@ public class DefaultEquivalenceResultBuilder<T extends Content> implements Equiv
         return combination;
     }
 
+    private Function<Entry<T, Score>, ScoredCandidate<T>> TO_CANDIDATE = new Function<Entry<T, Score>, ScoredCandidate<T>>() {
+        @Override
+        public ScoredCandidate<T> apply(@Nullable Entry<T, Score> input) {
+            return ScoredCandidate.valueOf(input.getKey(), input.getValue());
+        }
+    };
+    
     private List<ScoredCandidate<T>> filter(T target, ReadableDescription desc, ScoredCandidates<T> combined) {
         desc.startStage("Filtering candidates");
-        ImmutableList.Builder<ScoredCandidate<T>> filteredCandidates = ImmutableList.builder();
-        for (Entry<T, Score> entry : combined.candidates().entrySet()) {
-            ScoredCandidate<T> candidate = ScoredCandidate.valueOf(entry.getKey(), entry.getValue());
-            if (filter.apply(candidate, target, desc)) {
-                filteredCandidates.add(candidate);
-            }
-        }
+        Iterable<ScoredCandidate<T>> combineCandidates = Iterables.transform(combined.candidates().entrySet(), TO_CANDIDATE);
+        List<ScoredCandidate<T>> filteredCandidates = ImmutableList.copyOf(
+            filter.apply(combineCandidates, target, desc)
+        );
         desc.finishStage();
-        return filteredCandidates.build();
+        return filteredCandidates;
     }
 
     private Map<Publisher, ScoredCandidate<T>> extract(T target, List<ScoredCandidate<T>> filteredCandidates, ResultDescription desc) {
