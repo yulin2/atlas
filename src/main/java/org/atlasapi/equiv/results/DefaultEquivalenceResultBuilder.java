@@ -2,9 +2,6 @@ package org.atlasapi.equiv.results;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.annotation.Nullable;
 
 import org.atlasapi.equiv.results.combining.ScoreCombiner;
 import org.atlasapi.equiv.results.description.ReadableDescription;
@@ -12,19 +9,17 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
 import org.atlasapi.equiv.results.filters.EquivalenceFilter;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
-import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSortedSet;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 
@@ -64,18 +59,10 @@ public class DefaultEquivalenceResultBuilder<T extends Content> implements Equiv
         return combination;
     }
 
-    private Function<Entry<T, Score>, ScoredCandidate<T>> TO_CANDIDATE = new Function<Entry<T, Score>, ScoredCandidate<T>>() {
-        @Override
-        public ScoredCandidate<T> apply(@Nullable Entry<T, Score> input) {
-            return ScoredCandidate.valueOf(input.getKey(), input.getValue());
-        }
-    };
-    
     private List<ScoredCandidate<T>> filter(T target, ReadableDescription desc, ScoredCandidates<T> combined) {
         desc.startStage("Filtering candidates");
-        Iterable<ScoredCandidate<T>> combineCandidates = Iterables.transform(combined.candidates().entrySet(), TO_CANDIDATE);
         List<ScoredCandidate<T>> filteredCandidates = ImmutableList.copyOf(
-            filter.apply(combineCandidates, target, desc)
+            filter.apply(combined.orderedCandidates(Ordering.usingToString()), target, desc)
         );
         desc.finishStage();
         return filteredCandidates;
@@ -105,7 +92,7 @@ public class DefaultEquivalenceResultBuilder<T extends Content> implements Equiv
     }
     
     private SortedSetMultimap<Publisher, ScoredCandidate<T>> publisherBin(List<ScoredCandidate<T>> filteredCandidates) {
-        SortedSetMultimap<Publisher, ScoredCandidate<T>> publisherBins = TreeMultimap.create();
+        SortedSetMultimap<Publisher, ScoredCandidate<T>> publisherBins = TreeMultimap.create(Ordering.natural(), ScoredCandidate.SCORE_ORDERING.compound(Ordering.usingToString()));
         
         for (ScoredCandidate<T> candidate : filteredCandidates) {
             publisherBins.put(candidate.candidate().getPublisher(), candidate);
