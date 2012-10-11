@@ -52,7 +52,7 @@ public class C4EpgEntryContentExtractorTest {
     
     private final C4EpgEntryContentExtractor extractor = new C4EpgEntryContentExtractor(resolver, brandUpdater, clock );
     
-    private final Channel channel = new Channel(Publisher.C4, "Channel 4", "key", MediaType.VIDEO, "http://www.channel4.com");
+    private final Channel channel = new Channel(Publisher.C4, "Channel 4", "key", false, MediaType.VIDEO, "http://www.channel4.com");
     
     @Test
     public void testCreatesBrandSeriesItemAndBroadcastForRelatedLinkEntryWhenNothingResolved() {

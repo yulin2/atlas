@@ -43,7 +43,7 @@ public class ScheduleRequestParserTest {
     @Test
     public void testCreatesQueryFromValidQueryString() {
         
-        Channel channel = new Channel(BBC, "Channel", "cbbc", VIDEO, "uri");
+        Channel channel = new Channel(BBC, "Channel", "cbbc", false, VIDEO, "uri");
         channel.setId(1234L);
         
         DateTime from = new DateTime(DateTimeZones.UTC);
@@ -70,7 +70,7 @@ public class ScheduleRequestParserTest {
     @Test(expected=IllegalArgumentException.class)
     public void testDoesntAcceptQueryDurationGreaterThanMax() {
         
-        Channel channel = new Channel(BBC, "Channel", "cbbc", VIDEO, "uri");
+        Channel channel = new Channel(BBC, "Channel", "cbbc", false, VIDEO, "uri");
         channel.setId(1234L);
         Publisher publisher = BBC;
         Set<Annotation> annotations = Annotation.defaultAnnotations();

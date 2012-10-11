@@ -54,7 +54,7 @@ public class PaProgrammeProcessorTest {
             @Override
             public Maybe<Channel> answer(InvocationOnMock invocation) throws Throwable {
                 String input = (String)invocation.getArguments()[0];
-                return Maybe.just(new Channel(METABROADCAST, input, input, VIDEO, input));
+                return Maybe.just(new Channel(METABROADCAST, input, input, false, VIDEO, input));
             }
         });
         progProcessor = new PaProgrammeProcessor(contentWriter, contentResolver, channelResolver, itemsPeopleWriter, log);
@@ -62,7 +62,7 @@ public class PaProgrammeProcessorTest {
     
     @Test
     public void testExtractsNewFilmWithEpisodeUri() {
-        Channel channel = new Channel(METABROADCAST, "c", "c", VIDEO, "c");
+        Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
         ProgData progData = new ProgData();
         progData.setProgId("1");
         progData.setRtFilmnumber("5");
@@ -89,7 +89,7 @@ public class PaProgrammeProcessorTest {
     
     @Test
     public void testAddsEpisodesAliasForFilmWithRtFilmNumberUri() {
-        Channel channel = new Channel(METABROADCAST, "c", "c", VIDEO, "c");
+        Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
         ProgData progData = new ProgData();
         progData.setProgId("1");
         progData.setRtFilmnumber("5");
@@ -123,7 +123,7 @@ public class PaProgrammeProcessorTest {
 
     @Test
     public void testAddsRtFilmNumberAliasForFilmWithEpisodesUri() {
-        Channel channel = new Channel(METABROADCAST, "c", "c", VIDEO, "c");
+        Channel channel = new Channel(METABROADCAST, "c", "c", false, VIDEO, "c");
         ProgData progData = new ProgData();
         progData.setProgId("1");
         progData.setRtFilmnumber("5");
