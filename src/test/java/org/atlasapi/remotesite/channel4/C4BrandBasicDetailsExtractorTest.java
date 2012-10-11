@@ -31,12 +31,12 @@ import com.sun.syndication.feed.atom.Feed;
 @RunWith(MockitoJUnitRunner.class)
 public class C4BrandBasicDetailsExtractorTest extends TestCase {
 
-    private static final Channel FM = new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com");
-    private static final Channel E4 = new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com");
-    private static final Channel F4 = new Channel(Publisher.METABROADCAST, "Film4", "more4", MediaType.VIDEO, "http://film4.com");
-    private static final Channel C4 = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com");
-    private static final Channel M4 = new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.more4.com");
-    private static final Channel FS = new Channel(Publisher.METABROADCAST, "FourSeven", "fourseven", MediaType.VIDEO, "http://www.channel4.com/4seven");
+    private static final Channel FM = new Channel(Publisher.METABROADCAST, "4Music", "more4", false, MediaType.VIDEO, "http://www.4music.com");
+    private static final Channel E4 = new Channel(Publisher.METABROADCAST, "E4", "more4", false, MediaType.VIDEO, "http://www.e4.com");
+    private static final Channel F4 = new Channel(Publisher.METABROADCAST, "Film4", "more4", false, MediaType.VIDEO, "http://film4.com");
+    private static final Channel C4 = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", false, MediaType.VIDEO, "http://www.channel4.com");
+    private static final Channel M4 = new Channel(Publisher.METABROADCAST, "More4", "more4", false, MediaType.VIDEO, "http://www.more4.com");
+    private static final Channel FS = new Channel(Publisher.METABROADCAST, "FourSeven", "fourseven", false, MediaType.VIDEO, "http://www.channel4.com/4seven");
     
     private final Clock clock = new TimeMachine(new DateTime(DateTimeZones.UTC));
     private final ChannelResolver channelResolver = mock(ChannelResolver.class);

@@ -37,7 +37,7 @@ public class BroadcastRemovingScheduleOverlapListenerTest extends TestCase {
     private final DateTime now = new DateTime(DateTimeZones.UTC);
     private final Item item = new Item("item1", "item1", Publisher.BBC);
     
-    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
+    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
 
     private final Broadcast broadcast1 = new Broadcast(BBC_ONE.uri(), now, now.plusMinutes(2));
     private final Broadcast broadcast2 = new Broadcast(BBC_ONE.uri(), now.plusMinutes(2), now.plusMinutes(3));

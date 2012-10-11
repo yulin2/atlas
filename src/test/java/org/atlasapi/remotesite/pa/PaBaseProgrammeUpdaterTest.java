@@ -225,7 +225,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 		@Override
 		public Maybe<Channel> fromUri(String uri) {
 			if("http://www.bbc.co.uk/bbcone".equals(uri)) {
-				return Maybe.just(new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone"));
+				return Maybe.just(new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.VIDEO, "http://www.bbc.co.uk/bbcone"));
 			}
 			return Maybe.just(new Channel());
 		}
@@ -238,7 +238,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 		@Override
 		public Map<String, Channel> forAliases(String aliasPrefix) {
 			return ImmutableMap.of(
-					"http://pressassociation.com/channels/4", new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone"));
+					"http://pressassociation.com/channels/4", new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.VIDEO, "http://www.bbc.co.uk/bbcone"));
 		}
 
         @Override

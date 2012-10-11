@@ -33,7 +33,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
     private final ScheduleOverlapListener listener = context.mock(ScheduleOverlapListener.class);
     
-    private final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
+    private final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
     
     private final Publisher publisher = Publisher.BBC;
     private final DateTime now = new DateTime(DateTimeZones.UTC);

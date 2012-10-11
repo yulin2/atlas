@@ -38,7 +38,7 @@ public class ScheduleProbeTest extends TestCase {
     private final ScheduleResolver scheduleResolver = context.mock(ScheduleResolver.class);
 
     private final TimeMachine clock = new TimeMachine();
-    private static final Channel CHANNEL4 = new Channel(Publisher.METABROADCAST, "Channel 4", "c4", MediaType.AUDIO, "http://channel4.com");
+    private static final Channel CHANNEL4 = new Channel(Publisher.METABROADCAST, "Channel 4", "c4", false, MediaType.AUDIO, "http://channel4.com");
     private final Set<Channel> channels = ImmutableSet.of(CHANNEL4);
     private final Set<Publisher> publishers = ImmutableSet.of(Publisher.C4);
 

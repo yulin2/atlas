@@ -42,8 +42,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 @RunWith(JMock.class)
 public class BroadcastMatchingItemEquivalenceGeneratorTest extends TestCase {
 
-    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
-    private static final Channel BBC_ONE_CAMBRIDGE = new Channel(Publisher.METABROADCAST, "BBC One Cambridgeshire", "bbcone-cambridge", MediaType.AUDIO, "http://www.bbc.co.uk/services/bbcone/cambridge");
+    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
+    private static final Channel BBC_ONE_CAMBRIDGE = new Channel(Publisher.METABROADCAST, "BBC One Cambridgeshire", "bbcone-cambridge", false, MediaType.AUDIO, "http://www.bbc.co.uk/services/bbcone/cambridge");
 
     private final Mockery context = new Mockery();
     private final ScheduleResolver resolver = context.mock(ScheduleResolver.class);
