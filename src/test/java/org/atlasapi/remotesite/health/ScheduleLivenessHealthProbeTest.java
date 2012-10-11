@@ -30,9 +30,9 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 	private DateTime startTimeForScheduleTest;
 	private DateTime endTimeForScheduleTest;
 	
-    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
-    private static final Channel BBC_TWO = new Channel(Publisher.METABROADCAST, "BBC Two", "bbctwo", MediaType.AUDIO, "http://www.bbc.co.uk/bbctwo");
-    private static final Channel ITV1_LONDON = new Channel(Publisher.METABROADCAST, "ITV 1 London", "itv1london", MediaType.AUDIO, "http://www.itv.com");
+    private static final Channel BBC_ONE = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.AUDIO, "http://www.bbc.co.uk/bbcone");
+    private static final Channel BBC_TWO = new Channel(Publisher.METABROADCAST, "BBC Two", "bbctwo", false, MediaType.AUDIO, "http://www.bbc.co.uk/bbctwo");
+    private static final Channel ITV1_LONDON = new Channel(Publisher.METABROADCAST, "ITV 1 London", "itv1london", false, MediaType.AUDIO, "http://www.itv.com");
 
 	public void setUp() {
 		this.startTimeForScheduleTest = new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS);

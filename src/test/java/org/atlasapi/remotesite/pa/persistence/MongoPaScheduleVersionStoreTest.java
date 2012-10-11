@@ -15,7 +15,7 @@ import com.metabroadcast.common.persistence.MongoTestHelper;
 public class MongoPaScheduleVersionStoreTest {
 
     private final MongoPaScheduleVersionStore scheduleVersionStore = new MongoPaScheduleVersionStore(MongoTestHelper.anEmptyTestDatabase());
-    private final Channel channel = new Channel(Publisher.METABROADCAST, "test", "test", MediaType.AUDIO, "http://example.com");
+    private final Channel channel = new Channel(Publisher.METABROADCAST, "test", "test", false, MediaType.AUDIO, "http://example.com");
  
     @Test
     public void testStore() {
