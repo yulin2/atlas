@@ -17,7 +17,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
 import com.metabroadcast.common.base.Maybe;
 
@@ -75,7 +74,9 @@ public class SegmentModelSimplifier implements ModelSimplifier<List<SegmentEvent
         if(seg.getDuration() != null) {
             seg.setDuration(Ints.saturatedCast(segment.getDuration().getStandardSeconds()));
         }
-        seg.setType(segment.getType().toString());
+        if (segment.getType() != null) {
+            seg.setType(segment.getType().toString());
+        }
         
         return seg;
     }
