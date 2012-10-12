@@ -7,9 +7,12 @@ import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Policy.Platform;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import com.metabroadcast.common.time.SystemClock;
 import com.sun.syndication.feed.atom.Feed;
 
@@ -21,9 +24,7 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
     private final C4BrandEpgAdapter brandEpgAdatper;
     private final C4BrandClipAdapter clipAdapter;
     
-    private final C4OnDemandEpisodesLinker odLinker = new C4OnDemandEpisodesLinker();
-    private final C4BrandEpisodeLinker epgLinker = new C4BrandEpisodeLinker();
-    private final C4ClipLinker clipLinker = new C4ClipLinker();
+    private final C4ContentLinker linker = new C4ContentLinker();
     
     public C4BrandExtractor(C4AtomApiClient feedClient, Optional<Platform> platform, ChannelResolver channelResolver) {
         SystemClock clock = new SystemClock();
@@ -43,16 +44,18 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
         
         Brand brand = basicDetailsExtractor.extract(source);
         
-        List<SeriesAndEpisodes> episodeGuideContent = episodeGuideAdapter.fetch(brand.getCanonicalUri());
+        SetMultimap<Series, Episode> seriesAndEpisodes = HashMultimap.create();
+        
+        seriesAndEpisodes.putAll(episodeGuideAdapter.fetch(brand.getCanonicalUri()));
 
         List<Episode> fourOdContent = fourOditemAdapter.fetch(brand.getCanonicalUri());
-        List<SeriesAndEpisodes> seriesAndEpisodes = odLinker.link4odToEpg(episodeGuideContent, fourOdContent);
+        seriesAndEpisodes = linker.link4odToEpg(seriesAndEpisodes, fourOdContent, brand);
         
         List<Episode> epgContent = brandEpgAdatper.fetch(brand.getCanonicalUri());
-        seriesAndEpisodes = epgLinker.populateBroadcasts(seriesAndEpisodes, epgContent, brand);
+        seriesAndEpisodes = linker.populateBroadcasts(seriesAndEpisodes, epgContent, brand);
         
         List<Clip> clips = clipAdapter.fetch(brand.getCanonicalUri());
-        seriesAndEpisodes = clipLinker.linkClipsToContent(brand, seriesAndEpisodes, clips);
+        seriesAndEpisodes = linker.linkClipsToContent(seriesAndEpisodes, clips, brand);
         
         seriesAndEpisodes = setBrandProperties(seriesAndEpisodes, brand);
 
@@ -60,18 +63,16 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
     }
 
 
-    private List<SeriesAndEpisodes> setBrandProperties(List<SeriesAndEpisodes> content, Brand brand) {
-        for (SeriesAndEpisodes seriesAndEpisodes : content) {
-            for (Episode episode : seriesAndEpisodes.getEpisodes()) {
-                if (equivalentTitles(brand, episode)) {
-                    setHierarchicalTitle(episode);
-                }
-                if (episode.getImage() == null) {
-                    episode.setImage(brand.getImage());
-                    episode.setThumbnail(brand.getThumbnail());
-                }
-                episode.setGenres(brand.getGenres());
+    private SetMultimap<Series, Episode> setBrandProperties(SetMultimap<Series, Episode> content, Brand brand) {
+        for (Episode episode : content.values()) {
+            if (equivalentTitles(brand, episode)) {
+                setHierarchicalTitle(episode);
             }
+            if (episode.getImage() == null) {
+                episode.setImage(brand.getImage());
+                episode.setThumbnail(brand.getThumbnail());
+            }
+            episode.setGenres(brand.getGenres());
         }
         return content;
     }
