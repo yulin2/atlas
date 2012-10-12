@@ -1,6 +1,5 @@
 package org.atlasapi.remotesite.channel4;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +11,9 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.ImmutableSetMultimap.Builder;
+import com.google.common.collect.SetMultimap;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
@@ -23,7 +24,7 @@ import com.sun.syndication.feed.atom.Feed;
  * 
  * @author Fred van den Driessche (fred@metabroadcast.com)
  */
-public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, SeriesAndEpisodes> {
+public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, SetMultimap<Series,Episode>> {
 
     private static final Pattern SERIES_ID = Pattern.compile("series-(\\d+)");
 
@@ -36,17 +37,17 @@ public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, Seri
     }
 
     @Override
-    public SeriesAndEpisodes extract(Feed source) {
+    public SetMultimap<Series,Episode> extract(Feed source) {
 
         String seriesUri = C4AtomApi.canonicalSeriesUri(source);
         Series series = createSeriesFromFeed(seriesUri, source);
         
-        List<Episode> episodes = Lists.newArrayListWithExpectedSize(source.getEntries().size());
+        Builder<Series, Episode> result = ImmutableSetMultimap.builder();
         for (Object entry : source.getEntries()) {
-            episodes.add(extractEpisode(series, (Entry) entry));
+            result.put(series, extractEpisode(series, (Entry) entry));
         }
 
-        return new SeriesAndEpisodes(series, episodes);
+        return result.build();
     }
 
     private Series createSeriesFromFeed(String uri, Feed source) {

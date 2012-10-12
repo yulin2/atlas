@@ -2,11 +2,12 @@ package org.atlasapi.remotesite.channel4;
 
 import static org.atlasapi.media.entity.Identified.TO_URI;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Clip;
@@ -23,6 +24,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
@@ -49,17 +51,17 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 	private final C4AtomApiClient feedClient;
 	private final C4AtomContentResolver resolver;
 	private final ContentWriter writer;
-	private final C4BrandExtractor extractor;
+	private final ContentExtractor<Feed, BrandSeriesAndEpisodes> extractor;
 	private final Optional<Platform> platform;
 	private final boolean canUpdateDescriptions;
 
 	
-	public C4AtomBackedBrandUpdater(C4AtomApiClient feedClient, Optional<Platform> platform, ContentResolver contentResolver, ContentWriter contentWriter, ChannelResolver channelResolver) {
+	public C4AtomBackedBrandUpdater(C4AtomApiClient feedClient, Optional<Platform> platform, ContentResolver contentResolver, ContentWriter contentWriter, ContentExtractor<Feed, BrandSeriesAndEpisodes> extractor) {
 		this.feedClient = feedClient;
         this.platform = platform;
 		this.resolver = new C4AtomContentResolver(contentResolver);
 		this.writer = contentWriter;
-		this.extractor = new C4BrandExtractor(feedClient, platform, channelResolver);
+		this.extractor = extractor;
 		this.canUpdateDescriptions = !platform.isPresent();
 	}
 	
@@ -91,12 +93,14 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 	}
 
     private void writeSeriesAndEpisodes(BrandSeriesAndEpisodes brandHierarchy) {
-        for (SeriesAndEpisodes seriesAndEpisodes : brandHierarchy.getSeriesAndEpisodes()) {
-            Series series = resolveAndUpdate(seriesAndEpisodes.getSeries());
-            series.setParent(brandHierarchy.getBrand());
-            writer.createOrUpdate(series);
+        for (Entry<Series, Collection<Episode>> seriesAndEpisodes : brandHierarchy.getSeriesAndEpisodes().asMap().entrySet()) {
+            if (seriesAndEpisodes.getKey().getCanonicalUri() != null) {
+                Series series = resolveAndUpdate(seriesAndEpisodes.getKey());
+                series.setParent(brandHierarchy.getBrand());
+                writer.createOrUpdate(series);
+            }
             
-            for (Episode episode : seriesAndEpisodes.getEpisodes()) {
+            for (Episode episode : seriesAndEpisodes.getValue()) {
                 try {
                     episode = resolveAndUpdate(episode);
                     episode.setContainer(brandHierarchy.getBrand());
@@ -151,8 +155,9 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 
     private Optional<Item> resolve(Episode episode) {
         String hierarchyUri = hierarchyUri(episode);
-        Preconditions.checkArgument(!Strings.isNullOrEmpty(hierarchyUri), "%s requires hierarchy URI", episode.getCanonicalUri());
-        return resolver.itemFor(episode.getCanonicalUri(), Optional.fromNullable(hierarchyUri), Optional.<String>absent());
+        Optional<Item> resolved = resolver.itemFor(episode.getCanonicalUri(), Optional.fromNullable(hierarchyUri), Optional.<String>absent());
+        Preconditions.checkArgument(!Strings.isNullOrEmpty(hierarchyUri)||resolved.isPresent(), "To avoid duplication %s requires hierarchy URI", episode.getCanonicalUri());
+        return resolved;
     }
 
     private String hierarchyUri(Episode episode) {
@@ -324,11 +329,10 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
 
             @Override
             public boolean apply(Location input) {
-                if(platform.isPresent()) {
+                if (platform.isPresent()) {
                     return input.getPolicy() == null || !platform.get().equals(input.getPolicy().getPlatform());
-                }
-                else {
-                    return input.getPolicy() != null && input.getPolicy().getPlatform() != null; 
+                } else {
+                    return input.getPolicy() != null && input.getPolicy().getPlatform() != null;
                 }
             }
             
