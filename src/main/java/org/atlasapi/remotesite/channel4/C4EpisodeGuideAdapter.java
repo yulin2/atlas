@@ -1,8 +1,9 @@
 package org.atlasapi.remotesite.channel4;
 
-import java.util.List;
 import java.util.Set;
 
+import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.FetchException;
 import org.atlasapi.remotesite.SiteSpecificAdapter;
@@ -11,19 +12,21 @@ import org.jdom.Element;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.ImmutableSetMultimap.Builder;
+import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.time.Clock;
 import com.sun.syndication.feed.atom.Entry;
 import com.sun.syndication.feed.atom.Feed;
 
-public class C4EpisodeGuideAdapter implements SiteSpecificAdapter<List<SeriesAndEpisodes>> {
+public class C4EpisodeGuideAdapter implements SiteSpecificAdapter<SetMultimap<Series,Episode>> {
 
     private static final String BRAND_FLATTENED_NAME = "relation.BrandFlattened";
     private static final String SERIES_NUMBER = "relation.SeriesNumber";
     
     private final C4AtomApiClient client;
-    private final ContentExtractor<Feed, SeriesAndEpisodes> seriesAndEpisodeExtractor;
+    private final ContentExtractor<Feed, SetMultimap<Series,Episode>> seriesAndEpisodeExtractor;
     
     public C4EpisodeGuideAdapter(C4AtomApiClient client, Clock clock) {
         this.client = client;
@@ -36,7 +39,7 @@ public class C4EpisodeGuideAdapter implements SiteSpecificAdapter<List<SeriesAnd
     }
     
     @Override
-    public List<SeriesAndEpisodes> fetch(String uri) {
+    public SetMultimap<Series,Episode> fetch(String uri) {
         Preconditions.checkArgument(canFetch(uri));
         try {
             Optional<Feed> episodeGuide = client.brandEpisodeGuideFeed(uri);
@@ -44,7 +47,7 @@ public class C4EpisodeGuideAdapter implements SiteSpecificAdapter<List<SeriesAnd
             if (episodeGuide.isPresent()) {
                 return extractSeriesAndEpisodes(uri, episodeGuide.get());
             } else {
-                return Lists.newArrayList();
+                return ImmutableSetMultimap.of();
             }
             
         } catch (Exception e) {
@@ -52,7 +55,7 @@ public class C4EpisodeGuideAdapter implements SiteSpecificAdapter<List<SeriesAnd
         }
     }
 
-    private List<SeriesAndEpisodes> extractSeriesAndEpisodes(String uri, Feed feed) {
+    private SetMultimap<Series,Episode> extractSeriesAndEpisodes(String uri, Feed feed) {
         if (isFlattenedBrandGuide(feed)) {
             return extractFromFlattenedEpg(uri, feed);
         } else {
@@ -60,27 +63,27 @@ public class C4EpisodeGuideAdapter implements SiteSpecificAdapter<List<SeriesAnd
         }
     }
 
-    private List<SeriesAndEpisodes> extractFromFullEpg(String uri, Feed feed) {
-        List<SeriesAndEpisodes> result = Lists.newArrayListWithExpectedSize(feed.getEntries().size());
+    private SetMultimap<Series,Episode> extractFromFullEpg(String uri, Feed feed) {
+        Builder<Series, Episode> result = ImmutableSetMultimap.builder();
         for (Object entry : feed.getEntries()) {
             Optional<Feed> seriesFeed = fetchFeed(seriesNumber((Entry)entry), uri);
             if (seriesFeed.isPresent()) {
-                result.add(seriesAndEpisodeExtractor.extract(seriesFeed.get()));
+                result.putAll(seriesAndEpisodeExtractor.extract(seriesFeed.get()));
             }
         }
-        return result;
+        return result.build();
     }
 
-    private List<SeriesAndEpisodes> extractFromFlattenedEpg(String uri, Feed feed) {
+    private SetMultimap<Series,Episode> extractFromFlattenedEpg(String uri, Feed feed) {
         Set<Integer> seriesNumbers = seriesNumbers(feed);
-        List<SeriesAndEpisodes> result = Lists.newArrayListWithExpectedSize(seriesNumbers.size());
+        Builder<Series, Episode> result = ImmutableSetMultimap.builder();
         for (Integer seriesNumber : seriesNumbers) {
             Optional<Feed> seriesFeed = fetchFeed(seriesNumber, uri);
             if (seriesFeed.isPresent()) {
-                result.add(seriesAndEpisodeExtractor.extract(seriesFeed.get()));
+                result.putAll(seriesAndEpisodeExtractor.extract(seriesFeed.get()));
             }
         }
-        return result;
+        return result.build();
     }
 
     private Set<Integer> seriesNumbers(Feed episodeGuide) {

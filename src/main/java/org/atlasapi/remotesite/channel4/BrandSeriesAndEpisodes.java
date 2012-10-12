@@ -1,15 +1,17 @@
 package org.atlasapi.remotesite.channel4;
 
-import java.util.List;
-
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Series;
+
+import com.google.common.collect.SetMultimap;
 
 public class BrandSeriesAndEpisodes {
 
     private final Brand brand;
-    private final List<SeriesAndEpisodes> seriesAndEpisodes;
+    private final SetMultimap<Series, Episode> seriesAndEpisodes;
 
-    public BrandSeriesAndEpisodes(Brand brand, List<SeriesAndEpisodes> seriesAndEpisodes) {
+    public BrandSeriesAndEpisodes(Brand brand, SetMultimap<Series, Episode> seriesAndEpisodes) {
         this.brand = brand;
         this.seriesAndEpisodes = seriesAndEpisodes;
     }
@@ -18,7 +20,7 @@ public class BrandSeriesAndEpisodes {
         return this.brand;
     }
 
-    public List<SeriesAndEpisodes> getSeriesAndEpisodes() {
+    public SetMultimap<Series, Episode> getSeriesAndEpisodes() {
         return this.seriesAndEpisodes;
     }
 
