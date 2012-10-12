@@ -97,17 +97,22 @@ public class C4Module {
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
-    }
+	}
 
     protected C4AtomBackedBrandUpdater c4BrandFetcher(Optional<Platform> platform) {
         LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter = new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
         Optional<String> platformParam = platform.isPresent() ? Optional.of(platform.get().toString().toLowerCase()) : Optional.<String>absent();
         C4AtomApiClient client = new C4AtomApiClient(httpsClient(), ATOZ_BASE, platformParam);
-        return new C4AtomBackedBrandUpdater(client, platform, contentResolver, lastUpdatedSettingContentWriter, channelResolver);
+        C4BrandExtractor extractor = new C4BrandExtractor(client, platform, channelResolver);
+        return new C4AtomBackedBrandUpdater(client, platform, contentResolver, lastUpdatedSettingContentWriter, extractor);
     }
 
     @Bean
     protected C4BrandUpdateController c4BrandUpdateController() {
         return new C4BrandUpdateController(c4BrandFetcher(Optional.<Platform>absent()), ImmutableMap.of(Platform.XBOX, c4BrandFetcher(Optional.of(Platform.XBOX))));
+    }
+
+    @Bean protected LastUpdatedSettingContentWriter lastUpdatedSettingContentWriter() {
+        return new LastUpdatedSettingContentWriter(contentResolver, new LastUpdatedCheckingContentWriter(log, contentWriter));
     }
 }

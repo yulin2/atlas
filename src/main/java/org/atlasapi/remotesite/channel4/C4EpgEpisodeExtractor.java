@@ -53,7 +53,8 @@ public class C4EpgEpisodeExtractor extends BaseC4EpisodeExtractor implements
         Version version = new Version();
         episode.setVersions(Sets.newHashSet(version));
 
-        String txChannel = CHANNEL_LOOKUP.get(lookup.get(DC_TX_CHANNEL));
+        String channelKey = lookup.get(DC_TX_CHANNEL);
+        String txChannel = CHANNEL_LOOKUP.get(channelKey);
         String startTime = lookup.get(DC_START_TIME);
         Duration duration = C4AtomApi.durationFrom(lookup);
 
@@ -68,9 +69,8 @@ public class C4EpgEpisodeExtractor extends BaseC4EpisodeExtractor implements
             
             broadcast.setLastUpdated(episode.getLastUpdated());
             version.addBroadcast(broadcast);
-        }
-        else {
-            throw new IllegalArgumentException(String.format("Channel %s not recognised", txChannel));
+        } else {
+            throw new IllegalArgumentException(String.format("Channel %s not recognised, key was %s", txChannel, channelKey));
         }
 
         return episode;
