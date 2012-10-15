@@ -32,6 +32,7 @@ public class C4EpgEpisodeExtractor extends BaseC4EpisodeExtractor implements
         .put("E4", "http://www.e4.com")
         .put("4M", "http://www.4music.com")
         .put("F4", "http://film4.com")
+        .put("4S", "http://www.channel4.com/4seven")
         .build();
 
     public C4EpgEpisodeExtractor(Clock clock) {

@@ -20,6 +20,7 @@ import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
 import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,9 +44,9 @@ public class C4Module {
     private final static RepetitionRule TWO_HOURS = RepetitionRules.every(Duration.standardHours(2));
     private @Autowired
     SimpleScheduler scheduler;
-    private @Autowired
+    private @Autowired @Qualifier("contentResolver")
     ContentResolver contentResolver;
-    private @Autowired
+    private @Autowired @Qualifier("contentWriter")
     ContentWriter contentWriter;
     private @Autowired
     AdapterLog log;
