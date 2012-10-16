@@ -21,7 +21,8 @@ public class C4BroadcastBuilder {
         .put("http://film4.com", "F4")
         .put("http://www.e4.com", "E4")
         .put("http://www.4music.com", "4M")
-        .put("www.channel4.com/4seven", "4S").build();
+        .put("http://www.channel4.com/4seven", "4S")
+        .build();
     
     private final static Pattern ID_PATTERN = Pattern.compile("tag:([^,]+),(\\d{4}):slot/(\\d+)");
     

@@ -72,6 +72,7 @@ public class C4EpisodesExtractor implements ContentExtractor<Feed, List<Episode>
 		.put("M4", "http://www.channel4.com/more4")
 		.put("E4", "http://www.e4.com")
 		.put("4M", "http://www.4music.com")
+		.put("4S", "http://www.channel4.com/4seven")
 	.build();
 	
 	
