@@ -32,6 +32,7 @@ public class ESIndexer extends AbstractWorker {
             throw new IllegalStateException("More than one content found for id: " + message.getEntityId());
         } else if (results.getAllResolvedResults().size() == 1) {
             Identified source = results.getFirstValue().requireValue();
+            log.info("Indexing {} with id {}.", source.getClass().getName(), message.getEntityId());
             if (source instanceof Item) {
                 contentIndexer.index((Item) source);
             } else if (source instanceof Container) {
