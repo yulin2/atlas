@@ -1,10 +1,13 @@
 package org.atlasapi.remotesite.channel4;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Policy.Platform;
 import org.atlasapi.media.entity.Series;
@@ -12,6 +15,7 @@ import org.atlasapi.remotesite.ContentExtractor;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.SetMultimap;
 import com.metabroadcast.common.time.SystemClock;
 import com.sun.syndication.feed.atom.Feed;
@@ -63,18 +67,21 @@ public class C4BrandExtractor implements ContentExtractor<Feed, BrandSeriesAndEp
     }
 
 
-    private SetMultimap<Series, Episode> setBrandProperties(SetMultimap<Series, Episode> content, Brand brand) {
-        for (Episode episode : content.values()) {
-            if (equivalentTitles(brand, episode)) {
-                setHierarchicalTitle(episode);
+    private SetMultimap<Series, Episode> setBrandProperties(SetMultimap<Series, Episode> contents, Brand brand) {
+        for (Entry<Series, Collection<Episode>> content : contents.asMap().entrySet()) {
+            content.getKey().setGenres(brand.getGenres());
+            for (Episode episode : content.getValue()) {
+                if (equivalentTitles(brand, episode)) {
+                    setHierarchicalTitle(episode);
+                }
+                if (episode.getImage() == null) {
+                    episode.setImage(brand.getImage());
+                    episode.setThumbnail(brand.getThumbnail());
+                }
+                episode.setGenres(brand.getGenres());
             }
-            if (episode.getImage() == null) {
-                episode.setImage(brand.getImage());
-                episode.setThumbnail(brand.getThumbnail());
-            }
-            episode.setGenres(brand.getGenres());
         }
-        return content;
+        return contents;
     }
 
     private void setHierarchicalTitle(Episode episode) {
