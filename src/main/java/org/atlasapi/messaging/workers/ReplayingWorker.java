@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.jms.ConnectionFactory;
 import org.atlasapi.messaging.BeginReplayMessage;
 import org.atlasapi.messaging.EndReplayMessage;
 import org.atlasapi.messaging.EntityUpdatedMessage;
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class ReplayingWorker extends AbstractWorker {
+public class ReplayingWorker extends AbstractCoalescingWorker {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     //
@@ -30,19 +31,32 @@ public class ReplayingWorker extends AbstractWorker {
     private final AtomicLong latestReplayTime = new AtomicLong(0);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Worker delegate;
-    private final long threshold;
+    private long replayThreshold;
 
-    public ReplayingWorker(Worker delegate, long threshold) {
+    public ReplayingWorker(Worker delegate, ConnectionFactory connectionFactory, String coalesceQueue, int coalesceMillisThreshold, int coalesceSizeThreshold) {
+        super(connectionFactory, coalesceQueue, coalesceMillisThreshold, coalesceSizeThreshold);
         this.delegate = delegate;
-        this.threshold = threshold;
+        this.replayThreshold = 60000;
+    }
+    
+    public ReplayingWorker(Worker delegate) {
+        super();
+        this.delegate = delegate;
+        this.replayThreshold = 60000;
     }
 
-    public void init() {
-        scheduler.scheduleAtFixedRate(new ReplayCircuitBreaker(), threshold, threshold, TimeUnit.MILLISECONDS);
+    @Override
+    public void start() {
+        super.start();
+        scheduler.scheduleAtFixedRate(new ReplayCircuitBreaker(), replayThreshold, replayThreshold, TimeUnit.MILLISECONDS);
     }
     
     public void destroy() {
         scheduler.shutdownNow();
+    }
+
+    public void setReplayThreshold(long replayThreshold) {
+        this.replayThreshold = replayThreshold;
     }
 
     @Override
@@ -114,7 +128,7 @@ public class ReplayingWorker extends AbstractWorker {
             if (latestReplayTime.get() > 0) {
                 long now = new Date().getTime();
                 long elapsed = now - latestReplayTime.get();
-                if (elapsed > threshold) {
+                if (elapsed > replayThreshold) {
                     log.warn("Too much time ({}) passed since last replay message, interrupting...", elapsed);
                     doEndReplay();
                 }

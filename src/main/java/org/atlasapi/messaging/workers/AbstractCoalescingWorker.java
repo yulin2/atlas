@@ -53,6 +53,14 @@ public abstract class AbstractCoalescingWorker implements Worker {
     private final int coalesceMillisThreshold;
     private final int coalesceSizeThreshold;
 
+    /**
+     * Constructor to enable message coalescing capabilities.
+     *
+     * @param connectionFactory
+     * @param coalesceQueue
+     * @param coalesceMillisThreshold
+     * @param coalesceSizeThreshold
+     */
     public AbstractCoalescingWorker(ConnectionFactory connectionFactory, String coalesceQueue, int coalesceMillisThreshold, int coalesceSizeThreshold) {
         this.coalesceMillisThreshold = coalesceMillisThreshold;
         this.coalesceSizeThreshold = coalesceSizeThreshold;
@@ -62,8 +70,20 @@ public abstract class AbstractCoalescingWorker implements Worker {
         this.coalesceQueue.setReceiveTimeout(100);
     }
 
+    /**
+     * Constructor to disable message coalescing capabilities.
+     */
+    public AbstractCoalescingWorker() {
+        this.coalesceMillisThreshold = 0;
+        this.coalesceSizeThreshold = 0;
+        this.coalesceTx = null;
+        this.coalesceQueue = null;
+    }
+
     public void start() {
-        coalesceScheduler.scheduleAtFixedRate(new CoalesceRunner(), coalesceMillisThreshold, coalesceMillisThreshold, TimeUnit.MILLISECONDS);
+        if (coalesceSizeThreshold > 0) {
+            coalesceScheduler.scheduleAtFixedRate(new CoalesceRunner(), coalesceMillisThreshold, coalesceMillisThreshold, TimeUnit.MILLISECONDS);
+        }
     }
 
     public void onMessage(String message) {
