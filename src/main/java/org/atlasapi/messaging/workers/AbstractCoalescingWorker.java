@@ -35,7 +35,8 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 /**
  * Abstract {@link org.atlasapi.persistence.messaging.worker.Worker} class
  * providing
- * coalescing capabilities based on the entity id, useful for message deduping.
+ * coalescing capabilities based on the message type and entity id, useful for
+ * message deduping.
  */
 public abstract class AbstractCoalescingWorker implements Worker {
 
@@ -69,7 +70,7 @@ public abstract class AbstractCoalescingWorker implements Worker {
         try {
             Message event = mapper.readValue(message, Message.class);
             if (event.canCoalesce() && coalesceSizeThreshold > 0) {
-                log.info("Coalescing message: {}", message);
+                log.debug("Coalescing message: {}", message);
                 coalesceQueue.convertAndSend(message);
                 // Coalesces only at a given threshold:
                 if (coalesceSize.incrementAndGet() >= coalesceSizeThreshold) {
@@ -83,7 +84,7 @@ public abstract class AbstractCoalescingWorker implements Worker {
                     }
                 }
             } else {
-                log.info("Dispatching message: {}", message);
+                log.debug("Dispatching message: {}", message);
                 event.dispatchTo(this);
             }
         } catch (IOException ex) {
@@ -115,14 +116,15 @@ public abstract class AbstractCoalescingWorker implements Worker {
                 String received = (String) coalesceQueue.receiveAndConvert();
                 while (received != null) {
                     Message current = mapper.readValue(received, Message.class);
-                    if (events.containsKey(current.getEntityId())) {
-                        events.remove(current.getEntityId());
+                    String key = makeCoalescingKey(current);
+                    if (events.containsKey(key)) {
+                        events.remove(key);
                     }
-                    events.put(current.getEntityId(), current);
+                    events.put(key, current);
                     received = (String) coalesceQueue.receiveAndConvert();
                 }
                 for (Map.Entry<String, Message> current : events.entrySet()) {
-                    log.info("Dispatching coalesced message: {}", current.getValue());
+                    log.debug("Dispatching coalesced message: {}", current.getValue());
                     current.getValue().dispatchTo(this);
                 }
                 coalesceQueue.closeThreadLocalConsumer();
@@ -139,6 +141,10 @@ public abstract class AbstractCoalescingWorker implements Worker {
                 coalesceLock.unlock();
             }
         }
+    }
+
+    private String makeCoalescingKey(Message message) {
+        return message.getClass().getName() + ":" + message.getEntityId();
     }
 
     private static class UnclosedMessageConsumer implements MessageConsumer {
