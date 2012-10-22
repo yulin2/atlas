@@ -1,5 +1,6 @@
 package org.atlasapi.messaging;
 
+import com.metabroadcast.common.properties.Configurer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.jms.ConnectionFactory;
@@ -27,26 +28,20 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 @Configuration
 public class WorkersModule {
 
-    @Value("${messaging.destination.replicator}")
-    private String replicatorDestination;
-    @Value("${messaging.consumers.replicator}")
-    private int replicatorConsumers;
-    @Value("${messaging.destination.indexer}")
-    private String indexerDestination;
-    @Value("${messaging.consumers.indexer}")
-    private int indexerConsumers;
-    @Value("${messaging.destination.logger}")
-    private String loggerDestination;
-    @Value("${messaging.consumers.logger}")
-    private int loggerConsumers;
-    @Value("${messaging.destination.replay.replicator}")
-    private String replicatorReplayDestination;
-    @Value("${messaging.destination.replay.indexer}")
-    private String indexerReplayDestination;
-    @Value("${messaging.replay.interrupt.threshold}")
-    private long replayInterruptThreshold;
-    @Value("${messaging.enabled}")
-    private boolean enabled;
+    private String replicatorDestination = Configurer.get("messaging.destination.replicator").get();
+    private int replicatorConsumers = Integer.parseInt(Configurer.get("messaging.consumers.replicator").get());
+    private String indexerDestination = Configurer.get("messaging.destination.indexer").get();
+    private int indexerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.indexer").get());
+    private String loggerDestination = Configurer.get("messaging.destination.logger").get();
+    private int loggerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.logger").get());
+    private String replicatorReplayDestination = Configurer.get("messaging.destination.replay.replicator").get();
+    private String indexerReplayDestination = Configurer.get("messaging.destination.replay.indexer").get();
+    private long replayInterruptThreshold = Long.parseLong(Configurer.get("messaging.replay.interrupt.threshold").get());
+    private String indexerCoalesceQueue = Configurer.get("messaging.indexer.coalesce.queue").get();
+    private int indexerCoalesceSize = Integer.parseInt(Configurer.get("messaging.indexer.coalesce.size").get());
+    private int indexerCoalesceTime = Integer.parseInt(Configurer.get("messaging.indexer.coalesce.time").get());
+    private boolean enabled = Boolean.parseBoolean(Configurer.get("messaging.enabled").get());
+    //
     @Autowired
     private ConnectionFactory connectionFactory;
     @Autowired
@@ -80,7 +75,9 @@ public class WorkersModule {
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
-        return new ReplayingWorker(new ESIndexer(mongoContentResolver, contentIndexer), replayInterruptThreshold);
+        ESIndexer esIndexer = new ESIndexer(mongoContentResolver, contentIndexer, connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
+        esIndexer.start();
+        return new ReplayingWorker(esIndexer, replayInterruptThreshold);
     }
 
     @Bean
