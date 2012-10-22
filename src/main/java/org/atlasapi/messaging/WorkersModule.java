@@ -28,6 +28,9 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 @Configuration
 public class WorkersModule {
 
+    private String replicatorDestination = Configurer.get("messaging.destination.replicator").get();
+    private int replicatorConsumers = Integer.parseInt(Configurer.get("messaging.consumers.replicator").get());
+    private String replicatorReplayDestination = Configurer.get("messaging.destination.replay.replicator").get();
     private String indexerDestination = Configurer.get("messaging.destination.indexer").get();
     private int indexerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.indexer").get());
     private String indexerReplayDestination = Configurer.get("messaging.destination.replay.indexer").get();
@@ -47,7 +50,28 @@ public class WorkersModule {
     private ContentResolver mongoContentResolver;
     @Autowired
     private MessageStore mongoMessageStore;
+    @Autowired
+    @Qualifier(value = "cassandra")
+    private ContentWriter cassandraContentWriter;
 
+    @Bean
+    @Lazy(true)
+    public ReplayingWorker cassandraReplicator() {
+        return new ReplayingWorker(new CassandraReplicator(mongoContentResolver, cassandraContentWriter));
+    }
+
+    @Bean
+    @Lazy(true)
+    public DefaultMessageListenerContainer cassandraReplicatorMessageListener() {
+        return makeContainer(cassandraReplicator(), replicatorDestination, replicatorConsumers, replicatorConsumers);
+    }
+
+    @Bean
+    @Lazy(true)
+    public DefaultMessageListenerContainer cassandraReplicatorReplayListener() {
+        return makeContainer(cassandraReplicator(), replicatorReplayDestination, 1, 1);
+    }
+    
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
