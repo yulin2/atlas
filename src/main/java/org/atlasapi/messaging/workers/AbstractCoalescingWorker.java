@@ -39,7 +39,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  */
 public abstract class AbstractCoalescingWorker implements Worker {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractCoalescingWorker.class);
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     //
     private final ObjectMapper mapper = JsonFactory.makeJsonMapper();
     //
@@ -69,6 +69,7 @@ public abstract class AbstractCoalescingWorker implements Worker {
         try {
             Message event = mapper.readValue(message, Message.class);
             if (event.canCoalesce() && coalesceSizeThreshold > 0) {
+                log.info("Coalescing message: {}", message);
                 coalesceQueue.convertAndSend(message);
                 // Coalesces only at a given threshold:
                 if (coalesceSize.incrementAndGet() >= coalesceSizeThreshold) {
@@ -82,6 +83,7 @@ public abstract class AbstractCoalescingWorker implements Worker {
                     }
                 }
             } else {
+                log.info("Dispatching message: {}", message);
                 event.dispatchTo(this);
             }
         } catch (IOException ex) {
@@ -120,16 +122,17 @@ public abstract class AbstractCoalescingWorker implements Worker {
                     received = (String) coalesceQueue.receiveAndConvert();
                 }
                 for (Map.Entry<String, Message> current : events.entrySet()) {
+                    log.info("Dispatching coalesced message: {}", current.getValue());
                     current.getValue().dispatchTo(this);
                 }
                 coalesceQueue.closeThreadLocalConsumer();
                 coalesceTx.commit(tx);
             } catch (Exception ex) {
-                LOG.error(ex.getMessage(), ex);
+                log.error(ex.getMessage(), ex);
                 try {
                     coalesceQueue.closeThreadLocalConsumer();
                 } catch (JMSException ex2) {
-                    LOG.warn(ex2.getMessage(), ex2);
+                    log.warn(ex2.getMessage(), ex2);
                 }
                 coalesceTx.rollback(tx);
             } finally {
