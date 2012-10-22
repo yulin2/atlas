@@ -141,7 +141,11 @@ public abstract class AbstractCoalescingWorker implements Worker {
                         events.remove(key);
                     }
                     events.put(key, current);
-                    received = (String) coalesceQueue.receiveAndConvert();
+                    if (events.size() < coalesceSizeThreshold) {
+                        received = (String) coalesceQueue.receiveAndConvert();
+                    } else {
+                        received = null;
+                    }
                 }
                 for (Map.Entry<String, Message> current : events.entrySet()) {
                     log.debug("Dispatching coalesced message: {}", current.getValue());
