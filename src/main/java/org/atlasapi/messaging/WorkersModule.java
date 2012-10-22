@@ -28,56 +28,30 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 @Configuration
 public class WorkersModule {
 
-    private String replicatorDestination = Configurer.get("messaging.destination.replicator").get();
-    private int replicatorConsumers = Integer.parseInt(Configurer.get("messaging.consumers.replicator").get());
     private String indexerDestination = Configurer.get("messaging.destination.indexer").get();
     private int indexerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.indexer").get());
-    private String loggerDestination = Configurer.get("messaging.destination.logger").get();
-    private int loggerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.logger").get());
-    private String replicatorReplayDestination = Configurer.get("messaging.destination.replay.replicator").get();
     private String indexerReplayDestination = Configurer.get("messaging.destination.replay.indexer").get();
-    private long replayInterruptThreshold = Long.parseLong(Configurer.get("messaging.replay.interrupt.threshold").get());
     private String indexerCoalesceQueue = Configurer.get("messaging.indexer.coalesce.queue").get();
     private int indexerCoalesceSize = Integer.parseInt(Configurer.get("messaging.indexer.coalesce.size").get());
     private int indexerCoalesceTime = Integer.parseInt(Configurer.get("messaging.indexer.coalesce.time").get());
+    private String loggerDestination = Configurer.get("messaging.destination.logger").get();
+    private int loggerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.logger").get());
+    private long replayInterruptThreshold = Long.parseLong(Configurer.get("messaging.replay.interrupt.threshold").get());
     private boolean enabled = Boolean.parseBoolean(Configurer.get("messaging.enabled").get());
     //
     @Autowired
     private ConnectionFactory connectionFactory;
     @Autowired
-    @Qualifier(value = "cassandra")
-    private ContentWriter cassandraContentWriter;
+    private ContentIndexer contentIndexer;
     @Autowired
     private ContentResolver mongoContentResolver;
     @Autowired
     private MessageStore mongoMessageStore;
-    @Autowired
-    private ContentIndexer contentIndexer;
-
-    @Bean
-    @Lazy(true)
-    public ReplayingWorker cassandraReplicator() {
-        return new ReplayingWorker(new CassandraReplicator(mongoContentResolver, cassandraContentWriter), replayInterruptThreshold);
-    }
-
-    @Bean
-    @Lazy(true)
-    public DefaultMessageListenerContainer cassandraReplicatorMessageListener() {
-        return makeContainer(cassandraReplicator(), replicatorDestination, replicatorConsumers, replicatorConsumers);
-    }
-
-    @Bean
-    @Lazy(true)
-    public DefaultMessageListenerContainer cassandraReplicatorReplayListener() {
-        return makeContainer(cassandraReplicator(), replicatorReplayDestination, 1, 1);
-    }
 
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
-        ESIndexer esIndexer = new ESIndexer(mongoContentResolver, contentIndexer, connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
-        esIndexer.start();
-        return new ReplayingWorker(esIndexer, replayInterruptThreshold);
+        return new ReplayingWorker(new ESIndexer(mongoContentResolver, contentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
     }
 
     @Bean
@@ -107,9 +81,12 @@ public class WorkersModule {
     @PostConstruct
     public void start() {
         if (enabled) {
-            esIndexer().init();
+            esIndexer().start();
+            
+            esIndexerMessageListener().initialize();
             esIndexerMessageListener().start();
             
+            messageLoggerMessageListener().initialize();
             messageLoggerMessageListener().start();
         }
     }

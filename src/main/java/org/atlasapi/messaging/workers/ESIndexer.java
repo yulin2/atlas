@@ -1,7 +1,6 @@
 package org.atlasapi.messaging.workers;
 
 import java.util.Arrays;
-import javax.jms.ConnectionFactory;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -12,15 +11,14 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ESIndexer extends AbstractCoalescingWorker {
+public class ESIndexer extends AbstractWorker {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     //
     private final ContentResolver contentResolver;
     private final ContentIndexer contentIndexer;
 
-    public ESIndexer(ContentResolver contentResolver, ContentIndexer contentIndexer, ConnectionFactory connectionFactory, String coalesceQueue, int coalesceMillisThreshold, int coalesceSizeThreshold) {
-        super(connectionFactory, coalesceQueue, coalesceMillisThreshold, coalesceSizeThreshold);
+    public ESIndexer(ContentResolver contentResolver, ContentIndexer contentIndexer) {
         this.contentResolver = contentResolver;
         this.contentIndexer = contentIndexer;
     }

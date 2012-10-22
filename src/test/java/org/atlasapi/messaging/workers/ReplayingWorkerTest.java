@@ -26,9 +26,10 @@ public class ReplayingWorkerTest {
         Worker delegate = mock(Worker.class);
         long threshold = 100;
 
-        ReplayingWorker replayingWorker = new ReplayingWorker(delegate, threshold);
+        ReplayingWorker replayingWorker = new ReplayingWorker(delegate);
+        replayingWorker.setReplayThreshold(threshold);
         try {
-            replayingWorker.init();
+            replayingWorker.start();
 
             replayingWorker.process(mockedMessageDispatchingTo(delegate));
 
@@ -43,9 +44,10 @@ public class ReplayingWorkerTest {
         Worker delegate = mock(Worker.class);
         long threshold = 100;
 
-        ReplayingWorker replayingWorker = new ReplayingWorker(delegate, threshold);
+        ReplayingWorker replayingWorker = new ReplayingWorker(delegate);
+        replayingWorker.setReplayThreshold(threshold);
         try {
-            replayingWorker.init();
+            replayingWorker.start();
 
             ReplayMessage replay = mock(ReplayMessage.class);
             EntityUpdatedMessage original = mockedMessageDispatchingTo(delegate);
@@ -66,9 +68,10 @@ public class ReplayingWorkerTest {
         final Worker delegate = mock(Worker.class);
         final long threshold = 10000;
 
-        final ReplayingWorker replayingWorker = new ReplayingWorker(delegate, threshold);
+        final ReplayingWorker replayingWorker = new ReplayingWorker(delegate);
+        replayingWorker.setReplayThreshold(threshold);
         try {
-            replayingWorker.init();
+            replayingWorker.start();
 
             replayingWorker.process(mock(BeginReplayMessage.class));
 
@@ -93,10 +96,11 @@ public class ReplayingWorkerTest {
         final Worker delegate = mock(Worker.class);
         final long threshold = 10000;
 
-        final ReplayingWorker replayingWorker = new ReplayingWorker(delegate, threshold);
+        final ReplayingWorker replayingWorker = new ReplayingWorker(delegate);
+        replayingWorker.setReplayThreshold(threshold);
         final CountDownLatch processLatch = new CountDownLatch(1);
         try {
-            replayingWorker.init();
+            replayingWorker.start();
 
             replayingWorker.process(mock(BeginReplayMessage.class));
 
@@ -124,10 +128,11 @@ public class ReplayingWorkerTest {
         final Worker delegate = mock(Worker.class);
         final long threshold = 1000;
 
-        final ReplayingWorker replayingWorker = new ReplayingWorker(delegate, threshold);
+        final ReplayingWorker replayingWorker = new ReplayingWorker(delegate);
+        replayingWorker.setReplayThreshold(threshold);
         final CountDownLatch processLatch = new CountDownLatch(1);
         try {
-            replayingWorker.init();
+            replayingWorker.start();
 
             replayingWorker.process(mock(BeginReplayMessage.class));
 
