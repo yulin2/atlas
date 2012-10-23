@@ -54,14 +54,12 @@ public class QueryModule {
     @Autowired
     private LookupEntryStore lookupEntry;
     @Autowired
-    @Qualifier(value = "cassandra")
-    private ContentResolver cassandraResolver;
+    private ContentResolver contentResolver;
+    @Autowired
+    private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
     @Autowired
     @Qualifier("contentUpdater")
     private EquivalenceUpdater<Content> equivUpdater;
-    @Autowired
-    @Qualifier("contentSearcher")
-    private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
     //
     private String applicationsEnabled = Configurer.get("applications.enabled").get();
     private String searchHost = Configurer.get("atlas.search.host").get();
@@ -69,7 +67,7 @@ public class QueryModule {
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
 
-        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(cassandraResolver,
+        KnownTypeQueryExecutor queryExecutor = new LookupResolvingQueryExecutor(contentResolver,
                 lookupEntry);
 
         queryExecutor = new UriFetchingQueryExecutor(localOrRemoteFetcher, queryExecutor, equivUpdater, ImmutableSet.of(FACEBOOK));
