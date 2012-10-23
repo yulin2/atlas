@@ -269,7 +269,6 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    @Primary
     @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
