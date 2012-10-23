@@ -87,12 +87,12 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
     private MappedWriter<T> findWriterFor(HttpServletRequest request) throws IOException {
         MappedWriter<T> writer = null;
         try {
-            if (request.getHeader(HttpHeaders.ACCEPT) != null) {
-                writer = mimeTypeMap.get(MimeType.fromString(request.getHeader(HttpHeaders.ACCEPT)));
+            String extension = extensionFromUri(request.getRequestURI());
+            if (extension != null) {
+                writer = extensionMap.get(extension);
             } else {
-                String extension = extensionFromUri(request.getRequestURI());
-                if (extension != null) {
-                    writer = extensionMap.get(extension);
+                if (request.getHeader(HttpHeaders.ACCEPT) != null) {
+                    writer = mimeTypeMap.get(MimeType.fromString(request.getHeader(HttpHeaders.ACCEPT)));
                 } else {
                     writer = mimeTypeMap.get(MimeType.APPLICATION_JSON);
                 }
@@ -118,7 +118,7 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
         response.setContentType(TEXT_PLAIN.toString());
         response.getOutputStream().print("Not acceptable");
     }
-    
+
     public void writeNotFound(HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatusCode.NOT_FOUND.code());
         response.setCharacterEncoding(Charsets.UTF_8.toString());
