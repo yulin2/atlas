@@ -278,6 +278,7 @@ public class AtlasPersistenceModule {
             contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, cassandraContentPersistenceModule().cassandraLookupEntryStore());
+        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter);
         return contentWriter;
     }
 
