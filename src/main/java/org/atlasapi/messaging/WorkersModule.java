@@ -15,7 +15,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.messaging.MessageStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -40,7 +39,6 @@ public class WorkersModule {
     private String loggerDestination = Configurer.get("messaging.destination.logger").get();
     private int loggerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.logger").get());
     private long replayInterruptThreshold = Long.parseLong(Configurer.get("messaging.replay.interrupt.threshold").get());
-    private boolean enabled = Boolean.parseBoolean(Configurer.get("messaging.enabled").get());
     //
     @Autowired
     private ConnectionFactory connectionFactory;
@@ -71,7 +69,7 @@ public class WorkersModule {
     public DefaultMessageListenerContainer cassandraReplicatorReplayListener() {
         return makeContainer(cassandraReplicator(), replicatorReplayDestination, 1, 1);
     }
-    
+
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
@@ -104,22 +102,14 @@ public class WorkersModule {
 
     @PostConstruct
     public void start() {
-        if (enabled) {
-            esIndexer().start();
-            
-            esIndexerMessageListener().initialize();
-            esIndexerMessageListener().start();
-            
-            messageLoggerMessageListener().initialize();
-            messageLoggerMessageListener().start();
-        }
+        cassandraReplicator().start();
+        esIndexer().start();
     }
 
     @PreDestroy
     public void stop() {
-        if (enabled) {
-            esIndexer().destroy();
-        }
+        esIndexer().stop();
+        cassandraReplicator().stop();
     }
 
     private DefaultMessageListenerContainer makeContainer(Worker worker, String destination, int consumers, int maxConsumers) {
