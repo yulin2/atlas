@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.properties.Configurer;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
@@ -53,20 +54,17 @@ public class QueryModule {
     @Autowired
     private LookupEntryStore lookupEntry;
     @Autowired
-    private KnownTypeContentResolver mongoResolver;
-    @Autowired
     @Qualifier(value = "cassandra")
     private ContentResolver cassandraResolver;
     @Autowired
     @Qualifier("contentUpdater")
     private EquivalenceUpdater<Content> equivUpdater;
     @Autowired
+    @Qualifier("contentSearcher")
     private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
     //
-    @Value("${applications.enabled}")
-    private String applicationsEnabled;
-    @Value("${atlas.search.host}")
-    private String searchHost;
+    private String applicationsEnabled = Configurer.get("applications.enabled").get();
+    private String searchHost = Configurer.get("atlas.search.host").get();
 
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
