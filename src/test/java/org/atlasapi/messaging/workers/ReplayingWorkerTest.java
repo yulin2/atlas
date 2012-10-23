@@ -35,7 +35,7 @@ public class ReplayingWorkerTest {
 
             verify(delegate, times(1)).process(any(EntityUpdatedMessage.class));
         } finally {
-            replayingWorker.destroy();
+            replayingWorker.stop();
         }
     }
 
@@ -59,7 +59,7 @@ public class ReplayingWorkerTest {
 
             verify(delegate, times(1)).process(any(EntityUpdatedMessage.class));
         } finally {
-            replayingWorker.destroy();
+            replayingWorker.stop();
         }
     }
 
@@ -87,7 +87,7 @@ public class ReplayingWorkerTest {
 
             verify(delegate, times(0)).process(any(EntityUpdatedMessage.class));
         } finally {
-            replayingWorker.destroy();
+            replayingWorker.stop();
         }
     }
 
@@ -119,7 +119,7 @@ public class ReplayingWorkerTest {
 
             verify(delegate, times(1)).process(any(EntityUpdatedMessage.class));
         } finally {
-            replayingWorker.destroy();
+            replayingWorker.stop();
         }
     }
 
@@ -149,7 +149,7 @@ public class ReplayingWorkerTest {
 
             verify(delegate, times(1)).process(any(EntityUpdatedMessage.class));
         } finally {
-            replayingWorker.destroy();
+            replayingWorker.stop();
         }
     }
 
