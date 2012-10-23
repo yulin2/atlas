@@ -43,6 +43,13 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
+import com.metabroadcast.common.properties.Configurer;
+import org.atlasapi.equiv.update.EquivalenceUpdater;
+import org.atlasapi.persistence.content.SearchResolver;
+import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
+import org.atlasapi.query.content.search.ContentResolvingSearcher;
+import org.atlasapi.query.content.search.DummySearcher;
+import org.atlasapi.search.ContentSearcher;
 
 @Configuration
 @Import(EquivModule.class)
@@ -58,14 +65,13 @@ public class QueryModule {
     @Autowired @Qualifier(value="cassandra")
     private ContentResolver cassandraResolver;
     @Autowired
+    @Qualifier("contentSearcher")
     private org.atlasapi.media.content.ContentSearcher contentSearcher;
     @Qualifier("contentUpdater")
     private EquivalenceUpdater<Content> equivUpdater;
     //
-    @Value("${applications.enabled}")
-    private String applicationsEnabled;
-    @Value("${atlas.search.host}")
-    private String searchHost;
+    private String applicationsEnabled = Configurer.get("applications.enabled").get();
+    private String searchHost = Configurer.get("atlas.search.host").get();
 
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
