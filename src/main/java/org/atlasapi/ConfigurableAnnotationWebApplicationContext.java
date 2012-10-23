@@ -52,8 +52,6 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
             SearchModule.class,
             QueryModule.class,
             AtlasFetchModule.class,
-            AtlasPersistenceModule.class, 
-            AtlasFetchModule.class, 
             RemoteSiteModule.class,
             SystemModule.class,
             RadioPlayerModule.class,
