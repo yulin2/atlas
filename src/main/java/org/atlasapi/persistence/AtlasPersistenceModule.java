@@ -239,31 +239,37 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
+    @Primary
     public MongoMessageStore messageStore() {
         return mongoContentPersistenceModule().messageStore();
     }
 
     @Bean
+    @Primary
     public ESContentIndexer contentIndexer() {
         return esContentIndexModule().contentIndexer();
     }
 
     @Bean
+    @Primary
     public EsScheduleIndex scheduleIndex() {
         return esContentIndexModule().scheduleIndex();
     }
 
     @Bean
+    @Primary
     public ESTopicSearcher topicSearcher() {
         return esContentIndexModule().topicSearcher();
     }
 
     @Bean
+    @Primary
     public ESContentSearcher contentSearcher() {
         return esContentIndexModule().contentSearcher();
     }
 
     @Bean
+    @Primary
     @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();

@@ -64,6 +64,7 @@ public class QueryModule {
     private KnownTypeContentResolver mongoResolver;
     @Autowired @Qualifier(value="cassandra")
     private ContentResolver cassandraResolver;
+    private ContentResolver contentResolver;
     @Autowired
     @Qualifier("contentSearcher")
     private org.atlasapi.media.content.ContentSearcher contentSearcher;
