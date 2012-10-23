@@ -43,19 +43,20 @@ public class WorkersModule {
     @Autowired
     private ConnectionFactory connectionFactory;
     @Autowired
-    private ContentIndexer contentIndexer;
-    @Autowired
-    private ContentResolver mongoContentResolver;
-    @Autowired
     private MessageStore mongoMessageStore;
+    @Autowired
+    private ContentIndexer esContentIndexer;
     @Autowired
     @Qualifier(value = "cassandra")
     private ContentWriter cassandraContentWriter;
+    @Autowired
+    @Qualifier(value = "cassandra")
+    private ContentResolver cassandraContentResolver;
 
     @Bean
     @Lazy(true)
     public ReplayingWorker cassandraReplicator() {
-        return new ReplayingWorker(new CassandraReplicator(mongoContentResolver, cassandraContentWriter));
+        return new ReplayingWorker(new CassandraReplicator(cassandraContentResolver, cassandraContentWriter));
     }
 
     @Bean
@@ -73,7 +74,7 @@ public class WorkersModule {
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
-        return new ReplayingWorker(new ESIndexer(mongoContentResolver, contentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
+        return new ReplayingWorker(new ESIndexer(cassandraContentResolver, esContentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
     }
 
     @Bean
