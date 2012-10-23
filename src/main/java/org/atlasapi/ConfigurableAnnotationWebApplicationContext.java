@@ -46,21 +46,23 @@ public class ConfigurableAnnotationWebApplicationContext extends AnnotationConfi
 
     private void configure(Builder<Class<?>> builder) {
         builder.add(
-                AtlasModule.class,
-                AtlasMessagingModule.class,
-                AtlasPersistenceModule.class,
-                AtlasLoggingModule.class,
-                AtlasWebModule.class,
-                QueryModule.class,
-                RemoteSiteModule.class,
-                AtlasFetchModule.class,
-                SystemModule.class,
-                RadioPlayerModule.class,
-                XmlTvModule.class,
-                RemoteSiteHealthModule.class,
-                EquivModule.class);
-
-        if (runProcessingOnly()) {
+            AtlasModule.class,
+            AtlasMessagingModule.class,
+            AtlasPersistenceModule.class,
+            AtlasLoggingModule.class,
+            AtlasWebModule.class,
+            SearchModule.class,
+            QueryModule.class,
+            AtlasFetchModule.class,
+            RemoteSiteModule.class,
+            SystemModule.class,
+            RadioPlayerModule.class,
+            XmlTvModule.class, 
+            RemoteSiteHealthModule.class,
+            EquivModule.class
+        );
+        
+        if(runProcessingOnly()) {
             builder.add(
                 ManualScheduleRebuildModule.class, 
                 InterlinkingDeltaModule.class,
