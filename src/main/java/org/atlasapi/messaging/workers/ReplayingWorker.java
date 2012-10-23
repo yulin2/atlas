@@ -51,7 +51,7 @@ public class ReplayingWorker extends AbstractCoalescingWorker {
         scheduler.scheduleAtFixedRate(new ReplayCircuitBreaker(), replayThreshold, replayThreshold, TimeUnit.MILLISECONDS);
     }
     
-    public void destroy() {
+    public void stop() {
         scheduler.shutdownNow();
     }
 
