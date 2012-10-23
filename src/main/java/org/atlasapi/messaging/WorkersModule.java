@@ -5,13 +5,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.jms.ConnectionFactory;
 import org.atlasapi.messaging.worker.Worker;
-import org.atlasapi.messaging.workers.CassandraReplicator;
 import org.atlasapi.messaging.workers.ESIndexer;
 import org.atlasapi.messaging.workers.MessageLogger;
 import org.atlasapi.messaging.workers.ReplayingWorker;
 import org.atlasapi.persistence.content.ContentIndexer;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.messaging.MessageStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,9 +25,6 @@ import org.springframework.jms.listener.adapter.MessageListenerAdapter;
 @Configuration
 public class WorkersModule {
 
-    private String replicatorDestination = Configurer.get("messaging.destination.replicator").get();
-    private int replicatorConsumers = Integer.parseInt(Configurer.get("messaging.consumers.replicator").get());
-    private String replicatorReplayDestination = Configurer.get("messaging.destination.replay.replicator").get();
     private String indexerDestination = Configurer.get("messaging.destination.indexer").get();
     private int indexerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.indexer").get());
     private String indexerReplayDestination = Configurer.get("messaging.destination.replay.indexer").get();
@@ -43,38 +38,17 @@ public class WorkersModule {
     @Autowired
     private ConnectionFactory connectionFactory;
     @Autowired
-    private MessageStore mongoMessageStore;
+    private MessageStore messageStore;
     @Autowired
-    private ContentIndexer esContentIndexer;
-    @Autowired
-    @Qualifier(value = "cassandra")
-    private ContentWriter cassandraContentWriter;
+    private ContentIndexer contentIndexer;
     @Autowired
     @Qualifier(value = "cassandra")
-    private ContentResolver cassandraContentResolver;
-
-    @Bean
-    @Lazy(true)
-    public ReplayingWorker cassandraReplicator() {
-        return new ReplayingWorker(new CassandraReplicator(cassandraContentResolver, cassandraContentWriter));
-    }
-
-    @Bean
-    @Lazy(true)
-    public DefaultMessageListenerContainer cassandraReplicatorMessageListener() {
-        return makeContainer(cassandraReplicator(), replicatorDestination, replicatorConsumers, replicatorConsumers);
-    }
-
-    @Bean
-    @Lazy(true)
-    public DefaultMessageListenerContainer cassandraReplicatorReplayListener() {
-        return makeContainer(cassandraReplicator(), replicatorReplayDestination, 1, 1);
-    }
+    private ContentResolver contentResolver;
 
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
-        return new ReplayingWorker(new ESIndexer(cassandraContentResolver, esContentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
+        return new ReplayingWorker(new ESIndexer(contentResolver, contentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
     }
 
     @Bean
@@ -92,7 +66,7 @@ public class WorkersModule {
     @Bean
     @Lazy(true)
     public Worker messageLogger() {
-        return new MessageLogger(mongoMessageStore);
+        return new MessageLogger(messageStore);
     }
 
     @Bean
@@ -103,14 +77,12 @@ public class WorkersModule {
 
     @PostConstruct
     public void start() {
-        cassandraReplicator().start();
         esIndexer().start();
     }
 
     @PreDestroy
     public void stop() {
         esIndexer().stop();
-        cassandraReplicator().stop();
     }
 
     private DefaultMessageListenerContainer makeContainer(Worker worker, String destination, int consumers, int maxConsumers) {
