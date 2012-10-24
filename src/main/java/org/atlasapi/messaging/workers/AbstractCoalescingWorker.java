@@ -170,11 +170,20 @@ public abstract class AbstractCoalescingWorker implements Worker {
     private String makeCoalescingKey(Message message) {
         return message.getClass().getName() + ":" + message.getEntityId();
     }
+    
+    private class CoalesceRunner implements Runnable {
+
+        @Override
+        public void run() {
+            doCoalesce();
+        }
+    }
+    
+    // The following two classes have been introduced to work around: https://issues.apache.org/jira/browse/AMQ-3485
 
     private static class UnclosedMessageConsumer implements MessageConsumer {
 
         private final MessageConsumer delegate;
-        private volatile boolean closed;
 
         public UnclosedMessageConsumer(MessageConsumer delegate) {
             this.delegate = delegate;
@@ -240,14 +249,6 @@ public abstract class AbstractCoalescingWorker implements Worker {
                 LOCAL_CONSUMER.set(new UnclosedMessageConsumer(super.createConsumer(session, destination, messageSelector)));
             }
             return LOCAL_CONSUMER.get();
-        }
-    }
-
-    private class CoalesceRunner implements Runnable {
-
-        @Override
-        public void run() {
-            doCoalesce();
         }
     }
 }
