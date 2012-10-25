@@ -266,6 +266,15 @@ var updateEnabled = function(callback){
 	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 		var enabled = app.configuration.publishers[i].enabled;
 		var publisher = app.configuration.publishers[i].key;
+		var state = app.configuration.publishers[i].state;
+		
+		if (state != "available") {
+			if(count === ii-1){
+				callback();
+			}
+			count++;
+			continue;
+		}
 		var type = 'delete';
 		var data = null;
 		if(enabled){
@@ -277,11 +286,11 @@ var updateEnabled = function(callback){
 			url += "/"+publisher;
 		}
 		url += ".json";
-		
 		$.ajax({
 			type: type,
 			url: url,
 			data: data,
+			async: false,
 			success:function(responseData, textStatus, XMLHttpRequest) {
 				
 			},
