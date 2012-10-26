@@ -67,7 +67,7 @@ public abstract class AbstractCoalescingWorker implements Worker {
         this.coalesceTx = new JmsTransactionManager(connectionFactory);
         this.coalesceQueue = new JmsCustomTemplate(connectionFactory);
         this.coalesceQueue.setDefaultDestinationName(coalesceQueue);
-        this.coalesceQueue.setReceiveTimeout(100);
+        this.coalesceQueue.setReceiveTimeout(250);
     }
 
     /**
@@ -153,6 +153,7 @@ public abstract class AbstractCoalescingWorker implements Worker {
                 }
                 coalesceQueue.closeThreadLocalConsumer();
                 coalesceTx.commit(tx);
+                log.info("Committed {} messages.", events.size());
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
                 try {
