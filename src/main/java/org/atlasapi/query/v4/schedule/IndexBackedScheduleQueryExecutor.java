@@ -25,11 +25,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
     private static final long QUERY_TIMEOUT = 60000;
-    
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private KnownTypeQueryExecutor contentQueryExecutor;
     private ScheduleIndex index;
 
@@ -40,11 +43,18 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
     @Override
     public ScheduleChannel execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
+        long startIndexTime = System.currentTimeMillis();
         ListenableFuture<ScheduleRef> futureRef = queryIndex(query);
-        
         ScheduleRef scheduleRef = Futures.get(futureRef, QUERY_TIMEOUT, MILLISECONDS, ScheduleQueryExecutionException.class);
-        
-        return transformToChannelSchedule(query, scheduleRef);
+        log.info("Schedule index time: " + (System.currentTimeMillis() - startIndexTime));
+        //
+        long startRetrieveTime = System.currentTimeMillis();
+        ScheduleChannel schedule = transformToChannelSchedule(query, scheduleRef);
+        log.info("Schedule retrieve time: " + (System.currentTimeMillis() - startRetrieveTime));
+        //
+        log.info("Total schedule time: " + (System.currentTimeMillis() - startIndexTime));
+        //
+        return schedule;
     }
 
     private ListenableFuture<ScheduleRef> queryIndex(ScheduleQuery query) {
