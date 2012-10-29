@@ -66,8 +66,8 @@ public abstract class AbstractCoalescingWorker implements Worker {
         this.coalesceSizeThreshold = coalesceSizeThreshold;
         this.coalesceTx = new JmsTransactionManager(connectionFactory);
         this.coalesceQueue = new JmsCustomTemplate(connectionFactory);
-        this.coalesceQueue.setDefaultDestinationName(coalesceQueue);
-        this.coalesceQueue.setReceiveTimeout(250);
+        this.coalesceQueue.setDefaultDestinationName(coalesceQueue + "?consumer.prefetchSize=1");
+        this.coalesceQueue.setReceiveTimeout(10000);
     }
 
     /**
