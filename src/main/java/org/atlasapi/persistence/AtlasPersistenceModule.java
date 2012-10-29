@@ -88,6 +88,7 @@ public class AtlasPersistenceModule {
     private final String cassandraPort = Configurer.get("cassandra.port").get();
     private final String cassandraConnectionTimeout = Configurer.get("cassandra.connectionTimeout").get();
     private final String cassandraRequestTimeout = Configurer.get("cassandra.requestTimeout").get();
+    private final String cassandraClientThreads = Configurer.get("cassandra.clientThreads").get();
     private final String esSeeds = Configurer.get("elasticsearch.seeds").get();
     private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
     private final Parameter processingConfig = Configurer.get("processing.config");
@@ -119,7 +120,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     public CassandraContentPersistenceModule cassandraContentPersistenceModule() {
-        CassandraContentPersistenceModule cassandraContentPersistenceModule = new CassandraContentPersistenceModule(cassandraEnv, cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout), idGenerator());
+        CassandraContentPersistenceModule cassandraContentPersistenceModule = new CassandraContentPersistenceModule(cassandraEnv, cassandraSeeds, Integer.parseInt(cassandraPort), Integer.parseInt(cassandraConnectionTimeout), Integer.parseInt(cassandraRequestTimeout), Integer.parseInt(cassandraClientThreads), idGenerator());
         cassandraContentPersistenceModule.init();
         return cassandraContentPersistenceModule;
     }
