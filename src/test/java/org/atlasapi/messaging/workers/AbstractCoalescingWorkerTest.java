@@ -131,6 +131,28 @@ public class AbstractCoalescingWorkerTest {
         assertTrue(processLatch.await(600, TimeUnit.SECONDS));
     }
 
+    @Test
+    public void testCanCoalesceAllMessages() throws InterruptedException, IOException {
+        final int total = 1000;
+        final CountDownLatch processLatch = new CountDownLatch(total);
+        //
+        listener = makeListener(new AbstractCoalescingWorker(connectionFactory, COALESCE_QUEUE, 60000, 1000) {
+
+            @Override
+            public void process(EntityUpdatedMessage message) {
+                processLatch.countDown();
+            }
+        });
+        listener.initialize();
+        listener.start();
+        //
+        for (int i = 0; i <= total; i++) {
+            mainQueue.convertAndSend(mapper.writeValueAsString(new EntityUpdatedMessage("" + i, 1l, "" + i, "", "")));
+        }
+        //
+        assertTrue(processLatch.await(60, TimeUnit.SECONDS));
+    }
+
     private DefaultMessageListenerContainer makeListener(AbstractCoalescingWorker worker) {
         MessageListenerAdapter adapter = new MessageListenerAdapter(worker);
         DefaultMessageListenerContainer listener = new DefaultMessageListenerContainer();
