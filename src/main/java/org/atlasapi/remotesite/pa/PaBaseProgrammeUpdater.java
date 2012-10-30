@@ -238,7 +238,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
                    
                     Maybe<Channel> channel = channelMap.getChannel(Integer.valueOf(channelData.getChannelId()));
                     
-                    LocalDate scheduleDay = LocalDate.parse(fileDate, FILEDATE_FORMAT);
+                    LocalDate scheduleDay = FILEDATE_FORMAT.parseDateTime(fileDate).toLocalDate();
                     long version = deltaFileHelper.versionNumber(fileToProcess);
                     if (channel.hasValue() 
                             && isSupported(channel.requireValue()) 
