@@ -70,7 +70,7 @@ public class MusicBrainzProcessor {
                     try {
                         Long duration = Long.parseLong(Iterables.get(currentRecordingData, 4));
                         if (duration != null) {
-                            song.setDuration(Duration.millis(duration));
+                            song.setDuration(new Duration(duration));
                         }
                     } catch (NumberFormatException ex) {
                     }
