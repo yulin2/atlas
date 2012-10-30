@@ -81,6 +81,7 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
 import org.atlasapi.persistence.topic.TopicSearcher;
@@ -110,6 +111,7 @@ public class QueryWebModule {
     private @Autowired ProductResolver productResolver;
 
     private @Autowired KnownTypeQueryExecutor queryExecutor;
+    private @Autowired EquivalentContentResolver equivalentContentResolver;
     private @Autowired ApplicationConfigurationFetcher configFetcher;
     private @Autowired AdapterLog log;
     
@@ -155,7 +157,7 @@ public class QueryWebModule {
     
     @Bean
     org.atlasapi.query.v4.schedule.ScheduleController v4ScheduleController() {
-        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, queryExecutor);
+        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, equivalentContentResolver);
         return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, scheduleChannelModelOutputter());
     }
     
