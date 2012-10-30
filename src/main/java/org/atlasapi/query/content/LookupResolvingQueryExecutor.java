@@ -41,7 +41,7 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
     @Override
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
-        EquivalentContent content = contentResolver.resolveUris(uris, query.includedPublishers(), query.getAnnotations());
+        EquivalentContent content = contentResolver.resolveUris(uris, query.includedPublishers(), query.getAnnotations(), true);
         return transform(content);
     }
     
