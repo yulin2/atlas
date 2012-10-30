@@ -53,6 +53,8 @@ import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import com.metabroadcast.common.properties.Configurer;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
+import org.atlasapi.persistence.content.DefaultEquivalentContentResolver;
+import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.query.content.fuzzy.RemoteFuzzySearcher;
 import org.atlasapi.query.content.search.ContentResolvingSearcher;
@@ -82,6 +84,11 @@ public class QueryModule {
     private String applicationsEnabled = Configurer.get("applications.enabled").get();
     private String searchHost = Configurer.get("atlas.search.host").get();
 
+    @Bean
+    public EquivalentContentResolver equivExecutor() {
+        return new DefaultEquivalentContentResolver(contentResolver, lookupEntry);
+    }
+    
     @Bean
     public KnownTypeQueryExecutor queryExecutor() {
 
