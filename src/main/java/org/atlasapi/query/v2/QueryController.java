@@ -31,6 +31,7 @@ import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -44,10 +45,13 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
 	private final KnownTypeQueryExecutor executor;
+
+    private final ContentWriteController contentWriteController;
 	
-    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content, ? extends Identified>> outputter) {
+    public QueryController(KnownTypeQueryExecutor executor, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<QueryResult<Content, ? extends Identified>> outputter, ContentWriteController contentWriteController) {
 	    super(configFetcher, log, outputter);
         this.executor = executor;
+        this.contentWriteController = contentWriteController;
 	}
     
     @RequestMapping("/")
@@ -65,7 +69,7 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 	    outputter.writeError(request, response, UNSUPPORTED);
 	}
 	
-	@RequestMapping("/3.0/content.*")
+	@RequestMapping(value="/3.0/content.*",method=RequestMethod.GET)
 	public void content(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		try {
 			ContentQuery filter = builder.build(request);
@@ -108,5 +112,10 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
             return ImmutableList.of();
         }
         return ImmutableList.copyOf(URI_SPLITTER.split(parameter));
+    }
+    
+    @RequestMapping(value="/3.0/content.json", method = RequestMethod.POST)
+    public Void writeContent(HttpServletRequest req, HttpServletResponse resp) {
+        return contentWriteController.writeContent(req, resp);
     }
 }

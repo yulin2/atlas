@@ -1,0 +1,105 @@
+package org.atlasapi.query.v2;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.input.ModelReader;
+import org.atlasapi.input.ModelTransformer;
+import org.atlasapi.input.ReadException;
+import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.simple.Description;
+import org.atlasapi.persistence.content.ContentWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.google.common.base.Strings;
+import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.http.HttpStatusCode;
+
+public class ContentWriteController {
+    
+    private static final Logger log = LoggerFactory.getLogger(ContentWriteController.class);
+
+    private final ApplicationConfigurationFetcher appConfigFetcher;
+    private final ContentWriter writer;
+    private final ModelReader reader;
+
+    private ModelTransformer<Description, Content> transformer;
+
+    public ContentWriteController(ApplicationConfigurationFetcher appConfigFetcher, ContentWriter writer, ModelReader reader, ModelTransformer<Description, Content> transformer) {
+        this.appConfigFetcher = appConfigFetcher;
+        this.writer = writer;
+        this.reader = reader;
+        this.transformer = transformer;
+    }
+    
+    @RequestMapping(value="/3.0/content.json", method = RequestMethod.POST)
+    public Void writeContent(HttpServletRequest req, HttpServletResponse resp) {
+        
+        Maybe<ApplicationConfiguration> possibleConfig = appConfigFetcher.configurationFor(req);
+        
+        if (possibleConfig.isNothing()) {
+            return error(resp, HttpStatus.UNAUTHORIZED.value());
+        }
+        
+        Content content;
+        try {
+            content = complexify(deserialize(new InputStreamReader(req.getInputStream())));
+        } catch (IOException ioe) {
+            log.error("Error reading input for request " + req.getRequestURL(), ioe);
+            return error(resp, HttpStatusCode.SERVER_ERROR.code());
+        } catch (Exception e) {
+            log.error("Error reading input for request " + req.getRequestURL(), e);
+            return error(resp, HttpStatusCode.BAD_REQUEST.code());
+        }
+        
+        if (!possibleConfig.requireValue().canWrite(content.getPublisher())) {
+            return error(resp, HttpStatusCode.FORBIDDEN.code());
+        }
+        
+        if (Strings.isNullOrEmpty(content.getCanonicalUri())) {
+            return error(resp, HttpStatusCode.BAD_REQUEST.code());
+        }
+
+        try {
+            if (content instanceof Item) {
+                writer.createOrUpdate((Item) content);
+            } else {
+                writer.createOrUpdate((Container) content);
+            }
+        } catch (Exception e) {
+            log.error("Error reading input for request " + req.getRequestURL(), e);
+            return error(resp, HttpStatusCode.SERVER_ERROR.code());
+        }
+        
+        return null;
+    }
+    
+    private Content complexify(Description inputContent) {
+        return transformer.transform(inputContent);
+    }
+
+    private Description deserialize(Reader input) throws IOException, ReadException {
+        return reader.read(new BufferedReader(input), Description.class);
+    }
+    
+    private Void error(HttpServletResponse response, int code) {
+        response.setStatus(code);
+        response.setContentLength(0);
+        return null;
+    }
+    
+}
