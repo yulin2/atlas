@@ -117,6 +117,7 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     private Container merge(Container current, Container extracted) {
         current = mergeContents(current, extracted);
         if (current instanceof Series && extracted instanceof Series) {
+            ((Series) current).withSeriesNumber(((Series) extracted).getSeriesNumber());
             ((Series) current).setParentRef(((Series) extracted).getParent());
         }
         return current;
