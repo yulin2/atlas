@@ -50,13 +50,14 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         long startIndexTime = System.currentTimeMillis();
         ListenableFuture<ScheduleRef> futureRef = queryIndex(query);
         ScheduleRef scheduleRef = Futures.get(futureRef, QUERY_TIMEOUT, MILLISECONDS, ScheduleQueryExecutionException.class);
-        log.info("Schedule index time: " + (System.currentTimeMillis() - startIndexTime));
+        long id = Thread.currentThread().getId();
+        log.info("{}: schedule index time: {}", id, (System.currentTimeMillis() - startIndexTime));
         //
         long startRetrieveTime = System.currentTimeMillis();
         ScheduleChannel schedule = transformToChannelSchedule(query, scheduleRef);
-        log.info("Schedule retrieve time: " + (System.currentTimeMillis() - startRetrieveTime));
+        log.info("{}: schedule retrieve time: {}", id, (System.currentTimeMillis() - startRetrieveTime));
         //
-        log.info("Total schedule time: " + (System.currentTimeMillis() - startIndexTime));
+        log.info("{}: total schedule time: {}", id, (System.currentTimeMillis() - startIndexTime));
         //
         return schedule;
     }
