@@ -131,6 +131,8 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         current.setPeople(extracted.people());
         current.setLanguages(extracted.getLanguages());
         current.setCertificates(extracted.getCertificates());
+        current.setMediaType(extracted.getMediaType());
+        current.setSpecialization(extracted.getSpecialization());
         return current;
     }
 
