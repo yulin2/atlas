@@ -40,8 +40,10 @@ import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
@@ -245,6 +247,8 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setPeople(peopleFrom(CONTRIBUTOR.valueFrom(source)));
         content.setLanguages(languagesFrom(LANGUAGE.valueFrom(source)));
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
+        content.setMediaType(MediaType.VIDEO);
+        content.setSpecialization(Specialization.TV);
         return content;
     }
     
