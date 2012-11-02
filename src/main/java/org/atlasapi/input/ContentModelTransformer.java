@@ -58,8 +58,12 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
         result.setDescription(inputContent.getDescription());
         result.setImage(inputContent.getImage());
         result.setThumbnail(inputContent.getThumbnail());
-        result.setSpecialization(Specialization.fromKey(inputContent.getSpecialization()).valueOrNull());
-        result.setMediaType(MediaType.valueOf(inputContent.getMediaType().toUpperCase()));
+        if (inputContent.getSpecialization() != null) {
+            result.setSpecialization(Specialization.fromKey(inputContent.getSpecialization()).valueOrNull());
+        }
+        if (inputContent.getMediaType() != null) {
+            result.setMediaType(MediaType.valueOf(inputContent.getMediaType().toUpperCase()));
+        }
         result.setPeople(transformPeople(inputContent.getPeople(), publisher));
         result.setEquivalentTo(resolveEquivalences(inputContent.getSameAs()));
         result.setTopicRefs(topicRefs(inputContent.getTopics()));
