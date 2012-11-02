@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
@@ -85,7 +86,6 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 
 @Configuration
 public class QueryWebModule {
@@ -134,7 +134,7 @@ public class QueryWebModule {
     }
     
     ContentWriteController contentWriteController() {
-        return new ContentWriteController(configFetcher, contentWriter, new DefaultGsonModelReader(), new DelegatingModelTransformer(new ItemModelTransformer(contentResolver, topicStore)));
+        return new ContentWriteController(configFetcher, contentResolver, contentWriter, new DefaultGsonModelReader(), new DelegatingModelTransformer(new ItemModelTransformer(contentResolver, topicStore)));
     }
 
     @Bean
