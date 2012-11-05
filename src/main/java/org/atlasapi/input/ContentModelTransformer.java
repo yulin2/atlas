@@ -1,5 +1,6 @@
 package org.atlasapi.input;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.util.List;
@@ -26,6 +27,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.topic.TopicStore;
 
 import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -117,6 +119,7 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
 
     private CrewMember transformPerson(Person person, Publisher publisher) {
         CrewMember member;
+        checkNotNull(person.getUri(), "person requires uri");
         if ("actor".equals(person.getType())) {
             member = new Actor().withCharacter(person.getCharacter());
         } else {

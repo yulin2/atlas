@@ -120,7 +120,7 @@ public class ContentWriteController {
     }
 
     private <T> List<T> merge(List<T> existing, List<T> posted) {
-        return ImmutableSet.copyOf(Iterables.concat(existing, posted)).asList();
+        return ImmutableSet.copyOf(Iterables.concat(posted, existing)).asList();
     }
 
     private Maybe<Identified> resolveExisting(Content content) {
