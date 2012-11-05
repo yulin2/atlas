@@ -7,6 +7,7 @@ import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Song;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.topic.TopicStore;
+import org.joda.time.Duration;
 
 public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Item, Item> {
 
@@ -24,12 +25,18 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
             Film film = new Film();
             item = film;
         } else if ("song".equals(type)) {
-            Song song = new Song();
-            item = song;
+            item = createSong(inputItem);
         } else {
             item = new Item();
         }
         return setItemFields(item, inputItem);
+    }
+
+    protected Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
+        Song song = new Song();
+        song.setIsrc(inputItem.getIsrc());
+        song.setDuration(Duration.standardSeconds(inputItem.getDuration()));
+        return song;
     }
 
     protected Item setItemFields(Item item, org.atlasapi.media.entity.simple.Item inputItem) {

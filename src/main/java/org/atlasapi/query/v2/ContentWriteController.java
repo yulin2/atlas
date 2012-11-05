@@ -18,6 +18,7 @@ import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -118,6 +119,22 @@ public class ContentWriteController {
         existing.setSpecialization(posted.getSpecialization());
         existing.setTopicRefs(merge(existing.getTopicRefs(), posted.getTopicRefs()));
         existing.setPeople(merge(existing.people(), posted.people()));
+        if (existing instanceof Item && posted instanceof Item) {
+            return mergeItems((Item)existing, (Item) posted);
+        }
+        return existing;
+    }
+
+    private Item mergeItems(Item existing, Item posted) {
+        if (existing instanceof Song && posted instanceof Song) {
+            return mergeSongs((Song)existing, (Song)posted);
+        }
+        return existing;
+    }
+
+    private Song mergeSongs(Song existing, Song posted) {
+        existing.setIsrc(posted.getIsrc());
+        existing.setDuration(posted.getDuration());
         return existing;
     }
 
