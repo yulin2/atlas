@@ -35,7 +35,9 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
     protected Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
         Song song = new Song();
         song.setIsrc(inputItem.getIsrc());
-        song.setDuration(Duration.standardSeconds(inputItem.getDuration()));
+        if (inputItem.getDuration() != null) {
+            song.setDuration(Duration.standardSeconds(inputItem.getDuration()));
+        }
         return song;
     }
 
