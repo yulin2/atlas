@@ -37,6 +37,7 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
         ParentRef container = result.subject().getContainer();
         if (container == null) {
             desc.appendText("Item has no Container").finishStage();
+            delegate.handle(result);
             return;
         }
         
