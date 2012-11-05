@@ -12,7 +12,7 @@ import com.google.common.collect.Iterables;
 
 public final class ContentTitleScorer<T extends Content> {
 
-    public ScoredCandidates<T> scoreCandidates(T content, Iterable<T> candidates, ResultDescription desc) {
+    public ScoredCandidates<T> scoreCandidates(T content, Iterable<? extends T> candidates, ResultDescription desc) {
         Builder<T> equivalents = DefaultScoredCandidates.fromSource("Title");
         desc.appendText("Scoring %s candidates", Iterables.size(candidates));
         
