@@ -93,6 +93,8 @@ public class ContentWriteController {
             return error(resp, HttpStatusCode.SERVER_ERROR.code());
         }
         
+        resp.setStatus(HttpStatusCode.OK.code());
+        resp.setContentLength(0);
         return null;
     }
     
