@@ -16,14 +16,14 @@ public class ConjunctiveFilter<T> implements EquivalenceFilter<T> {
     }
 
     @Override
-    public Iterable<ScoredCandidate<T>> apply(Iterable<ScoredCandidate<T>> candidate, T subject, ResultDescription desc) {
+    public List<ScoredCandidate<T>> apply(Iterable<ScoredCandidate<T>> candidate, T subject, ResultDescription desc) {
         desc.startStage(toString());
         Iterable<ScoredCandidate<T>> result = candidate;
         for (EquivalenceFilter<T> filter : filters) {
             result = filter.apply(result, subject, desc);
         }
         desc.finishStage();
-        return result ;
+        return ImmutableList.copyOf(result);
     }
 
     @Override

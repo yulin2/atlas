@@ -1,26 +1,26 @@
 package org.atlasapi.equiv.results.filters;
 
-import javax.annotation.Nullable;
+import java.util.List;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 
 public abstract class AbstractEquivalenceFilter<T> implements EquivalenceFilter<T> {
 
     @Override
-    public final Iterable<ScoredCandidate<T>> apply(Iterable<ScoredCandidate<T>> input, final T subject, final ResultDescription desc) {
+    public final List<ScoredCandidate<T>> apply(Iterable<ScoredCandidate<T>> candidates, final T subject, final ResultDescription desc) {
         desc.startStage(toString());
-        Iterable<ScoredCandidate<T>> result = Iterables.filter(input, new Predicate<ScoredCandidate<T>>() {
-            @Override
-            public boolean apply(@Nullable ScoredCandidate<T> input) {
-                return doFilter(input, subject, desc);
+        Builder<ScoredCandidate<T>> results = ImmutableList.builder();
+        for (ScoredCandidate<T> candidate : candidates) {
+            if (doFilter(candidate, subject, desc)) {
+                results.add(candidate);
             }
-        });
+        }
         desc.finishStage();
-        return result;
+        return results.build();
     }
 
     protected abstract boolean doFilter(ScoredCandidate<T> input, T subject, ResultDescription desc);
