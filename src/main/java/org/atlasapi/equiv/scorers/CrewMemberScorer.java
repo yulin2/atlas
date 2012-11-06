@@ -19,20 +19,27 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
         Builder<Item> scored = DefaultScoredCandidates.fromSource("crew");
 
         List<CrewMember> contentCrew = content.getPeople();
+        
         for (Item candidate : candidates) {
             List<CrewMember> candidateCrew = candidate.getPeople();
             Score score;
-            if (nullOrEmpty(contentCrew) || nullOrEmpty(candidateCrew)) {
+            if (nullOrEmpty(contentCrew)) {
+                desc.appendText("Subject has no crew");
+                score = Score.NULL_SCORE;
+            } else if (nullOrEmpty(candidateCrew)) {
+                desc.appendText("%s has no crew", candidate.getCanonicalUri());
                 score = Score.NULL_SCORE;
             } else {
-                score = score(contentCrew, candidateCrew);
+                desc.startStage(candidate.getCanonicalUri()+":");
+                score = score(contentCrew, candidateCrew, desc);
+                desc.finishStage();
             }
             scored.addEquivalent(candidate, score);
         }
         return scored.build();
     }
 
-    private Score score(List<CrewMember> contentCrew, List<CrewMember> candidateCrew) {
+    private Score score(List<CrewMember> contentCrew, List<CrewMember> candidateCrew, ResultDescription desc) {
         //consistently choose needles and haystack so the scoring will be symmetric.
         int contentSize = contentCrew.size();
         int candidateSize = candidateCrew.size();
@@ -48,27 +55,46 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
          * haystack allowing in-exact matches between people. Again n^2
          */
         double found = 0;
+        double missed= 0;
         for (CrewMember needle : needles) {
-            if (needle.name() != null && needleInHaystack(needle, haystack)) {
-                found++;
+            if (needle.name() != null) {
+                CrewMember match = needleInHaystack(needle, haystack);
+                if (match != null) {
+                    desc.appendText("%s (%s, %s) matched %s (%s, %s)", 
+                        needle.getCanonicalUri(), needle.name(),needle.role(),
+                        match.getCanonicalUri(), match.name(), match.role()
+                    );
+                    found++;
+                } else {
+                    missed++;
+                    desc.appendText("no match: %s (%s, %s)", needle.getCanonicalUri(), needle.name(),needle.role());
+                }
+            } else {
+                desc.appendText("no name: %s", needle.getCanonicalUri());
             }
         }
         
-        return Score.valueOf(found/needles.size());
+        desc.appendText("score: (%s - %s)/%s", found, missed, needles.size());
+        return Score.valueOf((found-missed)/needles.size());
     }
 
-    private boolean needleInHaystack(CrewMember needle, List<CrewMember> haystack) {
+    private CrewMember needleInHaystack(CrewMember needle, List<CrewMember> haystack) {
         for (CrewMember hay : haystack) {
             if (Objects.equal(needle.name(), hay.name())
              && Objects.equal(needle.role(), hay.role())) {
-                return true;
+                return hay;
             }
         }
-        return false;
+        return null;
     }
 
     private boolean nullOrEmpty(List<CrewMember> people) {
         return people == null || people.isEmpty();
     }
 
+    @Override
+    public String toString() {
+        return "Crew Member";
+    }
+    
 }
