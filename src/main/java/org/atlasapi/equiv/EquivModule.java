@@ -246,7 +246,7 @@ public class EquivModule {
                     new NullContentEquivalenceUpdater<Container>(), 
                     ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
                     .withGenerator(
-                        TitleMatchingEquivalenceScoringGenerator.<Item>create(searchResolver, Song.class).copyWithPublishers(musicPublishers) 
+                        TitleMatchingEquivalenceScoringGenerator.<Item>create(searchResolver, Song.class).copyWithPublishers(Sets.union(musicPublishers, ImmutableSet.of(ITUNES))) 
                     )
                     .withScorer(new CrewMemberScorer())
                     .build()
