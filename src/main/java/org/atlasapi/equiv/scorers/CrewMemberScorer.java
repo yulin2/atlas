@@ -8,6 +8,7 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;
@@ -20,13 +21,18 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
 
         List<CrewMember> contentCrew = content.getPeople();
         
+        if (nullOrEmpty(contentCrew)) {
+            desc.appendText("Subject has no crew");
+            for (Item candidate : candidates) {
+                scored.addEquivalent(candidate, Score.NULL_SCORE);
+            }
+            return scored.build();
+        }
+        
         for (Item candidate : candidates) {
             List<CrewMember> candidateCrew = candidate.getPeople();
             Score score;
-            if (nullOrEmpty(contentCrew)) {
-                desc.appendText("Subject has no crew");
-                score = Score.NULL_SCORE;
-            } else if (nullOrEmpty(candidateCrew)) {
+            if (nullOrEmpty(candidateCrew)) {
                 desc.appendText("%s has no crew", candidate.getCanonicalUri());
                 score = Score.NULL_SCORE;
             } else {
@@ -54,20 +60,17 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
          * This could be the sum of the best score for each needle in the
          * haystack allowing in-exact matches between people. Again n^2
          */
-        double found = 0;
-        double missed= 0;
+        int found = 0;
+        int missed= 0;
         for (CrewMember needle : needles) {
             if (needle.name() != null) {
                 CrewMember match = needleInHaystack(needle, haystack);
                 if (match != null) {
-                    desc.appendText("%s (%s, %s) matched %s (%s, %s)", 
-                        needle.getCanonicalUri(), needle.name(),needle.role(),
-                        match.getCanonicalUri(), match.name(), match.role()
-                    );
+                    desc.appendText(describeMatch(needle, match));
                     found++;
                 } else {
+                    desc.appendText("no match: %s (%s)", needle.getCanonicalUri(), nameAndRole(needle));
                     missed++;
-                    desc.appendText("no match: %s (%s, %s)", needle.getCanonicalUri(), needle.name(),needle.role());
                 }
             } else {
                 desc.appendText("no name: %s", needle.getCanonicalUri());
@@ -75,7 +78,7 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
         }
         
         desc.appendText("score: (%s - %s)/%s", found, missed, needles.size());
-        return Score.valueOf((found-missed)/needles.size());
+        return Score.valueOf((found-missed)/(double)needles.size());
     }
 
     private CrewMember needleInHaystack(CrewMember needle, List<CrewMember> haystack) {
@@ -86,6 +89,19 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
             }
         }
         return null;
+    }
+    
+    protected String describeMatch(CrewMember needle, CrewMember match) {
+        return String.format("%s (%s) matched %s (%s)", 
+            needle.getCanonicalUri(), nameAndRole(needle),
+            match.getCanonicalUri(), nameAndRole(match)
+                );
+    }
+    
+    private String nameAndRole(CrewMember member) {
+        Role role = member.role();
+        String roleKey = role == null ? "" : "," + role.key();
+        return String.format("%s%s", member.name(), roleKey);
     }
 
     private boolean nullOrEmpty(List<CrewMember> people) {

@@ -51,6 +51,14 @@ public class CrewMemberScorerTest {
     }
 
     @Test
+    public void testScoresPositiveWhenTwoOfThreeCrewMatch() {
+        assertThat(scoreFrom(score(
+            itemWithCrew(crew("Romeo"), crew("Carl Morgan"), crew("MC Harvey")), 
+            itemWithCrew(crew("Romeo"), crew("Lisa Maffia"), crew("MC Harvey"))
+        )), is(Score.valueOf(1.0/3)));
+    }
+
+    @Test
     public void testScoresSymmetrically() {
         assertThat(scoreFrom(score(
             itemWithCrew(crew("Romeo")), 
