@@ -8,6 +8,7 @@ import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivale
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.media.entity.CrewMember;
+import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;
@@ -19,20 +20,32 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
         ScoredEquivalentsBuilder<Item> scored = DefaultScoredEquivalents.fromSource("crew");
 
         List<CrewMember> contentCrew = content.getPeople();
+        
+        if (nullOrEmpty(contentCrew)) {
+            desc.appendText("Subject has no crew");
+            for (Item candidate : candidates) {
+                scored.addEquivalent(candidate, Score.NULL_SCORE);
+            }
+            return scored.build();
+        }
+        
         for (Item candidate : candidates) {
             List<CrewMember> candidateCrew = candidate.getPeople();
             Score score;
-            if (nullOrEmpty(contentCrew) || nullOrEmpty(candidateCrew)) {
+            if (nullOrEmpty(candidateCrew)) {
+                desc.appendText("%s has no crew", candidate.getCanonicalUri());
                 score = Score.NULL_SCORE;
             } else {
-                score = score(contentCrew, candidateCrew);
+                desc.startStage(candidate.getCanonicalUri()+":");
+                score = score(contentCrew, candidateCrew, desc);
+                desc.finishStage();
             }
             scored.addEquivalent(candidate, score);
         }
         return scored.build();
     }
 
-    private Score score(List<CrewMember> contentCrew, List<CrewMember> candidateCrew) {
+    private Score score(List<CrewMember> contentCrew, List<CrewMember> candidateCrew, ResultDescription desc) {
         //consistently choose needles and haystack so the scoring will be symmetric.
         int contentSize = contentCrew.size();
         int candidateSize = candidateCrew.size();
@@ -47,28 +60,57 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
          * This could be the sum of the best score for each needle in the
          * haystack allowing in-exact matches between people. Again n^2
          */
-        double found = 0;
+        int found = 0;
+        int missed= 0;
         for (CrewMember needle : needles) {
-            if (needle.name() != null && needleInHaystack(needle, haystack)) {
-                found++;
+            if (needle.name() != null) {
+                CrewMember match = needleInHaystack(needle, haystack);
+                if (match != null) {
+                    desc.appendText(describeMatch(needle, match));
+                    found++;
+                } else {
+                    desc.appendText("no match: %s (%s)", needle.getCanonicalUri(), nameAndRole(needle));
+                    missed++;
+                }
+            } else {
+                desc.appendText("no name: %s", needle.getCanonicalUri());
             }
         }
         
-        return Score.valueOf(found/needles.size());
+        desc.appendText("score: (%s - %s)/%s", found, missed, needles.size());
+        return Score.valueOf((found-missed)/(double)needles.size());
     }
 
-    private boolean needleInHaystack(CrewMember needle, List<CrewMember> haystack) {
+    private CrewMember needleInHaystack(CrewMember needle, List<CrewMember> haystack) {
         for (CrewMember hay : haystack) {
             if (Objects.equal(needle.name(), hay.name())
              && Objects.equal(needle.role(), hay.role())) {
-                return true;
+                return hay;
             }
         }
-        return false;
+        return null;
+    }
+    
+    protected String describeMatch(CrewMember needle, CrewMember match) {
+        return String.format("%s (%s) matched %s (%s)", 
+            needle.getCanonicalUri(), nameAndRole(needle),
+            match.getCanonicalUri(), nameAndRole(match)
+                );
+    }
+    
+    private String nameAndRole(CrewMember member) {
+        Role role = member.role();
+        String roleKey = role == null ? "" : "," + role.key();
+        return String.format("%s%s", member.name(), roleKey);
     }
 
     private boolean nullOrEmpty(List<CrewMember> people) {
         return people == null || people.isEmpty();
     }
 
+    @Override
+    public String toString() {
+        return "Crew Member";
+    }
+    
 }

@@ -35,19 +35,27 @@ public class CrewMemberScorerTest {
     }
 
     @Test
-    public void testScoresZeroWhenNoCrewMatch() {
+    public void testScoresNegativeWhenNoCrewMatch() {
         assertThat(scoreFrom(score(
             itemWithCrew(crew("Romeo")), 
             itemWithCrew(crew("MC Harvey"))
-        )), is(Score.ZERO));
+        )), is(Score.valueOf(-1.0)));
     }
 
     @Test
-    public void testScoresHalfWhenHalfCrewMatch() {
+    public void testScoresZeroWhenHalfCrewMatch() {
         assertThat(scoreFrom(score(
             itemWithCrew(crew("Romeo"), crew("Carl Morgan")), 
             itemWithCrew(crew("Romeo"), crew("Lisa Maffia"))
-        )), is(Score.valueOf(0.5)));
+        )), is(Score.valueOf(0.0)));
+    }
+
+    @Test
+    public void testScoresPositiveWhenTwoOfThreeCrewMatch() {
+        assertThat(scoreFrom(score(
+            itemWithCrew(crew("Romeo"), crew("Carl Morgan"), crew("MC Harvey")), 
+            itemWithCrew(crew("Romeo"), crew("Lisa Maffia"), crew("MC Harvey"))
+        )), is(Score.valueOf(1.0/3)));
     }
 
     @Test
