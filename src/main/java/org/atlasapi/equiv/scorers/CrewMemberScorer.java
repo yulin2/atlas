@@ -83,7 +83,7 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
 
     private CrewMember needleInHaystack(CrewMember needle, List<CrewMember> haystack) {
         for (CrewMember hay : haystack) {
-            if (Objects.equal(needle.name(), hay.name())
+            if (Objects.equal(normalize(needle.name()), normalize(hay.name()))
              && Objects.equal(needle.role(), hay.role())) {
                 return hay;
             }
@@ -91,6 +91,10 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
         return null;
     }
     
+    private Object normalize(String name) {
+        return name.toLowerCase().replace("[^\\d\\w]","");
+    }
+
     protected String describeMatch(CrewMember needle, CrewMember match) {
         return String.format("%s (%s) matched %s (%s)", 
             needle.getCanonicalUri(), nameAndRole(needle),
