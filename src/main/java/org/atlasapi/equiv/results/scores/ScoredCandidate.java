@@ -2,8 +2,6 @@ package org.atlasapi.equiv.results.scores;
 
 import java.util.Comparator;
 
-import org.atlasapi.media.entity.Content;
-
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Ordering;
@@ -21,7 +19,7 @@ public final class ScoredCandidate<T> {
         return new ScoredCandidate<T>(equivalent, score);
     }
     
-    public static final <T extends Content> Function<ScoredCandidate<T>, T> toCandidate() {
+    public static final <T> Function<ScoredCandidate<T>, T> toCandidate() {
         return new Function<ScoredCandidate<T>, T>() {
             @Override
             public T apply(ScoredCandidate<T> input) {
