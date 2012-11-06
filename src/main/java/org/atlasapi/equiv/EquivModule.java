@@ -261,7 +261,7 @@ public class EquivModule {
         for (Publisher publisher : musicPublishers) {
             updaters.register(publisher, Item.class, standardItemUpdater(
                 Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES)),
-                ImmutableSet.of(TitleSearchGenerator.<Item>create(searchResolver, Song.class).copyWithPublishers(musicPublishers)), 
+                ImmutableSet.of(TitleSearchGenerator.<Item>create(searchResolver, Song.class).copyWithPublishers(Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES)))), 
                 ImmutableSet.of(new CrewMemberScorer())
             ));
         }
