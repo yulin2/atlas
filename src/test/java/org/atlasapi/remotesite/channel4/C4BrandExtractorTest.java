@@ -82,17 +82,17 @@ public class C4BrandExtractorTest extends TestCase {
 		context.checking(new Expectations() {
 			{
 				allowing(channelResolver).fromUri("http://www.channel4.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", false, MediaType.VIDEO, "http://www.channel4.com"))));
 				allowing(channelResolver).fromUri("http://www.channel4.com/more4");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.more4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", false, MediaType.VIDEO, "http://www.more4.com"))));
 				allowing(channelResolver).fromUri("http://film4.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", MediaType.VIDEO, "http://film4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", false, MediaType.VIDEO, "http://film4.com"))));
 				allowing(channelResolver).fromUri("http://www.e4.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", false, MediaType.VIDEO, "http://www.e4.com"))));
 				allowing(channelResolver).fromUri("http://www.4music.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", false, MediaType.VIDEO, "http://www.4music.com"))));
 				allowing(channelResolver).fromUri("http://www.channel4.com/4seven");
-                will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4seven", "4seven", MediaType.VIDEO, "http://www.channel4.com/4seven"))));
+                will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4seven", "4seven", false, MediaType.VIDEO, "http://www.channel4.com/4seven"))));
 			}
 		});
 	}
