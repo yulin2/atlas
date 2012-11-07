@@ -143,8 +143,11 @@ public class EquivModule {
     }
 
     public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
+        Set<Publisher> musicPublishers = ImmutableSet.of(Publisher.BBC_MUSIC, Publisher.YOUTUBE, 
+                Publisher.SPOTIFY, Publisher.SOUNDCLOUD, Publisher.RDIO, Publisher.AMAZON_UK);
+
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM));
+        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), Iterables.concat(ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM), musicPublishers));
         
         TitleMatchingEquivalenceScoringGenerator<Container> titleScoringGenerator = TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class);
         
@@ -164,7 +167,7 @@ public class EquivModule {
             itemUpdater), 
         acceptablePublishers);
         
-        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM);
+        Iterable<Publisher> nonStandardPublishers = Iterables.concat(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM), musicPublishers);
         for (Publisher publisher : Iterables.filter(ImmutableList.copyOf(Publisher.values()), not(in(nonStandardPublishers)))) {
                 publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
         }
@@ -238,8 +241,6 @@ public class EquivModule {
                 .build(), 
         itemUpdater),lfPublishers));
         
-        Set<Publisher> musicPublishers = ImmutableSet.of(Publisher.BBC_MUSIC, Publisher.YOUTUBE, 
-            Publisher.SPOTIFY, Publisher.SOUNDCLOUD, Publisher.RDIO, Publisher.AMAZON_UK);
         for (Publisher publisher : musicPublishers) {
             publisherUpdaters.put(publisher, resultHandlingUpdater(
                 new RootEquivalenceUpdater(
