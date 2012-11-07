@@ -50,7 +50,7 @@ public class BbcIonScheduleUpdaterTest extends TestCase {
     private final BroadcastTrimmer trimmer = context.mock(BroadcastTrimmer.class);
     private final ChannelResolver channelResolver = context.mock(ChannelResolver.class);
     private final AdapterLog log = new SystemOutAdapterLog(); 
-    private final Channel channel = new Channel();
+    private final Channel channel = Channel.builder().build();
     private final BbcIonBroadcastHandler handler = new DefaultBbcIonBroadcastHandler(resolver, writer, log, new ContentLock());
     
     @SuppressWarnings("unchecked")

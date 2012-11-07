@@ -51,11 +51,12 @@ public class ChannelSimplifier {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
         simple.setAliases(input.getAliases());
-        simple.setPublisherDetails(toPublisherDetails(input.publisher()));
+        simple.setPublisherDetails(toPublisherDetails(input.source()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
         simple.setHighDefinition(input.highDefinition());
         simple.setAvailableFrom(transform(input.availableFrom(), TO_PUBLISHER_DETAILS));
         simple.setTitle(input.title());
+        simple.setImage(input.image());
         simple.setMediaType(input.mediaType() != null ? input.mediaType().toString().toLowerCase() : null);
         
         if(showChannelGroups) {

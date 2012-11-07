@@ -47,7 +47,7 @@ public class MongoChannelInitialPopulate {
 				String id = REDUX_CHANNEL_MAP.get(oldChannel);
 				oldChannel.addAlias(String.format("http://devapi.bbcredux.com/channels/%s", id));
 			}
-			oldChannel.setPublisher(Publisher.METABROADCAST);
+			oldChannel.setSource(Publisher.METABROADCAST);
 			oldChannel.setCanonicalUri(oldChannel.uri());
 			store.write(oldChannel);
 			written++;
