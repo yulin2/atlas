@@ -3,9 +3,6 @@ package org.atlasapi.remotesite.metabroadcast;
 import java.util.Iterator;
 import java.util.List;
 
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
-
 public class ContentWords {
 
     public static class WordWeighting {
@@ -17,14 +14,14 @@ public class ContentWords {
         private String type;
         
         public WordWeighting(){
-		}
+        }
         
         public WordWeighting(String content, int weight, String url, String value, String type){
-        	this.content = content;
-        	this.weight = weight;
-        	this.url = url;
-        	this.value = value;
-        	this.type = type;
+            this.content = content;
+            this.weight = weight;
+            this.url = url;
+            this.value = value;
+            this.type = type;
         }
         
         public String getContent() {
