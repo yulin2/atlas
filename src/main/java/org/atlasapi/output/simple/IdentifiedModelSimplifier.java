@@ -22,9 +22,15 @@ public abstract class IdentifiedModelSimplifier<F extends Identified, T extends 
             aliased.setId(idCodec.encode(BigInteger.valueOf(identified.getId())));
         }
         
-        if(annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
+        if (annotations.contains(Annotation.DESCRIPTION)
+         || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
             aliased.setAliases(identified.getAliases());
             aliased.setCurie(identified.getCurie());
+        }
+        
+        if (annotations.contains(Annotation.AUDIT)) {
+            aliased.setLastUpdated(identified.getLastUpdated());
+            aliased.setEquivalenceUdpate(identified.getEquivalenceUpdate());
         }
     }
 
