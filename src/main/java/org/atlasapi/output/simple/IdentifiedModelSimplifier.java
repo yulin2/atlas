@@ -6,6 +6,7 @@ import java.util.Set;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.Aliased;
+import org.atlasapi.media.entity.simple.Audit;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.output.Annotation;
 
@@ -29,8 +30,10 @@ public abstract class IdentifiedModelSimplifier<F extends Identified, T extends 
         }
         
         if (annotations.contains(Annotation.AUDIT)) {
-            aliased.setLastUpdated(identified.getLastUpdated());
-            aliased.setEquivalenceUdpate(identified.getEquivalenceUpdate());
+            Audit audit = new Audit();
+            audit.setLastUpdated(identified.getLastUpdated());
+            audit.setEquivalenceLastUdpated(identified.getEquivalenceUpdate());
+            aliased.setAudit(audit);
         }
     }
 
