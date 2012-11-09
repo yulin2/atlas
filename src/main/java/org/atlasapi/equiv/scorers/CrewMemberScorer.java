@@ -99,13 +99,13 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
         return String.format("%s (%s) matched %s (%s)", 
             needle.getCanonicalUri(), nameAndRole(needle),
             match.getCanonicalUri(), nameAndRole(match)
-                );
+        );
     }
     
     private String nameAndRole(CrewMember member) {
         Role role = member.role();
         String roleKey = role == null ? "" : "," + role.key();
-        return String.format("%s%s", member.name(), roleKey);
+        return String.format("%s%s", normalize(member.name()), roleKey);
     }
 
     private boolean nullOrEmpty(List<CrewMember> people) {

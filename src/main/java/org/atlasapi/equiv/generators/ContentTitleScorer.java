@@ -9,17 +9,22 @@ import org.atlasapi.media.entity.Content;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.base.Function;
 
 public final class ContentTitleScorer<T extends Content> {
+    
+    private Function<String, String> titleTransform;
+
+    public ContentTitleScorer(Function<String, String> titleTransform) {
+        this.titleTransform = titleTransform;
+    }
 
     public ScoredCandidates<T> scoreCandidates(T content, Iterable<? extends T> candidates, ResultDescription desc) {
         Builder<T> equivalents = DefaultScoredCandidates.fromSource("Title");
         desc.appendText("Scoring %s candidates", Iterables.size(candidates));
         
         for (T found : ImmutableSet.copyOf(candidates)) {
-            Score score = score(content, found);
-            desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
-            equivalents.addEquivalent(found, score);
+            equivalents.addEquivalent(found, score(content, found, desc));
         }
 
         return equivalents.build();
@@ -31,12 +36,18 @@ public final class ContentTitleScorer<T extends Content> {
      * @param candidate - candidate content
      * @return score representing how closely candidate's title matches subject's title.
      */
-    private Score score(T subject, T candidate) {
-        return Score.valueOf(score(sanitize(subject.getTitle()), sanitize(candidate.getTitle())));
+    public Score score(Content subject, Content candidate, ResultDescription desc) {
+        String subjectTitle = sanitize(subject.getTitle());
+        String contentTitle = sanitize(candidate.getTitle());
+        double score = score(subjectTitle, contentTitle);
+        desc.appendText("%s vs. %s (%s): %s", subjectTitle, contentTitle, candidate.getCanonicalUri(), score);
+        return Score.valueOf(score);
     }
     
     private String sanitize(String title) {
-        return removeCommonPrefixes(title.replaceAll(" & ", " and ").replaceAll("[^\\d\\w\\s]", "").toLowerCase());
+        return removeCommonPrefixes(titleTransform.apply(title)
+            .replaceAll(" & ", " and ")
+            .replaceAll("[^\\d\\w\\s]", "").toLowerCase());
     }
     
     private String removeCommonPrefixes(String title) {
@@ -44,7 +55,11 @@ public final class ContentTitleScorer<T extends Content> {
     }
     
     private double score(String subjectTitle, String candidateTitle) {
-        return subjectTitle.length() < candidateTitle.length() ? scoreTitles(subjectTitle, candidateTitle) : scoreTitles(candidateTitle, subjectTitle);
+        if (subjectTitle.length() < candidateTitle.length()) {
+            return scoreTitles(subjectTitle, candidateTitle);
+        } else {
+            return scoreTitles(candidateTitle, subjectTitle);
+        }
     }
 
     private double scoreTitles(String shorter, String longer) {

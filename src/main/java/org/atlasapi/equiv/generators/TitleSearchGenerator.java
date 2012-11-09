@@ -1,8 +1,5 @@
 package org.atlasapi.equiv.generators;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,33 +14,38 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.query.Selection;
 
 public class TitleSearchGenerator<T extends Content> implements EquivalenceGenerator<T> {
 
     private final static float TITLE_WEIGHTING = 1.0f;
     
-    public static final <T extends Content> TitleSearchGenerator<T> create(SearchResolver searchResolver, Class<? extends T> cls) {
-        return new TitleSearchGenerator<T>(searchResolver, cls, ImmutableSet.<Publisher>of());
+    public static final <T extends Content> TitleSearchGenerator<T> create(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
+        return new TitleSearchGenerator<T>(searchResolver, cls, publishers);
     }
     
     private final SearchResolver searchResolver;
     private final Class<? extends T> cls;
     private final Set<Publisher> searchPublishers;
-
-    private final ContentTitleScorer<T> scorer;
-
+    private final Function<String, String> titleTransform;
+    private final ContentTitleScorer<T> titleScorer;
 
     public TitleSearchGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
+        this(searchResolver, cls, publishers, Functions.<String>identity());
+    }
+
+    public TitleSearchGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers, Function<String,String> titleTransform) {
         this.searchResolver = searchResolver;
         this.cls = cls;
         this.searchPublishers = ImmutableSet.copyOf(publishers);
-        this.scorer = new ContentTitleScorer<T>();
+        this.titleTransform = titleTransform;
+        this.titleScorer = new ContentTitleScorer<T>(titleTransform);
     }
     
     public TitleSearchGenerator<T> copyWithPublishers(Iterable<Publisher> publishers) {
@@ -52,21 +54,23 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
 
     @Override
     public ScoredCandidates<T> generate(T content, ResultDescription desc) {
-        Iterable<? extends T> candidates = searchForCandidates(content);
-        return scorer.scoreCandidates(content, candidates, desc);
+        Iterable<? extends T> candidates = searchForCandidates(content, desc);
+        return titleScorer.scoreCandidates(content, candidates, desc);
     }
 
-    private Iterable<? extends T> searchForCandidates(T content) {
+    private Iterable<? extends T> searchForCandidates(T content, ResultDescription desc) {
         Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
         ApplicationConfiguration appConfig = ApplicationConfiguration.defaultConfiguration().withSources(enabledPublishers(publishers));
 
-        SearchQuery.Builder query = SearchQuery.builder(content.getTitle())
+        String title = titleTransform.apply(content.getTitle());
+        SearchQuery.Builder query = SearchQuery.builder(title)
                 .withSelection(new Selection(0, 20))
                 .withPublishers(publishers)
                 .withTitleWeighting(TITLE_WEIGHTING);
         if (content.getSpecialization() != null) {
             query.withSpecializations(ImmutableSet.of(content.getSpecialization()));
         }
+        desc.appendText("query: %s, specialization: %s, publishers: %s", title, content.getSpecialization(), publishers);
         List<Identified> search = searchResolver.search(query.build(), appConfig);
         return Iterables.filter(search,cls);
     }

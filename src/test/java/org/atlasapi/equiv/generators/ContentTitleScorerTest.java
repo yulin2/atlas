@@ -17,43 +17,48 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.base.Functions;
 
 public class ContentTitleScorerTest {
 
-    private final ContentTitleScorer<Container> scorer = new ContentTitleScorer<Container>();
+    private final ContentTitleScorer<Container> scorer = new ContentTitleScorer<Container>(Functions.<String>identity());
+
     private final ResultDescription desc = new DefaultDescription();
 
+    private ScoredCandidates<Container> score(String subject, String candidate) {
+        return scorer.scoreCandidates(brandWithTitle(subject), ImmutableList.of(brandWithTitle(candidate)), desc);
+    }
+    
     @Test
     public void testScore() {
-        scoreLt(0.01, scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("nothing")), desc));
-        score(1, scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("biker")), desc));
-        scoreLt(0.1, scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("bike")), desc));
-        scoreLt(0.1, scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("bikers")), desc));
+        scoreLt(0.01, score("biker", "nothing"));
+        score(1, score("biker", "biker"));
+        scoreLt(0.1, score("biker", "bike"));
+        scoreLt(0.1, score("biker", "bikers"));
     }
 
     @Test
     public void testScoreSymmetry() {
-        assertEquals(scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("biker")), desc), scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("biker")), desc));
-        assertEquals(scorer.scoreCandidates(brandWithTitle("bike"), ImmutableList.of(brandWithTitle("biker")), desc), scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("bike")), desc));
-        assertEquals(scorer.scoreCandidates(brandWithTitle("bikers"), ImmutableList.of(brandWithTitle("biker")), desc), scorer.scoreCandidates(brandWithTitle("biker"), ImmutableList.of(brandWithTitle("bikers")), desc));
+        assertEquals(score("biker", "biker"), score("biker", "biker"));
+        assertEquals(score("bike", "biker"), score("biker", "bike"));
+        assertEquals(score("bikers", "biker"), score("biker", "bikers"));
     }
-    
     
     @Test
     public void testScoreWithAmpersands() {
-        score(1, scorer.scoreCandidates(brandWithTitle("Rosencrantz & Guildenstern Are Dead"), ImmutableList.of(brandWithTitle("Rosencrantz and Guildenstern Are Dead")), desc));
-        score(1, scorer.scoreCandidates(brandWithTitle("Bill & Ben"), ImmutableList.of(brandWithTitle("Bill and Ben")), desc));
+        score(1, score("Rosencrantz & Guildenstern Are Dead", "Rosencrantz and Guildenstern Are Dead"));
+        score(1, score("Bill & Ben", "Bill and Ben"));
     }
     
     @Test
     public void testScoreWithCommonPrefix() {
-        score(1, scorer.scoreCandidates(brandWithTitle("The Great Escape"), ImmutableList.of(brandWithTitle("The Great Escape")), desc));
-        scoreLt(0.1, scorer.scoreCandidates(brandWithTitle("The Great Escape"), ImmutableList.of(brandWithTitle("Italian Job")), desc));
+        score(1, score("The Great Escape", "The Great Escape"));
+        scoreLt(0.1, score("The Great Escape", "Italian Job"));
         
-        score(1, scorer.scoreCandidates(brandWithTitle("The Great Escape"), ImmutableList.of(brandWithTitle("Great Escape")), desc));
-        score(1, scorer.scoreCandidates(brandWithTitle("the Great Escape"), ImmutableList.of(brandWithTitle("Great Escape")), desc));
-        scoreLt(0.1, scorer.scoreCandidates(brandWithTitle("Theatreland"), ImmutableList.of(brandWithTitle("The atreland")), desc));
-        scoreLt(0.1, scorer.scoreCandidates(brandWithTitle("theatreland"), ImmutableList.of(brandWithTitle("the atreland")), desc));
+        score(1, score("The Great Escape", "Great Escape"));
+        score(1, score("the Great Escape", "Great Escape"));
+        scoreLt(0.1, score("Theatreland", "The atreland"));
+        scoreLt(0.1, score("theatreland", "the atreland"));
     }
     
     private void scoreLt(double expected, ScoredCandidates<Container> candidates) {

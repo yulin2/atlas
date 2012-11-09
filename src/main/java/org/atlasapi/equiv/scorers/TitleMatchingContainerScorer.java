@@ -5,12 +5,14 @@ import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Container;
 
+import com.google.common.base.Functions;
+
 public class TitleMatchingContainerScorer implements EquivalenceScorer<Container> {
 
     private ContentTitleScorer<Container> scorer;
 
     public TitleMatchingContainerScorer() {
-        this.scorer = new ContentTitleScorer<Container>();
+        this.scorer = new ContentTitleScorer<Container>(Functions.<String>identity());
     }
     
     @Override

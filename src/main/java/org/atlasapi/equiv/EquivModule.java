@@ -37,6 +37,7 @@ import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.RadioTimesFilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ScalingEquivalenceGenerator;
 import org.atlasapi.equiv.generators.TitleSearchGenerator;
+import org.atlasapi.equiv.generators.SongTitleTransform;
 import org.atlasapi.equiv.handlers.BroadcastingEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EpisodeFilteringEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EpisodeMatchingEquivalenceHandler;
@@ -141,7 +142,7 @@ public class EquivModule {
 
     private EquivalenceUpdater<Container> standardContainerUpdater(Set<Publisher> acceptablePublishers) {
         Set<EquivalenceGenerator<Container>> generators = ImmutableSet.of(
-            TitleSearchGenerator.create(searchResolver, Container.class).copyWithPublishers(acceptablePublishers),
+            TitleSearchGenerator.create(searchResolver, Container.class, acceptablePublishers),
             ScalingEquivalenceGenerator.scale(new ContainerChildEquivalenceGenerator(contentResolver, equivSummaryStore),20)
         );
         Set<EquivalenceScorer<Container>> scorers = ImmutableSet.<EquivalenceScorer<Container>>of(
@@ -198,7 +199,7 @@ public class EquivModule {
         updaters.register(BBC_REDUX, Container.class, standardContainerUpdater(
             reduxPublishers,
             ImmutableSet.of(
-                TitleSearchGenerator.create(searchResolver, Container.class).copyWithPublishers(reduxPublishers),
+                TitleSearchGenerator.create(searchResolver, Container.class, reduxPublishers),
                 new ContainerChildEquivalenceGenerator(contentResolver, equivSummaryStore)
             ),
             ImmutableSet.of(titleScorer)
@@ -216,7 +217,7 @@ public class EquivModule {
         ));
         updaters.register(ITUNES, Container.class, standardContainerUpdater(
             acceptablePublishers,
-            ImmutableSet.of(TitleSearchGenerator.create(searchResolver, Container.class).copyWithPublishers(acceptablePublishers)), 
+            ImmutableSet.of(TitleSearchGenerator.create(searchResolver, Container.class, acceptablePublishers)), 
             ImmutableSet.of(titleScorer, 
                 new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
             ))
@@ -235,7 +236,7 @@ public class EquivModule {
                 ));
         updaters.register(LOVEFILM, Container.class, standardContainerUpdater(
             lfPublishers,
-            ImmutableSet.of(TitleSearchGenerator.create(searchResolver, Container.class).copyWithPublishers(lfPublishers)), 
+            ImmutableSet.of(TitleSearchGenerator.create(searchResolver, Container.class, lfPublishers)), 
             ImmutableSet.of(titleScorer, 
                 new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
             ))
@@ -245,7 +246,7 @@ public class EquivModule {
         updaters.register(FACEBOOK, Container.class, standardContentUpdater(
             facebookAcceptablePublishers,
             ImmutableSet.of(
-                TitleSearchGenerator.create(searchResolver, Container.class).copyWithPublishers(facebookAcceptablePublishers),
+                TitleSearchGenerator.create(searchResolver, Container.class, facebookAcceptablePublishers),
                 aliasResolvingGenerator(contentResolver, Container.class)
             ),
             ImmutableSet.<EquivalenceScorer<Container>>of(),
@@ -261,7 +262,7 @@ public class EquivModule {
         for (Publisher publisher : musicPublishers) {
             updaters.register(publisher, Item.class, standardItemUpdater(
                 Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES)),
-                ImmutableSet.of(TitleSearchGenerator.<Item>create(searchResolver, Song.class).copyWithPublishers(Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES)))), 
+                ImmutableSet.of(new TitleSearchGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform())), 
                 ImmutableSet.of(new CrewMemberScorer())
             ));
         }
