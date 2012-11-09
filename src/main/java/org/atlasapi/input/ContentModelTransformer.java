@@ -25,31 +25,36 @@ import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.topic.TopicStore;
+import org.joda.time.DateTime;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.time.Clock;
 
 public abstract class ContentModelTransformer<F extends Description,T extends Content> implements ModelTransformer<F, T> {
 
     private final ContentResolver resolver;
     private final TopicStore topicStore;
+    protected final Clock clock;
 
-    public ContentModelTransformer(ContentResolver resolver, TopicStore topicStore) {
+    public ContentModelTransformer(ContentResolver resolver, TopicStore topicStore, Clock clock) {
         this.resolver = resolver;
         this.topicStore = topicStore;
+        this.clock = clock;
     }
     
     @Override
     public T transform(F simple) {
-        T output = createOutput(simple);
+        DateTime now = clock.now();
+        T output = createOutput(simple, now);
+        output.setLastUpdated(now);
         return setContentFields(output, simple);
     }
 
-    protected abstract T createOutput(F simple);
+    protected abstract T createOutput(F simple, DateTime now);
 
     private T setContentFields(T result, Description inputContent) {
         result.setCanonicalUri(inputContent.getUri());

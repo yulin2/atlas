@@ -27,16 +27,17 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.metabroadcast.common.currency.Price;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.media.MimeType;
+import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
 
 public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.media.entity.simple.Item, Item> {
 
-    public ItemModelTransformer(ContentResolver resolver, TopicStore topicStore) {
-        super(resolver, topicStore);
+    public ItemModelTransformer(ContentResolver resolver, TopicStore topicStore, Clock clock) {
+        super(resolver, topicStore, clock);
     }
 
     @Override
-    protected Item createOutput(org.atlasapi.media.entity.simple.Item inputItem) {
+    protected Item createOutput(org.atlasapi.media.entity.simple.Item inputItem, DateTime now) {
         String type = inputItem.getType();
         Item item;
         if ("episode".equals(type)) {
@@ -49,7 +50,8 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         } else {
             item = new Item();
         }
-        return setItemFields(item, inputItem);
+        item.setLastUpdated(now);
+        return setItemFields(item, inputItem, now);
     }
 
     protected Item createSong(org.atlasapi.media.entity.simple.Item inputItem) {
@@ -72,22 +74,23 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         return episode;
     }
 
-    protected Item setItemFields(Item item, org.atlasapi.media.entity.simple.Item inputItem) {
-        Set<Encoding> encodings = encodingsFrom(inputItem.getLocations());
+    protected Item setItemFields(Item item, org.atlasapi.media.entity.simple.Item inputItem, DateTime now) {
+        Set<Encoding> encodings = encodingsFrom(inputItem.getLocations(), now);
         if (!encodings.isEmpty()) {
             Version version = new Version();
+            version.setLastUpdated(now);
             version.setManifestedAs(encodings);
             item.setVersions(ImmutableSet.of(version));
         }
         return item;
     }
 
-    private Set<Encoding> encodingsFrom(Set<org.atlasapi.media.entity.simple.Location> locations) {
+    private Set<Encoding> encodingsFrom(Set<org.atlasapi.media.entity.simple.Location> locations, DateTime now) {
         Builder<Encoding> encodings = ImmutableSet.builder();
         for (org.atlasapi.media.entity.simple.Location simpleLocation : locations) {
-            Encoding encoding = encodingFrom(simpleLocation);
-            Location location = locationFrom(simpleLocation);
-            Policy policy = policyFrom(simpleLocation);
+            Encoding encoding = encodingFrom(simpleLocation, now);
+            Location location = locationFrom(simpleLocation, now);
+            Policy policy = policyFrom(simpleLocation, now);
             location.setPolicy(policy);
             encoding.setAvailableAt(ImmutableSet.of(location));
             encodings.add(encoding);
@@ -95,8 +98,9 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         return encodings.build();
     }
 
-    private Encoding encodingFrom(org.atlasapi.media.entity.simple.Location inputLocation) {
+    private Encoding encodingFrom(org.atlasapi.media.entity.simple.Location inputLocation, DateTime now) {
         Encoding encoding = new Encoding();
+        encoding.setLastUpdated(now);
         encoding.setAdvertisingDuration(inputLocation.getAdvertisingDuration());
         encoding.setAudioBitRate(inputLocation.getAudioBitRate());
         encoding.setAudioChannels(inputLocation.getAudioChannels());
@@ -118,8 +122,9 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         return encoding;
     }
 
-    private Location locationFrom(org.atlasapi.media.entity.simple.Location inputLocation) {
+    private Location locationFrom(org.atlasapi.media.entity.simple.Location inputLocation, DateTime now) {
         Location location = new Location();
+        location.setLastUpdated(now);
         location.setEmbedCode(inputLocation.getEmbedCode());
         location.setEmbedId(inputLocation.getEmbedId());
         location.setTransportIsLive(inputLocation.getTransportIsLive());
@@ -134,8 +139,9 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         return location;
     }
 
-    private Policy policyFrom(org.atlasapi.media.entity.simple.Location inputLocation) {
+    private Policy policyFrom(org.atlasapi.media.entity.simple.Location inputLocation, DateTime now) {
         Policy policy = new Policy();
+        policy.setLastUpdated(now);
         policy.setAvailabilityStart(asUtcDateTime(inputLocation.getAvailabilityStart()));
         policy.setAvailabilityEnd(asUtcDateTime(inputLocation.getAvailabilityEnd()));
         policy.setDrmPlayableFrom(asUtcDateTime(inputLocation.getDrmPlayableFrom()));

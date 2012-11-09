@@ -112,6 +112,7 @@ public class ContentWriteController {
     }
 
     private Content merge(Content existing, Content posted) {
+        existing.setLastUpdated(posted.getLastUpdated());
         existing.setTitle(posted.getTitle());
         existing.setDescription(posted.getDescription());
         existing.setImage(posted.getImage());
