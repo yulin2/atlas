@@ -19,6 +19,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Song;
+import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -126,10 +127,19 @@ public class ContentWriteController {
     }
 
     private Item mergeItems(Item existing, Item posted) {
+        if (!posted.getVersions().isEmpty()) {
+            Version existingVersion = Iterables.getFirst(existing.getVersions(), new Version());
+            Version postedVersion = Iterables.getOnlyElement(posted.getVersions());
+            mergeVersions(existingVersion, postedVersion);
+        }
         if (existing instanceof Song && posted instanceof Song) {
             return mergeSongs((Song)existing, (Song)posted);
         }
         return existing;
+    }
+
+    private void mergeVersions(Version existing, Version posted) {
+        existing.setManifestedAs(posted.getManifestedAs());
     }
 
     private Song mergeSongs(Song existing, Song posted) {
