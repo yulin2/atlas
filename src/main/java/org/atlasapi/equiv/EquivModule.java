@@ -35,6 +35,7 @@ import org.atlasapi.equiv.generators.ContainerChildEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.RadioTimesFilmEquivalenceGenerator;
+import org.atlasapi.equiv.generators.SongTitleTransform;
 import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
 import org.atlasapi.equiv.handlers.BroadcastingEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
@@ -146,13 +147,11 @@ public class EquivModule {
         //Generally acceptable publishers.
         Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM));
         
-        TitleMatchingEquivalenceScoringGenerator<Container> titleScoringGenerator = TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class);
-        
         ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
         
         ImmutableMap.Builder<Publisher, ContentEquivalenceUpdater<Content>> publisherUpdaters = ImmutableMap.builder();
         
-        titleScoringGenerator = titleScoringGenerator.copyWithPublishers(acceptablePublishers);
+        TitleMatchingEquivalenceScoringGenerator<Container> titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, acceptablePublishers);
         ContentEquivalenceUpdater<Content> standardContainerEquivalenceUpdater = resultHandlingUpdater(
             new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
                 .withGenerators(ImmutableSet.of(
@@ -193,7 +192,7 @@ public class EquivModule {
                     )
                 ))
                 .withGenerators(ImmutableSet.of(
-                    titleScoringGenerator.copyWithPublishers(facebookPublishers),
+                    TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, facebookPublishers),
                     aliasResolvingGenerator(contentResolver, Container.class)
                 ))
                 .build(),
@@ -213,7 +212,7 @@ public class EquivModule {
         ImmutableSet.of(RADIO_TIMES,PA,PREVIEW_NETWORKS)));
         
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
-        titleScoringGenerator = titleScoringGenerator.copyWithPublishers(reduxPublishers);
+        titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, reduxPublishers);
         publisherUpdaters.put(BBC_REDUX, resultHandlingUpdater(
             new RootEquivalenceUpdater(containerUpdaterBuilder(reduxPublishers)
                 .withGenerators(ImmutableSet.of(
@@ -226,7 +225,7 @@ public class EquivModule {
         reduxPublishers));
 
         Set<Publisher> lfPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(LOVEFILM));
-        titleScoringGenerator = titleScoringGenerator.copyWithPublishers(lfPublishers);
+        titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, lfPublishers);
         publisherUpdaters.put(LOVEFILM, resultHandlingUpdater(new RootEquivalenceUpdater(
             containerUpdaterBuilder(lfPublishers)
                 .withGenerator(titleScoringGenerator)
@@ -246,7 +245,7 @@ public class EquivModule {
                     new NullContentEquivalenceUpdater<Container>(), 
                     ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
                     .withGenerator(
-                        TitleMatchingEquivalenceScoringGenerator.<Item>create(searchResolver, Song.class).copyWithPublishers(Sets.union(musicPublishers, ImmutableSet.of(ITUNES))) 
+                        new TitleMatchingEquivalenceScoringGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform()) 
                     )
                     .withScorer(new CrewMemberScorer())
                     .build()
