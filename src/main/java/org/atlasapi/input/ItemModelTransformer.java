@@ -123,6 +123,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
         location.setEmbedCode(inputLocation.getEmbedCode());
         location.setEmbedId(inputLocation.getEmbedId());
         location.setTransportIsLive(inputLocation.getTransportIsLive());
+        location.setUri(inputLocation.getUri());
         
         if (inputLocation.getTransportSubType() != null) {
             location.setTransportSubType(TransportSubType.fromString(inputLocation.getTransportSubType()));
@@ -158,7 +159,7 @@ public class ItemModelTransformer extends ContentModelTransformer<org.atlasapi.m
     }
 
     private DateTime asUtcDateTime(Date date) {
-        if (date != null) {
+        if (date == null) {
             return null;
         }
         return new DateTime(date).withZone(DateTimeZones.UTC);
