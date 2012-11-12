@@ -1,5 +1,10 @@
 package org.atlasapi.equiv.scorers;
 
+import static java.math.BigDecimal.ROUND_HALF_UP;
+import static java.math.RoundingMode.HALF_UP;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
@@ -11,15 +16,32 @@ import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
 import org.atlasapi.media.entity.Item;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 
 public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
 
+    private Function<Item, List<CrewMember>> peopleExtractor;
+
+    public CrewMemberScorer(Function<Item, List<CrewMember>> peopleExtractor) {
+        this.peopleExtractor = peopleExtractor;
+    }
+    
+    public CrewMemberScorer() {
+        this(new Function<Item, List<CrewMember>>() {
+            @Override
+            public List<CrewMember> apply(Item input) {
+                return input.getPeople();
+            }
+        });
+    }
+    
+    
     @Override
-    public ScoredEquivalents<Item> score(Item content, Iterable<Item> candidates, ResultDescription desc) {
+    public final ScoredEquivalents<Item> score(Item content, Iterable<Item> candidates, ResultDescription desc) {
         ScoredEquivalentsBuilder<Item> scored = DefaultScoredEquivalents.fromSource("crew");
 
-        List<CrewMember> contentCrew = content.getPeople();
+        List<CrewMember> contentCrew = peopleExtractor.apply(content);
         
         if (nullOrEmpty(contentCrew)) {
             desc.appendText("Subject has no crew");
@@ -30,7 +52,7 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
         }
         
         for (Item candidate : candidates) {
-            List<CrewMember> candidateCrew = candidate.getPeople();
+            List<CrewMember> candidateCrew = peopleExtractor.apply(candidate);
             Score score;
             if (nullOrEmpty(candidateCrew)) {
                 desc.appendText("%s has no crew", candidate.getCanonicalUri());
@@ -61,7 +83,6 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
          * haystack allowing in-exact matches between people. Again n^2
          */
         int found = 0;
-        int missed= 0;
         for (CrewMember needle : needles) {
             if (needle.name() != null) {
                 CrewMember match = needleInHaystack(needle, haystack);
@@ -70,15 +91,43 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
                     found++;
                 } else {
                     desc.appendText("no match: %s (%s)", needle.getCanonicalUri(), nameAndRole(needle));
-                    missed++;
                 }
             } else {
                 desc.appendText("no name: %s", needle.getCanonicalUri());
             }
         }
         
-        desc.appendText("score: (%s - %s)/%s", found, missed, needles.size());
-        return Score.valueOf((found-missed)/(double)needles.size());
+        double score = score(found, needles.size());
+        
+        desc.appendText("matched: %s/%s -> %s", found, needles.size(), scoreFormat.format(score));
+        return Score.valueOf(score);
+    }
+
+    private static final DecimalFormat scoreFormat = new DecimalFormat("#.###");
+    {
+        scoreFormat.setMinimumFractionDigits(1);
+        scoreFormat.setPositivePrefix("+");
+        scoreFormat.setNegativePrefix("-");
+    }
+    
+    private static final BigDecimal A = BigDecimal.valueOf(-40)
+            .divide(BigDecimal.valueOf(21), 3, HALF_UP);
+    private static final BigDecimal B = BigDecimal.valueOf(82)
+            .divide(BigDecimal.valueOf(21), 3, HALF_UP);
+    private static final BigDecimal C = BigDecimal.valueOf(-1);
+    
+    // y = (-40/21)x^2 + (82/21)x - 1 gives:
+    // 1 for exact matches
+    // 0 for 30% matches
+    // -1 for no matches
+    private double score(int matched, int maxMatched) {
+        BigDecimal x = BigDecimal.valueOf(matched)
+                .divide(BigDecimal.valueOf(maxMatched),3, HALF_UP);
+        BigDecimal r = A.multiply(x.multiply(x))
+                .add(B.multiply(x))
+                .add(C)
+                .setScale(3, ROUND_HALF_UP);
+        return Math.max(-1.0, Math.min(1.0, r.doubleValue()));
     }
 
     private CrewMember needleInHaystack(CrewMember needle, List<CrewMember> haystack) {
@@ -91,21 +140,21 @@ public class CrewMemberScorer implements ContentEquivalenceScorer<Item> {
         return null;
     }
     
-    private Object normalize(String name) {
-        return name.toLowerCase().replace("[^\\d\\w]","");
+    private String normalize(String name) {
+        return name.toLowerCase().replaceAll("[^\\d\\w\\s]","");
     }
 
-    protected String describeMatch(CrewMember needle, CrewMember match) {
+    private String describeMatch(CrewMember needle, CrewMember match) {
         return String.format("%s (%s) matched %s (%s)", 
             needle.getCanonicalUri(), nameAndRole(needle),
             match.getCanonicalUri(), nameAndRole(match)
-                );
+        );
     }
     
     private String nameAndRole(CrewMember member) {
         Role role = member.role();
         String roleKey = role == null ? "" : "," + role.key();
-        return String.format("%s%s", member.name(), roleKey);
+        return String.format("%s%s", normalize(member.name()), roleKey);
     }
 
     private boolean nullOrEmpty(List<CrewMember> people) {

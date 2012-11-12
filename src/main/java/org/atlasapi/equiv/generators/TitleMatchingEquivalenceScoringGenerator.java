@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.generators;
 
+import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,7 +11,6 @@ import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.media.entity.Content;
@@ -18,6 +19,8 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
@@ -29,30 +32,32 @@ public class TitleMatchingEquivalenceScoringGenerator<T extends Content> impleme
 
     private final static float TITLE_WEIGHTING = 1.0f;
     
-    public static final <T extends Content> TitleMatchingEquivalenceScoringGenerator<T> create(SearchResolver searchResolver, Class<? extends T> cls) {
-        return new TitleMatchingEquivalenceScoringGenerator<T>(searchResolver, cls, ImmutableSet.<Publisher>of());
+    public static final <T extends Content> TitleMatchingEquivalenceScoringGenerator<T> create(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
+        return new TitleMatchingEquivalenceScoringGenerator<T>(searchResolver, cls, publishers);
     }
     
     private final SearchResolver searchResolver;
-    private final ContentTitleScorer titleScorer;
     private final Class<? extends T> cls;
-
     private final Set<Publisher> searchPublishers;
+    private final Function<String, String> titleTransform;
+    private final ContentTitleScorer titleScorer;
+
 
     public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
+        this(searchResolver, cls, publishers, Functions.<String>identity());
+    }
+    
+    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers, Function<String,String> titleTransform) {
         this.searchResolver = searchResolver;
         this.cls = cls;
         this.searchPublishers = ImmutableSet.copyOf(publishers);
-        this.titleScorer = new ContentTitleScorer();
-    }
-    
-    public TitleMatchingEquivalenceScoringGenerator<T> copyWithPublishers(Iterable<Publisher> publishers) {
-        return new TitleMatchingEquivalenceScoringGenerator<T>(searchResolver, cls, publishers);
+        this.titleTransform = titleTransform;
+        this.titleScorer = new ContentTitleScorer(titleTransform);
     }
 
     @Override
     public ScoredEquivalents<T> generate(T content, ResultDescription desc) {
-        return scoreSuggestions(content, searchForEquivalents(content), desc);
+        return scoreSuggestions(content, searchForEquivalents(content, desc), desc);
     }
 
     @Override
@@ -65,25 +70,25 @@ public class TitleMatchingEquivalenceScoringGenerator<T extends Content> impleme
         desc.appendText("Scoring %s suggestions", Iterables.size(suggestions));
         
         for (T found : ImmutableSet.copyOf(suggestions)) {
-            Score score = titleScorer.score(content, found);
-            desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
-            equivalents.addEquivalent(found, score);
+            equivalents.addEquivalent(found, titleScorer.score(content, found, desc));
         }
 
         return equivalents.build();
     }
 
-    private Iterable<? extends T> searchForEquivalents(T content) {
+    private Iterable<? extends T> searchForEquivalents(T content, ResultDescription desc) {
         Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
-        ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
+        ApplicationConfiguration appConfig = defaultConfiguration().withSources(enabledPublishers(publishers));
 
-        SearchQuery.Builder query = SearchQuery.builder(content.getTitle())
+        String title = titleTransform.apply(content.getTitle());
+        SearchQuery.Builder query = SearchQuery.builder(title)
                 .withSelection(new Selection(0, 20))
                 .withPublishers(publishers)
                 .withTitleWeighting(TITLE_WEIGHTING);
         if (content.getSpecialization() != null) {
             query.withSpecializations(ImmutableSet.of(content.getSpecialization()));
         }
+        desc.appendText("query: %s, specialization: %s, publishers: %s", title, content.getSpecialization(), publishers);
         List<Identified> search = searchResolver.search(query.build(), appConfig);
         return Iterables.filter(search,cls);
     }
