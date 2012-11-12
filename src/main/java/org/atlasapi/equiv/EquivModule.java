@@ -64,6 +64,7 @@ import org.atlasapi.equiv.scorers.CrewMemberScorer;
 import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingContainerScorer;
 import org.atlasapi.equiv.scorers.TitleMatchingItemScorer;
+import org.atlasapi.equiv.scorers.SongCrewMemberExtractor;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
 import org.atlasapi.equiv.update.EquivalenceUpdaters;
@@ -263,7 +264,7 @@ public class EquivModule {
             updaters.register(publisher, Item.class, standardItemUpdater(
                 Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES)),
                 ImmutableSet.of(new TitleSearchGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform())), 
-                ImmutableSet.of(new CrewMemberScorer())
+                ImmutableSet.of(new CrewMemberScorer(new SongCrewMemberExtractor()))
             ));
         }
         

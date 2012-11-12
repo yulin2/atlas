@@ -44,5 +44,17 @@ public class SongTitleTransformTest {
         assertThat(sanitizer.apply("No Church in the Wild (Featuring Frank Ocean)"),
             is("No Church in the Wild"));
     }
+    
+    @Test
+    public void testRemovesTranscibers() {
+        assertThat(sanitizer.apply("Grande Valse Brillante in D major Op 18 (transcribed Carl Davidov)"),
+            is("Grande Valse Brillante in D major Op 18"));
+    }
 
+    @Test
+    public void testExtractsFeaturedArtists() {
+        assertThat(sanitizer.extractFeaturedArtists("No Church in the Wild (feat. Frank Ocean)"),
+            is("Frank Ocean"));
+    }
+    
 }
