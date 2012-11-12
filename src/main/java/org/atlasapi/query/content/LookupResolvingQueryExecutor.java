@@ -106,8 +106,10 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                     }
                 }), Predicates.notNull()));
                 
-                for (Identified ided : identifieds) {
-                    ided.setEquivalenceUpdate(entry.updated());
+                if (!entry.created().equals(entry.updated())) {
+                    for (Identified ided : identifieds) {
+                        ided.setEquivalenceUpdate(entry.updated());
+                    }
                 }
 
                 return setEquivalentToFields(identifieds);
