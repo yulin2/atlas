@@ -57,6 +57,7 @@ import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
 import org.atlasapi.equiv.scorers.CrewMemberScorer;
 import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
+import org.atlasapi.equiv.scorers.SongCrewMemberExtractor;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
@@ -247,7 +248,7 @@ public class EquivModule {
                     .withGenerator(
                         new TitleMatchingEquivalenceScoringGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform()) 
                     )
-                    .withScorer(new CrewMemberScorer())
+                    .withScorer(new CrewMemberScorer(new SongCrewMemberExtractor()))
                     .build()
                 ),
             musicPublishers));

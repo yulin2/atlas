@@ -9,7 +9,7 @@ import com.google.common.base.Function;
 
 public class SongTitleTransform implements Function<String, String> {
 
-    private static final Pattern FEAT_PATTERN = Pattern.compile("(.*) \\(?(f|F)eat(|uring).*\\)?.*");
+    private static final Pattern FEAT_PATTERN = Pattern.compile("(.*) \\(?((f|F)eat(|uring)|transcribed)\\.? ([^)]+)\\)?.*");
 
     @Override
     @Nullable
@@ -17,15 +17,23 @@ public class SongTitleTransform implements Function<String, String> {
         if (input == null) {
             return null;
         }
-        return santize(input);
+        return removeFeaturedArtists(input);
+    }
+    
+    public String extractFeaturedArtists(String title) {
+        Matcher matcher = FEAT_PATTERN.matcher(title);
+        if (matcher.matches()) {
+            return matcher.group(5);
+        }
+        return "";
     }
 
-    private String santize(String input) {
-        Matcher matcher = FEAT_PATTERN.matcher(input);
+    public String removeFeaturedArtists(String title) {
+        Matcher matcher = FEAT_PATTERN.matcher(title);
         if (matcher.matches()) {
             return matcher.group(1);
         }
-        return input;
+        return title;
     }
 
 }
