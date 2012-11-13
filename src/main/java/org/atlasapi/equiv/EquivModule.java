@@ -175,9 +175,12 @@ public class EquivModule {
     @Bean 
     public EquivalenceUpdater<Content> contentUpdater() {
         
+        Set<Publisher> musicPublishers = ImmutableSet.of(Publisher.BBC_MUSIC, Publisher.YOUTUBE, 
+                Publisher.SPOTIFY, Publisher.SOUNDCLOUD, Publisher.RDIO, Publisher.AMAZON_UK);
+
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM));
-        
+        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), Sets.union(ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM), musicPublishers));
+
         EquivalenceUpdater<Item> standardItemUpdater = standardItemUpdater(acceptablePublishers);
         EquivalenceUpdater<Container> standardContainerUpdater = standardContainerUpdater(acceptablePublishers);
 
@@ -258,8 +261,6 @@ public class EquivModule {
             ), containerResultHandlers(facebookAcceptablePublishers)
         ));
         
-        Set<Publisher> musicPublishers = ImmutableSet.of(Publisher.BBC_MUSIC, Publisher.YOUTUBE, 
-            Publisher.SPOTIFY, Publisher.SOUNDCLOUD, Publisher.RDIO, Publisher.AMAZON_UK);
         for (Publisher publisher : musicPublishers) {
             updaters.register(publisher, Item.class, standardItemUpdater(
                 Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES)),
