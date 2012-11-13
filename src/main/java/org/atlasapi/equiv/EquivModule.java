@@ -48,6 +48,7 @@ import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.MusicEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PublisherFilteringExtractor;
 import org.atlasapi.equiv.results.extractors.SpecializationMatchingEquivalenceExtractor;
@@ -251,7 +252,7 @@ public class EquivModule {
                     new NullContentEquivalenceUpdater<Container>(), 
                     ItemEquivalenceUpdater.builder(DefaultEquivalenceResultBuilder.resultBuilder(
                         new NullScoreAwareAveragingCombiner<Item>(), 
-                        new MinimumScoreEquivalenceExtractor<Item>(new TopEquivalenceExtractor<Item>(), 0.7)
+                        new MusicEquivalenceExtractor()
                     ), log)
                     .withGenerator(
                         new TitleMatchingEquivalenceScoringGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform()) 
