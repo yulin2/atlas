@@ -41,15 +41,17 @@ public class TitleMatchingEquivalenceScoringGenerator<T extends Content> impleme
     private final Set<Publisher> searchPublishers;
     private final Function<String, String> titleTransform;
     private final ContentTitleScorer titleScorer;
+    private final int searchLimit;
 
 
     public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
-        this(searchResolver, cls, publishers, Functions.<String>identity());
+        this(searchResolver, cls, publishers, Functions.<String>identity(), 20);
     }
     
-    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers, Function<String,String> titleTransform) {
+    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers, Function<String,String> titleTransform, int searchLimit) {
         this.searchResolver = searchResolver;
         this.cls = cls;
+        this.searchLimit = searchLimit;
         this.searchPublishers = ImmutableSet.copyOf(publishers);
         this.titleTransform = titleTransform;
         this.titleScorer = new ContentTitleScorer(titleTransform);
@@ -82,7 +84,7 @@ public class TitleMatchingEquivalenceScoringGenerator<T extends Content> impleme
 
         String title = titleTransform.apply(content.getTitle());
         SearchQuery.Builder query = SearchQuery.builder(title)
-                .withSelection(new Selection(0, 20))
+                .withSelection(new Selection(0, searchLimit))
                 .withPublishers(publishers)
                 .withTitleWeighting(TITLE_WEIGHTING);
         if (content.getSpecialization() != null) {
