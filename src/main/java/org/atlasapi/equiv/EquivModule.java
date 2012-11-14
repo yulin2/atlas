@@ -256,7 +256,7 @@ public class EquivModule {
                     .withScorer(new CrewMemberScorer(new SongCrewMemberExtractor()))
                     .build()
                 ),
-            musicPublishers));
+            Sets.union(musicPublishers, ImmutableSet.of(ITUNES))));
         }
         
         return new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build());
