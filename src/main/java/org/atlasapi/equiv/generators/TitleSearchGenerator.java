@@ -35,14 +35,16 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
     private final Set<Publisher> searchPublishers;
     private final Function<String, String> titleTransform;
     private final ContentTitleScorer<T> titleScorer;
+    private final int searchLimit;
 
     public TitleSearchGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
-        this(searchResolver, cls, publishers, Functions.<String>identity());
+        this(searchResolver, cls, publishers, Functions.<String>identity(), 20);
     }
-
-    public TitleSearchGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers, Function<String,String> titleTransform) {
+    
+    public TitleSearchGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers, Function<String,String> titleTransform, int searchLimit) {
         this.searchResolver = searchResolver;
         this.cls = cls;
+        this.searchLimit = searchLimit;
         this.searchPublishers = ImmutableSet.copyOf(publishers);
         this.titleTransform = titleTransform;
         this.titleScorer = new ContentTitleScorer<T>(titleTransform);
@@ -64,7 +66,7 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
 
         String title = titleTransform.apply(content.getTitle());
         SearchQuery.Builder query = SearchQuery.builder(title)
-                .withSelection(new Selection(0, 20))
+                .withSelection(new Selection(0, searchLimit))
                 .withPublishers(publishers)
                 .withTitleWeighting(TITLE_WEIGHTING);
         if (content.getSpecialization() != null) {

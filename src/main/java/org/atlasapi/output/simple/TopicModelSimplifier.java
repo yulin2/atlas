@@ -26,7 +26,9 @@ public class TopicModelSimplifier extends IdentifiedModelSimplifier<Topic, org.a
         topic.setImage(fullTopic.getImage());
         topic.setThumbnail(fullTopic.getThumbnail());
         topic.setPublisher(toPublisherDetails(fullTopic.getPublisher()));
-        topic.setType(fullTopic.getType().toString());
+        if (fullTopic.getType() != null) {
+            topic.setType(fullTopic.getType().toString());
+        }
         topic.setValue(fullTopic.getValue());
         topic.setNamespace(fullTopic.getNamespace());
         return topic;

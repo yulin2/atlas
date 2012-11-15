@@ -49,8 +49,10 @@ import org.atlasapi.equiv.results.combining.ItemScoreFilteringCombiner;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.combining.ScoreCombiner;
 import org.atlasapi.equiv.results.extractors.EquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.MusicEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.filters.AbstractEquivalenceFilter;
+import org.atlasapi.equiv.results.filters.AlwaysTrueFilter;
 import org.atlasapi.equiv.results.filters.ConjunctiveFilter;
 import org.atlasapi.equiv.results.filters.EquivalenceFilter;
 import org.atlasapi.equiv.results.filters.MinimumScoreFilter;
@@ -262,14 +264,17 @@ public class EquivModule {
         ));
         
         for (Publisher publisher : musicPublishers) {
-            updaters.register(publisher, Item.class, standardItemUpdater(
-                Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES)),
-                ImmutableSet.of(new TitleSearchGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform())), 
-                ImmutableSet.of(new CrewMemberScorer(new SongCrewMemberExtractor()))
-            ));
+            updaters.register(publisher, Item.class, new ContentEquivalenceUpdater<Item>(
+                ImmutableSet.<EquivalenceGenerator<Item>>of(new TitleSearchGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform(),100)), 
+                ImmutableSet.<EquivalenceScorer<Item>>of(new CrewMemberScorer(new SongCrewMemberExtractor())),
+                new NullScoreAwareAveragingCombiner<Item>(),
+                new AlwaysTrueFilter<Item>(),
+                new MusicEquivalenceExtractor(),
+                itemResultHandlers(Sets.union(musicPublishers, ImmutableSet.of(Publisher.ITUNES))
+            )));
         }
         
         return updaters; 
     }
-
+    
 }
