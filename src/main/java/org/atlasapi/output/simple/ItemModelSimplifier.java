@@ -381,6 +381,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private void copyProperties(Location location, org.atlasapi.media.entity.simple.Location simpleLocation) {
         Policy policy = location.getPolicy();
         if (policy != null) {
+            if (policy.getActualAvailabilityStart() != null) {
+                simpleLocation.setActualAvailabilityStart(policy.getActualAvailabilityStart().toDate());
+            }
             if (policy.getAvailabilityStart() != null) {
                 simpleLocation.setAvailabilityStart(policy.getAvailabilityStart().toDate());
             }
@@ -402,6 +405,9 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
             }
             if (policy.getPlatform() != null) {
                 simpleLocation.setPlatform(policy.getPlatform().key());
+            }
+            if (policy.getNetwork().isPresent()) {
+                simpleLocation.setNetwork(policy.getNetwork().get().key());
             }
         }
 
