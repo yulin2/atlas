@@ -39,7 +39,7 @@ public class BbcProgrammeEncodingAndLocationCreator {
             IonService requiredIonService = ionService.requireValue();
             requiredIonService.applyToEncoding(encoding);
             for (Location location : encoding.getAvailableAt()) {
-                applyToLocation(location, ondemand);
+                applyToLocation(location, ondemand, episodeId);
             }
 
             return Maybe.just(encoding);
@@ -47,19 +47,19 @@ public class BbcProgrammeEncodingAndLocationCreator {
         return Maybe.nothing();
     }
 
-    public List<Location> locations(IonOndemandChange change) {
+    public List<Location> locations(IonOndemandChange change, String episodeId) {
         Maybe<IonService> ionService = IonService.fromString(change.getService());
         if (ionService.hasValue()) {
             List<Location> locations = ionService.requireValue().locations();
             for (Location location : locations) {
-                applyToLocation(location, change);
+                applyToLocation(location, change, episodeId);
             }
             return locations;
         }
         return ImmutableList.of();
     }
 
-    private void applyToLocation(Location location, IonOndemandChange ondemand) {
+    private void applyToLocation(Location location, IonOndemandChange ondemand, String episodeId) {
 
         Policy policy = location.getPolicy();
         applyToPolicy(policy, ondemand);
@@ -67,7 +67,7 @@ public class BbcProgrammeEncodingAndLocationCreator {
         location.setAvailable(availableNow(policy));
         location.setCanonicalUri(SLASH_PROGRAMMES_ROOT + ondemand.getId());
         location.setTransportType(TransportType.LINK);
-        location.setUri("http://www.bbc.co.uk/iplayer/episode/" + ondemand.getEpisodeId());
+        location.setUri("http://www.bbc.co.uk/iplayer/episode/" + episodeId);
     }
     
     private void applyToPolicy(Policy policy, IonOndemandChange ondemand) {
