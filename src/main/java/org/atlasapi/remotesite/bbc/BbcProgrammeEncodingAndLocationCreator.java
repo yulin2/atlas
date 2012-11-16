@@ -47,12 +47,12 @@ public class BbcProgrammeEncodingAndLocationCreator {
         return Maybe.nothing();
     }
 
-    public List<Location> locations(IonOndemandChange change, String episodeId) {
+    public List<Location> locations(IonOndemandChange change) {
         Maybe<IonService> ionService = IonService.fromString(change.getService());
         if (ionService.hasValue()) {
             List<Location> locations = ionService.requireValue().locations();
             for (Location location : locations) {
-                applyToLocation(location, change, episodeId);
+                applyToLocation(location, change, change.getEpisodeId());
             }
             return locations;
         }
