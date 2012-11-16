@@ -83,15 +83,21 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
                 if (!containsRequestedUri(entry.equivalents(), uri)) {
                     return ImmutableList.of();
                 }
-                Iterable<Identified> identifieds = Iterables.filter(Iterables.transform(entry.equivalents(), new Function<LookupRef, Identified>() {
+                List<Identified> identifieds = ImmutableList.copyOf(Iterables.filter(Iterables.transform(entry.equivalents(), new Function<LookupRef, Identified>() {
 
                     @Override
                     public Identified apply(LookupRef input) {
                         return allResolvedResults.get(input.id()).valueOrNull();
                     }
-                }), Predicates.notNull());
+                }), Predicates.notNull()));
+                
+                if (!entry.created().equals(entry.updated())) {
+                    for (Identified ided : identifieds) {
+                        ided.setEquivalenceUpdate(entry.updated());
+                    }
+                }
 
-                return setEquivalentToFields(ImmutableList.copyOf(identifieds));
+                return setEquivalentToFields(identifieds);
             }
         });
     }

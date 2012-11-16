@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.generators;
 
+import static org.atlasapi.application.ApplicationConfiguration.defaultConfiguration;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -9,15 +11,16 @@ import org.atlasapi.application.SourceStatus;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
 import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
-import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredEquivalents;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.search.model.SearchQuery;
 
+import com.google.common.base.Function;
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.common.collect.ImmutableSet;
@@ -25,57 +28,71 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.query.Selection;
 
-public class TitleMatchingEquivalenceScoringGenerator implements ContentEquivalenceGenerator<Container>, ContentEquivalenceScorer<Container> {
+public class TitleMatchingEquivalenceScoringGenerator<T extends Content> implements ContentEquivalenceGenerator<T>, ContentEquivalenceScorer<T> {
 
     private final static float TITLE_WEIGHTING = 1.0f;
-    private final static float BROADCAST_WEIGHTING = 0.0f;
-    private final static float CATCHUP_WEIGHTING = 0.0f;
     
-    private final Set<Publisher> searchPublishers = ImmutableSet.of(
-            Publisher.BBC, Publisher.C4, Publisher.HULU, Publisher.YOUTUBE, Publisher.TED, 
-            Publisher.VIMEO, Publisher.ITV, Publisher.BLIP, Publisher.DAILYMOTION, 
-            Publisher.FLICKR, Publisher.FIVE, Publisher.SEESAW, Publisher.TVBLOB, 
-            Publisher.ICTOMORROW, Publisher.HBO, Publisher.ITUNES, Publisher.MSN_VIDEO, 
-            Publisher.PA, Publisher.RADIO_TIMES, Publisher.ARCHIVE_ORG, Publisher.WORLD_SERVICE, Publisher.BBC_REDUX
-    );
+    public static final <T extends Content> TitleMatchingEquivalenceScoringGenerator<T> create(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
+        return new TitleMatchingEquivalenceScoringGenerator<T>(searchResolver, cls, publishers);
+    }
     
     private final SearchResolver searchResolver;
+    private final Class<? extends T> cls;
+    private final Set<Publisher> searchPublishers;
+    private final Function<String, String> titleTransform;
     private final ContentTitleScorer titleScorer;
+    private final int searchLimit;
 
-    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver) {
+
+    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers) {
+        this(searchResolver, cls, publishers, Functions.<String>identity(), 20);
+    }
+    
+    public TitleMatchingEquivalenceScoringGenerator(SearchResolver searchResolver, Class<? extends T> cls, Iterable<Publisher> publishers, Function<String,String> titleTransform, int searchLimit) {
         this.searchResolver = searchResolver;
-        this.titleScorer = new ContentTitleScorer();
+        this.cls = cls;
+        this.searchLimit = searchLimit;
+        this.searchPublishers = ImmutableSet.copyOf(publishers);
+        this.titleTransform = titleTransform;
+        this.titleScorer = new ContentTitleScorer(titleTransform);
     }
 
     @Override
-    public ScoredEquivalents<Container> generate(Container content, ResultDescription desc) {
-        return scoreSuggestions(content, Iterables.filter(searchForEquivalents(content), Container.class), desc);
+    public ScoredEquivalents<T> generate(T content, ResultDescription desc) {
+        return scoreSuggestions(content, searchForEquivalents(content, desc), desc);
     }
 
     @Override
-    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
+    public ScoredEquivalents<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {
         return scoreSuggestions(content, suggestions, desc);
     }
 
-    private ScoredEquivalents<Container> scoreSuggestions(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        ScoredEquivalentsBuilder<Container> equivalents = DefaultScoredEquivalents.fromSource("Title");
+    private ScoredEquivalents<T> scoreSuggestions(T content, Iterable<? extends T> suggestions, ResultDescription desc) {
+        ScoredEquivalentsBuilder<T> equivalents = DefaultScoredEquivalents.fromSource("Title");
         desc.appendText("Scoring %s suggestions", Iterables.size(suggestions));
         
-        for (Container found : ImmutableSet.copyOf(suggestions)) {
-            Score score = titleScorer.score(content, found);
-            desc.appendText("%s (%s) scored %s", found.getTitle(), found.getCanonicalUri(), score);
-            equivalents.addEquivalent(found, score);
+        for (T found : ImmutableSet.copyOf(suggestions)) {
+            equivalents.addEquivalent(found, titleScorer.score(content, found, desc));
         }
 
         return equivalents.build();
     }
 
-    private List<Identified> searchForEquivalents(Container content) {
+    private Iterable<? extends T> searchForEquivalents(T content, ResultDescription desc) {
         Set<Publisher> publishers = Sets.difference(searchPublishers, ImmutableSet.of(content.getPublisher()));
-        ApplicationConfiguration appConfig = ApplicationConfiguration.DEFAULT_CONFIGURATION.withSources(enabledPublishers(publishers));
+        ApplicationConfiguration appConfig = defaultConfiguration().withSources(enabledPublishers(publishers));
 
-        List<Identified> search = searchResolver.search(new SearchQuery(content.getTitle(), new Selection(0, 20), publishers, TITLE_WEIGHTING, BROADCAST_WEIGHTING, CATCHUP_WEIGHTING), appConfig);
-        return search;
+        String title = titleTransform.apply(content.getTitle());
+        SearchQuery.Builder query = SearchQuery.builder(title)
+                .withSelection(new Selection(0, searchLimit))
+                .withPublishers(publishers)
+                .withTitleWeighting(TITLE_WEIGHTING);
+        if (content.getSpecialization() != null) {
+            query.withSpecializations(ImmutableSet.of(content.getSpecialization()));
+        }
+        desc.appendText("query: %s, specialization: %s, publishers: %s", title, content.getSpecialization(), publishers);
+        List<Identified> search = searchResolver.search(query.build(), appConfig);
+        return Iterables.filter(search,cls);
     }
 
     private Map<Publisher, SourceStatus> enabledPublishers(Set<Publisher> enabledSources) {

@@ -40,7 +40,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 
 public class C4EpgEntryProcessorTest extends TestCase {
     
-	private static final Channel CHANNEL_FOUR = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com");
+	private static final Channel CHANNEL_FOUR = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", false, MediaType.VIDEO, "http://www.channel4.com");
 
     private final AdapterLog log = new SystemOutAdapterLog();
     

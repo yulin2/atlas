@@ -47,11 +47,11 @@ import com.metabroadcast.common.time.DayRangeGenerator;
 @RunWith(JMock.class)
 public class C4EpgUpdaterTest extends TestCase {
     
-	private static final Channel CHANNEL_FOUR = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com");
-	private static final Channel E_FOUR = new Channel(Publisher.METABROADCAST, "E4", "e4", MediaType.VIDEO, "http://www.e4.com");
-	private static final Channel FILM_4 = new Channel(Publisher.METABROADCAST, "Film4", "film4", MediaType.VIDEO, "http://www.film4.com");
-	private static final Channel FOUR_MUSIC = new Channel(Publisher.METABROADCAST, "4 Music", "4music", MediaType.VIDEO, "http://www.4music.com");
-	private static final Channel MORE_FOUR = new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.channel4.com/more4");
+	private static final Channel CHANNEL_FOUR = new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", false, MediaType.VIDEO, "http://www.channel4.com");
+	private static final Channel E_FOUR = new Channel(Publisher.METABROADCAST, "E4", "e4", false, MediaType.VIDEO, "http://www.e4.com");
+	private static final Channel FILM_4 = new Channel(Publisher.METABROADCAST, "Film4", "film4", false, MediaType.VIDEO, "http://www.film4.com");
+	private static final Channel FOUR_MUSIC = new Channel(Publisher.METABROADCAST, "4 Music", "4music", false, MediaType.VIDEO, "http://www.4music.com");
+	private static final Channel MORE_FOUR = new Channel(Publisher.METABROADCAST, "More4", "more4", false, MediaType.VIDEO, "http://www.channel4.com/more4");
 
 	
     private final Mockery context = new Mockery();
@@ -83,17 +83,17 @@ public class C4EpgUpdaterTest extends TestCase {
         context.checking(new Expectations() {
 			{
 				allowing(channelResolver).fromUri("http://www.channel4.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", MediaType.VIDEO, "http://www.channel4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Channel 4", "channel4", false, MediaType.VIDEO, "http://www.channel4.com"))));
 				allowing(channelResolver).fromUri("http://www.channel4.com/more4");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", MediaType.VIDEO, "http://www.more4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "More4", "more4", false, MediaType.VIDEO, "http://www.more4.com"))));
 				allowing(channelResolver).fromUri("http://film4.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", MediaType.VIDEO, "http://film4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "Film4", "more4", false, MediaType.VIDEO, "http://film4.com"))));
 				allowing(channelResolver).fromUri("http://www.e4.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", MediaType.VIDEO, "http://www.e4.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "E4", "more4", false, MediaType.VIDEO, "http://www.e4.com"))));
 				allowing(channelResolver).fromUri("http://www.4music.com");
-				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", MediaType.VIDEO, "http://www.4music.com"))));
+				will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4Music", "more4", false, MediaType.VIDEO, "http://www.4music.com"))));
                 allowing(channelResolver).fromUri("http://www.channel4.com/4seven");
-                will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4seven", "4seven", MediaType.VIDEO, "http://www.channel4.com/4seven"))));
+                will(returnValue(Maybe.just(new Channel(Publisher.METABROADCAST, "4seven", "4seven", false, MediaType.VIDEO, "http://www.channel4.com/4seven"))));
 			}
 		});
 		updater = new C4EpgUpdater(c4AtomFetcher, entryProcessor, brandlessProcessor, trimmer, log, new DayRangeGenerator(), channelResolver);

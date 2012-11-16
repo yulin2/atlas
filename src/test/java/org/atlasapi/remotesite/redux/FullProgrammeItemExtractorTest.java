@@ -34,7 +34,7 @@ public class FullProgrammeItemExtractorTest extends TestCase {
     @Test
     public void testExtract() {
 
-        final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
+        final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
     	channel.addAlias("http://devapi.bbcredux.com/channels/bbconehd");
     	context.checking(new Expectations() {
 			{

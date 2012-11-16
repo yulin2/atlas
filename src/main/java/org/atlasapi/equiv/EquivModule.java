@@ -35,6 +35,7 @@ import org.atlasapi.equiv.generators.ContainerChildEquivalenceGenerator;
 import org.atlasapi.equiv.generators.ContentEquivalenceGenerator;
 import org.atlasapi.equiv.generators.FilmEquivalenceGenerator;
 import org.atlasapi.equiv.generators.RadioTimesFilmEquivalenceGenerator;
+import org.atlasapi.equiv.generators.SongTitleTransform;
 import org.atlasapi.equiv.generators.TitleMatchingEquivalenceScoringGenerator;
 import org.atlasapi.equiv.handlers.BroadcastingEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
@@ -45,6 +46,7 @@ import org.atlasapi.equiv.results.DefaultEquivalenceResultBuilder;
 import org.atlasapi.equiv.results.EquivalenceResultBuilder;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.extractors.MinimumScoreEquivalenceExtractor;
+import org.atlasapi.equiv.results.extractors.MusicEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.SpecializationMatchingEquivalenceExtractor;
 import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
@@ -54,7 +56,9 @@ import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.scorers.ContainerChildEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingEquivalenceScorer;
 import org.atlasapi.equiv.scorers.ContentEquivalenceScorer;
+import org.atlasapi.equiv.scorers.CrewMemberScorer;
 import org.atlasapi.equiv.scorers.SequenceItemEquivalenceScorer;
+import org.atlasapi.equiv.scorers.SongCrewMemberExtractor;
 import org.atlasapi.equiv.scorers.TitleMatchingItemEquivalenceScorer;
 import org.atlasapi.equiv.update.ContainerEquivalenceUpdater;
 import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
@@ -68,6 +72,7 @@ import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Song;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
@@ -141,61 +146,47 @@ public class EquivModule {
     }
 
     public @Bean ContentEquivalenceUpdater<Content> contentUpdater() {
+        Set<Publisher> musicPublishers = ImmutableSet.of(Publisher.BBC_MUSIC, Publisher.YOUTUBE, 
+                Publisher.SPOTIFY, Publisher.SOUNDCLOUD, Publisher.RDIO, Publisher.AMAZON_UK);
+
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM));
-        
-        TitleMatchingEquivalenceScoringGenerator titleScoringGenerator = new TitleMatchingEquivalenceScoringGenerator(searchResolver);
+        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), Sets.union(ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM), musicPublishers));
         
         ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
         
         ImmutableMap.Builder<Publisher, ContentEquivalenceUpdater<Content>> publisherUpdaters = ImmutableMap.builder();
         
-        ContentEquivalenceUpdater<Content> standardContainerEquivalenceUpdater = resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
+        TitleMatchingEquivalenceScoringGenerator<Container> titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, acceptablePublishers);
+        ContentEquivalenceUpdater<Content> standardContainerEquivalenceUpdater = resultHandlingUpdater(
+            new RootEquivalenceUpdater(containerUpdaterBuilder(acceptablePublishers)
                 .withGenerators(ImmutableSet.of(
-                        titleScoringGenerator,
-                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
+                    titleScoringGenerator,
+                    new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)
+                ))
                 .withScorer(titleScoringGenerator)
-                .build(), itemUpdater), acceptablePublishers);
+                .build(), 
+            itemUpdater), 
+        acceptablePublishers);
         
-        ImmutableSet<Publisher> nonStandardPublishers = ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM);
+        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM), musicPublishers);
         for (Publisher publisher : Iterables.filter(ImmutableList.copyOf(Publisher.values()), not(in(nonStandardPublishers)))) {
                 publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
         }
         
-        publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(new RootEquivalenceUpdater(new NullContentEquivalenceUpdater<Container>(),
-                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
-                    .withGenerators(ImmutableSet.of(new RadioTimesFilmEquivalenceGenerator(contentResolver), new FilmEquivalenceGenerator(searchResolver)))
-                    .build()),ImmutableSet.of(RADIO_TIMES,PA,PREVIEW_NETWORKS)));
-        
-        publisherUpdaters.put(BBC_REDUX, resultHandlingUpdater(new RootEquivalenceUpdater(containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
-                .withGenerators(ImmutableSet.of(
-                        titleScoringGenerator,
-                        new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)))
-                .withScorer(titleScoringGenerator)
-                .build(), itemUpdater),Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX)))
-        );
-        
         publisherUpdaters.put(ITUNES, resultHandlingUpdater(new RootEquivalenceUpdater(
-                containerUpdaterBuilder(acceptablePublishers)
-                    .withGenerator(titleScoringGenerator)
-                    .withScorers(ImmutableSet.of(titleScoringGenerator, 
-                            new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
-                            new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)))
-                    .build(), 
-                itemUpdater),acceptablePublishers));
-
-        Set<Publisher> lfPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(LOVEFILM));
-        publisherUpdaters.put(LOVEFILM, resultHandlingUpdater(new RootEquivalenceUpdater(
-            containerUpdaterBuilder(lfPublishers)
+            containerUpdaterBuilder(acceptablePublishers)
                 .withGenerator(titleScoringGenerator)
-                .withScorers(ImmutableSet.of(titleScoringGenerator, 
+                .withScorers(ImmutableSet.of(
+                    titleScoringGenerator, 
                     new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
-                    new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)))
+                    new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
+                ))
                 .build(), 
-            itemUpdater),lfPublishers));
+        itemUpdater),acceptablePublishers));
         
+        Set<Publisher> facebookPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK));
         publisherUpdaters.put(FACEBOOK, resultHandlingUpdater(new RootEquivalenceUpdater(
-            containerUpdaterBuilder(Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK)))
+            containerUpdaterBuilder(facebookPublishers)
                 .withResultBuilder(DefaultEquivalenceResultBuilder.<Container>resultBuilder(
                     new NullScoreAwareAveragingCombiner<Container>(),
                     new SpecializationMatchingEquivalenceExtractor<Container>(
@@ -206,12 +197,67 @@ public class EquivModule {
                     )
                 ))
                 .withGenerators(ImmutableSet.of(
-                    titleScoringGenerator,
+                    TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, facebookPublishers),
                     aliasResolvingGenerator(contentResolver, Container.class)
                 ))
                 .build(),
-            new NullContentEquivalenceUpdater<Item>()
-        ), Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK))));
+              new NullContentEquivalenceUpdater<Item>()
+        ),facebookPublishers));
+        
+        publisherUpdaters.put(RADIO_TIMES, resultHandlingUpdater(
+            new RootEquivalenceUpdater(
+                new NullContentEquivalenceUpdater<Container>(),
+                ItemEquivalenceUpdater.builder(new ConfiguredEquivalenceResultBuilder<Item>(), log)
+                    .withGenerators(ImmutableSet.of(
+                        new RadioTimesFilmEquivalenceGenerator(contentResolver), 
+                        new FilmEquivalenceGenerator(searchResolver)
+                    ))
+                .build()
+            ),
+        ImmutableSet.of(RADIO_TIMES,PA,PREVIEW_NETWORKS)));
+        
+        Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
+        titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, reduxPublishers);
+        publisherUpdaters.put(BBC_REDUX, resultHandlingUpdater(
+            new RootEquivalenceUpdater(containerUpdaterBuilder(reduxPublishers)
+                .withGenerators(ImmutableSet.of(
+                    titleScoringGenerator,
+                    new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)
+                ))
+                .withScorer(titleScoringGenerator)
+                .build(), 
+            itemUpdater),
+        reduxPublishers));
+
+        Set<Publisher> lfPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(LOVEFILM));
+        titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, lfPublishers);
+        publisherUpdaters.put(LOVEFILM, resultHandlingUpdater(new RootEquivalenceUpdater(
+            containerUpdaterBuilder(lfPublishers)
+                .withGenerator(titleScoringGenerator)
+                .withScorers(ImmutableSet.of(
+                    titleScoringGenerator, 
+                    new ContainerChildEquivalenceScorer(itemUpdater, liveResultsStore(), contentResolver, log),
+                    new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
+                ))
+                .build(), 
+        itemUpdater),lfPublishers));
+
+        for (Publisher publisher : musicPublishers) {
+            publisherUpdaters.put(publisher, resultHandlingUpdater(
+                new RootEquivalenceUpdater(
+                    new NullContentEquivalenceUpdater<Container>(), 
+                    ItemEquivalenceUpdater.builder(DefaultEquivalenceResultBuilder.resultBuilder(
+                        new NullScoreAwareAveragingCombiner<Item>(), 
+                        new MusicEquivalenceExtractor()
+                    ), log)
+                    .withGenerator(
+                        new TitleMatchingEquivalenceScoringGenerator<Item>(searchResolver, Song.class, Sets.union(musicPublishers, ImmutableSet.of(ITUNES)), new SongTitleTransform(), 100) 
+                    )
+                    .withScorer(new CrewMemberScorer(new SongCrewMemberExtractor()))
+                    .build()
+                ),
+            Sets.union(musicPublishers, ImmutableSet.of(ITUNES))));
+        }
         
         return new PublisherSwitchingContentEquivalenceUpdater(publisherUpdaters.build());
     }

@@ -43,7 +43,7 @@ public class TitleMatchingEquivalenceScoringGeneratorTest {
             }
         };
         
-        TitleMatchingEquivalenceScoringGenerator generator = new TitleMatchingEquivalenceScoringGenerator(searchResolver);
+        TitleMatchingEquivalenceScoringGenerator<Container> generator = TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, Publisher.all());
         ScoredEquivalents<Container> generated = generator.generate(subject, new DefaultDescription());
         
         assertTrue(generated.equivalents().keySet().size() == 1);

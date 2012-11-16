@@ -1,6 +1,9 @@
 package org.atlasapi.query;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.input.DefaultGsonModelReader;
+import org.atlasapi.input.DelegatingModelTransformer;
+import org.atlasapi.input.ItemModelTransformer;
 import org.atlasapi.media.channel.ChannelGroupStore;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
@@ -11,6 +14,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
@@ -56,6 +60,7 @@ import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
+import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
 import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
@@ -64,6 +69,7 @@ import org.atlasapi.query.v2.ChannelController;
 import org.atlasapi.query.v2.ChannelGroupController;
 import org.atlasapi.query.v2.ChannelSimplifier;
 import org.atlasapi.query.v2.ContentGroupController;
+import org.atlasapi.query.v2.ContentWriteController;
 import org.atlasapi.query.v2.PeopleController;
 import org.atlasapi.query.v2.ProductController;
 import org.atlasapi.query.v2.QueryController;
@@ -71,6 +77,7 @@ import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,7 +86,7 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
-import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
+import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
 public class QueryWebModule {
@@ -98,6 +105,7 @@ public class QueryWebModule {
     private @Autowired SearchResolver searchResolver;
     private @Autowired PeopleResolver peopleResolver;
     private @Autowired TopicQueryResolver topicResolver;
+    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
     private @Autowired TopicContentLister topicContentLister;
     private @Autowired SegmentResolver segmentResolver;
     private @Autowired ProductResolver productResolver;
@@ -123,7 +131,11 @@ public class QueryWebModule {
 
     @Bean
     QueryController queryController() {
-        return new QueryController(queryExecutor, configFetcher, log, contentModelOutputter());
+        return new QueryController(queryExecutor, configFetcher, log, contentModelOutputter(), contentWriteController());
+    }
+    
+    ContentWriteController contentWriteController() {
+        return new ContentWriteController(configFetcher, contentResolver, contentWriter, new DefaultGsonModelReader(), new DelegatingModelTransformer(new ItemModelTransformer(contentResolver, topicStore, new SystemClock())));
     }
 
     @Bean
