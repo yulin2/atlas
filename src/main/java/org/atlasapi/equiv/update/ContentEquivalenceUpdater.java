@@ -20,6 +20,7 @@ import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
 public class ContentEquivalenceUpdater<T extends Content> implements EquivalenceUpdater<T> {
@@ -36,6 +37,18 @@ public class ContentEquivalenceUpdater<T extends Content> implements Equivalence
     private final EquivalenceScorers<T> scorers;
     private final DefaultEquivalenceResultBuilder<T> resultBuilder;
     private final EquivalenceResultHandler<T> handler;
+    
+    public ContentEquivalenceUpdater(
+            EquivalenceGenerator<T> generator,
+            EquivalenceScorer<T> scorer,
+            ScoreCombiner<T> combiner,
+            EquivalenceFilter<T> filter,
+            EquivalenceExtractor<T> extractor,
+            EquivalenceResultHandler<T> handler
+        ) {
+        this(ImmutableSet.of(generator), ImmutableSet.of(scorer), 
+            combiner, filter, extractor, handler);
+    }
     
     public ContentEquivalenceUpdater(
         Iterable<? extends EquivalenceGenerator<T>> generators,
