@@ -1,8 +1,10 @@
 package org.atlasapi.remotesite.bbc.ion;
 
-import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
@@ -19,7 +21,6 @@ import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChanges;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import com.google.common.base.Optional;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.SystemClock;
 
@@ -42,29 +43,29 @@ public class BbcIonOndemandChangeMultipleLocationsTest {
                 assertTrue(encoding.hasValue());
                 if (ionService.requireValue().equals(IonService.IPLAYER_STB_UK_STREAM_AAC_CONCRETE)) {
                     // APPLE_IPHONE4_HLS
-                    checkPolicy(encoding.requireValue(), Optional.fromNullable(Network.WIFI), Platform.IOS);
+                    checkPolicy(encoding.requireValue(), Network.WIFI, Platform.IOS);
                         
                 } else if (ionService.requireValue().equals(IonService.IPLAYER_UK_STREAM_AAC_RTMP_LO_CONCRETE)) {
                     // APPLE_PHONE4_IPAD_HLS_3G
-                    checkPolicy(encoding.requireValue(), Optional.fromNullable(Network.THREE_G), Platform.IOS);
+                    checkPolicy(encoding.requireValue(), Network.THREE_G, Platform.IOS);
                     
                 } else if (ionService.requireValue().equals(IonService.IPLAYER_UK_STREAM_AAC_RTMP_CONCRETE)) {
                     // PC
-                    checkPolicy(encoding.requireValue(), Optional.<Network>absent(), Platform.PC);
+                    checkPolicy(encoding.requireValue(), null, Platform.PC);
                 }
             }
         }
     }
 
-    private void checkPolicy(Encoding encoding, Optional<Network> network, Platform platform) {
+    private void checkPolicy(Encoding encoding, Network network, Platform platform) {
         assertThat(encoding.getAvailableAt().size(), is(1));
         for (Location location : encoding.getAvailableAt()) {
             Policy policy = location.getPolicy();
-            if (network.isPresent()) {
-                assertTrue(policy.getNetwork().isPresent());
-                assertThat(policy.getNetwork().get(), equalTo(network.get()));
+            if (network != null) {
+                assertTrue(policy.getNetwork() != null);
+                assertThat(policy.getNetwork(), equalTo(network));
             } else {
-                assertFalse(policy.getNetwork().isPresent());
+                assertFalse(policy.getNetwork() != null);
             }
             assertThat(policy.getPlatform(), equalTo(platform));
         }
