@@ -60,7 +60,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         
         ScheduleChannel channelSchedule = queryExecutor.execute(query);
 
-        verify(contentQueryExecutor, never()).resolveUris(argThat(any(Iterable.class)), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
+        verify(contentQueryExecutor, never()).resolveUris(argThat(any(Iterable.class)), argThat(any(List.class)), argThat(any(Set.class)), eq(false));
         
         assertThat(channelSchedule.channel(), is(channel));
         assertThat(channelSchedule.items().isEmpty(), is(true));
@@ -82,12 +82,12 @@ public class IndexBackedScheduleQueryExecutorTest {
                     .build()
             ));
         
-        when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false)))
+        when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(List.class)), argThat(any(Set.class)), eq(false)))
             .thenReturn(queryResult(item.getCanonicalUri(), ImmutableList.<Content>of(item)));
         
         ScheduleChannel channelSchedule = queryExecutor.execute(query);
 
-        verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
+        verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(List.class)), argThat(any(Set.class)), eq(false));
         
         assertThat(channelSchedule.channel(), is(channel));
         
@@ -115,12 +115,12 @@ public class IndexBackedScheduleQueryExecutorTest {
                     .build()
             ));
         
-        when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false)))
+        when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(List.class)), argThat(any(Set.class)), eq(false)))
         .thenReturn(queryResult(item.getCanonicalUri(), ImmutableList.<Content>of(item)));
     
         ScheduleChannel channelSchedule = queryExecutor.execute(query);
     
-        verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
+        verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(List.class)), argThat(any(Set.class)), eq(false));
         
         assertThat(channelSchedule.channel(), is(channel));
         

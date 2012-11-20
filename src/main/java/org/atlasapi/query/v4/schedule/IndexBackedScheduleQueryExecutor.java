@@ -1,64 +1,70 @@
 package org.atlasapi.query.v4.schedule;
 
-import com.google.common.base.Function;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.equiv.query.OutputContentMerger;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.EquivalentContent;
+import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.Collection;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.persistence.content.EquivalentContent;
-import org.atlasapi.persistence.content.EquivalentContentResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
+    private static final boolean DONT_USE_ALIASES = false;
     private static final long QUERY_TIMEOUT = 60000;
+    
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private EquivalentContentResolver contentQueryExecutor;
-    private ScheduleIndex index;
+    
+    private final EquivalentContentResolver contentQueryExecutor;
+    private final ScheduleIndex index;
+    private final OutputContentMerger outputContentMerger;
 
     public IndexBackedScheduleQueryExecutor(ScheduleIndex index, EquivalentContentResolver contentQueryExecutor) {
-        this.index = index;
-        this.contentQueryExecutor = contentQueryExecutor;
+        this.index = checkNotNull(index);
+        this.contentQueryExecutor = checkNotNull(contentQueryExecutor);
+        this.outputContentMerger = new OutputContentMerger();
     }
 
     @Override
     public ScheduleChannel execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
         long startIndexTime = System.currentTimeMillis();
+
         ListenableFuture<ScheduleRef> futureRef = queryIndex(query);
         ScheduleRef scheduleRef = Futures.get(futureRef, QUERY_TIMEOUT, MILLISECONDS, ScheduleQueryExecutionException.class);
+        
         long id = Thread.currentThread().getId();
         log.info("{}: schedule index time: {}", id, (System.currentTimeMillis() - startIndexTime));
-        //
+
         long startRetrieveTime = System.currentTimeMillis();
         ScheduleChannel schedule = transformToChannelSchedule(query, scheduleRef);
         log.info("{}: schedule retrieve time: {}", id, (System.currentTimeMillis() - startRetrieveTime));
-        //
+
         log.info("{}: total schedule time: {}", id, (System.currentTimeMillis() - startIndexTime));
-        //
         return schedule;
     }
 
@@ -76,13 +82,22 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
             uris.add(entry.getItemUri());
         }
         
-        EquivalentContent equivalentContent = contentQueryExecutor.resolveUris(
-                Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToUri()), 
-                ImmutableSet.of(query.getPublisher()), 
-                query.getAnnotations(), 
-                false);
+        ApplicationConfiguration config = queryOrderedPublisherConfig(query);
         
-        return new ScheduleChannel(query.getChannel(), contentList(query, scheduleRef, equivalentContent.asMap()));
+        EquivalentContent equivalentContent = contentQueryExecutor.resolveUris(
+            Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToUri()), 
+            config.precedence(), 
+            query.getAnnotations(), 
+            DONT_USE_ALIASES
+        );
+        
+        Map<String, Collection<Content>> merged = merge(config, equivalentContent);
+        Iterable<Item> contentList = contentList(query, scheduleRef, merged);
+        return new ScheduleChannel(query.getChannel(), contentList);
+    }
+
+    private Map<String, Collection<Content>> merge(ApplicationConfiguration config, EquivalentContent equivalentContent) {
+        return outputContentMerger.mergeContentResults(config, equivalentContent.asMap());
     }
 
     private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, Map<String, Collection<Content>> resolvedContent) {
@@ -161,17 +176,19 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
      * referenced broadcast in the content (broadcasts on other versions are 
      * removed.) Yum. 
      */
-    private ApplicationConfiguration ensureRequestedPublisherIsPrecedent(ScheduleQuery query, ApplicationConfiguration appConfig) {
-        if (!appConfig.precedenceEnabled()) {
-            return appConfig;
+    private ApplicationConfiguration queryOrderedPublisherConfig(ScheduleQuery query) {
+        ApplicationConfiguration config = query.getApplicationConfiguration();
+
+        ImmutableSet.Builder<Publisher> publishers = ImmutableSet.builder();
+        publishers.add(query.getPublisher());
+        
+        Iterable<Publisher> otherSources = config.getEnabledSources();
+        if (config.precedenceEnabled()) {
+            otherSources = config.publisherPrecedenceOrdering().sortedCopy(otherSources);
         }
-        List<Publisher> publishers = Lists.newArrayList(query.getPublisher());
-        for (Publisher publisher : appConfig.orderdPublishers()) {
-            if (!publisher.equals(query.getPublisher())) {
-                publishers.add(publisher);
-            }
-        }
-        return appConfig.copyWithPrecedence(publishers);
+        publishers.addAll(otherSources);
+        
+        return config.copyWithPrecedence(publishers.build().asList());
     }
     
     private static class ScheduleRefEntryToUri implements Function<ScheduleRefEntry, String> {
