@@ -14,15 +14,15 @@
  permissions and limitations under the License. */
 package org.atlasapi;
 
+import org.atlasapi.persistence.content.elasticsearch.schema.EsSchema;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
-import org.junit.Test;
-
-import com.metabroadcast.common.properties.Configurer;
-import org.atlasapi.persistence.content.elasticsearch.schema.ESSchema;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Test;
+
+import com.metabroadcast.common.properties.Configurer;
 
 /**
  * Test that we can load beans from the Spring configuration - checks that the
@@ -35,7 +35,7 @@ public class SpringTest {
 
     @BeforeClass
     static public void before() throws InterruptedException {
-        NodeBuilder.nodeBuilder().clusterName(ESSchema.CLUSTER_NAME).build().start();
+        NodeBuilder.nodeBuilder().clusterName(EsSchema.CLUSTER_NAME).build().start();
     }
 
     @Test

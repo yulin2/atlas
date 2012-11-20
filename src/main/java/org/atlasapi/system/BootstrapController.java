@@ -1,17 +1,13 @@
 package org.atlasapi.system;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.atlasapi.persistence.bootstrap.ChangeListener;
@@ -21,7 +17,7 @@ import org.atlasapi.persistence.bootstrap.elasticsearch.ESChangeListener;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
+import org.atlasapi.persistence.content.elasticsearch.EsContentIndexer;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
 import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
@@ -32,6 +28,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 
 /**
  */
@@ -53,7 +53,7 @@ public class BootstrapController {
     private CassandraSegmentStore cassandraSegmentStore;
     private CassandraTopicStore cassandraTopicStore;
     private CassandraLookupEntryStore cassandraLookupEntryStore;
-    private ESContentIndexer esContentIndexer;
+    private EsContentIndexer esContentIndexer;
     //
     private ContentBootstrapper cassandraContentBootstrapper;
     private ContentBootstrapper cassandraChannelBootstrapper;
@@ -100,7 +100,7 @@ public class BootstrapController {
         this.cassandraLookupEntryStore = cassandraLookupEntryStore;
     }
 
-    public void setEsContentIndexer(ESContentIndexer esContentIndexer) {
+    public void setEsContentIndexer(EsContentIndexer esContentIndexer) {
         this.esContentIndexer = esContentIndexer;
     }
 
@@ -252,7 +252,7 @@ public class BootstrapController {
     }
 
     public void writeBootstrapStatus(ContentBootstrapper contentBootstrapper, HttpServletResponse response) throws IOException {
-        Map result = new HashMap();
+        Map<String, Object> result = Maps.newHashMap();
         result.put("bootstrapping", contentBootstrapper.isBootstrapping());
         result.put("lastStatus", contentBootstrapper.getLastStatus());
         if (contentBootstrapper.isBootstrapping()) {

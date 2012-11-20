@@ -4,8 +4,22 @@ import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.messaging.producers.MessageReplayer;
+import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
+import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
+import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
+import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
+import org.atlasapi.persistence.content.elasticsearch.EsContentIndexer;
+import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
+import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
+import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
+import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
+import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
+import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.health.HealthProbe;
@@ -13,20 +27,6 @@ import com.metabroadcast.common.health.probes.DiskSpaceProbe;
 import com.metabroadcast.common.health.probes.MemoryInfoProbe;
 import com.metabroadcast.common.persistence.mongo.health.MongoConnectionPoolProbe;
 import com.metabroadcast.common.webapp.health.HealthController;
-import org.atlasapi.messaging.producers.MessageReplayer;
-import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
-import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
-import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
-import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
-import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
-import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SystemModule {
@@ -45,7 +45,7 @@ public class SystemModule {
     private @Autowired CassandraSegmentStore cassandraSegmentStore;
     private @Autowired CassandraTopicStore cassandraTopicStore;
     private @Autowired CassandraLookupEntryStore cassandraLookupEntryStore;
-    private @Autowired ESContentIndexer esContentIndexer;
+    private @Autowired EsContentIndexer esContentIndexer;
     private @Autowired @Qualifier("cassandraContentBootstrapper") ContentBootstrapper cassandraContentBootstrapper;
     private @Autowired @Qualifier("cassandraChannelBootstrapper") ContentBootstrapper cassandraChannelBootstrapper;
     private @Autowired @Qualifier("cassandraContentGroupBootstrapper") ContentBootstrapper cassandraContentGroupBootstrapper;

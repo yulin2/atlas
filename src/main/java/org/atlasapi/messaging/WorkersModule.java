@@ -5,7 +5,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.jms.ConnectionFactory;
 import org.atlasapi.messaging.worker.Worker;
-import org.atlasapi.messaging.workers.ESIndexer;
+import org.atlasapi.messaging.workers.EsIndexer;
 import org.atlasapi.messaging.workers.MessageLogger;
 import org.atlasapi.messaging.workers.ReplayingWorker;
 import org.atlasapi.persistence.content.ContentIndexer;
@@ -48,7 +48,7 @@ public class WorkersModule {
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
-        return new ReplayingWorker(new ESIndexer(contentResolver, contentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
+        return new ReplayingWorker(new EsIndexer(contentResolver, contentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
     }
 
     @Bean

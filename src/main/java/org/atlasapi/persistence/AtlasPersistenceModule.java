@@ -7,12 +7,20 @@ import javax.annotation.Resource;
 
 import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
+import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
-import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
+import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
+import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
+import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
+import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
+import org.atlasapi.persistence.content.elasticsearch.EsContentIndexer;
+import org.atlasapi.persistence.content.elasticsearch.EsContentSearcher;
 import org.atlasapi.persistence.content.elasticsearch.EsScheduleIndex;
+import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
 import org.atlasapi.persistence.content.mongo.MongoContentLister;
@@ -20,17 +28,25 @@ import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.mongo.MongoProductStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
+import org.atlasapi.persistence.content.people.QueuingPersonWriter;
+import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
+import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
+import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
+import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
 import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
+import org.atlasapi.persistence.topic.elasticsearch.EsTopicSearcher;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,22 +70,6 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
-import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
-import org.atlasapi.persistence.content.KnownTypeContentResolver;
-import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
-import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
-import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
-import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
-import org.atlasapi.persistence.content.listing.ContentLister;
-import org.atlasapi.persistence.content.people.QueuingPersonWriter;
-import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
-import org.atlasapi.persistence.logging.SystemOutAdapterLog;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
-import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelStore;
-import org.atlasapi.persistence.media.segment.cassandra.CassandraSegmentStore;
-import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
-import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
 public class AtlasPersistenceModule {
@@ -237,7 +237,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public ESContentIndexer contentIndexer() {
+    public EsContentIndexer contentIndexer() {
         return esContentIndexModule().contentIndexer();
     }
 
@@ -249,13 +249,13 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public ESTopicSearcher topicSearcher() {
+    public EsTopicSearcher topicSearcher() {
         return esContentIndexModule().topicSearcher();
     }
 
     @Bean
     @Primary
-    public ESContentSearcher contentSearcher() {
+    public EsContentSearcher contentSearcher() {
         return esContentIndexModule().contentSearcher();
     }
 
