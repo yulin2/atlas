@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.bbc.ion.ondemand;
 
+import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Encoding;
@@ -13,6 +14,7 @@ import org.atlasapi.remotesite.bbc.BbcProgrammeGraphExtractor;
 import org.atlasapi.remotesite.bbc.ion.model.IonOndemandChange;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.time.Clock;
@@ -42,20 +44,23 @@ public class BbcIonOndemandItemUpdater {
     private void processVersion(IonOndemandChange change, boolean revoked, Version version) {
         Maybe<Encoding> encoding = encoding(version.getManifestedAs(), BbcFeeds.slashProgrammesUriForPid(change.getId()));
         if (encoding.hasValue()) {
-            Maybe<Location> location = location(encoding.requireValue().getAvailableAt(),
+            List<Location> locations = locations(encoding.requireValue().getAvailableAt(),
                     BbcProgrammeGraphExtractor.iplayerPageFrom(BbcFeeds.slashProgrammesUriForPid(change.getEpisodeId())));
-            if (location.hasValue()) {
-                if (!revoked) {
-                    updateAvailability(location.requireValue(), change, true);
-                } else {
-                    removeLocation(encoding.requireValue(), location.requireValue());
+            if (!locations.isEmpty()) {
+                for (Location location : locations) {
+                    if (!revoked) {
+                        updateAvailability(location, change, true);
+                    } else {
+                        removeLocation(encoding.requireValue(), location);
+                    }
                 }
             } else if (!revoked) {
-                Maybe<Location> possibleNewLocation = encodingCreator.location(change);
-                if (possibleNewLocation.hasValue()) {
-                	Location newLocation = possibleNewLocation.requireValue();
-					newLocation.setAvailable(true);
-                	encoding.requireValue().addAvailableAt(newLocation);
+                List<Location> newLocations = encodingCreator.locations(change);
+                if (!newLocations.isEmpty()) {
+                    for (Location newLocation : locations) {
+                        newLocation.setAvailable(true);
+                        encoding.requireValue().addAvailableAt(newLocation);
+                    }
                 }
             }
         } else if (!revoked) {
@@ -91,17 +96,19 @@ public class BbcIonOndemandItemUpdater {
         return Maybe.nothing();
     }
 
-    private Maybe<Location> location(Set<Location> locations, String uri) {
+    private List<Location> locations(Set<Location> locations, String uri) {
+        List<Location> matchedLocations = Lists.newArrayList();
         for (Location location : locations) {
             if (uri.equals(location.getUri())) {
-                return Maybe.just(location);
+                matchedLocations.add(location);
             }
         }
-        return Maybe.nothing();
+        return matchedLocations;
     }
 
     private void updateAvailability(Location location, IonOndemandChange change, boolean available) {
         Policy policy = location.getPolicy();
+        policy.setActualAvailabilityStart(change.getActualStart());
         policy.setAvailabilityStart(change.getScheduledStart());
         policy.setAvailabilityEnd(change.getDiscoverableEnd());
         location.setAvailable(available);

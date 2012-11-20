@@ -1,0 +1,775 @@
+{
+link: {
+rel: "self",
+href: "http://dynamite.iplayer.bbc.co.uk/iplayer/ion/episodedetail/episode/b01nphb7/format/json",
+type: "application/json",
+locale_str: "en"
+},
+count: "1",
+pagination: {
+page: "1",
+per_page: "3000",
+total_count: "1"
+},
+blocklist: [
+{
+my_series_url: "/iplayer/series/b006tnwj/Drama_on_3/",
+is_embargoed: "0",
+image_template_url: "",
+my_mediaselector_json_url: "http://www.bbc.co.uk/mediaselector/4/mtis/all/b01nph9d",
+play_version_has_competition_warning: "",
+is_embeddable: "0",
+original_title: "The Torchbearers",
+original_broadcast_service_title: "BBC Radio 3",
+series_medium_synopsis: "",
+is_available_elektra_sd: "0",
+series_long_synopsis: "",
+available_toplevel_episode_count: "1",
+long_synopsis: "Award winning poet and dramatist Simon Armitage captures our extraordinary relationship to the Olympic flame in this years Free Thinking Drama transmitted live from the Baltic Centre for Contemporary Art. Ray ..... Kevin Whately Paula ..... Julie Hesmondhalgh Colin ..... Mark Benton Chloe ..... Phillippa Wilson Spencer ..... Christopher Connell Director: Kate Rowland Kevin Whately (star of ITV's Inspector Morse and Lewis) Julie Hesmondhalgh (best known as Hailey Cropper in Coronation Street) and Mark Benton (Early Doors and Murphy's Law) lead the cast in a new drama written for Free Thinking by award winning writer and poet Simon Armitage to be broadcast live in front of an audience in the Baltic Centre for Contemporary Art. In the aftermath of the Olympic Games, The Torchbearers tells the stories of five people whose lies and obsessions come within touching distance of the eternal flame. Can an illness be cured? Can a death be undone? Can the past start haunting the present? As their loved ones struggle to cope with their lies, a blazing torch passes through their worlds and changes things forever. Strangers meet in unexpected places.",
+webcast_service_id: "",
+stacked_container_id: "",
+complete_title: "Drama on 3: The Torchbearers",
+subseries_title: "",
+previous_episode_id: "b01nj7fh",
+is_downloadable_sd: "0",
+next_episode_id: "b01nt18q",
+is_repeat: "0",
+actual_start: "2012-11-04T22:44:14+0000",
+version_id: "b01nph9d",
+masterbrand_title: "BBC Radio 3",
+availability_class: "ondemand",
+title: "The Torchbearers",
+is_downloadable_hd: "0",
+is_available_mediaset_pc_hd: "0",
+partner: "s0000001",
+shortened_path: "/i/b01nphb7/",
+is_delayed: "1",
+available_sibling_count: "0",
+my_short_url: "bbc.co.uk/i/b01nphb7/",
+is_film: "0",
+contextual_family_tree: "b-e",
+is_available_mediaset_pc_sd: "0",
+passionsite_link: "http://www.bbc.co.uk/programmes/b006tnwj/microsite",
+media_type: "audio",
+next_available_episode: "",
+passionsite_title: "Drama on 3",
+categories: [
+{
+short_name: "Drama",
+path: "drama",
+parent_id: "",
+level: "1",
+text: "Drama & Soaps",
+updated: "",
+type: "category",
+id: "9100003",
+title: "Drama",
+child_categories: [ ]
+}
+],
+series_id: "",
+is_feedback_disabled: "0",
+toplevel_container_id: "b006tnwj",
+available_until: "2012-11-11T22:02:00+0000",
+my_image_base_url: "http://node2.bbcimg.co.uk/iplayer/images/episode/",
+brand_short_synopsis: "Series of drama performances, ranging from experiment works to the Classics",
+is_available_mediaset_stb_sd: "0",
+play_version_id: "b01nph9d",
+masterbrand: "bbc_radio_three",
+tag_schemes: [ ],
+parent_id: "b006tnwj",
+is_stacked: "0",
+original_broadcast_service: "bbc_radio_three",
+toplevel_container_title: "Drama on 3",
+brand_medium_synopsis: "Series of drama performances, ranging from experiment works to the Classics",
+my_playlist_url: "/iplayer/playlist/b01nphb7/",
+contributors: [ ],
+synopsis: "By Simon Armitage. Live drama from Free Thinking 2012, focusing on how the lives of four people in different towns are affected as the Olympic flame passes them.",
+has_guidance: "1",
+ondemand_scheduled_start: "2012-11-04T22:02:00+0000",
+ondemand_start: "2012-11-04T22:46:15+0000",
+my_alternate_url: "",
+updated: "2012-10-29T16:34:30+0000",
+id: "b01nphb7",
+related_links: [ ],
+is_free: "1",
+links: "",
+is_clip: "0",
+series_short_synopsis: "",
+brand_title: "Drama on 3",
+duration: "3600",
+subseries_id: "",
+hierarchical_title: "The Torchbearers",
+type: "episode_detail",
+has_bsl: "0",
+is_available_elektra_hd: "0",
+brand_id: "b006tnwj",
+my_url: "/iplayer/episode/b01nphb7/Drama_on_3_The_Torchbearers/",
+original_broadcast_datetime: "2012-11-04T21:00:00+0000",
+series_title: "",
+position: "",
+is_available_mediaset_stb_hd: "0",
+clips: [ ],
+versions: [
+{
+most_recent_broadcast_service: "bbc_radio_three",
+aspect_ratio: "",
+download_size_elektra_hd: "0",
+is_available_mediaset_stb_sd: "0",
+is_original: "1",
+first_broadcast_service_title: "BBC Radio 3",
+original_broadcast_service_title: "BBC Radio 3",
+original_broadcast_service: "bbc_radio_three",
+most_recent_broadcast_datetime: "2012-11-04T21:00:00+0000",
+is_available_elektra_sd: "0",
+ondemand_start: "2012-11-04T22:46:15+0000",
+ondemand_scheduled_start: "2012-11-04T22:02:00+0000",
+is_available_vp6_stream: "0",
+download_size_http_wmv: "0",
+updated: "2012-11-02T08:21:42+0000",
+id: "b01nph9d",
+is_available_streaming_hd: "0",
+ondemands: [
+{
+file_size: "0",
+actual_start: "",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_adb35ee069fb35b48b5ec220192eb33d",
+service: "iplayer_uk_stream_mp3",
+media_sets: [
+{
+rights_platform: "pc",
+type: "media_set",
+id: "emp",
+playback_formats: "",
+description: "The 'emp' media set is the default media set (ie: if none specified 'emp' is set) for the episodedetail ION feed, and the episode playlist. It will be deprecated in favour of the 'pc' media set in time."
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "pc",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer on a standard PC browser. This media set also contains all Radio services (both abstract and concrete) for all territiories, in order to correctly display availability for UK Radio Player, bo"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "pc-bigscreen",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer through the 'Big Screen' site"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "ps3",
+playback_formats: "",
+description: "ps3"
+},
+{
+rights_platform: "gaming",
+type: "media_set",
+id: "wii",
+playback_formats: "",
+description: "wii"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-10-26T02:03:32+0000",
+type: "ondemand",
+id: "p0108k5b",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:40:08+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_0610987db67c7c36ca9d504ecbc18fc0_900082",
+service: "iplayer_intl_stream_wma_lo_concrete",
+media_sets: [
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "bt-vision-wmp",
+playback_formats: "",
+description: "bt-vision-wmp"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "wmp",
+playback_formats: "",
+description: "Ondemand HTTP progressive download intended for Windows Media Players on a PC"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-04T22:41:59+0000",
+type: "ondemand",
+id: "p010nclw",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "0",
+actual_start: "",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_a05a67c8969ad26b038e1a0cafff5d28",
+service: "iplayer_intl_stream_aac_abstract",
+media_sets: [
+{
+rights_platform: "pc",
+type: "media_set",
+id: "emp",
+playback_formats: "",
+description: "The 'emp' media set is the default media set (ie: if none specified 'emp' is set) for the episodedetail ION feed, and the episode playlist. It will be deprecated in favour of the 'pc' media set in time."
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "pc",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer on a standard PC browser. This media set also contains all Radio services (both abstract and concrete) for all territiories, in order to correctly display availability for UK Radio Player, bo"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "pc-bigscreen",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer through the 'Big Screen' site"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "ps3",
+playback_formats: "",
+description: "ps3"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-10-26T02:03:25+0000",
+type: "ondemand",
+id: "p0108k56",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:39:30+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_0610987db67c7c36ca9d504ecbc18fc0_900083",
+service: "iplayer_intl_stream_wma_uk_concrete",
+media_sets: [
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "bt-vision-wmp",
+playback_formats: "",
+description: "bt-vision-wmp"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "wmp",
+playback_formats: "",
+description: "Ondemand HTTP progressive download intended for Windows Media Players on a PC"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-04T22:40:24+0000",
+type: "ondemand",
+id: "p010nck2",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:44:14+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_3ff5cbf94d43b3fdff9fa5797dcd9564_900050",
+service: "iplayer_uk_stream_aac_rtmp_concrete",
+media_sets: [
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "android-phone-rtmp-high",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for higher specification Android phones over WiFi and 3G"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "android-phone-rtmp-low",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for lower specification Android phone over Wifi and 3G"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "android-phone-tablet-rtmp-3g",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for higher specification Android phones and tablets, over 3G"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "android-tablet-rtmp",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for Android tablets over WiFi and 3G"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "emp",
+playback_formats: "",
+description: "The 'emp' media set is the default media set (ie: if none specified 'emp' is set) for the episodedetail ION feed, and the episode playlist. It will be deprecated in favour of the 'pc' media set in time."
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "mobile-emp",
+playback_formats: "",
+description: "mobile-emp"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "pc",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer on a standard PC browser. This media set also contains all Radio services (both abstract and concrete) for all territiories, in order to correctly display availability for UK Radio Player, bo"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "pc-bigscreen",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer through the 'Big Screen' site"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "ps3",
+playback_formats: "",
+description: "ps3"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-05T12:07:12+0000",
+type: "ondemand",
+id: "p010nck0",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:54:27+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_3ff5cbf94d43b3fdff9fa5797dcd9564_900051",
+service: "iplayer_uk_stream_aac_3gp_concrete",
+media_sets: [
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "3gp-mobile-3g",
+playback_formats: "",
+description: "3gp-mobile-3g"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "3gp-mobile-generic",
+playback_formats: "",
+description: "3gp-mobile-generic"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "3gp-mobile-wifi",
+playback_formats: "",
+description: "3gp-mobile-wifi"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-05T12:13:40+0000",
+type: "ondemand",
+id: "p010ncw0",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "0",
+actual_start: "",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_192ff6ea39dc4525044b9acb180079fb",
+service: "iplayer_intl_stream_real",
+media_sets: "",
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-10-26T02:03:21+0000",
+type: "ondemand",
+id: "p0108k55",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:46:12+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_3ff5cbf94d43b3fdff9fa5797dcd9564_900079",
+service: "iplayer_uk_stream_aac_wii_concrete",
+media_sets: [
+{
+rights_platform: "gaming",
+type: "media_set",
+id: "iplayer-wii",
+playback_formats: "",
+description: "iplayer-wii"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-05T12:07:30+0000",
+type: "ondemand",
+id: "p010ncrm",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:50:24+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_3ff5cbf94d43b3fdff9fa5797dcd9564_900084",
+service: "iplayer_uk_stream_aac_rtmp_lo_concrete",
+media_sets: [
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "apple-iphone4-ipad-hls-3g",
+playback_formats: "",
+description: "Ondemand HLS streaming intended for iPhone 3GS and 4, iPod gen 3 and 4, and iPad 1+2, over 3G"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "emp",
+playback_formats: "",
+description: "The 'emp' media set is the default media set (ie: if none specified 'emp' is set) for the episodedetail ION feed, and the episode playlist. It will be deprecated in favour of the 'pc' media set in time."
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "pc",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer on a standard PC browser. This media set also contains all Radio services (both abstract and concrete) for all territiories, in order to correctly display availability for UK Radio Player, bo"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "pc-bigscreen",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer through the 'Big Screen' site"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "ps3",
+playback_formats: "",
+description: "ps3"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-05T12:12:03+0000",
+type: "ondemand",
+id: "p010ncsh",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "0",
+actual_start: "",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_b42fdc7a1bb3ae2ba5440952620c2e7a",
+service: "iplayer_uk_stream_mp3_http",
+media_sets: "",
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-10-26T02:03:30+0000",
+type: "ondemand",
+id: "p0108k59",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "0",
+actual_start: "",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_0610987db67c7c36ca9d504ecbc18fc0",
+service: "iplayer_intl_stream_wma",
+media_sets: [
+{
+rights_platform: "pc",
+type: "media_set",
+id: "wmp",
+playback_formats: "",
+description: "Ondemand HTTP progressive download intended for Windows Media Players on a PC"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-10-26T02:03:23+0000",
+type: "ondemand",
+id: "p0108k57",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:48:10+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_3ff5cbf94d43b3fdff9fa5797dcd9564_900094",
+service: "iplayer_stb_uk_stream_aac_concrete",
+media_sets: [
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "apple-i-family",
+playback_formats: "",
+description: "apple-i-family"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "apple-ipad",
+playback_formats: "",
+description: "Ondemand HTTP and HLS streaming intended for iPad 1 and 2 over WiFi and 3G. This media set will be deprecated in favour of apple-ipad-hls in time"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "apple-ipad-hls",
+playback_formats: "",
+description: "Ondemand HLS streaming intended for iPad 1 and 2 over WiFi and 3G. This media set is intended to supercede apple-ipad in time"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "apple-iphone2-hls",
+playback_formats: "",
+description: "Ondemand HLS streaming intended for iPhone 2G, iPhone 3G and iPod Gen 1 and 2 over WiFi and 3G"
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "apple-iphone4-hls",
+playback_formats: "",
+description: "Ondemand HLS streaming intended for iPhone 3GS and 4 and iPod gen 3 and 4 over WiFi and 3G"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "bt-cardinal",
+playback_formats: "",
+description: "Ondemand HTTP streaming via BT WCC CDS intended for BT Cardinal (BT Vision) bigscreen devices"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "flash-iplayer-all",
+playback_formats: "",
+description: "flash-iplayer-all"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "flash-iplayer-all-ns",
+playback_formats: "",
+description: "flash-iplayer-all-ns"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "flash-iplayer-sd",
+playback_formats: "",
+description: "flash-iplayer-sd"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "flash-iplayer-sd-ns",
+playback_formats: "",
+description: "flash-iplayer-sd-ns"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "stb-aac",
+playback_formats: "",
+description: "stb-aac"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-05T12:10:18+0000",
+type: "ondemand",
+id: "p010ncs3",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "0",
+actual_start: "",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_3ff5cbf94d43b3fdff9fa5797dcd9564",
+service: "iplayer_uk_stream_aac_abstract",
+media_sets: [
+{
+rights_platform: "pc",
+type: "media_set",
+id: "emp",
+playback_formats: "",
+description: "The 'emp' media set is the default media set (ie: if none specified 'emp' is set) for the episodedetail ION feed, and the episode playlist. It will be deprecated in favour of the 'pc' media set in time."
+},
+{
+rights_platform: "mobile",
+type: "media_set",
+id: "mobile-emp",
+playback_formats: "",
+description: "mobile-emp"
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "pc",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer on a standard PC browser. This media set also contains all Radio services (both abstract and concrete) for all territiories, in order to correctly display availability for UK Radio Player, bo"
+},
+{
+rights_platform: "iptv",
+type: "media_set",
+id: "stb-aac",
+playback_formats: "",
+description: "stb-aac"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-10-26T02:03:27+0000",
+type: "ondemand",
+id: "p0108k58",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+},
+{
+file_size: "1",
+actual_start: "2012-11-04T22:46:15+0000",
+oid: "b01nph9d.imi:bbc.co.uk/AMI_a05a67c8969ad26b038e1a0cafff5d28_900066",
+service: "iplayer_intl_stream_aac_rtmp_concrete",
+media_sets: [
+{
+rights_platform: "pc",
+type: "media_set",
+id: "emp",
+playback_formats: "",
+description: "The 'emp' media set is the default media set (ie: if none specified 'emp' is set) for the episodedetail ION feed, and the episode playlist. It will be deprecated in favour of the 'pc' media set in time."
+},
+{
+rights_platform: "pc",
+type: "media_set",
+id: "pc",
+playback_formats: "",
+description: "Ondemand RTMP streaming intended for clients accessing iPlayer on a standard PC browser. This media set also contains all Radio services (both abstract and concrete) for all territiories, in order to correctly display availability for UK Radio Player, bo"
+}
+],
+end: "2012-11-11T22:02:00+0000",
+discoverable_end: "2012-11-11T22:02:00+0000",
+revocation_status: "active",
+updated: "2012-11-05T12:05:53+0000",
+type: "ondemand",
+id: "p010nck1",
+scheduled_start: "2012-11-04T22:02:00+0000",
+is_free: "1"
+}
+],
+sound_format: "Stereo",
+download_size_kontiki_wmv: "0",
+first_broadcast_service: "bbc_radio_three",
+duration: "3600",
+is_audiodescribed: "0",
+is_available_kontiki_wmv: "0",
+download_size_elektra_sd: "0",
+content_expiry: "2012-11-11T22:02:00+0000",
+guidance_code: "WL",
+type: "version",
+is_available_mediaset_pc_hd: "0",
+has_bsl: "0",
+is_available_h264_high_stream: "0",
+original_broadcast_datetime: "2012-11-04T21:00:00+0000",
+is_available_elektra_hd: "0",
+is_delayed: "1",
+version_type_string: "Original version",
+is_available_mediaset_stb_hd: "0",
+is_available_http_wmv: "0",
+download_size_iplayer_mobile_wmv: "0",
+availability: "CURRENT",
+is_available_mediaset_pc_sd: "0",
+is_available_h264_stream: "0",
+most_recent_broadcast_service_title: "BBC Radio 3",
+guidance_text: "Contains language which may offend.",
+is_available_iplayer_mobile_wmv: "0",
+is_coming_very_soon: "0"
+}
+],
+availability: "CURRENT",
+brand_long_synopsis: "Series of drama performances, ranging from experiment works to the Classics.",
+image_pid: "",
+is_downloadable: "0",
+short_synopsis: "Live drama from Free Thinking 2012, capturing our relationship with the Olympic flame.",
+has_segment: "0",
+is_hd_only: "0",
+my_mediaselector_xml_url: "http://www.bbc.co.uk/mediaselector/4/mtis/all/b01nph9d",
+play_version_guidance_text: "Contains language which may offend."
+}
+],
+generator: {
+version: "0.1",
+type: "generator",
+title: "OMG Publishing Services",
+uri: "http://publishing.omg.bbc.co.uk/"
+},
+context: {
+in_hd: "0",
+domain: "",
+is_signed: "0",
+locale: "en",
+is_dubbed_audio: "0",
+bikini_states: [
+{
+area: "global",
+state: "0"
+},
+{
+area: "db.activity",
+state: "0"
+},
+{
+area: "db.publishing",
+state: "0"
+},
+{
+area: "net.recommendations_supplier",
+state: "0"
+}
+],
+recipe: ""
+},
+updated: "2012-11-07T09:43:19+0000",
+type: "ion",
+id: "tag:bbc.co.uk,2008:ps:fetcher:episodedetail:allow_unavailable:1:category_type:iplayer:clips:exclude:episode_id:b01nphb7:expose_search_categories:0:include_broadcasts:0:include_clip_counts:0:next_broadcasts:0:request_context:discoverable_only=0,media_set=emp:skip_credits:0",
+locale_str: "en"
+}
