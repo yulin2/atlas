@@ -14,16 +14,20 @@
  permissions and limitations under the License. */
 package org.atlasapi;
 
+import org.atlasapi.persistence.content.elasticsearch.schema.EsSchema;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
 import org.junit.Test;
 
 import com.metabroadcast.common.properties.Configurer;
-import org.atlasapi.persistence.content.elasticsearch.schema.EsSchema;
+import org.atlasapi.media.EsSchema;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
+import org.junit.Test;
+
+import com.metabroadcast.common.properties.Configurer;
 
 /**
  * Test that we can load beans from the Spring configuration - checks that the
