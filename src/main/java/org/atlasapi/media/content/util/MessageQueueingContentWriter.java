@@ -1,5 +1,7 @@
 package org.atlasapi.media.content.util;
 
+import java.util.UUID;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
@@ -8,8 +10,9 @@ import javax.jms.TextMessage;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.messaging.EntityUpdatedMessage;
+import org.atlasapi.persistence.content.ContentHasher;
+import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +20,8 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.metabroadcast.common.ids.NumberToShortStringCodec;
-import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
-import java.util.UUID;
 
 public class MessageQueueingContentWriter implements ContentWriter {
 
@@ -29,16 +29,17 @@ public class MessageQueueingContentWriter implements ContentWriter {
     private final ObjectMapper mapper = JsonFactory.makeJsonMapper();
     private final JmsTemplate template;
     private final ContentWriter delegate;
+    private final ContentHasher hasher;
     private final Clock clock;
 
-    public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate) {
-        this(template, delegate, new SystemClock());
+    public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate, ContentHasher hasher) {
+        this(template, delegate, hasher, new SystemClock());
     }
 
-    public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate, Clock clock) {
-        NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
+    public MessageQueueingContentWriter(JmsTemplate template, ContentWriter delegate, ContentHasher hasher, Clock clock) {
         this.template = template;
         this.delegate = delegate;
+        this.hasher = hasher;
         this.clock = clock;
     }
 
@@ -55,6 +56,9 @@ public class MessageQueueingContentWriter implements ContentWriter {
     }
 
     private void enqueueMessageUpdatedMessage(final Content content) {
+        if (content.hashChanged(hasher.hash(content))) {
+            enqueueMessageUpdatedMessage(content);
+        }
         template.send(new MessageCreator() {
 
             @Override
