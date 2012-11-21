@@ -33,6 +33,7 @@ import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.logging.SystemOutAdapterLog;
 import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.persistence.media.TranslatorContentHasher;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
@@ -176,7 +177,7 @@ public class AtlasPersistenceModule {
         if (Boolean.valueOf(generateIds)) {
             contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
-        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter);
+        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter, new TranslatorContentHasher());
         return contentWriter;
     }
 
@@ -296,7 +297,7 @@ public class AtlasPersistenceModule {
             contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, cassandraContentPersistenceModule().cassandraLookupEntryStore());
-        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter);
+        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter, new TranslatorContentHasher());
         return contentWriter;
     }
 
