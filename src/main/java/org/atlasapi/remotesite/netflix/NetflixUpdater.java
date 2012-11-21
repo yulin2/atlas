@@ -1,0 +1,74 @@
+package org.atlasapi.remotesite.netflix;
+
+import nu.xom.Document;
+import nu.xom.Element;
+
+import org.atlasapi.remotesite.redux.UpdateProgress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Throwables;
+import com.metabroadcast.common.scheduling.ScheduledTask;
+
+public class NetflixUpdater extends ScheduledTask {
+
+    private final NetflixXmlElementHandler elementHandler;
+    private final NetflixDataStore dataStore;
+    private static final Logger log = LoggerFactory.getLogger(NetflixUpdater.class);
+    
+    public NetflixUpdater(NetflixXmlElementHandler elementHandler, NetflixDataStore store) {
+        this.elementHandler = elementHandler;
+        this.dataStore = store;
+    }
+
+    @Override
+    protected void runTask() {
+        try {
+            Document netflixData = dataStore.getData();
+            
+            Element rootElement = netflixData.getRootElement();
+            NetflixDataProcessor<UpdateProgress> processor = processor();
+            UpdateProgress progress = processor.getResult();
+            
+            elementHandler.prepare();
+
+            for (int i = 0; i < rootElement.getChildCount(); i++) {
+                processor.process(rootElement.getChildElements().get(i));
+                progress = progress.reduce(processor.getResult());
+            }
+            
+            elementHandler.finish();
+            
+            reportStatus(progress.toString());
+            
+        } catch (Exception e) {
+            reportStatus(e.getMessage());
+            Throwables.propagate(e);
+        }
+    }
+    
+    private NetflixDataProcessor<UpdateProgress> processor() {
+        return new NetflixDataProcessor<UpdateProgress>() {
+            
+            UpdateProgress progress = UpdateProgress.START;
+            
+            @Override
+            public boolean process(Element element) {
+                try {
+                    elementHandler.handle(element);
+                    progress = progress.reduce(UpdateProgress.SUCCESS);
+                } catch (Exception e) {
+                    log.warn(element.getLocalName() , e);
+                    progress = progress.reduce(UpdateProgress.FAILURE);
+                }
+                reportStatus(progress.toString());
+                return shouldContinue();
+            }
+
+            @Override
+            public UpdateProgress getResult() {
+                return progress;
+            }
+        };
+    }
+}
