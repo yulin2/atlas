@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- edited by Gary Bielby "PA" Listings -->
-<!-- listings Radio Times DTD v2.07 17/01/2012 mj -->
+<!-- listings Radio Times DTD v2.08 16/08/2012 mj -->
 
 
 <!ELEMENT tv_data (listings_date+)>
@@ -226,6 +226,7 @@ person_id: A unique id for this person
 	tv_movie: this programme is a made-for-tv movie
 	web_choice: RT web choice
 	special: this programme is part of a series but should generally be referred to by the episode title rather than the series title. E.g. "The X-Factor Live Final", "Never Mind the Buzzcocks Christmas Special". E.g. if displaying these programmes on a schedule list, the episode titles should be prominent. 
+	three_d: the programme employs techniques of 3D presentation.
 	 
 -->
 <!ELEMENT attr EMPTY>
@@ -254,6 +255,7 @@ person_id: A unique id for this person
 	tv_movie (yes | no) "no"
 	web_choice (yes | no) "no"
 	special (yes | no) "no"
+	three_d (yes | no) "no"
 >
 
 
