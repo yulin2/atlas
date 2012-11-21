@@ -56,8 +56,8 @@ public class MessageQueueingContentWriter implements ContentWriter {
     }
 
     private void enqueueMessageUpdatedMessage(final Content content) {
-        if (content.hashChanged(hasher.hash(content))) {
-            enqueueMessageUpdatedMessage(content);
+        if (!content.hashChanged(hasher.hash(content))) {
+            return;
         }
         template.send(new MessageCreator() {
 
