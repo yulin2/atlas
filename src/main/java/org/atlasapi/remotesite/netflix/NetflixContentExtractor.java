@@ -55,18 +55,16 @@ public abstract class NetflixContentExtractor<T extends Content> {
             List<CrewMember> people = Lists.newArrayList();
             for (int i = 0; i < peopleElement.getChildElements().size(); i++) {
                 Element personElement = peopleElement.getChildElements().get(i);
-                if (personElement != null) {
-                    CrewMember person = new CrewMember();
-                    person.setCanonicalUri(PEOPLE_URL_PREFIX + getId(personElement));
-                    person.withRole(TYPE_ROLE_MAPPING.get(getType(personElement)));
-                    
-                    Element nameElement = personElement.getFirstChildElement(NAME_KEY);
-                    if (nameElement != null) {
-                        person.withName(personElement.getValue());
-                    }
-                    
-                    people.add(person);
+                CrewMember person = new CrewMember();
+                person.setCanonicalUri(PEOPLE_URL_PREFIX + getId(personElement));
+                person.withRole(TYPE_ROLE_MAPPING.get(getType(personElement)));
+
+                Element nameElement = personElement.getFirstChildElement(NAME_KEY);
+                if (nameElement == null) {
+                    throw new ElementNotFoundException(personElement, NAME_KEY);
                 }
+                person.withName(personElement.getValue().trim());
+                people.add(person);
             }
             return people;
         }

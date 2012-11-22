@@ -30,20 +30,20 @@ public class NetflixFilmExtractor extends NetflixContentExtractor<Film>  {
     @Override
     public Set<Film> extract(Element source, int id) {
         try {
-        Film film = new Film();
+            Film film = new Film();
 
-        film.setCanonicalUri(MOVIES_URL_PREFIX + id);
-        
-        film.setTitle(getTitle(source));
-        film.setYear(getYear(source));
-        film.setDescription(getDescription(source));
-        film.addVersion(getVersion(source));
-        film.setGenres(getGenres(source));
-        film.setPeople(getPeople(source));
-        film.setCertificates(getCertificates(source));
-        film.addAlias(getAlias(source));
-        
-        return ImmutableSet.<Film>builder().add(film).build();
+            film.setCanonicalUri(MOVIES_URL_PREFIX + id);
+
+            film.setTitle(getTitle(source));
+            film.setYear(getYear(source));
+            film.setDescription(getDescription(source));
+            film.addVersion(getVersion(source));
+            film.setGenres(getGenres(source));
+            film.setPeople(getPeople(source));
+            film.setCertificates(getCertificates(source));
+            film.addAlias(getAlias(source));
+
+            return ImmutableSet.<Film>builder().add(film).build();
         } catch (Exception e) {
             Throwables.propagate(e);
             // never get here
@@ -86,7 +86,7 @@ public class NetflixFilmExtractor extends NetflixContentExtractor<Film>  {
     private int getYear(Element filmElement) throws ElementNotFoundException {
         Element yearElement = filmElement.getFirstChildElement(RELEASE_YEAR_KEY);
         if (yearElement != null) {
-            Integer.parseInt(yearElement.getValue());
+            return Integer.parseInt(yearElement.getValue());
         }
         throw new ElementNotFoundException(filmElement, RELEASE_YEAR_KEY);
     }
@@ -99,7 +99,7 @@ public class NetflixFilmExtractor extends NetflixContentExtractor<Film>  {
         throw new ElementNotFoundException(filmElement, TITLE_KEY);
     }
 
-    private Set<Certificate> getCertificates(Element filmElement) throws ElementNotFoundException {
+    private Set<Certificate> getCertificates(Element filmElement) throws ElementNotFoundException, AttributeNotFoundException {
         Element parentalAdvisories = filmElement.getFirstChildElement(PARENTAL_ADVISORIES_KEY);
         if (parentalAdvisories != null) {
             Set<Certificate> certificates =  Sets.newHashSet();
@@ -115,12 +115,12 @@ public class NetflixFilmExtractor extends NetflixContentExtractor<Film>  {
         throw new ElementNotFoundException(filmElement, PARENTAL_ADVISORIES_KEY);
     }
 
-    private String advisorySystem(Element parentalAdvisory) {
+    private String advisorySystem(Element parentalAdvisory) throws AttributeNotFoundException {
         for (int i = 0; i < parentalAdvisory.getAttributeCount(); i++) {
             if (parentalAdvisory.getAttribute(i).getLocalName().equals(SYSTEM_ATTRIBUTE)) {
                 return parentalAdvisory.getAttribute(i).getValue();
             }
         }
-        return null;
+        throw new AttributeNotFoundException(parentalAdvisory, SYSTEM_ATTRIBUTE);
     }
 }

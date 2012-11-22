@@ -1,10 +1,15 @@
 package org.atlasapi.remotesite.netflix;
 
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
 import nu.xom.Element;
 
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -58,7 +63,10 @@ public class NetflixModule {
         S3Client s3client = new DefaultS3Client(s3access, s3secret, s3bucket);
         NetflixDataStore dataStore = new DefaultNetflixFileStore(netflixFileName, localFilesPath, s3client);
         NetflixFileUpdater fileUpdater = new NetflixFileUpdater(netflixUrl, dataStore, timeout);
-        ContentExtractor<Element, Optional<Content>> extractor = new NetflixXmlElementContentExtractor();
+        NetflixContentExtractor<Film> filmExtractor = new NetflixFilmExtractor();
+        NetflixContentExtractor<Container> brandExtractor;
+        NetflixContentExtractor<? extends Content> episodeExtractor;
+        ContentExtractor<Element, Set<? extends Content>> extractor = new NetflixXmlElementContentExtractor(filmExtractor, brandExtractor, episodeExtractor);
         NetflixXmlElementHandler xmlHandler= new DefaultNetflixXmlElementHandler(extractor, resolver, contentWriter);
         return new NetflixUpdater(fileUpdater, xmlHandler, dataStore);
     }

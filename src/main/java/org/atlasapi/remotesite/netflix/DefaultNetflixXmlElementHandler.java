@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.netflix;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
@@ -31,13 +32,13 @@ import nu.xom.Element;
 public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler {
 
     private final Map<String, Container> seen = Maps.newHashMap();
-    private final ContentExtractor<Element, Optional<Content>> extractor;
+    private final ContentExtractor<Element, Set<? extends Content>> extractor;
     private final SetMultimap<String, Content> cached = HashMultimap.create();
     private final ContentWriter writer;
     private final ContentResolver resolver;
     private final Logger log = LoggerFactory.getLogger(DefaultNetflixXmlElementHandler.class);
     
-    public DefaultNetflixXmlElementHandler(ContentExtractor<Element, Optional<Content>> extractor, ContentResolver resolver, ContentWriter writer) {
+    public DefaultNetflixXmlElementHandler(ContentExtractor<Element, Set<? extends Content>> extractor, ContentResolver resolver, ContentWriter writer) {
         this.extractor = extractor;
         this.resolver = resolver;
         this.writer = writer;
@@ -50,7 +51,7 @@ public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler
     @Override
     public void handle(Element element) {
         // how to deal with an element producing both item and series?
-        Optional<Content> possibleContent = extractor.extract(element);
+        Set<? extends Content> possibleContent = extractor.extract(element);
         if (!possibleContent.isPresent()) {
             return;
         }
