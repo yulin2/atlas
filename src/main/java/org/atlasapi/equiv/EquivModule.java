@@ -21,6 +21,7 @@ import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
 import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
+import static org.atlasapi.media.entity.Publisher.NETFLIX;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
@@ -248,9 +249,21 @@ public class EquivModule {
             ))
         );
         
+        Set<Publisher> netflixPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(NETFLIX));
+        updaters.register(NETFLIX, Item.class, standardItemUpdater(netflixPublishers, 
+            ImmutableSet.<EquivalenceGenerator<Item>> of(
+                new CandidateContainerEquivalenceGenerator(contentResolver, equivSummaryStore)
+            ), 
+            ImmutableSet.of(new TitleMatchingItemScorer(),new SequenceItemEquivalenceScorer())
+        ));
+        updaters.register(NETFLIX, Container.class, standardContainerUpdater(netflixPublishers,
+            ImmutableSet.of(TitleSearchGenerator.create(searchResolver, Container.class, netflixPublishers)), 
+            ImmutableSet.of(titleScorer, new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
+            ))
+        );
+        
         Set<Publisher> facebookAcceptablePublishers = Sets.union(acceptablePublishers, ImmutableSet.of(FACEBOOK));
-        updaters.register(FACEBOOK, Container.class, standardContentUpdater(
-            facebookAcceptablePublishers,
+        updaters.register(FACEBOOK, Container.class, standardContentUpdater(facebookAcceptablePublishers, 
             ImmutableSet.of(
                 TitleSearchGenerator.create(searchResolver, Container.class, facebookAcceptablePublishers),
                 aliasResolvingGenerator(contentResolver, Container.class)
@@ -260,7 +273,8 @@ public class EquivModule {
             ImmutableList.of(
                 new MinimumScoreFilter<Container>(0.2),
                 new SpecializationMatchingFilter<Container>()
-            ), containerResultHandlers(facebookAcceptablePublishers)
+            ), 
+            containerResultHandlers(facebookAcceptablePublishers)
         ));
         
         for (Publisher publisher : musicPublishers) {
@@ -276,5 +290,4 @@ public class EquivModule {
         
         return updaters; 
     }
-    
 }
