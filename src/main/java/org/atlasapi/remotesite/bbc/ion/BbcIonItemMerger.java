@@ -2,10 +2,14 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import java.util.Map;
 
+import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.joda.time.Duration;
 
@@ -26,69 +30,27 @@ public class BbcIonItemMerger {
             return mergeFetchedItem(fetchedItem, existingItem);
         }
     }
-
-    private Item mergeFetchedItem(Item fetchedItem, Item existingItem) {
-        if (existingItem instanceof Episode || existingItem instanceof Film) {
-            //existing is not just an item, so copy its details to a new one.
-            Item newItem = new Item();
-            Item.copyTo(existingItem, newItem);
-            existingItem = newItem;
+    
+    private Film mergeFetchedFilm(Film fetchedFilm, Item existingItem) {
+        Film existingFilm;
+        if (existingItem instanceof Film) {
+            existingFilm = (Film) existingItem;
+        } else {
+            existingFilm = new Film();
+            Item.copyTo(existingItem, existingFilm);
         }
-        return mergeItems(fetchedItem, existingItem);
+        return mergeFilms(fetchedFilm, existingFilm);
     }
 
-    private <T extends Item> T mergeItems(T fetchedItem, T existingItem) {
-        //Identified attrs. Assume uri, curie are corrrect, equivs ignored.
-        existingItem.addAliases(fetchedItem.getAliases());
-        existingItem.setLastUpdated(ifNotNull(fetchedItem.getLastUpdated(), existingItem.getLastUpdated()));
+    private Film mergeFilms(Film fetchedFilm, Film existingFilm) {
+        Film mergedFilms = mergeItems(fetchedFilm, existingFilm);
         
-        //Described attrs.
-        existingItem.setTitle(ifNotNull(fetchedItem.getTitle(), existingItem.getTitle()));
-        existingItem.setDescription(ifNotNull(fetchedItem.getDescription(), existingItem.getDescription()));
-        existingItem.setMediaType(ifNotNull(fetchedItem.getMediaType(), existingItem.getMediaType()));
-        existingItem.setSpecialization(ifNotNull(fetchedItem.getSpecialization(), existingItem.getSpecialization()));
-        existingItem.setGenres(Iterables.concat(fetchedItem.getGenres(), existingItem.getGenres()));
-        existingItem.setTags(ImmutableSet.copyOf(Iterables.concat(fetchedItem.getTags(), existingItem.getTags())));
-        existingItem.setImage(ifNotNull(fetchedItem.getImage(), existingItem.getImage()));
-        existingItem.setThumbnail(ifNotNull(fetchedItem.getThumbnail(), existingItem.getThumbnail()));
-        existingItem.setPresentationChannel(ifNotNull(fetchedItem.getPresentationChannel(), fetchedItem.getPresentationChannel()));
+        mergedFilms.setYear(ifNotNull(fetchedFilm.getYear(), existingFilm.getYear()));
+        mergedFilms.setWebsiteUrl(ifNotNull(fetchedFilm.getWebsiteUrl(), existingFilm.getWebsiteUrl()));
         
-        //Content attrs. Assume that clips themselves don't need merging.
-        existingItem.setClips(ImmutableSet.copyOf(Iterables.concat(fetchedItem.getClips(), existingItem.getClips())));
-        
-        //Item attrs.
-        existingItem.setParentRef(fetchedItem.getContainer());
-        existingItem.setPeople(ImmutableList.copyOf(Sets.newLinkedHashSet(Iterables.concat(fetchedItem.getPeople(), existingItem.getPeople()))));
-
-        //Versions...
-        Map<String,Version> existingVersionMap = Maps.uniqueIndex(existingItem.getVersions(), Identified.TO_URI);
-        for (Version fetchedVersion : fetchedItem.getVersions()) {
-            Version existingVersion = existingVersionMap.get(fetchedVersion.getCanonicalUri());
-            if(existingVersion != null) {
-                mergeVersions(fetchedVersion, existingVersion);
-            } else {
-                existingItem.addVersion(fetchedVersion);
-            }
-        }
-        
-        return existingItem;
+        return mergedFilms;
     }
     
-    private void mergeVersions(Version fetchedVersion, Version existingVersion) {
-        Integer intDuration = ifNotNull(fetchedVersion.getDuration(), existingVersion.getDuration());
-        if(intDuration != null) {
-            existingVersion.setDuration(Duration.standardSeconds(intDuration));
-        }
-        existingVersion.setBroadcasts(Sets.newHashSet(Iterables.concat(fetchedVersion.getBroadcasts(), existingVersion.getBroadcasts())));
-        existingVersion.setPublishedDuration(ifNotNull(fetchedVersion.getPublishedDuration(), existingVersion.getPublishedDuration()));
-        existingVersion.setRestriction(ifNotNull(fetchedVersion.getRestriction(), existingVersion.getRestriction()));
-        existingVersion.setManifestedAs(Sets.newHashSet(Iterables.concat(fetchedVersion.getManifestedAs(), existingVersion.getManifestedAs())));
-    }
-
-    private <T> T ifNotNull(T preferredVal, T defautVal) {
-        return preferredVal != null ? preferredVal : defautVal;
-    }
-
     private Episode mergeFetchedEpisode(Episode fetchedEpisode, Item existingItem) {
         Episode existingEpisode;
         if (existingItem instanceof Episode) {
@@ -111,24 +73,108 @@ public class BbcIonItemMerger {
         return mergedEpisode;
     }
 
-    private Film mergeFetchedFilm(Film fetchedFilm, Item existingItem) {
-        Film existingFilm;
-        if (existingItem instanceof Film) {
-            existingFilm = (Film) existingItem;
-        } else {
-            existingFilm = new Film();
-            Item.copyTo(existingItem, existingFilm);
+    private Item mergeFetchedItem(Item fetchedItem, Item existingItem) {
+        if (existingItem instanceof Episode || existingItem instanceof Film) {
+            //existing is not just an item, so copy its details to a new one.
+            Item newItem = new Item();
+            Item.copyTo(existingItem, newItem);
+            existingItem = newItem;
         }
-        return mergeFilms(fetchedFilm, existingFilm);
+        return mergeItems(fetchedItem, existingItem);
     }
 
-    private Film mergeFilms(Film fetchedFilm, Film existingFilm) {
-        Film mergedFilms = mergeItems(fetchedFilm, existingFilm);
+    private <T extends Item> T mergeItems(T fetchedItem, T existingItem) {
+        mergeContents(fetchedItem, existingItem);
         
-        mergedFilms.setYear(ifNotNull(fetchedFilm.getYear(), existingFilm.getYear()));
-        mergedFilms.setWebsiteUrl(ifNotNull(fetchedFilm.getWebsiteUrl(), existingFilm.getWebsiteUrl()));
+        //Item attrs.
+        existingItem.setParentRef(fetchedItem.getContainer());
+        existingItem.setPeople(ImmutableList.copyOf(Sets.newLinkedHashSet(
+            Iterables.concat(fetchedItem.getPeople(), existingItem.getPeople())
+        )));
+
+        //Versions...
+        Map<String,Version> existingVersionMap = Maps.uniqueIndex(existingItem.getVersions(), Identified.TO_URI);
+        for (Version fetchedVersion : fetchedItem.getVersions()) {
+            Version existingVersion = existingVersionMap.get(fetchedVersion.getCanonicalUri());
+            if(existingVersion != null) {
+                mergeVersions(fetchedVersion, existingVersion);
+            } else {
+                existingItem.addVersion(fetchedVersion);
+            }
+        }
         
-        return mergedFilms;
+        return existingItem;
     }
     
+    public Container mergeContainers(Container fetchedContainer, Container existingContainer) {
+        if (fetchedContainer instanceof Series) {
+            return mergeSeries((Series)fetchedContainer, existingContainer);
+        }
+        if (fetchedContainer instanceof Brand) {
+            return mergeBrands((Brand)fetchedContainer, existingContainer);
+        }
+        throw new RuntimeException("Can't merge container of type " + fetchedContainer.getClass().getSimpleName());
+    }
+
+    private Brand mergeBrands(Brand fetchedBrand, Container existingContainer) {
+        Brand existingBrand;
+        if (existingContainer instanceof Brand) {
+            existingBrand = (Brand) existingContainer;
+        } else {
+            existingBrand = new Brand();
+            Brand.copyTo(existingContainer, existingBrand);
+        }
+        mergeContents(fetchedBrand, existingBrand);
+        return existingBrand;
+    }
+
+    private Series mergeSeries(Series fetchedSeries, Container existingContainer) {
+        Series existingSeries;
+        if (existingContainer instanceof Series) {
+            existingSeries = (Series) existingContainer;
+        } else {
+            existingSeries = new Series();
+            Series.copyTo(existingContainer, existingSeries);
+        }
+        mergeContents(fetchedSeries, existingSeries);
+        existingSeries.setParentRef(ifNotNull(fetchedSeries.getParent(), existingSeries.getParent()));
+        existingSeries.withSeriesNumber(ifNotNull(fetchedSeries.getSeriesNumber(), existingSeries.getSeriesNumber()));
+        return existingSeries;
+    }
+
+    private <T extends Content> void mergeContents(T fetchedItem, T existingItem) {
+        //Identified attrs. Assume uri, curie are corrrect, equivs ignored.
+        existingItem.addAliases(fetchedItem.getAliases());
+        existingItem.setLastUpdated(ifNotNull(fetchedItem.getLastUpdated(), existingItem.getLastUpdated()));
+        
+        //Described attrs.
+        existingItem.setTitle(ifNotNull(fetchedItem.getTitle(), existingItem.getTitle()));
+        existingItem.setDescription(ifNotNull(fetchedItem.getDescription(), existingItem.getDescription()));
+        existingItem.setMediaType(ifNotNull(fetchedItem.getMediaType(), existingItem.getMediaType()));
+        existingItem.setSpecialization(ifNotNull(fetchedItem.getSpecialization(), existingItem.getSpecialization()));
+        existingItem.setGenres(Iterables.concat(fetchedItem.getGenres(), existingItem.getGenres()));
+        existingItem.setTags(ImmutableSet.copyOf(Iterables.concat(fetchedItem.getTags(), existingItem.getTags())));
+        existingItem.setImage(ifNotNull(fetchedItem.getImage(), existingItem.getImage()));
+        existingItem.setThumbnail(ifNotNull(fetchedItem.getThumbnail(), existingItem.getThumbnail()));
+        existingItem.setPresentationChannel(ifNotNull(fetchedItem.getPresentationChannel(), existingItem.getPresentationChannel()));
+        
+        //Content attrs. Assume that clips themselves don't need merging.
+        existingItem.setClips(ImmutableSet.copyOf(Iterables.concat(fetchedItem.getClips(), existingItem.getClips())));
+    }
+    
+    private void mergeVersions(Version fetchedVersion, Version existingVersion) {
+        Integer intDuration = ifNotNull(fetchedVersion.getDuration(), existingVersion.getDuration());
+        if(intDuration != null) {
+            existingVersion.setDuration(Duration.standardSeconds(intDuration));
+        }
+        existingVersion.setBroadcasts(Sets.newHashSet(Iterables.concat(fetchedVersion.getBroadcasts(), existingVersion.getBroadcasts())));
+        existingVersion.setPublishedDuration(ifNotNull(fetchedVersion.getPublishedDuration(), existingVersion.getPublishedDuration()));
+        existingVersion.setRestriction(ifNotNull(fetchedVersion.getRestriction(), existingVersion.getRestriction()));
+        existingVersion.setManifestedAs(Sets.newHashSet(Iterables.concat(fetchedVersion.getManifestedAs(), existingVersion.getManifestedAs())));
+    }
+
+    private <T> T ifNotNull(T preferredVal, T defautVal) {
+        return preferredVal != null ? preferredVal : defautVal;
+    }
+
 }

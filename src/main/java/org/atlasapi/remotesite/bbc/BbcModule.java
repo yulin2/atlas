@@ -227,7 +227,7 @@ public class BbcModule {
 	    RemoteSiteClient<SlashProgrammesRdf> rdfClient = BbcSlashProgrammesRdfClient.slashProgrammesClient(
 	        new RequestLimitingSimpleHttpClient(HttpClients.webserviceClient(), 3), SlashProgrammesRdf.class
         );
-        return new BbcIonProgrammeAdapter(contentWriters, detailAdapter, extendedDataAdapter, segmentAdapter, 
+        return new BbcIonProgrammeAdapter(contentResolver, contentWriters, detailAdapter, extendedDataAdapter, segmentAdapter, 
 	        rdfClient, containerAdapter, clipAdapter, Executors.newFixedThreadPool(5));
 	}
 	
