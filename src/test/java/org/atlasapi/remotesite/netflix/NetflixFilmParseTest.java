@@ -8,7 +8,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.List;
 import java.util.Set;
 
 import nu.xom.Builder;
@@ -48,7 +47,7 @@ public class NetflixFilmParseTest {
         Element rootElement = netflixData.getRootElement();
         
         NetflixContentExtractor<Film> filmExtractor = new NetflixFilmExtractor();        
-        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(filmExtractor, Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class));
+        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(filmExtractor, Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class));
 
         Set<Content> contents = Sets.newHashSet();
         for (int i = 0; i < rootElement.getChildElements().size(); i++) {
@@ -117,6 +116,7 @@ public class NetflixFilmParseTest {
         }
     }
     
+    @SuppressWarnings("unchecked")
     @Test
     public void testFilmParsingNoLongSynopsis() {
         Document netflixData;
@@ -131,7 +131,7 @@ public class NetflixFilmParseTest {
         Element rootElement = netflixData.getRootElement();
         
         NetflixFilmExtractor filmExtractor = new NetflixFilmExtractor();        
-        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(filmExtractor, Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class));
+        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(filmExtractor, Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class));
 
 
         Set<Content> contents = Sets.newHashSet();

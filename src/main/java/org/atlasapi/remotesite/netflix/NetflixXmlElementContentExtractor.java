@@ -4,14 +4,17 @@ import java.util.Set;
 
 import nu.xom.Element;
 
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Sets;
 import com.google.inject.internal.ImmutableSet;
 
 public class NetflixXmlElementContentExtractor implements ContentExtractor<Element, Set<? extends Content>> {
@@ -19,15 +22,17 @@ public class NetflixXmlElementContentExtractor implements ContentExtractor<Eleme
     private static final String ID_ATTRIBUTE = "id";
     
     private final NetflixContentExtractor<Film> filmExtractor;
-    private final NetflixContentExtractor<Container> brandExtractor;
-    private final NetflixContentExtractor<? extends Content> episodeExtractor;
+    private final NetflixContentExtractor<Brand> brandExtractor;
+    private final NetflixContentExtractor<Episode> episodeExtractor;
+    private final NetflixContentExtractor<Series> seriesExtractor;
     
     private final Logger log = LoggerFactory.getLogger(NetflixXmlElementContentExtractor.class);
     
-    public NetflixXmlElementContentExtractor(NetflixContentExtractor<Film> filmExtractor, NetflixContentExtractor<Container> brandExtractor, NetflixContentExtractor<? extends Content> episodeExtractor) {
+    public NetflixXmlElementContentExtractor(NetflixContentExtractor<Film> filmExtractor, NetflixContentExtractor<Brand> brandExtractor, NetflixContentExtractor<Episode> episodeExtractor, NetflixContentExtractor<Series> seriesExtractor) {
         this.filmExtractor = filmExtractor;
         this.brandExtractor = brandExtractor;
         this.episodeExtractor = episodeExtractor;
+        this.seriesExtractor = seriesExtractor;
     }
     
     @Override
@@ -41,7 +46,7 @@ public class NetflixXmlElementContentExtractor implements ContentExtractor<Eleme
             } else if (type.equals("show")) {
                 return brandExtractor.extract(source, id);
             } else if (type.equals("episode")) {
-                return episodeExtractor.extract(source, id);
+                return Sets.union(episodeExtractor.extract(source, id), seriesExtractor.extract(source, id));
             }
             log.warn("content type of element recognised but not parsed: " + source);
             return ImmutableSet.of();
