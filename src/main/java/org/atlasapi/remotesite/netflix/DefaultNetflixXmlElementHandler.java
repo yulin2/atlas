@@ -1,8 +1,11 @@
-package org.atlasapi.remotesite.lovefilm;
+package org.atlasapi.remotesite.netflix;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import nu.xom.Element;
 
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
@@ -16,49 +19,28 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.ContentMerger;
-import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.SetMultimap;
 import com.metabroadcast.common.base.Maybe;
 
-/**
- * Extracts LoveFilmDataRow, merges with existing Content and writes.
- * 
- * Rows are not required to be passed to this in the order they have to be
- * written. To achieve this a set of 'seen' content IDs is maintained along with
- * a Multimap of content ID to cached Content. When Content is extracted, if its
- * parent(s) have not yet been written it is placed in the cache mapped against
- * the missing parent. When a possible parent is written its ID is added to
- * 'seen' and any Content cached against that ID is written and removed from the
- * cache.
- * 
- */
-public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
-
-    private final ContentResolver resolver;
-    private final ContentWriter writer;
-    private final ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor;
+public class DefaultNetflixXmlElementHandler implements NetflixXmlElementHandler {
 
     private final Map<String, Container> seen = Maps.newHashMap();
+    private final ContentExtractor<Element, Set<? extends Content>> extractor;
     private final SetMultimap<String, Content> cached = HashMultimap.create();
-
-    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer) {
-        this(resolver, writer, new LoveFilmDataRowContentExtractor());
-    }
-
-    public DefaultLoveFilmDataRowHandler(ContentResolver resolver, ContentWriter writer, 
-            ContentExtractor<LoveFilmDataRow, Optional<Content>> extractor) {
+    private final ContentWriter writer;
+    private final ContentResolver resolver;
+    private final Logger log = LoggerFactory.getLogger(DefaultNetflixXmlElementHandler.class);
+    
+    public DefaultNetflixXmlElementHandler(ContentExtractor<Element, Set<? extends Content>> extractor, ContentResolver resolver, ContentWriter writer) {
+        this.extractor = extractor;
         this.resolver = resolver;
         this.writer = writer;
-        this.extractor = extractor;
     }
 
     @Override
@@ -66,21 +48,18 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
     }
 
     @Override
-    public void handle(LoveFilmDataRow row) {
-        Optional<Content> possibleContent = extract(row);
-        if (!possibleContent.isPresent()) {
-            return;
-        }
-        Content content = possibleContent.get();
-        Maybe<Identified> existing = resolve(content.getCanonicalUri());
-        if (existing.isNothing()) {
-            write(content);
-        } else {
-            Identified identified = existing.requireValue();
-            if (content instanceof Item) {
-                write(ContentMerger.merge(ContentMerger.asItem(identified), (Item) content));
-            } else if (content instanceof Container) {
-                write(ContentMerger.merge(ContentMerger.asContainer(identified), (Container) content));
+    public void handle(Element element) {
+        for (Content content : extractor.extract(element)) {
+            Maybe<Identified> existing = resolve(content.getCanonicalUri());
+            if (existing.isNothing()) {
+                write(content);
+            } else {
+                Identified identified = existing.requireValue();
+                if (content instanceof Item) {
+                    write(ContentMerger.merge(ContentMerger.asItem(identified), (Item) content));
+                } else if (content instanceof Container) {
+                    write(ContentMerger.merge(ContentMerger.asContainer(identified), (Container) content));
+                }
             }
         }
     }
@@ -96,10 +75,6 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         }
         seen.clear();
         cached.clear();
-    }
-
-    private Optional<Content> extract(LoveFilmDataRow row) {
-        return extractor.extract(row);
     }
 
     private Maybe<Identified> resolve(String uri) {

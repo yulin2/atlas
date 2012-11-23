@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog_titles>
+<catalog_title id="70136130" type="show">
+  <url>http://api.netflix.com/catalog/titles/series/70136130</url>
+  <release_year>2006</release_year>
+  <title>Heroes</title>
+  <short_synopsis>This groundbreaking sci-fi drama intertwines the stories of a disparate group of people who suddenly discover they possess superhuman abilities.</short_synopsis>
+  <long_synopsis>Drawing on American comic book tradition, this groundbreaking sci-fi serial drama intertwines the stories of a disparate group of seemingly ordinary people who suddenly discover they possess superhuman abilities.</long_synopsis>
+  <is_hd_available>true</is_hd_available>
+  <is_3d_available>false</is_3d_available>
+  <is_surround_available channels="5.1">true</is_surround_available>
+  <people>
+    <person id="20000578" type="actor">
+      <name>Jack Coleman</name>
+    </person>
+    <person id="20016275" type="actor">
+      <name>Hayden Panettiere</name>
+    </person>
+    <person id="20048493" type="actor">
+      <name>Milo Ventimiglia</name>
+    </person>
+    <person id="30057259" type="actor">
+      <name>Masi Oka</name>
+    </person>
+    <person id="30057260" type="actor">
+      <name>Sendhil Ramamurthy</name>
+    </person>
+    <person id="30058990" type="actor">
+      <name>James Kyson</name>
+    </person>
+    <person id="71663" type="actor">
+      <name>Adrian Pasdar</name>
+    </person>
+    <person id="30013156" type="actor">
+      <name>Zachary Quinto</name>
+    </person>
+    <person id="20007498" type="actor">
+      <name>Greg Grunberg</name>
+    </person>
+    <person id="20007804" type="actor">
+      <name>Ali Larter</name>
+    </person>
+    <person id="20059195" type="actor">
+      <name>Cristine Rose</name>
+    </person>
+    <person id="20033069" type="actor">
+      <name>Ashley Crow</name>
+    </person>
+    <person id="20035856" type="actor">
+      <name>Jimmy Jean-Louis</name>
+    </person>
+    <person id="20009942" type="actor">
+      <name>Robert Knepper</name>
+    </person>
+    <person id="20031341" type="actor">
+      <name>Madeline Zima</name>
+    </person>
+    <person id="20014655" type="actor">
+      <name>Ray Park</name>
+    </person>
+    <person id="20052049" type="actor">
+      <name>Kristen Bell</name>
+    </person>
+    <person id="30057262" type="actor">
+      <name>Tawny Cypress</name>
+    </person>
+    <person id="185202" type="actor">
+      <name>Leonard Roberts</name>
+    </person>
+    <person id="30141131" type="creator">
+      <name>Tim Kring</name>
+    </person>
+  </people>
+  <parental_advisories>
+    <parental_advisory system="BBFC">15</parental_advisory>
+  </parental_advisories>
+  <genres>
+    <genre>TV Shows</genre>
+    <genre>US TV Shows</genre>
+    <genre>TV Action &amp; Adventure</genre>
+    <genre>TV Dramas</genre>
+    <genre>TV Sci-Fi &amp; Fantasy</genre>
+    <genre>US TV Dramas</genre>
+  </genres>
+</catalog_title>
+</catalog_titles>

@@ -32,6 +32,7 @@ import org.atlasapi.remotesite.music.emimusic.EmiMusicModule;
 import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.music.emipub.EmiPubModule;
 import org.atlasapi.remotesite.music.musicbrainz.MusicBrainzModule;
+import org.atlasapi.remotesite.netflix.NetflixModule;
 
 public class RemoteSiteModuleConfigurer {
 
@@ -58,6 +59,7 @@ public class RemoteSiteModuleConfigurer {
         .put("redux", ReduxModule.class)
         .put("voila", VoilaModule.class)
         .put("lovefilm", LoveFilmModule.class)
+        .put("netflix", NetflixModule.class)
         .put("bbc-products", BBCProductsModule.class)
         .put("thespace", TheSpaceModule.class)
         .put("musicbrainz", MusicBrainzModule.class)
