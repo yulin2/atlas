@@ -234,7 +234,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
         Location location = new Location();
         location.setPolicy(policy);
         location.setTransportType(TransportType.LINK);
-        location.setCanonicalUri(uri);
+        location.setUri(uri);
         
         Encoding encoding = new Encoding();
         encoding.setAvailableAt(Sets.newHashSet(location));
