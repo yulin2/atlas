@@ -7,9 +7,10 @@ import javax.annotation.PostConstruct;
 import nu.xom.Element;
 
 import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -21,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Optional;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Daily;
@@ -64,9 +64,10 @@ public class NetflixModule {
         NetflixDataStore dataStore = new DefaultNetflixFileStore(netflixFileName, localFilesPath, s3client);
         NetflixFileUpdater fileUpdater = new NetflixFileUpdater(netflixUrl, dataStore, timeout);
         NetflixContentExtractor<Film> filmExtractor = new NetflixFilmExtractor();
-        NetflixContentExtractor<Container> brandExtractor;
-        NetflixContentExtractor<? extends Content> episodeExtractor;
-        ContentExtractor<Element, Set<? extends Content>> extractor = new NetflixXmlElementContentExtractor(filmExtractor, brandExtractor, episodeExtractor);
+        NetflixContentExtractor<Brand> brandExtractor = new NetflixBrandExtractor();
+        NetflixContentExtractor<Episode> episodeExtractor = new NetflixEpisodeExtractor();
+        NetflixContentExtractor<Series> seriesExtractor = new NetflixSeriesExtractor();
+        ContentExtractor<Element, Set<? extends Content>> extractor = new NetflixXmlElementContentExtractor(filmExtractor, brandExtractor, episodeExtractor, seriesExtractor);
         NetflixXmlElementHandler xmlHandler= new DefaultNetflixXmlElementHandler(extractor, resolver, contentWriter);
         return new NetflixUpdater(fileUpdater, xmlHandler, dataStore);
     }

@@ -26,7 +26,6 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.intl.Countries;
 
 
@@ -49,10 +48,9 @@ public class NetflixFilmParseTest {
         NetflixContentExtractor<Film> filmExtractor = new NetflixFilmExtractor();        
         NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(filmExtractor, Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class));
 
-        Set<Content> contents = Sets.newHashSet();
-        for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-            contents = Sets.union(contents, extractor.extract(rootElement.getChildElements().get(i)));
-        }
+        assertThat(rootElement.getChildElements().size(), is(1));
+        
+        Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
         // check that a piece of content is returned
         assertFalse(contents.isEmpty());
         assertThat(contents.size(), is(1));
@@ -134,10 +132,9 @@ public class NetflixFilmParseTest {
         NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(filmExtractor, Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class));
 
 
-        Set<Content> contents = Sets.newHashSet();
-        for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-            contents = Sets.union(contents, extractor.extract(rootElement.getChildElements().get(i)));
-        }
+        assertThat(rootElement.getChildElements().size(), is(1));
+        
+        Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
         // check that a piece of content is returned
         assertFalse(contents.isEmpty());
         assertThat(contents.size(), is(1));

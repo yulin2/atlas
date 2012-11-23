@@ -5,8 +5,8 @@ import java.util.Set;
 import nu.xom.Element;
 
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.ParentRef;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableSet;
 
 public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
@@ -15,39 +15,43 @@ public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
 
     @Override
     Set<Episode> extract(Element source, int id) {
-        try {
-            Episode episode = new Episode();
+        Episode episode = new Episode();
 
-            episode.setCanonicalUri(EPISODE_URL_PREFIX + id + "-" + getSeriesNumber(source));
+        episode.setCanonicalUri(EPISODE_URL_PREFIX + id);
 
-            episode.setTitle(getTitle(source));
-            episode.setDescription(getDescription(source));
-            episode.addVersion(getVersion(source));
-            episode.setYear(getYear(source));
-            episode.setGenres(getGenres(source));
-            episode.setCertificates(getCertificates(source));
-            episode.addAlias(getAlias(source));
-            // TODO series_summary
-            // TODO container
-            episode.setEpisodeNumber(getEpisodeNumber(source));
-            episode.setSeriesNumber(getSeriesNumber(source));
+        episode.setTitle(getTitle(source));
+        episode.setDescription(getDescription(source));
+        episode.addVersion(getVersion(source));
+        episode.setYear(getYear(source));
+        episode.setGenres(getGenres(source));
+        episode.setCertificates(getCertificates(source));
+        episode.addAlias(getAlias(source));
+        episode.setParentRef(getParentRef(source));
+        episode.setSeriesRef(getSeriesRef(source));
+        episode.setEpisodeNumber(getEpisodeNumber(source));
+        episode.setSeriesNumber(getSeriesNumber(source));
 
-            return ImmutableSet.<Episode>builder().add(episode).build();
-        } catch (Exception e) {
-            Throwables.propagate(e);
-            // never get here
-            return null;
-        }
+        return ImmutableSet.<Episode>builder().add(episode).build();
     }
 
-    String getTitle(Element filmElement) throws ElementNotFoundException {
-        Element titleElement = filmElement.getFirstChildElement(NetflixContentExtractor.TITLE_KEY);
+    private ParentRef getParentRef(Element episodeElement) {
+        return new ParentRef(NetflixBrandExtractor.BRAND_URL_PREFIX + getShowId(episodeElement));
+    }
+
+    private ParentRef getSeriesRef(Element episodeElement) {
+        return new ParentRef(NetflixSeriesExtractor.SERIES_URL_PREFIX + getShowId(episodeElement) + "-" + getSeriesNumber(episodeElement));
+    }
+
+    @Override
+    String getTitle(Element episodeElement) {
+        Element titleElement = episodeElement.getFirstChildElement(NetflixContentExtractor.TITLE_KEY);
         if (titleElement != null) {
             String[] parts = titleElement.getValue().split(":");
             // return last part of title, trimmed of whitespace
-            return parts[parts.length - 1].trim();
+            // leading and trailing quotes removed if present
+            return parts[parts.length - 1].trim().replaceAll("^\"|\"$", "");
         }
-        throw new ElementNotFoundException(filmElement, NetflixContentExtractor.TITLE_KEY);
+        throw new ElementNotFoundException(episodeElement, NetflixContentExtractor.TITLE_KEY);
     }
 
 }

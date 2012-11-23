@@ -57,21 +57,21 @@ public class NetflixXmlElementContentExtractor implements ContentExtractor<Eleme
         }
     }
 
-    private int getId(Element source) throws IdNotFoundException {
+    private int getId(Element source) {
         for (int i = 0; i < source.getAttributeCount(); i++) {
             if (source.getAttribute(i).getLocalName().equals(ID_ATTRIBUTE)) {
                 return Integer.parseInt(source.getAttribute(i).getValue());
             }
         }
-        throw new IdNotFoundException(source);
+        throw new AttributeNotFoundException(source, ID_ATTRIBUTE);
     }
 
-    private String getType(Element source) throws TypeNotFoundException {
+    private String getType(Element source) {
         for (int i = 0; i < source.getAttributeCount(); i++) {
             if (source.getAttribute(i).getLocalName().equals(TYPE_ATTRIBUTE)) {
                 return source.getAttribute(i).getValue();
             }
         }
-        throw new TypeNotFoundException(source);
+        throw new AttributeNotFoundException(source, TYPE_ATTRIBUTE);
     }
 }

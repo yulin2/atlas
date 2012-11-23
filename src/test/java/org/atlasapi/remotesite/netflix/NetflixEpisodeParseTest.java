@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Set;
@@ -17,20 +16,21 @@ import nu.xom.Element;
 import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Version;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.metabroadcast.common.intl.Countries;
 
 public class NetflixEpisodeParseTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testBrandParsing() {
+    public void testEpisodeParsing() {
         Document netflixData;
         try {
             netflixData = new Builder().build(new ClassPathResource("netflix-episode.xml").getInputStream());
@@ -42,27 +42,34 @@ public class NetflixEpisodeParseTest {
         
         Element rootElement = netflixData.getRootElement();
         
-        NetflixContentExtractor<Episode> episodeExtractor = new NetflixEpisodeExtractor();        
-        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), episodeExtractor, Mockito.mock(NetflixContentExtractor.class));
+        NetflixContentExtractor<Episode> episodeExtractor = new NetflixEpisodeExtractor();
+        NetflixContentExtractor<Series> seriesExtractor = new NetflixSeriesExtractor();
+        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), episodeExtractor, seriesExtractor);
 
-        Set<Content> contents = Sets.newHashSet();
-        for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-            contents = Sets.union(contents, extractor.extract(rootElement.getChildElements().get(i)));
-        }
+        assertThat(rootElement.getChildElements().size(), is(1));
+        
+        Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
+        
         assertFalse(contents.isEmpty());
         assertThat(contents.size(), is(2));
         
-        // check that it is a Episode
-        Content content = contents.iterator().next();
-        assertTrue(content instanceof Episode);
-        Episode episode = (Episode) content;
+        Episode episode = null;
+        for (Content content : contents) {
+            if (content instanceof Episode) {
+                episode = (Episode) content;
+                break;
+            }
+        }
+        
+        // check that an Episode was in the contents list
+        assertFalse(episode == null);
         
         // check contents of item
         assertThat(episode.getCanonicalUri(), equalTo("http://gb.netflix.com/episodes/70151113"));
         assertThat(episode.getTitle(), equalTo("Orientation"));
         assertThat(episode.getDescription(), equalTo("Recent events have all the heroes looking for answers. " +
         		"Claire tries to start over at college, but she hits a snag."));
-        assertThat(episode.getYear(), equalTo(2006));
+        assertThat(episode.getYear(), equalTo(2009));
 
         assertThat(episode.getGenres().size(), is(6));
         assertEquals(episode.getGenres(), ImmutableSet.of(
@@ -90,7 +97,8 @@ public class NetflixEpisodeParseTest {
             assertThat(version.getDuration(), equalTo(2608));
         }
         
-        // TODO Container and SeriesSummary
+        assertEquals(episode.getSeriesRef(), new ParentRef("http://gb.netflix.com/seasons/70136130-4"));
+        assertEquals(episode.getContainer(), new ParentRef("http://gb.netflix.com/shows/70136130"));
 
         assertThat(episode.getSeriesNumber(), is(4));
         assertThat(episode.getEpisodeNumber(), is(1));
@@ -99,7 +107,7 @@ public class NetflixEpisodeParseTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testBrandParsingNoLongSynopsis() {
+    public void testEpisodeParsingNoLongSynopsis() {
         Document netflixData;
         try {
             netflixData = new Builder().build(new ClassPathResource("netflix-episode-short-synopsis.xml").getInputStream());
@@ -111,20 +119,27 @@ public class NetflixEpisodeParseTest {
         
         Element rootElement = netflixData.getRootElement();
         
-        NetflixContentExtractor<Episode> episodeExtractor = new NetflixEpisodeExtractor();        
-        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), episodeExtractor, Mockito.mock(NetflixContentExtractor.class));
+        NetflixContentExtractor<Episode> episodeExtractor = new NetflixEpisodeExtractor(); 
+        NetflixContentExtractor<Series> seriesExtractor = new NetflixSeriesExtractor();       
+        NetflixXmlElementContentExtractor extractor = new NetflixXmlElementContentExtractor(Mockito.mock(NetflixContentExtractor.class), Mockito.mock(NetflixContentExtractor.class), episodeExtractor, seriesExtractor);
 
-        Set<Content> contents = Sets.newHashSet();
-        for (int i = 0; i < rootElement.getChildElements().size(); i++) {
-            contents = Sets.union(contents, extractor.extract(rootElement.getChildElements().get(i)));
-        }
+        assertThat(rootElement.getChildElements().size(), is(1));
+        
+        Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
+        
         assertFalse(contents.isEmpty());
         assertThat(contents.size(), is(2));
         
-        // check that it is a Episode
-        Content content = contents.iterator().next();
-        assertTrue(content instanceof Episode);
-        Episode episode = (Episode) content;
+        Episode episode = null;
+        for (Content content : contents) {
+            if (content instanceof Episode) {
+                episode = (Episode) content;
+                break;
+            }
+        }
+        
+        // check that an Episode was in the contents list
+        assertFalse(episode == null);
         
         // check contents of item
         assertThat(episode.getDescription(), equalTo("Recent events have all the heroes looking for answers. " +

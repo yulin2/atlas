@@ -50,8 +50,8 @@ public abstract class NetflixContentExtractor<T extends Content> {
     
     abstract Set<T> extract(Element source, int id);
 
-    int getSeriesNumber(Element filmElement) throws ElementNotFoundException {
-        Element showElement = filmElement.getFirstChildElement(SHOW_KEY);
+    int getSeriesNumber(Element contentElement) {
+        Element showElement = contentElement.getFirstChildElement(SHOW_KEY);
         if (showElement != null) {
             Element seasonNumberElement = showElement.getFirstChildElement(SEASON_NUMBER_KEY);
             if (seasonNumberElement != null) {
@@ -59,11 +59,11 @@ public abstract class NetflixContentExtractor<T extends Content> {
             }
             throw new ElementNotFoundException(showElement, SEASON_NUMBER_KEY );
         }
-        throw new ElementNotFoundException(filmElement, SHOW_KEY);
+        throw new ElementNotFoundException(contentElement, SHOW_KEY);
     }
 
-    int getEpisodeNumber(Element filmElement) throws ElementNotFoundException {
-        Element showElement = filmElement.getFirstChildElement(SHOW_KEY);
+    int getEpisodeNumber(Element contentElement) {
+        Element showElement = contentElement.getFirstChildElement(SHOW_KEY);
         if (showElement != null) {
             Element episodeNumberElement = showElement.getFirstChildElement(EPISODE_NUMBER_KEY );
             if (episodeNumberElement != null) {
@@ -71,11 +71,11 @@ public abstract class NetflixContentExtractor<T extends Content> {
             }
             throw new ElementNotFoundException(showElement, EPISODE_NUMBER_KEY);
         }
-        throw new ElementNotFoundException(filmElement, SHOW_KEY);
+        throw new ElementNotFoundException(contentElement, SHOW_KEY);
     }
 
-    Set<Certificate> getCertificates(Element filmElement) throws ElementNotFoundException, AttributeNotFoundException {
-        Element parentalAdvisories = filmElement.getFirstChildElement(PARENTAL_ADVISORIES_KEY);
+    Set<Certificate> getCertificates(Element contentElement) {
+        Element parentalAdvisories = contentElement.getFirstChildElement(PARENTAL_ADVISORIES_KEY);
         if (parentalAdvisories != null) {
             Set<Certificate> certificates =  Sets.newHashSet();
             for (int i = 0; i < parentalAdvisories.getChildElements().size(); i++) {
@@ -87,10 +87,10 @@ public abstract class NetflixContentExtractor<T extends Content> {
             }
             return certificates;
         }
-        throw new ElementNotFoundException(filmElement, PARENTAL_ADVISORIES_KEY);
+        throw new ElementNotFoundException(contentElement, PARENTAL_ADVISORIES_KEY);
     }
 
-    private String advisorySystem(Element parentalAdvisory) throws AttributeNotFoundException {
+    private String advisorySystem(Element parentalAdvisory) {
         for (int i = 0; i < parentalAdvisory.getAttributeCount(); i++) {
             if (parentalAdvisory.getAttribute(i).getLocalName().equals(SYSTEM_ATTRIBUTE)) {
                 return parentalAdvisory.getAttribute(i).getValue();
@@ -99,36 +99,36 @@ public abstract class NetflixContentExtractor<T extends Content> {
         throw new AttributeNotFoundException(parentalAdvisory, SYSTEM_ATTRIBUTE);
     }
 
-    String getTitle(Element filmElement) throws ElementNotFoundException {
-        Element titleElement = filmElement.getFirstChildElement(TITLE_KEY);
+    String getTitle(Element contentElement) {
+        Element titleElement = contentElement.getFirstChildElement(TITLE_KEY);
         if (titleElement != null) {
             return titleElement.getValue();
         }
-        throw new ElementNotFoundException(filmElement, TITLE_KEY);
+        throw new ElementNotFoundException(contentElement, TITLE_KEY);
     }
 
-    int getYear(Element filmElement) throws ElementNotFoundException {
-        Element yearElement = filmElement.getFirstChildElement(RELEASE_YEAR_KEY);
+    int getYear(Element contentElement) {
+        Element yearElement = contentElement.getFirstChildElement(RELEASE_YEAR_KEY);
         if (yearElement != null) {
             return Integer.parseInt(yearElement.getValue());
         }
-        throw new ElementNotFoundException(filmElement, RELEASE_YEAR_KEY);
+        throw new ElementNotFoundException(contentElement, RELEASE_YEAR_KEY);
     }
 
-    String getDescription(Element filmElement) throws ElementNotFoundException {
-        Element synopsisElement = filmElement.getFirstChildElement(LONG_SYNOPSIS_KEY);
+    String getDescription(Element contentElement) {
+        Element synopsisElement = contentElement.getFirstChildElement(LONG_SYNOPSIS_KEY);
         if (synopsisElement != null) {
             return synopsisElement.getValue();
         }
         //fall back to short_synopsis
-        Element shortSynopsisElement = filmElement.getFirstChildElement(SHORT_SYNOPSIS_KEY);
+        Element shortSynopsisElement = contentElement.getFirstChildElement(SHORT_SYNOPSIS_KEY);
         if (shortSynopsisElement != null) {
             return shortSynopsisElement.getValue();
         }
-        throw new ElementNotFoundException(filmElement, SHORT_SYNOPSIS_KEY);
+        throw new ElementNotFoundException(contentElement, SHORT_SYNOPSIS_KEY);
     }
 
-    Iterable<String> getGenres(Element contentElement) throws ElementNotFoundException {
+    Iterable<String> getGenres(Element contentElement) {
         Element genresElement = contentElement.getFirstChildElement(GENRES_KEY);
         if (genresElement != null) {
             Set<String> genres = Sets.newHashSet();
@@ -143,7 +143,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
         throw new ElementNotFoundException(contentElement, GENRES_KEY);
     }
     
-    List<CrewMember> getPeople(Element contentElement) throws ElementNotFoundException, IdNotFoundException {
+    List<CrewMember> getPeople(Element contentElement) {
         Element peopleElement = contentElement.getFirstChildElement(PEOPLE_KEY);
         if (peopleElement != null) {
             List<CrewMember> people = Lists.newArrayList();
@@ -165,39 +165,47 @@ public abstract class NetflixContentExtractor<T extends Content> {
         throw new ElementNotFoundException(contentElement, PEOPLE_KEY);
     }
 
-    private String getType(Element source) throws IdNotFoundException {
-        for (int i = 0; i < source.getAttributeCount(); i++) {
-            if (source.getAttribute(i).getLocalName().equals(TYPE_ATTRIBUTE)) {
-                return source.getAttribute(i).getValue();
+    private String getType(Element contentElement) {
+        for (int i = 0; i < contentElement.getAttributeCount(); i++) {
+            if (contentElement.getAttribute(i).getLocalName().equals(TYPE_ATTRIBUTE)) {
+                return contentElement.getAttribute(i).getValue();
             }
         }
-        throw new IdNotFoundException(source);
+        throw new AttributeNotFoundException(contentElement, TYPE_ATTRIBUTE);
     }
 
-    Version getVersion(Element filmElement) throws ElementNotFoundException {
-        Element durationElement = filmElement.getFirstChildElement(DURATION_KEY);
+    Version getVersion(Element contentElement) {
+        Element durationElement = contentElement.getFirstChildElement(DURATION_KEY);
         if (durationElement != null) {
             Version version = new Version();
             version.setDuration(Duration.standardSeconds(Integer.parseInt(durationElement.getValue())));
             return version;
         }
-        throw new ElementNotFoundException(filmElement, DURATION_KEY);
+        throw new ElementNotFoundException(contentElement, DURATION_KEY);
     }
 
-    private int getId(Element source) throws IdNotFoundException {
-        for (int i = 0; i < source.getAttributeCount(); i++) {
-            if (source.getAttribute(i).getLocalName().equals(ID_ATTRIBUTE)) {
-                return Integer.parseInt(source.getAttribute(i).getValue());
+    int getId(Element contentElement) {
+        for (int i = 0; i < contentElement.getAttributeCount(); i++) {
+            if (contentElement.getAttribute(i).getLocalName().equals(ID_ATTRIBUTE)) {
+                return Integer.parseInt(contentElement.getAttribute(i).getValue());
             }
         }
-        throw new IdNotFoundException(source);
+        throw new AttributeNotFoundException(contentElement, ID_ATTRIBUTE);
     }
 
-    String getAlias(Element filmElement) throws ElementNotFoundException {
+    String getAlias(Element filmElement) {
         Element urlElement = filmElement.getFirstChildElement(URL_KEY);
         if (urlElement != null) {
             return urlElement.getValue();
         }
         throw new ElementNotFoundException(filmElement, URL_KEY);
+    }
+    
+    int getShowId(Element episodeElement) {
+        Element showElement = episodeElement.getFirstChildElement(NetflixContentExtractor.SHOW_KEY);
+        if (showElement != null) {
+            return getId(showElement);
+        }
+        throw new ElementNotFoundException(episodeElement, NetflixContentExtractor.SHOW_KEY);
     }
 }

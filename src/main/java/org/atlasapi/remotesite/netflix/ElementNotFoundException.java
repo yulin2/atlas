@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.netflix;
 
 import nu.xom.Element;
 
-public class ElementNotFoundException extends Exception {
+public class ElementNotFoundException extends RuntimeException {
     /**
      * 
      */
