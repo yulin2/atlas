@@ -15,8 +15,10 @@ public class NetflixUpdater extends ScheduledTask {
     private final NetflixXmlElementHandler elementHandler;
     private final NetflixDataStore dataStore;
     private static final Logger log = LoggerFactory.getLogger(NetflixUpdater.class);
+    private final NetflixFileUpdater fileUpdater;
     
-    public NetflixUpdater(NetflixXmlElementHandler elementHandler, NetflixDataStore store) {
+    public NetflixUpdater(NetflixFileUpdater fileUpdater, NetflixXmlElementHandler elementHandler, NetflixDataStore store) {
+        this.fileUpdater = fileUpdater;
         this.elementHandler = elementHandler;
         this.dataStore = store;
     }
@@ -24,6 +26,7 @@ public class NetflixUpdater extends ScheduledTask {
     @Override
     protected void runTask() {
         try {
+            fileUpdater.updateFile();
             Document netflixData = dataStore.getData();
             
             Element rootElement = netflixData.getRootElement();
@@ -47,7 +50,7 @@ public class NetflixUpdater extends ScheduledTask {
         }
     }
     
-    private NetflixDataProcessor<UpdateProgress> processor() {
+    NetflixDataProcessor<UpdateProgress> processor() {
         return new NetflixDataProcessor<UpdateProgress>() {
             
             UpdateProgress progress = UpdateProgress.START;
