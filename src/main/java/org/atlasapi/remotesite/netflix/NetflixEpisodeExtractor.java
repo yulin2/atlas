@@ -12,6 +12,8 @@ import com.google.common.collect.ImmutableSet;
 public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
     
     private static final String EPISODE_URL_PREFIX = "http://gb.netflix.com/episodes/";
+    private static final String LOCATIONS_URL_PREFIX = "http://movies.netflix.com/WiPlayer?movieid=";
+    private static final String EPISODE_PARAM = "&EpisodeMovieId=";
 
     @Override
     Set<Episode> extract(Element source, int id) {
@@ -21,7 +23,7 @@ public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
 
         episode.setTitle(getTitle(source));
         episode.setDescription(getDescription(source));
-        episode.addVersion(getVersion(source));
+        episode.addVersion(getVersion(source, getEncoding(LOCATIONS_URL_PREFIX + getShowId(source) + EPISODE_PARAM + id)));
         episode.setYear(getYear(source));
         episode.setGenres(getGenres(source));
         episode.setCertificates(getCertificates(source));
@@ -30,6 +32,7 @@ public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
         episode.setSeriesRef(getSeriesRef(source));
         episode.setEpisodeNumber(getEpisodeNumber(source));
         episode.setSeriesNumber(getSeriesNumber(source));
+        episode.setPublisher(getPublisher());
 
         return ImmutableSet.<Episode>builder().add(episode).build();
     }

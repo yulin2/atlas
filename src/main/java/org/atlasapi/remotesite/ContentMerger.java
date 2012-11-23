@@ -12,12 +12,13 @@ public class ContentMerger {
     public static Item merge(Item current, Item extracted) {
         current = mergeContents(current, extracted);
         current.setParentRef(extracted.getContainer());
+        current.setVersions(extracted.getVersions());
         if (current instanceof Episode && extracted instanceof Episode) {
             Episode currentEp = (Episode) current;
             Episode extractedEp = (Episode) extracted;
             currentEp.setEpisodeNumber(extractedEp.getEpisodeNumber());
             currentEp.setSeriesRef(extractedEp.getSeriesRef());
-        }
+        }        
         return current;
     }
 
@@ -31,7 +32,9 @@ public class ContentMerger {
     }
 
     private static <C extends Content> C mergeContents(C current, C extracted) {
+        current.setAliases(extracted.getAliases());
         current.setTitle(extracted.getTitle());
+        current.setDescription(extracted.getDescription());
         current.setImage(extracted.getImage());
         current.setYear(extracted.getYear());
         current.setGenres(extracted.getGenres());

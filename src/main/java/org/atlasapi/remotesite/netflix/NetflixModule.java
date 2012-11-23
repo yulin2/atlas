@@ -19,7 +19,6 @@ import org.atlasapi.s3.DefaultS3Client;
 import org.atlasapi.s3.S3Client;
 import org.joda.time.LocalTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.properties.Configurer;
@@ -46,7 +45,6 @@ public class NetflixModule {
         scheduler.schedule(netflixUpdater().withName("Netflix Updater"), DAILY);
     }
 
-    @Bean
     private NetflixUpdater netflixUpdater() {
         int timeout = Configurer.get("netflix.connectionTimeout").toInt();
         String netflixConsumerKey = Configurer.get("netflix.consumerKey").get();

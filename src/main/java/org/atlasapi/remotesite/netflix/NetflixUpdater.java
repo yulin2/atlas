@@ -31,18 +31,16 @@ public class NetflixUpdater extends ScheduledTask {
             
             Element rootElement = netflixData.getRootElement();
             NetflixDataProcessor<UpdateProgress> processor = processor();
-            UpdateProgress progress = processor.getResult();
             
             elementHandler.prepare();
 
-            for (int i = 0; i < rootElement.getChildCount(); i++) {
+            for (int i = 0; i < rootElement.getChildElements().size(); i++) {
                 processor.process(rootElement.getChildElements().get(i));
-                progress = progress.reduce(processor.getResult());
             }
             
             elementHandler.finish();
             
-            reportStatus(progress.toString());
+            reportStatus(processor.getResult().toString());
             
         } catch (Exception e) {
             reportStatus(e.getMessage());

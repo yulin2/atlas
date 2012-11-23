@@ -7,17 +7,23 @@ import java.util.Set;
 import nu.xom.Element;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
-import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.CrewMember.Role;
+import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.Location;
+import org.atlasapi.media.entity.Policy;
+import org.atlasapi.media.entity.Policy.RevenueContract;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.Version;
 import org.joda.time.Duration;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.inject.internal.ImmutableMap;
-import com.google.inject.internal.Lists;
 import com.metabroadcast.common.intl.Countries;
 
 public abstract class NetflixContentExtractor<T extends Content> {
@@ -49,6 +55,10 @@ public abstract class NetflixContentExtractor<T extends Content> {
             .build();
     
     abstract Set<T> extract(Element source, int id);
+    
+    Publisher getPublisher() {
+        return Publisher.NETFLIX;
+    }
 
     int getSeriesNumber(Element contentElement) {
         Element showElement = contentElement.getFirstChildElement(SHOW_KEY);
@@ -152,6 +162,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
                 CrewMember person = new CrewMember();
                 person.setCanonicalUri(PEOPLE_URL_PREFIX + getId(personElement));
                 person.withRole(TYPE_ROLE_MAPPING.get(getType(personElement)));
+                person.withPublisher(getPublisher());
 
                 Element nameElement = personElement.getFirstChildElement(NAME_KEY);
                 if (nameElement == null) {
@@ -174,12 +185,18 @@ public abstract class NetflixContentExtractor<T extends Content> {
         throw new AttributeNotFoundException(contentElement, TYPE_ATTRIBUTE);
     }
 
-    Version getVersion(Element contentElement) {
+    Version getVersion(Element contentElement, Encoding encoding) {
+        Version version = new Version();
+        version.setManifestedAs(Sets.newHashSet(encoding));
+        version.setDuration(getDuration(contentElement));
+        version.setPublishedDuration((int)getDuration(contentElement).getStandardSeconds());
+        return version;
+    }
+    
+    private Duration getDuration(Element contentElement) {
         Element durationElement = contentElement.getFirstChildElement(DURATION_KEY);
         if (durationElement != null) {
-            Version version = new Version();
-            version.setDuration(Duration.standardSeconds(Integer.parseInt(durationElement.getValue())));
-            return version;
+            return Duration.standardSeconds(Integer.parseInt(durationElement.getValue()));
         }
         throw new ElementNotFoundException(contentElement, DURATION_KEY);
     }
@@ -201,11 +218,27 @@ public abstract class NetflixContentExtractor<T extends Content> {
         throw new ElementNotFoundException(filmElement, URL_KEY);
     }
     
-    int getShowId(Element episodeElement) {
-        Element showElement = episodeElement.getFirstChildElement(NetflixContentExtractor.SHOW_KEY);
+    int getShowId(Element contentElement) {
+        Element showElement = contentElement.getFirstChildElement(NetflixContentExtractor.SHOW_KEY);
         if (showElement != null) {
             return getId(showElement);
         }
-        throw new ElementNotFoundException(episodeElement, NetflixContentExtractor.SHOW_KEY);
+        throw new ElementNotFoundException(contentElement, NetflixContentExtractor.SHOW_KEY);
+    }
+    
+    Encoding getEncoding(String uri) {
+        Policy policy = new Policy();
+        policy.setAvailableCountries(Sets.newHashSet(Countries.GB));
+        policy.setRevenueContract(RevenueContract.SUBSCRIPTION);
+
+        Location location = new Location();
+        location.setPolicy(policy);
+        location.setTransportType(TransportType.LINK);
+        location.setCanonicalUri(uri);
+        
+        Encoding encoding = new Encoding();
+        encoding.setAvailableAt(Sets.newHashSet(location));
+        
+        return encoding;
     }
 }

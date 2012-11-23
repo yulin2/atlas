@@ -40,7 +40,7 @@ public class DefaultNetflixFileStore implements NetflixDataStore {
             File localFile = new File(localFolder, netflixFileName);
             fos = new FileOutputStream(localFile);
             IOUtils.copy(dataStream, fos);
-            s3client.put(netflixFileName, localFile);
+            //s3client.put(netflixFileName, localFile);
         } finally {
             if (fos != null) {
                 fos.close();

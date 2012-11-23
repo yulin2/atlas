@@ -20,6 +20,7 @@ public class NetflixSeriesExtractor extends NetflixContentExtractor<Series> {
 
         series.setTitle(getTitle(source));
         series.withSeriesNumber(getSeriesNumber(source));
+        series.setPublisher(getPublisher());
 
         return ImmutableSet.<Series>builder().add(series).build();
     }
