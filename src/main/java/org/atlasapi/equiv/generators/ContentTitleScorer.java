@@ -37,6 +37,9 @@ public final class ContentTitleScorer<T extends Content> {
      * @return score representing how closely candidate's title matches subject's title.
      */
     public Score score(Content subject, Content candidate, ResultDescription desc) {
+        if (subject.getTitle() == null || candidate.getTitle() == null) {
+            return Score.NULL_SCORE;
+        }
         String subjectTitle = sanitize(subject.getTitle());
         String contentTitle = sanitize(candidate.getTitle());
         double score = score(subjectTitle, contentTitle);
