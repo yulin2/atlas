@@ -219,6 +219,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
                 T top = topImageMatches.get(0);
                 chosen.setImage(top.getImage());
                 chosen.setThumbnail(top.getThumbnail());
+                chosen.setImages(top.getImages());
             }
         }
     }
