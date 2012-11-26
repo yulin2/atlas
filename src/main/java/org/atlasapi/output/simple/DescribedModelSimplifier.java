@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
+import org.atlasapi.media.entity.simple.Descriptions;
 import org.atlasapi.output.Annotation;
 
 import com.google.common.collect.ImmutableSet;
@@ -27,6 +28,13 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             
             simpleDescription.setTitle(content.getTitle());
             simpleDescription.setDescription(content.getDescription());
+            if (content.getSynopses() != null) {
+                Descriptions descriptions = new Descriptions();
+                descriptions.setShortDescription(content.getSynopses().getShortDescription());
+                descriptions.setMediumDescription(content.getSynopses().getMediumDescription());
+                descriptions.setLongDescription(content.getSynopses().getLongDescription());
+                simpleDescription.setDescriptions(descriptions);
+            }
             
             simpleDescription.setImage(content.getImage());
             simpleDescription.setImages(toImages(content.getImages()));
