@@ -94,7 +94,6 @@ public class PaModule {
         PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
         PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore, paScheduleVersionStore());
         return updater;
-        return null;
     }
     
     @Bean BroadcastTrimmer broadcastTrimmer() {
