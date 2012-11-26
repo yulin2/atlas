@@ -21,10 +21,11 @@ import static org.atlasapi.media.entity.Publisher.BBC_REDUX;
 import static org.atlasapi.media.entity.Publisher.FACEBOOK;
 import static org.atlasapi.media.entity.Publisher.ITUNES;
 import static org.atlasapi.media.entity.Publisher.LOVEFILM;
-import static org.atlasapi.media.entity.Publisher.NETFLIX;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
+import static org.atlasapi.media.entity.Publisher.NETFLIX;
+import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.persistence.lookup.TransitiveLookupWriter.generatedTransitiveLookupWriter;
 
 import java.io.File;

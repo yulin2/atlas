@@ -10,6 +10,7 @@ import static org.atlasapi.media.entity.Publisher.LOVEFILM;
 import static org.atlasapi.media.entity.Publisher.NETFLIX;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
+import static org.atlasapi.media.entity.Publisher.NETFLIX;
 
 import java.util.Set;
 
