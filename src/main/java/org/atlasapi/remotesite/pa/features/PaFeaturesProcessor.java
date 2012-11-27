@@ -3,6 +3,7 @@ package org.atlasapi.remotesite.pa.features;
 import java.util.Map;
 
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
@@ -41,6 +42,7 @@ public class PaFeaturesProcessor {
         ResolvedContent resolvedContent = contentGroupResolver.findByCanonicalUris(ImmutableList.of(CONTENT_GROUP_URI));
         if (resolvedContent.get(CONTENT_GROUP_URI).hasValue()) {
             contentGroup = (ContentGroup) resolvedContent.get(CONTENT_GROUP_URI).requireValue();
+            contentGroup.setContents(ImmutableList.<ChildRef>of());
         } else {
             contentGroup = new ContentGroup(CONTENT_GROUP_URI, Publisher.PA_FEATURES);
         }
