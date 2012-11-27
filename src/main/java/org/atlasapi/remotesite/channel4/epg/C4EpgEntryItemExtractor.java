@@ -15,6 +15,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.Policy.RevenueContract;
+import org.atlasapi.query.content.PerPublisherCurieExpander;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.channel4.C4AtomApi;
 import org.atlasapi.remotesite.channel4.epg.model.C4EpgEntry;
@@ -55,7 +56,7 @@ public class C4EpgEntryItemExtractor implements ContentExtractor<C4EpgEntryItemS
         item.setLastUpdated(now);
         
         item.setCanonicalUri(uriExtractor.uriForItemId(entry));
-        item.setCurie(C4AtomApi.PROGRAMMES_BASE + entry.programmeId());
+        item.setCurie(PerPublisherCurieExpander.CurieAlgorithm.C4.compact(C4AtomApi.PROGRAMMES_BASE + entry.programmeId()));
         item.setPublisher(Publisher.C4);
         
         item.setTitle(entry.title());
