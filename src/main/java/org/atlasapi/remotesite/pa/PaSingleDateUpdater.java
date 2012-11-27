@@ -26,7 +26,7 @@ public class PaSingleDateUpdater extends PaBaseProgrammeUpdater {
     @Override
     public void runTask() {
     	final String filenameContains = dateString + "_tvdata";
-        processFiles(fileManager.localFiles(new Predicate<File>() {
+        processFiles(fileManager.localTvDataFiles(new Predicate<File>() {
             @Override
             public boolean apply(File input) {
                 return input.getName().contains(filenameContains);

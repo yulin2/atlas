@@ -46,17 +46,32 @@
                 <version>0.8.1</version>
                 <executions>
                     <execution>
+                        <id>generate-tv-listings-schema</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <generatePackage>org.atlasapi.remotesite.pa.listings.bindings</generatePackage>
+                            <schemaIncludes>
+                                <schemaInclude>TVListings.dtd</schemaInclude>
+                            </schemaIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/pa-listings</generateDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-features-schema</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatePackage>org.atlasapi.remotesite.pa.features.bindings</generatePackage>
+                            <schemaIncludes>
+                                <schemaInclude>features.dtd</schemaInclude>
+                            </schemaIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/pa-features</generateDirectory>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <generatePackage>org.atlasapi.remotesite.pa.bindings</generatePackage>
-                    <schemaIncludes>
-                        <schemaInclude>TVListings.dtd</schemaInclude>
-                    </schemaIncludes>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

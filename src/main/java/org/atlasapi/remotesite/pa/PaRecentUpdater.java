@@ -29,7 +29,7 @@ public class PaRecentUpdater extends PaBaseProgrammeUpdater implements Runnable 
     @Override
     public void runTask() {
         final Long since = new DateTime(DateTimeZones.UTC).minusDays(10).getMillis();
-        this.processFiles(fileManager.localFiles(new Predicate<File>() {
+        this.processFiles(fileManager.localTvDataFiles(new Predicate<File>() {
             @Override
             public boolean apply(File input) {
                 Maybe<FileUploadResult> result = fileUploadResultStore.latestResultFor(SERVICE, input.getName());

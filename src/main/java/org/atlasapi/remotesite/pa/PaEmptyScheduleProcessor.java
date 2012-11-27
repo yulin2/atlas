@@ -8,7 +8,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.ScheduleResolver;
-import org.atlasapi.remotesite.pa.bindings.ProgData;
+import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
