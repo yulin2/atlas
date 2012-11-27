@@ -26,10 +26,17 @@ import com.metabroadcast.common.base.Maybe;
 public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
 
     private static final String TV_LISTINGS_DTD = "TVListings.dtd";
-    private static final FilenameFilter filenameFilter = new FilenameFilter() {
+    private static final String FEATURES_DTD = "features.dtd";
+    private static final FilenameFilter tvDataFilenameFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
             return name.endsWith("_tvdata.xml");
+        }
+    };
+    private static final FilenameFilter featuresFilenameFilter = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith("_features.xml");
         }
     };
     private static final String PROCESSING_DIR = "/processing";
@@ -57,19 +64,24 @@ public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
             throw new IllegalArgumentException("Processing folder is not a directory: " + localFilesPath + PROCESSING_DIR);
         }
         
-        File tvListings = new File(localFolder, TV_LISTINGS_DTD);
-        if (! tvListings.exists()) {
+        loadDtdFile(TV_LISTINGS_DTD);
+        loadDtdFile(FEATURES_DTD);
+    }
+    
+    private void loadDtdFile(String dtdFileName) {
+        File dtdFile = new File(localFolder, dtdFileName);
+        if (! dtdFile.exists()) {
             InputStream resourceAsStream = null;
             try {
-                resourceAsStream = DefaultPaProgrammeDataStore.class.getClassLoader().getResourceAsStream(TV_LISTINGS_DTD);
+                resourceAsStream = DefaultPaProgrammeDataStore.class.getClassLoader().getResourceAsStream(dtdFileName);
             } catch (NullPointerException e) {
-                resourceAsStream = DefaultPaProgrammeDataStore.class.getClassLoader().getParent().getResourceAsStream(TV_LISTINGS_DTD);
+                resourceAsStream = DefaultPaProgrammeDataStore.class.getClassLoader().getParent().getResourceAsStream(dtdFileName);
             }
             
             if (resourceAsStream != null) {
                 FileOutputStream fos = null;
                 try {
-                    fos = new FileOutputStream(tvListings);
+                    fos = new FileOutputStream(dtdFile);
                     IOUtils.copy(resourceAsStream, fos);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -85,9 +97,9 @@ public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
             }
         }
         
-        if (tvListings.exists()) {
+        if (dtdFile.exists()) {
             try {
-                FileUtils.copyFileToDirectory(tvListings, processingFolder);
+                FileUtils.copyFileToDirectory(dtdFile, processingFolder);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -125,9 +137,15 @@ public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
     }
 
     @Override
-    public List<File> localFiles(Predicate<File> filter) {
+    public List<File> localTvDataFiles(Predicate<File> filter) {
         Predicate<File> fileFilter = filter == null ? Predicates.<File> alwaysTrue() : filter;
-        return FILE_NAME_ORDER.immutableSortedCopy(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(filenameFilter)), fileFilter));
+        return FILE_NAME_ORDER.immutableSortedCopy(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(tvDataFilenameFilter)), fileFilter));
+    }
+
+    @Override
+    public List<File> localFeaturesFiles(Predicate<File> filter) {
+        Predicate<File> fileFilter = filter == null ? Predicates.<File> alwaysTrue() : filter;
+        return FILE_NAME_ORDER.immutableSortedCopy(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(featuresFilenameFilter)), fileFilter));
     }
     
     private final Ordering<File> FILE_NAME_ORDER = new Ordering<File>() {
