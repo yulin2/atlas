@@ -99,7 +99,8 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
                         topic, 
                         input.getWeighting(),
                         input.isSupervised(), 
-                        Relationship.fromString(input.getRelationship()).orNull()
+                        Relationship.fromString(input.getRelationship()).orNull(),
+                        input.getOffset()
                     );
                 } else {
                     throw new IllegalStateException(
