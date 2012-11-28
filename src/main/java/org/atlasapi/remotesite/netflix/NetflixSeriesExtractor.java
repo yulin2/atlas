@@ -5,6 +5,7 @@ import java.util.Set;
 import nu.xom.Element;
 
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -21,8 +22,9 @@ public class NetflixSeriesExtractor extends NetflixContentExtractor<Series> {
         series.setTitle(getTitle(source));
         series.withSeriesNumber(getSeriesNumber(source));
         series.setPublisher(getPublisher());
+        series.setSpecialization(Specialization.TV);
 
-        return ImmutableSet.<Series>builder().add(series).build();
+        return ImmutableSet.of(series);
     }
 
     String getTitle(Element filmElement) throws ElementNotFoundException {

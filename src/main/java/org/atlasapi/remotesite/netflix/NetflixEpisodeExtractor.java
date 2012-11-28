@@ -6,14 +6,14 @@ import nu.xom.Element;
 
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Specialization;
 
 import com.google.common.collect.ImmutableSet;
 
 public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
     
     private static final String EPISODE_URL_PREFIX = "http://gb.netflix.com/episodes/";
-    private static final String LOCATIONS_URL_PREFIX = "http://movies.netflix.com/WiPlayer?movieid=";
-    private static final String EPISODE_PARAM = "&EpisodeMovieId=";
+    private static final String LOCATIONS_URL_PREFIX = "http://movies.netflix.com/movie/";
 
     @Override
     Set<Episode> extract(Element source, int id) {
@@ -23,7 +23,7 @@ public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
 
         episode.setTitle(getTitle(source));
         episode.setDescription(getDescription(source));
-        episode.addVersion(getVersion(source, getEncoding(LOCATIONS_URL_PREFIX + getShowId(source) + EPISODE_PARAM + id)));
+        episode.addVersion(getVersion(source, getEncoding(LOCATIONS_URL_PREFIX + id)));
         episode.setYear(getYear(source));
         episode.setGenres(getGenres(source));
         episode.setCertificates(getCertificates(source));
@@ -33,8 +33,9 @@ public class NetflixEpisodeExtractor extends NetflixContentExtractor<Episode> {
         episode.setEpisodeNumber(getEpisodeNumber(source));
         episode.setSeriesNumber(getSeriesNumber(source));
         episode.setPublisher(getPublisher());
+        episode.setSpecialization(Specialization.TV);
 
-        return ImmutableSet.<Episode>builder().add(episode).build();
+        return ImmutableSet.of(episode);
     }
 
     private ParentRef getParentRef(Element episodeElement) {
