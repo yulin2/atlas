@@ -21,6 +21,7 @@ import org.atlasapi.media.entity.Version;
 import org.joda.time.Duration;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -68,7 +69,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
         
         Element seasonNumberElement = showElement.getFirstChildElement(SEASON_NUMBER_KEY);
         if (seasonNumberElement == null) {
-            throw new ElementNotFoundException(showElement, SEASON_NUMBER_KEY );
+            throw new ElementNotFoundException(showElement, SEASON_NUMBER_KEY);
         }
         
         return Integer.parseInt(seasonNumberElement.getValue());
@@ -80,7 +81,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
             throw new ElementNotFoundException(contentElement, SHOW_KEY);
         }
         
-        Element episodeNumberElement = showElement.getFirstChildElement(EPISODE_NUMBER_KEY );
+        Element episodeNumberElement = showElement.getFirstChildElement(EPISODE_NUMBER_KEY);
         if (episodeNumberElement == null) {
             throw new ElementNotFoundException(showElement, EPISODE_NUMBER_KEY);
         }
@@ -146,7 +147,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
     Iterable<String> getGenres(Element contentElement) {
         Element genresElement = contentElement.getFirstChildElement(GENRES_KEY);
         if (genresElement == null) {
-            throw new ElementNotFoundException(contentElement, GENRES_KEY);
+            return ImmutableList.of();
         }
         
         Set<String> genres = Sets.newHashSet();
@@ -162,7 +163,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
     List<CrewMember> getPeople(Element contentElement) {
         Element peopleElement = contentElement.getFirstChildElement(PEOPLE_KEY);
         if (peopleElement == null) {
-            throw new ElementNotFoundException(contentElement, PEOPLE_KEY);
+            return ImmutableList.of();
         }
         
         List<CrewMember> people = Lists.newArrayList();
