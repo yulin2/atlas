@@ -13,6 +13,7 @@ import nu.xom.Element;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
@@ -41,7 +42,6 @@ public class NetflixSeriesParseTest {
         
         Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
         
-        assertFalse(contents.isEmpty());
         assertThat(contents.size(), is(2));
         
         Series series= null;
@@ -58,6 +58,8 @@ public class NetflixSeriesParseTest {
         assertThat(series.getCanonicalUri(), equalTo("http://gb.netflix.com/seasons/70136130-4"));
         assertThat(series.getTitle(), equalTo("Season 4"));
         assertThat(series.getSeriesNumber(), is(4));
+
+        assertEquals(series.getSpecialization(), Specialization.TV);
     }
 
 }

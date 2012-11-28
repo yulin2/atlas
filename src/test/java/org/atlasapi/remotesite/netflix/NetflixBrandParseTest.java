@@ -3,9 +3,7 @@ package org.atlasapi.remotesite.netflix;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Set;
@@ -19,12 +17,14 @@ import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.CrewMember.Role;
+import org.atlasapi.media.entity.Specialization;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.intl.Countries;
 
 public class NetflixBrandParseTest {
@@ -49,12 +49,8 @@ public class NetflixBrandParseTest {
         assertThat(rootElement.getChildElements().size(), is(1));
         
         Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
-        assertFalse(contents.isEmpty());
-        assertThat(contents.size(), is(1));
         
-        // check that it is a Brand
-        Content content = contents.iterator().next();
-        assertTrue(content instanceof Brand);
+        Content content = Iterables.getOnlyElement(contents);
         Brand brand = (Brand) content;
         
         // check contents of item
@@ -154,6 +150,8 @@ public class NetflixBrandParseTest {
         for (String alias : brand.getAliases()) {
             assertThat(alias, equalTo("http://api.netflix.com/catalog/titles/series/70136130"));
         }
+
+        assertEquals(brand.getSpecialization(), Specialization.TV);
     }
 
     @SuppressWarnings("unchecked")
@@ -176,13 +174,8 @@ public class NetflixBrandParseTest {
         assertThat(rootElement.getChildElements().size(), is(1));
         
         Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
-        // check that a piece of content is returned
-        assertFalse(contents.isEmpty());
-        assertThat(contents.size(), is(1));
         
-        // check that it is a Film
-        Content content = contents.iterator().next();
-        assertTrue(content instanceof Brand);
+        Content content = Iterables.getOnlyElement(contents);
         Brand brand = (Brand) content;
         
         // check contents of item

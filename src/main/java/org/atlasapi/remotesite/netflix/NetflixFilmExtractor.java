@@ -5,13 +5,14 @@ import java.util.Set;
 import nu.xom.Element;
 
 import org.atlasapi.media.entity.Film;
+import org.atlasapi.media.entity.Specialization;
 
 import com.google.inject.internal.ImmutableSet;
 
 public class NetflixFilmExtractor extends NetflixContentExtractor<Film>  {
     
     private static final String MOVIES_URL_PREFIX = "http://gb.netflix.com/movies/";
-    private static final String LOCATIONS_URL_PREFIX = "http://movies.netflix.com/WiPlayer?movieid=";
+    private static final String LOCATIONS_URL_PREFIX = "http://movies.netflix.com/movie/";
     
     @Override
     public Set<Film> extract(Element source, int id) {
@@ -28,7 +29,8 @@ public class NetflixFilmExtractor extends NetflixContentExtractor<Film>  {
         film.setCertificates(getCertificates(source));
         film.addAlias(getAlias(source));
         film.setPublisher(getPublisher());
+        film.setSpecialization(Specialization.FILM);
 
-        return ImmutableSet.<Film>builder().add(film).build();
+        return ImmutableSet.of(film);
     }
 }

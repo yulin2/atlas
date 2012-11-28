@@ -15,15 +15,19 @@ import nu.xom.Element;
 
 import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Version;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.core.io.ClassPathResource;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.internal.Iterables;
 import com.metabroadcast.common.intl.Countries;
 
 public class NetflixEpisodeParseTest {
@@ -50,7 +54,6 @@ public class NetflixEpisodeParseTest {
         
         Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
         
-        assertFalse(contents.isEmpty());
         assertThat(contents.size(), is(2));
         
         Episode episode = null;
@@ -92,16 +95,19 @@ public class NetflixEpisodeParseTest {
             assertThat(alias, equalTo("http://api.netflix.com/catalog/titles/programs/262101/70151113"));
         }
 
-        assertThat(episode.getVersions().size(), is(1));
-        for (Version version : episode.getVersions()) {
-            assertThat(version.getDuration(), equalTo(2608));
-        }
+        Version version = Iterables.getOnlyElement(episode.getVersions());
+        assertThat(version.getDuration(), equalTo(2608));
+        Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
+        Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
+        assertEquals(location.getUri(), "http://movies.netflix.com/movie/70151113");
         
         assertEquals(episode.getSeriesRef(), new ParentRef("http://gb.netflix.com/seasons/70136130-4"));
         assertEquals(episode.getContainer(), new ParentRef("http://gb.netflix.com/shows/70136130"));
 
         assertThat(episode.getSeriesNumber(), is(4));
         assertThat(episode.getEpisodeNumber(), is(1));
+
+        assertEquals(episode.getSpecialization(), Specialization.TV);
     }
 
 
@@ -127,7 +133,6 @@ public class NetflixEpisodeParseTest {
         
         Set<? extends Content> contents = extractor.extract(rootElement.getChildElements().get(0));
         
-        assertFalse(contents.isEmpty());
         assertThat(contents.size(), is(2));
         
         Episode episode = null;

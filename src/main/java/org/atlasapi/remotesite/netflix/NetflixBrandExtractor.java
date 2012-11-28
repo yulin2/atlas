@@ -5,6 +5,7 @@ import java.util.Set;
 import nu.xom.Element;
 
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.Specialization;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -26,7 +27,8 @@ public class NetflixBrandExtractor extends NetflixContentExtractor<Brand> {
         brand.setCertificates(getCertificates(source));
         brand.addAlias(getAlias(source));
         brand.setPublisher(getPublisher());
+        brand.setSpecialization(Specialization.TV);
 
-        return ImmutableSet.<Brand>builder().add(brand).build();
+        return ImmutableSet.of(brand);
     }
 }
