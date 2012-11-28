@@ -51,12 +51,10 @@ public class PaFeaturesProcessor {
     
     public void process(String programmeId) {
         Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableSet.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId))).asResolvedMap();
-        for (Identified identified : resolvedContent.values()) {
-            Item item = (Item)identified;
-            Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
-            if (featureDate.contains(broadcast.getTransmissionTime())) {
-               contentGroup.addContent(item.childRef()); 
-            }
+        Item item = (Item) Iterables.getOnlyElement(resolvedContent.values());
+        Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
+        if (featureDate.contains(broadcast.getTransmissionTime())) {
+           contentGroup.addContent(item.childRef()); 
         }
     }
     
