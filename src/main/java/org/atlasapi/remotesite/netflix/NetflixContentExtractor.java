@@ -21,6 +21,7 @@ import org.atlasapi.media.entity.Version;
 import org.joda.time.Duration;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -62,42 +63,47 @@ public abstract class NetflixContentExtractor<T extends Content> {
 
     int getSeriesNumber(Element contentElement) {
         Element showElement = contentElement.getFirstChildElement(SHOW_KEY);
-        if (showElement != null) {
-            Element seasonNumberElement = showElement.getFirstChildElement(SEASON_NUMBER_KEY);
-            if (seasonNumberElement != null) {
-                return Integer.parseInt(seasonNumberElement.getValue());
-            }
-            throw new ElementNotFoundException(showElement, SEASON_NUMBER_KEY );
+        if (showElement == null) {
+            throw new ElementNotFoundException(contentElement, SHOW_KEY);    
         }
-        throw new ElementNotFoundException(contentElement, SHOW_KEY);
+        
+        Element seasonNumberElement = showElement.getFirstChildElement(SEASON_NUMBER_KEY);
+        if (seasonNumberElement == null) {
+            throw new ElementNotFoundException(showElement, SEASON_NUMBER_KEY);
+        }
+        
+        return Integer.parseInt(seasonNumberElement.getValue());
     }
 
     int getEpisodeNumber(Element contentElement) {
         Element showElement = contentElement.getFirstChildElement(SHOW_KEY);
-        if (showElement != null) {
-            Element episodeNumberElement = showElement.getFirstChildElement(EPISODE_NUMBER_KEY );
-            if (episodeNumberElement != null) {
-                return Integer.parseInt(episodeNumberElement.getValue());
-            }
+        if (showElement == null) {
+            throw new ElementNotFoundException(contentElement, SHOW_KEY);
+        }
+        
+        Element episodeNumberElement = showElement.getFirstChildElement(EPISODE_NUMBER_KEY);
+        if (episodeNumberElement == null) {
             throw new ElementNotFoundException(showElement, EPISODE_NUMBER_KEY);
         }
-        throw new ElementNotFoundException(contentElement, SHOW_KEY);
+        
+        return Integer.parseInt(episodeNumberElement.getValue());
     }
 
     Set<Certificate> getCertificates(Element contentElement) {
         Element parentalAdvisories = contentElement.getFirstChildElement(PARENTAL_ADVISORIES_KEY);
-        if (parentalAdvisories != null) {
-            Set<Certificate> certificates =  Sets.newHashSet();
-            for (int i = 0; i < parentalAdvisories.getChildElements().size(); i++) {
-                Element parentalAdvisory = parentalAdvisories.getChildElements().get(i);
-                String advisorySystem = advisorySystem(parentalAdvisory); 
-                if (advisorySystem != null && advisorySystem.equals(BBFC)) {
-                    certificates.add(new Certificate(parentalAdvisory.getValue(), Countries.GB));
-                }
-            }
-            return certificates;
+        if (parentalAdvisories == null) {
+            throw new ElementNotFoundException(contentElement, PARENTAL_ADVISORIES_KEY);
         }
-        throw new ElementNotFoundException(contentElement, PARENTAL_ADVISORIES_KEY);
+        
+        Set<Certificate> certificates =  Sets.newHashSet();
+        for (int i = 0; i < parentalAdvisories.getChildElements().size(); i++) {
+            Element parentalAdvisory = parentalAdvisories.getChildElements().get(i);
+            String advisorySystem = advisorySystem(parentalAdvisory); 
+            if (advisorySystem != null && advisorySystem.equals(BBFC)) {
+                certificates.add(new Certificate(parentalAdvisory.getValue(), Countries.GB));
+            }
+        }
+        return certificates;
     }
 
     private String advisorySystem(Element parentalAdvisory) {
@@ -111,18 +117,18 @@ public abstract class NetflixContentExtractor<T extends Content> {
 
     String getTitle(Element contentElement) {
         Element titleElement = contentElement.getFirstChildElement(TITLE_KEY);
-        if (titleElement != null) {
-            return titleElement.getValue();
+        if (titleElement == null) {
+            throw new ElementNotFoundException(contentElement, TITLE_KEY);
         }
-        throw new ElementNotFoundException(contentElement, TITLE_KEY);
+        return titleElement.getValue();
     }
 
     int getYear(Element contentElement) {
         Element yearElement = contentElement.getFirstChildElement(RELEASE_YEAR_KEY);
-        if (yearElement != null) {
-            return Integer.parseInt(yearElement.getValue());
+        if (yearElement == null) {
+            throw new ElementNotFoundException(contentElement, RELEASE_YEAR_KEY);
         }
-        throw new ElementNotFoundException(contentElement, RELEASE_YEAR_KEY);
+        return Integer.parseInt(yearElement.getValue());
     }
 
     String getDescription(Element contentElement) {
@@ -132,48 +138,50 @@ public abstract class NetflixContentExtractor<T extends Content> {
         }
         //fall back to short_synopsis
         Element shortSynopsisElement = contentElement.getFirstChildElement(SHORT_SYNOPSIS_KEY);
-        if (shortSynopsisElement != null) {
-            return shortSynopsisElement.getValue();
+        if (shortSynopsisElement == null) {
+            throw new ElementNotFoundException(contentElement, SHORT_SYNOPSIS_KEY);
         }
-        throw new ElementNotFoundException(contentElement, SHORT_SYNOPSIS_KEY);
+        return shortSynopsisElement.getValue();
     }
 
     Iterable<String> getGenres(Element contentElement) {
         Element genresElement = contentElement.getFirstChildElement(GENRES_KEY);
-        if (genresElement != null) {
-            Set<String> genres = Sets.newHashSet();
-            for (int i = 0; i < genresElement.getChildElements().size(); i++) {
-                String netflixGenre = genresElement.getChildElements().get(i).getValue();
-                netflixGenre = StringEscapeUtils.unescapeHtml(netflixGenre);
-                netflixGenre = CharMatcher.WHITESPACE.removeFrom(netflixGenre);
-                genres.add(GENRES_URL_PREFIX + netflixGenre.toLowerCase());
-            }
-            return genres;
+        if (genresElement == null) {
+            return ImmutableList.of();
         }
-        throw new ElementNotFoundException(contentElement, GENRES_KEY);
+        
+        Set<String> genres = Sets.newHashSet();
+        for (int i = 0; i < genresElement.getChildElements().size(); i++) {
+            String netflixGenre = genresElement.getChildElements().get(i).getValue();
+            netflixGenre = StringEscapeUtils.unescapeHtml(netflixGenre);
+            netflixGenre = CharMatcher.WHITESPACE.removeFrom(netflixGenre);
+            genres.add(GENRES_URL_PREFIX + netflixGenre.toLowerCase());
+        }
+        return genres;
     }
     
     List<CrewMember> getPeople(Element contentElement) {
         Element peopleElement = contentElement.getFirstChildElement(PEOPLE_KEY);
-        if (peopleElement != null) {
-            List<CrewMember> people = Lists.newArrayList();
-            for (int i = 0; i < peopleElement.getChildElements().size(); i++) {
-                Element personElement = peopleElement.getChildElements().get(i);
-                CrewMember person = new CrewMember();
-                person.setCanonicalUri(PEOPLE_URL_PREFIX + getId(personElement));
-                person.withRole(TYPE_ROLE_MAPPING.get(getType(personElement)));
-                person.withPublisher(getPublisher());
-
-                Element nameElement = personElement.getFirstChildElement(NAME_KEY);
-                if (nameElement == null) {
-                    throw new ElementNotFoundException(personElement, NAME_KEY);
-                }
-                person.withName(personElement.getValue().trim());
-                people.add(person);
-            }
-            return people;
+        if (peopleElement == null) {
+            return ImmutableList.of();
         }
-        throw new ElementNotFoundException(contentElement, PEOPLE_KEY);
+        
+        List<CrewMember> people = Lists.newArrayList();
+        for (int i = 0; i < peopleElement.getChildElements().size(); i++) {
+            Element personElement = peopleElement.getChildElements().get(i);
+            CrewMember person = new CrewMember();
+            person.setCanonicalUri(PEOPLE_URL_PREFIX + getId(personElement));
+            person.withRole(TYPE_ROLE_MAPPING.get(getType(personElement)));
+            person.withPublisher(getPublisher());
+
+            Element nameElement = personElement.getFirstChildElement(NAME_KEY);
+            if (nameElement == null) {
+                throw new ElementNotFoundException(personElement, NAME_KEY);
+            }
+            person.withName(personElement.getValue().trim());
+            people.add(person);
+        }
+        return people;
     }
 
     private String getType(Element contentElement) {
@@ -195,10 +203,11 @@ public abstract class NetflixContentExtractor<T extends Content> {
     
     private Duration getDuration(Element contentElement) {
         Element durationElement = contentElement.getFirstChildElement(DURATION_KEY);
-        if (durationElement != null) {
-            return Duration.standardSeconds(Integer.parseInt(durationElement.getValue()));
+        if (durationElement == null) {
+            throw new ElementNotFoundException(contentElement, DURATION_KEY);
         }
-        throw new ElementNotFoundException(contentElement, DURATION_KEY);
+        
+        return Duration.standardSeconds(Integer.parseInt(durationElement.getValue()));
     }
 
     int getId(Element contentElement) {
@@ -212,21 +221,22 @@ public abstract class NetflixContentExtractor<T extends Content> {
 
     String getAlias(Element filmElement) {
         Element urlElement = filmElement.getFirstChildElement(URL_KEY);
-        if (urlElement != null) {
-            return urlElement.getValue();
+        if (urlElement == null) {
+            throw new ElementNotFoundException(filmElement, URL_KEY);
         }
-        throw new ElementNotFoundException(filmElement, URL_KEY);
+        
+        return urlElement.getValue();
     }
     
     int getShowId(Element contentElement) {
         Element showElement = contentElement.getFirstChildElement(NetflixContentExtractor.SHOW_KEY);
-        if (showElement != null) {
-            return getId(showElement);
+        if (showElement == null) {
+            throw new ElementNotFoundException(contentElement, NetflixContentExtractor.SHOW_KEY);
         }
-        throw new ElementNotFoundException(contentElement, NetflixContentExtractor.SHOW_KEY);
+        return getId(showElement);
     }
     
-    Encoding getEncoding(String uri) {
+    Encoding getEncoding(String locationUri) {
         Policy policy = new Policy();
         policy.setAvailableCountries(Sets.newHashSet(Countries.GB));
         policy.setRevenueContract(RevenueContract.SUBSCRIPTION);
@@ -234,7 +244,7 @@ public abstract class NetflixContentExtractor<T extends Content> {
         Location location = new Location();
         location.setPolicy(policy);
         location.setTransportType(TransportType.LINK);
-        location.setUri(uri);
+        location.setUri(locationUri);
         
         Encoding encoding = new Encoding();
         encoding.setAvailableAt(Sets.newHashSet(location));
