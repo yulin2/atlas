@@ -17,6 +17,7 @@ import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Interval;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 
@@ -49,7 +50,7 @@ public class PaFeaturesProcessor {
     }
     
     public void process(String programmeId) {
-        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableList.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId))).asResolvedMap();
+        Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableSet.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId))).asResolvedMap();
         for (Identified identified : resolvedContent.values()) {
             Item item = (Item)identified;
             Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
