@@ -15,6 +15,7 @@ import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.HttpClients;
 import org.atlasapi.remotesite.rt.RtFilmFeedUpdater;
 
+import com.google.common.base.Optional;
 import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.scheduling.ScheduledTask;
@@ -45,16 +46,18 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     @Override
     protected void runTask() {
         try {
-            reportStatus("Requesting feed contents (" + feedUri + ")");
-            String lastUpdated = lastUpdatedStore.retrieve();
-            String feedContents;
-            if (lastUpdated != null) {
-                feedContents = client.getContentsOf(feedUri + "?" + LAST_UPDATE_KEY + "=" + lastUpdatedStore.retrieve());
+            Optional<String> lastUpdated = lastUpdatedStore.retrieve();
+            String uri;
+            if (lastUpdated.isPresent()) {
+                uri = feedUri + "?" + LAST_UPDATE_KEY + "=" + lastUpdated.get();
             } else {
-                feedContents = client.getContentsOf(feedUri);
+                uri = feedUri;
             }
-                
+            
+            reportStatus("Requesting feed contents (" + uri + ")");
+            String feedContents = client.getContentsOf(uri);
             reportStatus("Feed contents received");
+            
             FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
             Builder builder = new Builder(filmProcessingNodeFactory);
             builder.build(new StringReader(feedContents));
