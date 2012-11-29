@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa.features;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChildRef;
@@ -15,6 +16,8 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.remotesite.pa.PaHelper;
 import org.joda.time.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -34,6 +37,7 @@ public class PaFeaturesProcessor {
     private final ContentGroupWriter contentGroupWriter;
     private final Interval featureDate;
     private ContentGroup contentGroup;
+    private final Logger log = LoggerFactory.getLogger(PaFeaturesProcessor.class);
     
     public PaFeaturesProcessor(ContentResolver contentResolver, ContentGroupResolver contentGroupResolver, ContentGroupWriter contentGroupWriter, Interval featureDate) {
         this.contentResolver = contentResolver;
@@ -51,10 +55,14 @@ public class PaFeaturesProcessor {
     
     public void process(String programmeId) {
         Map<String, Identified> resolvedContent = contentResolver.findByCanonicalUris(ImmutableSet.of(PaHelper.getFilmUri(programmeId), PaHelper.getEpisodeUri(programmeId))).asResolvedMap();
-        Item item = (Item) Iterables.getOnlyElement(resolvedContent.values());
-        Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
-        if (featureDate.contains(broadcast.getTransmissionTime())) {
-           contentGroup.addContent(item.childRef()); 
+        try {
+            Item item = (Item) Iterables.getOnlyElement(resolvedContent.values());
+            Broadcast broadcast = BY_BROADCAST_DATE.min(Iterables.concat(Iterables.transform(item.getVersions(), Version.TO_BROADCASTS)));
+            if (featureDate.contains(broadcast.getTransmissionTime())) {
+                contentGroup.addContent(item.childRef()); 
+            }
+        } catch (NoSuchElementException e) {
+            log .error("No content found for programme Id: " + programmeId, e);
         }
     }
     
