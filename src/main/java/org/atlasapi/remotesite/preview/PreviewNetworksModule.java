@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
@@ -26,12 +27,21 @@ public class PreviewNetworksModule {
     @Autowired
     private SimpleScheduler scheduler;
     
+    @Autowired
+    private DatabasedMongo mongo;
+    
+    
     @Bean
     public PreviewFilmClipFeedUpdater previewFilmClipFeedUpdater() {
-        PreviewFilmClipFeedUpdater previewFilmClipFeedUpdater = new PreviewFilmClipFeedUpdater(feedUrl, contentWriter, log);
+        PreviewFilmClipFeedUpdater previewFilmClipFeedUpdater = new PreviewFilmClipFeedUpdater(feedUrl, contentWriter, log, lastUpdatedStore());
         
         scheduler.schedule(previewFilmClipFeedUpdater.withName("Preview Networks Film Clip Updater"), RepetitionRules.daily(new LocalTime(5, 45)));
         
         return previewFilmClipFeedUpdater;
+    }
+    
+
+    private PreviewLastUpdatedStore lastUpdatedStore() {
+        return new MongoPreviewLastUpdatedStore(mongo);
     }
 }
