@@ -1,6 +1,7 @@
 package org.atlasapi.equiv.update;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.equiv.generators.EquivalenceGenerator;
 import org.atlasapi.equiv.generators.EquivalenceGenerators;
@@ -19,7 +20,6 @@ import org.atlasapi.equiv.scorers.EquivalenceScorers;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
@@ -71,7 +71,7 @@ public class ContentEquivalenceUpdater<T extends Content> implements Equivalence
         
         List<ScoredCandidates<T>> generatedScores = generators.generate(content, desc);
         
-        List<T> candidates = ImmutableList.copyOf(extractCandidates(generatedScores));
+        Set<T> candidates = ImmutableSet.copyOf(extractCandidates(generatedScores));
         
         List<ScoredCandidates<T>> scoredScores = scorers.score(content, candidates, desc);
         

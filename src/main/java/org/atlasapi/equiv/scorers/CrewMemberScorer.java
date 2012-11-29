@@ -6,9 +6,11 @@ import static java.math.RoundingMode.HALF_UP;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.CrewMember;
@@ -37,8 +39,8 @@ public class CrewMemberScorer implements EquivalenceScorer<Item> {
     
     
     @Override
-    public final ScoredCandidates<Item> score(Item content, Iterable<Item> candidates, ResultDescription desc) {
-        DefaultScoredCandidates.Builder<Item> scored = DefaultScoredCandidates.fromSource("crew");
+    public ScoredCandidates<Item> score(Item content, Set<? extends Item> candidates, ResultDescription desc) {
+        Builder<Item> scored = DefaultScoredCandidates.fromSource("crew");
 
         List<CrewMember> contentCrew = peopleExtractor.apply(content);
         

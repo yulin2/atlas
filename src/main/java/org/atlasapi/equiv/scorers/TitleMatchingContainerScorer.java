@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.scorers;
 
+import java.util.Set;
+
 import org.atlasapi.equiv.generators.ContentTitleScorer;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -16,7 +18,7 @@ public class TitleMatchingContainerScorer implements EquivalenceScorer<Container
     }
     
     @Override
-    public ScoredCandidates<Container> score(Container subject, Iterable<Container> candidates, ResultDescription desc) {
+    public ScoredCandidates<Container> score(Container subject, Set<? extends Container> candidates, ResultDescription desc) {
         return scorer.scoreCandidates(subject, candidates, desc);
     }
 

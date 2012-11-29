@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.scorers;
 
+import java.util.Set;
+
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
@@ -36,7 +38,7 @@ public class ScalingEquivalenceScorer<T extends Content> implements EquivalenceS
     }
     
     @Override
-    public ScoredCandidates<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {
+    public ScoredCandidates<T> score(T content, Set<? extends T> suggestions, ResultDescription desc) {
         return ScaledScoredEquivalents.<T>scale(delegate.score(content, suggestions, desc), scalingFunction);
     }
  

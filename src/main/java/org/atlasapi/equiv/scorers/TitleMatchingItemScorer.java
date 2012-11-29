@@ -1,5 +1,6 @@
 package org.atlasapi.equiv.scorers;
 
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +52,7 @@ public class TitleMatchingItemScorer implements EquivalenceScorer<Item> {
     
     
     @Override
-    public ScoredCandidates<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
+    public ScoredCandidates<Item> score(Item subject, Set<? extends Item> suggestions, ResultDescription desc) {
         Builder<Item> equivalents = DefaultScoredCandidates.fromSource("Title");
         
         if(!Strings.isNullOrEmpty(subject.getTitle())) {
