@@ -23,7 +23,7 @@ public class SequenceItemEquivalenceScorer implements EquivalenceScorer<Item> {
             Episode episode = (Episode) subject;
             desc.appendText("Subject: S: %s, E: %s. %s candidates",
                 episode.getSeriesNumber(),
-                episode.getSeriesNumber(),
+                episode.getEpisodeNumber(),
                 Iterables.size(candidates)
             );
             for (Item candidate : candidates) {
@@ -42,25 +42,28 @@ public class SequenceItemEquivalenceScorer implements EquivalenceScorer<Item> {
 
     private Score score(Episode subject, Item candidate, ResultDescription desc) {
 
-        if (candidate instanceof Episode) {
-
-            Episode candidateEpisode = (Episode) candidate;
-
-            if (nullableSeriesNumbersEqual(subject, candidateEpisode)
-                && nonNullEpisodeNumbersEqual(subject, candidateEpisode)) {
-                Score score = Score.valueOf(1.0);
-                describeScore(desc, candidateEpisode, score);
-                return score;
-            }
+        if (!(candidate instanceof Episode)) {
+            desc.appendText("%s not episode", candidate);
+            return Score.NULL_SCORE;
         }
-
-        return Score.NULL_SCORE;
+        
+        Episode candidateEpisode = (Episode) candidate;
+        
+        Score score;
+        if (nullableSeriesNumbersEqual(subject, candidateEpisode)
+            && nonNullEpisodeNumbersEqual(subject, candidateEpisode)) {
+            score = Score.ONE;
+        } else {
+            score = Score.NULL_SCORE;
+        }
+        
+        describeScore(desc, candidateEpisode, score);
+        return score;
     }
 
     private void describeScore(ResultDescription desc, Episode candidate, Score score) {
-        desc.appendText("%s (%s) S: %s, E: %s scored %s",
-            candidate.getTitle(),
-            candidate.getCanonicalUri(),
+        desc.appendText("%s: S: %s, E: %s scored %s",
+            candidate,
             candidate.getSeriesNumber(),
             candidate.getEpisodeNumber(),
             score
