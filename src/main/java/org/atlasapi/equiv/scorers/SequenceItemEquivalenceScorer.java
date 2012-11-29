@@ -1,5 +1,7 @@
 package org.atlasapi.equiv.scorers;
 
+import java.util.Set;
+
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
@@ -15,12 +17,12 @@ import com.google.common.collect.Iterables;
 public class SequenceItemEquivalenceScorer implements EquivalenceScorer<Item> {
 
     @Override
-    public ScoredCandidates<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
+    public ScoredCandidates<Item> score(Item subject, Set<? extends Item> candidates, ResultDescription desc) {
         Builder<Item> equivalents = DefaultScoredCandidates.fromSource("Sequence");
 
-        desc.appendText("%s suggestions", Iterables.size(suggestions));
+        desc.appendText("%s suggestions", Iterables.size(candidates));
 
-        for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(suggestions), Item.class)) {
+        for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(candidates), Item.class)) {
             equivalents.addEquivalent(suggestion, score(subject, suggestion, desc));
         }
 
