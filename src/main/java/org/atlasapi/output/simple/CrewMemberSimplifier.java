@@ -25,6 +25,7 @@ public class CrewMemberSimplifier extends IdentifiedModelSimplifier<CrewMember,P
         person.setProfileLinks(fullCrew.profileLinks());
         if (fullCrew.role() != null) {
             person.setRole(fullCrew.role().key());
+            person.setDisplayRole(fullCrew.role().title());
         }
         
         return person;
