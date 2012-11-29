@@ -21,6 +21,8 @@ import com.metabroadcast.common.scheduling.ScheduledTask;
 
 public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     
+    private static final String LAST_UPDATE_KEY = "last_update";
+    
     private final SimpleHttpClient client = new SimpleHttpClientBuilder()
         .withUserAgent(HttpClients.ATLAS_USER_AGENT)
         .withSocketTimeout(5, TimeUnit.MINUTES)
@@ -30,10 +32,13 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     private final PreviewFilmProcessor processor;
     private final AdapterLog log;
     private final String feedUri;
+
+    private final PreviewLastUpdatedStore lastUpdatedStore;
     
-    public PreviewFilmClipFeedUpdater(String feedUri, ContentWriter contentWriter, AdapterLog log) {
+    public PreviewFilmClipFeedUpdater(String feedUri, ContentWriter contentWriter, AdapterLog log, PreviewLastUpdatedStore lastUpdatedStore) {
         this.feedUri = feedUri;
         this.log = log;
+        this.lastUpdatedStore = lastUpdatedStore;
         this.processor = new PreviewFilmProcessor(contentWriter);
     }
 
@@ -41,7 +46,14 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
     protected void runTask() {
         try {
             reportStatus("Requesting feed contents (" + feedUri + ")");
-            String feedContents = client.getContentsOf(feedUri);
+            String lastUpdated = lastUpdatedStore.retrieve();
+            String feedContents;
+            if (lastUpdated != null) {
+                feedContents = client.getContentsOf(feedUri + "?" + LAST_UPDATE_KEY + "=" + lastUpdatedStore.retrieve());
+            } else {
+                feedContents = client.getContentsOf(feedUri);
+            }
+                
             reportStatus("Feed contents received");
             FilmProcessingNodeFactory filmProcessingNodeFactory = new FilmProcessingNodeFactory();
             Builder builder = new Builder(filmProcessingNodeFactory);
@@ -58,7 +70,15 @@ public class PreviewFilmClipFeedUpdater extends ScheduledTask {
         
         @Override
         public Nodes finishMakingElement(Element element) {
-            if (element.getLocalName().equalsIgnoreCase("movie") && shouldContinue()) {
+            
+            if (element.getLocalName().equalsIgnoreCase("previewnetworks") && shouldContinue()) {
+                String lastUpdated = element.getAttributeValue("last_upd_date");
+                if (lastUpdated != null) {
+                    lastUpdatedStore.store(lastUpdated);
+                }
+                
+                return super.finishMakingElement(element);
+            } else if (element.getLocalName().equalsIgnoreCase("movie") && shouldContinue()) {
                 currentFilmNumber++;
                 reportStatus("Processing film number " + currentFilmNumber);
                 
