@@ -86,6 +86,7 @@ public class PaFeaturesUpdater extends ScheduledTask {
                         reader.parse(fileToProcess.toURI().toString());
 
                         filesProcessed++;
+                        FileUploadResult.successfulUpload(SERVICE, file.getName());
                     }
                     else {
                         log.info("Not processing file " + file.toString() + " as filename format is not recognised");
@@ -95,7 +96,6 @@ public class PaFeaturesUpdater extends ScheduledTask {
                     FileUploadResult.failedUpload(SERVICE, file.getName()).withCause(e);
                     log.error("Error processing file " + file.toString(), e);
                 }
-                FileUploadResult.successfulUpload(SERVICE, file.getName());
             }
 
             reportStatus(String.format("found %s files, processed %s files", Iterables.size(files), filesProcessed));
