@@ -1,11 +1,6 @@
 package org.atlasapi.remotesite.pa;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -30,12 +25,11 @@ import javax.xml.parsers.SAXParserFactory;
 import org.atlasapi.feeds.upload.FileUploadResult;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.remotesite.pa.bindings.ChannelData;
-import org.atlasapi.remotesite.pa.bindings.ProgData;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.atlasapi.remotesite.pa.listings.bindings.ChannelData;
+import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
@@ -147,7 +141,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 			SAXException, ParserConfigurationException, InterruptedException {
 		final CompletionService<Integer> completion = new ExecutorCompletionService<Integer>(executor);
 		
-		JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.bindings");
+		JAXBContext context = JAXBContext.newInstance("org.atlasapi.remotesite.pa.listings.bindings");
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 
 		SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -173,6 +167,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, fileToProcess, scheduleDay));
 		            
 		            reader.parse(fileToProcess.toURI().toString());
+		            storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
 		        }
 		        else {
 		            log.info("Not processing file " + file.toString() + " as filename format is not recognised");
@@ -182,7 +177,6 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		        storeResult(FileUploadResult.failedUpload(SERVICE, file.getName()).withCause(e));
 		        log.error("Error processing file " + file.toString(), e);
 		    }
-		    storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
 		}
 		
 		if (!shouldContinue()) {

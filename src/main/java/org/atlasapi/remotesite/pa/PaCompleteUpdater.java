@@ -20,7 +20,7 @@ public class PaCompleteUpdater extends PaBaseProgrammeUpdater implements Runnabl
     
     @Override
     public void runTask() {
-        this.processFiles(fileManager.localFiles(Predicates.<File>alwaysTrue()));
+        this.processFiles(fileManager.localTvDataFiles(Predicates.<File>alwaysTrue()));
     }
     
 }
