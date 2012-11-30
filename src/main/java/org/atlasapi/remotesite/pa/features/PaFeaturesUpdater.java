@@ -1,6 +1,7 @@
 package org.atlasapi.remotesite.pa.features;
 
 import java.io.File;
+import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -112,7 +113,11 @@ public class PaFeaturesUpdater extends ScheduledTask {
 
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof Feature) {
-                    processor.process(((Feature) target).getProgrammeID());
+                    try {
+                        processor.process(((Feature) target).getProgrammeID());
+                    } catch (NoSuchElementException e) {
+                        log.error("No content found for programme Id: " + ((Feature) target).getProgrammeID(), e);
+                    }
                 }
             }
         };

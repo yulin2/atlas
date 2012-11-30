@@ -43,7 +43,7 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 @Configuration
 @Import(RtFilmModule.class)
 public class PaModule {
-    private final static RepetitionRule FEATURES_INGEST = RepetitionRules.daily(LocalTime.fromMillisOfDay(0));
+    private final static RepetitionRule FEATURES_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);
     private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardMinutes(10)).withOffset(Duration.standardMinutes(15));
     private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardMinutes(10));
     private final static RepetitionRule COMPLETE_INGEST = RepetitionRules.NEVER;//weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
