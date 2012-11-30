@@ -23,7 +23,7 @@ public class SequenceItemEquivalenceScorer implements EquivalenceScorer<Item> {
             Episode episode = (Episode) subject;
             desc.appendText("Subject: S: %s, E: %s. %s candidates",
                 episode.getSeriesNumber(),
-                episode.getSeriesNumber(),
+                episode.getEpisodeNumber(),
                 Iterables.size(candidates)
             );
             for (Item candidate : candidates) {
