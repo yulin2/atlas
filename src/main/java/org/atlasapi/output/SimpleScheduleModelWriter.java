@@ -3,7 +3,7 @@ package org.atlasapi.output;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.output.simple.ChannelSimplifier;
 import org.atlasapi.output.simple.ItemModelSimplifier;
@@ -16,7 +16,7 @@ import com.google.common.collect.ImmutableList;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
-public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<ScheduleChannel>, ScheduleQueryResult> {
+public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<ChannelSchedule>, ScheduleQueryResult> {
 
     private final ItemModelSimplifier itemModelSimplifier;
     private final ChannelSimplifier channelSimplifier;
@@ -28,15 +28,15 @@ public class SimpleScheduleModelWriter extends TransformingModelWriter<Iterable<
 	}
 	
 	@Override
-    protected ScheduleQueryResult transform(Iterable<ScheduleChannel> fullGraph, Set<Annotation> annotations, ApplicationConfiguration config) {
+    protected ScheduleQueryResult transform(Iterable<ChannelSchedule> fullGraph, Set<Annotation> annotations, ApplicationConfiguration config) {
         ScheduleQueryResult outputGraph = new ScheduleQueryResult();
-	    for (ScheduleChannel scheduleChannel : fullGraph) {
+	    for (ChannelSchedule scheduleChannel : fullGraph) {
 	        outputGraph.add(scheduleChannelFrom(scheduleChannel, annotations, config));
 	    }
 	    return outputGraph;
 	}
 
-	org.atlasapi.media.entity.simple.ScheduleChannel scheduleChannelFrom(ScheduleChannel scheduleChannel, Set<Annotation> annotations, ApplicationConfiguration config) {
+	org.atlasapi.media.entity.simple.ScheduleChannel scheduleChannelFrom(ChannelSchedule scheduleChannel, Set<Annotation> annotations, ApplicationConfiguration config) {
 	    org.atlasapi.media.entity.simple.ScheduleChannel newScheduleChannel = new org.atlasapi.media.entity.simple.ScheduleChannel();
 	    newScheduleChannel.setChannelUri(scheduleChannel.channel().uri());
 	    newScheduleChannel.setChannelKey(scheduleChannel.channel().key());

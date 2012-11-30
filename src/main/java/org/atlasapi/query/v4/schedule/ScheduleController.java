@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -27,9 +27,9 @@ public class ScheduleController {
     
     private final ScheduleRequestParser requestParser;
     private final ScheduleQueryExecutor queryExecutor;
-    private final AtlasModelWriter<Iterable<ScheduleChannel>> modelWriter;
+    private final AtlasModelWriter<Iterable<ChannelSchedule>> modelWriter;
     
-    public ScheduleController(ScheduleQueryExecutor queryExecutor, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, AtlasModelWriter<Iterable<ScheduleChannel>> modelWriter) {
+    public ScheduleController(ScheduleQueryExecutor queryExecutor, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, AtlasModelWriter<Iterable<ChannelSchedule>> modelWriter) {
         this.requestParser = new ScheduleRequestParser(channelResolver, appFetcher, MAX_REQUEST_DURATION);
         this.queryExecutor = queryExecutor;
         this.modelWriter = modelWriter;
@@ -39,14 +39,13 @@ public class ScheduleController {
     public void writeChannelSchedule(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             ScheduleQuery scheduleQuery = requestParser.queryFrom(request);
-            ScheduleChannel channelSchedule = queryExecutor.execute(scheduleQuery);
+            ChannelSchedule channelSchedule = queryExecutor.execute(scheduleQuery);
             modelWriter.writeTo(request, response, ImmutableSet.of(channelSchedule), scheduleQuery.getAnnotations(), scheduleQuery.getApplicationConfiguration());
         }catch(Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
             AtlasErrorSummary exception = AtlasErrorSummary.forException(e);
             modelWriter.writeError(request, response, exception);
         }
-
     }
 
 }
