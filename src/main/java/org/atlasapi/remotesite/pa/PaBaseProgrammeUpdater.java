@@ -167,6 +167,7 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		            unmarshaller.setListener(channelDataProcessingListener(completion, submitted, fileToProcess, scheduleDay));
 		            
 		            reader.parse(fileToProcess.toURI().toString());
+		            storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
 		        }
 		        else {
 		            log.info("Not processing file " + file.toString() + " as filename format is not recognised");
@@ -176,7 +177,6 @@ public abstract class PaBaseProgrammeUpdater extends ScheduledTask {
 		        storeResult(FileUploadResult.failedUpload(SERVICE, file.getName()).withCause(e));
 		        log.error("Error processing file " + file.toString(), e);
 		    }
-		    storeResult(FileUploadResult.successfulUpload(SERVICE, file.getName()));
 		}
 		
 		if (!shouldContinue()) {
