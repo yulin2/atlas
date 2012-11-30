@@ -11,7 +11,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
@@ -53,10 +53,11 @@ public class ScheduleEquivalenceUpdateTaskTest {
         
         DateTime now = new DateTime().withZone(DateTimeZone.UTC);
         
-        ScheduleChannel schChannel1 = new ScheduleChannel(bbcOne, ImmutableList.of(yvItemOne, yvItemTwo));
         LocalDate today = new LocalDate();
         LocalDate tomorrow = today.plusDays(1);
-        Schedule schedule1 = new Schedule(ImmutableList.of(schChannel1), new Interval(today.toDateTimeAtStartOfDay(), tomorrow.toDateTimeAtStartOfDay()));
+        Interval interval = new Interval(today.toDateTimeAtStartOfDay(), tomorrow.toDateTimeAtStartOfDay());
+        ChannelSchedule schChannel1 = new ChannelSchedule(bbcOne, interval, ImmutableList.of(yvItemOne, yvItemTwo));
+        Schedule schedule1 = new Schedule(ImmutableList.of(schChannel1), interval);
         
         ScheduleResolver resolver = scheduleResolver(schedule1);
         

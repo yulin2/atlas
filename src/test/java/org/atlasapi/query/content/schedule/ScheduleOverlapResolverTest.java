@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -173,7 +174,7 @@ public class ScheduleOverlapResolverTest extends TestCase {
     }
     
     private Schedule schedule(Channel channel, Item...items) {
-        Schedule.ScheduleChannel scheduleChannel = new Schedule.ScheduleChannel(channel, ImmutableList.copyOf(items));
+        ChannelSchedule scheduleChannel = new ChannelSchedule(channel, interval, ImmutableList.copyOf(items));
         return new Schedule(ImmutableList.of(scheduleChannel), interval);
     }
     
@@ -187,8 +188,8 @@ public class ScheduleOverlapResolverTest extends TestCase {
     
     private void assertSchedules(Schedule schedule, Schedule testSchedule) {
         assertEquals(schedule, testSchedule);
-        Schedule.ScheduleChannel channel = Iterables.getOnlyElement(schedule.scheduleChannels());
-        Schedule.ScheduleChannel testChannel = Iterables.getOnlyElement(schedule.scheduleChannels());
+        ChannelSchedule channel = Iterables.getOnlyElement(schedule.channelSchedules());
+        ChannelSchedule testChannel = Iterables.getOnlyElement(schedule.channelSchedules());
         
         for (int i=0; i<channel.items().size(); i++) {
             Item item = channel.items().get(i);

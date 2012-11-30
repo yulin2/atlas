@@ -16,7 +16,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -93,7 +93,7 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
                         ImmutableList.of(publisher),
                         Optional.<ApplicationConfiguration>absent());
                 
-                Iterator<ScheduleChannel> channelItr = schedule.scheduleChannels().iterator();
+                Iterator<ChannelSchedule> channelItr = schedule.channelSchedules().iterator();
                 if (!channelItr.hasNext()) {
                     throw new RuntimeException(String.format(
                         "No schedule channel in schedule for %s, channel %s, from %s to %s", 
@@ -103,7 +103,7 @@ public class ScheduleEquivalenceUpdateTask extends ScheduledTask {
                         end.toString()
                     ));
                 }
-                ScheduleChannel scheduleChannel = channelItr.next();
+                ChannelSchedule scheduleChannel = channelItr.next();
                 
                 Iterator<Item> channelItems = scheduleChannel.items().iterator();
                 while (channelItems.hasNext() && shouldContinue()) {

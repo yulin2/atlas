@@ -11,12 +11,12 @@ import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ChannelQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
@@ -301,8 +301,8 @@ public class QueryWebModule {
     }
 
     @Bean
-    AtlasModelWriter<Iterable<ScheduleChannel>> scheduleChannelModelOutputter() {
-        return this.<Iterable<ScheduleChannel>>standardWriter(
+    AtlasModelWriter<Iterable<ChannelSchedule>> scheduleChannelModelOutputter() {
+        return this.<Iterable<ChannelSchedule>>standardWriter(
                 new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), itemModelSimplifier(), channelSimplifier()),
                 new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), itemModelSimplifier(), channelSimplifier()));
     }

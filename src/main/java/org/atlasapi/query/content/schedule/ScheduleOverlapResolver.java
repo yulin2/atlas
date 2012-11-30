@@ -5,10 +5,10 @@ import java.util.List;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.ScheduleEntry;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -39,9 +39,9 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
     public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels, Iterable<Publisher> publishers, Optional<ApplicationConfiguration> mergeConfig) {
         Schedule schedule = scheduleResovler.schedule(from, to, channels, publishers, mergeConfig);
 
-        ImmutableList.Builder<ScheduleChannel> scheduleChannels = ImmutableList.builder();
-        for (ScheduleChannel channel : schedule.scheduleChannels()) {
-            scheduleChannels.add(new ScheduleChannel(channel.channel(), processOverlaps(channel.items())));
+        ImmutableList.Builder<ChannelSchedule> scheduleChannels = ImmutableList.builder();
+        for (ChannelSchedule channel : schedule.channelSchedules()) {
+            scheduleChannels.add(new ChannelSchedule(channel.channel(), channel.interval(), processOverlaps(channel.items())));
         }
 
         return new Schedule(scheduleChannels.build(), schedule.interval());

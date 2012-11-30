@@ -13,8 +13,9 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
@@ -38,7 +39,7 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 @Controller
-public class ScheduleController extends BaseController<Iterable<ScheduleChannel>> {
+public class ScheduleController extends BaseController<Iterable<ChannelSchedule>> {
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
@@ -46,7 +47,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
 	
     private final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
     
-    public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ScheduleChannel>> outputter) {
+    public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ChannelSchedule>> outputter) {
         super(configFetcher, log, outputter);
         this.scheduleResolver = scheduleResolver;
         this.channelResolver = channelResolver;
@@ -98,7 +99,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
             }
             
             ApplicationConfiguration mergeConfig = apiKeySupplied && !publishersSupplied ? appConfig : null;
-            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, Optional.fromNullable(mergeConfig)).scheduleChannels(), appConfig);
+            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, Optional.fromNullable(mergeConfig)).channelSchedules(), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
@@ -119,7 +120,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
         return ImmutableSet.copyOf(Iterables.transform(Iterables.filter(Iterables.transform(URI_SPLITTER.split(channelId), new Function<String, Maybe<Channel>>() {
             @Override
             public Maybe<Channel> apply(String input) {
-                return channelResolver.fromId(idCodec.decode(input).longValue());
+                return channelResolver.fromId(Id.valueOf(idCodec.decode(input)));
             }
         }),Maybe.HAS_VALUE),Maybe.<Channel>requireValueFunction()));
     }

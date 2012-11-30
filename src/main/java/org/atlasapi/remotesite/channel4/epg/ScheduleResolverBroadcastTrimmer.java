@@ -45,7 +45,7 @@ public class ScheduleResolverBroadcastTrimmer implements BroadcastTrimmer {
             Schedule schedule = scheduleResolver.schedule(scheduleInterval.getStart(), scheduleInterval.getEnd(), ImmutableSet.of(channel), ImmutableSet.of(publisher), Optional.<ApplicationConfiguration>absent());
 
             //For each item, check that it's broadcasts are in correct in the acceptable set, set actively published false if not.
-            for (Item itemEmbeddedInSchedule : Iterables.getOnlyElement(schedule.scheduleChannels()).items()) {
+            for (Item itemEmbeddedInSchedule : Iterables.getOnlyElement(schedule.channelSchedules()).items()) {
             	// load the item from the main db to avoid reading stale data
             	String itemEmbeddedInScheduleUri = itemEmbeddedInSchedule.getCanonicalUri();
                 Maybe<Identified> maybeItem = resolver.findByCanonicalUris(ImmutableList.of(itemEmbeddedInScheduleUri)).get(itemEmbeddedInScheduleUri);
