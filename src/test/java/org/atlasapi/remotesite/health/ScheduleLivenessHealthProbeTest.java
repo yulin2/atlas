@@ -9,11 +9,11 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Schedule;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -45,8 +45,8 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		Interval dummyInterval = new Interval(startTimeForScheduleTest, endTimeForScheduleTest);
 		Item item = new Item();
 		Schedule schedule = new Schedule(ImmutableList.of(
-				new ScheduleChannel(BBC_ONE, ImmutableList.<Item>of(item)),
-				new ScheduleChannel(BBC_TWO, ImmutableList.<Item>of(item))
+				new ChannelSchedule(BBC_ONE, dummyInterval, ImmutableList.<Item>of(item)),
+				new ChannelSchedule(BBC_TWO, dummyInterval, ImmutableList.<Item>of(item))
 				), dummyInterval);
 		
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
@@ -65,8 +65,8 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		Interval dummyInterval = new Interval(new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS), new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS).plusHours(12));
 		Item item = new Item();
 		Schedule schedule = new Schedule(ImmutableList.of(
-				new ScheduleChannel(BBC_ONE, ImmutableList.<Item>of(item)),
-				new ScheduleChannel(BBC_TWO, ImmutableList.<Item>of(item))
+				new ChannelSchedule(BBC_ONE, dummyInterval, ImmutableList.<Item>of(item)),
+				new ChannelSchedule(BBC_TWO, dummyInterval, ImmutableList.<Item>of(item))
 				), dummyInterval);
 		
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
@@ -85,8 +85,8 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 		Interval dummyInterval = new Interval(new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS), new DateTime().plusHours(TWELVE_POINT_FIVE_DAYS_IN_HOURS).plusHours(12));
 		Item item = new Item();
 		Schedule schedule = new Schedule(ImmutableList.of(
-				new ScheduleChannel(BBC_ONE, ImmutableList.<Item>of()),
-				new ScheduleChannel(BBC_TWO, ImmutableList.<Item>of(item))
+				new ChannelSchedule(BBC_ONE, dummyInterval, ImmutableList.<Item>of()),
+				new ChannelSchedule(BBC_TWO, dummyInterval, ImmutableList.<Item>of(item))
 				), dummyInterval);
 		
 		DummyScheduleResolver dummySchedule = new DummyScheduleResolver(schedule);
@@ -121,10 +121,10 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 			
 			final List<Channel> channelList = ImmutableList.copyOf(channels);
 			
-			return new Schedule(ImmutableList.copyOf(Iterables.filter(schedule.scheduleChannels(), new Predicate<ScheduleChannel>() {
+			return new Schedule(ImmutableList.copyOf(Iterables.filter(schedule.channelSchedules(), new Predicate<ChannelSchedule>() {
 
 				@Override
-				public boolean apply(ScheduleChannel input) {
+				public boolean apply(ChannelSchedule input) {
 					return channelList.contains(input.channel());
 				}
 				

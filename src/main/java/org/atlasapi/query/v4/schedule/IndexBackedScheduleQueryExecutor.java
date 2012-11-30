@@ -9,10 +9,10 @@ import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
@@ -46,7 +46,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
     }
 
     @Override
-    public ScheduleChannel execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
+    public ChannelSchedule execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
         long startIndexTime = System.currentTimeMillis();
         ListenableFuture<ScheduleRef> futureRef = queryIndex(query);
         ScheduleRef scheduleRef = Futures.get(futureRef, QUERY_TIMEOUT, MILLISECONDS, ScheduleQueryExecutionException.class);
@@ -54,7 +54,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         log.info("{}: schedule index time: {}", id, (System.currentTimeMillis() - startIndexTime));
         //
         long startRetrieveTime = System.currentTimeMillis();
-        ScheduleChannel schedule = transformToChannelSchedule(query, scheduleRef);
+        ChannelSchedule schedule = transformToChannelSchedule(query, scheduleRef);
         log.info("{}: schedule retrieve time: {}", id, (System.currentTimeMillis() - startRetrieveTime));
         //
         log.info("{}: total schedule time: {}", id, (System.currentTimeMillis() - startIndexTime));
@@ -66,9 +66,9 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         return index.resolveSchedule(query.getPublisher(), query.getChannel(), query.getInterval());
     }
 
-    private ScheduleChannel transformToChannelSchedule(ScheduleQuery query, ScheduleRef scheduleRef) {
+    private ChannelSchedule transformToChannelSchedule(ScheduleQuery query, ScheduleRef scheduleRef) {
         if (scheduleRef.isEmpty()) {
-            return new ScheduleChannel(query.getChannel(), ImmutableList.<Item>of());
+            return new ChannelSchedule(query.getChannel(), query.getInterval(), ImmutableList.<Item>of());
         }
         
         Builder<String> uris = ImmutableList.builder();
@@ -77,12 +77,13 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         }
         
         EquivalentContent equivalentContent = contentQueryExecutor.resolveUris(
-                Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToUri()), 
-                ImmutableSet.of(query.getPublisher()), 
-                query.getAnnotations(), 
-                false);
+            Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToUri()), 
+            ImmutableSet.of(query.getPublisher()), 
+            query.getAnnotations(), 
+            false
+        );
         
-        return new ScheduleChannel(query.getChannel(), contentList(query, scheduleRef, equivalentContent.asMap()));
+        return new ChannelSchedule(query.getChannel(), query.getInterval(), contentList(query, scheduleRef, equivalentContent.asMap()));
     }
 
     private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, Map<String, Collection<Content>> resolvedContent) {

@@ -1,9 +1,9 @@
 package org.atlasapi.query.v4.schedule;
 
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
+import org.atlasapi.media.entity.ChannelSchedule;
 
 public interface ScheduleQueryExecutor {
 
-    ScheduleChannel execute(ScheduleQuery scheduleQuery) throws ScheduleQueryExecutionException;
+    ChannelSchedule execute(ScheduleQuery scheduleQuery) throws ScheduleQueryExecutionException;
 
 }

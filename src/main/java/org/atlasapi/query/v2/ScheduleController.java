@@ -10,8 +10,8 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
@@ -31,7 +31,7 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 @Controller
-public class ScheduleController extends BaseController<Iterable<ScheduleChannel>> {
+public class ScheduleController extends BaseController<Iterable<ChannelSchedule>> {
     
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
     private final ScheduleResolver scheduleResolver;
@@ -39,7 +39,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
 	
     private final NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
     
-    public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ScheduleChannel>> outputter) {
+    public ScheduleController(ScheduleResolver scheduleResolver, ChannelResolver channelResolver, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ChannelSchedule>> outputter) {
         super(configFetcher, log, outputter);
         this.scheduleResolver = scheduleResolver;
         this.channelResolver = channelResolver;
@@ -80,7 +80,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
                 throw new IllegalArgumentException("You must specify at least one channel that exists using the channel or channel_id parameter");
             }
             
-            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers).scheduleChannels(), appConfig);
+            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers).channelSchedules(), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }

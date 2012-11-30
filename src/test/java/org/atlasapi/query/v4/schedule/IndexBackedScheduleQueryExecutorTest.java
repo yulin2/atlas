@@ -18,10 +18,10 @@ import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
@@ -58,7 +58,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(ScheduleRef.forChannel(channel.getCanonicalUri()).build()));
         
-        ScheduleChannel channelSchedule = queryExecutor.execute(query);
+        ChannelSchedule channelSchedule = queryExecutor.execute(query);
 
         verify(contentQueryExecutor, never()).resolveUris(argThat(any(Iterable.class)), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
         
@@ -85,7 +85,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false)))
             .thenReturn(queryResult(item.getCanonicalUri(), ImmutableList.<Content>of(item)));
         
-        ScheduleChannel channelSchedule = queryExecutor.execute(query);
+        ChannelSchedule channelSchedule = queryExecutor.execute(query);
 
         verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
         
@@ -118,7 +118,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false)))
         .thenReturn(queryResult(item.getCanonicalUri(), ImmutableList.<Content>of(item)));
     
-        ScheduleChannel channelSchedule = queryExecutor.execute(query);
+        ChannelSchedule channelSchedule = queryExecutor.execute(query);
     
         verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
         
