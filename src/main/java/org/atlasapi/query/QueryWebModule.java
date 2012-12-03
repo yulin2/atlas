@@ -219,12 +219,6 @@ public class QueryWebModule {
 //        BroadcastRemovingScheduleOverlapListener broadcastRemovingListener = new BroadcastRemovingScheduleOverlapListener(contentResolver, contentWriter);
 //        return new ThreadedScheduleOverlapListener(broadcastRemovingListener, log);
     }
-
-    @Bean
-    ScheduleController schedulerController() {
-        ScheduleOverlapResolver resolver = new ScheduleOverlapResolver(scheduleResolver, scheduleOverlapListener(), log);
-        return new ScheduleController(resolver, channelResolver, configFetcher, log, scheduleChannelModelOutputter());
-    }
     
     @Bean
     org.atlasapi.query.v4.schedule.ScheduleController v4ScheduleController() {
@@ -301,10 +295,11 @@ public class QueryWebModule {
     }
 
     @Bean
-    AtlasModelWriter<Iterable<ChannelSchedule>> scheduleChannelModelOutputter() {
-        return this.<Iterable<ChannelSchedule>>standardWriter(
-                new SimpleScheduleModelWriter(new JsonTranslator<ScheduleQueryResult>(), itemModelSimplifier(), channelSimplifier()),
-                new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleQueryResult>(), itemModelSimplifier(), channelSimplifier()));
+    AtlasModelWriter<ChannelSchedule> scheduleChannelModelOutputter() {
+        return DispatchingAtlasModelWriter.<ChannelSchedule>dispatchingModelWriter()
+            .register(new SimpleScheduleModelWriter(new JaxbXmlTranslator<ScheduleChannel>(), itemModelSimplifier(), channelSimplifier()), "xml", MimeType.APPLICATION_XML)
+            .register(new SimpleScheduleModelWriter(new JsonTranslator<ScheduleChannel>(), itemModelSimplifier(), channelSimplifier()), "json", MimeType.APPLICATION_JSON)
+            .build();
     }
 
     @Bean
@@ -350,6 +345,10 @@ public class QueryWebModule {
     }
 
     private <I extends Iterable<?>> AtlasModelWriter<I> standardWriter(AtlasModelWriter<I> jsonWriter, AtlasModelWriter<I> xmlWriter) {
-        return DispatchingAtlasModelWriter.<I>dispatchingModelWriter().register(new RdfXmlTranslator<I>(), "rdf.xml", MimeType.APPLICATION_RDF_XML).register(jsonWriter, "json", MimeType.APPLICATION_JSON).register(xmlWriter, "xml", MimeType.APPLICATION_XML).build();
+        return DispatchingAtlasModelWriter.<I>dispatchingModelWriter()
+            .register(new RdfXmlTranslator<I>(), "rdf.xml", MimeType.APPLICATION_RDF_XML)
+            .register(jsonWriter, "json", MimeType.APPLICATION_JSON)
+            .register(xmlWriter, "xml", MimeType.APPLICATION_XML)
+            .build();
     }
 }

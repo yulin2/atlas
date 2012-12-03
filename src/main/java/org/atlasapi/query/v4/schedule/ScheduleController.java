@@ -27,9 +27,9 @@ public class ScheduleController {
     
     private final ScheduleRequestParser requestParser;
     private final ScheduleQueryExecutor queryExecutor;
-    private final AtlasModelWriter<Iterable<ChannelSchedule>> modelWriter;
+    private final AtlasModelWriter<ChannelSchedule> modelWriter;
     
-    public ScheduleController(ScheduleQueryExecutor queryExecutor, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, AtlasModelWriter<Iterable<ChannelSchedule>> modelWriter) {
+    public ScheduleController(ScheduleQueryExecutor queryExecutor, ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, AtlasModelWriter<ChannelSchedule> modelWriter) {
         this.requestParser = new ScheduleRequestParser(channelResolver, appFetcher, MAX_REQUEST_DURATION);
         this.queryExecutor = queryExecutor;
         this.modelWriter = modelWriter;
@@ -40,7 +40,7 @@ public class ScheduleController {
         try {
             ScheduleQuery scheduleQuery = requestParser.queryFrom(request);
             ChannelSchedule channelSchedule = queryExecutor.execute(scheduleQuery);
-            modelWriter.writeTo(request, response, ImmutableSet.of(channelSchedule), scheduleQuery.getAnnotations(), scheduleQuery.getApplicationConfiguration());
+            modelWriter.writeTo(request, response, channelSchedule, scheduleQuery.getAnnotations(), scheduleQuery.getApplicationConfiguration());
         }catch(Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
             AtlasErrorSummary exception = AtlasErrorSummary.forException(e);

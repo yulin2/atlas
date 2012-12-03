@@ -122,9 +122,9 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
         assertThat(itemElem, hasChildElem(allOf(of(
                 localName(is("publisher")),
-                hasChildElem(allOf(of(localName(is("country")),value(is(item.getPublisher().getCountry()))))),
-                hasChildElem(allOf(of(localName(is("key")),value(is(item.getPublisher().getKey()))))),
-                hasChildElem(allOf(of(localName(is("name")),value(is(item.getPublisher().getName())))))
+                hasChildElem(allOf(of(localName(is("country")),value(is(item.getSource().getCountry()))))),
+                hasChildElem(allOf(of(localName(is("key")),value(is(item.getSource().getKey()))))),
+                hasChildElem(allOf(of(localName(is("name")),value(is(item.getSource().getName())))))
         ))));
         
         assertThat(itemElem, hasChildElem(allOf(of(localName(is("scheduleOnly")),value(is(String.valueOf(item.isScheduleOnly())))))));
