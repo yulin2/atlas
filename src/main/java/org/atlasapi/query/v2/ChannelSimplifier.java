@@ -51,7 +51,7 @@ public class ChannelSimplifier {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
         simple.setAliases(input.getAliases());
-        simple.setPublisherDetails(toPublisherDetails(input.publisher()));
+        simple.setSourceDetails(toPublisherDetails(input.publisher()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
         simple.setAvailableFrom(transform(input.availableFrom(), TO_PUBLISHER_DETAILS));
         simple.setTitle(input.title());

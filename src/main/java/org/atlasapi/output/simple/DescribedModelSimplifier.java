@@ -21,7 +21,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         copyIdentifiedAttributesTo(content, simpleDescription, annotations);
         
         if (annotations.contains(Annotation.DESCRIPTION) || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
-            simpleDescription.setPublisher(toPublisherDetails(content.getPublisher()));
+            simpleDescription.setSource(toPublisherDetails(content.getPublisher()));
             
             simpleDescription.setTitle(content.getTitle());
             simpleDescription.setDescription(content.getDescription());
