@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Content;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -31,7 +31,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 @Controller
 public class ContentGroupController extends BaseController<Iterable<ContentGroup>> {
 
-    private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
+    private static final ErrorSummary NOT_FOUND = new ErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
     private static final Function<ChildRef, String> CHILD_REF_TO_URI_FN = new ChildRefToUri();
     //
     private final ContentGroupResolver contentGroupResolver;
@@ -89,7 +89,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
                             contentGroup);
                     queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
                 } catch (Exception e) {
-                    errorViewFor(req, resp, AtlasErrorSummary.forException(e));
+                    errorViewFor(req, resp, ErrorSummary.forException(e));
                 }
             }
         } catch (NumberFormatException ex) {

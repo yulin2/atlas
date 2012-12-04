@@ -28,7 +28,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 
 /**
@@ -96,7 +96,7 @@ public class OembedTranslator implements AtlasModelWriter<Iterable<Content>> {
 	}
 
 	@Override
-	public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) {
+	public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary exception) {
 		//no-op
 	}
 

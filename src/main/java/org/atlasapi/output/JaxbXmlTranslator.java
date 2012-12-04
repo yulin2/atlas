@@ -98,7 +98,7 @@ public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
 		try {
             writeOut(request, response, result);
         } catch (JAXBException e) {
-            writeError(request, response, AtlasErrorSummary.forException(e));
+            writeError(request, response, ErrorSummary.forException(e));
         }
 	}
 
@@ -141,7 +141,7 @@ public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
 	}
 	
 	@Override
-	public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) {
+	public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary exception) {
 		try {
 			write(response.getOutputStream(), xmlFrom(exception));
 		} catch (UnsupportedEncodingException e) {
@@ -151,7 +151,7 @@ public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
 		}
 	}
 	
-	private Element xmlFrom(AtlasErrorSummary exception) {
+	private Element xmlFrom(ErrorSummary exception) {
 		Element error = new Element("error");
 		error.appendChild(stringElement("message", exception.message()));
 		error.appendChild(stringElement("code", exception.errorCode()));
