@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.HttpStatusCode;
 
-public class AtlasErrorSummary {
+public class ErrorSummary {
 	
 	private static class AtlasExceptionBuilder {
 		
@@ -26,8 +26,8 @@ public class AtlasErrorSummary {
 			return httpStatus;
 		}
 		
-		public AtlasErrorSummary build(Exception exception) {
-			return new AtlasErrorSummary(exception).withErrorCode(friendly()).withStatusCode(httpStatus());
+		public ErrorSummary build(Exception exception) {
+			return new ErrorSummary(exception).withErrorCode(friendly()).withStatusCode(httpStatus());
 		}
 	}
 	
@@ -37,19 +37,19 @@ public class AtlasErrorSummary {
 			super(friendlyCode, httpStatusCode);
 		}
 		
-		public AtlasErrorSummary build(Exception exception) {
-			return new AtlasErrorSummary(exception).withErrorCode(friendly()).withStatusCode(httpStatus()).withMessage(exception.getMessage());
+		public ErrorSummary build(Exception exception) {
+			return new ErrorSummary(exception).withErrorCode(friendly()).withStatusCode(httpStatus()).withMessage(exception.getMessage());
 		}
 	}
 	
 	private static Map<Class<? extends Exception>, AtlasExceptionBuilder> exceptionCodes = exceptionMap();
 	
-	public static AtlasErrorSummary forException(Exception exception) {
+	public static ErrorSummary forException(Exception exception) {
 		AtlasExceptionBuilder builder = exceptionCodes.get(exception.getClass());
 		if (builder != null) {
 			return builder.build(exception);
 		} else {
-			return new AtlasErrorSummary(exception);
+			return new ErrorSummary(exception);
 		}
 	}
 	
@@ -65,12 +65,12 @@ public class AtlasErrorSummary {
 	private HttpStatusCode statusCode = HttpStatusCode.SERVER_ERROR;
 	private String message = "An internal server error occurred";
 	
-	public AtlasErrorSummary(Exception exception) {
+	public ErrorSummary(Exception exception) {
 		this.exception = exception;
 	    this.id = UUID.randomUUID().toString();
 	}
 	
-	public AtlasErrorSummary() {}
+	public ErrorSummary() {}
 
 	public String id() {
 		return id;
@@ -80,7 +80,7 @@ public class AtlasErrorSummary {
 		return exception;
 	}
 
-	public AtlasErrorSummary withStatusCode(HttpStatusCode statusCode) {
+	public ErrorSummary withStatusCode(HttpStatusCode statusCode) {
 		this.statusCode = statusCode;
 		return this;
 	}
@@ -89,7 +89,7 @@ public class AtlasErrorSummary {
 		return statusCode;
 	}
 	
-	public AtlasErrorSummary withErrorCode(String errorCode) {
+	public ErrorSummary withErrorCode(String errorCode) {
 		this.errorCode = errorCode;
 		return this;
 	}
@@ -97,7 +97,7 @@ public class AtlasErrorSummary {
 		return errorCode;
 	}
 	
-	public AtlasErrorSummary withMessage(String message) {
+	public ErrorSummary withMessage(String message) {
 		this.message = message;
 		return this;
 	}

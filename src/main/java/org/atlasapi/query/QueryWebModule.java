@@ -73,6 +73,7 @@ import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
 import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
+import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -153,7 +154,7 @@ public class QueryWebModule {
     @Bean
     org.atlasapi.query.v4.schedule.ScheduleController v4ScheduleController() {
         ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, equivalentContentResolver);
-        return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, scheduleChannelModelOutputter());
+        return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, new ScheduleQueryResultWriter());
     }
     
     @Bean
