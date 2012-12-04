@@ -31,7 +31,7 @@ public class BtVodModule {
         String url = Configurer.get("bt.url").get();
         String username = Configurer.get("bt.username").get();
         String password = Configurer.get("bt.password").get();
-        int timeout = Configurer.get("bt.url").toInt();
+        int timeout = Configurer.get("bt.timeout").toInt();
         BtVodContentCreator<Film> filmCreator = new BtVodFilmCreator();
         BtVodContentCreator<Episode> episodeCreator = new BtVodEpisodeCreator();
         BtVodContentCreator<Series> seriesCreator = new BtVodSeriesCreator();
