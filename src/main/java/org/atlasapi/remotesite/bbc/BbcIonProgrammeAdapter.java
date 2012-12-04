@@ -201,8 +201,17 @@ public class BbcIonProgrammeAdapter extends AbstractBbcAdapter<Content> {
         }
         addExtendedData(fetchedItem, extendedDataAdapter.fetch(uri));
         attachSegmentsToVersions(fetchedItem);
-        if (fetchedItem instanceof Episode && series != null) {
-            ((Episode)fetchedItem).setSeriesNumber(series.getSeriesNumber());
+        if (fetchedItem instanceof Episode) {
+            Episode episode = (Episode)fetchedItem;
+            if (series == null && episode.getSeriesRef() != null) {
+                Container fetchedContainer = containerAdapter.fetch(episode.getSeriesRef().getUri());
+                if (fetchedContainer instanceof Series) {
+                    series = (Series) fetchedContainer;
+                }
+            }
+            if (series != null) {
+                episode.setSeriesNumber(series.getSeriesNumber());
+            }
         }
         Maybe<Identified> possibleExistingContent = existingContent(uri);
         if (possibleExistingContent.hasValue()) {
