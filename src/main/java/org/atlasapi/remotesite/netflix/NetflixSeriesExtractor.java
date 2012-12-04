@@ -6,6 +6,7 @@ import nu.xom.Element;
 
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
+import org.atlasapi.remotesite.ElementNotFoundException;
 
 import com.google.common.collect.ImmutableSet;
 

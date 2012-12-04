@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<title>
+      <id type="integer">76469</id>
+      <title>E03, Episode 3</title>
+      <name>Episode 3</name>
+      <episode-number type="integer">3</episode-number>
+      <external-id>BBW000067503</external-id>
+      <link rel="self" href="https://preproduction-movida.bebanjo.net/api/titles/76469"/>
+      <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/titles/76469/schedule"/>
+      <link rel="availability_windows" href="https://preproduction-movida.bebanjo.net/api/titles/76469/availability_windows">
+            <availability-windows type="array">
+                  <availability-window>
+                        <id type="integer">34373</id>
+                        <from type="datetime">2010-01-01T00:00:00+00:00</from>
+                        <to type="datetime">2013-02-01T23:59:59+00:00</to>
+                        <link rel="self" href="https://preproduction-movida.bebanjo.net/api/availability_windows/34373"/>
+                        <link rel="title" href="https://preproduction-movida.bebanjo.net/api/titles/76469"/>
+                        <link rel="platforms" href="https://preproduction-movida.bebanjo.net/api/availability_windows/34373/platforms">
+                              <platforms type="array">
+                                    <platform>
+                                          <name>BTV Cardinal - Film</name>
+                                          <id type="integer">83</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/83"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/83/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/83/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/83/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/83/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Classic - Film</name>
+                                          <id type="integer">134</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/134"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/134/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/134/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/134/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/134/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>YouView - Film</name>
+                                          <id type="integer">229</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/229"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/229/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/229/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/229/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/229/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Classic - TV</name>
+                                          <id type="integer">241</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/241"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/241/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/241/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/241/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/241/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Classic - Sport</name>
+                                          <id type="integer">245</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/245"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/245/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/245/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/245/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/245/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Classic - Music</name>
+                                          <id type="integer">249</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/249"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/249/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/249/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/249/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/249/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Classic - Kids</name>
+                                          <id type="integer">253</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/253"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/253/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/253/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/253/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/253/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>YouView - TV</name>
+                                          <id type="integer">257</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/257"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/257/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/257/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/257/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/257/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>YouView - Sport</name>
+                                          <id type="integer">261</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/261"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/261/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/261/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/261/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/261/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>YouView - Music</name>
+                                          <id type="integer">265</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/265"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/265/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/265/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/265/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/265/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>YouView - Kids</name>
+                                          <id type="integer">269</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/269"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/269/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/269/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/269/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/269/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Cardinal - TV</name>
+                                          <id type="integer">273</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/273"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/273/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/273/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/273/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/273/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Cardinal - Sport</name>
+                                          <id type="integer">277</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/277"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/277/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/277/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/277/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/277/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Cardinal - Music</name>
+                                          <id type="integer">281</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/281"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/281/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/281/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/281/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/281/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                                    <platform>
+                                          <name>BTV Cardinal - Kids</name>
+                                          <id type="integer">285</id>
+                                          <link rel="self" href="https://preproduction-movida.bebanjo.net/api/platforms/285"/>
+                                          <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/platforms/285/schedule"/>
+                                          <link rel="draft_schedules" href="https://preproduction-movida.bebanjo.net/api/platforms/285/draft_schedules"/>
+                                          <link rel="requirements" href="https://preproduction-movida.bebanjo.net/api/platforms/285/requirements"/>
+                                          <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/platforms/285/metadata">
+                                                <metadata type="document">                </metadata>
+                                          </link>
+                                    </platform>
+                              </platforms>
+                        </link>
+                  </availability-window>
+            </availability-windows>
+      </link>
+      <link rel="series" href="https://preproduction-movida.bebanjo.net/api/title_groups/11225">
+            <title-group>
+                  <id type="integer">11225</id>
+                  <name>Gavin and Stacey: S01</name>
+                  <external-id>BBW_Gavin and Stacey_s1</external-id>
+                  <title-group-type>series</title-group-type>
+                  <link rel="self" href="https://preproduction-movida.bebanjo.net/api/title_groups/11225"/>
+                  <link rel="titles" href="https://preproduction-movida.bebanjo.net/api/title_groups/11225/titles"/>
+                  <link rel="schedule" href="https://preproduction-movida.bebanjo.net/api/title_groups/11225/schedule"/>
+                  <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/title_groups/11225/metadata">
+                        <metadata type="document">
+                              <double-packshot-assetid>bbw000067506_img2</double-packshot-assetid>
+                              <season-number>1</season-number>
+                              <name>Gavin and Stacey</name>
+                              <double-packshot-filename>bbw000067501_img.jpg</double-packshot-filename>
+                        </metadata>
+                  </link>
+                  <link rel="images" href="https://preproduction-movida.bebanjo.net/api/title_groups/11225/images"/>
+            </title-group>
+      </link>
+      <link rel="title_groups" href="https://preproduction-movida.bebanjo.net/api/titles/76469/title_groups"/>
+      <link rel="licensor" href="https://preproduction-movida.bebanjo.net/api/licensors/573"/>
+      <link rel="images" href="https://preproduction-movida.bebanjo.net/api/titles/76469/images"/>
+      <link rel="assets" href="https://preproduction-movida.bebanjo.net/api/titles/76469/assets">
+            <assets type="array">
+                  <asset>
+                        <name>BBW000067503</name>
+                        <description nil="true"/>
+                        <link rel="self" href="https://preproduction-movida.bebanjo.net/api/assets/60621"/>
+                        <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/assets/60621/metadata">
+                              <metadata type="document">
+                                    <rating>15</rating>
+                                    <runtime>00:30:00</runtime>
+                                    <aspect-ratio>16x9</aspect-ratio>
+                                    <parent-media-id>BTMB-VS_42d685fe-2889-414</parent-media-id>
+                                    <language>English</language>
+                              </metadata>
+                        </link>
+                        <link rel="title" href="https://preproduction-movida.bebanjo.net/api/titles/76469"/>
+                        <link rel="renditions" href="https://preproduction-movida.bebanjo.net/api/assets/60621/renditions"/>
+                  </asset>
+            </assets>
+      </link>
+      <link rel="metadata" href="https://preproduction-movida.bebanjo.net/api/titles/76469/metadata">
+            <metadata type="document">
+                  <category>TV - Comedy</category>
+                  <short-description>Gavin and Stacey tell their friends and family about their surprise engagement. BBC Hits is a commercial service. Programmes made available here were previously available for free on BBC channels.</short-description>
+                  <maximum-play-time>1440</maximum-play-time>
+                  <long-description>Gavin and Stacey tell their friends and family about their surprise engagement. BBC Hits is a commercial service. Programmes made available here were previously available for free on BBC channels.</long-description>
+                  <name>Episode 3</name>
+                  <placement>Misc TV Episodes</placement>
+                  <subgenres type="array">
+                        <subgenre>Comedy</subgenre>
+                        <subgenre>UK</subgenre>
+                        <subgenre>00's</subgenre>
+                  </subgenres>
+                  <single-packshot-assetid>bbw000067503_img</single-packshot-assetid>
+                  <type>Feature</type>
+                  <release-date type="datetime">2007-01-01T00:00:00+00:00</release-date>
+                  <single-packshot-filename>bbw000067501_img.jpg</single-packshot-filename>
+                  <price>TV - Standard (£1.10)</price>
+            </metadata>
+      </link>
+</title>
