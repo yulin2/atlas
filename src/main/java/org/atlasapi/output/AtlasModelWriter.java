@@ -27,6 +27,6 @@ public interface AtlasModelWriter<T> {
 	
 	public void writeTo(HttpServletRequest request, HttpServletResponse response, T graph, Set<Annotation> annotations, ApplicationConfiguration config) throws IOException;
 	
-	public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException;
+	public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary exception) throws IOException;
 	
 }

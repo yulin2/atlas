@@ -1,5 +1,35 @@
 package org.atlasapi.query;
 
+import static org.atlasapi.output.Annotation.AVAILABLE_LOCATIONS;
+import static org.atlasapi.output.Annotation.BRAND_REFERENCE;
+import static org.atlasapi.output.Annotation.BRAND_SUMMARY;
+import static org.atlasapi.output.Annotation.BROADCASTS;
+import static org.atlasapi.output.Annotation.CHANNEL;
+import static org.atlasapi.output.Annotation.CHANNELS;
+import static org.atlasapi.output.Annotation.CLIPS;
+import static org.atlasapi.output.Annotation.CONTENT_GROUPS;
+import static org.atlasapi.output.Annotation.DESCRIPTION;
+import static org.atlasapi.output.Annotation.EXTENDED_DESCRIPTION;
+import static org.atlasapi.output.Annotation.EXTENDED_ID;
+import static org.atlasapi.output.Annotation.FILTERING_RESOURCE;
+import static org.atlasapi.output.Annotation.FIRST_BROADCASTS;
+import static org.atlasapi.output.Annotation.ID;
+import static org.atlasapi.output.Annotation.ID_SUMMARY;
+import static org.atlasapi.output.Annotation.KEY_PHRASES;
+import static org.atlasapi.output.Annotation.LOCATIONS;
+import static org.atlasapi.output.Annotation.NEXT_BROADCASTS;
+import static org.atlasapi.output.Annotation.PEOPLE;
+import static org.atlasapi.output.Annotation.PRODUCTS;
+import static org.atlasapi.output.Annotation.PUBLISHER;
+import static org.atlasapi.output.Annotation.RECENTLY_BROADCAST;
+import static org.atlasapi.output.Annotation.RELATED_LINKS;
+import static org.atlasapi.output.Annotation.SEGMENT_EVENTS;
+import static org.atlasapi.output.Annotation.SERIES_REFERENCE;
+import static org.atlasapi.output.Annotation.SERIES_SUMMARY;
+import static org.atlasapi.output.Annotation.SUB_ITEMS;
+import static org.atlasapi.output.Annotation.TOPICS;
+import static org.atlasapi.output.Annotation.UPCOMING;
+
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.input.BrandModelTransformer;
 import org.atlasapi.input.DefaultGsonModelReader;
@@ -24,8 +54,11 @@ import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
 import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleQueryResult;
+import org.atlasapi.media.entity.simple.ScheduleChannel;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
+import org.atlasapi.output.Annotation;
+import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.DispatchingAtlasModelWriter;
 import org.atlasapi.output.JaxbXmlTranslator;
@@ -39,6 +72,35 @@ import org.atlasapi.output.SimplePersonModelWriter;
 import org.atlasapi.output.SimpleProductModelWriter;
 import org.atlasapi.output.SimpleScheduleModelWriter;
 import org.atlasapi.output.SimpleTopicModelWriter;
+import org.atlasapi.output.annotation.AvailableLocationsAnnotation;
+import org.atlasapi.output.annotation.BrandReferenceAnnotation;
+import org.atlasapi.output.annotation.BrandSummaryAnnotation;
+import org.atlasapi.output.annotation.BroadcastsAnnotation;
+import org.atlasapi.output.annotation.ChannelAnnotation;
+import org.atlasapi.output.annotation.ChannelsAnnotation;
+import org.atlasapi.output.annotation.ClipsAnnotation;
+import org.atlasapi.output.annotation.ContentGroupsAnnotation;
+import org.atlasapi.output.annotation.DescriptionAnnotation;
+import org.atlasapi.output.annotation.ExtendedDescriptionAnnotation;
+import org.atlasapi.output.annotation.ExtendedIdentificationAnnotation;
+import org.atlasapi.output.annotation.FilteringResourceAnnotation;
+import org.atlasapi.output.annotation.FirstBroadcastAnnotation;
+import org.atlasapi.output.annotation.IdentificationAnnotation;
+import org.atlasapi.output.annotation.IdentificationSummaryAnnotation;
+import org.atlasapi.output.annotation.KeyPhrasesAnnotation;
+import org.atlasapi.output.annotation.LocationsAnnotation;
+import org.atlasapi.output.annotation.NextBroadcastAnnotation;
+import org.atlasapi.output.annotation.PeopleAnnotation;
+import org.atlasapi.output.annotation.ProductsAnnotation;
+import org.atlasapi.output.annotation.PublisherAnnotation;
+import org.atlasapi.output.annotation.RecentlyBroadcastAnnotation;
+import org.atlasapi.output.annotation.RelatedLinksAnnotation;
+import org.atlasapi.output.annotation.SegmentEventsAnnotation;
+import org.atlasapi.output.annotation.SeriesReferenceAnnotation;
+import org.atlasapi.output.annotation.SeriesSummaryAnnotation;
+import org.atlasapi.output.annotation.SubItemAnnotation;
+import org.atlasapi.output.annotation.TopicsAnnotation;
+import org.atlasapi.output.annotation.UpcomingAnnotation;
 import org.atlasapi.output.rdf.RdfXmlTranslator;
 import org.atlasapi.output.simple.ChannelGroupModelSimplifier;
 import org.atlasapi.output.simple.ChannelGroupSimplifier;
@@ -80,7 +142,6 @@ import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
-import org.atlasapi.query.content.schedule.ScheduleOverlapResolver;
 import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
 import org.atlasapi.query.topic.PublisherFilteringTopicResolver;
 import org.atlasapi.query.v2.ChannelController;
@@ -90,17 +151,18 @@ import org.atlasapi.query.v2.ContentWriteController;
 import org.atlasapi.query.v2.PeopleController;
 import org.atlasapi.query.v2.ProductController;
 import org.atlasapi.query.v2.QueryController;
-import org.atlasapi.query.v2.ScheduleController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
 import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
+import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
@@ -223,7 +285,7 @@ public class QueryWebModule {
     @Bean
     org.atlasapi.query.v4.schedule.ScheduleController v4ScheduleController() {
         ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, equivalentContentResolver);
-        return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, scheduleChannelModelOutputter());
+        return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, new ScheduleQueryResultWriter(annotations()));
     }
     
     @Bean
@@ -350,5 +412,45 @@ public class QueryWebModule {
             .register(jsonWriter, "json", MimeType.APPLICATION_JSON)
             .register(xmlWriter, "xml", MimeType.APPLICATION_XML)
             .build();
+    }
+    
+    @Bean
+    protected AnnotationRegistry annotations() {
+        ImmutableSet<Annotation> commonImplied = ImmutableSet.of(ID_SUMMARY);
+        SubstitutionTableNumberCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
+        RecentlyBroadcastChildrenResolver recentlyBroadcastResolver = new MongoRecentlyBroadcastChildrenResolver(mongo);
+        UpcomingChildrenResolver upcomingChildrenResolver = new MongoUpcomingChildrenResolver(mongo);
+        MongoContainerSummaryResolver containerSummaryResolver = new MongoContainerSummaryResolver(mongo, idCodec);
+        return AnnotationRegistry.builder()
+        .register(ID_SUMMARY, new IdentificationSummaryAnnotation(idCodec))
+        .register(ID, new IdentificationAnnotation(), commonImplied)
+        .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(), ImmutableSet.of(ID))
+        .register(SERIES_REFERENCE, new SeriesReferenceAnnotation(), commonImplied)
+        .register(SERIES_SUMMARY, new SeriesSummaryAnnotation(), commonImplied, ImmutableSet.of(SERIES_REFERENCE))
+        .register(BRAND_REFERENCE, new BrandReferenceAnnotation(), commonImplied)
+        .register(BRAND_SUMMARY, new BrandSummaryAnnotation(containerSummaryResolver), commonImplied, ImmutableSet.of(SERIES_REFERENCE))
+        .register(DESCRIPTION, new DescriptionAnnotation(), ImmutableSet.of(ID, SERIES_REFERENCE))
+        .register(EXTENDED_DESCRIPTION, new ExtendedDescriptionAnnotation(), ImmutableSet.of(DESCRIPTION, EXTENDED_ID))
+        .register(SUB_ITEMS, new SubItemAnnotation(), commonImplied)
+        .register(CLIPS, new ClipsAnnotation(), commonImplied)
+        .register(PEOPLE, new PeopleAnnotation(), commonImplied)
+        .register(TOPICS, new TopicsAnnotation(topicResolver, localHostName, idCodec), commonImplied)
+        .register(CONTENT_GROUPS, new ContentGroupsAnnotation(contentGroupResolver), commonImplied)
+        .register(SEGMENT_EVENTS, new SegmentEventsAnnotation(), commonImplied)
+        .register(RELATED_LINKS, new RelatedLinksAnnotation(), commonImplied)
+        .register(KEY_PHRASES, new KeyPhrasesAnnotation(), commonImplied)
+        .register(LOCATIONS, new LocationsAnnotation(), commonImplied)
+        .register(BROADCASTS, new BroadcastsAnnotation(), commonImplied)
+        .register(FIRST_BROADCASTS, new FirstBroadcastAnnotation(), commonImplied)
+        .register(NEXT_BROADCASTS, new NextBroadcastAnnotation(new SystemClock()), commonImplied)
+        .register(AVAILABLE_LOCATIONS, new AvailableLocationsAnnotation(), commonImplied)
+        .register(UPCOMING, new UpcomingAnnotation(upcomingChildrenResolver), commonImplied)
+        .register(FILTERING_RESOURCE, new FilteringResourceAnnotation(), commonImplied)
+        .register(CHANNEL, new ChannelAnnotation(), commonImplied)
+        .register(PRODUCTS, new ProductsAnnotation(productResolver), commonImplied)
+        .register(RECENTLY_BROADCAST, new RecentlyBroadcastAnnotation(recentlyBroadcastResolver), commonImplied)
+        .register(CHANNELS, new ChannelsAnnotation(), commonImplied)
+        .register(PUBLISHER, new PublisherAnnotation(), commonImplied)
+        .build();
     }
 }

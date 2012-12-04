@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -48,14 +48,14 @@ public abstract class BaseController<T> {
         this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
 
-    protected void errorViewFor(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary ae) throws IOException {
+    protected void errorViewFor(HttpServletRequest request, HttpServletResponse response, ErrorSummary ae) throws IOException {
         log.record(new AdapterLogEntry(ae.id(), Severity.ERROR, new DateTime(DateTimeZones.UTC)).withCause(ae.exception()).withSource(this.getClass()));
         outputter.writeError(request, response, ae);
     }
 
     protected void modelAndViewFor(HttpServletRequest request, HttpServletResponse response, T queryResult, ApplicationConfiguration config) throws IOException {
         if (queryResult == null) {
-            errorViewFor(request, response, AtlasErrorSummary.forException(new NullPointerException("Query result was null")));
+            errorViewFor(request, response, ErrorSummary.forException(new NullPointerException("Query result was null")));
         } else {
             outputter.writeTo(request, response, queryResult, annotationExtractor.extract(request).or(defaultAnnotations()), config);
         }

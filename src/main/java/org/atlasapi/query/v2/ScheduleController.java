@@ -16,7 +16,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -101,7 +101,7 @@ public class ScheduleController extends BaseController<Iterable<ChannelSchedule>
             ApplicationConfiguration mergeConfig = apiKeySupplied && !publishersSupplied ? appConfig : null;
             modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, Optional.fromNullable(mergeConfig)).channelSchedules(), appConfig);
         } catch (Exception e) {
-            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+            errorViewFor(request, response, ErrorSummary.forException(e));
         }
     }
     

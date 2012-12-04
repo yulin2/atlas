@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicSearcher;
@@ -49,7 +49,7 @@ public class TopicController {
             List<Topic> topics = topicSearcher.popularTopics(interval, topicResolver, selection);
             responseWriter.writeTo(request, response, topics, Collections.EMPTY_SET, configuration);
         } catch (Exception ex) {
-            responseWriter.writeError(request, response, AtlasErrorSummary.forException(ex));
+            responseWriter.writeError(request, response, ErrorSummary.forException(ex));
         }
     }
 }

@@ -1,0 +1,71 @@
+package org.atlasapi.query.v4.schedule;
+
+import static org.atlasapi.application.ApplicationConfiguration.DEFAULT_CONFIGURATION;
+import static org.hamcrest.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.ChannelSchedule;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.ParentRef;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.simple.BrandSummary;
+import org.atlasapi.output.Annotation;
+import org.atlasapi.output.AnnotationRegistry;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.metabroadcast.common.servlet.StubHttpServletRequest;
+import com.metabroadcast.common.servlet.StubHttpServletResponse;
+import com.metabroadcast.common.time.DateTimeZones;
+
+public class ScheduleQueryResultWriterTest {
+
+    private final ContainerSummaryResolver containerSummaryResolver = mock(ContainerSummaryResolver.class);
+    private final ScheduleQueryResultWriter writer = new ScheduleQueryResultWriter(AnnotationRegistry.builder().build());
+    
+    @Before
+    public void setup() {
+        when(containerSummaryResolver.summarizeTopLevelContainer(argThat(any(ParentRef.class)))).thenReturn(Optional.<BrandSummary>absent());
+    }
+    
+    @Test
+    public void testWrite() throws IOException {
+        Channel channel = new Channel(Publisher.BBC, "aTitle", "aKey", MediaType.VIDEO, "aUri");
+        channel.setId(1234l);
+        
+        DateTime from = new DateTime(0, DateTimeZones.UTC);
+        DateTime to = new DateTime(1, DateTimeZones.UTC);
+        Interval interval = new Interval(from, to);
+        
+        Item item = new Item("aUri","aCurie",Publisher.BBC);
+        item.setId(4321l);
+        item.setTitle("aTitle");
+        
+        Iterable<Item> entries = ImmutableList.of(item);
+        ChannelSchedule cs = new ChannelSchedule(channel, interval, entries);
+        
+        HttpServletRequest request = new StubHttpServletRequest();
+        StubHttpServletResponse response = new StubHttpServletResponse();
+        JsonResponseWriter responseWriter = new JsonResponseWriter(request, response);
+        ScheduleQueryResult result = new ScheduleQueryResult(cs, Annotation.defaultAnnotations(), DEFAULT_CONFIGURATION);
+        
+        writer.write(result, responseWriter);
+        
+        response.getWriter().flush();
+        System.out.println(response.getResponseAsString());
+    }
+
+}

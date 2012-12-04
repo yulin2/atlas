@@ -24,7 +24,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -43,7 +43,7 @@ import com.metabroadcast.common.http.HttpStatusCode;
 @Controller
 public class QueryController extends BaseController<QueryResult<Content, ? extends Identified>> {
 	
-	private static final AtlasErrorSummary UNSUPPORTED = new AtlasErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
+	private static final ErrorSummary UNSUPPORTED = new ErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
 	private final KnownTypeQueryExecutor executor;
 
@@ -93,7 +93,7 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 			    }
 			}
 		} catch (Exception e) {
-			errorViewFor(request, response, AtlasErrorSummary.forException(e));
+			errorViewFor(request, response, ErrorSummary.forException(e));
 		}
 	}
 

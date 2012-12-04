@@ -24,7 +24,7 @@ public abstract class TransformingModelWriter<I, O> implements AtlasModelWriter<
     protected abstract O transform(I model, Set<Annotation> annotations, ApplicationConfiguration config);
 
     @Override
-    public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException {
+    public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary exception) throws IOException {
         delegate.writeError(request, response, exception);
     }
 

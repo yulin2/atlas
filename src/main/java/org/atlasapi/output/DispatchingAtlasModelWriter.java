@@ -65,7 +65,7 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
     }
 
     @Override
-    public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException {
+    public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary exception) throws IOException {
         MappedWriter<T> writer = findWriterFor(request);
         if (writer != null) {
             writer.writeError(request, response, exception);
@@ -147,7 +147,7 @@ public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
         }
 
         @Override
-        public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary error) throws IOException {
+        public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary error) throws IOException {
             response.setStatus(error.statusCode().code());
             response.setCharacterEncoding(Charsets.UTF_8.toString());
             response.setContentType(mimeType.toString());
