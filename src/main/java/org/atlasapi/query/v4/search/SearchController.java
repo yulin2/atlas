@@ -13,7 +13,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.JsonTranslator;
 import org.atlasapi.output.QueryResult;
@@ -84,7 +84,7 @@ public class SearchController extends BaseController<QueryResult<Content, ? exte
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content, Content.class)), appConfig);
         } catch (Exception e) {
-            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+            errorViewFor(request, response, ErrorSummary.forException(e));
         }
     }
 

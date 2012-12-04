@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Person;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -43,7 +43,7 @@ public class PeopleController extends BaseController<Iterable<Person>> {
             
             modelAndViewFor(request, response, ImmutableList.of(person), filter.getConfiguration());
         } catch (Exception e) {
-            errorViewFor(request, response, AtlasErrorSummary.forException(e));
+            errorViewFor(request, response, ErrorSummary.forException(e));
         }
     }
 }

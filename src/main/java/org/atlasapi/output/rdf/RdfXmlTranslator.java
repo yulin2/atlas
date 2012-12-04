@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 
 import com.google.common.collect.ImmutableMap;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -90,7 +90,7 @@ public class RdfXmlTranslator<EntityType extends Iterable<?>> extends JenaRdfTra
 	}
 
 	@Override
-	public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) {
+	public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary exception) {
 		//no-op
 	}
 }

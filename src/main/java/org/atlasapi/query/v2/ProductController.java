@@ -10,7 +10,7 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.persistence.media.product.ProductResolver;
-import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -31,8 +31,8 @@ import com.metabroadcast.common.query.Selection;
 @Controller
 public class ProductController extends BaseController<Iterable<Product>> {
     
-    private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
-    private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
+    private static final ErrorSummary NOT_FOUND = new ErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
+    private static final ErrorSummary FORBIDDEN = new ErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
 
     private final ProductResolver productResolver;
     private final KnownTypeQueryExecutor queryExecutor;
@@ -58,7 +58,7 @@ public class ProductController extends BaseController<Iterable<Product>> {
                 }
             }), query.getConfiguration());
         } catch (Exception e) {
-            errorViewFor(req, resp, AtlasErrorSummary.forException(e));
+            errorViewFor(req, resp, ErrorSummary.forException(e));
         }
     }
     
@@ -108,7 +108,7 @@ public class ProductController extends BaseController<Iterable<Product>> {
             QueryResult<Content, Product> result = QueryResult.of(Iterables.filter(Iterables.concat(queryExecutor.executeUriQuery(product.getContent(), query).values()),Content.class), product);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
         } catch (Exception e) {
-            errorViewFor(req, resp, AtlasErrorSummary.forException(e));
+            errorViewFor(req, resp, ErrorSummary.forException(e));
         }
     }
 }

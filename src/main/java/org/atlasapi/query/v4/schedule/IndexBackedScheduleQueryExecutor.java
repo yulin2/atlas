@@ -1,8 +1,8 @@
 package org.atlasapi.query.v4.schedule;
 
-import com.google.common.base.Function;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,14 +10,20 @@ import java.util.Set;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
+import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.persistence.content.EquivalentContent;
+import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
@@ -26,12 +32,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import java.util.Collection;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.persistence.content.EquivalentContent;
-import org.atlasapi.persistence.content.EquivalentContentResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
@@ -46,7 +46,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
     }
 
     @Override
-    public ChannelSchedule execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
+    public ScheduleQueryResult execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
         long id = Thread.currentThread().getId();
         long startIndexTime = System.currentTimeMillis();
 
@@ -59,7 +59,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         long retrieveTime = System.currentTimeMillis() - startRetrieveTime;
 
         log.info("{}: schedule times: {}\t{}", new Object[]{id, indexTime, retrieveTime});
-        return schedule;
+        return new ScheduleQueryResult(schedule, query.getAnnotations(), query.getApplicationConfiguration());
     }
 
     private ListenableFuture<ScheduleRef> queryIndex(ScheduleQuery query) {

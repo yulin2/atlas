@@ -66,7 +66,7 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
 					.disableHtmlEscaping()
 					.setDateFormat(DateFormat.LONG)
 					.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-					.registerTypeAdapter(AtlasErrorSummary.class, new AtlasExceptionJsonSerializer())
+					.registerTypeAdapter(ErrorSummary.class, new AtlasExceptionJsonSerializer())
 					.registerTypeAdapter(Date.class, new DateTimeSerializer())
 					.registerTypeAdapter(Description.class, new DescriptionSerializer())
 					.registerTypeAdapter(DateTime.class, new JodaDateTimeSerializer()));
@@ -124,7 +124,7 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
 	}
 
 	@Override
-	public void writeError(HttpServletRequest request, HttpServletResponse response, AtlasErrorSummary exception) throws IOException {
+	public void writeError(HttpServletRequest request, HttpServletResponse response, ErrorSummary exception) throws IOException {
 		String callback = callback(request);
 
 		OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream(), Charsets.UTF_8);
@@ -149,10 +149,10 @@ public class JsonTranslator<T> implements AtlasModelWriter<T> {
 		}
 	}
 
-	private static class AtlasExceptionJsonSerializer implements JsonSerializer<AtlasErrorSummary> {
+	private static class AtlasExceptionJsonSerializer implements JsonSerializer<ErrorSummary> {
 
 		@Override
-		public JsonElement serialize(AtlasErrorSummary src, Type typeOfSrc, JsonSerializationContext context) {
+		public JsonElement serialize(ErrorSummary src, Type typeOfSrc, JsonSerializationContext context) {
 			JsonObject serialized = new JsonObject();
 			JsonObject error = new JsonObject();
 			error.addProperty("message", src.message());
