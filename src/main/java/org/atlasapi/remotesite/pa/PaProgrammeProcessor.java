@@ -23,7 +23,6 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Specialization;
-import org.atlasapi.media.entity.Synopses;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -367,25 +366,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                         episode.setDescription(billing.getvalue());
                     }
                     if (billing.getType().equals("pa_detail1")) {
-                        if (episode.getSynopses() == null) {
-                            episode.setSynopses(Synopses.withShortDescription(billing.getvalue()));
-                        } else {
-                            episode.getSynopses().setShortDescription(billing.getvalue());
-                        }
+                        episode.setShortDescription(billing.getvalue());
                     }
                     if (billing.getType().equals("pa_detail2")) {
-                        if (episode.getSynopses() == null) {
-                            episode.setSynopses(Synopses.withMediumDescription(billing.getvalue()));
-                        } else {
-                            episode.getSynopses().setMediumDescription(billing.getvalue());
-                        }
+                        episode.setMediumDescription(billing.getvalue());
                     }
                     if (billing.getType().equals("pa_detail3")) {
-                        if (episode.getSynopses() == null) {
-                            episode.setSynopses(Synopses.withLongDescription(billing.getvalue()));
-                        } else {
-                            episode.getSynopses().setLongDescription(billing.getvalue());
-                        }
+                        episode.setLongDescription(billing.getvalue());
                     }
                 }
             }
