@@ -47,18 +47,18 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
     @Override
     public ChannelSchedule execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
+        long id = Thread.currentThread().getId();
         long startIndexTime = System.currentTimeMillis();
+
         ListenableFuture<ScheduleRef> futureRef = queryIndex(query);
         ScheduleRef scheduleRef = Futures.get(futureRef, QUERY_TIMEOUT, MILLISECONDS, ScheduleQueryExecutionException.class);
-        long id = Thread.currentThread().getId();
-        log.info("{}: schedule index time: {}", id, (System.currentTimeMillis() - startIndexTime));
-        //
+        long indexTime = System.currentTimeMillis() - startIndexTime;
+
         long startRetrieveTime = System.currentTimeMillis();
         ChannelSchedule schedule = transformToChannelSchedule(query, scheduleRef);
-        log.info("{}: schedule retrieve time: {}", id, (System.currentTimeMillis() - startRetrieveTime));
-        //
-        log.info("{}: total schedule time: {}", id, (System.currentTimeMillis() - startIndexTime));
-        //
+        long retrieveTime = System.currentTimeMillis() - startRetrieveTime;
+
+        log.info("{}: schedule times: {}\t{}", new Object[]{id, indexTime, retrieveTime});
         return schedule;
     }
 
