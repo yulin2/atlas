@@ -1,8 +1,10 @@
 package org.atlasapi.output.simple;
 
+import java.math.BigInteger;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.EntityType;
@@ -17,6 +19,7 @@ import org.atlasapi.media.entity.Song;
 import org.atlasapi.media.entity.Subtitles;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.simple.BrandSummary;
+import org.atlasapi.media.entity.simple.Channel;
 import org.atlasapi.media.entity.simple.Language;
 import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
@@ -35,6 +38,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.DateTimeZones;
@@ -42,19 +46,23 @@ import com.metabroadcast.common.time.SystemClock;
 
 public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasapi.media.entity.simple.Item> {
 
+    private final NumberToShortStringCodec idCodec;
     private final ContainerSummaryResolver containerSummaryResolver;
+    private final ChannelResolver channelResolver;
     private final Clock clock;
     private final SegmentModelSimplifier segmentSimplifier;
     
-    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver){
-        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec){
+        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, idCodec, new SystemClock());
     }
 
-    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, Clock clock) {
+    public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec, Clock clock) {
         super(localHostName, contentGroupResolver, topicResolver, productResolver);
         this.containerSummaryResolver = containerSummaryResolver;
         this.clock = clock;
         this.segmentSimplifier = segmentResolver != null ? new SegmentModelSimplifier(segmentResolver) : null;
+        this.channelResolver = channelResolver;
+        this.idCodec = idCodec;
     }
 
     @Override
@@ -163,7 +171,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         }
         if (broadcasts != null) {
             for (Broadcast broadcast : broadcasts) {
-                org.atlasapi.media.entity.simple.Broadcast simpleBroadcast = simplify(broadcast);
+                org.atlasapi.media.entity.simple.Broadcast simpleBroadcast = simplify(broadcast, annotations);
                 copyProperties(version, simpleBroadcast, item);
                 simpleItem.addBroadcast(simpleBroadcast);
             }
@@ -211,7 +219,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         });
     }
 
-    private org.atlasapi.media.entity.simple.Broadcast simplify(Broadcast broadcast) {
+    private org.atlasapi.media.entity.simple.Broadcast simplify(Broadcast broadcast, Set<Annotation> annotations) {
         org.atlasapi.media.entity.simple.Broadcast simpleModel = new org.atlasapi.media.entity.simple.Broadcast(broadcast.getBroadcastOn(), broadcast.getTransmissionTime(),
                 broadcast.getTransmissionEndTime(), broadcast.getSourceId());
 
@@ -225,8 +233,20 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleModel.setLive(broadcast.getLive());
         simpleModel.setPremiere(broadcast.getPremiere());
         simpleModel.setNewSeries(broadcast.getNewSeries());
+        simpleModel.setChannel(simplify(channelResolver.fromUri(broadcast.getBroadcastOn()).requireValue(), annotations));
+        
 
         return simpleModel;
+    }
+    
+    private Channel simplify(org.atlasapi.media.channel.Channel channel, Set<Annotation> annotations) {
+        Channel simpleChannel = new Channel();
+        simpleChannel.setId(idCodec.encode(BigInteger.valueOf(channel.getId())));
+        if(annotations.contains(Annotation.CHANNEL_SUMMARY)) {
+            simpleChannel.setTitle(channel.title());
+            simpleChannel.setImage(channel.image());
+        }
+        return simpleChannel;
     }
 
     private void copyProperties(Version version, org.atlasapi.media.entity.simple.Version simpleLocation, org.atlasapi.media.entity.Item item) {
