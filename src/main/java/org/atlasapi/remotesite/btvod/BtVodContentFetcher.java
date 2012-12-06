@@ -12,8 +12,6 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 
-import org.apache.http.auth.UsernamePasswordCredentials;
-
 import com.google.common.collect.Queues;
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
@@ -22,6 +20,7 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.media.MimeType;
+import com.metabroadcast.common.security.UsernameAndPassword;
 
 public class BtVodContentFetcher {
     private static final String CONTENT_ANNOTATIONS = "?expand=availability_windows,platforms,series,assets,metadata";
@@ -33,7 +32,7 @@ public class BtVodContentFetcher {
 
     public BtVodContentFetcher(String url, String username, String password, int timeout) {
         this.url = url;
-        UsernamePasswordCredentials creds = new UsernamePasswordCredentials(username, password);
+        UsernameAndPassword creds = new UsernameAndPassword(username, password);
         SimpleHttpClientBuilder httpClientBuilder = new SimpleHttpClientBuilder();
         this.client = httpClientBuilder
                 .withSocketTimeout(timeout, TimeUnit.SECONDS)
