@@ -224,8 +224,9 @@ public class QueryWebModule {
 
     @Bean
     ItemModelSimplifier itemModelSimplifier() {
+        NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
