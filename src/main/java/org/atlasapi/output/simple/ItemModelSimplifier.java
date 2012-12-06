@@ -58,7 +58,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
     private final ChannelResolver channelResolver;
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec) {
-        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, new SystemClock());
+        this(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummaryResolver, channelResolver, idCodec, new SystemClock());
     }
 
     public ItemModelSimplifier(String localHostName, ContentGroupResolver contentGroupResolver, TopicQueryResolver topicResolver, ProductResolver productResolver, SegmentResolver segmentResolver, ContainerSummaryResolver containerSummaryResolver, ChannelResolver channelResolver, NumberToShortStringCodec idCodec, Clock clock) {
