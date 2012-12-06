@@ -18,6 +18,8 @@ import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Policy.RevenueContract;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.remotesite.AttributeNotFoundException;
+import org.atlasapi.remotesite.ElementNotFoundException;
 import org.joda.time.Duration;
 
 import com.google.common.base.CharMatcher;
