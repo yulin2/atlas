@@ -10,7 +10,10 @@ import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.remotesite.ContentExtractor;
 import org.atlasapi.remotesite.btvod.model.BtVodItemData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.google.common.collect.ImmutableSet;
 
 public class BtVodContentExtractor implements ContentExtractor<Element, Set<? extends Content>> {
@@ -19,6 +22,7 @@ public class BtVodContentExtractor implements ContentExtractor<Element, Set<? ex
     private final BtVodContentCreator<Episode> episodeCreator;
     private final BtVodContentCreator<Series> seriesCreator;
     private final BtVodItemDataExtractor itemDataExtractor;
+    private final Logger log = LoggerFactory.getLogger(BtVodContentExtractor.class);
     
     public BtVodContentExtractor(BtVodContentCreator<Film> filmCreator, BtVodContentCreator<Episode> episodeCreator, 
             BtVodContentCreator<Series> seriesCreator, BtVodItemDataExtractor itemDataExtractor) {
@@ -30,12 +34,17 @@ public class BtVodContentExtractor implements ContentExtractor<Element, Set<? ex
     
     @Override
     public Set<? extends Content> extract(Element source) {
-        BtVodItemData data = itemDataExtractor.extract(source);
-        
-        if (isNotTopLevelItem(data)) {
-            return ImmutableSet.of(episodeCreator.extract(data), seriesCreator.extract(data));            
-        } else {
-            return ImmutableSet.of(filmCreator.extract(data));
+        try {
+            BtVodItemData data = itemDataExtractor.extract(source);
+
+            if (isNotTopLevelItem(data)) {
+                return ImmutableSet.of(episodeCreator.extract(data), seriesCreator.extract(data));            
+            } else {
+                return ImmutableSet.of(filmCreator.extract(data));
+            }
+        } catch (ElementNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return ImmutableSet.of();
         }
     }
 
@@ -43,10 +52,7 @@ public class BtVodContentExtractor implements ContentExtractor<Element, Set<? ex
     private boolean isNotTopLevelItem(BtVodItemData data) {
         return data.getContainer().isPresent() 
                 && data.getContainerTitle().isPresent()
-                && data.getContainerExternalId().isPresent()
-                && data.getContainerSelfLink().isPresent()
-                && data.getSeriesNumber().isPresent()
-                && data.getEpisodeNumber().isPresent();
+                && data.getContainerExternalId().isPresent();
     }
 
 }

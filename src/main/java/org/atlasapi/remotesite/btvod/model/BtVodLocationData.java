@@ -14,7 +14,7 @@ public class BtVodLocationData {
     private final String uri;
     private final DateTime availabilityStart;
     private final DateTime availabilityEnd;
-    private final int duration;
+    private final Integer duration;
     private final Set<Platform> platforms;
     
     public static BtVodLocationDataBuilder builder() {
@@ -41,7 +41,7 @@ public class BtVodLocationData {
         return availabilityEnd;
     }
 
-    public int getDuration() {
+    public Integer getDuration() {
         return duration;
     }
 
@@ -72,7 +72,7 @@ public class BtVodLocationData {
         private String uri;
         private DateTime availabilityStart;
         private DateTime availabilityEnd;
-        private int duration;
+        private Integer duration;
         private Set<Platform> platforms;
         
         public BtVodLocationData build() {
@@ -110,11 +110,11 @@ public class BtVodLocationData {
             return this;
         }
 
-        public void setDuration(int duration) {
+        public void setDuration(Integer duration) {
             this.duration = duration;
         }
 
-        public BtVodLocationDataBuilder withDuration(int duration) {
+        public BtVodLocationDataBuilder withDuration(Integer duration) {
             this.duration = duration;
             return this;
         }

@@ -19,14 +19,22 @@ public class BtVodFilmCreator implements BtVodContentCreator<Film> {
         film.setCanonicalUri(data.getUri());
         film.setTitle(data.getTitle());
         film.setDescription(data.getDescription());
-        film.setYear(data.getYear());
-        film.setLanguages(ImmutableSet.of(data.getLanguage()));
-        film.setCertificates(ImmutableSet.of(new Certificate(data.getCertificate(), Countries.GB)));
+        if (data.getYear() != null) {
+            film.setYear(data.getYear());
+        }
+        if (data.getLanguage() != null) {
+            film.setLanguages(ImmutableSet.of(data.getLanguage()));
+        }
+        if (data.getCertificate() != null) {
+            film.setCertificates(ImmutableSet.of(new Certificate(data.getCertificate(), Countries.GB)));
+        }
         film.setGenres(data.getGenres());
         for (BtVodLocationData location : data.getLocations()) {
             film.addVersion(BtVodExtractionHelper.generateVersion(location));
         }
-        film.addAlias(data.getSelfLink());
+        if (data.getSelfLink() != null) {
+            film.addAlias(data.getSelfLink());
+        }
         film.addAlias(data.getExternalId());
         film.setSpecialization(Specialization.FILM);
         film.setPublisher(Publisher.BT);

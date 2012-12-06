@@ -12,6 +12,8 @@ import org.atlasapi.remotesite.btvod.model.BtVodItemData.BtVodItemDataBuilder;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.CharMatcher;
 import com.google.inject.internal.Sets;
@@ -21,7 +23,7 @@ public class BtVodItemDataExtractor {
     public static final String ID_KEY = "id";
     public static final String SELF_KEY = "self";
     public static final String HREF_KEY = "href";
-    private static final String LINK_KEY = "link";
+    public static final String LINK_KEY = "link";
     private static final String REL_KEY = "rel";
     private static final String EXTERNAL_ID_KEY = "external-id";
     private static final String METADATA_KEY = "metadata";
@@ -44,61 +46,128 @@ public class BtVodItemDataExtractor {
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis().withZoneUTC();
     private final DateTimeFormatter timeFormatter = ISODateTimeFormat.hourMinuteSecond();
     private final BtVodLocationDataExtractor locationExtractor = new BtVodLocationDataExtractor();
+    private final Logger log = LoggerFactory.getLogger(BtVodItemDataExtractor.class);
     
     public BtVodItemData extract(Element source) {
         BtVodItemDataBuilder data = BtVodItemData.builder();
 
-        data.withUri(getChildElement(source, ID_KEY).getValue());
+        extractId(data, source);
         
-        Element metadataLinkElem = getLinkElement(source, METADATA_KEY);
-        if (metadataLinkElem == null) {
-            throw new ElementNotFoundException(source, LINK_KEY + ":" + METADATA_KEY);
-        }        
-        extractMetadataFields(data, metadataLinkElem);
+        extractMetadataFields(data, source);
         
-        Element assetsLinkElem = getLinkElement(source, ASSETS_KEY);
-        if (assetsLinkElem == null) {
-            throw new ElementNotFoundException(source, LINK_KEY + ":" + ASSETS_KEY);
-        } 
-        int duration = extractAssetsFields(data, assetsLinkElem);
+        Integer duration = extractAssetsFields(data, source);
         
-        extractLocations(data, getLinkElement(source, AVAILABILITY_WINDOWS_LINK_KEY), duration);
-        
-        data.withSelfLink(getLinkElement(source, SELF_KEY).getAttributeValue(HREF_KEY));
-        data.withExternalId(getChildElement(source, EXTERNAL_ID_KEY).getValue());
-        
-        
-        Element seriesElement = getLinkElement(source, SERIES_KEY);
-        if (seriesElement != null) {
-            extractSeriesFields(data, seriesElement);
-        }
+        extractLocations(data, source, duration);
+        extractSelfLink(data, source);
+        extractExternalId(data, source);
+        extractSeriesFields(data, source);
         extractEpisodeNumber(data, source);
         
         return data.build();
     }
+    
+    private void extractExternalId(BtVodItemDataBuilder data, Element source) {
+        Element idElem = source.getFirstChildElement(EXTERNAL_ID_KEY);
+        if (idElem == null) {
+            throw new ElementNotFoundException(source, EXTERNAL_ID_KEY);
+        }
+        data.setExternalId(idElem.getValue());
+    }
 
-    private void extractLocations(BtVodItemDataBuilder data, Element availabilityLinkElem, int duration) {
-        Element availabilityWindowsElem = getChildElement(availabilityLinkElem, AVAILABILITY_WINDOWS_KEY);
+    private void extractSelfLink(BtVodItemDataBuilder data, Element source) {
+        Element selfLinkElem = getLinkElement(source, SELF_KEY);
+        if (selfLinkElem != null) {
+            data.setSelfLink(selfLinkElem.getAttributeValue(HREF_KEY));
+        } else {
+            log.debug("No child element with name " + SELF_KEY + " found on element " + source);
+        }
+    }
+
+    private void extractId(BtVodItemDataBuilder data, Element source) {
+        Element idElem = source.getFirstChildElement(ID_KEY);
+        if (idElem == null) {
+            throw new ElementNotFoundException(source, ID_KEY);
+        }
+        data.setUri(idElem.getValue());
+    }
+
+    private void extractLocations(BtVodItemDataBuilder data, Element source, Integer duration) {
+        Element availabilityLinkElem = getLinkElement(source, AVAILABILITY_WINDOWS_LINK_KEY);
+        if (availabilityLinkElem == null) {
+            throw new ElementNotFoundException(source, LINK_KEY + ":" + AVAILABILITY_WINDOWS_LINK_KEY);
+        }
+        Element availabilityWindowsElem = availabilityLinkElem.getFirstChildElement(AVAILABILITY_WINDOWS_KEY);
+        if (availabilityWindowsElem == null) {
+            throw new ElementNotFoundException(availabilityLinkElem, AVAILABILITY_WINDOWS_KEY);
+        }
+        
         for (int i = 0; i < availabilityWindowsElem.getChildElements().size(); i++) {
             data.addLocation(locationExtractor.extract(availabilityWindowsElem.getChildElements().get(i), duration));
         }
     }
 
-    private void extractSeriesFields(BtVodItemDataBuilder data, Element seriesElement) {
-        Element titleGroupElem = getChildElement(seriesElement, TITLE_GROUP_KEY);
-        Element metadataElement = getChildElement(getLinkElement(titleGroupElem, METADATA_KEY), METADATA_KEY);
+    private void extractSeriesFields(BtVodItemDataBuilder data, Element source) {
+        Element seriesElement = getLinkElement(source, SERIES_KEY);
+        if (seriesElement == null) {
+            return;
+        }
+        Element titleGroupElem = seriesElement.getFirstChildElement(TITLE_GROUP_KEY);
+        if (titleGroupElem == null) {
+            return;
+        }
         
-        Element seasonNumberElem = getChildElement(metadataElement, SEASON_NUMBER_KEY);
-        Element idElement  = getChildElement(titleGroupElem, ID_KEY);
-        Element nameElement = getChildElement(titleGroupElem, NAME_KEY);
-        Element externalIdElem = getChildElement(titleGroupElem, EXTERNAL_ID_KEY);
-        Element selfLink = getLinkElement(titleGroupElem, SELF_KEY);
-        
-        data.setSeriesNumber(Integer.parseInt(seasonNumberElem.getValue()));
-        data.setContainer(idElement.getValue());
-        data.setContainerTitle(nameElement.getValue());
-        data.setContainerSelfLink(selfLink.getAttributeValue(HREF_KEY));
-        data.setContainerExternalId(externalIdElem.getValue());
+        extractSeasonNumber(data, titleGroupElem);
+        extractContainerSelfLink(data, titleGroupElem);
+        extractContainer(data, titleGroupElem);
+        extractContainerTitle(data, titleGroupElem);
+        extractContainerExternalId(data, titleGroupElem);
+    }
+    
+    private void extractContainerSelfLink(BtVodItemDataBuilder data, Element titleGroupElem) {
+        Element selfLinkElem = getLinkElement(titleGroupElem, SELF_KEY);
+        if (selfLinkElem != null) {
+            data.setContainerSelfLink(selfLinkElem.getAttributeValue(HREF_KEY));
+        }
+    }
+    
+    private void extractContainer(BtVodItemDataBuilder data, Element titleGroupElem) {
+        Element containerElem = titleGroupElem.getFirstChildElement(ID_KEY);
+        if (containerElem == null) {
+            throw new ElementNotFoundException(titleGroupElem, ID_KEY);
+        }
+        data.setContainer(containerElem.getValue());
+    }
+    
+    private void extractContainerTitle(BtVodItemDataBuilder data, Element titleGroupElem) {
+        Element containerTitleElem = titleGroupElem.getFirstChildElement(NAME_KEY);
+        if (containerTitleElem == null) {
+            throw new ElementNotFoundException(titleGroupElem, NAME_KEY);
+        }
+        data.setContainerTitle(containerTitleElem.getValue());
+    }
+    
+    private void extractContainerExternalId(BtVodItemDataBuilder data, Element titleGroupElem) {
+        Element containerExternalIdElem = titleGroupElem.getFirstChildElement(EXTERNAL_ID_KEY);
+        if (containerExternalIdElem == null) {
+            throw new ElementNotFoundException(titleGroupElem, EXTERNAL_ID_KEY);
+        }
+        data.setContainerExternalId(containerExternalIdElem.getValue());
+    }
+    
+    private void extractSeasonNumber(BtVodItemDataBuilder data, Element titleGroupElem) {
+        Element metadataLinkElem = getLinkElement(titleGroupElem, METADATA_KEY);
+        if (metadataLinkElem == null) {
+            return;
+        }
+        Element metadataElement = metadataLinkElem.getFirstChildElement(METADATA_KEY);
+        if (metadataElement == null) {
+            return;
+        }
+
+        Element seasonNumberElem = metadataElement.getFirstChildElement(SEASON_NUMBER_KEY);
+        if (seasonNumberElem != null) {
+            data.setSeriesNumber(Integer.parseInt(seasonNumberElem.getValue()));
+        }
     }
 
     private void extractEpisodeNumber(BtVodItemDataBuilder data, Element source) {
@@ -108,35 +177,98 @@ public class BtVodItemDataExtractor {
         }
     }
 
-    private void extractMetadataFields(BtVodItemDataBuilder data, Element metadataLink) {
-        Element metadataElement = getChildElement(metadataLink, METADATA_KEY);
+    private void extractMetadataFields(BtVodItemDataBuilder data, Element source) {
+        Element metadataLinkElem = getLinkElement(source, METADATA_KEY);
+        if (metadataLinkElem == null) {
+            throw new ElementNotFoundException(source, LINK_KEY + ":" + METADATA_KEY);
+        }  
+        Element metadataElement = metadataLinkElem.getFirstChildElement(METADATA_KEY);
+        if (metadataElement == null) {
+            throw new ElementNotFoundException(metadataLinkElem, METADATA_KEY);
+        }
         
-        Element nameElement = getChildElement(metadataElement, NAME_KEY);
-        Element descriptionElement = getChildElement(metadataElement, LONG_DESCRIPTION_KEY);
-        Element dateElement = getChildElement(metadataElement, RELEASE_DATE_KEY);
-        Element genresElement = getChildElement(metadataElement, SUB_GENRES_KEY);
-        
-        data.withTitle(nameElement.getValue())
-            .withDescription(descriptionElement.getValue())
-            .withYear(dateFormatter.parseDateTime(dateElement.getValue()).getYear());
-        
-        for (String genre : getGenres(genresElement)) {
-            data.addGenre(genre);
+        extractTitle(data, metadataElement);
+        extractDescription(data, metadataElement);
+        extractYear(data, metadataElement);
+        extractGenres(data, metadataElement);
+    }
+
+    private void extractTitle(BtVodItemDataBuilder data, Element metadataElement) {
+        Element nameElement = metadataElement.getFirstChildElement(NAME_KEY);
+        if (nameElement == null) {
+            throw new ElementNotFoundException(metadataElement, NAME_KEY);
+        }
+        data.setTitle(nameElement.getValue());
+    }
+
+    private void extractDescription(BtVodItemDataBuilder data, Element metadataElement) {
+        Element descriptionElement = metadataElement.getFirstChildElement(LONG_DESCRIPTION_KEY);
+        if (descriptionElement == null) {
+            throw new ElementNotFoundException(metadataElement, LONG_DESCRIPTION_KEY);
+        }
+        data.setDescription(descriptionElement.getValue());
+    }
+
+    private void extractYear(BtVodItemDataBuilder data, Element metadataElement) {
+        Element dateElement = metadataElement.getFirstChildElement(RELEASE_DATE_KEY);
+        if (dateElement != null) {
+            data.setYear(dateFormatter.parseDateTime(dateElement.getValue()).getYear());
         }
     }
 
-    private int extractAssetsFields(BtVodItemDataBuilder data, Element assetsLink) {
-        Element assetsElement = getChildElement(getChildElement(assetsLink, ASSETS_KEY), ASSET_KEY);
-        Element metadataElement = getChildElement(getLinkElement(assetsElement, METADATA_KEY), METADATA_KEY);
+    private void extractGenres(BtVodItemDataBuilder data, Element metadataElement) {
+        Element genresElement = metadataElement.getFirstChildElement(SUB_GENRES_KEY);
+        if (genresElement != null) {
+            for (String genre : getGenres(genresElement)) {
+                data.addGenre(genre);
+            }
+        }
+    }
+
+    private Integer extractAssetsFields(BtVodItemDataBuilder data, Element source) {
+        Element assetsLinkElem = getLinkElement(source, ASSETS_KEY);
+        if (assetsLinkElem == null) {
+            return null;
+        }
+        Element assetsElement = assetsLinkElem.getFirstChildElement(ASSETS_KEY);
+        if (assetsElement == null) {
+            return null;
+        }
+        Element assetElement = assetsElement.getFirstChildElement(ASSET_KEY);
+        if (assetElement == null) {
+            return null;
+        }
+        Element metadataLinkElem = getLinkElement(assetElement, METADATA_KEY);
+        if (metadataLinkElem == null) {
+            return null;
+        }  
+        Element metadataElement = metadataLinkElem.getFirstChildElement(METADATA_KEY);
+        if (metadataElement == null) {
+            return null;
+        }
         
-        Element languageElement = getChildElement(metadataElement, LANGUAGE_KEY);
-        Element ratingElement = getChildElement(metadataElement, RATING_KEY);
-        Element runtimeElement = getChildElement(metadataElement, RUNTIME_KEY);
+        extractLanguage(data, metadataElement);
+        extractRating(data, metadataElement);
         
-        data.withLanguage(languageElement.getValue())
-            .withCertificate(ratingElement.getValue());
-        
+        Element runtimeElement = metadataElement.getFirstChildElement(RUNTIME_KEY);
+        if (runtimeElement == null) {
+            return null;
+        }
         return extractDurationInSeconds(runtimeElement.getValue());
+    }
+
+    private void extractLanguage(BtVodItemDataBuilder data, Element metadataElement) {
+        Element languageElement = metadataElement.getFirstChildElement(LANGUAGE_KEY);
+        if (languageElement != null) {
+            data.setLanguage(languageElement.getValue());
+        }
+    }
+
+    private void extractRating(BtVodItemDataBuilder data, Element metadataElement) {
+        Element ratingElement = metadataElement.getFirstChildElement(RATING_KEY);
+        if (ratingElement != null) {
+            data.setCertificate(ratingElement.getValue());
+        }
     }
 
     private int extractDurationInSeconds(String value) {
@@ -153,14 +285,6 @@ public class BtVodItemDataExtractor {
             genres.add(genre);
         }
         return genres;
-    }
-
-    static Element getChildElement(Element source, String childName) {
-        Element childElement = source.getFirstChildElement(childName);
-        if (childElement == null) {
-            throw new ElementNotFoundException(source, childName);
-        }
-        return childElement;
     }
     
     // gets the element with name = 'link' and attribute 'rel' == rel

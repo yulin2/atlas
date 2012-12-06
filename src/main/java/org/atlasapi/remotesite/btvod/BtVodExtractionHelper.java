@@ -16,8 +16,10 @@ public class BtVodExtractionHelper {
 
     public static Version generateVersion(BtVodLocationData locationData) {
         Version version = new Version();
-        version.setDuration(Duration.standardSeconds(locationData.getDuration()));
-        version.setPublishedDuration(locationData.getDuration());
+        if (locationData.getDuration() != null) {
+            version.setDuration(Duration.standardSeconds(locationData.getDuration()));
+            version.setPublishedDuration(locationData.getDuration());
+        }
         
         Encoding encoding = new Encoding();
         
@@ -25,8 +27,12 @@ public class BtVodExtractionHelper {
             Policy policy = new Policy();
             policy.addAvailableCountry(Countries.GB);
             policy.setPlatform(platform);
-            policy.setAvailabilityStart(locationData.getAvailabilityStart());
-            policy.setAvailabilityEnd(locationData.getAvailabilityEnd());
+            if (locationData.getAvailabilityStart() != null) {
+                policy.setAvailabilityStart(locationData.getAvailabilityStart());
+            }
+            if (locationData.getAvailabilityEnd() != null) {
+                policy.setAvailabilityEnd(locationData.getAvailabilityEnd());
+            }
             
             Location location = new Location();
             location.setUri(locationData.getUri());

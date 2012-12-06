@@ -13,8 +13,12 @@ public class BtVodSeriesCreator implements BtVodContentCreator<Series> {
         
         series.setCanonicalUri(data.getContainer().get());
         series.setTitle(data.getContainerTitle().get());
-        series.withSeriesNumber(data.getSeriesNumber().get());
-        series.addAlias(data.getContainerSelfLink().get());
+        if (data.getSeriesNumber().isPresent()) {
+            series.withSeriesNumber(data.getSeriesNumber().get());
+        }
+        if (data.getContainerSelfLink().isPresent()) {
+            series.addAlias(data.getContainerSelfLink().get());
+        }
         series.addAlias(data.getContainerExternalId().get());
         series.setSpecialization(Specialization.TV);
         series.setPublisher(Publisher.BT);

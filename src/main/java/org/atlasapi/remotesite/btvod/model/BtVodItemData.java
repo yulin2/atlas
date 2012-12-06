@@ -12,7 +12,7 @@ public class BtVodItemData {
     private final String uri;
     private final String title;
     private final String description;
-    private final int year;
+    private final Integer year;
     private final String language;
     private final String certificate;
     private final Set<String> genres;
@@ -65,7 +65,7 @@ public class BtVodItemData {
         return description;
     }
     
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
     
@@ -125,7 +125,7 @@ public class BtVodItemData {
         private String uri;
         private String title;
         private String description;
-        private int year;
+        private Integer year;
         private String language;
         private String certificate;
         private Set<String> genres;
@@ -183,11 +183,11 @@ public class BtVodItemData {
             return this;
         }
 
-        public void setYear(int year) {
+        public void setYear(Integer year) {
             this.year = year;
         }
 
-        public BtVodItemDataBuilder withYear(int year) {
+        public BtVodItemDataBuilder withYear(Integer year) {
             this.year = year;
             return this;
         }

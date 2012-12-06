@@ -20,19 +20,32 @@ public class BtVodEpisodeCreator implements BtVodContentCreator<Episode> {
         episode.setCanonicalUri(data.getUri());
         episode.setTitle(data.getTitle());
         episode.setDescription(data.getDescription());
-        episode.setYear(data.getYear());
-        episode.setLanguages(ImmutableSet.of(data.getLanguage()));
-        episode.setCertificates(ImmutableSet.of(new Certificate(data.getCertificate(), Countries.GB)));
+        if (data.getYear() != null) {
+            episode.setYear(data.getYear());
+        }
+        if (data.getLanguage() != null) {
+            episode.setLanguages(ImmutableSet.of(data.getLanguage()));
+        }
+        if (data.getCertificate() != null) {
+            episode.setCertificates(ImmutableSet.of(new Certificate(data.getCertificate(), Countries.GB)));
+        }
         episode.setGenres(data.getGenres());
         for (BtVodLocationData location : data.getLocations()) {
             episode.addVersion(BtVodExtractionHelper.generateVersion(location));
         }
-        episode.addAlias(data.getSelfLink());
+        if (data.getSelfLink() != null) {
+            episode.addAlias(data.getSelfLink());
+        }
         episode.addAlias(data.getExternalId());
+        
         episode.setSeriesRef(new ParentRef(data.getContainer().get()));
         episode.setParentRef(new ParentRef(data.getContainer().get()));
-        episode.setSeriesNumber(data.getSeriesNumber().get());
-        episode.setEpisodeNumber(data.getEpisodeNumber().get());
+        if (data.getSeriesNumber().isPresent()) {
+            episode.setSeriesNumber(data.getSeriesNumber().get());
+        }
+        if (data.getEpisodeNumber().isPresent()) {
+            episode.setEpisodeNumber(data.getEpisodeNumber().get());
+        }
         episode.setSpecialization(Specialization.TV);
         episode.setPublisher(Publisher.BT);
         
