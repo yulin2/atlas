@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.EntityType;
@@ -24,6 +23,7 @@ import org.atlasapi.media.entity.simple.Restriction;
 import org.atlasapi.media.entity.simple.SeriesSummary;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.joda.time.DateTime;
