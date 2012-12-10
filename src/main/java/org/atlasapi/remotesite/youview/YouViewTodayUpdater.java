@@ -5,7 +5,7 @@ import org.joda.time.Duration;
 public class YouViewTodayUpdater extends YouViewUpdater {
 
     public YouViewTodayUpdater(YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler) {
-        super(fetcher, elementHandler, Duration.millis(0), Duration.standardDays(1));
+        super(fetcher, elementHandler, Duration.standardDays(0), Duration.standardDays(1));
     }
 
 }
