@@ -4,8 +4,10 @@ import nu.xom.Element;
 import nu.xom.Elements;
 
 import org.atlasapi.remotesite.redux.UpdateProgress;
+import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,18 +26,19 @@ public class YouViewUpdater extends ScheduledTask {
     private final Duration minus;
     private final Logger log = LoggerFactory.getLogger(YouViewUpdater.class);
     
-    public YouViewUpdater(YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler, Duration plus, Duration minus) {
+    public YouViewUpdater(YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler, Duration minus, Duration plus) {
         this.fetcher = fetcher;
         this.elementHandler = elementHandler;
-        this.plus = plus;
         this.minus = minus;
+        this.plus = plus;
     }
     
     @Override
     protected void runTask() {
         try {
-            DateTime startTime = new DateTime(LocalTime.MIDNIGHT).minus(minus.getStandardDays());
-            DateTime endTime = new DateTime(LocalTime.MIDNIGHT).plus(plus.getStandardDays());
+            DateTime midnightToday = new DateTime(DateMidnight.now());
+            DateTime startTime = midnightToday.minus(minus);
+            DateTime endTime = midnightToday.plus(plus);
             
             YouViewDataProcessor<UpdateProgress> processor = processor();
             
