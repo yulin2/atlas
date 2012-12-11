@@ -1,7 +1,5 @@
 package org.atlasapi.remotesite.youview;
 
-import java.util.Map;
-
 import nu.xom.Attribute;
 import nu.xom.Element;
 import nu.xom.Elements;
@@ -48,12 +46,12 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String START_KEY = "start";
     private static final String END_KEY = "end";
     private static final String SCHEDULE_EVENT_PREFIX = "http://youview.com/scheduleevent/";
-    private final Map<String, Channel> channelMapping;
+    private final YouViewChannelResolver channelResolver;
     
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
     
-    public YouViewContentExtractor(Map<String, Channel> channelMapping) {
-        this.channelMapping = channelMapping;
+    public YouViewContentExtractor(YouViewChannelResolver channelResolver) {
+        this.channelResolver = channelResolver;
     }
     
     @Override
@@ -126,7 +124,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         if (serviceId == null) {
             throw new ElementNotFoundException(source, YV_PREFIX + ":" + SERVICE_ID_KEY);
         }
-        return channelMapping.get(serviceId.getValue()).uri();
+        return channelResolver.getChannelUri(Integer.parseInt(serviceId.getValue()));
     }
 
     private Duration getBroadcastDuration(Element source) {
@@ -204,7 +202,11 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         if (serviceId == null) {
             throw new ElementNotFoundException(source, YV_PREFIX + ":" + SERVICE_ID_KEY);
         }
-        return channelMapping.get(serviceId.getValue()).mediaType();
+        Optional<Channel> channel = channelResolver.getChannel(Integer.parseInt(serviceId.getValue()));
+        if (!channel.isPresent()) {
+            throw new RuntimeException("Channel with YouView Id: " + serviceId.getValue() + " not found");
+        }
+        return channel.get().mediaType();
     }
 
     private String getTitle(Element source) {

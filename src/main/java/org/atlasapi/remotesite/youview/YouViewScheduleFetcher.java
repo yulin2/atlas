@@ -3,11 +3,11 @@ package org.atlasapi.remotesite.youview;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.io.IOUtils;
+import nu.xom.Builder;
+import nu.xom.Document;
+
 import org.atlasapi.remotesite.HttpClients;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.DateTimeFormatterBuilder;
 
 import com.metabroadcast.common.http.HttpException;
 import com.metabroadcast.common.http.HttpResponsePrologue;
@@ -16,9 +16,6 @@ import com.metabroadcast.common.http.SimpleHttpClient;
 import com.metabroadcast.common.http.SimpleHttpClientBuilder;
 import com.metabroadcast.common.http.SimpleHttpRequest;
 import com.metabroadcast.common.url.QueryStringParameters;
-
-import nu.xom.Builder;
-import nu.xom.Document;
 
 public class YouViewScheduleFetcher {
     
