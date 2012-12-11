@@ -277,7 +277,6 @@ var updateEnabled = function(callback){
 		if(enabled){
 			type = 'post';
 			data = {pubkey: publisher};
-			console.log("enable: " + publisher);
 		}
 		var url = "/admin/applications/"+slug+"/publishers/enabled";
 		if(!enabled){
