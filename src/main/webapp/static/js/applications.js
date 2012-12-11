@@ -266,6 +266,11 @@ var updateEnabled = function(callback){
 	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 		var enabled = app.configuration.publishers[i].enabled;
 		var publisher = app.configuration.publishers[i].key;
+		var available = app.configuration.publishers[i].state == "available";
+		if (!available) {
+			count++;
+			continue;
+		}
 		var type = 'delete';
 		var data = null;
 		if(enabled){
