@@ -1,10 +1,7 @@
 package org.atlasapi.remotesite.youview;
 
-import java.util.Map;
-
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -46,11 +43,11 @@ public class YouViewModule {
     }
     
     private YouViewXmlElementHandler youViewXmlElementHandler() {
-        YouViewContentExtractor extractor = new YouViewContentExtractor(channelMapping());
+        YouViewContentExtractor extractor = new YouViewContentExtractor(channelResolver());
         return new DefaultYouViewXmlElementHandler(extractor, contentResolver, contentWriter);
     }
 
-    private Map<String, Channel> channelMapping() {
-        return YouViewChannelResolver.generateChannelMapping(channelResolver);
+    private YouViewChannelResolver channelResolver() {
+        return new DefaultYouViewChannelResolver(channelResolver);
     }
 }

@@ -39,10 +39,10 @@ public class YouViewItemParseTest {
     private final YouViewContentExtractor contentExtractor;
     
     public YouViewItemParseTest() {
-        Map<String, Channel> channelMapping = ImmutableMap.<String, Channel>builder()
-                .put("1044", FIVE)
+        Map<Integer, Channel> channelMapping = ImmutableMap.<Integer, Channel>builder()
+                .put(1044, FIVE)
                 .build();
-        contentExtractor = new YouViewContentExtractor(channelMapping);
+        contentExtractor = new YouViewContentExtractor(new DummyYouViewChannelResolver(channelMapping));
     }
     
     @Test
@@ -58,10 +58,6 @@ public class YouViewItemParseTest {
         Version version = Iterables.getOnlyElement(item.getVersions());
         assertThat(version.getPublishedDuration(), is(3600));
         
-//        Broadcast broadcast = new Broadcast("http://www.five.tv", new DateTime(2012, 11, 18, 23, 30, 00), new DateTime(2012, 11, 19, 00, 30, 00));
-//        broadcast.withId("youview:7780297");
-//        broadcast.addAlias("dvb://233a..2134;8696");
-        
         Broadcast broadcast = Iterables.getOnlyElement(version.getBroadcasts());
         
         assertEquals("http://www.five.tv", broadcast.getBroadcastOn());
@@ -70,7 +66,6 @@ public class YouViewItemParseTest {
         assertThat(broadcast.getBroadcastDuration(), is(3600));
         assertEquals(ImmutableSet.of("dvb://233a..2134;8696"), broadcast.getAliases());
         assertEquals("youview:7780297", broadcast.getSourceId());
-//        assertEquals(ImmutableSet.of(broadcast), ImmutableSet.copyOf(version.getBroadcasts()));
         
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
         Location location = Iterables.getOnlyElement(encoding.getAvailableAt());
