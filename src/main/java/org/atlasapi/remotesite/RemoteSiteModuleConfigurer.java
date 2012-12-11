@@ -29,6 +29,7 @@ import org.atlasapi.remotesite.space.TheSpaceModule;
 import org.atlasapi.remotesite.tvblob.TVBlobModule;
 import org.atlasapi.remotesite.voila.VoilaModule;
 import org.atlasapi.remotesite.worldservice.WorldServicesModule;
+import org.atlasapi.remotesite.youview.YouViewModule;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -64,6 +65,7 @@ public class RemoteSiteModuleConfigurer {
         .put("lovefilm", LoveFilmModule.class)
         .put("netflix", NetflixModule.class)
         .put("bt", BtVodModule.class)
+        .put("youview", YouViewModule.class)
         .put("bbc-products", BBCProductsModule.class)
         .put("thespace", TheSpaceModule.class)
         .put("musicbrainz", MusicBrainzModule.class)
