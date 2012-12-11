@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.youview;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.joda.time.Duration;

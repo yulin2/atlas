@@ -17,7 +17,7 @@ import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.remotesite.AttributeNotFoundException;
 import org.atlasapi.remotesite.ContentExtractor;
-import org.atlasapi.remotesite.netflix.ElementNotFoundException;
+import org.atlasapi.remotesite.ElementNotFoundException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormatter;
