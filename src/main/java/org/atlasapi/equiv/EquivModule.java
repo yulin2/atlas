@@ -27,6 +27,7 @@ import static org.atlasapi.media.entity.Publisher.PREVIEW_NETWORKS;
 import static org.atlasapi.media.entity.Publisher.RADIO_TIMES;
 import static org.atlasapi.media.entity.Publisher.NETFLIX;
 import static org.atlasapi.media.entity.Publisher.BBC;
+import static org.atlasapi.media.entity.Publisher.YOUVIEW;
 import static org.atlasapi.persistence.lookup.TransitiveLookupWriter.generatedTransitiveLookupWriter;
 
 import java.io.File;
@@ -152,7 +153,7 @@ public class EquivModule {
                 Publisher.SPOTIFY, Publisher.SOUNDCLOUD, Publisher.RDIO, Publisher.AMAZON_UK);
 
         //Generally acceptable publishers.
-        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), Sets.union(ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX), musicPublishers));
+        Set<Publisher> acceptablePublishers = Sets.difference(ImmutableSet.copyOf(Publisher.values()), Sets.union(ImmutableSet.of(PREVIEW_NETWORKS, BBC_REDUX, RADIO_TIMES, LOVEFILM, NETFLIX, YOUVIEW), musicPublishers));
         
         ItemEquivalenceUpdater<Item> itemUpdater = standardItemUpdater();
         
@@ -170,7 +171,7 @@ public class EquivModule {
             itemUpdater), 
         acceptablePublishers);
         
-        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX), musicPublishers);
+        Set<Publisher> nonStandardPublishers = Sets.union(ImmutableSet.of(ITUNES, BBC_REDUX, RADIO_TIMES, FACEBOOK, LOVEFILM, NETFLIX, YOUVIEW), musicPublishers);
         for (Publisher publisher : Iterables.filter(ImmutableList.copyOf(Publisher.values()), not(in(nonStandardPublishers)))) {
                 publisherUpdaters.put(publisher, standardContainerEquivalenceUpdater);
         }
@@ -230,6 +231,19 @@ public class EquivModule {
                 .build(), 
             itemUpdater),
         reduxPublishers));
+        
+        Set<Publisher> youViewPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(YOUVIEW));
+        titleScoringGenerator = TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, youViewPublishers);
+        publisherUpdaters.put(YOUVIEW, resultHandlingUpdater(
+            new RootEquivalenceUpdater(containerUpdaterBuilder(youViewPublishers)
+                .withGenerators(ImmutableSet.of(
+                    titleScoringGenerator,
+                    new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, liveResultsStore(), log)
+                ))
+                .withScorer(titleScoringGenerator)
+                .build(), 
+            itemUpdater),
+            youViewPublishers));
 
         Set<Publisher> lfPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(LOVEFILM));
         titleScoringGenerator =  TitleMatchingEquivalenceScoringGenerator.create(searchResolver, Container.class, lfPublishers);
