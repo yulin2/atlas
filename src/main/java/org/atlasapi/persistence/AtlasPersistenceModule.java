@@ -49,7 +49,6 @@ import com.metabroadcast.common.persistence.mongo.health.MongoIOProbe;
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import com.mongodb.Mongo;
-import com.mongodb.MongoReplicaSetProbe;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 import javax.annotation.PostConstruct;
@@ -278,11 +277,6 @@ public class AtlasPersistenceModule {
     @Bean
     public EquivalenceSummaryStore equivalenceSummaryStore() {
         return cassandraContentPersistenceModule().cassandraEquivalenceSummaryStore();
-    }
-
-    @Bean
-    MongoReplicaSetProbe mongoReplicaSetProbe() {
-        return new MongoReplicaSetProbe(mongo());
     }
 
     @Bean
