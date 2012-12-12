@@ -361,17 +361,17 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         if (progData.getBillings() != null) {
             for (Billing billing : progData.getBillings().getBilling()) {
-                if(episode.getDescription() == null || !channel.uri().contains("wales")) {
-                    if (billing.getType().equals("synopsis")) {
+                if(!channel.uri().contains("wales")) {
+                    if (episode.getDescription() == null && billing.getType().equals("synopsis")) {
                         episode.setDescription(billing.getvalue());
                     }
-                    if (billing.getType().equals("pa_detail1")) {
+                    if (episode.getShortDescription() == null && billing.getType().equals("pa_detail1")) {
                         episode.setShortDescription(billing.getvalue());
                     }
-                    if (billing.getType().equals("pa_detail2")) {
+                    if (episode.getMediumDescription() == null && billing.getType().equals("pa_detail2")) {
                         episode.setMediumDescription(billing.getvalue());
                     }
-                    if (billing.getType().equals("pa_detail3")) {
+                    if (episode.getLongDescription() == null && billing.getType().equals("pa_detail3")) {
                         episode.setLongDescription(billing.getvalue());
                     }
                 }
