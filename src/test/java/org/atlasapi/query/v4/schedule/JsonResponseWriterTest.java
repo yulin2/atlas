@@ -2,6 +2,7 @@ package org.atlasapi.query.v4.schedule;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -38,7 +40,6 @@ public class JsonResponseWriterTest {
     
     @SuppressWarnings("unchecked")
     private Map<String, Object> asMap(StubHttpServletResponse response) throws IOException {
-        response.getWriter().flush();
         return mapper.readValue(response.getResponseAsString(), Map.class);
     }
 
@@ -180,4 +181,25 @@ public class JsonResponseWriterTest {
         assertEquals(testString, asMap(response).get("hello"));
     }
 
+    @Test
+    public void testDoesntWriteAnythingWhenAnExceptionIsThrown() throws IOException {
+        try {
+            formatter.writeObject(new EntityWriter<Integer>() {
+
+                @Override
+                public void write(Integer entity, FieldWriter writer, OutputContext ctxt)
+                    throws IOException {
+                    writer.writeField("error", 100 / entity);
+                }
+
+                @Override
+                public String fieldName() {
+                    return "field";
+                }
+            }, 0, ctxt);
+        } catch (Exception e) {
+            // excpected
+        }
+        assertTrue(Strings.isNullOrEmpty(response.getResponseAsString()));
+    }
 }
