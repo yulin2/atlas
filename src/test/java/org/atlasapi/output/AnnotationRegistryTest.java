@@ -8,6 +8,7 @@ import static org.atlasapi.output.Annotation.ID_SUMMARY;
 import static org.atlasapi.output.Annotation.SERIES_REFERENCE;
 import static org.atlasapi.output.Annotation.SERIES_SUMMARY;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import org.atlasapi.output.annotation.IdentificationSummaryAnnotation;
 import org.atlasapi.output.annotation.OutputAnnotation;
 import org.atlasapi.output.annotation.SeriesReferenceAnnotation;
 import org.atlasapi.output.annotation.SeriesSummaryAnnotation;
+import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.junit.Test;
 
 import com.google.common.collect.Collections2;
@@ -36,7 +38,7 @@ public class AnnotationRegistryTest {
     private final DescriptionAnnotation desc = new DescriptionAnnotation();
     private final ExtendedDescriptionAnnotation extDesc = new ExtendedDescriptionAnnotation();
     private final SeriesReferenceAnnotation seriesRef = new SeriesReferenceAnnotation();
-    private final SeriesSummaryAnnotation seriesSum = new SeriesSummaryAnnotation();
+    private final SeriesSummaryAnnotation seriesSum = new SeriesSummaryAnnotation(mock(ContainerSummaryResolver.class));
     
     private final AnnotationRegistry registry = AnnotationRegistry.builder()
         .register(ID_SUMMARY, idSum)
