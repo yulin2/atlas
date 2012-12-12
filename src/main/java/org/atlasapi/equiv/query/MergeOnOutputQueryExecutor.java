@@ -152,7 +152,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
         applyImagePrefs(config, chosen, notChosen);
         mergeTopics(chosen, notChosen);
         mergeKeyPhrases(chosen, notChosen);
-        mergeVersions(chosen, notChosen);
+        mergeVersions(config, chosen, notChosen);
         if (chosen instanceof Film) {
             mergeFilmProperties(config, (Film) chosen, Iterables.filter(notChosen, Film.class));
         }
@@ -224,12 +224,13 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
         }
     }
 
-    private <T extends Item> void mergeVersions(T chosen, Iterable<T> notChosen) {
+    <T extends Item> void mergeVersions(ApplicationConfiguration config, T chosen, Iterable<T> notChosen) {
         // if chosen has broadcasts, merge the set of broadcasts from notChosen
         Set<Broadcast> chosenBroadcasts = Sets.newHashSet(Iterables.concat(Iterables.transform(chosen.getVersions(), Version.TO_BROADCASTS)));
         if (!chosenBroadcasts.isEmpty()) {
+            List<T> notChosenOrdered = toContentOrdering(config.publisherPrecedenceOrdering()).sortedCopy(notChosen);
             for (Broadcast chosenBroadcast : chosenBroadcasts) {
-                matchAndMerge(chosenBroadcast, notChosen);
+                matchAndMerge(chosenBroadcast, notChosenOrdered);
             }
         }
         for (T notChosenItem : notChosen) {
@@ -241,8 +242,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
         }
     }
     
-    // iterable is not ordered in any way. so precedence order not guaranteed at this stage
-    private <T extends Item> void matchAndMerge(final Broadcast chosenBroadcast, Iterable<T> notChosen) {
+    private <T extends Item> void matchAndMerge(final Broadcast chosenBroadcast, List<T> notChosen) {
         List<Broadcast> equivBroadcasts = Lists.newArrayList();
         for (T notChosenItem : notChosen) {
             Iterable<Broadcast> notChosenBroadcasts = Iterables.concat(Iterables.transform(notChosenItem.getVersions(), Version.TO_BROADCASTS));
