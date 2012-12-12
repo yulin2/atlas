@@ -6,6 +6,7 @@ import java.util.List;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.annotation.OutputAnnotation;
 
@@ -16,7 +17,7 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ScheduleQuer
         @Override
         public void write(Channel entity, FieldWriter writer, OutputContext ctxt)
             throws IOException {
-            List<OutputAnnotation<? super Channel>> annotations = ctxt.getAnnotations(Channel.class);
+            List<OutputAnnotation<? super Channel>> annotations = ctxt.getAnnotations(Channel.class, Annotation.ID_SUMMARY);
             for (int i = 0; i < annotations.size(); i++) {
                 annotations.get(i).write(entity, writer, ctxt);
             }
@@ -32,7 +33,7 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ScheduleQuer
 
         @Override
         public void write(Item entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            List<OutputAnnotation<? super Item>> annotations = ctxt.getAnnotations(entity.getClass());
+            List<OutputAnnotation<? super Item>> annotations = ctxt.getAnnotations(entity.getClass(), Annotation.ID);
             for (int i = 0; i < annotations.size(); i++) {
                 annotations.get(i).write(entity, writer, ctxt);
             }
