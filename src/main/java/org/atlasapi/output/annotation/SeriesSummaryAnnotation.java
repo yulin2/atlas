@@ -1,6 +1,8 @@
 package org.atlasapi.output.annotation;
 
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 
 import org.atlasapi.media.entity.Content;
@@ -19,7 +21,12 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
 
     private final class SeriesSummaryWriter implements EntityWriter<Episode> {
 
-        private ContainerSummaryResolver containerSummaryResolver;
+        private final ContainerSummaryResolver containerSummaryResolver;
+        
+        
+        public SeriesSummaryWriter(ContainerSummaryResolver containerSummaryResolver) {
+            this.containerSummaryResolver = checkNotNull(containerSummaryResolver);
+        }
 
         @Override
         public void write(Episode entity, FieldWriter writer, OutputContext ctxt) throws IOException {
@@ -40,9 +47,9 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
         }
     }
 
-    public SeriesSummaryAnnotation() {
+    public SeriesSummaryAnnotation(ContainerSummaryResolver containerSummaryResolver) {
         super(Content.class);
-        summaryWriter = new SeriesSummaryWriter();
+        summaryWriter = new SeriesSummaryWriter(containerSummaryResolver);
     }
 
     @Override

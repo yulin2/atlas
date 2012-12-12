@@ -416,14 +416,15 @@ public class QueryWebModule {
         SubstitutionTableNumberCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
         RecentlyBroadcastChildrenResolver recentlyBroadcastResolver = new MongoRecentlyBroadcastChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildrenResolver = new MongoUpcomingChildrenResolver(mongo);
+        MongoContainerSummaryResolver containerSummaryResolver = new MongoContainerSummaryResolver(mongo);
         return AnnotationRegistry.builder()
         .register(ID_SUMMARY, new IdentificationSummaryAnnotation(idCodec))
         .register(ID, new IdentificationAnnotation(), commonImplied)
         .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(), ImmutableSet.of(ID))
         .register(SERIES_REFERENCE, new SeriesReferenceAnnotation(), commonImplied)
-        .register(SERIES_SUMMARY, new SeriesSummaryAnnotation(), commonImplied, ImmutableSet.of(SERIES_REFERENCE))
+        .register(SERIES_SUMMARY, new SeriesSummaryAnnotation(containerSummaryResolver), commonImplied, ImmutableSet.of(SERIES_REFERENCE))
         .register(BRAND_REFERENCE, new BrandReferenceAnnotation(), commonImplied)
-        .register(BRAND_SUMMARY, new BrandSummaryAnnotation(new MongoContainerSummaryResolver(mongo)), commonImplied, ImmutableSet.of(BRAND_REFERENCE))
+        .register(BRAND_SUMMARY, new BrandSummaryAnnotation(containerSummaryResolver), commonImplied, ImmutableSet.of(BRAND_REFERENCE))
         .register(DESCRIPTION, new DescriptionAnnotation(), ImmutableSet.of(ID, SERIES_REFERENCE, BRAND_REFERENCE))
         .register(EXTENDED_DESCRIPTION, new ExtendedDescriptionAnnotation(), ImmutableSet.of(DESCRIPTION, EXTENDED_ID))
         .register(SUB_ITEMS, new SubItemAnnotation(), commonImplied)
