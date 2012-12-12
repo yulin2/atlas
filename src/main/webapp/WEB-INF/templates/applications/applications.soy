@@ -127,6 +127,7 @@
 {/template}
 
 /**
+ * @param page
  * @param applications
  * @param page
  */
@@ -177,7 +178,14 @@
 			{/if}
 		{/if}
 	</div>
-	
+	<div>
+	{if $page.prevUrl}
+	   <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+	{/if}
+	{if $page.nextUrl}
+	   <a href="{$page.nextUrl}" class="btn inf mlm fr">Next</a>
+	{/if}
+	</div>
 	<div class="overlayBlocker" style="display: none;">
 		<div class="overlay">
 			<a href="#" class="closeOverlay"></a>
