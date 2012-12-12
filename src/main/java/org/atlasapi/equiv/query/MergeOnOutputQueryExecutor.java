@@ -26,6 +26,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -225,6 +226,13 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     private <T extends Item> void mergeVersions(T chosen, Iterable<T> notChosen) {
+        // if chosen has broadcasts, merge the set of broadcasts from notChosen
+        Set<Broadcast> chosenBroadcasts = Sets.newHashSet(Iterables.concat(Iterables.transform(chosen.getVersions(), Version.TO_BROADCASTS)));
+        if (!chosenBroadcasts.isEmpty()) {
+            for (Broadcast chosenBroadcast : chosenBroadcasts) {
+                matchAndMerge(chosenBroadcast, notChosen);
+            }
+        }
         for (T notChosenItem : notChosen) {
             for (Version version : notChosenItem.getVersions()) {
                 // TODO When we have more granular precedence this broadcast masking can be removed
@@ -233,6 +241,70 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
             }
         }
     }
+    
+    // iterable is not ordered in any way. so precedence order not guaranteed at this stage
+    private <T extends Item> void matchAndMerge(final Broadcast chosenBroadcast, Iterable<T> notChosen) {
+        List<Broadcast> equivBroadcasts = Lists.newArrayList();
+        for (T notChosenItem : notChosen) {
+            Iterable<Broadcast> notChosenBroadcasts = Iterables.concat(Iterables.transform(notChosenItem.getVersions(), Version.TO_BROADCASTS));
+            Optional<Broadcast> matched = Iterables.tryFind(notChosenBroadcasts, new Predicate<Broadcast>() {
+                @Override
+                public boolean apply(Broadcast input) {
+                    return chosenBroadcast.getBroadcastOn().equals(input.getBroadcastOn())
+                            && chosenBroadcast.getTransmissionTime().equals(input.getTransmissionTime());
+                }
+             });
+            if (matched.isPresent()) {
+                equivBroadcasts.add(matched.get());
+            }
+        }
+        // equivB'casts = list of matched broadcasts, ordered by precedence
+        for (Broadcast equiv : equivBroadcasts) {
+            mergeBroadcast(chosenBroadcast, equiv);
+        }
+    }
+    
+    private void mergeBroadcast(Broadcast chosen, Broadcast toMerge) {
+        chosen.setAliases(toMerge.getAliases());
+        
+        if (chosen.getRepeat() == null && toMerge.getRepeat() != null) {
+            chosen.setRepeat(toMerge.getRepeat());
+        }
+        if (chosen.getScheduleDate() == null && toMerge.getScheduleDate() != null) {
+            chosen.setScheduleDate(toMerge.getScheduleDate());
+        }
+        if (chosen.getSourceId() == null && toMerge.getSourceId() != null) {
+            chosen.withId(toMerge.getSourceId());
+        }
+        if (chosen.getSubtitled() == null && toMerge.getSubtitled() != null) {
+            chosen.setSubtitled(toMerge.getSubtitled());
+        }
+        if (chosen.getSigned() == null && toMerge.getSigned() != null) {
+            chosen.setSigned(toMerge.getSigned());
+        }
+        if (chosen.getAudioDescribed() == null && toMerge.getAudioDescribed() != null) {
+            chosen.setAudioDescribed(toMerge.getAudioDescribed());
+        }
+        if (chosen.getHighDefinition() == null && toMerge.getHighDefinition() != null) {
+            chosen.setHighDefinition(toMerge.getHighDefinition());
+        }
+        if (chosen.getWidescreen() == null && toMerge.getWidescreen() != null) {
+            chosen.setWidescreen(toMerge.getWidescreen());
+        }
+        if (chosen.getSurround() == null && toMerge.getSurround() != null) {
+            chosen.setSurround(toMerge.getSurround());
+        }
+        if (chosen.getLive() == null && toMerge.getLive() != null) {
+            chosen.setLive(toMerge.getLive());
+        }
+        if (chosen.getNewSeries() == null && toMerge.getNewSeries() != null) {
+            chosen.setNewSeries(toMerge.getNewSeries());
+        }
+        if (chosen.getPremiere() == null && toMerge.getPremiere() != null) {
+            chosen.setPremiere(toMerge.getPremiere());
+        }
+    }
+    
     private static final Predicate<Content> HAS_IMAGE_FIELD_SET = new Predicate<Content>() {
 
         @Override
