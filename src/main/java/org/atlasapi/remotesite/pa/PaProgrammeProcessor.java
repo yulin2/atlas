@@ -361,19 +361,21 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         if (progData.getBillings() != null) {
             for (Billing billing : progData.getBillings().getBilling()) {
-                if(!channel.uri().contains("wales")) {
-                    if (episode.getDescription() == null && billing.getType().equals("synopsis")) {
-                        episode.setDescription(billing.getvalue());
-                    }
-                    if (episode.getShortDescription() == null && billing.getType().equals("pa_detail1")) {
-                        episode.setShortDescription(billing.getvalue());
-                    }
-                    if (episode.getMediumDescription() == null && billing.getType().equals("pa_detail2")) {
-                        episode.setMediumDescription(billing.getvalue());
-                    }
-                    if (episode.getLongDescription() == null && billing.getType().equals("pa_detail3")) {
-                        episode.setLongDescription(billing.getvalue());
-                    }
+                if((episode.getDescription() == null || !channel.uri().contains("wales")) 
+                        && billing.getType().equals("synopsis")) {
+                    episode.setDescription(billing.getvalue());
+                }
+                if ((episode.getShortDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail1")) {
+                    episode.setShortDescription(billing.getvalue());
+                }
+                if ((episode.getMediumDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail2")) {
+                    episode.setMediumDescription(billing.getvalue());
+                }
+                if ((episode.getLongDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail3")) {
+                    episode.setLongDescription(billing.getvalue());
                 }
             }
         }
