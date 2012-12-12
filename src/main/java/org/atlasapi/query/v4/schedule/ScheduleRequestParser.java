@@ -22,7 +22,6 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
@@ -37,7 +36,10 @@ class ScheduleRequestParser {
     private final ChannelResolver channelResolver;
     private final ApplicationConfigurationFetcher applicationStore;
 
-    private final RequestParameterValidator validator = new RequestParameterValidator(ImmutableSet.of("from","to","source"),ImmutableSet.of("annotations","apiKey"));
+    private final RequestParameterValidator validator = RequestParameterValidator.builder()
+        .withRequiredParameters("from","to","source")
+        .withOptionalParameters("annotations","apiKey", "callback")
+        .build();
     
     private final NumberToShortStringCodec idCodec;
     private final DateTimeInQueryParser dateTimeParser;

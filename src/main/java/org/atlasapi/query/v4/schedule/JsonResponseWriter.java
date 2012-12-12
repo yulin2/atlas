@@ -95,7 +95,7 @@ public final class JsonResponseWriter implements ResponseWriter {
     public void finishResponse() throws IOException {
         writer.write(END_OBJECT);
         if (callback != null) {
-            writer.write(callback + ")");
+            writer.write(")");
         }
         writer.flush();
         if (out instanceof GZIPOutputStream) {
