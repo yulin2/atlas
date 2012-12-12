@@ -55,7 +55,9 @@ public class ScheduleController {
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
             ErrorSummary exception = ErrorSummary.forException(e);
+            writer.startResponse();
             errorSummaryWriter.write(exception, writer, NO_CONTEXT);
+            writer.finishResponse();
         }
     }
 
