@@ -23,6 +23,7 @@ import org.atlasapi.output.annotation.SeriesReferenceAnnotation;
 import org.atlasapi.output.annotation.SeriesSummaryAnnotation;
 import org.junit.Test;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
@@ -95,6 +96,24 @@ public class AnnotationRegistryTest {
         assertTrue("4th mapped annotation should be desc", desc.equals(mapped.get(3)));
         assertTrue("5th mapped annotation should be ext desc", extDesc.equals(mapped.get(4)));
         assertTrue("6th mapped annotation should be series summary", seriesSum.equals(mapped.get(5)));
+        
+    }
+
+    @Test
+    public void testOverridesWithMultipleImplyingAnnotations() {
+        
+        ImmutableSet<Annotation> annotations = ImmutableSet.of(EXTENDED_DESCRIPTION,SERIES_SUMMARY, DESCRIPTION);
+        for (List<Annotation> annotationList : Collections2.permutations(annotations)) {
+            AnnotationSet set = registry.activeAnnotations(annotationList);
+            List<OutputAnnotation<? super Item>> mapped = set.map(Item.class, ID);
+            
+            assertTrue("1st mapped annotation should be id summary", idSum.equals(mapped.get(0)));
+            assertTrue("2nd mapped annotation should be identification", ident.equals(mapped.get(1)));
+            assertTrue("3rd mapped annotation should be ext ident", extIdent.equals(mapped.get(2)));
+            assertTrue("4th mapped annotation should be desc", desc.equals(mapped.get(3)));
+            assertTrue("5th mapped annotation should be ext desc", extDesc.equals(mapped.get(4)));
+            assertTrue("6th mapped annotation should be series summary not "+mapped.get(5), seriesSum.equals(mapped.get(5)));
+        }
         
     }
 

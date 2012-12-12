@@ -115,6 +115,11 @@ public class AnnotationRegistry {
             for (OutputAnnotation<? super T> annotation : annotations) {
                 addWithImplied(activeAnnotations, annotation);
             }
+            for (OutputAnnotation<? super T> annotation : annotations) {
+                for (Object overridden : overrides.get(annotation)) {
+                    activeAnnotations.remove(overridden);
+                }
+            }
             return ImmutableList.copyOf(activeAnnotations);
         }
         
@@ -123,9 +128,6 @@ public class AnnotationRegistry {
                                         OutputAnnotation<? super T> annotation) {
             for (OutputAnnotation<?> implied : implications.get(annotation)) {
                 addWithImplied(builder,  (OutputAnnotation<? super T>)implied);
-            }
-            for (Object overridden : overrides.get(annotation)) {
-                builder.remove(overridden);
             }
             builder.add(annotation);
         }
