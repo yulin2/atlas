@@ -384,4 +384,9 @@ var page = {
 		
 		$('#app-publishers tbody').replaceWith(publisherString);
 	}
-};	
+};
+
+$("#runSearch").live('click', function() {
+	var url = window.location.pathname + "?search=" + encodeURIComponent($("#search").val());	
+	window.location.href = url;
+});
