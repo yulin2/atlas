@@ -68,7 +68,7 @@ import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.properties.Parameter;
 import com.metabroadcast.common.proxy.DelegateProxy;
 import com.mongodb.Mongo;
-import com.mongodb.MongoReplicaSetProbe;
+import com.mongodb.ReadPreference;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 
@@ -123,7 +123,7 @@ public class AtlasPersistenceModule {
     public Mongo mongo() {
         Mongo mongo = new Mongo(mongoHosts());
         if (processingConfig == null || !processingConfig.toBoolean()) {
-            mongo.slaveOk();
+            mongo.setReadPreference(ReadPreference.secondaryPreferred());
         }
         return mongo;
     }
@@ -443,11 +443,6 @@ public class AtlasPersistenceModule {
         ContentBootstrapper bootstrapper = new ContentBootstrapper();
         bootstrapper.withContentListers(contentLister());
         return bootstrapper;
-    }
-
-    @Bean
-    MongoReplicaSetProbe mongoReplicaSetProbe() {
-        return new MongoReplicaSetProbe(mongo());
     }
 
     @Bean
