@@ -15,6 +15,30 @@ import com.google.common.collect.Sets;
 
 public class RequestParameterValidator {
     
+    public static final Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        
+        private ImmutableSet<String> required;
+        private ImmutableSet<String> optional;
+
+        public Builder withRequiredParameters(String...parameters) {
+            this.required = ImmutableSet.copyOf(parameters);
+            return this;
+        }
+        
+        public Builder withOptionalParameters(String...parameters) {
+            this.optional = ImmutableSet.copyOf(parameters);
+            return this;
+        }
+        
+        public RequestParameterValidator build() {
+            return new RequestParameterValidator(required, optional);
+        }
+    }
+    
     private static final MapJoiner suggestionJoiner = Joiner.on("?), ").withKeyValueSeparator(" (");
     private static final Joiner commaJoiner = Joiner.on(", ");
 
@@ -24,9 +48,9 @@ public class RequestParameterValidator {
     
     private final String validParamMsg;
 
-    public RequestParameterValidator(Set<String> requiredParams, Set<String> validParams) {
+    private RequestParameterValidator(Set<String> requiredParams, Set<String> optionalParams) {
         this.requiredParams = ImmutableSet.copyOf(requiredParams);
-        this.optionalParams = ImmutableSet.copyOf(validParams);
+        this.optionalParams = ImmutableSet.copyOf(optionalParams);
         this.allParams = Sets.union(this.requiredParams, this.optionalParams);
         this.validParamMsg = "Valid params: " + commaJoiner.join(allParams);
     }

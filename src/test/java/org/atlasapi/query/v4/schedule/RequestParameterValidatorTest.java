@@ -4,14 +4,14 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 
 public class RequestParameterValidatorTest {
 
-    RequestParameterValidator validator = new RequestParameterValidator(
-        ImmutableSet.of("from","to","publisher"), ImmutableSet.of("apiKey","annotations")
-    );
+    RequestParameterValidator validator = RequestParameterValidator.builder()
+        .withRequiredParameters("from","to","publisher")
+        .withOptionalParameters("apiKey","annotations")
+        .build();
     
     @Test
     public void testValidatesParameters() {
