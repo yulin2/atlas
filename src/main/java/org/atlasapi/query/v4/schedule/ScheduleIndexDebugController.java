@@ -35,7 +35,7 @@ public class ScheduleIndexDebugController {
         );
     }
 
-    @RequestMapping({"/system/debug/schedule/{cid}.*","/system/debugschedules/{cid}"})
+    @RequestMapping({"/system/debug/schedules/{cid}.*","/system/debug/schedules/{cid}"})
     public void debugSchedule(HttpServletRequest request, HttpServletResponse response) throws Exception {
         ScheduleQuery query = requestParser.queryFrom(request);
         ListenableFuture<ScheduleRef> resolveSchedule = index.resolveSchedule(query.getPublisher(), query.getChannel(), query.getInterval());
