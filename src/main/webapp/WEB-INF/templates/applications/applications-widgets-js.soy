@@ -9,6 +9,9 @@
 	<div class="unit size1of2">
 		<h2>Your API Key</h2>
 		<div class="h3">{$application.credentials.apiKey}</div>
+		<div>
+	       <input type="checkbox" name="appEnabled" id="appEnabled" {if $application.credentials.enabled}checked{/if} /><label for="appEnabled">Enabled</label>
+	    </div>
 	</div>
 	<div class="unit size1of2 lastUnit">
 		<h2>Allowed IP Addresses</h2>
@@ -136,16 +139,16 @@
  */
 {template .applicationLink}
 	<div class="line app-link">
-		<div class="unit size1of4">
+		<div class="unit size1of5">
 			<a href="/admin/applications/{$app.slug}" data-id="{$app.slug}">{$app.title}</a>
 		</div>
-		<div class="unit size1of4">
+		<div class="unit size1of5">
 			{$app.slug}
 		</div>
-		<div class="unit size1of4">
+		<div class="unit size1of5">
 			{$app.credentials.apiKey}
 		</div>
-		<div class="unit size1of4 lastUnit">
+		<div class="unit size1of5 lastUnit">
 			-
 		</div>
 	</div>
