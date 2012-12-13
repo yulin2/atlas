@@ -22,9 +22,9 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             
             simpleDescription.setTitle(content.getTitle());
             simpleDescription.setDescription(content.getDescription());
-            
             simpleDescription.setImage(content.getImage());
             simpleDescription.setThumbnail(content.getThumbnail());
+            simpleDescription.setShortDescription(content.getShortDescription());
 
             MediaType mediaType = content.getMediaType();
             if (mediaType != null) {
@@ -42,6 +42,9 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setTags(content.getTags());
             simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),LookupRef.TO_ID));
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
+            simpleDescription.setMediumDescription(content.getMediumDescription());
+            simpleDescription.setLongDescription(content.getLongDescription());
+            
         }
         
     }
