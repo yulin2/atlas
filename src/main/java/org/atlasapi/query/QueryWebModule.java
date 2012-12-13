@@ -154,6 +154,7 @@ import org.atlasapi.query.v2.QueryController;
 import org.atlasapi.query.v2.SearchController;
 import org.atlasapi.query.v2.TopicController;
 import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
+import org.atlasapi.query.v4.schedule.ScheduleIndexDebugController;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -452,5 +453,10 @@ public class QueryWebModule {
         .register(CHANNELS, new ChannelsAnnotation(), commonImplied)
         .register(PUBLISHER, new PublisherAnnotation(), commonImplied)
         .build();
+    }
+    
+    @Bean
+    public ScheduleIndexDebugController scheduleIndexDebug() {
+        return new ScheduleIndexDebugController(scheduleIndex, channelResolver, configFetcher);
     }
 }
