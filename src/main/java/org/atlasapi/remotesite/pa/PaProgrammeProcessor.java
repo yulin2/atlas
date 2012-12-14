@@ -12,6 +12,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
@@ -52,6 +53,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.Timestamp;
 
@@ -253,6 +255,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         brand.setTitle(progData.getTitle());
         brand.setDescription(progData.getSeriesSynopsis());
         brand.setSpecialization(specialization(progData, channel));
+        setCertificate(progData, brand);
         setGenres(progData, brand);
 
         if (progData.getPictures() != null) {
@@ -298,6 +301,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
+        setCertificate(progData, series);
         setGenres(progData, series);
         
         if (progData.getPictures() != null) {
@@ -425,6 +429,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             return "http://pressassociation.com/genres/" + from.getCategoryCode();
         }
     };
+
+    private void setCertificate(ProgData progData, Content content) {
+        if (progData.getCertificate() != null) {
+            content.setCertificates(ImmutableList.of(new Certificate(progData.getCertificate(), Countries.GB)));
+        }
+    }
     
     private void setGenres(ProgData progData, Content content) {
         Set<String> extractedGenres = genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), TO_GENRE_URIS)));
@@ -609,6 +619,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private void setBasicDetails(ProgData progData, Item item) {
+        setCertificate(progData, item);
         Version version = new Version();
         version.setProvider(Publisher.PA);
         version.set3d(getBooleanValue(progData.getAttr().getThreeD()));
