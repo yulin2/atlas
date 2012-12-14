@@ -405,3 +405,9 @@ var updateEnabledDisabled = function() {
 		$('#appEnabled').attr('checked', !checkedStatus);
 	}
 }
+
+$('#showEnabledOnly').live('click', function() {
+	var url = "/admin/applications?showEnabledOnly=";
+	url += $(this).attr('checked') ? "yes" : "no";
+	window.location.href = url;
+});

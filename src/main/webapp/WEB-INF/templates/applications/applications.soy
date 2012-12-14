@@ -128,6 +128,8 @@
 
 /**
  * @param applications
+ * @param user
+ * @param showEnabledOnly
  */
 {template .index}
 {call atlas.templates.applications.head}
@@ -135,15 +137,12 @@
 	{param application: null /}
 {/call}
 	<h1>Applications</h1>
-	<!--<div class="form fr mrm">
-    	<div class="grp">
-    		<label for="filter">Filter</label>
-    		<div class="inputHolder">
-    			<input type="text" id="filter" />
-    			<span class="extra neg" style="display: none;"><a href="#" class="icn cross" id="clearFilter" title="Clear">Clear</a></span>
-    		</div>
-    	</div>
-	</div>-->
+	{if $user.role == 'admin'}
+		<div class="form fr mrm">
+	       <label for="showEnabledOnly">Show only enabled applications</label>
+	       <input type="checkbox" name="showEnabledOnly" id="showEnabledOnly" {if $showEnabledOnly}checked{/if} />
+	    </div>
+	{/if}
 	<button type="button" class="btn pos mlm fr" onclick="$('.overlayBlocker').show();">Create Application</button>
 	<h2 class="fl">Current Applications</h2>
 	<div id="applications-list" data-apps="{length($applications)}" class="cf cb">
@@ -207,6 +206,7 @@
 
 /**
  * @param application
+ * @param user
  */
 {template .application}
 {call atlas.templates.applications.head}
@@ -215,6 +215,7 @@
 {/call}
 	{call atlas.templates.applications.widgets.applicationContent}
 		{param application: $application /}
+		{param user: $user /}
 	{/call}
 {call atlas.templates.applications.foot /}
 {/template}
