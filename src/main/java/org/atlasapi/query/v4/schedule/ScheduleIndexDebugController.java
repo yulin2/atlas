@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.metabroadcast.common.time.SystemClock;
 
 @Controller
 public class ScheduleIndexDebugController {
@@ -42,7 +43,8 @@ public class ScheduleIndexDebugController {
         this.requestParser = new ScheduleRequestParser(
             channelResolver,
             appFetcher,
-            MAX_REQUEST_DURATION
+            MAX_REQUEST_DURATION,
+            new SystemClock()
         );
     }
 

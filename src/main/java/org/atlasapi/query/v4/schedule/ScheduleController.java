@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.metabroadcast.common.time.SystemClock;
+
 @Controller
 public class ScheduleController {
 
@@ -38,7 +40,8 @@ public class ScheduleController {
         this.requestParser = new ScheduleRequestParser(
             channelResolver,
             appFetcher,
-            MAX_REQUEST_DURATION
+            MAX_REQUEST_DURATION,
+            new SystemClock()
         );
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;

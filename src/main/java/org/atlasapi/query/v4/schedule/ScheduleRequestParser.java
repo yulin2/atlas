@@ -11,12 +11,14 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.query.v2.QueryParameterAnnotationsExtractor;
+import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
@@ -25,6 +27,7 @@ import com.google.common.base.Strings;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
+import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 class ScheduleRequestParser {
@@ -44,9 +47,11 @@ class ScheduleRequestParser {
     private final NumberToShortStringCodec idCodec;
     private final DateTimeInQueryParser dateTimeParser;
     private final QueryParameterAnnotationsExtractor annotationExtractor;
-    private Duration maxQueryDuration;
+    private final Duration maxQueryDuration;
+    private final Clock clock;
 
-    public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration) {
+
+    public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock) {
         this.channelResolver = channelResolver;
         this.applicationStore = appFetcher;
         this.maxQueryDuration = maxQueryDuration;
@@ -57,6 +62,7 @@ class ScheduleRequestParser {
                 .parsesIsoDates()
                 .parsesOffsets()
                 .build();
+        this.clock = clock;
         this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
 
@@ -71,11 +77,31 @@ class ScheduleRequestParser {
         Interval queryInterval = extractInterval(request);
         
         ApplicationConfiguration appConfig = getConfiguration(request);
-        checkArgument(appConfig.getEnabledSources().contains(publisher), "Source %s not enabled", publisher);
+        appConfig = appConfigForValidPublisher(publisher, appConfig, queryInterval);
+        checkArgument(appConfig != null, "Source %s not enabled", publisher);
         
         Set<Annotation> annotations = annotationExtractor.extract(request).or(defaultAnnotations());
 
         return new ScheduleQuery(publisher, channel, queryInterval, appConfig, annotations);
+    }
+
+    private ApplicationConfiguration appConfigForValidPublisher(Publisher publisher,
+                                                                ApplicationConfiguration appConfig,
+                                                                Interval interval) {
+        if (appConfig.isEnabled(publisher)) {
+            return appConfig;
+        }
+        if (Publisher.PA.equals(publisher) && overlapsOpenInterval(interval)) {
+            appConfig = appConfig.withSource(Publisher.PA, SourceStatus.AVAILABLE_ENABLED);
+            return appConfig;
+        }
+        return null;
+    }
+
+    private boolean overlapsOpenInterval(Interval interval) {
+        DateMidnight now = clock.now().toDateMidnight();
+        Interval openInterval = new Interval(now.minusDays(7), now.plusDays(7));
+        return openInterval.contains(interval);
     }
 
     private Channel extractChannel(HttpServletRequest request) {
