@@ -42,7 +42,7 @@ public class ScheduleRequestParserTest {
 
     private final ApplicationConfigurationFetcher applicationFetcher = mock(ApplicationConfigurationFetcher.class);
     private final ChannelResolver channelResolver = mock(ChannelResolver.class);
-    private final DateTime time = new DateTime(DateTimeZones.UTC);
+    private final DateTime time = new DateTime(2012, 12, 14, 10,00,00,000, DateTimeZones.UTC);
     private final ScheduleRequestParser builder = new ScheduleRequestParser(
         channelResolver,
         applicationFetcher,
@@ -120,7 +120,7 @@ public class ScheduleRequestParserTest {
     @Test(expected=IllegalArgumentException.class)
     public void testDoesntAcceptDisabledPublisherOutOfOpenRange() {
         
-        DateTime from = time.toDateMidnight().minusDays(8).toDateTime();
+        DateTime from = new DateTime(2012,12,06,10,00,00,000,DateTimeZones.UTC);
         DateTime to = from.plusDays(1);
         
         StubHttpServletRequest request = scheduleRequest(channel, from, to,
@@ -131,10 +131,36 @@ public class ScheduleRequestParserTest {
     }
 
     @Test
-    public void testAcceptsDisabledPublisherInRange() {
+    public void testAcceptsDisabledPublisherAtBeginningOfRange() {
         
-        DateTime from = time.toDateMidnight().minusDays(7).toDateTime();
+        DateTime from = new DateTime(2012,12,07,00,00,00,000,DateTimeZones.UTC);
         DateTime to = from.plusHours(2);
+        
+        StubHttpServletRequest request = scheduleRequest(channel, from, to,
+            PA, "apikey", Annotation.defaultAnnotations(), ".json");
+        
+        builder.queryFrom(request);
+        
+    }
+
+    @Test
+    public void testAcceptsDisabledPublisherAtEndOfRange() {
+        
+        DateTime from = new DateTime(2012,12,21,00,00,00,000,DateTimeZones.UTC);
+        DateTime to = from.plusHours(24);
+        
+        StubHttpServletRequest request = scheduleRequest(channel, from, to,
+            PA, "apikey", Annotation.defaultAnnotations(), ".json");
+        
+        builder.queryFrom(request);
+        
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testDoesntAcceptDisabledPublisherBeyondEndOfRange() {
+        
+        DateTime from = new DateTime(2012,12,22,00,00,00,000,DateTimeZones.UTC);
+        DateTime to = from.plusHours(24);
         
         StubHttpServletRequest request = scheduleRequest(channel, from, to,
             PA, "apikey", Annotation.defaultAnnotations(), ".json");

@@ -100,7 +100,7 @@ class ScheduleRequestParser {
 
     private boolean overlapsOpenInterval(Interval interval) {
         DateMidnight now = clock.now().toDateMidnight();
-        Interval openInterval = new Interval(now.minusDays(7), now.plusDays(7));
+        Interval openInterval = new Interval(now.minusDays(7), now.plusDays(8));
         return openInterval.contains(interval);
     }
 
