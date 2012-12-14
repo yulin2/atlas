@@ -427,7 +427,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
                 simpleLocation.setPlatform(policy.getPlatform().key());
             }
             if (policy.getNetwork() != null) {
-                simpleLocation.setNetwork(policy.getNetwork().key());
+                simpleLocation.setNetwork(policy.getNetwork().getTitle());
             }
         }
 
