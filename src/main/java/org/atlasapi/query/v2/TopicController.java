@@ -54,47 +54,50 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     
     @RequestMapping(value={"3.0/topics/{id}.*","/topics/{id}.*"})
     public void topic(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
+    	try {
+            ContentQuery query = builder.build(req);
         
-        ContentQuery query = builder.build(req);
+            Maybe<Topic> topicForUri = topicResolver.topicForId(idCodec.decode(id).longValue());
         
-        Maybe<Topic> topicForUri = topicResolver.topicForId(idCodec.decode(id).longValue());
+            if(topicForUri.isNothing()) {
+                outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
+                return;
+            }
         
-        if(topicForUri.isNothing()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
-            return;
+            Topic topic = topicForUri.requireValue();
+        
+            if(!query.allowsSource(topic.getPublisher())) {
+                outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
+                return;
+            }
+        
+        
+            modelAndViewFor(req, resp, ImmutableSet.<Topic>of(topicForUri.requireValue()), query.getConfiguration());
+    	} catch (Exception e) {
+            errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
-        
-        Topic topic = topicForUri.requireValue();
-        
-        if(!query.allowsSource(topic.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
-            return;
-        }
-        
-        
-        modelAndViewFor(req, resp, ImmutableSet.<Topic>of(topicForUri.requireValue()), query.getConfiguration());
     }
     
     @RequestMapping(value={"3.0/topics/{id}/content.*", "/topics/{id}/content"})
     public void topicContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
-        ContentQuery query = builder.build(req);
-
-        long decodedId = idCodec.decode(id).longValue();
-        Maybe<Topic> topicForUri = topicResolver.topicForId(decodedId);
-        
-        if(topicForUri.isNothing()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
-            return;
-        }
-        
-        Topic topic = topicForUri.requireValue();
-        
-        if(!query.allowsSource(topic.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
-            return;
-        }
-        
         try {
+    	    ContentQuery query = builder.build(req);
+
+            long decodedId = idCodec.decode(id).longValue();
+            Maybe<Topic> topicForUri = topicResolver.topicForId(decodedId);
+        
+            if(topicForUri.isNothing()) {
+                outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
+                return;
+            }
+        
+            Topic topic = topicForUri.requireValue();
+        
+            if(!query.allowsSource(topic.getPublisher())) {
+                outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
+                return;
+            }
+
             Selection selection = query.getSelection();
             QueryResult<Content, Topic> result = QueryResult.of(query.getSelection().apply(iterable(contentLister.contentForTopic(decodedId, query))), topic);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());

@@ -64,46 +64,49 @@ public class ProductController extends BaseController<Iterable<Product>> {
     
     @RequestMapping(value={"3.0/products/{id}.*","/products/{id}.*"})
     public void topic(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
+    	try {
+            ContentQuery query = builder.build(req);
         
-        ContentQuery query = builder.build(req);
+            Optional<Product> productForId = productResolver.productForId(idCodec.decode(id).longValue());
         
-        Optional<Product> productForId = productResolver.productForId(idCodec.decode(id).longValue());
+            if(!productForId.isPresent()) {
+                outputter.writeError(req, resp, NOT_FOUND.withMessage("Product " + id + " not found"));
+                return;
+            }
         
-        if(!productForId.isPresent()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Product " + id + " not found"));
-            return;
+            Product product = productForId.get();
+        
+            if(!query.allowsSource(product.getPublisher())) {
+                outputter.writeError(req, resp, FORBIDDEN.withMessage("Product " + id + " unavailable"));
+                return;
+            }
+        
+            modelAndViewFor(req, resp, ImmutableSet.<Product>of(product), query.getConfiguration());
+        } catch (Exception e) {
+            errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
-        
-        Product product = productForId.get();
-        
-        if(!query.allowsSource(product.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Product " + id + " unavailable"));
-            return;
-        }
-        
-        modelAndViewFor(req, resp, ImmutableSet.<Product>of(product), query.getConfiguration());
     }
     
     @RequestMapping(value={"3.0/products/{id}/content.*", "/products/{id}/content"})
     public void topicContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
-        ContentQuery query = builder.build(req);
+    	try {
+    	    ContentQuery query = builder.build(req);
 
-        long decodedId = idCodec.decode(id).longValue();
-        Optional<Product> productForId = productResolver.productForId(decodedId);
+            long decodedId = idCodec.decode(id).longValue();
+            Optional<Product> productForId = productResolver.productForId(decodedId);
         
-        if(!productForId.isPresent()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Product " + id + " not found"));
-            return;
-        }
+            if(!productForId.isPresent()) {
+                outputter.writeError(req, resp, NOT_FOUND.withMessage("Product " + id + " not found"));
+                return;
+            }
         
-        Product product = productForId.get();
+            Product product = productForId.get();
         
-        if(!query.allowsSource(product.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Product " + id + " unavailable"));
-            return;
-        }
+            if(!query.allowsSource(product.getPublisher())) {
+                outputter.writeError(req, resp, FORBIDDEN.withMessage("Product " + id + " unavailable"));
+                return;
+            }
         
-        try {
             Selection selection = query.getSelection();
             QueryResult<Content, Product> result = QueryResult.of(Iterables.filter(Iterables.concat(queryExecutor.executeUriQuery(product.getContent(), query).values()),Content.class), product);
             queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
