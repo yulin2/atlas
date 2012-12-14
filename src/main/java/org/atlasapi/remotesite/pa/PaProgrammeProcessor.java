@@ -324,6 +324,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         brand.setTitle(progData.getTitle());
         brand.setDescription(progData.getSeriesSynopsis());
         brand.setSpecialization(specialization(progData, channel));
+        setCertificate(progData, brand);
         setGenres(progData, brand);
 
         if (progData.getPictures() != null) {
@@ -369,6 +370,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
+        setCertificate(progData, series);
         setGenres(progData, series);
         
         if (progData.getPictures() != null) {
@@ -452,19 +454,21 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         if (progData.getBillings() != null) {
             for (Billing billing : progData.getBillings().getBilling()) {
-                if(episode.getDescription() == null || !channel.uri().contains("wales")) {
-                    if (billing.getType().equals("synopsis")) {
-                        episode.setDescription(billing.getvalue());
-                    }
-                    if (billing.getType().equals("pa_detail1")) {
-                        episode.setShortDescription(billing.getvalue());
-                    }
-                    if (billing.getType().equals("pa_detail2")) {
-                        episode.setMediumDescription(billing.getvalue());
-                    }
-                    if (billing.getType().equals("pa_detail3")) {
-                        episode.setLongDescription(billing.getvalue());
-                    }
+                if((episode.getDescription() == null || !channel.uri().contains("wales")) 
+                        && billing.getType().equals("synopsis")) {
+                    episode.setDescription(billing.getvalue());
+                }
+                if ((episode.getShortDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail1")) {
+                    episode.setShortDescription(billing.getvalue());
+                }
+                if ((episode.getMediumDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail2")) {
+                    episode.setMediumDescription(billing.getvalue());
+                }
+                if ((episode.getLongDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail3")) {
+                    episode.setLongDescription(billing.getvalue());
                 }
             }
         }
@@ -514,6 +518,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             return "http://pressassociation.com/genres/" + from.getCategoryCode();
         }
     };
+
+    private void setCertificate(ProgData progData, Content content) {
+        if (progData.getCertificate() != null) {
+            content.setCertificates(ImmutableList.of(new Certificate(progData.getCertificate(), Countries.GB)));
+        }
+    }
     
     private void setGenres(ProgData progData, Content content) {
         Set<String> extractedGenres = genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), TO_GENRE_URIS)));
@@ -705,6 +715,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private void setBasicDetails(ProgData progData, Item item) {
+        setCertificate(progData, item);
         Version version = new Version();
         version.setProvider(Publisher.PA);
         version.set3d(getBooleanValue(progData.getAttr().getThreeD()));
