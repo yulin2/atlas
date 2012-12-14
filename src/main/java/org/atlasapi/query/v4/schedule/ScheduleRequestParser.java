@@ -66,7 +66,7 @@ class ScheduleRequestParser {
         this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
 
-    public ScheduleQuery queryFrom(HttpServletRequest request) {
+    public ScheduleQuery queryFrom(HttpServletRequest request) throws NotFoundException {
         // Attempt to extract channel first so we can 404 if missing before
         // 400ing from bad params.
         Channel channel = extractChannel(request);
@@ -104,13 +104,14 @@ class ScheduleRequestParser {
         return openInterval.contains(interval);
     }
 
-    private Channel extractChannel(HttpServletRequest request) {
+    private Channel extractChannel(HttpServletRequest request) throws NotFoundException {
         String channelId = getChannelId(request.getRequestURI());
         Maybe<Channel> channel = resolveChannel(channelId);
         
-        //Exception thrown should be translated to 404 not 400.
-        checkArgument(channel.hasValue(), "Unknown channel '%s'", channelId);
-        return channel.requireValue();
+        if (channel.hasValue()) {
+            return channel.requireValue();
+        }
+        throw new NotFoundException(String.format("Unknown channel '%s'", channelId));
     }
 
     private Maybe<Channel> resolveChannel(String channelId) {
