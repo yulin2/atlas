@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.pa;
 
+import java.util.concurrent.locks.Lock;
+
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
@@ -78,6 +80,7 @@ public class PaModule {
     private @Autowired ChannelWriter channelWriter;
     private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
+    private @Autowired Lock peopleLock;
     
     private @Value("${pa.ftp.username}") String ftpUsername;
     private @Value("${pa.ftp.password}") String ftpPassword;
@@ -109,11 +112,11 @@ public class PaModule {
     }
 
     private PaCompletePeopleUpdater paCompletePeopleUpdater() {
-        return new PaCompletePeopleUpdater(paProgrammeDataStore(), personResolver, personWriter);
+        return new PaCompletePeopleUpdater(paProgrammeDataStore(), personResolver, personWriter, peopleLock);
     }
 
     private PaDailyPeopleUpdater paDailyPeopleUpdater() {
-        return new PaDailyPeopleUpdater(paProgrammeDataStore(), personResolver, personWriter);
+        return new PaDailyPeopleUpdater(paProgrammeDataStore(), personResolver, personWriter, fileUploadResultStore, peopleLock);
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
