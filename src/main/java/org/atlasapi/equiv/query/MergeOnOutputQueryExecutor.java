@@ -264,7 +264,7 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     }
     
     private void mergeBroadcast(Broadcast chosen, Broadcast toMerge) {
-        chosen.setAliases(toMerge.getAliases());
+        chosen.addAliases(toMerge.getAliases());
         
         if (chosen.getRepeat() == null && toMerge.getRepeat() != null) {
             chosen.setRepeat(toMerge.getRepeat());
