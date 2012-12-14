@@ -40,6 +40,14 @@ public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
             return name.endsWith("_features.xml");
         }
     };
+
+    private static final FilenameFilter profilesFilenameFilter = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith("_profiles.xml") || name.endsWith("_profiles_full_dump.xml");
+        }
+    };
+
     private static final FilenameFilter channelsFilenameFilter = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String name) {
@@ -154,6 +162,12 @@ public class DefaultPaProgrammeDataStore implements PaProgrammeDataStore {
     public List<File> localFeaturesFiles(Predicate<File> filter) {
         Predicate<File> fileFilter = filter == null ? Predicates.<File> alwaysTrue() : filter;
         return FILE_NAME_ORDER.immutableSortedCopy(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(featuresFilenameFilter)), fileFilter));
+    }
+
+    @Override
+    public List<File> localProfilesFiles(Predicate<File> filter) {
+        Predicate<File> fileFilter = filter == null ? Predicates.<File> alwaysTrue() : filter;
+        return FILE_NAME_ORDER.immutableSortedCopy(Iterables.filter(ImmutableList.copyOf(localFolder.listFiles(profilesFilenameFilter)), fileFilter));
     }
     
     @Override

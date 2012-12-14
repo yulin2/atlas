@@ -12,8 +12,10 @@ import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
+import org.atlasapi.persistence.content.PeopleResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
+import org.atlasapi.persistence.content.people.PersonWriter;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
@@ -27,6 +29,8 @@ import org.atlasapi.remotesite.pa.channels.PaChannelsUpdater;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.features.PaFeaturesUpdater;
+import org.atlasapi.remotesite.pa.people.PaCompletePeopleUpdater;
+import org.atlasapi.remotesite.pa.people.PaDailyPeopleUpdater;
 import org.atlasapi.remotesite.pa.persistence.MongoPaScheduleVersionStore;
 import org.atlasapi.remotesite.pa.persistence.PaScheduleVersionStore;
 import org.atlasapi.remotesite.rt.RtFilmModule;
@@ -50,6 +54,8 @@ import com.metabroadcast.common.security.UsernameAndPassword;
 @Import(RtFilmModule.class)
 public class PaModule {
     private final static RepetitionRule CHANNELS_INGEST = RepetitionRules.every(Duration.standardHours(12));
+    private final static RepetitionRule PEOPLE_COMPLETE_INGEST = RepetitionRules.NEVER;
+    private final static RepetitionRule PEOPLE_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);
     private final static RepetitionRule FEATURES_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);
     private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardMinutes(10)).withOffset(Duration.standardMinutes(15));
     private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardMinutes(10));
@@ -62,6 +68,8 @@ public class PaModule {
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ChannelGroupWriter channelGroupWriter;
     private @Autowired ChannelGroupResolver channelGroupResolver;
+    private @Autowired PeopleResolver personResolver;
+    private @Autowired PersonWriter personWriter;
     private @Autowired AdapterLog log;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ItemsPeopleWriter peopleWriter;
@@ -83,6 +91,8 @@ public class PaModule {
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(paChannelsUpdater().withName("PA Channels Updater"), CHANNELS_INGEST);
+        scheduler.schedule(paCompletePeopleUpdater().withName("PA Complete People Updater"), PEOPLE_COMPLETE_INGEST);
+        scheduler.schedule(paDailyPeopleUpdater().withName("PA People Updater"), PEOPLE_INGEST);
         scheduler.schedule(paFeaturesUpdater().withName("PA Features Updater"), FEATURES_INGEST);
         scheduler.schedule(paFileUpdater().withName("PA File Updater"), RECENT_FILE_DOWNLOAD);
         scheduler.schedule(paCompleteUpdater().withName("PA Complete Updater"), COMPLETE_INGEST);
@@ -96,6 +106,14 @@ public class PaModule {
     
     @Bean PaChannelDataHandler channelDataHandler() {
         return new PaChannelDataHandler(new PaChannelsIngester(), new PaChannelGroupsIngester(), channelResolver, channelWriter, channelGroupResolver, channelGroupWriter);
+    }
+
+    private PaCompletePeopleUpdater paCompletePeopleUpdater() {
+        return new PaCompletePeopleUpdater(paProgrammeDataStore(), personResolver, personWriter);
+    }
+
+    private PaDailyPeopleUpdater paDailyPeopleUpdater() {
+        return new PaDailyPeopleUpdater(paProgrammeDataStore(), personResolver, personWriter);
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {
