@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.TopicRef.Relationship;
 import org.atlasapi.media.entity.simple.Description;
@@ -78,25 +79,28 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
     }
 
     private Iterable<TopicRef> topicRefs(Set<org.atlasapi.media.entity.simple.TopicRef> topics) {
-        return Iterables.transform(topics, new Function<org.atlasapi.media.entity.simple.TopicRef, TopicRef>() {
+        return ImmutableSet.copyOf(Iterables.transform(topics, new Function<org.atlasapi.media.entity.simple.TopicRef, TopicRef>() {
 
             @Override
             public TopicRef apply(org.atlasapi.media.entity.simple.TopicRef input) {
-                org.atlasapi.media.entity.simple.Topic topic = input.getTopic();
-                String value = topic.getValue();
-                String namespace = topic.getNamespace();
-                Publisher publisher = getPublisher(topic.getPublisher());
+                org.atlasapi.media.entity.simple.Topic inputTopic = input.getTopic();
+                String value = inputTopic.getValue();
+                String namespace = inputTopic.getNamespace();
+                Publisher publisher = getPublisher(inputTopic.getPublisher());
                 if (isNullOrEmpty(value) || isNullOrEmpty(namespace)) {
                     throw new IllegalArgumentException("Topic missing value or namespace");
                 }
                 Maybe<Topic> possibleTopic = topicStore.topicFor(publisher, namespace, value);
                 if (possibleTopic.hasValue()) {
-                    topicStore.write(possibleTopic.requireValue());
+                    Topic topic = possibleTopic.requireValue();
+                    updateTopic(inputTopic, topic);
+                    topicStore.write(topic);
                     return new TopicRef(
-                        possibleTopic.requireValue(), 
+                        topic, 
                         input.getWeighting(),
                         input.isSupervised(), 
-                        Relationship.fromString(input.getRelationship()).orNull()
+                        Relationship.fromString(input.getRelationship()).orNull(),
+                        input.getOffset()
                     );
                 } else {
                     throw new IllegalStateException(
@@ -104,7 +108,26 @@ public abstract class ContentModelTransformer<F extends Description,T extends Co
                     );
                 }
             }
-        });
+
+            private void updateTopic(org.atlasapi.media.entity.simple.Topic inputTopic, Topic topic) {
+                if (inputTopic.getType() != null && topic.getType() == null) {
+                    topic.setType(Type.fromKey(inputTopic.getType()));
+                }
+                if (topic.getTitle() == null) {
+                    topic.setTitle(inputTopic.getTitle());
+                }
+                if (topic.getDescription() == null) {
+                    topic.setDescription(inputTopic.getDescription());
+                }
+                if (topic.getImage() == null) {
+                    topic.setImage(inputTopic.getImage());
+                }
+                if (topic.getThumbnail() == null) {
+                    topic.setThumbnail(inputTopic.getThumbnail());
+                }
+            }
+            
+        }));
     }
 
     private Set<LookupRef> resolveEquivalences(Set<String> sameAs) {

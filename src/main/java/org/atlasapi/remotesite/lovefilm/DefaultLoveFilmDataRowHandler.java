@@ -15,6 +15,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.remotesite.ContentExtractor;
+import org.atlasapi.remotesite.ContentMerger;
 import org.atlasapi.remotesite.lovefilm.LoveFilmData.LoveFilmDataRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +78,9 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         } else {
             Identified identified = existing.requireValue();
             if (content instanceof Item) {
-                write(merge(asItem(identified), (Item) content));
+                write(ContentMerger.merge(ContentMerger.asItem(identified), (Item) content));
             } else if (content instanceof Container) {
-                write(merge(asContainer(identified), (Container) content));
+                write(ContentMerger.merge(ContentMerger.asContainer(identified), (Container) content));
             }
         }
     }
@@ -99,41 +100,6 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
 
     private Optional<Content> extract(LoveFilmDataRow row) {
         return extractor.extract(row);
-    }
-
-    //TODO: extract merging to somewhere common.
-    private Item merge(Item current, Item extracted) {
-        current = mergeContents(current, extracted);
-        current.setParentRef(extracted.getContainer());
-        if (current instanceof Episode && extracted instanceof Episode) {
-            Episode currentEp = (Episode) current;
-            Episode extractedEp = (Episode) extracted;
-            currentEp.setEpisodeNumber(extractedEp.getEpisodeNumber());
-            currentEp.setSeriesRef(extractedEp.getSeriesRef());
-        }
-        return current;
-    }
-
-    private Container merge(Container current, Container extracted) {
-        current = mergeContents(current, extracted);
-        if (current instanceof Series && extracted instanceof Series) {
-            ((Series) current).withSeriesNumber(((Series) extracted).getSeriesNumber());
-            ((Series) current).setParentRef(((Series) extracted).getParent());
-        }
-        return current;
-    }
-
-    private <C extends Content> C mergeContents(C current, C extracted) {
-        current.setTitle(extracted.getTitle());
-        current.setImage(extracted.getImage());
-        current.setYear(extracted.getYear());
-        current.setGenres(extracted.getGenres());
-        current.setPeople(extracted.people());
-        current.setLanguages(extracted.getLanguages());
-        current.setCertificates(extracted.getCertificates());
-        current.setMediaType(extracted.getMediaType());
-        current.setSpecialization(extracted.getSpecialization());
-        return current;
     }
 
     private Maybe<Identified> resolve(String uri) {
@@ -212,24 +178,4 @@ public class DefaultLoveFilmDataRowHandler implements LoveFilmDataRowHandler {
         
         writer.createOrUpdate(episode);
     }
-
-    private Container asContainer(Identified identified) {
-        return castTo(identified, Container.class);
-    }
-
-    private Item asItem(Identified identified) {
-        return castTo(identified, Item.class);
-    }
-
-    private <T> T castTo(Identified identified, Class<T> cls) {
-        try {
-            return cls.cast(identified);
-        } catch (ClassCastException e) {
-            throw new ClassCastException(String.format("%s: expected %s got %s", 
-                identified.getCanonicalUri(), 
-                cls.getSimpleName(), 
-                identified.getClass().getSimpleName()));
-        }
-    }
-
 }

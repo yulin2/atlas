@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog_titles>
+<catalog_title id="70151113" type="episode">
+  <url>http://api.netflix.com/catalog/titles/programs/262101/70151113</url>
+  <release_year>2009</release_year>
+  <title>Heroes: Season 4: "Orientation"</title>
+  <short_synopsis>Recent events have all the heroes looking for answers. Claire tries to start over at college, but she hits a snag.</short_synopsis>
+  <long_synopsis>Recent events have all the heroes looking for answers. Claire tries to start over at college, but she hits a snag.</long_synopsis>
+  <duration>2608</duration>
+  <is_hd_available>true</is_hd_available>
+  <is_3d_available>false</is_3d_available>
+  <is_surround_available channels="5.1">true</is_surround_available>
+  <parental_advisories>
+    <parental_advisory system="BBFC">15</parental_advisory>
+  </parental_advisories>
+  <genres>
+    <genre>TV Shows</genre>
+    <genre>US TV Shows</genre>
+    <genre>TV Action &amp; Adventure</genre>
+    <genre>TV Dramas</genre>
+    <genre>TV Sci-Fi &amp; Fantasy</genre>
+    <genre>US TV Dramas</genre>
+  </genres>
+  <show id="70136130">
+    <season_number>4</season_number>
+    <episode_number>1</episode_number>
+  </show>
+</catalog_title>
+</catalog_titles>

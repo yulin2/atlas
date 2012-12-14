@@ -31,13 +31,13 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.remotesite.pa.bindings.Attr;
-import org.atlasapi.remotesite.pa.bindings.Billing;
-import org.atlasapi.remotesite.pa.bindings.CastMember;
-import org.atlasapi.remotesite.pa.bindings.Category;
-import org.atlasapi.remotesite.pa.bindings.PictureUsage;
-import org.atlasapi.remotesite.pa.bindings.ProgData;
-import org.atlasapi.remotesite.pa.bindings.StaffMember;
+import org.atlasapi.remotesite.pa.listings.bindings.Attr;
+import org.atlasapi.remotesite.pa.listings.bindings.Billing;
+import org.atlasapi.remotesite.pa.listings.bindings.CastMember;
+import org.atlasapi.remotesite.pa.listings.bindings.Category;
+import org.atlasapi.remotesite.pa.listings.bindings.PictureUsage;
+import org.atlasapi.remotesite.pa.listings.bindings.ProgData;
+import org.atlasapi.remotesite.pa.listings.bindings.StaffMember;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -361,11 +361,21 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         if (progData.getBillings() != null) {
             for (Billing billing : progData.getBillings().getBilling()) {
-                if (billing.getType().equals("synopsis")) {
-                	if(episode.getDescription() == null || !channel.uri().contains("wales")) {
-	                    episode.setDescription(billing.getvalue());
-	                    break;
-                	}
+                if((episode.getDescription() == null || !channel.uri().contains("wales")) 
+                        && billing.getType().equals("synopsis")) {
+                    episode.setDescription(billing.getvalue());
+                }
+                if ((episode.getShortDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail1")) {
+                    episode.setShortDescription(billing.getvalue());
+                }
+                if ((episode.getMediumDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail2")) {
+                    episode.setMediumDescription(billing.getvalue());
+                }
+                if ((episode.getLongDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail3")) {
+                    episode.setLongDescription(billing.getvalue());
                 }
             }
         }
@@ -601,6 +611,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private void setBasicDetails(ProgData progData, Item item) {
         Version version = new Version();
         version.setProvider(Publisher.PA);
+        version.set3d(getBooleanValue(progData.getAttr().getThreeD()));
         item.addVersion(version);
 
         Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));

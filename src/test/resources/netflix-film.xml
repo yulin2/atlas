@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog_titles>
+	<catalog_title id="21930861" type="movie">
+		<url>http://api.netflix.com/catalog/titles/movies/21930861</url>
+		<release_year>1974</release_year>
+		<title>The Night Porter</title>
+		<short_synopsis>Twelve years after World War II, an ex-Nazi concentration camp guard is reunited with one of his victims, and they resume a twisted relationship.</short_synopsis>
+		<long_synopsis>Twelve years after World War II, an ex-Nazi concentration camp guard working as a porter at a hotel is reunited with one of his victims, and contrary to expectations, they resume a twisted and doomed relationship.</long_synopsis>
+		<duration>7039</duration>
+		<is_hd_available>false</is_hd_available>
+		<is_3d_available>false</is_3d_available>
+		<is_surround_available channels="2.0">true
+		</is_surround_available>
+		<people>
+			<person id="9321" type="actor">
+				<name>Dirk Bogarde</name>
+			</person>
+			<person id="76167" type="actor">
+				<name>Charlotte Rampling</name>
+			</person>
+			<person id="20003720" type="actor">
+				<name>Philippe Leroy</name>
+			</person>
+			<person id="20014925" type="actor">
+				<name>Gabriele Ferzetti</name>
+			</person>
+			<person id="20040845" type="actor">
+				<name>Giuseppe Addobbati</name>
+			</person>
+			<person id="64305" type="actor">
+				<name>Isa Miranda</name>
+			</person>
+			<person id="15506" type="director">
+				<name>Liliana Cavani</name>
+			</person>
+		</people>
+		<parental_advisories>
+			<parental_advisory system="BBFC">18</parental_advisory>
+		</parental_advisories>
+		<genres>
+			<genre>Dramas</genre>
+			<genre>Classic Dramas</genre>
+			<genre>Italian Movies</genre>
+		</genres>
+	</catalog_title>
+</catalog_titles>

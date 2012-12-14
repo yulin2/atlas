@@ -14,7 +14,9 @@ public interface PaProgrammeDataStore {
     
     void save(String fileName, InputStream dataStream) throws Exception;
     
-    List<File> localFiles(Predicate<File> filter);
+    List<File> localTvDataFiles(Predicate<File> filter);
+    
+    List<File> localFeaturesFiles(Predicate<File> filter);
     
     File copyForProcessing(File file);
 }
