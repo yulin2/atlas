@@ -55,7 +55,7 @@ class ScheduleRequestParser {
         this.channelResolver = channelResolver;
         this.applicationStore = appFetcher;
         this.maxQueryDuration = maxQueryDuration;
-        this.idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
+        this.idCodec = new SubstitutionTableNumberCodec();
         this.dateTimeParser = queryDateTimeParser()
                 .parsesIsoDateTimes()
                 .parsesIsoTimes()
