@@ -61,7 +61,7 @@ public class ScheduleRequestParserTest {
     }
     
     @Test
-    public void testCreatesQueryFromValidQueryString() {
+    public void testCreatesQueryFromValidQueryString() throws NotFoundException {
         
         Interval intvl = new Interval(new DateTime(DateTimeZones.UTC), new DateTime(DateTimeZones.UTC).plusHours(1));
         StubHttpServletRequest request = scheduleRequest(
@@ -83,7 +83,7 @@ public class ScheduleRequestParserTest {
     }
     
     @Test
-    public void testCreatesQueryFromValidQueryStringWithNoExtension() {
+    public void testCreatesQueryFromValidQueryStringWithNoExtension() throws NotFoundException {
         
         Interval intvl = new Interval(new DateTime(DateTimeZones.UTC), new DateTime(DateTimeZones.UTC).plusHours(1));
         StubHttpServletRequest request = scheduleRequest(
@@ -105,7 +105,7 @@ public class ScheduleRequestParserTest {
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testDoesntAcceptQueryDurationGreaterThanMax() {
+    public void testDoesntAcceptQueryDurationGreaterThanMax() throws NotFoundException {
         
         DateTime from = new DateTime(DateTimeZones.UTC);
         DateTime to = from.plusHours(25);
@@ -118,7 +118,7 @@ public class ScheduleRequestParserTest {
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testDoesntAcceptDisabledPublisherOutOfOpenRange() {
+    public void testDoesntAcceptDisabledPublisherOutOfOpenRange() throws NotFoundException {
         
         DateTime from = new DateTime(2012,12,06,10,00,00,000,DateTimeZones.UTC);
         DateTime to = from.plusDays(1);
@@ -131,7 +131,7 @@ public class ScheduleRequestParserTest {
     }
 
     @Test
-    public void testAcceptsDisabledPublisherAtBeginningOfRange() {
+    public void testAcceptsDisabledPublisherAtBeginningOfRange() throws NotFoundException {
         
         DateTime from = new DateTime(2012,12,07,00,00,00,000,DateTimeZones.UTC);
         DateTime to = from.plusHours(2);
@@ -144,7 +144,7 @@ public class ScheduleRequestParserTest {
     }
 
     @Test
-    public void testAcceptsDisabledPublisherAtEndOfRange() {
+    public void testAcceptsDisabledPublisherAtEndOfRange() throws NotFoundException {
         
         DateTime from = new DateTime(2012,12,21,00,00,00,000,DateTimeZones.UTC);
         DateTime to = from.plusHours(24);
@@ -157,7 +157,7 @@ public class ScheduleRequestParserTest {
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void testDoesntAcceptDisabledPublisherBeyondEndOfRange() {
+    public void testDoesntAcceptDisabledPublisherBeyondEndOfRange() throws NotFoundException {
         
         DateTime from = new DateTime(2012,12,22,00,00,00,000,DateTimeZones.UTC);
         DateTime to = from.plusHours(24);
