@@ -3,8 +3,12 @@ package org.atlasapi.output;
 import java.util.Map;
 import java.util.UUID;
 
+import org.atlasapi.query.v4.schedule.NotAcceptableException;
+import org.atlasapi.query.v4.schedule.NotFoundException;
+
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.HttpStatusCode;
+import com.metabroadcast.common.webapp.query.DateTimeInQueryParser.MalformedDateTimeException;
 
 public class ErrorSummary {
 	
@@ -55,8 +59,11 @@ public class ErrorSummary {
 	
 	private static Map<Class<? extends Exception>, AtlasExceptionBuilder> exceptionMap() {
 		return ImmutableMap.<Class<? extends Exception>, AtlasExceptionBuilder>of(
-			IllegalArgumentException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST)
-		);
+			IllegalArgumentException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST),
+			MalformedDateTimeException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_DATE_TIME_VALUE", HttpStatusCode.BAD_REQUEST),
+			NotFoundException.class, new ExceptionExposingAtlasExceptionBuilder("RESOURCE_NOT_FOUND", HttpStatusCode.NOT_FOUND),
+			NotAcceptableException.class, new ExceptionExposingAtlasExceptionBuilder("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE)
+	    );
 	}
 
 	private String id;
