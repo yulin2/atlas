@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
+import com.metabroadcast.common.media.MimeType;
 
 /**
  *
@@ -83,6 +84,7 @@ public final class JsonResponseWriter implements ResponseWriter {
     
     @Override
     public void startResponse() throws IOException {
+        response.setContentType(MimeType.APPLICATION_JSON.toString());
         writer = writer();
         callback = callback(request);
         if (callback != null) {

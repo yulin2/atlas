@@ -23,15 +23,11 @@ public class ScheduleController {
 
     private static final Duration MAX_REQUEST_DURATION = Duration.standardDays(1);
 
-    private static final OutputContext NO_CONTEXT = null;
-    
     private final ScheduleRequestParser requestParser;
     private final ScheduleQueryExecutor queryExecutor;
     private final QueryResultWriter<ScheduleQueryResult> resultWriter;
 
     private ResponseWriterFactory writerResolver = new ResponseWriterFactory();
-
-    private static final ErrorSummaryWriter errorSummaryWriter = new ErrorSummaryWriter();
 
     public ScheduleController(ScheduleQueryExecutor queryExecutor,
         ChannelResolver channelResolver,
@@ -50,17 +46,16 @@ public class ScheduleController {
     @RequestMapping({ "/4.0/schedules/{cid}.*", "/4.0/schedules/{cid}" })
     public void writeChannelSchedule(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
-        ResponseWriter writer = writerResolver.writerFor(request, response);            
+        ResponseWriter writer = null;
         try {
+            writer = writerResolver.writerFor(request, response);
             ScheduleQuery scheduleQuery = requestParser.queryFrom(request);
             ScheduleQueryResult queryResult = queryExecutor.execute(scheduleQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
-            ErrorSummary exception = ErrorSummary.forException(e);
-            writer.startResponse();
-            errorSummaryWriter.write(exception, writer, NO_CONTEXT);
-            writer.finishResponse();
+            ErrorSummary summary = ErrorSummary.forException(e);
+            new ErrorResultWriter().write(summary, writer, request, response);
         }
     }
 
