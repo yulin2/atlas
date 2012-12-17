@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
@@ -61,7 +62,7 @@ public abstract class BaseController<T> {
         }
     }
 
-    protected ApplicationConfiguration appConfig(HttpServletRequest request) {
+    protected ApplicationConfiguration appConfig(HttpServletRequest request) throws InvalidAPIKeyException {
         Maybe<ApplicationConfiguration> config = configFetcher.configurationFor(request);
         return config.hasValue() ? config.requireValue() : ApplicationConfiguration.DEFAULT_CONFIGURATION;
     }

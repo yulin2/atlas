@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
@@ -58,7 +59,7 @@ class ScheduleRequestParser {
         this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
 
-    public ScheduleQuery queryFrom(HttpServletRequest request) {
+    public ScheduleQuery queryFrom(HttpServletRequest request) throws InvalidAPIKeyException {
         // Attempt to extract channel first so we can 404 if missing before
         // 400ing from bad params.
         Channel channel = extractChannel(request);
@@ -119,7 +120,7 @@ class ScheduleRequestParser {
         return publisher.requireValue();
     }
 
-    private ApplicationConfiguration getConfiguration(HttpServletRequest request) {
+    private ApplicationConfiguration getConfiguration(HttpServletRequest request) throws InvalidAPIKeyException {
         Maybe<ApplicationConfiguration> config = applicationStore.configurationFor(request);
         if (config.hasValue()) {
             return config.requireValue();

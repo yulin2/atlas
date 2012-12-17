@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.output.AtlasErrorSummary;
@@ -52,6 +53,8 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             modelAndViewFor(req, resp, contentGroupResolver.findAll(), query.getConfiguration());
         } catch (NumberFormatException ex) {
             outputter.writeError(req, resp, NOT_FOUND.withMessage("Error retrieving Content Groups!"));
+        } catch (InvalidAPIKeyException e) {
+        	errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
     }
 
@@ -67,6 +70,8 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             }
         } catch (NumberFormatException ex) {
             outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " unavailable"));
+        } catch (InvalidAPIKeyException e) {
+        	errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
     }
 
@@ -94,6 +99,8 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             }
         } catch (NumberFormatException ex) {
             outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " unavailable"));
+        } catch (InvalidAPIKeyException e) {
+        	errorViewFor(req, resp, AtlasErrorSummary.forException(e));
         }
     }
 

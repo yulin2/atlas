@@ -386,7 +386,39 @@ var page = {
 	}
 };
 
+<<<<<<< HEAD
 $("#runSearch").live('click', function() {
 	var url = window.location.pathname + "?search=" + encodeURIComponent($("#search").val());	
+=======
+$('#appEnabled').live('click', function() {
+	updateEnabledDisabled();
+});
+
+var updateEnabledDisabled = function() {
+	var checkedStatus = $('#appEnabled').attr('checked');
+	var action = checkedStatus ? "enable" : "disable";
+	var check = confirm("Are you sure you want to " + action + " the API key for " + app.slug + "?");
+	if (check) {
+		var url = "/admin/applications/" + app.slug + "/" + action;
+		$('#saveApplicationSources').addClass('loading');
+		$.ajax({
+			type:'POST',
+			url: url,
+			success:function(responseData, textStatus, XMLHttpRequest) {
+				$('#saveApplicationSources').removeClass('loading');
+			},
+			error:function(textStatus) {
+				console.log("fail:", textStatus);
+			}
+		});	
+	} else {
+		$('#appEnabled').attr('checked', !checkedStatus);
+	}
+}
+
+$('#showEnabledOnly').live('click', function() {
+	var url = "/admin/applications?showEnabledOnly=";
+	url += $(this).attr('checked') ? "yes" : "no";
+>>>>>>> mbst-3616-admin-endisable-app
 	window.location.href = url;
 });

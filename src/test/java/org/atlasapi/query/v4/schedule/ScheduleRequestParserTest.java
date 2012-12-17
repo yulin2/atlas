@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
@@ -41,7 +42,7 @@ public class ScheduleRequestParserTest {
     private final NumberToShortStringCodec codec = new SubstitutionTableNumberCodec();
     
     @Test
-    public void testCreatesQueryFromValidQueryString() {
+    public void testCreatesQueryFromValidQueryString() throws InvalidAPIKeyException {
         
         Channel channel = new Channel(BBC, "Channel", "cbbc", false, VIDEO, "uri");
         channel.setId(1234L);
@@ -68,7 +69,7 @@ public class ScheduleRequestParserTest {
     }
     
     @Test(expected=IllegalArgumentException.class)
-    public void testDoesntAcceptQueryDurationGreaterThanMax() {
+    public void testDoesntAcceptQueryDurationGreaterThanMax() throws InvalidAPIKeyException {
         
         Channel channel = new Channel(BBC, "Channel", "cbbc", false, VIDEO, "uri");
         channel.setId(1234L);
