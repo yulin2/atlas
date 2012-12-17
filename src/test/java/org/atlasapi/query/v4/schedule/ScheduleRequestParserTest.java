@@ -50,7 +50,7 @@ public class ScheduleRequestParserTest {
         new TimeMachine(time)
     );
 
-    private final NumberToShortStringCodec codec = new SubstitutionTableNumberCodec();
+    private final NumberToShortStringCodec codec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final Channel channel = new Channel(BBC, "Channel", "cbbc", VIDEO, "uri");
     
     @Before
@@ -166,7 +166,6 @@ public class ScheduleRequestParserTest {
             PA, "apikey", Annotation.defaultAnnotations(), ".json");
         
         builder.queryFrom(request);
-        
     }
 
     private StubHttpServletRequest scheduleRequest(Channel channel, DateTime from, DateTime to, Publisher publisher, String appKey, Set<Annotation> annotations, String extension) {
