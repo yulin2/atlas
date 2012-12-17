@@ -51,7 +51,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ContentResolver resolver = new StubContentResolver().respondTo(item);
         
         context.checking(new Expectations(){{
-            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers)); will(returnValue(schedule));
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), false); will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});
         
@@ -85,7 +85,7 @@ public class ScheduleResolverBroadcastTrimmerTest extends TestCase {
         ContentResolver resolver = new StubContentResolver().respondTo(item1).respondTo(item2);
 
         context.checking(new Expectations() {{
-            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers));
+            oneOf(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), false);
             will(returnValue(schedule));
             one(contentWriter).createOrUpdate(with(trimmedItem()));
         }});

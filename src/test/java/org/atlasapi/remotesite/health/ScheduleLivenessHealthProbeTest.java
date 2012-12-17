@@ -114,7 +114,7 @@ public class ScheduleLivenessHealthProbeTest extends TestCase {
 
 		@Override
 		public Schedule schedule(DateTime from, DateTime to,
-				Iterable<Channel> channels, Iterable<Publisher> publisher) {
+				Iterable<Channel> channels, Iterable<Publisher> publisher, boolean merge) {
 			
 			this.requestedStartTime = from;
 			this.requestedEndTime = to;

@@ -34,8 +34,8 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
     }
 
     @Override
-    public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels, Iterable<Publisher> publishers) {
-        Schedule schedule = scheduleResovler.schedule(from, to, channels, publishers);
+    public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels, Iterable<Publisher> publishers, boolean merge) {
+        Schedule schedule = scheduleResovler.schedule(from, to, channels, publishers, false);
 
         ImmutableList.Builder<ScheduleChannel> scheduleChannels = ImmutableList.builder();
         for (ScheduleChannel channel : schedule.scheduleChannels()) {

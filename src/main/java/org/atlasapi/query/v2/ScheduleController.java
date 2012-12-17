@@ -80,7 +80,7 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
                 throw new IllegalArgumentException("You must specify at least one channel that exists using the channel or channel_id parameter");
             }
             
-            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers).scheduleChannels(), appConfig);
+            modelAndViewFor(request, response, scheduleResolver.schedule(fromWhen, toWhen, channels, publishers, false).scheduleChannels(), appConfig);
         } catch (Exception e) {
             errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
