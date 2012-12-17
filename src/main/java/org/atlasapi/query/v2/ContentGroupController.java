@@ -31,7 +31,7 @@ import org.atlasapi.persistence.content.ResolvedContent;
 @Controller
 public class ContentGroupController extends BaseController<Iterable<ContentGroup>> {
 
-    private static final ErrorSummary NOT_FOUND = new ErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
+    private static final ErrorSummary NOT_FOUND = new ErrorSummary(new NullPointerException(), "PRODUCT_NOT_FOUND", HttpStatusCode.NOT_FOUND, "error");
     private static final Function<ChildRef, String> CHILD_REF_TO_URI_FN = new ChildRefToUri();
     //
     private final ContentGroupResolver contentGroupResolver;
@@ -51,7 +51,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             ContentQuery query = builder.build(req);
             modelAndViewFor(req, resp, contentGroupResolver.findAll(), query.getConfiguration());
         } catch (NumberFormatException ex) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Error retrieving Content Groups!"));
+            outputter.writeError(req, resp, NOT_FOUND);
         }
     }
 
@@ -61,12 +61,12 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             ContentQuery query = builder.build(req);
             ResolvedContent contentGroup = contentGroupResolver.findByIds(ImmutableList.of(idCodec.decode(id).longValue()));
             if (contentGroup.isEmpty()) {
-                outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " not found"));
+                outputter.writeError(req, resp, NOT_FOUND);
             } else {
                 modelAndViewFor(req, resp, ImmutableSet.of((ContentGroup) contentGroup.getFirstValue().requireValue()), query.getConfiguration());
             }
         } catch (NumberFormatException ex) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " unavailable"));
+            outputter.writeError(req, resp, NOT_FOUND);
         }
     }
 
@@ -76,7 +76,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
             ContentQuery query = builder.build(req);
             ResolvedContent resolvedContent = contentGroupResolver.findByIds(ImmutableList.of(idCodec.decode(id).longValue()));
             if (resolvedContent.isEmpty()) {
-                outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " not found"));
+                outputter.writeError(req, resp, NOT_FOUND);
             } else {
                 try {
                     ContentGroup contentGroup = (ContentGroup) resolvedContent.getFirstValue().requireValue();
@@ -93,7 +93,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
                 }
             }
         } catch (NumberFormatException ex) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " unavailable"));
+            outputter.writeError(req, resp, NOT_FOUND);
         }
     }
 
