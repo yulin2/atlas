@@ -386,10 +386,11 @@ var page = {
 	}
 };
 
-<<<<<<< HEAD
 $("#runSearch").live('click', function() {
 	var url = window.location.pathname + "?search=" + encodeURIComponent($("#search").val());	
-=======
+	window.location.href = url;
+});
+	
 $('#appEnabled').live('click', function() {
 	updateEnabledDisabled();
 });
@@ -419,6 +420,5 @@ var updateEnabledDisabled = function() {
 $('#showEnabledOnly').live('click', function() {
 	var url = "/admin/applications?showEnabledOnly=";
 	url += $(this).attr('checked') ? "yes" : "no";
->>>>>>> mbst-3616-admin-endisable-app
 	window.location.href = url;
 });
