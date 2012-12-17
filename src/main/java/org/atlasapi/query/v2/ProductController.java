@@ -31,9 +31,6 @@ import com.metabroadcast.common.query.Selection;
 @Controller
 public class ProductController extends BaseController<Iterable<Product>> {
     
-    private static final ErrorSummary NOT_FOUND = new ErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
-    private static final ErrorSummary FORBIDDEN = new ErrorSummary(new NullPointerException()).withErrorCode("PRODUCT_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
-
     private final ProductResolver productResolver;
     private final KnownTypeQueryExecutor queryExecutor;
     private final QueryController queryController;
@@ -70,14 +67,16 @@ public class ProductController extends BaseController<Iterable<Product>> {
         Optional<Product> productForId = productResolver.productForId(idCodec.decode(id).longValue());
         
         if(!productForId.isPresent()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Product " + id + " not found"));
+            ErrorSummary err = new ErrorSummary(new NullPointerException(), "PRODUCT_NOT_FOUND", HttpStatusCode.NOT_FOUND, "Product " + id + " not found");
+            outputter.writeError(req, resp, err);
             return;
         }
         
         Product product = productForId.get();
         
         if(!query.allowsSource(product.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Product " + id + " unavailable"));
+            ErrorSummary err = new ErrorSummary(new NullPointerException(),"PRODUCT_UNAVAILABLE",HttpStatusCode.FORBIDDEN, "Product " + id + " unavailable");
+            outputter.writeError(req, resp, err);
             return;
         }
         
@@ -92,14 +91,16 @@ public class ProductController extends BaseController<Iterable<Product>> {
         Optional<Product> productForId = productResolver.productForId(decodedId);
         
         if(!productForId.isPresent()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Product " + id + " not found"));
+            ErrorSummary err = new ErrorSummary(new NullPointerException(), "PRODUCT_NOT_FOUND", HttpStatusCode.NOT_FOUND, "Product " + id + " not found");
+            outputter.writeError(req, resp, err);
             return;
         }
         
         Product product = productForId.get();
         
         if(!query.allowsSource(product.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Product " + id + " unavailable"));
+            ErrorSummary err = new ErrorSummary(new NullPointerException(),"PRODUCT_UNAVAILABLE",HttpStatusCode.FORBIDDEN, "Product " + id + " unavailable");
+            outputter.writeError(req, resp, err);
             return;
         }
         

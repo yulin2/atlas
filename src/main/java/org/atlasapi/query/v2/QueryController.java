@@ -42,8 +42,6 @@ import com.metabroadcast.common.http.HttpStatusCode;
 
 @Controller
 public class QueryController extends BaseController<QueryResult<Content, ? extends Identified>> {
-	
-	private static final ErrorSummary UNSUPPORTED = new ErrorSummary(new UnsupportedOperationException()).withErrorCode("UNSUPPORTED_VERSION").withMessage("The requested version is no longer supported by this instance").withStatusCode(HttpStatusCode.BAD_REQUEST);
 
 	private final KnownTypeQueryExecutor executor;
 
@@ -62,12 +60,12 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
     
     @RequestMapping(value = {"/2.0/*.*"})
     public void onePointZero(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        outputter.writeError(request, response, UNSUPPORTED);
+        outputter.writeError(request, response, new ErrorSummary(new UnsupportedOperationException(), "UNSUPPORTED_VERSION", HttpStatusCode.BAD_REQUEST, "The requested version is no longer supported by this instance"));
     }
 	
 	@RequestMapping("/3.0/discover.*")
 	public void discover(HttpServletRequest request, HttpServletResponse response) throws IOException {
-	    outputter.writeError(request, response, UNSUPPORTED);
+	    outputter.writeError(request, response, new ErrorSummary(new UnsupportedOperationException(), "UNSUPPORTED_VERSION", HttpStatusCode.BAD_REQUEST, "The requested version is no longer supported by this instance"));
 	}
 	
 	@RequestMapping(value="/3.0/content.*",method=RequestMethod.GET)

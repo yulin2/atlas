@@ -12,73 +12,64 @@ import com.metabroadcast.common.webapp.query.DateTimeInQueryParser.MalformedDate
 
 public class ErrorSummary {
 	
-	private static class AtlasExceptionBuilder {
-		
-		private final String friendly;
-		private final HttpStatusCode httpStatus;
+    public static interface ErrorSummaryFactory<T extends Exception> {
+        
+        ErrorSummary build(T exception);
+        
+    }
+    
+    public static final class DefaultErrorSummaryFactory implements ErrorSummaryFactory<Exception> {
 
-		public AtlasExceptionBuilder(String friendlyCode, HttpStatusCode httpStatusCode) {
-			this.friendly = friendlyCode;
-			this.httpStatus = httpStatusCode;
-		}
+        private final String errorCode;
+        private final HttpStatusCode statusCode;
 
-		public String friendly() {
-			return friendly;
-		}
+        public DefaultErrorSummaryFactory(String errorCode, HttpStatusCode statusCode) {
+            this.errorCode = errorCode;
+            this.statusCode = statusCode;
+        }
 
-		public HttpStatusCode httpStatus() {
-			return httpStatus;
-		}
-		
-		public ErrorSummary build(Exception exception) {
-			return new ErrorSummary(exception).withErrorCode(friendly()).withStatusCode(httpStatus());
-		}
-	}
+        @Override
+        public ErrorSummary build(Exception exception) {
+            return new ErrorSummary(exception, errorCode, statusCode, exception.getMessage());
+        }
+        
+    }
 	
-	private static class ExceptionExposingAtlasExceptionBuilder extends AtlasExceptionBuilder{
-
-		public ExceptionExposingAtlasExceptionBuilder(String friendlyCode, HttpStatusCode httpStatusCode) {
-			super(friendlyCode, httpStatusCode);
-		}
-		
-		public ErrorSummary build(Exception exception) {
-			return new ErrorSummary(exception).withErrorCode(friendly()).withStatusCode(httpStatus()).withMessage(exception.getMessage());
-		}
-	}
+	private static Map<Class<? extends Exception>, ErrorSummaryFactory<?>> factories = factoryMap();
 	
-	private static Map<Class<? extends Exception>, AtlasExceptionBuilder> exceptionCodes = exceptionMap();
-	
-	public static ErrorSummary forException(Exception exception) {
-		AtlasExceptionBuilder builder = exceptionCodes.get(exception.getClass());
-		if (builder != null) {
-			return builder.build(exception);
+	public static <T extends Exception> ErrorSummary forException(T exception) {
+        @SuppressWarnings("unchecked")
+        ErrorSummaryFactory<? super T> factory = (ErrorSummaryFactory<? super T>) factories.get(exception);
+		if (factory != null) {
+			return factory.build(exception);
 		} else {
-			return new ErrorSummary(exception);
+			return new ErrorSummary(exception, "INTERNAL_ERROR", HttpStatusCode.SERVER_ERROR, "An internal server error occurred");
 		}
 	}
 	
-	private static Map<Class<? extends Exception>, AtlasExceptionBuilder> exceptionMap() {
-		return ImmutableMap.<Class<? extends Exception>, AtlasExceptionBuilder>of(
-			IllegalArgumentException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST),
-			MalformedDateTimeException.class, new ExceptionExposingAtlasExceptionBuilder("BAD_DATE_TIME_VALUE", HttpStatusCode.BAD_REQUEST),
-			NotFoundException.class, new ExceptionExposingAtlasExceptionBuilder("RESOURCE_NOT_FOUND", HttpStatusCode.NOT_FOUND),
-			NotAcceptableException.class, new ExceptionExposingAtlasExceptionBuilder("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE)
+	private static Map<Class<? extends Exception>, ErrorSummaryFactory<?>> factoryMap() {
+		return ImmutableMap.<Class<? extends Exception>, ErrorSummaryFactory<?>>of(
+			IllegalArgumentException.class, new DefaultErrorSummaryFactory("BAD_QUERY_ATTRIBUTE", HttpStatusCode.BAD_REQUEST),
+			MalformedDateTimeException.class, new DefaultErrorSummaryFactory("BAD_DATE_TIME_VALUE", HttpStatusCode.BAD_REQUEST),
+			NotFoundException.class, new DefaultErrorSummaryFactory("RESOURCE_NOT_FOUND", HttpStatusCode.NOT_FOUND),
+			NotAcceptableException.class, new DefaultErrorSummaryFactory("NOT_ACCEPTABLE", HttpStatusCode.NOT_ACCEPTABLE)
 	    );
 	}
 
-	private String id;
-	private Exception exception;
-	private String errorCode = "INTERNAL_ERROR";
-	private HttpStatusCode statusCode = HttpStatusCode.SERVER_ERROR;
-	private String message = "An internal server error occurred";
+	private final String id;
+	private final Exception exception;
+	private final String errorCode;
+	private final HttpStatusCode statusCode;
+	private final String message;
 	
-	public ErrorSummary(Exception exception) {
-		this.exception = exception;
+	public ErrorSummary(Exception exception, String errorCode, HttpStatusCode status, String msg) {
 	    this.id = UUID.randomUUID().toString();
+	    this.exception = exception;
+	    this.errorCode = errorCode;
+        this.statusCode = status;
+		this.message = msg;
 	}
 	
-	public ErrorSummary() {}
-
 	public String id() {
 		return id;
 	}
@@ -87,27 +78,14 @@ public class ErrorSummary {
 		return exception;
 	}
 
-	public ErrorSummary withStatusCode(HttpStatusCode statusCode) {
-		this.statusCode = statusCode;
-		return this;
-	}
-
 	public HttpStatusCode statusCode() {
 		return statusCode;
 	}
 	
-	public ErrorSummary withErrorCode(String errorCode) {
-		this.errorCode = errorCode;
-		return this;
-	}
 	public String errorCode() {
 		return errorCode;
 	}
 	
-	public ErrorSummary withMessage(String message) {
-		this.message = message;
-		return this;
-	}
 	public String message() {
 		return this.message;
 	}
