@@ -1,17 +1,25 @@
 package org.atlasapi.equiv.update;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.atlasapi.equiv.ContentRef;
+import org.atlasapi.equiv.EquivalenceSummary;
+import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.handlers.EpisodeFilteringEquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.DefaultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Episode;
@@ -21,31 +29,37 @@ import org.atlasapi.media.entity.Publisher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
 
-@RunWith(JMock.class)
+@RunWith(MockitoJUnitRunner.class)
 public class EpisodeFilteringEquivalenceResultHandlerTest {
 
-    private final Mockery context = new Mockery();
-    private final @SuppressWarnings("unchecked") EquivalenceResultHandler<Item> delegateHandler = context.mock(EquivalenceResultHandler.class);
+    @SuppressWarnings("unchecked")
+    private final EquivalenceResultHandler<Item> delegate = mock(EquivalenceResultHandler.class);
+    private final EquivalenceSummaryStore summaryStore = mock(EquivalenceSummaryStore.class);
     
-    private final Episode target = new Episode("episode","episodeCurie", Publisher.PA);
-    private final List<ScoredEquivalents<Item>> scores = ImmutableList.of();
-    private final ScoredEquivalents<Item> combined = DefaultScoredEquivalents.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
+    EquivalenceResultHandler<Item> handler = new EpisodeFilteringEquivalenceResultHandler(delegate, summaryStore) ;
     
-    private final Set<Container> strongContainers = ImmutableSet.<Container>of(
-            new Brand("bbcbrand", "bbcbrandCurie", Publisher.BBC),
-            new Brand("pabrand", "pabrandCurie", Publisher.PA)
-            );
+    private Episode subject;
+    private Brand subjectContainer;
+    
+    private final List<ScoredCandidates<Item>> noScores = ImmutableList.of();
+    private final ScoredCandidates<Item> emptyCombined = DefaultScoredCandidates.fromMappedEquivs("test", ImmutableMap.<Item, Score>of());
+    
+    @Before
+    public void setup() {
+        subject = new Episode("episode","episodeCurie", Publisher.PA);
+        subjectContainer = new Brand("brand", "brandCurie", Publisher.PA);
+        subject.setContainer(subjectContainer);
+    }
 
     private Matcher<EquivalenceResult<Item>> resultWithStrongEquiv(final Publisher publisher, final String uri) {
         return new TypeSafeMatcher<EquivalenceResult<Item>>() {
@@ -56,7 +70,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
 
             @Override
             public boolean matchesSafely(EquivalenceResult<Item> result) {
-                return result.strongEquivalences().get(publisher).equivalent().getCanonicalUri().equals(uri);
+                return result.strongEquivalences().get(publisher).candidate().getCanonicalUri().equals(uri);
             }
         };
     }
@@ -78,89 +92,98 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
     @Test
     public void testFiltersItemFromNonStrongBrand() {
         
-         Set<Container> strongContainers = ImmutableSet.<Container>of(
-                new Brand("pabrand", "pabrandCurie", Publisher.PA)
-        );
+        Container strongContainer = new Brand("pabrand", "pabrandCurie", Publisher.PA);
 
-        Episode goodEquiv = new Episode("bequiv", "bequivCurie", Publisher.PA);
-        goodEquiv.setParentRef(new ParentRef("weakpabrand"));
+        EquivalenceSummary equivSummary = summary(subjectContainer.getCanonicalUri(), strongContainer);
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.PA, ScoredEquivalent.<Item>equivalentScore(goodEquiv, Score.ONE)
+        when(summaryStore.summariesForUris(argThat(hasItem(subject.getContainer().getUri()))))
+            .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getUri(), Optional.of(equivSummary))));
+        
+        Episode badEquiv = new Episode("bequiv", "bequivCurie", Publisher.PA);
+        badEquiv.setParentRef(new ParentRef("weakpabrand"));
+        
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+            Publisher.PA, ScoredCandidate.<Item>valueOf(badEquiv, Score.ONE)
         );
         
-        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());
-        
-        context.checking(new Expectations(){{
-            one(delegateHandler).handle(with(resultWithNoStrongEquivalents()));
-        }});
-        
-        EquivalenceResultHandler<Item> handler = new EpisodeFilteringEquivalenceResultHandler(delegateHandler, strongContainers) ;
+        EquivalenceResult<Item> result = new EquivalenceResult<Item>(subject, noScores, emptyCombined , strong, new DefaultDescription());
+
         handler.handle(result);
+        
+        verify(delegate).handle(argThat(resultWithNoStrongEquivalents()));
     }
     
     
     @Test
     public void testDoesntFilterItemFromStrongBrand() {
         
-        Set<Container> strongContainers = ImmutableSet.<Container>of(
-                new Brand("bbcbrand", "bbcbrandCurie", Publisher.BBC)
-         );
+        Container strongContainer = new Brand("bbcbrand", "bbcbrandCurie", Publisher.BBC);
 
-        Episode goodEquiv = new Episode("gequiv", "gequivCurie", Publisher.BBC);
-        goodEquiv.setContainer(Iterables.getOnlyElement(strongContainers));
+        EquivalenceSummary equivSummary = summary(subjectContainer.getCanonicalUri(), strongContainer);
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.BBC, ScoredEquivalent.<Item>equivalentScore(goodEquiv, Score.ONE)
+        when(summaryStore.summariesForUris(argThat(hasItem(subject.getContainer().getUri()))))
+            .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getUri(), Optional.of(equivSummary))));
+        
+        Episode goodEquiv = new Episode("gequiv", "gequivCurie", Publisher.BBC);
+        goodEquiv.setContainer(strongContainer);
+        
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+            Publisher.BBC, ScoredCandidate.<Item>valueOf(goodEquiv, Score.ONE)
         );
         
-        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());
+        EquivalenceResult<Item> result = new EquivalenceResult<Item>(subject, noScores, emptyCombined , strong, new DefaultDescription());
         
-        context.checking(new Expectations(){{
-            one(delegateHandler).handle(with(resultWithStrongEquiv(Publisher.BBC, "gequiv")));
-        }});
-        
-        EquivalenceResultHandler<Item> handler = new EpisodeFilteringEquivalenceResultHandler(delegateHandler, strongContainers) ;
         handler.handle(result);
+
+        verify(delegate).handle(argThat(resultWithStrongEquiv(Publisher.BBC, "gequiv")));
     }
     
     @Test
     public void testDoesntFilterItemFromSourceWithNoStrongBrands() {
 
+        EquivalenceSummary equivSummary = new EquivalenceSummary(subject.getCanonicalUri(), ImmutableList.<String>of(), ImmutableMap.<Publisher,ContentRef>of());
+        
+        when(summaryStore.summariesForUris(argThat(hasItem(subject.getContainer().getUri()))))
+            .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getUri(), Optional.of(equivSummary))));
+        
         Episode ignoredEquiv = new Episode("ignoredequiv", "ignoredequiv", Publisher.C4);
         ignoredEquiv.setParentRef(new ParentRef("weakbutignoredbrand"));
 
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.C4, ScoredEquivalent.<Item>equivalentScore(ignoredEquiv, Score.ONE)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+            Publisher.C4, ScoredCandidate.<Item>valueOf(ignoredEquiv, Score.ONE)
         );
         
-        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());
+        EquivalenceResult<Item> result = new EquivalenceResult<Item>(subject, noScores, emptyCombined , strong, new DefaultDescription());
         
-        context.checking(new Expectations(){{
-            one(delegateHandler).handle(with(resultWithStrongEquiv(Publisher.C4, "ignoredequiv")));
-        }});
-        
-        EquivalenceResultHandler<Item> handler = new EpisodeFilteringEquivalenceResultHandler(delegateHandler, strongContainers) ;
         handler.handle(result);
+
+        verify(delegate).handle(argThat(resultWithStrongEquiv(Publisher.C4, "ignoredequiv")));
     }
     
     @Test
     public void testDoesntFilterItemWithNoBrand() {
         
+        EquivalenceSummary equivSummary = new EquivalenceSummary(subject.getCanonicalUri(), ImmutableList.<String>of(), ImmutableMap.<Publisher,ContentRef>of());
+        
+        when(summaryStore.summariesForUris(argThat(hasItem(subject.getContainer().getUri()))))
+            .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getUri(), Optional.of(equivSummary))));
+        
         Item noBrand = new Item("nobrand", "nobrandCurie", Publisher.FIVE);
         
-        Map<Publisher, ScoredEquivalent<Item>> strong = ImmutableMap.of(
-                Publisher.FIVE, ScoredEquivalent.<Item>equivalentScore(noBrand, Score.ONE)
+        Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
+                Publisher.FIVE, ScoredCandidate.<Item>valueOf(noBrand, Score.ONE)
         );
         
-        EquivalenceResult<Item> result = new EquivalenceResult<Item>(target, scores, combined , strong, new DefaultDescription());
+        EquivalenceResult<Item> result = new EquivalenceResult<Item>(subject, noScores, emptyCombined , strong, new DefaultDescription());
         
-        context.checking(new Expectations(){{
-            one(delegateHandler).handle(with(resultWithStrongEquiv(Publisher.FIVE, "nobrand")));
-        }});
-        
-        EquivalenceResultHandler<Item> handler = new EpisodeFilteringEquivalenceResultHandler(delegateHandler, strongContainers) ;
         handler.handle(result);
+        
+        verify(delegate).handle(argThat(resultWithStrongEquiv(Publisher.FIVE, "nobrand")));
+    }
+
+    private EquivalenceSummary summary(String uri, Container strongContainer) {
+        EquivalenceSummary equivSummary = new EquivalenceSummary(uri, ImmutableList.<String>of(), ImmutableMap.of(strongContainer.getPublisher(), ContentRef.valueOf(strongContainer)));
+        return equivSummary;
     }
 
 }

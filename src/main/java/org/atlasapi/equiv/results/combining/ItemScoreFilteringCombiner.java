@@ -4,48 +4,48 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoreThreshold;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Maps.EntryTransformer;
 
-public class ItemScoreFilteringCombiner<T extends Content> implements EquivalenceCombiner<T> {
+public class ItemScoreFilteringCombiner<T extends Content> implements ScoreCombiner<T> {
 
-    private final EquivalenceCombiner<T> delegate;
+    private final ScoreCombiner<T> delegate;
     private final String source;
     private final ScoreThreshold threshold;
 
-    public ItemScoreFilteringCombiner(EquivalenceCombiner<T> delegate, String source, ScoreThreshold threshold) {
+    public ItemScoreFilteringCombiner(ScoreCombiner<T> delegate, String source, ScoreThreshold threshold) {
         this.delegate = delegate;
         this.source = source;
         this.threshold = threshold;
     }
     
-    public ItemScoreFilteringCombiner(EquivalenceCombiner<T> delegate, String source) {
+    public ItemScoreFilteringCombiner(ScoreCombiner<T> delegate, String source) {
         this(delegate, source, ScoreThreshold.POSITIVE);
     }
     
     @Override
-    public ScoredEquivalents<T> combine(List<ScoredEquivalents<T>> scoredEquivalents, final ResultDescription desc) {
-        ScoredEquivalents<T> combined = delegate.combine(scoredEquivalents, desc);
+    public ScoredCandidates<T> combine(List<ScoredCandidates<T>> scoredEquivalents, final ResultDescription desc) {
+        ScoredCandidates<T> combined = delegate.combine(scoredEquivalents, desc);
         
         desc.startStage("Filtering null " +  source + " scores");
         
-        ScoredEquivalents<T> itemScores = findItemScores(scoredEquivalents);
+        ScoredCandidates<T> itemScores = findItemScores(scoredEquivalents);
         
         if(itemScores == null) {
             desc.appendText("No %s scores found", source).finishStage();
             return combined;
         }
         
-        final Map<T, Score> itemScoreMap = itemScores.equivalents();
+        final Map<T, Score> itemScoreMap = itemScores.candidates();
         
-        Map<T, Score> transformedCombined = ImmutableMap.copyOf(Maps.transformEntries(combined.equivalents(), new EntryTransformer<T, Score, Score>() {
+        Map<T, Score> transformedCombined = ImmutableMap.copyOf(Maps.transformEntries(combined.candidates(), new EntryTransformer<T, Score, Score>() {
             @Override
             public Score transformEntry(T equiv, Score combinedScore) {
                 Score itemScore = itemScoreMap.get(equiv);
@@ -59,11 +59,11 @@ public class ItemScoreFilteringCombiner<T extends Content> implements Equivalenc
             }
         }));
         desc.finishStage();
-        return DefaultScoredEquivalents.fromMappedEquivs(combined.source(), transformedCombined);
+        return DefaultScoredCandidates.fromMappedEquivs(combined.source(), transformedCombined);
     }
     
-    private ScoredEquivalents<T> findItemScores(List<ScoredEquivalents<T>> scoredEquivalents) {
-        for (ScoredEquivalents<T> sourceEquivs : scoredEquivalents) {
+    private ScoredCandidates<T> findItemScores(List<ScoredCandidates<T>> scoredEquivalents) {
+        for (ScoredCandidates<T> sourceEquivs : scoredEquivalents) {
             if(sourceEquivs.source().equals(source)) {
                 return sourceEquivs;
             }

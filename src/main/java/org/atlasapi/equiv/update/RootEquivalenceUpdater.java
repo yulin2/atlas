@@ -1,45 +1,57 @@
 package org.atlasapi.equiv.update;
 
+import static org.atlasapi.media.entity.ChildRef.TO_URI;
+
 import java.util.List;
 
-import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.content.ContentResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
-public class RootEquivalenceUpdater implements ContentEquivalenceUpdater<Content> {
+public class RootEquivalenceUpdater implements EquivalenceUpdater<Content> {
+    
+    private static final Logger log = LoggerFactory.getLogger(RootEquivalenceUpdater.class);
 
-    private final ContentEquivalenceUpdater<Container> containerUpdater;
-    private final ContentEquivalenceUpdater<Item> itemUpdater;
+    private ContentResolver contentResolver;
+    private EquivalenceUpdater<Content> updater;
 
-    public RootEquivalenceUpdater(ContentEquivalenceUpdater<Container> containerUpdater, ContentEquivalenceUpdater<Item> itemUpdater) {
-        this.containerUpdater = containerUpdater;
-        this.itemUpdater = itemUpdater;
+    public RootEquivalenceUpdater(ContentResolver contentResolver, EquivalenceUpdater<Content> updater) {
+        this.contentResolver = contentResolver;
+        this.updater = updater;
     }
 
     @Override
-    public EquivalenceResult<Content> updateEquivalences(Content content, Optional<List<Content>> externalCandidates) {
-        if(content instanceof Container) {
-            return updateContainer((Container)content);
+    public void updateEquivalences(Content content) {
+        if (content instanceof Container) {
+            updateContainer((Container) content);
+        } else if (content instanceof Item){
+            updateContentEquivalence(content);
         }
-        if(content instanceof Item) {
-            return updateItem((Item)content);
-        }
-        return null;
     }
 
-    @SuppressWarnings("unchecked")
-    private <Y extends Content> EquivalenceResult<Y> updateContainer(Container content) {
-        EquivalenceResult<Y> updateEquivalences = (EquivalenceResult<Y>) containerUpdater.updateEquivalences(content, Optional.<List<Container>>absent());
-        return updateEquivalences;
-    }
-    
-    @SuppressWarnings("unchecked")
-    private <Y extends Content> EquivalenceResult<Y> updateItem(Item content) {
-        EquivalenceResult<Y> updateEquivalences = (EquivalenceResult<Y>) itemUpdater.updateEquivalences(content, Optional.<List<Item>>absent());
-        return updateEquivalences;
+    private void updateContentEquivalence(Content content) {
+        log.trace("equiv update {}", content);
+        updater.updateEquivalences(content);
     }
 
+    private void updateContainer(Container container) {
+        updateContentEquivalence(container);
+        for (Item child : childrenOf(container)) {
+            updateContentEquivalence(child);
+        }
+        updateContentEquivalence(container);
+    }
+
+    protected Iterable<Item> childrenOf(Container content) {
+        List<String> childUris = Lists.transform(content.getChildRefs(), TO_URI);
+        ResolvedContent children = contentResolver.findByCanonicalUris(childUris);
+        return Iterables.filter(children.getAllResolvedResults(), Item.class);
+    }
 }

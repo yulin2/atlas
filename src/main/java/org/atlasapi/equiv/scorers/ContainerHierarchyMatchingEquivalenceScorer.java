@@ -1,12 +1,13 @@
 package org.atlasapi.equiv.scorers;
 
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Container;
@@ -22,7 +23,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.PeekingIterator;
 
-public class ContainerHierarchyMatchingEquivalenceScorer implements ContentEquivalenceScorer<Container> {
+public class ContainerHierarchyMatchingEquivalenceScorer implements EquivalenceScorer<Container> {
 
     private static final int MAX_EPISODE_DIFFERENCE = 1;
     private static final int MAX_SERIES_DIFFERENCE = 1;
@@ -34,8 +35,8 @@ public class ContainerHierarchyMatchingEquivalenceScorer implements ContentEquiv
     }
     
     @Override
-    public ScoredEquivalents<Container> score(Container content, Iterable<Container> suggestions, ResultDescription desc) {
-        ScoredEquivalentsBuilder<Container> results = DefaultScoredEquivalents.fromSource("Hierarchy");
+    public ScoredCandidates<Container> score(Container content, Set<? extends Container> suggestions, ResultDescription desc) {
+        Builder<Container> results = DefaultScoredCandidates.fromSource("Hierarchy");
 
         // Brands can have full Series hierarchy so compare its Series' hierarchies if present. 
         // If there are no Series treat it as a flat container

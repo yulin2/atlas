@@ -28,7 +28,7 @@ public class MongoEquivalenceResultStore implements EquivalenceResultStore {
     @Override
     public <T extends Content> StoredEquivalenceResult store(EquivalenceResult<T> result) {
         DBObject dbo = translator.toDBObject(result);
-        equivResults.update(where().fieldEquals(ID, result.target().getCanonicalUri()).build(), dbo, true, false);
+        equivResults.update(where().fieldEquals(ID, result.subject().getCanonicalUri()).build(), dbo, true, false);
         return translator.fromDBObject(dbo);
     }
 

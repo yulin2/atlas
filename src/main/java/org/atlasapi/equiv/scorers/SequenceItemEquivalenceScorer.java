@@ -1,48 +1,82 @@
 package org.atlasapi.equiv.scorers;
 
+import java.util.Set;
+
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.results.scores.DefaultScoredEquivalents.ScoredEquivalentsBuilder;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 
-public class SequenceItemEquivalenceScorer implements ContentEquivalenceScorer<Item> {
+public class SequenceItemEquivalenceScorer implements EquivalenceScorer<Item> {
 
     @Override
-    public ScoredEquivalents<Item> score(Item subject, Iterable<Item> suggestions, ResultDescription desc) {
-        ScoredEquivalentsBuilder<Item> equivalents = DefaultScoredEquivalents.fromSource("Sequence");
-
-        desc.appendText("%s suggestions", Iterables.size(suggestions));
-
-        for (Item suggestion : Iterables.filter(ImmutableSet.copyOf(suggestions), Item.class)) {
-            equivalents.addEquivalent(suggestion, score(subject, suggestion, desc));
+    public ScoredCandidates<Item> score(Item subject, Set<? extends Item> candidates, ResultDescription desc) {
+        Builder<Item> equivalents = DefaultScoredCandidates.fromSource("Sequence");
+        
+        if (subject instanceof Episode) {
+            Episode episode = (Episode) subject;
+            desc.appendText("Subject: S: %s, E: %s. %s candidates",
+                episode.getSeriesNumber(),
+                episode.getEpisodeNumber(),
+                Iterables.size(candidates)
+            );
+            for (Item candidate : candidates) {
+                Score score = score(episode, candidate, desc);
+                equivalents.addEquivalent(candidate, score);
+            }
+        } else {
+            desc.appendText("Subject: not epsiode");
+            for (Item suggestion : candidates) {
+                equivalents.addEquivalent(suggestion, Score.NULL_SCORE);
+            }
         }
 
         return equivalents.build();
     }
 
-    private Score score(Item subject, Item suggestion, ResultDescription desc) {
+    private Score score(Episode subject, Item candidate, ResultDescription desc) {
 
-        if (subject instanceof Episode && suggestion instanceof Episode) {
-
-            Episode subEp = (Episode) subject;
-            Episode sugEp = (Episode) suggestion;
-
-            if (Objects.equal(subEp.getSeriesNumber(), sugEp.getSeriesNumber()) && subEp.getEpisodeNumber() != null && sugEp.getEpisodeNumber() != null
-                    && Objects.equal(subEp.getEpisodeNumber(), sugEp.getEpisodeNumber())) {
-                Score score = Score.valueOf(1.0);
-                desc.appendText("%s (%s) S: %s, E: %s scored %s", sugEp.getTitle(), sugEp.getCanonicalUri(), sugEp.getSeriesNumber(), sugEp.getEpisodeNumber(), score);
-                return score;
-            }
+        if (!(candidate instanceof Episode)) {
+            desc.appendText("%s not episode", candidate);
+            return Score.NULL_SCORE;
         }
+        
+        Episode candidateEpisode = (Episode) candidate;
+        
+        Score score;
+        if (nullableSeriesNumbersEqual(subject, candidateEpisode)
+            && nonNullEpisodeNumbersEqual(subject, candidateEpisode)) {
+            score = Score.ONE;
+        } else {
+            score = Score.NULL_SCORE;
+        }
+        
+        describeScore(desc, candidateEpisode, score);
+        return score;
+    }
 
-        return Score.NULL_SCORE;
+    private void describeScore(ResultDescription desc, Episode candidate, Score score) {
+        desc.appendText("%s: S: %s, E: %s scored %s",
+            candidate,
+            candidate.getSeriesNumber(),
+            candidate.getEpisodeNumber(),
+            score
+        );
+    }
+
+    private boolean nonNullEpisodeNumbersEqual(Episode episode, Episode candidate) {
+        return episode.getEpisodeNumber() != null
+            && episode.getEpisodeNumber().equals(candidate.getEpisodeNumber());
+    }
+    
+    private boolean nullableSeriesNumbersEqual(Episode episode, Episode candidate) {
+        return Objects.equal(episode.getSeriesNumber(), candidate.getSeriesNumber());
     }
 
     @Override

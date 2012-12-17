@@ -1,19 +1,21 @@
 package org.atlasapi.equiv.scorers;
 
+import java.util.Set;
+
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScaledScoredEquivalents;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 
 import com.google.common.base.Function;
 
-public class ScalingEquivalenceScorer<T extends Content> implements ContentEquivalenceScorer<T> {
+public class ScalingEquivalenceScorer<T extends Content> implements EquivalenceScorer<T> {
 
-    private final ContentEquivalenceScorer<T> delegate;
+    private final EquivalenceScorer<T> delegate;
     private final Function<Double, Double> scalingFunction;
 
 
-    public static <T extends Content> ScalingEquivalenceScorer<T> scale(ContentEquivalenceScorer<T> delegate, final double scaler) {
+    public static <T extends Content> ScalingEquivalenceScorer<T> scale(EquivalenceScorer<T> delegate, final double scaler) {
         return scale(delegate, new Function<Double, Double>() {
             @Override
             public Double apply(Double input) {
@@ -26,17 +28,17 @@ public class ScalingEquivalenceScorer<T extends Content> implements ContentEquiv
         });
     }
     
-    public static <T extends Content> ScalingEquivalenceScorer<T> scale(ContentEquivalenceScorer<T> delegate, Function<Double, Double> scalingFunction) {
+    public static <T extends Content> ScalingEquivalenceScorer<T> scale(EquivalenceScorer<T> delegate, Function<Double, Double> scalingFunction) {
       return new ScalingEquivalenceScorer<T>(delegate, scalingFunction);
     }
     
-    public ScalingEquivalenceScorer(ContentEquivalenceScorer<T> delegate, Function<Double, Double> scalingFunction) {
+    public ScalingEquivalenceScorer(EquivalenceScorer<T> delegate, Function<Double, Double> scalingFunction) {
         this.delegate = delegate;
         this.scalingFunction = scalingFunction;
     }
     
     @Override
-    public ScoredEquivalents<T> score(T content, Iterable<T> suggestions, ResultDescription desc) {
+    public ScoredCandidates<T> score(T content, Set<? extends T> suggestions, ResultDescription desc) {
         return ScaledScoredEquivalents.<T>scale(delegate.score(content, suggestions, desc), scalingFunction);
     }
  

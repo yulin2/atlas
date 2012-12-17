@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.equiv.results.description.ReadableDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Publisher;
 
@@ -14,26 +14,26 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-public class EquivalenceResult<T extends Content> {
+public class EquivalenceResult<T> {
     
-    public static final <T extends Content> Function<EquivalenceResult<T>, T> toTarget() {
+    public static final <T extends Content> Function<EquivalenceResult<T>, T> toSubject() {
         return new Function<EquivalenceResult<T>, T>() {
 
             @Override
             public T apply(EquivalenceResult<T> input) {
-                return input.target();
+                return input.subject();
             }
         };
     }
 
-    private final T target;
-    private final List<ScoredEquivalents<T>> scores;
-    private final ScoredEquivalents<T> combined;
-    private final Map<Publisher, ScoredEquivalent<T>> strong;
+    private final T subject;
+    private final List<ScoredCandidates<T>> scores;
+    private final ScoredCandidates<T> combined;
+    private final Map<Publisher, ScoredCandidate<T>> strong;
     private final ReadableDescription desc;
 
-    public EquivalenceResult(T target, List<ScoredEquivalents<T>> scores, ScoredEquivalents<T> combined, Map<Publisher, ScoredEquivalent<T>> strong, ReadableDescription desc) {
-        this.target = target;
+    public EquivalenceResult(T subject, List<ScoredCandidates<T>> scores, ScoredCandidates<T> combined, Map<Publisher, ScoredCandidate<T>> strong, ReadableDescription desc) {
+        this.subject = subject;
         this.scores = ImmutableList.copyOf(scores);
         this.combined = combined;
         this.strong = ImmutableMap.copyOf(strong);
@@ -42,7 +42,7 @@ public class EquivalenceResult<T extends Content> {
 
     @Override
     public String toString() {
-        return String.format("%s: %s", target(), scores);
+        return String.format("%s: %s", subject, scores);
     }
     
     @Override
@@ -52,39 +52,34 @@ public class EquivalenceResult<T extends Content> {
         }
         if(that instanceof EquivalenceResult) {
             EquivalenceResult<?> other = (EquivalenceResult<?>) that;
-            return Objects.equal(target(), other.target()) && Objects.equal(scores, other.scores);
+            return Objects.equal(subject, other.subject) && Objects.equal(scores, other.scores);
         }
         return false;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hashCode(target(), scores);
+        return Objects.hashCode(subject, scores);
     }
     
-    public ScoredEquivalents<T> combinedEquivalences() {
+    public ScoredCandidates<T> combinedEquivalences() {
         return this.combined;
     }
     
-    public Map<Publisher, ScoredEquivalent<T>> strongEquivalences() {
+    public Map<Publisher, ScoredCandidate<T>> strongEquivalences() {
         return strong;
     }
 
-    public T target() {
-        return target;
+    public T subject() {
+        return subject;
     }
 
-    public List<ScoredEquivalents<T>> rawScores() {
+    public List<ScoredCandidates<T>> rawScores() {
         return scores;
     }
 
     public ReadableDescription description() {
         return desc;
     }
-
-    public EquivalenceResult<T> rebuildWith(EquivalenceResultBuilder<T> builder) {
-        return builder.resultFor(target, scores, desc);
-    }
-    
     
 }

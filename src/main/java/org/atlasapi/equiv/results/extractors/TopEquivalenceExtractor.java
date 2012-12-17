@@ -3,10 +3,10 @@ package org.atlasapi.equiv.results.extractors;
 import java.util.List;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
+import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.media.entity.Content;
 
-import com.metabroadcast.common.base.Maybe;
+import com.google.common.base.Optional;
 
 /**
  * Always selects the equivalent with the highest score
@@ -18,11 +18,11 @@ public class TopEquivalenceExtractor<T extends Content> implements EquivalenceEx
     }
     
     @Override
-    public Maybe<ScoredEquivalent<T>> extract(T target, List<ScoredEquivalent<T>> equivalents, ResultDescription desc) {
+    public Optional<ScoredCandidate<T>> extract(List<ScoredCandidate<T>> equivalents, T target, ResultDescription desc) {
         if(equivalents == null || equivalents.isEmpty()) {
-            return Maybe.nothing();
+            return Optional.absent();
         }
-        return Maybe.just(equivalents.get(0));
+        return Optional.of(equivalents.get(0));
         
     }
 
