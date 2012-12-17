@@ -28,8 +28,6 @@ import com.metabroadcast.common.query.Selection;
 @Controller
 public class TopicController extends BaseController<Iterable<Topic>> {
 
-    private static final ErrorSummary NOT_FOUND = new ErrorSummary(new NullPointerException()).withErrorCode("TOPIC_NOT_FOUND").withStatusCode(HttpStatusCode.NOT_FOUND);
-    private static final ErrorSummary FORBIDDEN = new ErrorSummary(new NullPointerException()).withErrorCode("TOPIC_UNAVAILABLE").withStatusCode(HttpStatusCode.FORBIDDEN);
 
     private final TopicQueryResolver topicResolver;
     private final TopicContentLister contentLister;
@@ -60,14 +58,14 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         Maybe<Topic> topicForUri = topicResolver.topicForId(idCodec.decode(id).longValue());
         
         if(topicForUri.isNothing()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
+            outputter.writeError(req, resp, new ErrorSummary(new NullPointerException(), "TOPIC_NOT_FOUND", HttpStatusCode.NOT_FOUND, "Topic " + id + " not found"));
             return;
         }
         
         Topic topic = topicForUri.requireValue();
         
         if(!query.allowsSource(topic.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
+            outputter.writeError(req, resp, new ErrorSummary(new NullPointerException(),"TOPIC_UNAVAILABLE",HttpStatusCode.FORBIDDEN, "Topic " + id + " unavailable"));
             return;
         }
         
@@ -83,14 +81,14 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         Maybe<Topic> topicForUri = topicResolver.topicForId(decodedId);
         
         if(topicForUri.isNothing()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Topic " + id + " not found"));
+            outputter.writeError(req, resp, new ErrorSummary(new NullPointerException(), "TOPIC_NOT_FOUND", HttpStatusCode.NOT_FOUND, "Topic " + id + " not found"));
             return;
         }
         
         Topic topic = topicForUri.requireValue();
         
         if(!query.allowsSource(topic.getPublisher())) {
-            outputter.writeError(req, resp, FORBIDDEN.withMessage("Topic " + id + " unavailable"));
+            outputter.writeError(req, resp, new ErrorSummary(new NullPointerException(),"TOPIC_UNAVAILABLE",HttpStatusCode.FORBIDDEN, "Topic " + id + " unavailable"));
             return;
         }
         
