@@ -58,7 +58,7 @@ public class ScheduleProbe implements HealthProbe {
         
         for (int i = 0; i < days; i++, date = date.plusDays(1)) {
             DateTime start = date.toDateTimeAtStartOfDay();
-            Schedule schedule = scheduleResolver.schedule(start, start.plusDays(1), ImmutableSet.of(channel), ImmutableSet.of(publisher));
+            Schedule schedule = scheduleResolver.schedule(start, start.plusDays(1), ImmutableSet.of(channel), ImmutableSet.of(publisher), null);
             result.addEntry(scheduleSize(schedule));
             addContiguityEntries(schedule, result);
         }

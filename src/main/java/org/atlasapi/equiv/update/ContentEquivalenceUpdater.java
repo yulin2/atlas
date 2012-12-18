@@ -39,6 +39,18 @@ public class ContentEquivalenceUpdater<T extends Content> implements Equivalence
     private final EquivalenceResultHandler<T> handler;
     
     public ContentEquivalenceUpdater(
+            EquivalenceGenerator<T> generator,
+            EquivalenceScorer<T> scorer,
+            ScoreCombiner<T> combiner,
+            EquivalenceFilter<T> filter,
+            EquivalenceExtractor<T> extractor,
+            EquivalenceResultHandler<T> handler
+        ) {
+        this(ImmutableSet.of(generator), ImmutableSet.of(scorer),
+            combiner, filter, extractor, handler);
+    }
+    
+    public ContentEquivalenceUpdater(
         Iterable<? extends EquivalenceGenerator<T>> generators,
         Iterable<? extends EquivalenceScorer<T>> scorers,
         ScoreCombiner<T> combiner,

@@ -49,10 +49,6 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
         this.titleTransform = titleTransform;
         this.titleScorer = new ContentTitleScorer<T>(titleTransform);
     }
-    
-    public TitleSearchGenerator<T> copyWithPublishers(Iterable<Publisher> publishers) {
-        return new TitleSearchGenerator<T>(searchResolver, cls, publishers);
-    }
 
     @Override
     public ScoredCandidates<T> generate(T content, ResultDescription desc) {
@@ -72,9 +68,10 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
         if (content.getSpecialization() != null) {
             query.withSpecializations(ImmutableSet.of(content.getSpecialization()));
         }
+        
         desc.appendText("query: %s, specialization: %s, publishers: %s", title, content.getSpecialization(), publishers);
         List<Identified> search = searchResolver.search(query.build(), appConfig);
-        return Iterables.filter(search,cls);
+        return Iterables.filter(search, cls);
     }
 
     private Map<Publisher, SourceStatus> enabledPublishers(Set<Publisher> enabledSources) {
@@ -93,5 +90,4 @@ public class TitleSearchGenerator<T extends Content> implements EquivalenceGener
     public String toString() {
         return "Title-matching Generator";
     }
-
 }
