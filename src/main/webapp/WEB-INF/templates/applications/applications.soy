@@ -186,11 +186,15 @@
 		{/if}
 	</div>
 	<div>
-	{if $page.prevUrl}
-	   <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
-	{/if}
 	{if $page.nextUrl}
-	   <a href="{$page.nextUrl}" class="btn inf mlm fr">Next</a>
+	   <div class="prevNextBtn  fr">
+	       <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+	   </div>
+	{/if}
+	{if $page.prevUrl}
+	   <div class="prevNextBtn">
+	       <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+	   </div>
 	{/if}
 	</div>
 	<div class="overlayBlocker" style="display: none;">
