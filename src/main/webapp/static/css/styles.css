@@ -304,3 +304,7 @@ nav a {
 	border: 1px solid rgba(0,0,0,0.04);
 	color: #999;
 }
+
+#applications-list {
+	margin-bottom: 20px;
+}
