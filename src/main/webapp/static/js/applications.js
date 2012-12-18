@@ -386,9 +386,19 @@ var page = {
 	}
 };
 
-$("#runSearch").live('click', function() {
+var runSearch = function() {
 	var url = window.location.pathname + "?search=" + encodeURIComponent($("#search").val());	
 	window.location.href = url;
+};
+
+$("#runSearch").live('click', function() {
+	runSearch();
+});
+
+$('#search').live('keypress',function(e) {
+	if (e.which == 13) {
+		runSearch();	
+	}
 });
 	
 $('#appEnabled').live('click', function() {
