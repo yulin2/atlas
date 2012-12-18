@@ -16,6 +16,8 @@ import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -30,6 +32,7 @@ import com.google.common.collect.Sets;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 
+    private final Logger log = LoggerFactory.getLogger(LookupResolvingQueryExecutor.class);
     private final KnownTypeContentResolver cassandraContentResolver;
     private final KnownTypeContentResolver mongoContentResolver;
     private final LookupEntryStore mongoLookupResolver;
@@ -44,7 +47,12 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         Map<String, List<Identified>> results = resolveMongoEntries(query, mongoLookupResolver.entriesForIdentifiers(uris));
         if (results.isEmpty()) {
-            results = resolveCassandraEntries(uris, query);
+            try {
+                results = resolveCassandraEntries(uris, query);
+            }
+            catch(Exception e) {
+                log.error(String.format("Cassandra resolution failed for URIS %s", uris), e);
+            }
         }
         return results;
     }
