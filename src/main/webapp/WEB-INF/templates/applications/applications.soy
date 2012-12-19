@@ -276,9 +276,13 @@
     {param application: null /}
     {param sources: null /}
 {/call}
+    <div class="cf sub">
     <h1>{$source.title}</h1>
+    <nav class="sub">
         <div>Readers</div>
         <a href="/admin/sources/{$source.id}/applications/writers">Writers</a>
+    </nav>
+    </div>
     {if length($applications) > 0}
     	<div class="line">
     		<div class="unit size1of6">
@@ -338,12 +342,18 @@
 {call atlas.templates.applications.head}
 	{param applications: $applications /}
 {/call}
-    <h1>{$source.title}</h1>
-        <a href="/admin/sources/{$source.id}/applications">Readers</a>
-        <div>Writers</div>
+    <div class="cf sub">
+        <h1>{$source.title}</h1>
+        <nav class="sub">
+            <a href="/admin/sources/{$source.id}/applications">Readers</a>
+            <div>Writers</div>
+        </nav>
         <div class="fr">
 	       <a href="/admin/sources/{$source.id}/applications/writers/add" class="btn inf mlm">Add/Remove</a>
-	    </div>
+        </div>
+    </div>
+    
+    
     {if length($applications) > 0}
     	<div class="line">
     		<div class="unit size1of4">
