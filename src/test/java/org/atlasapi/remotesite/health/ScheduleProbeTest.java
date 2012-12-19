@@ -122,33 +122,8 @@ public class ScheduleProbeTest extends TestCase {
         assertThat(Iterables.get(result.entries(),0).isFailure(), is(false));
         assertThat(Iterables.get(result.entries(),1).isFailure(), is(false));
         assertThat(Iterables.get(result.entries(),2).isFailure(), is(true)); 
-        assertThat(Iterables.get(result.entries(),3).isFailure(), is(false)); 
     }
 
-    @Test
-    public void testScheduleWithStaleItemsFails() throws Exception {
-        
-        clock.jumpTo(new DateTime(3600020, DateTimeZones.UTC));
-        
-        ScheduleProbe probe = new ScheduleProbe(Publisher.C4, CHANNEL4, scheduleResolver, clock);
-        
-        final Item item1 = broadcastItem(10, 10, 10);
-        final Item item2 = broadcastItem(22, 10, 10);
-        
-        context.checking(new Expectations(){{
-            one(scheduleResolver).schedule(with(any(DateTime.class)), with(any(DateTime.class)), with(channels), with(publishers), with(nullValue(ApplicationConfiguration.class)));
-            will(returnValue(schedule(CHANNEL4, ImmutableList.<Item>of(item1, item2), dayIntervalAround(clock.now()))));
-        }});
-        
-        ProbeResult result = probe.probe();
-        
-        assertThat(result.isFailure(), is(true));
-        assertThat(Iterables.get(result.entries(),0).isFailure(), is(false));
-        assertThat(Iterables.get(result.entries(),1).isFailure(), is(false));
-        assertThat(Iterables.get(result.entries(),2).isFailure(), is(false));
-        assertThat(Iterables.get(result.entries(),3).isFailure(), is(true)); 
-    }
-    
     private Item broadcastItem(long start, long duration) {
         return broadcastItem(start, duration, start);
     }
