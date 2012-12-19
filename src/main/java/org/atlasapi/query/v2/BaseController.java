@@ -57,7 +57,7 @@ public abstract class BaseController<T> {
         if (queryResult == null) {
             errorViewFor(request, response, ErrorSummary.forException(new NullPointerException("Query result was null")));
         } else {
-            outputter.writeTo(request, response, queryResult, annotationExtractor.extract(request).or(defaultAnnotations()), config);
+            outputter.writeTo(request, response, queryResult, annotationExtractor.extractFromKeys(request).or(defaultAnnotations()), config);
         }
     }
 

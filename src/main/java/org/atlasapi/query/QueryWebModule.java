@@ -6,8 +6,11 @@ import static org.atlasapi.output.Annotation.BRAND_SUMMARY;
 import static org.atlasapi.output.Annotation.BROADCASTS;
 import static org.atlasapi.output.Annotation.CHANNEL;
 import static org.atlasapi.output.Annotation.CHANNELS;
+import static org.atlasapi.output.Annotation.CHANNEL_SUMMARY;
 import static org.atlasapi.output.Annotation.CLIPS;
+import static org.atlasapi.output.Annotation.CONTENT_DETAIL;
 import static org.atlasapi.output.Annotation.CONTENT_GROUPS;
+import static org.atlasapi.output.Annotation.CONTENT_SUMMARY;
 import static org.atlasapi.output.Annotation.DESCRIPTION;
 import static org.atlasapi.output.Annotation.EXTENDED_DESCRIPTION;
 import static org.atlasapi.output.Annotation.EXTENDED_ID;
@@ -16,6 +19,7 @@ import static org.atlasapi.output.Annotation.FIRST_BROADCASTS;
 import static org.atlasapi.output.Annotation.ID;
 import static org.atlasapi.output.Annotation.ID_SUMMARY;
 import static org.atlasapi.output.Annotation.KEY_PHRASES;
+import static org.atlasapi.output.Annotation.LICENSE;
 import static org.atlasapi.output.Annotation.LOCATIONS;
 import static org.atlasapi.output.Annotation.NEXT_BROADCASTS;
 import static org.atlasapi.output.Annotation.PEOPLE;
@@ -77,6 +81,7 @@ import org.atlasapi.output.annotation.BrandReferenceAnnotation;
 import org.atlasapi.output.annotation.BrandSummaryAnnotation;
 import org.atlasapi.output.annotation.BroadcastsAnnotation;
 import org.atlasapi.output.annotation.ChannelAnnotation;
+import org.atlasapi.output.annotation.ChannelSummaryWriter;
 import org.atlasapi.output.annotation.ChannelsAnnotation;
 import org.atlasapi.output.annotation.ClipsAnnotation;
 import org.atlasapi.output.annotation.ContentGroupsAnnotation;
@@ -88,8 +93,10 @@ import org.atlasapi.output.annotation.FirstBroadcastAnnotation;
 import org.atlasapi.output.annotation.IdentificationAnnotation;
 import org.atlasapi.output.annotation.IdentificationSummaryAnnotation;
 import org.atlasapi.output.annotation.KeyPhrasesAnnotation;
+import org.atlasapi.output.annotation.LicenseWriter;
 import org.atlasapi.output.annotation.LocationsAnnotation;
 import org.atlasapi.output.annotation.NextBroadcastAnnotation;
+import org.atlasapi.output.annotation.NullWriter;
 import org.atlasapi.output.annotation.PeopleAnnotation;
 import org.atlasapi.output.annotation.ProductsAnnotation;
 import org.atlasapi.output.annotation.PublisherAnnotation;
@@ -447,11 +454,17 @@ public class QueryWebModule {
         .register(AVAILABLE_LOCATIONS, new AvailableLocationsAnnotation(), commonImplied)
         .register(UPCOMING, new UpcomingAnnotation(upcomingChildrenResolver), commonImplied)
         .register(FILTERING_RESOURCE, new FilteringResourceAnnotation(), commonImplied)
-        .register(CHANNEL, new ChannelAnnotation(), commonImplied)
         .register(PRODUCTS, new ProductsAnnotation(productResolver), commonImplied)
         .register(RECENTLY_BROADCAST, new RecentlyBroadcastAnnotation(recentlyBroadcastResolver), commonImplied)
         .register(CHANNELS, new ChannelsAnnotation(), commonImplied)
         .register(PUBLISHER, new PublisherAnnotation(), commonImplied)
+        .register(LICENSE, new LicenseWriter(), commonImplied)
+        .register(CHANNEL_SUMMARY, new ChannelSummaryWriter(), commonImplied)
+        .register(CHANNEL, new ChannelAnnotation(), ImmutableSet.of(CHANNEL_SUMMARY))
+        .register(CONTENT_SUMMARY, new NullWriter(), ImmutableSet.of(DESCRIPTION, BRAND_SUMMARY, 
+            SERIES_SUMMARY, NEXT_BROADCASTS, AVAILABLE_LOCATIONS))
+        .register(CONTENT_DETAIL, new NullWriter(), ImmutableSet.of(EXTENDED_DESCRIPTION, SUB_ITEMS, CLIPS, 
+            PEOPLE, BRAND_SUMMARY, SERIES_SUMMARY, BROADCASTS, LOCATIONS, KEY_PHRASES, RELATED_LINKS))
         .build();
     }
     

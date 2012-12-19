@@ -80,7 +80,7 @@ class ScheduleRequestParser {
         appConfig = appConfigForValidPublisher(publisher, appConfig, queryInterval);
         checkArgument(appConfig != null, "Source %s not enabled", publisher);
         
-        Set<Annotation> annotations = annotationExtractor.extract(request).or(defaultAnnotations());
+        Set<Annotation> annotations = annotationExtractor.extractFromKeys(request).or(defaultAnnotations());
 
         return new ScheduleQuery(publisher, channel, queryInterval, appConfig, annotations);
     }
