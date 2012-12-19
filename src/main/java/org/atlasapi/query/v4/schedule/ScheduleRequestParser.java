@@ -23,6 +23,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -80,7 +81,7 @@ class ScheduleRequestParser {
         appConfig = appConfigForValidPublisher(publisher, appConfig, queryInterval);
         checkArgument(appConfig != null, "Source %s not enabled", publisher);
         
-        Set<Annotation> annotations = annotationExtractor.extractFromKeys(request).or(defaultAnnotations());
+        Set<Annotation> annotations = annotationExtractor.extractFromRequest(request, Optional.<String>absent()).or(defaultAnnotations());
 
         return new ScheduleQuery(publisher, channel, queryInterval, appConfig, annotations);
     }
