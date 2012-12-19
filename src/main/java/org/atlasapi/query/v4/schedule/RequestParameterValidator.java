@@ -39,7 +39,7 @@ public class RequestParameterValidator {
         }
     }
     
-    private static final MapJoiner suggestionJoiner = Joiner.on("?), ").withKeyValueSeparator(" (");
+    private static final MapJoiner suggestionJoiner = Joiner.on("?), ").withKeyValueSeparator(" (did you mean ");
     private static final Joiner commaJoiner = Joiner.on(", ");
 
     private final Set<String> requiredParams;
