@@ -37,7 +37,6 @@ public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identifie
 
     @Override
     public void write(Identified entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-        writer.writeField("curie", entity.getCurie());
         writer.writeList("aliases", "alias", entity.getAliases(), ctxt);
         writer.writeList(equivalentWriter, entity.getEquivalentTo(), ctxt);
     }
