@@ -77,7 +77,7 @@ public class QueryParameterAnnotationsExtractor {
         msg.append(invalid);
         String suggestion = findSuggestion(invalid, annotationNames);
         if (suggestion != null) {
-            msg.append(" (").append(suggestion).append("?)");
+            msg.append(" (did you mean ").append(suggestion).append("?)");
         }
     }
 
