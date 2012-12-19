@@ -329,6 +329,83 @@
 {/template}
 
 /**
+ * @param page
+ * @param source
+ * @param applications
+ */
+{template .writableSources}
+{call atlas.templates.applications.head}
+	{param applications: $applications /}
+	{param application: null /}
+{/call}
+	<h1>Applications that can write as {$source.title}</h1>
+	<h3>Add Application</h3>
+	<div class="form mrm">
+    	<div class="grp">
+    		<label for="search">Search</label>
+    		<div class="inputHolder">
+    			<input type="text" id="search" value="{$page.search}"/>
+    			<span class="extra pos"><a href="#" class="icn tick" id="runSearch" title="Search">Search</a></span>
+    		</div>
+    	</div>
+	</div>
+	<div id="applications-list" data-apps="{length($applications)}" class="cf cb">
+		{if length($applications) > 0}
+			<div class="line">
+				<div class="unit size1of4">
+					<span class="h3">App Name</span>
+				</div>
+				<div class="unit size1of4">
+					<span class="h3">App Slug</span>
+				</div>
+				<div class="unit size1of4">
+					<span class="h3">API Key</span>
+				</div>
+				<div class="unit size1of4 lastUnit">
+
+				</div>
+			</div>
+			{foreach $application in $applications}
+				<div class="line app-link">
+		           <div class="unit size1of4">
+			           <a href="/admin/applications/{$application.slug}" data-id="{$application.slug}">{$application.title}</a>
+		           </div>
+		           <div class="unit size1of4">
+			           {$application.slug}
+		           </div>
+		           <div class="unit size1of4">
+			           {$application.credentials.apiKey}
+		           </div>
+		           <div class="unit size1of4 lastUnit">
+					  <input type="button" class="inf btn fr mrm addWritable" value="Add" data-pub="{$source.id}" data-id="{$application.slug}" />
+		           </div>
+	          </div>
+			{/foreach}
+		{else}
+		    {if $page.search == ''}
+			    <div class="alert inf">Search for an application</div>
+			{else}
+			    <div class="alert inf">No results</div>
+			{/if}
+		{/if}
+	</div>
+	<div>
+	{if $page.nextUrl}
+	   <div class="prevNextBtn  fr">
+	       <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+	   </div>
+	{/if}
+	{if $page.prevUrl}
+	   <div class="prevNextBtn">
+	       <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+	   </div>
+	{/if}
+	</div>
+	<script src="/static/js/list.js"></script>
+{call atlas.templates.applications.foot /}
+{/template}
+
+/**
  * 
  */
 {template .login}

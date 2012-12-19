@@ -397,3 +397,20 @@ $('#search').live('keypress',function(e) {
 		runSearch();	
 	}
 });
+
+$(".addWritable").live('click', function() {
+	var appSlug = $(this).attr("data-id");
+	var pubId = $(this).attr("data-pub");
+	var url = "/admin/sources/" + pubId + "/writable/applications/add?application=" + appSlug;
+	$.ajax({
+		type:'POST',
+		url: url,
+		success:function(responseData, textStatus, XMLHttpRequest) {
+			alert("Successfully added " + appSlug + " as a writer for this publisher");
+		},
+		error:function(textStatus) {
+			console.log("fail:", textStatus);
+		}
+	});	
+	return false;
+});
