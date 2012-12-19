@@ -36,7 +36,7 @@ public class ScheduleOverlapResolver implements ScheduleResolver {
 
     @Override
     public Schedule schedule(DateTime from, DateTime to, Iterable<Channel> channels, Iterable<Publisher> publishers, ApplicationConfiguration mergeConfig) {
-        Schedule schedule = scheduleResovler.schedule(from, to, channels, publishers, null);
+        Schedule schedule = scheduleResovler.schedule(from, to, channels, publishers, mergeConfig);
 
         ImmutableList.Builder<ScheduleChannel> scheduleChannels = ImmutableList.builder();
         for (ScheduleChannel channel : schedule.scheduleChannels()) {
