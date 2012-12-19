@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import com.google.common.base.Strings;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
@@ -107,7 +108,10 @@ public class ScheduleController extends BaseController<Iterable<ScheduleChannel>
         if (!Strings.isNullOrEmpty(publisher)) {
             return Sets.intersection(publishersFrom(publisher), appConfig.getEnabledSources());
         }
-        return ImmutableSet.copyOf(Iterables.filter(appConfig.precedence(), Predicates.in(appConfig.getEnabledSources())));
+        if (appConfig.precedenceEnabled()) {
+            return ImmutableSet.of(appConfig.orderdPublishers().get(0));
+        } 
+        throw new IllegalArgumentException("Need precedence enabled");
     }
 
     private Set<Channel> channelsFromIds(String channelId) {
