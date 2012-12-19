@@ -39,7 +39,7 @@ public class ErrorSummary {
 	
 	public static <T extends Exception> ErrorSummary forException(T exception) {
         @SuppressWarnings("unchecked")
-        ErrorSummaryFactory<? super T> factory = (ErrorSummaryFactory<? super T>) factories.get(exception);
+        ErrorSummaryFactory<? super T> factory = (ErrorSummaryFactory<? super T>) factories.get(exception.getClass());
 		if (factory != null) {
 			return factory.build(exception);
 		} else {
