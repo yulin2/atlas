@@ -74,10 +74,13 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ScheduleQuer
         ChannelSchedule channelSchedule = result.getChannelSchedule();
 
         if (result.getAnnotations().contains(Annotation.LICENSE)) {
-            writer.writeField("license", "In accessing this feed, you agree that you will only " +
-            		"access its contents for your own personal and non-commercial use and not for " +
-            		"any commercial or other purposes, including advertising or selling any goods or " +
-            		"services, including any third-party software applications available to the general public.");
+            writer.writeField("license",
+                "In accessing this feed, you agree that you will only " +
+                "access its contents for your own personal and non-commercial " +
+                "use, and not for any commercial or other purposes, including " +
+                "but not restricted to advertising or selling any goods or " +
+                "services, including any third-party software applications " +
+                "available to the general public.");
         }
         
         writer.writeObject(new ScheduleChannelWriter(), channelSchedule.channel(), ctxt);
