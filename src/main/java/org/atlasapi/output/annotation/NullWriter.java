@@ -6,10 +6,14 @@ import org.atlasapi.query.v4.schedule.FieldWriter;
 import org.atlasapi.query.v4.schedule.OutputContext;
 
 
-public class NullWriter extends OutputAnnotation<Object> {
+public class NullWriter<T> extends OutputAnnotation<T> {
 
-    public NullWriter() {
-        super(Object.class);
+    public static final <T> OutputAnnotation<T> create(Class<T> cls) {
+        return new NullWriter<T>(cls);
+    }
+    
+    public NullWriter(Class<T> cls) {
+        super(cls);
     }
 
     @Override
