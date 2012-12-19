@@ -43,7 +43,7 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
 
         @Override
         public String fieldName() {
-            return "series_summary";
+            return "series";
         }
     }
 
@@ -57,7 +57,7 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
         if (entity instanceof Episode) {
             Episode episode = (Episode) entity;
             if (episode.getSeriesRef() == null) {
-                writer.writeField("series_summary", null);
+                writer.writeField("series", null);
             } else {
                 writer.writeObject(summaryWriter, episode, ctxt);
             }
