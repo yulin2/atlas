@@ -30,7 +30,7 @@
 		</form>
 	</div>
 </div>
-<h2>Sources</h2>
+<h2>Sources (Read)</h2>
     <!--<div id="enable-precendence-div" class="alert inf {if $application.configuration.precedence}hide{/if}">Publisher precedence not enabled, <a id="enable-precedence" href="#enable">enable</a></div>-->
 	
 	<div class="line mbl">
@@ -102,6 +102,24 @@
 		</form>
 	</div>
 </div>
+
+{if length($application.configuration.writable) > 0}
+<h2>Sources (Writable)</h2>
+<div id="app-publishers" class="line" style="padding-left: 8px;">
+	<div class="unit size1of1">
+		<span class="h3">Source</span>
+	</div>
+</div>
+<div class="js_draggable form cb">
+	{foreach $publisher in $application.configuration.writable}
+	    <div class="line pr dragItem">
+	        <div class="dragItemContent">
+		        <div class="unit size1of1 b lastUnit">{$publisher.title}</div>
+		    </div>
+		</div>
+	{/foreach}
+</div>
+{/if}
 {/template}
 
 /**
@@ -111,6 +129,33 @@
  * @param index
  */
 {template .publisher}
+	<div class="line pr dragItem" data-publisher="{$publisher.key}">
+		{if $precedence}
+			<span class="extra inf"><span class="icn move"></span></span>
+		{/if}
+		<div class="dragItemContent">
+			<div class="unit size1of3 b">{$publisher.title}</div>
+			{if $publisher.state == 'available'}
+		        <div class="unit size1of3">Available</div>
+			    <div class="unit size1of3 lastUnit"><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" {if $publisher.enabled}checked{/if}></div>
+		    {elseif $publisher.state == 'unavailable'}
+			    <div class="unit size1of3"><a id="request-link-{$index|id}" class="request-link" href="javascript:requestPublisher('{$slug}','{$publisher.key}', {$index})">Request Access</a></div>
+		        <div class="unit size1of3 lastUnit"><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></div>
+			{else}
+		        <div class="unit size1of3">{$publisher.state}</div>
+		        <div class="unit size1of3 lastUnit"><input class="app-publisher" type="checkbox" name="pubkey" value="{$publisher.key}" disabled></div>
+			{/if}
+		</div>
+	</div>
+{/template}
+
+/**
+ * @param publisher
+ * @param precedence
+ * @param slug
+ * @param index
+ */
+{template .writable}
 	<div class="line pr dragItem" data-publisher="{$publisher.key}">
 		{if $precedence}
 			<span class="extra inf"><span class="icn move"></span></span>
