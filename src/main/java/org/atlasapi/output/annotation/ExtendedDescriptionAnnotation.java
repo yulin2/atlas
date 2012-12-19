@@ -43,7 +43,6 @@ public class ExtendedDescriptionAnnotation extends OutputAnnotation<Content> {
     @Override
     public void write(Content desc, FieldWriter writer, OutputContext ctxt) throws IOException {
         writer.writeList("genres", "genre", desc.getGenres(), ctxt);
-        writer.writeList("tags", "tag", desc.getTags(), ctxt);
         writer.writeField("presentation_channel", desc.getPresentationChannel());        
         
         if (desc instanceof Item) {
