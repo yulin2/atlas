@@ -21,7 +21,7 @@ public class SeriesReferenceAnnotation extends OutputAnnotation<Content> {
 
         @Override
         public String fieldName() {
-            return "series_summary";
+            return "series";
         }
     }
 
@@ -37,7 +37,7 @@ public class SeriesReferenceAnnotation extends OutputAnnotation<Content> {
         if (content instanceof Episode) {
             Episode episode = (Episode) content;
             if (episode.getSeriesRef() == null) {
-                writer.writeField("series_summary", null);
+                writer.writeField("series", null);
             } else {
                 writer.writeObject(seriesRefWriter, episode, ctxt);
             }
