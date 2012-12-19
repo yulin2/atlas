@@ -462,7 +462,7 @@ public class QueryWebModule {
         .register(CHANNEL_SUMMARY, new ChannelSummaryWriter(), commonImplied)
         .register(CHANNEL, new ChannelAnnotation(), ImmutableSet.of(CHANNEL_SUMMARY))
         .register(CONTENT_SUMMARY, NullWriter.create(Content.class), ImmutableSet.of(DESCRIPTION, BRAND_SUMMARY, 
-            SERIES_SUMMARY, NEXT_BROADCASTS, AVAILABLE_LOCATIONS))
+            SERIES_SUMMARY, BROADCASTS, LOCATIONS))
         .register(CONTENT_DETAIL, NullWriter.create(Content.class), ImmutableSet.of(EXTENDED_DESCRIPTION, SUB_ITEMS, CLIPS, 
             PEOPLE, BRAND_SUMMARY, SERIES_SUMMARY, BROADCASTS, LOCATIONS, KEY_PHRASES, RELATED_LINKS))
         .build();
