@@ -473,7 +473,6 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             }
         }
 
-
         episode.setMediaType(channel.mediaType());
         episode.setSpecialization(specialization(progData, channel));
         setGenres(progData, episode);
@@ -506,7 +505,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         episode.setPeople(people(progData, episode.getPeople()));
 
         Version version = findBestVersion(episode.getVersions());
-        
+
+        version.set3d(getBooleanValue(progData.getAttr().getThreeD()));
+        Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
+        version.setDuration(duration);
+        setCertificate(progData, episode);
+
         Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
         return broadcast;
