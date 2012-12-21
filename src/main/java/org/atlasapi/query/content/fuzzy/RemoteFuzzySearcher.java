@@ -8,19 +8,16 @@ import org.atlasapi.search.model.SearchResultsError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
 import com.google.gson.Gson;
 import com.metabroadcast.common.http.HttpResponse;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.http.SimpleHttpClient;
-import com.metabroadcast.common.url.UrlEncoding;
+import com.metabroadcast.common.url.Urls;
 
 public class RemoteFuzzySearcher implements ContentSearcher {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteFuzzySearcher.class);
     
-    private static final Joiner CSV = Joiner.on(',');
-
     private final SimpleHttpClient client = HttpClients.webserviceClient();
     private final Gson gson = new Gson();
     private final String remoteHost;
@@ -31,20 +28,7 @@ public class RemoteFuzzySearcher implements ContentSearcher {
 
     @Override
     public SearchResults search(SearchQuery query) {
-        String queryString = remoteHost + String.format("/titles?title=%s&%s&specializations=%s&publishers=%s&titleWeighting=%s&broadcastWeighting=%s&catchupWeighting=%s",
-                    UrlEncoding.encode(query.getTerm()), 
-                    query.getSelection().asQueryParameters(),
-                    CSV.join(query.getIncludedSpecializations()),
-                    CSV.join(query.getIncludedPublishers()), 
-                    query.getTitleWeighting(), 
-                    query.getBroadcastWeighting(), 
-                    query.getCatchupWeighting());
-        if (query.getPriorityChannelWeighting().hasValue()) {
-            queryString = String.format("%s&priorityChannelWeighting=%s", queryString, query.getPriorityChannelWeighting().requireValue());
-        }
-        if (query.getFirstBroadcastWeighting().hasValue()) {
-            queryString = String.format("%s&firstBroadcastWeighting=%s", queryString, query.getFirstBroadcastWeighting().requireValue());
-        }
+        String queryString = Urls.appendParameters(remoteHost+"/titles",query.toQueryStringParameters());
         try {
             log.trace("Calling remote searcher, request URI is {}", queryString);
             HttpResponse response = client.get(queryString);
