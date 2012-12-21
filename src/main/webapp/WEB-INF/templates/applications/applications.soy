@@ -402,8 +402,8 @@
 	{param application: null /}
 {/call}
 	<h1><a href="/admin/sources/{$source.id}/applications">{$source.title}</a></h1>
-	<h3>Edit applications that can write as this source</h3>
-	<div class="form mrm">
+	
+	<div class="form mrm fr">
     	<div class="grp">
     		<label for="search">Search</label>
     		<div class="inputHolder">
@@ -412,6 +412,7 @@
     		</div>
     	</div>
 	</div>
+	<h4 class="headingSearch">Edit applications with write permission on this source</h4>
 	<div id="applications-list" data-apps="{length($applications)}" class="cf cb">
 		{if length($applications) > 0}
 			<div class="line">
