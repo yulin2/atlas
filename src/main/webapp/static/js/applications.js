@@ -432,3 +432,39 @@ $('#showEnabledOnly').live('click', function() {
 	url += $(this).attr('checked') ? "yes" : "no";
 	window.location.href = url;
 });
+
+$(".addWritable").live('click', function() {
+	var appSlug = $(this).attr("data-id");
+	var pubId = $(this).attr("data-pub");
+	var href = window.location.href;
+	var url = "/admin/sources/" + pubId + "/writable/applications/add?application=" + appSlug;
+	$.ajax({
+		type:'POST',
+		url: url,
+		success:function(responseData, textStatus, XMLHttpRequest) {
+			window.location.href = href;
+		},
+		error:function(textStatus) {
+			console.log("fail:", textStatus);
+		}
+	});	
+	return false;
+});
+
+$(".removeWritable").live('click', function() {
+	var appSlug = $(this).attr("data-id");
+	var pubId = $(this).attr("data-pub");
+	var href = window.location.href;
+	var url = "/admin/sources/" + pubId + "/writable/applications/remove?application=" + appSlug;
+	$.ajax({
+		type:'POST',
+		url: url,
+		success:function(responseData, textStatus, XMLHttpRequest) {
+			window.location.href = href;
+		},
+		error:function(textStatus) {
+			console.log("fail:", textStatus);
+		}
+	});	
+	return false;
+});
