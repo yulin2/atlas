@@ -40,6 +40,8 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
     private static final String TITLE_WEIGHTING_PARAM = "titleWeighting";
     private static final String BROADCAST_WEIGHTING_PARAM = "broadcastWeighting";
     private static final String CATCHUP_WEIGHTING_PARAM = "catchupWeighting";
+    private static final String TYPE_PARAM = "type";
+    private static final String TOP_LEVEL_PARAM = "topLevelOnly";
     private static final String ANNOTATIONS_PARAM = "annotations";
 
     private static final float DEFAULT_TITLE_WEIGHTING = 1.0f;
@@ -61,7 +63,10 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             @RequestParam(value = PUBLISHER_PARAM, required = false) String publisher,
             @RequestParam(value = TITLE_WEIGHTING_PARAM, required = false) String titleWeightingParam,
             @RequestParam(value = BROADCAST_WEIGHTING_PARAM, required = false) String broadcastWeightingParam,
-            @RequestParam(value = CATCHUP_WEIGHTING_PARAM, required = false) String catchupWeightingParam, HttpServletRequest request, HttpServletResponse response) throws IOException {
+            @RequestParam(value = CATCHUP_WEIGHTING_PARAM, required = false) String catchupWeightingParam,
+            @RequestParam(value = TYPE_PARAM, required = false) String type, 
+            @RequestParam(value = TOP_LEVEL_PARAM, required = false, defaultValue = "true") String topLevel,
+            HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             paramChecker.checkParameters(request);
 
@@ -81,7 +86,16 @@ public class SearchController extends BaseController<QueryResult<Content,?extend
             ApplicationConfiguration appConfig = appConfig(request);
             Set<Specialization> specializations = specializations(specialization);
             Set<Publisher> publishers = publishers(publisher, appConfig);
-            List<Identified> content = searcher.search(new SearchQuery(q, selection, specializations, publishers, titleWeighting, broadcastWeighting, catchupWeighting), appConfig);
+            List<Identified> content = searcher.search(SearchQuery.builder(q)
+                .withSelection(selection)
+                .withSpecializations(specializations)
+                .withPublishers(publishers)
+                .withTitleWeighting(titleWeighting)
+                .withBroadcastWeighting(broadcastWeighting)
+                .withCatchupWeighting(catchupWeighting)
+                .withType(type)
+                .isTopLevel(!Strings.isNullOrEmpty(topLevel) ? Boolean.valueOf(topLevel) : null)
+                .build(), appConfig);
 
             modelAndViewFor(request, response, QueryResult.of(Iterables.filter(content,Content.class)), appConfig);
         } catch (Exception e) {
