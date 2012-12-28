@@ -43,7 +43,7 @@ public class PeopleController extends BaseController<Iterable<Person>> {
             }
             Person person;
             if (uri != null) {
-                person = resolver.person(uri);
+                person = resolver.person(uri).valueOrNull();
             } else {
                 person = resolver.person(idCodec.decode(id).longValue());
             }
