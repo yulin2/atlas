@@ -1,5 +1,6 @@
 package org.atlasapi.system;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 import java.io.IOException;
@@ -23,13 +24,18 @@ public class ReplayController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/system/replay")
-    public void replay(@RequestParam(required = true) String from, @RequestParam(required = true) String to, @RequestParam(required = true) String destination, HttpServletResponse response) throws IOException {
+    public void replay(
+           @RequestParam(required = true) String from, 
+           @RequestParam(required = true) String to, 
+           @RequestParam(required = true) String destination, 
+           @RequestParam(required = false) String source,
+           HttpServletResponse response) throws IOException {
         if (Strings.isNullOrEmpty(from)
                 || Strings.isNullOrEmpty(to)
                 || Strings.isNullOrEmpty(destination)) {
             throw new IllegalArgumentException("Request parameters 'destination', 'from' and 'to' are required!");
         }
 
-        messageReplayer.replay(destination, dateTimeParser.parse(from), dateTimeParser.parse(to));
+        messageReplayer.replay(destination, dateTimeParser.parse(from), dateTimeParser.parse(to), Optional.fromNullable(Strings.emptyToNull(source)));
     }
 }

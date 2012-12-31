@@ -1,6 +1,7 @@
 package org.atlasapi.messaging.producers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 import com.metabroadcast.common.time.Clock;
 import com.metabroadcast.common.time.SystemClock;
 import java.io.IOException;
@@ -29,9 +30,9 @@ public class MessageReplayer {
         this.producer = producer;
     }
 
-    public void replay(String destination, DateTime from, DateTime to) {
+    public void replay(String destination, DateTime from, DateTime to, Optional<String> source) {
         producer.send(destination, new JsonMessageCreator(new BeginReplayMessage(UUID.randomUUID().toString(), clock.now().getMillis(), null, null, null)));
-        for (final Message original : store.get(from, to)) {
+        for (final Message original : store.get(from, to, source)) {
             producer.send(destination, new JsonMessageCreator(new ReplayMessage(UUID.randomUUID().toString(), clock.now().getMillis(), null, null, null, original)));
         }
         producer.send(destination, new JsonMessageCreator(new EndReplayMessage(UUID.randomUUID().toString(), clock.now().getMillis(), null, null, null)));
