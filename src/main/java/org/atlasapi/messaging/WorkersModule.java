@@ -34,7 +34,7 @@ public class WorkersModule {
     private String loggerDestination = Configurer.get("messaging.destination.logger").get();
     private int loggerConsumers = Integer.parseInt(Configurer.get("messaging.consumers.logger").get());
     private long replayInterruptThreshold = Long.parseLong(Configurer.get("messaging.replay.interrupt.threshold").get());
-    //
+
     @Autowired
     private ConnectionFactory connectionFactory;
     @Autowired
@@ -48,7 +48,7 @@ public class WorkersModule {
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
-        return new ReplayingWorker(new EsIndexer(contentResolver, contentIndexer), connectionFactory, indexerCoalesceQueue, indexerCoalesceTime, indexerCoalesceSize);
+        return new ReplayingWorker(new EsIndexer(contentResolver, contentIndexer));
     }
 
     @Bean
