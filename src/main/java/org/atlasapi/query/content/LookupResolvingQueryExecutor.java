@@ -1,33 +1,29 @@
 package org.atlasapi.query.content;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
+import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.common.Id;
-import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.DefaultEquivalentContentResolver;
-import org.atlasapi.persistence.content.EquivalentContent;
-import org.atlasapi.persistence.content.EquivalentContentResolver;
+import org.atlasapi.persistence.content.KnownTypeContentResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
+import org.atlasapi.persistence.lookup.entry.LookupEntry;
 import org.atlasapi.persistence.lookup.entry.LookupEntryStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Maps.EntryTransformer;
 
 public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
 

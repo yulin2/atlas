@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.output.writers.CertificateWriter;

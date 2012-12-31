@@ -4,7 +4,7 @@ package org.atlasapi.output.annotation;
 import java.io.IOException;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.query.v4.schedule.EntityListWriter;

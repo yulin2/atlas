@@ -15,8 +15,8 @@ import java.util.Iterator;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.update.EquivalenceUpdater;
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;

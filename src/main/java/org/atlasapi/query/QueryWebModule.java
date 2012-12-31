@@ -50,7 +50,6 @@ import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
-import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ChannelQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
@@ -61,6 +60,7 @@ import org.atlasapi.media.entity.simple.ScheduleQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleChannel;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
+import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.AtlasModelWriter;
@@ -176,10 +176,6 @@ import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.time.SystemClock;
-import org.atlasapi.persistence.output.ContainerSummaryResolver;
-import org.atlasapi.persistence.output.MongoContainerSummaryResolver;
-import org.atlasapi.persistence.topic.TopicSearcher;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 @Configuration
 public class QueryWebModule {

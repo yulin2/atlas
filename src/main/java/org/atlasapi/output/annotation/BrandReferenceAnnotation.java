@@ -2,7 +2,7 @@ package org.atlasapi.output.annotation;
 
 import java.io.IOException;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.query.v4.schedule.EntityWriter;
 import org.atlasapi.query.v4.schedule.FieldWriter;

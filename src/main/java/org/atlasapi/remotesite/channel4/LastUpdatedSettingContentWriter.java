@@ -3,8 +3,8 @@ package org.atlasapi.remotesite.channel4;
 import java.util.Map;
 import java.util.Set;
 
-import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.content.Container;
+import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;

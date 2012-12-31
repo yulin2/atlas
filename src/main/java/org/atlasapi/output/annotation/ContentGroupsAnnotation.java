@@ -4,7 +4,7 @@ package org.atlasapi.output.annotation;
 import java.io.IOException;
 import java.util.List;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.ContentGroupRef;
 import org.atlasapi.output.writers.ChildRefWriter;

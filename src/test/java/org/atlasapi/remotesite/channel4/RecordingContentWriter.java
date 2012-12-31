@@ -2,8 +2,8 @@ package org.atlasapi.remotesite.channel4;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.content.Container;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.persistence.content.ContentWriter;

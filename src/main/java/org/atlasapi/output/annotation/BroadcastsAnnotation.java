@@ -6,8 +6,8 @@ import static org.atlasapi.media.entity.Version.TO_BROADCASTS;
 import java.io.IOException;
 import java.util.Set;
 
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.output.writers.BroadcastWriter;

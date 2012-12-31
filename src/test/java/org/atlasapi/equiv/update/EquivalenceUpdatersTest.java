@@ -1,12 +1,8 @@
 package org.atlasapi.equiv.update;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
@@ -15,8 +11,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import com.google.gson.reflect.TypeToken;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EquivalenceUpdatersTest {

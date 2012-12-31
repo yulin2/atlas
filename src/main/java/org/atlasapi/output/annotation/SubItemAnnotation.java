@@ -3,8 +3,8 @@ package org.atlasapi.output.annotation;
 
 import java.io.IOException;
 
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.output.writers.ChildRefWriter;
 import org.atlasapi.query.v4.schedule.FieldWriter;
 import org.atlasapi.query.v4.schedule.OutputContext;

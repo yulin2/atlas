@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
 import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
