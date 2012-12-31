@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;

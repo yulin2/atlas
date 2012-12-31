@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;

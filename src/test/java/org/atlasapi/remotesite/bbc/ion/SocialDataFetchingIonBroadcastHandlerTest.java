@@ -7,15 +7,15 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.media.entity.TopicRef;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.RelatedLink;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;

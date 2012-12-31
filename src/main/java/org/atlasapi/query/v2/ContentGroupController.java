@@ -1,11 +1,7 @@
 package org.atlasapi.query.v2;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-
 import java.io.IOException;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,24 +9,26 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.media.entity.ChildRef;
+import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.QueryResult;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.query.Selection;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.ContentGroup;
-import org.atlasapi.persistence.content.ContentGroupResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
 
 @Controller
 public class ContentGroupController extends BaseController<Iterable<ContentGroup>> {

@@ -8,9 +8,9 @@ import static org.hamcrest.Matchers.notNullValue;
 import junit.framework.TestCase;
 
 import org.atlasapi.equiv.update.tasks.ScheduleTaskProgressStore;
+import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.SortKey;
 import org.atlasapi.persistence.content.ContentResolver;

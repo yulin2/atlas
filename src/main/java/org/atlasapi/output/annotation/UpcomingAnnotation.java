@@ -4,9 +4,9 @@ import static com.metabroadcast.common.base.MorePredicates.transformingPredicate
 
 import java.io.IOException;
 
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.output.writers.ChildRefWriter;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.query.v4.schedule.FieldWriter;

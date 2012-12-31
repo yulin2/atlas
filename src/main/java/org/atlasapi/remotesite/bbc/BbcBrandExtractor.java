@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;

@@ -3,8 +3,8 @@ package org.atlasapi.remotesite.bbc.ion;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.errorEntry;
 import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
 
-import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.content.Container;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;

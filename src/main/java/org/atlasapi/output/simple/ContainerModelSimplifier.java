@@ -5,15 +5,18 @@ import static com.metabroadcast.common.base.MorePredicates.transformingPredicate
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.ChildRef;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
+import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
-import org.atlasapi.persistence.media.product.ProductResolver;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.output.Annotation;
+import org.atlasapi.persistence.content.ContentGroupResolver;
+import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
 import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
@@ -25,8 +28,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
-import org.atlasapi.persistence.content.ContentGroupResolver;
 
 public class ContainerModelSimplifier extends ContentModelSimplifier<Container, Playlist> {
 
@@ -101,8 +102,8 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         return asChildRefFilter(recentlyBroadcastResolver.recentlyBroadcastChildrenFor(fullPlayList, 3));
     }
     
-    private Predicate<ChildRef> asChildRefFilter(Iterable<String> childRefUris) {
-        return transformingPredicate(ChildRef.TO_URI, Predicates.in(ImmutableSet.copyOf(childRefUris)));
+    private Predicate<ChildRef> asChildRefFilter(Iterable<Id> childRefId) {
+        return transformingPredicate(Identifiables.toId(), Predicates.in(ImmutableSet.copyOf(childRefId)));
     }
 
     @Override

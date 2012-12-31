@@ -3,7 +3,6 @@ package org.atlasapi.equiv.results.www;
 import static com.metabroadcast.common.http.HttpStatusCode.NOT_FOUND;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -11,9 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
-import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.common.Id;
-import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.springframework.stereotype.Controller;
@@ -21,9 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.model.SimpleModel;
 import com.metabroadcast.common.model.SimpleModelList;

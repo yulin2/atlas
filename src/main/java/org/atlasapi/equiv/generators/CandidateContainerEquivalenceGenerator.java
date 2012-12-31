@@ -2,8 +2,6 @@ package org.atlasapi.equiv.generators;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.atlasapi.equiv.EquivalenceSummary;
 import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.description.ResultDescription;
@@ -11,15 +9,12 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
-import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ResolvedContent;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
