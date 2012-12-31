@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class ReplayingWorker extends AbstractCoalescingWorker {
+public class ReplayingWorker extends AbstractWorker {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     //
@@ -32,22 +32,13 @@ public class ReplayingWorker extends AbstractCoalescingWorker {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Worker delegate;
     private long replayThreshold;
-
-    public ReplayingWorker(Worker delegate, ConnectionFactory connectionFactory, String coalesceQueue, int coalesceMillisThreshold, int coalesceSizeThreshold) {
-        super(connectionFactory, coalesceQueue, coalesceMillisThreshold, coalesceSizeThreshold);
-        this.delegate = delegate;
-        this.replayThreshold = 60000;
-    }
     
     public ReplayingWorker(Worker delegate) {
-        super();
         this.delegate = delegate;
         this.replayThreshold = 60000;
     }
 
-    @Override
     public void start() {
-        super.start();
         scheduler.scheduleAtFixedRate(new ReplayCircuitBreaker(), replayThreshold, replayThreshold, TimeUnit.MILLISECONDS);
     }
     
