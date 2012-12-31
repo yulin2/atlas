@@ -12,9 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.atlasapi.equiv.update.tasks.ScheduleTaskProgressStore;
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ChildRef;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;

@@ -5,10 +5,10 @@ import static org.atlasapi.remotesite.redux.UpdateProgress.SUCCESS;
 
 import java.util.List;
 
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Clip;
-import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Film;

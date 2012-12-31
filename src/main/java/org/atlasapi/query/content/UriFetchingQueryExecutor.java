@@ -22,7 +22,7 @@ import javax.annotation.Nullable;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;

@@ -35,9 +35,9 @@ import static org.atlasapi.output.Annotation.TOPICS;
 import static org.atlasapi.output.Annotation.UPCOMING;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
-import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;

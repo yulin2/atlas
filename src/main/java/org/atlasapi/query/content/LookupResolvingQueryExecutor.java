@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.DefaultEquivalentContentResolver;

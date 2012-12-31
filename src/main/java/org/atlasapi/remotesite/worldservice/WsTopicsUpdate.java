@@ -9,7 +9,7 @@ import static org.atlasapi.persistence.logging.AdapterLogEntry.infoEntry;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;

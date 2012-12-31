@@ -2,7 +2,7 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import java.util.List;
 
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.RelatedLink;

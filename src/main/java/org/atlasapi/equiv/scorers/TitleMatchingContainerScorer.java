@@ -3,7 +3,7 @@ package org.atlasapi.equiv.scorers;
 import org.atlasapi.equiv.generators.ContentTitleScorer;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
-import org.atlasapi.media.entity.Container;
+import org.atlasapi.media.content.Container;
 
 public class TitleMatchingContainerScorer implements EquivalenceScorer<Container> {
 
