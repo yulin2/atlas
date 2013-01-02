@@ -136,7 +136,7 @@ public class AtlasPersistenceModule {
         return new DatabasedMongo(mongo(), mongoDbName);
     }
 
-    @Bean
+    @Bean @Primary
     public Mongo mongo() {
         Mongo mongo = new Mongo(mongoHosts());
         if (processingConfig == null || !processingConfig.toBoolean()) {
@@ -144,7 +144,7 @@ public class AtlasPersistenceModule {
         }
         return mongo;
     }
-
+    
     @Bean
     public IdGeneratorBuilder idGeneratorBuilder() {
         return new IdGeneratorBuilder() {
