@@ -130,7 +130,7 @@ public class ContainerHierarchyMatchingScorerTest {
     
     private Brand brandWithSeries(int series) {
         Brand brand = new Brand();
-        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new ChildRef("uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), series));
+        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new ChildRef(1234L, "uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), series));
         return brand;
     }
 
@@ -141,7 +141,7 @@ public class ContainerHierarchyMatchingScorerTest {
     }
 
     public void setChildren(int children, Container brand) {
-        brand.setChildRefs(Iterables.limit(Iterables.cycle(new ChildRef("uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), children));
+        brand.setChildRefs(Iterables.limit(Iterables.cycle(new ChildRef(1234L, "uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), children));
     }
 
 }
