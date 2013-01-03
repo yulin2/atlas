@@ -67,7 +67,10 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         if (programmeId.isPresent()) {
             item.addAlias(programmeId.get());
         }
-        item.addAlias(getProgrammeCrid(source));
+        Optional<String> programmeCrid = getProgrammeCrid(source);
+        if (programmeCrid.isPresent()) {
+            item.addAlias(programmeCrid.get());
+        }
         item.addVersion(getVersion(source));
         return item;
     }
@@ -170,12 +173,12 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         return version;
     }
 
-    private String getProgrammeCrid(Element source) {
+    private Optional<String> getProgrammeCrid(Element source) {
         Element programmeCrid = getElementOfType(source, IDENTIFIER_KEY, YV_PREFIX, PROGRAMME_CRID_KEY);
         if (programmeCrid == null) {
-            throw new ElementNotFoundException(source, YV_PREFIX + ":" + IDENTIFIER_KEY + " with type: " + PROGRAMME_CRID_KEY);
+            return Optional.absent();
         }
-        return programmeCrid.getValue();
+        return Optional.fromNullable(programmeCrid.getValue());
     }
 
     private Element getElementOfType(Element source, String elementName, String prefixName, String elementType) {
