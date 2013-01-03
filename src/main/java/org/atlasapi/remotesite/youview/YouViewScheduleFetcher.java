@@ -34,9 +34,9 @@ public class YouViewScheduleFetcher {
     }
 
     // fetch schedule from start to finish
-    public Document getSchedule(DateTime start, DateTime finish) throws HttpException, Exception {
+    public Document getSchedule(DateTime start, DateTime finish, int service) throws HttpException, Exception {
         QueryStringParameters qsp = new QueryStringParameters();
-        qsp.add("service", "" + 1044);
+        qsp.add("service", "" + service);
         qsp.add("starttime", start.toString(DATE_TIME_FORMAT));
         qsp.add("endtime", finish.toString(DATE_TIME_FORMAT));
         client.get(new SimpleHttpRequest<Void>(youviewUrl + "?" + qsp.toQueryString(), xmlTransformer));

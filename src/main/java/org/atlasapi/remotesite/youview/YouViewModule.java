@@ -29,11 +29,11 @@ public class YouViewModule {
     }
 
     private YouViewFortnightUpdater youViewFornightUpdater() {
-        return new YouViewFortnightUpdater(youViewFetcher(), youViewXmlElementHandler());
+        return new YouViewFortnightUpdater(channelResolver(), youViewFetcher(), youViewXmlElementHandler());
     }
 
     private YouViewTodayUpdater youViewTodayUpdater() {
-        return new YouViewTodayUpdater(youViewFetcher(), youViewXmlElementHandler());
+        return new YouViewTodayUpdater(channelResolver(), youViewFetcher(), youViewXmlElementHandler());
     }
     
     private YouViewScheduleFetcher youViewFetcher() {
