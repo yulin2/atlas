@@ -44,4 +44,12 @@ public class PaChannelMap {
         }
         return Maybe.nothing();
     }
+    
+    public static String createUriFromId(String channelId) {
+        return PA_URI_PREFIX + channelId;
+    }
+    
+    public static int channelIdFromPaUri(String uri) {
+        return Integer.parseInt(uri.replace(PA_URI_PREFIX, ""));
+    }
 }

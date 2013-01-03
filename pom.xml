@@ -51,6 +51,19 @@
                             <generateDirectory>${project.build.directory}/generated-sources/pa-features</generateDirectory>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-channels-schema</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatePackage>org.atlasapi.remotesite.pa.channels.bindings</generatePackage>
+                            <schemaIncludes>
+                                <schemaInclude>tv_channel_data.dtd</schemaInclude>
+                            </schemaIncludes>
+                            <generateDirectory>${project.build.directory}/generated-sources/pa-channels</generateDirectory>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
