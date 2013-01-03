@@ -8,11 +8,12 @@ import javax.annotation.Resource;
 import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
+import org.atlasapi.persistence.content.ContentResolverBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
-import org.atlasapi.persistence.content.IdSettingContentWriter;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
+import org.atlasapi.persistence.content.LookupStoreBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
@@ -159,7 +160,7 @@ public class AtlasPersistenceModule {
         ContentWriter contentWriter = mongoContentPersistenceModule().contentWriter();
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, lookupStore());
         if (Boolean.valueOf(generateIds)) {
-            contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
+            contentWriter = new LookupStoreBackedIdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
         contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter, new TranslatorContentHasher());
         return contentWriter;
@@ -272,7 +273,7 @@ public class AtlasPersistenceModule {
     public ContentWriter cassandraContentWriter() {
         ContentWriter contentWriter = cassandraContentPersistenceModule().cassandraContentStore();
         if (Boolean.valueOf(generateIds)) {
-            contentWriter = new IdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
+            contentWriter = new ContentResolverBackedIdSettingContentWriter(cassandraContentStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, cassandraContentPersistenceModule().cassandraLookupEntryStore());
         contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter, new TranslatorContentHasher());
