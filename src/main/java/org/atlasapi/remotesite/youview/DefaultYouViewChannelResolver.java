@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.youview;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -9,12 +10,13 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
     
     private static final String YOUVIEW_URI_PREFIX = "http://youview.com/service/";
-    private static Pattern YOUVIEW_URI_MATCHER = Pattern.compile("^" + YOUVIEW_URI_PREFIX + "(\\d+)$");
+    static Pattern YOUVIEW_URI_MATCHER = Pattern.compile("^" + YOUVIEW_URI_PREFIX + "(\\d+)$");
     
     private final Map<Integer, Channel> channelMap = Maps.newHashMap();
     
@@ -42,5 +44,10 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
             return Optional.fromNullable(channelMap.get(channelId));
         }
         return Optional.absent();
+    }
+
+    @Override
+    public List<Channel> getAllChannels() {
+        return ImmutableList.copyOf(channelMap.values());
     }
 }

@@ -4,8 +4,8 @@ import org.joda.time.Duration;
 
 public class YouViewFortnightUpdater extends YouViewUpdater {
 
-    public YouViewFortnightUpdater(YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler) {
-        super(fetcher, elementHandler, Duration.standardDays(7), Duration.standardDays(7));
+    public YouViewFortnightUpdater(YouViewChannelResolver channelResolver, YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler) {
+        super(channelResolver, fetcher, elementHandler, Duration.standardDays(7), Duration.standardDays(7));
     }
 
 }

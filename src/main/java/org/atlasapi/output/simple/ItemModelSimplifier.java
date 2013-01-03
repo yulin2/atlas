@@ -225,6 +225,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
         simpleModel.setLive(broadcast.getLive());
         simpleModel.setPremiere(broadcast.getPremiere());
         simpleModel.setNewSeries(broadcast.getNewSeries());
+        simpleModel.setAliases(broadcast.getAliases());
 
         return simpleModel;
     }
