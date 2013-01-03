@@ -35,7 +35,7 @@ public class EsIndexer extends AbstractWorker {
             throw new IllegalStateException("More than one content found for id: " + message.getEntityId());
         } else if (results.getAllResolvedResults().size() == 1) {
             Identified source = results.getFirstValue().requireValue();
-            log.info("Indexing {} with id {}.", source.getClass().getName(), message.getEntityId());
+            log.info("Indexing {}", source);
             if (source instanceof Item) {
                 try {
                     contentIndexer.index((Item) source);
