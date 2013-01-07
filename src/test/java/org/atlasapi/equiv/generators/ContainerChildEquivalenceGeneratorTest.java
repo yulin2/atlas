@@ -15,6 +15,7 @@ import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.content.Container;
+import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -38,11 +39,11 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
     @Test
     public void testExtractsContainerFromStrongItemEquivalents() {
         
-        Container subject = new Container("subject","s",Publisher.BBC);
+        Container subject = new Brand("subject","s",Publisher.BBC);
         subject.setId(1L);
-        Container equiv1 = new Container("equivalent1","e1",Publisher.PA);
+        Container equiv1 = new Brand("equivalent1","e1",Publisher.PA);
         equiv1.setId(2L);
-        Container equiv2 = new Container("equivalent2","e2",Publisher.ITV);
+        Container equiv2 = new Brand("equivalent2","e2",Publisher.ITV);
         equiv2.setId(3L);
         
         when(equivSummaryStore.summariesForChildren("subject")).thenReturn(
