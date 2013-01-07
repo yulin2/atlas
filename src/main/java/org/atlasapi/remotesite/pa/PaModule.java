@@ -3,6 +3,8 @@ package org.atlasapi.remotesite.pa;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
+import org.atlasapi.media.channel.ChannelGroupResolver;
+import org.atlasapi.media.channel.ChannelGroupWriter;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Publisher;
@@ -57,6 +59,8 @@ public class PaModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
+    private @Autowired ChannelGroupWriter channelGroupWriter;
+    private @Autowired ChannelGroupResolver channelGroupResolver;
     private @Autowired AdapterLog log;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ItemsPeopleWriter peopleWriter;
@@ -90,7 +94,7 @@ public class PaModule {
     }
     
     @Bean PaChannelsProcessor channelsProcessor() {
-        return new PaChannelsProcessor(channelResolver, channelWriter, contentGroupResolver, contentGroupWriter);
+        return new PaChannelsProcessor(channelResolver, channelWriter, channelGroupResolver, channelGroupWriter);
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {

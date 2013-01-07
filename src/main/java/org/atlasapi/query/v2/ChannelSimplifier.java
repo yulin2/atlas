@@ -7,8 +7,10 @@ import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.media.channel.ChannelGroupStore;
+import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.Platform;
+import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 
@@ -24,9 +26,9 @@ public class ChannelSimplifier {
     
     private final NumberToShortStringCodec idCodec;
     private final ChannelResolver channelResolver;
-    private final ChannelGroupStore channelGroupResolver;
+    private final ChannelGroupResolver channelGroupResolver;
 
-    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver) {
+    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver) {
         this.idCodec = idCodec;
         this.channelResolver = channelResolver;
         this.channelGroupResolver = channelGroupResolver;
@@ -79,7 +81,11 @@ public class ChannelSimplifier {
     public org.atlasapi.media.entity.simple.ChannelGroup simplify(ChannelGroup input, boolean showChannels) {
         org.atlasapi.media.entity.simple.ChannelGroup simple = new org.atlasapi.media.entity.simple.ChannelGroup();
         
-        simple.setType(input.getType().key());
+        if (input instanceof Platform) {
+            simple.setType("platform");
+        } else if (input instanceof Region) {
+            simple.setType("region");
+        }
         simple.setUri(input.getCanonicalUri());
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));

@@ -5,9 +5,13 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.media.channel.ChannelGroupStore;
+import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
+import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,21 +25,17 @@ import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.output.AtlasModelWriter;
-import org.atlasapi.persistence.logging.AdapterLog;
 
 @Controller
 public class ChannelGroupController extends BaseController<ChannelGroupQueryResult> {
 
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(50).withDefaultLimit(10);
     private static final Splitter CSV_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
-    private final ChannelGroupStore channelGroupResolver;
+    private final ChannelGroupResolver channelGroupResolver;
     private final ChannelSimplifier simplifier;
     private final NumberToShortStringCodec idCodec;
 
-    public ChannelGroupController(ChannelGroupStore channelGroupResolver, NumberToShortStringCodec idCodec, ChannelSimplifier simplifier, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<ChannelGroupQueryResult> outputter) {
+    public ChannelGroupController(ChannelGroupResolver channelGroupResolver, NumberToShortStringCodec idCodec, ChannelSimplifier simplifier, ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<ChannelGroupQueryResult> outputter) {
         super(configFetcher, log, outputter);
         this.channelGroupResolver = channelGroupResolver;
         this.idCodec = idCodec;

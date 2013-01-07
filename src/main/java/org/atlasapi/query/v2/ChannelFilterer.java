@@ -20,14 +20,14 @@ import com.google.inject.internal.Nullable;
 
 public class ChannelFilterer {
     
-    public Set<Channel> filter(Iterable<Channel> channels, ChannelFilter filter, @Nullable SetMultimap<Channel, ChannelGroup> channelToGroups) {
+    public Set<Channel> filter(Iterable<Channel> channels, ChannelFilter filter, @Nullable SetMultimap<Long, ChannelGroup> channelToGroups) {
         
         Preconditions.checkArgument(!(filter.channelGroups.isPresent() && channelToGroups == null));
         
         return ImmutableSet.copyOf(Iterables.filter(channels, filterPredicate(filter, channelToGroups)));
     }
     
-    private Predicate<Channel> filterPredicate(final ChannelFilter filter, @Nullable final SetMultimap<Channel, ChannelGroup> channelToGroups) {
+    private Predicate<Channel> filterPredicate(final ChannelFilter filter, @Nullable final SetMultimap<Long, ChannelGroup> channelToGroups) {
         return new Predicate<Channel>() {
             @Override
             public boolean apply(Channel input) {
@@ -44,7 +44,7 @@ public class ChannelFilterer {
                     return false;
                 }
                 
-                if (filter.channelGroups.isPresent() && Sets.intersection(filter.channelGroups.get(), channelToGroups.get(input)).isEmpty()) {
+                if (filter.channelGroups.isPresent() && Sets.intersection(filter.channelGroups.get(), channelToGroups.get(input.getId())).isEmpty()) {
                     return false;
                 }
                 

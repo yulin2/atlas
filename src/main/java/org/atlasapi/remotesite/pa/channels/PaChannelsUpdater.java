@@ -83,7 +83,6 @@ public class PaChannelsUpdater extends ScheduledTask {
             reportStatus(String.format("found %s files, processed %s files", Iterables.size(files), filesProcessed));
         } catch (Exception e) {
             log.error("Exception running PA channels updater", e);
-            // this will stop the task
             Throwables.propagate(e);
         }
     }

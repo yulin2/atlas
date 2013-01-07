@@ -16,6 +16,7 @@ import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.channels.bindings.Epg;
+import org.atlasapi.remotesite.pa.channels.bindings.EpgContent;
 import org.atlasapi.remotesite.pa.channels.bindings.Name;
 import org.atlasapi.remotesite.pa.channels.bindings.Names;
 import org.atlasapi.remotesite.pa.channels.bindings.Regionalisation;
@@ -39,10 +40,8 @@ public class PlatformRegionalisationTest {
         // create serviceProvider with no regions
         ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
         serviceProvider.setRegions(Lists.<RegionalisationInfo>newArrayList());
-        // create region
-        org.atlasapi.remotesite.pa.channels.bindings.Region region = Mockito.mock(org.atlasapi.remotesite.pa.channels.bindings.Region.class);
-        
-        List<ChannelGroup> channelGroups = processor.processPlatform(platformInfo.createPlatform(), serviceProvider.createServiceProvider(), Lists.newArrayList(region));
+
+        List<ChannelGroup> channelGroups = processor.processPlatform(platformInfo.createPlatform(), serviceProvider.createServiceProvider(), Lists.<org.atlasapi.remotesite.pa.channels.bindings.Region>newArrayList());
 
         // assert no regions on platform
         ChannelGroup result = Iterables.getOnlyElement(channelGroups);
@@ -51,6 +50,7 @@ public class PlatformRegionalisationTest {
         assertTrue(platform.getRegions().isEmpty());
         // test that platform fields are picked up ok
         assertEquals("Freeview", platform.getTitle());
+        assertEquals("http://ref.atlasapi.org/platforms/freeview", platform.getCanonicalUri());
         assertEquals("http://pressassociation.com/platforms/3", Iterables.getOnlyElement(platform.getAliases()));
         assertEquals(Publisher.METABROADCAST, platform.getPublisher());
     }
@@ -67,12 +67,16 @@ public class PlatformRegionalisationTest {
         ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
         serviceProvider.setRegions(Lists.newArrayList(regionalisation));
         
-        // create region
-        RegionInfo regionInfo = new RegionInfo();
-        regionInfo.setId("61");
-        regionInfo.setName("South");
+        // create regions
+        RegionInfo south = new RegionInfo();
+        south.setId("61");
+        south.setName("South");
         
-        List<ChannelGroup> channelGroups = processor.processPlatform(platformInfo.createPlatform(), serviceProvider.createServiceProvider(), Lists.newArrayList(regionInfo.createRegion()));
+        RegionInfo yorkshire = new RegionInfo();
+        yorkshire.setId("67");
+        yorkshire.setName("Yorkshire");
+        
+        List<ChannelGroup> channelGroups = processor.processPlatform(platformInfo.createPlatform(), serviceProvider.createServiceProvider(), Lists.newArrayList(south.createRegion(), yorkshire.createRegion()));
 
         assertThat(channelGroups.size(), is(2));
         
@@ -93,109 +97,152 @@ public class PlatformRegionalisationTest {
         assertTrue(region != null);
         
         assertEquals("South", region.getTitle());
+        assertEquals("http://ref.atlasapi.org/regions/south", region.getCanonicalUri());
         assertEquals("http://pressassociation.com/regions/61", Iterables.getOnlyElement(region.getAliases()));
         assertEquals(Publisher.METABROADCAST, region.getPublisher());
-        assertEquals(platform, region.getPlatform());
+        assertEquals(platform.getId(), region.getPlatform());
         
         // test that platform fields are picked up ok
         assertEquals("Freeview", platform.getTitle());
+        assertEquals("http://ref.atlasapi.org/platforms/freeview", platform.getCanonicalUri());
         assertEquals("http://pressassociation.com/platforms/3", Iterables.getOnlyElement(platform.getAliases()));
         assertEquals(Publisher.METABROADCAST, platform.getPublisher());
         
-        Region nestedRegion = Iterables.getOnlyElement(platform.getRegions()); 
-        assertEquals(region, nestedRegion);        
+        Long nestedRegionId = Iterables.getOnlyElement(platform.getRegions()); 
+        assertEquals(region.getId(), nestedRegionId);        
     }
-    
-    private class PlatformInfo {
-        private String name;
-        private String id;
-        
-        public void setName(String name) {
-            this.name = name;
-        }
-        
-        public void setId(String id) {
-            this.id = id;
-        }
-        
-        public org.atlasapi.remotesite.pa.channels.bindings.Platform createPlatform() {
-            org.atlasapi.remotesite.pa.channels.bindings.Platform platform = new org.atlasapi.remotesite.pa.channels.bindings.Platform();
-            
-            Names paPlatformNames = new Names();
-            Name paPlatformName = new Name();
-            paPlatformName.setvalue(name);
-            paPlatformNames.getName().add(paPlatformName);
-            platform.setNames(paPlatformNames);
-            
-            Epg epg = new Epg();
-            platform.setEpg(epg);
-            
-            platform.setId(id);
-            
-            return platform;
-        }
-    }
-    
-    private class ServiceProviderInfo {
-        private List<RegionalisationInfo> regions;
+}
 
-        public void setRegions(List<RegionalisationInfo> regions) {
-            this.regions = regions;
-        }
-        
-        public ServiceProvider createServiceProvider() {
-            ServiceProvider serviceProvider = new ServiceProvider();
-            
-            RegionalisationList regionalisationList = new RegionalisationList();
-            for (RegionalisationInfo regionalisation : regions) {
-                regionalisationList.getRegionalisation().add(regionalisation.createRegionalisation());                
-            }
-            serviceProvider.setRegionalisationList(regionalisationList);
-            
-            return serviceProvider;
-        }
+class PlatformInfo {
+    private String name;
+    private String id;
+    private List<EpgContentInfo> epgContents = Lists.newArrayList();
+    
+    public void setName(String name) {
+        this.name = name;
     }
     
-    private class RegionalisationInfo {
-        private String regionId;
-        
-        public void setRegionId(String regionId) {
-            this.regionId = regionId;
-        }
-        
-        public Regionalisation createRegionalisation() {
-            Regionalisation regionalisation = new Regionalisation();
-            
-            regionalisation.setRegionId(regionId);
-            
-            return regionalisation;
-        }
+    public void setId(String id) {
+        this.id = id;
     }
     
-    private class RegionInfo {
-        private String name;
-        private String id;
+    public void setEpgContents(List<EpgContentInfo> epgContents) {
+        this.epgContents = epgContents;
+    }
+    
+    public org.atlasapi.remotesite.pa.channels.bindings.Platform createPlatform() {
+        org.atlasapi.remotesite.pa.channels.bindings.Platform platform = new org.atlasapi.remotesite.pa.channels.bindings.Platform();
         
-        public void setId(String id) {
-            this.id = id;
-        }
+        Names paPlatformNames = new Names();
+        Name paPlatformName = new Name();
+        paPlatformName.setvalue(name);
+        paPlatformNames.getName().add(paPlatformName);
+        platform.setNames(paPlatformNames);
         
-        public void setName(String name) {
-            this.name = name;
+        Epg epg = new Epg();
+        for (EpgContentInfo epgContent : epgContents) {
+            epg.getEpgContent().add(epgContent.createEpgContent());
         }
+        platform.setEpg(epg);
         
-        public org.atlasapi.remotesite.pa.channels.bindings.Region createRegion() {
-            org.atlasapi.remotesite.pa.channels.bindings.Region region = new org.atlasapi.remotesite.pa.channels.bindings.Region();
-            
-            Names paRegionNames = new Names();
-            Name paRegionName = new Name();
-            paRegionName.setvalue(name);
-            paRegionNames.getName().add(paRegionName);
-            region.setNames(paRegionNames);
-            
-            region.setId(id);
-            
-            return region;
+        platform.setId(id);
+        
+        return platform;
+    }
+}
+
+class ServiceProviderInfo {
+    private List<RegionalisationInfo> regions = Lists.newArrayList();
+
+    public void setRegions(List<RegionalisationInfo> regions) {
+        this.regions = regions;
+    }
+    
+    public ServiceProvider createServiceProvider() {
+        ServiceProvider serviceProvider = new ServiceProvider();
+        
+        RegionalisationList regionalisationList = new RegionalisationList();
+        for (RegionalisationInfo regionalisation : regions) {
+            regionalisationList.getRegionalisation().add(regionalisation.createRegionalisation());                
         }
+        serviceProvider.setRegionalisationList(regionalisationList);
+        
+        return serviceProvider;
+    }
+}
+
+class RegionalisationInfo {
+    private String regionId;
+    
+    public void setRegionId(String regionId) {
+        this.regionId = regionId;
+    }
+    
+    public Regionalisation createRegionalisation() {
+        Regionalisation regionalisation = new Regionalisation();
+        
+        regionalisation.setRegionId(regionId);
+        
+        return regionalisation;
+    }
+}
+
+class RegionInfo {
+    private String name;
+    private String id;
+    
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public org.atlasapi.remotesite.pa.channels.bindings.Region createRegion() {
+        org.atlasapi.remotesite.pa.channels.bindings.Region region = new org.atlasapi.remotesite.pa.channels.bindings.Region();
+        
+        Names paRegionNames = new Names();
+        Name paRegionName = new Name();
+        paRegionName.setvalue(name);
+        paRegionNames.getName().add(paRegionName);
+        region.setNames(paRegionNames);
+        
+        region.setId(id);
+        
+        return region;
+    }
+}
+
+class EpgContentInfo {
+    private String channelId;
+    private String channelNumber;
+    private List<RegionalisationInfo> regions = Lists.newArrayList();
+    
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+    }
+    
+    public void setChannelNumber(String channelNumber) {
+        this.channelNumber = channelNumber;
+    }
+    
+    public void setRegions(List<RegionalisationInfo> regions) {
+        this.regions = regions;
+    }
+    
+    public EpgContent createEpgContent() {
+        EpgContent epgContent = new EpgContent();
+        
+        epgContent.setChannelId(channelId);
+        epgContent.setChannelNumber(channelNumber);
+        
+        RegionalisationList regionalisationList = new RegionalisationList();
+        for (RegionalisationInfo regionalisation : regions) {
+            regionalisationList.getRegionalisation().add(regionalisation.createRegionalisation());                
+        }
+        epgContent.setRegionalisationList(regionalisationList);
+        
+        return epgContent;
     }
 }

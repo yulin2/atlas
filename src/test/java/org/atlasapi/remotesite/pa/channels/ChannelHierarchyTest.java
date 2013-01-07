@@ -36,19 +36,12 @@ public class ChannelHierarchyTest {
         channel.setName("Heat TV");
         channel.setImage("p131906.png");
         
-        StationInfo station = new StationInfo();
-        station.setId("1019");
-        station.setName("Heat TV");
-//        station.setImage(image);
-        station.addChannel(channel);
+        Channel createdChannel = processor.processStandaloneChannel(channel.createPaChannel());
         
-        List<Channel> ingestedChannels = processor.processStation(station.createPaStation());
-        
-        Channel createdChannel = Iterables.getOnlyElement(ingestedChannels);
-        
-        assertEquals("http://pressassociation.com/channels/1741", createdChannel.getCanonicalUri());
+        assertEquals("http://ref.atlasapi.org/channels/heattv", createdChannel.getCanonicalUri());
+        assertEquals("http://pressassociation.com/channels/1741", Iterables.getOnlyElement(createdChannel.getAliases()));
         assertEquals("Heat TV", createdChannel.title());
-//        AssertEquals("", createdChannel.image());
+        assertEquals("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131906.png", createdChannel.image());
         assertEquals(Publisher.METABROADCAST, createdChannel.source());
     }
     
@@ -71,36 +64,33 @@ public class ChannelHierarchyTest {
         station.addChannel(westMidlands);
         station.addChannel(channelIslands);
         
-        List<Channel> ingestedChannels = processor.processStation(station.createPaStation());
+        Channel parent = processor.processParentChannel(station.createPaStation());
+        List<Channel> children = processor.processChildChannels(station.createPaStation().getChannels().getChannel());
         
-        Channel parent = Channel.builder()
-                .withSource(Publisher.METABROADCAST)
-                .withUri("http://pressassociation.com/channels/1")
-                .withTitle("BBC One")
-//                .withImage("")
-                .build();
+        assertEquals(Publisher.METABROADCAST, parent.source());
+        assertEquals("http://ref.atlasapi.org/channels/bbcone", parent.uri());
+        assertEquals("BBC One", parent.title());
+//      assertEquals("", parent.image());
+        assertEquals("http://pressassociation.com/channels/1", Iterables.getOnlyElement(parent.getAliases()));
         
         Channel westMids = Channel.builder()
                 .withSource(Publisher.METABROADCAST)
-                .withUri("http://pressassociation.com/channels/11")
+                .withUri("http://ref.atlasapi.org/channels/bbconewestmidlands")
                 .withTitle("BBC One West Midlands")
                 .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131474.png")
-                .withParent(parent)
                 .build();
+        westMids.addAlias("http://pressassociation.com/channels/11");
         
         Channel channelIsl = Channel.builder()
                 .withSource(Publisher.METABROADCAST)
-                .withUri("http://pressassociation.com/channels/1663")
+                .withUri("http://ref.atlasapi.org/channels/bbconechannelislands")
                 .withTitle("BBC One Channel Islands")
                 .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131731.png")
-                .withParent(parent)
                 .build();
-        
-        parent.addVariation(westMids);
-        parent.addVariation(channelIsl);
+        channelIsl.addAlias("http://pressassociation.com/channels/1663");
         
         ExtendedChannelEquivalence equiv = new ExtendedChannelEquivalence();
-        assertTrue(equiv.pairwise().equivalent(ImmutableList.of(westMids, channelIsl, parent), ImmutableList.copyOf(ingestedChannels)));
+        assertTrue(equiv.pairwise().equivalent(ImmutableList.of(westMids, channelIsl), ImmutableList.copyOf(children)));
     }
     
     private class ExtendedChannelEquivalence extends Equivalence<Channel> {

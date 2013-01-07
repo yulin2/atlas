@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.media.channel.ChannelGroupStore;
+import org.atlasapi.media.channel.ChannelGroupResolver;
+import org.atlasapi.media.channel.ChannelNumbering;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -74,7 +72,7 @@ public class ChannelController {
     private final BackgroundComputingValue<ChannelAndGroupsData> data;
     private final NumberToShortStringCodec codec;
     
-    public ChannelController(final ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver, ChannelSimplifier channelSimplifier, NumberToShortStringCodec codec) {
+    public ChannelController(final ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver, ChannelSimplifier channelSimplifier, NumberToShortStringCodec codec) {
         this.channelSimplifier = channelSimplifier;
         this.codec = codec;
         this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
@@ -255,9 +253,9 @@ public class ChannelController {
 
     private class ChannelAndGroupsDataUpdater implements Callable<ChannelAndGroupsData> {
         private final ChannelResolver channelResolver;
-        private final ChannelGroupStore channelGroupResolver;
+        private final ChannelGroupResolver channelGroupResolver;
 
-        public ChannelAndGroupsDataUpdater(ChannelResolver channelResolver, ChannelGroupStore channelGroupResolver) {
+        public ChannelAndGroupsDataUpdater(ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver) {
             this.channelResolver = channelResolver;
             this.channelGroupResolver = channelGroupResolver;
         }
@@ -270,10 +268,10 @@ public class ChannelController {
             Map<String, Channel> keyToChannel = Maps.uniqueIndex(allChannels, Channel.TO_KEY);
             Map<Long, ChannelGroup> idToChannelGroup = Maps.uniqueIndex(allChannelGroups, ChannelGroup.TO_ID);
             
-            SetMultimap<Channel, ChannelGroup> channelToGroups = HashMultimap.create();
+            SetMultimap<Long, ChannelGroup> channelToGroups = HashMultimap.create();
             for (ChannelGroup group : allChannelGroups) {
-                for (Long id : group.getChannels()) {
-                    channelToGroups.put(idToChannel.get(id), group);
+                for (ChannelNumbering channelNumbering : group.getChannelNumberings()) {
+                    channelToGroups.put(channelNumbering.getChannel(), group);
                 }
             }
             
@@ -283,12 +281,12 @@ public class ChannelController {
     
     private class ChannelAndGroupsData {
         private final Set<Channel> allChannels;
-        private final SetMultimap<Channel, ChannelGroup> channelToGroups;
+        private final SetMultimap<Long, ChannelGroup> channelToGroups;
         private final Map<Long, Channel> idToChannel;
         private final Map<String, Channel> keyToChannel;
         private final Map<Long, ChannelGroup> idToChannelGroup;
         
-        public ChannelAndGroupsData(Set<Channel> allChannels, Map<Long, Channel> idToChannel, Map<String, Channel> keyToChannel, Map<Long, ChannelGroup> idToChannelGroup, SetMultimap<Channel, ChannelGroup> channelToGroups) {
+        public ChannelAndGroupsData(Set<Channel> allChannels, Map<Long, Channel> idToChannel, Map<String, Channel> keyToChannel, Map<Long, ChannelGroup> idToChannelGroup, SetMultimap<Long, ChannelGroup> channelToGroups) {
             this.allChannels = allChannels;
             this.idToChannel = idToChannel;
             this.keyToChannel = keyToChannel;
