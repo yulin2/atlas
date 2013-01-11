@@ -38,7 +38,7 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
 
         @Override
         public ContentIdentifier apply(ChildRef input) {
-            return ContentIdentifier.identifierFor(input);
+            return ContentIdentifier.identifierFor(input, idCodec);
         }
     };
 
