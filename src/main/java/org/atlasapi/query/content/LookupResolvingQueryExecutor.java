@@ -30,18 +30,18 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     @Override
-    public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
+    public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         EquivalentContent content = contentResolver.resolveUris(uris, query.includedPublishers(), query.getAnnotations(), true);
         return transform(content);
     }
     
     @Override
-    public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
+    public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
         EquivalentContent content = contentResolver.resolveIds(ids, query.includedPublishers(), query.getAnnotations());
         return transform(content);
     }
 
-    protected Map<String, List<Identified>> transform(EquivalentContent content) {
+    protected Map<Long, List<Identified>> transform(EquivalentContent content) {
         return Maps.transformValues(content.asMap(), new Function<Collection<Content>, List<Identified>>() {
             @Override
             public List<Identified> apply(@Nullable Collection<Content> input) {

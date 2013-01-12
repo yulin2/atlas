@@ -1,5 +1,8 @@
 package org.atlasapi.query.content;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -17,49 +20,45 @@ import org.atlasapi.query.content.search.ContentResolvingSearcher;
 import org.atlasapi.search.ContentSearcher;
 import org.atlasapi.search.model.SearchQuery;
 import org.atlasapi.search.model.SearchResults;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.query.Selection;
 
-@RunWith(JMock.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ContentResolvingSearchTest extends TestCase {
     
-    private final Mockery context = new Mockery();
-    private final ContentSearcher fuzzySearcher = context.mock(ContentSearcher.class);
-    private final KnownTypeQueryExecutor contentResolver = context.mock(KnownTypeQueryExecutor.class);
+    private final ContentSearcher fuzzySearcher = mock(ContentSearcher.class);
+    private final KnownTypeQueryExecutor contentResolver = mock(KnownTypeQueryExecutor.class);
     
-    private final Brand brand = new Brand("brand", "brand", Publisher.BBC);
-    private final Episode item = new Episode("item", "item", Publisher.BBC);
-    private final Selection selection = new Selection(0, 10);
-    private final List<Publisher> publishers = ImmutableList.of(Publisher.BBC);
-    
-    private ContentResolvingSearcher searcher;
+    private final ContentResolvingSearcher searcher = new ContentResolvingSearcher(fuzzySearcher, contentResolver);
 
     @Override
     @Before
     public void setUp() throws Exception {
-        brand.setChildRefs(ImmutableList.of(item.childRef()));
-        searcher = new ContentResolvingSearcher(fuzzySearcher, contentResolver);
     }
 
     @Test
     public void testShouldReturnSearchedForItem() {
-        final String searchQuery = "test";
-        final ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
-        final SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
+        Brand brand = new Brand("brand", "brand", Publisher.BBC);
+        brand.setId(1234L);
+        Episode item = new Episode("item", "item", Publisher.BBC);
+        brand.setChildRefs(ImmutableList.of(item.childRef()));
+
+        Selection selection = new Selection(0, 10);
+        List<Publisher> publishers = ImmutableList.of(Publisher.BBC);
+
+        String searchQuery = "test";
+        ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
+        SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
         
-        context.checking(new Expectations() {{ 
-            one(fuzzySearcher).search(query); will(returnValue(new SearchResults(ImmutableList.of(brand.getCanonicalUri()))));
-            one(contentResolver).executeUriQuery(ImmutableList.of(brand.getCanonicalUri()), contentQuery); will(returnValue(ImmutableMap.of(brand.getCanonicalUri(), ImmutableList.of(brand))));
-        }});
+        when(fuzzySearcher.search(query)).thenReturn(new SearchResults(ImmutableList.of(brand.getId())));
+        when(contentResolver.executeIdQuery(ImmutableList.of(brand.getId()), contentQuery)).thenReturn(ImmutableMap.<Long,List<Identified>>of(brand.getId(), ImmutableList.<Identified>of(brand)));
             
         List<Identified> content = searcher.search(query, ApplicationConfiguration.DEFAULT_CONFIGURATION);
         assertFalse(content.isEmpty());

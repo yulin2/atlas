@@ -46,16 +46,16 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     @Override
-    public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
+    public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         return mergeResults(query, delegate.executeUriQuery(uris, query));
     }
 
     @Override
-    public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
+    public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
         return mergeResults(query, delegate.executeIdQuery(ids, query));
     }
 
-    private Map<String, List<Identified>> mergeResults(final ContentQuery query, Map<String, List<Identified>> unmergedResult) {
+    private Map<Long, List<Identified>> mergeResults(final ContentQuery query, Map<Long, List<Identified>> unmergedResult) {
         ApplicationConfiguration config = query.getConfiguration();
         if (!config.precedenceEnabled()) {
             return unmergedResult;

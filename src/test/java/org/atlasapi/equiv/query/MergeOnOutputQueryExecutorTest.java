@@ -78,10 +78,10 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
 		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
-		Map<String, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
+		Map<Long, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
 		
-		assertEquals(ImmutableList.of(item1), merged.get(item1.getCanonicalUri()));
-		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getCanonicalUri()))).getClips());
+		assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
+		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
 	}
 	
 	public void testMergingWithExplicitPrecidenceMissingNewPublisher() throws Exception {
@@ -89,33 +89,33 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 
 	    // Let's not specify a precedence for YouTube, but content will be returned for YouTube
         ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC /*, Publisher.YOUTUBE */)));
-        Map<String, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
+        Map<Long, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
         
-        assertEquals(ImmutableList.of(item1), merged.get(item1.getCanonicalUri()));
-        assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getCanonicalUri()))).getClips());
+        assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
+        assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
 	}
 	
     public void testMergingPeople() throws Exception {
         MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(film1, film2));
 
         ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.PA, Publisher.RADIO_TIMES)));
-        Map<String, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(film1.getCanonicalUri()), query));
+        Map<Long, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(film1.getCanonicalUri()), query));
         
-        assertEquals(ImmutableList.of(film1), merged.get(film1.getCanonicalUri()));
-        assertEquals(ImmutableList.of(actor), ((Film)Iterables.getOnlyElement(merged.get(film1.getCanonicalUri()))).getPeople());
+        assertEquals(ImmutableList.of(film1), merged.get(film1.getId()));
+        assertEquals(ImmutableList.of(actor), ((Film)Iterables.getOnlyElement(merged.get(film1.getId()))).getPeople());
     }
 
 	private KnownTypeQueryExecutor delegate(final Content... respondWith) {
 		return new KnownTypeQueryExecutor() {
 
 			@Override
-			public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
-				return ImmutableMap.<String, List<Identified>>of(respondWith[0].getCanonicalUri(), ImmutableList.<Identified>copyOf(respondWith));
+			public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+				return ImmutableMap.<Long, List<Identified>>of(respondWith[0].getId(), ImmutableList.<Identified>copyOf(respondWith));
 			}
 
             @Override
-            public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
-                return ImmutableMap.<String, List<Identified>>of(respondWith[0].getCanonicalUri(), ImmutableList.<Identified>copyOf(respondWith));
+            public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
+                return ImmutableMap.<Long, List<Identified>>of(respondWith[0].getId(), ImmutableList.<Identified>copyOf(respondWith));
             }
 		};
 	}

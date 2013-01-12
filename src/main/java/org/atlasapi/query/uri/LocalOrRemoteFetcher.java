@@ -60,4 +60,9 @@ public class LocalOrRemoteFetcher implements Fetcher<Identified>, ContentResolve
         }
         return builder.build();
 	}
+
+    @Override
+    public ResolvedContent findByIds(Iterable<Long> transform) {
+        return localStore.findByIds(transform);
+    }
 }

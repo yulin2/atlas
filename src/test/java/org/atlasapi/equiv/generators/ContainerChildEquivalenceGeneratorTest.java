@@ -39,17 +39,20 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
     public void testExtractsContainerFromStrongItemEquivalents() {
         
         Container subject = new Container("subject","s",Publisher.BBC);
+        subject.setId(1L);
         Container equiv1 = new Container("equivalent1","e1",Publisher.PA);
+        equiv1.setId(2L);
         Container equiv2 = new Container("equivalent2","e2",Publisher.ITV);
+        equiv2.setId(3L);
         
         when(equivSummaryStore.summariesForChildren("subject")).thenReturn(
             ImmutableSet.of(
                 new EquivalenceSummary("child1","subject",NO_CANDIDATES,ImmutableMap.of(
-                    Publisher.BBC, new ContentRef("equivItem",Publisher.BBC,""),
+                    Publisher.BBC, new ContentRef("equivItem", Publisher.BBC,""),
                     Publisher.PA, new ContentRef("equivC1", Publisher.PA, "equivalent1"))),
                 new EquivalenceSummary("child2","subject",NO_CANDIDATES,ImmutableMap.of(
-                    Publisher.BBC, new ContentRef("equivC2",Publisher.BBC,"equivalent2"),
-                    Publisher.PA, new ContentRef("equivC1",Publisher.PA, "equivalent1"))
+                    Publisher.BBC, new ContentRef("equivC2", Publisher.BBC,"equivalent2"),
+                    Publisher.PA, new ContentRef("equivC1", Publisher.PA, "equivalent1"))
                 )
             )
         );
