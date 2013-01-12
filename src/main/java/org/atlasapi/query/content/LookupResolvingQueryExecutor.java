@@ -7,7 +7,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.atlasapi.content.criteria.ContentQuery;
-import org.atlasapi.media.entity.Content;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.DefaultEquivalentContentResolver;
@@ -40,28 +41,19 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     @Override
-    public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         EquivalentContent content = contentResolver.resolveUris(uris, query.includedPublishers(), query.getAnnotations(), true);
         return transform(content);
     }
     
     @Override
-    public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, final ContentQuery query) {
         EquivalentContent content = contentResolver.resolveIds(ids, query.includedPublishers(), query.getAnnotations());
         return transform(content);
     }
 
-    @Override
-    public Map<String, List<Identified>> executeAliasQuery(Optional<String> namespace, Iterable<String> values,
-            ContentQuery query) {
-        Map<String, List<Identified>> mongoResults = resolveMongoEntries(query, mongoLookupResolver.entriesForAliases(namespace, values));
-        return mongoResults;
-    }
-
-    private Map<String, List<Identified>> resolveMongoEntries(final ContentQuery query, Iterable<LookupEntry> lookupEntries) {
-        final ApplicationConfiguration configuration = query.getConfiguration();
-        ImmutableMap<String, LookupEntry> lookup = Maps.uniqueIndex(Iterables.filter(lookupEntries, new Predicate<LookupEntry>() {
-
+    protected Map<Id, List<Identified>> transform(EquivalentContent content) {
+        return Maps.transformValues(content.asMap(), new Function<Collection<Content>, List<Identified>>() {
             @Override
             public boolean apply(LookupEntry input) {
                 return configuration.isEnabled(input.lookupRef().publisher());

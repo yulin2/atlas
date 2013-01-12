@@ -18,8 +18,8 @@ import org.atlasapi.search.model.SearchQuery;
 import org.atlasapi.search.model.SearchResults;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.metabroadcast.common.collect.DedupingIterator;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 
 public class ContentResolvingSearcher implements SearchResolver {
     private final ContentSearcher fuzzySearcher;
@@ -33,24 +33,16 @@ public class ContentResolvingSearcher implements SearchResolver {
     @Override
     public List<Identified> search(SearchQuery query, ApplicationConfiguration appConfig) {
         SearchResults searchResults = fuzzySearcher.search(query);
-        List<String> uris = searchResults.toUris();
-        if (uris.isEmpty()) {
+        List<Long> ids = searchResults.getIds();
+        if (ids.isEmpty()) {
             return ImmutableList.of();
         }
 
         ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>> copyOf(query.getIncludedPublishers()))
                 .withSelection(query.getSelection()).build();
-        Map<String, List<Identified>> content = contentResolver.executeUriQuery(uris, contentQuery.copyWithApplicationConfiguration(appConfig));
+        Map<Long, List<Identified>> content = contentResolver.executeIdQuery(ids, contentQuery.copyWithApplicationConfiguration(appConfig));
         
-        List<Identified> hydrated = Lists.newArrayListWithExpectedSize(uris.size());
-        for (String uri : uris) {
-            List<Identified> identified = content.get(uri);
-            if (identified != null) {
-                hydrated.addAll(identified);
-            }
-        }
-        
-        return DedupingIterator.dedupeIterable(hydrated);
+        return ImmutableSet.copyOf(Iterables.concat(content.values())).asList();
     }
 
     public void setExecutor(KnownTypeQueryExecutor queryExecutor) {

@@ -432,7 +432,7 @@ public class QueryWebModule {
         return AnnotationRegistry.builder()
         .register(ID_SUMMARY, new IdentificationSummaryAnnotation(idCodec))
         .register(ID, new IdentificationAnnotation(), commonImplied)
-        .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(), ImmutableSet.of(ID))
+        .register(EXTENDED_ID, new ExtendedIdentificationAnnotation(idCodec), ImmutableSet.of(ID))
         .register(SERIES_REFERENCE, new SeriesReferenceAnnotation(), commonImplied)
         .register(SERIES_SUMMARY, new SeriesSummaryAnnotation(containerSummaryResolver), commonImplied, ImmutableSet.of(SERIES_REFERENCE))
         .register(BRAND_REFERENCE, new BrandReferenceAnnotation(), commonImplied)

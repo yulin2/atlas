@@ -78,16 +78,16 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())
-                    .addEntry(new ScheduleRefEntry(item.getCanonicalUri(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
+                    .addEntry(new ScheduleRefEntry(item.getId(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
                     .build()
             ));
         
-        when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false)))
-            .thenReturn(queryResult(item.getCanonicalUri(), ImmutableList.<Content>of(item)));
+        when(contentQueryExecutor.resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class))))
+            .thenReturn(queryResult(item.getId(), ImmutableList.<Content>of(item)));
         
         ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
 
-        verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
+        verify(contentQueryExecutor).resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class)));
         
         assertThat(channelSchedule.channel(), is(channel));
         
@@ -110,17 +110,17 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())
-                    .addEntry(new ScheduleRefEntry(item.getCanonicalUri(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
-                    .addEntry(new ScheduleRefEntry(item.getCanonicalUri(), channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2"))
+                    .addEntry(new ScheduleRefEntry(item.getId(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
+                    .addEntry(new ScheduleRefEntry(item.getId(), channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2"))
                     .build()
             ));
         
-        when(contentQueryExecutor.resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false)))
-        .thenReturn(queryResult(item.getCanonicalUri(), ImmutableList.<Content>of(item)));
+        when(contentQueryExecutor.resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class))))
+            .thenReturn(queryResult(item.getId(), ImmutableList.<Content>of(item)));
     
         ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
     
-        verify(contentQueryExecutor).resolveUris(argThat(hasItems(item.getCanonicalUri())), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
+        verify(contentQueryExecutor).resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class)));
         
         assertThat(channelSchedule.channel(), is(channel));
         
@@ -149,7 +149,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         version.addBroadcast(broadcast);
     }
 
-    private EquivalentContent queryResult(String itemUri, List<Content> content) {
+    private EquivalentContent queryResult(Long itemUri, List<Content> content) {
         Builder builder = EquivalentContent.builder();
         builder.putEquivalents(itemUri,content);
         return builder.build();
@@ -164,6 +164,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         version.addBroadcast(broadcast);
         
         Item item = new Item(itemUri, itemUri, Publisher.METABROADCAST);
+        item.setId(Long.valueOf(itemUri.hashCode()));
         item.addVersion(version);
         
         return item;

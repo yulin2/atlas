@@ -43,7 +43,8 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
         if (annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
             simpleDescription.setGenres(content.getGenres());
             simpleDescription.setTags(content.getTags());
-            simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),LookupRef.TO_ID));
+            simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),
+                LookupRef.TO_URI));
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
             simpleDescription.setMediumDescription(content.getMediumDescription());
             simpleDescription.setLongDescription(content.getLongDescription());

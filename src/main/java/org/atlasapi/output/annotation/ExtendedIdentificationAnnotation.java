@@ -9,14 +9,17 @@ import org.atlasapi.query.v4.schedule.EntityListWriter;
 import org.atlasapi.query.v4.schedule.FieldWriter;
 import org.atlasapi.query.v4.schedule.OutputContext;
 
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
+
 
 public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identified> {
 
-    private static final EntityListWriter<LookupRef> equivalentWriter = new EntityListWriter<LookupRef>() {
+    private final EntityListWriter<LookupRef> equivalentWriter = new EntityListWriter<LookupRef>() {
 
         @Override
         public void write(LookupRef entity, FieldWriter formatter, OutputContext ctxt) throws IOException {
-            formatter.writeField("uri", entity.id());
+//            formatter.writeField("id", idCodec.encode(BigInteger.valueOf(entity.id())));
+            formatter.writeField("uri", entity.uri());
             formatter.writeField("source", entity.publisher().key());
         }
 
@@ -30,9 +33,12 @@ public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identifie
             return "equivalent";
         }
     };
+    
+    private final NumberToShortStringCodec idCodec;
 
-    public ExtendedIdentificationAnnotation() {
+    public ExtendedIdentificationAnnotation(NumberToShortStringCodec idCodec) {
         super(Identified.class);
+        this.idCodec = idCodec;
     }
 
     @Override

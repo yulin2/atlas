@@ -27,14 +27,16 @@ import org.junit.Test;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 
 public class AnnotationRegistryTest {
 
+    private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final IdentificationSummaryAnnotation idSum = new IdentificationSummaryAnnotation(
-        SubstitutionTableNumberCodec.lowerCaseOnly());
+        idCodec);
     private final IdentificationAnnotation ident = new IdentificationAnnotation();
-    private final ExtendedIdentificationAnnotation extIdent = new ExtendedIdentificationAnnotation();
+    private final ExtendedIdentificationAnnotation extIdent = new ExtendedIdentificationAnnotation(idCodec);
     private final DescriptionAnnotation desc = new DescriptionAnnotation();
     private final ExtendedDescriptionAnnotation extDesc = new ExtendedDescriptionAnnotation();
     private final SeriesReferenceAnnotation seriesRef = new SeriesReferenceAnnotation();

@@ -71,25 +71,19 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
             return new ChannelSchedule(query.getChannel(), query.getInterval(), ImmutableList.<Item>of());
         }
         
-        Builder<String> uris = ImmutableList.builder();
-        for (ScheduleRefEntry entry : scheduleRef.getScheduleEntries()) {
-            uris.add(entry.getItemUri());
-        }
-        
-        EquivalentContent equivalentContent = contentQueryExecutor.resolveUris(
-            Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToUri()), 
+        EquivalentContent equivalentContent = contentQueryExecutor.resolveIds(
+            Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToId()), 
             ImmutableSet.of(query.getPublisher()), 
-            query.getAnnotations(), 
-            false
+            query.getAnnotations() 
         );
         
         return new ChannelSchedule(query.getChannel(), query.getInterval(), contentList(query, scheduleRef, equivalentContent.asMap()));
     }
 
-    private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, Map<String, Collection<Content>> resolvedContent) {
+    private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, Map<Long, Collection<Content>> resolvedContent) {
         Builder<Item> contentList = ImmutableList.builder();
         for (ScheduleRefEntry entry : scheduleRef.getScheduleEntries()){
-            Collection<Content> resolved = resolvedContent.get(entry.getItemUri());
+            Collection<Content> resolved = resolvedContent.get(entry.getItemId());
             /* copy the item here because it may appear in the same schedule
              * twice but will only appear in resolvedContent once.
              */
@@ -175,11 +169,11 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         return appConfig.copyWithPrecedence(publishers);
     }
     
-    private static class ScheduleRefEntryToUri implements Function<ScheduleRefEntry, String> {
+    private static class ScheduleRefEntryToId implements Function<ScheduleRefEntry, Long> {
 
         @Override
-        public String apply(ScheduleRefEntry input) {
-            return input.getItemUri();
+        public Long apply(ScheduleRefEntry input) {
+            return input.getItemId();
         }
         
     }

@@ -178,7 +178,7 @@ public class ScheduleRequestParserTest {
                 .withParam("from", from.toString())
                 .withParam("to", to.toString())
                 .withParam("source", publisher.key())
-                .withParam("annotations", Joiner.on(',').join(Iterables.transform(annotations, Annotation.toKeyFunction())))
+                .withParam("annotations", Joiner.on(',').join(Iterables.transform(annotations, Annotation.toRequestName())))
                 .withParam("apiKey", appKey);
     }
 
