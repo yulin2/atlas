@@ -69,16 +69,9 @@ public class EquivalenceSummaryWritingHandler<T extends Content> implements Equi
         return ImmutableMap.copyOf(Maps.transformValues(strongEquivalences, new Function<ScoredCandidate<T>, ContentRef>() {
             @Override
             public ContentRef apply(@Nullable ScoredCandidate<T> input) {
-                return contentRefFrom(input.candidate());
+                return ContentRef.valueOf(input.candidate());
             }
         }));
     }
     
-    private ContentRef contentRefFrom(T candidate) {
-        Id id = candidate.getId();
-        Publisher publisher = candidate.getPublisher();
-        Id parent = parentOf(candidate);
-        return new ContentRef(id, publisher, parent);
-    }
-
 }

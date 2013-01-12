@@ -68,12 +68,12 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 	
 	@Override
-	public Map<String, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return executeContentQuery(uris, query);
 	}
 
 	@Override
-	public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
+	public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
 	    return delegate.executeIdQuery(ids, query);
 	}
 
@@ -83,9 +83,9 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
         return delegate.executeAliasQuery(namespace, values, query);
     }
 	
-	public Map<String, List<Identified>> executeContentQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<Long, List<Identified>> executeContentQuery(Iterable<String> uris, ContentQuery query) {
 
-		Map<String, List<Identified>> found = delegate.executeUriQuery(uris, query);
+		Map<Long, List<Identified>> found = delegate.executeUriQuery(uris, query);
 		
 		Set<String> missingUris = missingUris(Iterables.concat(Iterables.transform(Iterables.concat(found.values()),TO_ALL_URIS)), uris);
 		
@@ -94,20 +94,20 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		} 
 
 		Map<String, Identified> fetched = Maps.newHashMap();
-		Map<String, List<Identified>> youtubeContentGroups = Maps.newHashMap();
+		Map<Long, List<Identified>> youtubeContentGroups = Maps.newHashMap();
 		
 		for (String missingUri : missingUris) {
 			Identified remoteContent = fetcher.fetch(missingUri);
 			if (remoteContent != null) {
 			    if (remoteContent instanceof ContentGroup && ((ContentGroup) remoteContent).getPublisher().equals(Publisher.YOUTUBE)) {
-			        youtubeContentGroups.put(missingUri, ImmutableList.of(remoteContent));
+			        youtubeContentGroups.put(remoteContent.getId(), ImmutableList.of(remoteContent));
 			    } else {
 			        fetched.put(remoteContent.getCanonicalUri(), remoteContent);
 			    }
 			}
 		}
 
-		Builder<String, List<Identified>> results = ImmutableMap.<String, List<Identified>>builder().putAll(found).putAll(youtubeContentGroups);
+		Builder<Long, List<Identified>> results = ImmutableMap.<Long, List<Identified>>builder().putAll(found).putAll(youtubeContentGroups);
 		
 		// If we couldn't resolve any of the missing uris then we should just return the results of the original query
 		if (fetched.isEmpty()) {

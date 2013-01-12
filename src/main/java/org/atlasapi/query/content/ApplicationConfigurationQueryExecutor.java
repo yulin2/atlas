@@ -32,12 +32,12 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 //	}
 
 	@Override
-	public Map<String,List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return delegate.executeUriQuery(uris, queryForContent(query));
 	}
 
 	@Override
-	public Map<String,List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
+	public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
 	    return delegate.executeIdQuery(ids, queryForContent(query));
 	}
 

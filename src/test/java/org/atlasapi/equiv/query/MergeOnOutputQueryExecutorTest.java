@@ -82,8 +82,8 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
 		Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
 		
-		assertEquals(ImmutableList.of(item1), merged.get(item1.getCanonicalUri()));
-		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getCanonicalUri()))).getClips());
+		assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
+		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
 	}
 	
 	public void testMergingWithExplicitPrecidenceMissingNewPublisher() throws Exception {
@@ -93,8 +93,8 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
         ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC /*, Publisher.YOUTUBE */)));
         Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
         
-        assertEquals(ImmutableList.of(item1), merged.get(item1.getCanonicalUri()));
-        assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getCanonicalUri()))).getClips());
+        assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
+        assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
 	}
 	
     public void testMergingPeople() throws Exception {
@@ -103,8 +103,8 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
         ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.PA, Publisher.RADIO_TIMES)));
         Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(film1.getCanonicalUri()), query));
         
-        assertEquals(ImmutableList.of(film1), merged.get(film1.getCanonicalUri()));
-        assertEquals(ImmutableList.of(actor), ((Film)Iterables.getOnlyElement(merged.get(film1.getCanonicalUri()))).getPeople());
+        assertEquals(ImmutableList.of(film1), merged.get(film1.getId()));
+        assertEquals(ImmutableList.of(actor), ((Film)Iterables.getOnlyElement(merged.get(film1.getId()))).getPeople());
     }
 
 	private KnownTypeQueryExecutor delegate(final Content... respondWith) {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
@@ -24,13 +25,11 @@ public class CurieResolvingQueryExecutor implements KnownTypeQueryExecutor {
 //		return delegate.discover(query);
 //	}
 
-	@Override
-	public Map<String, List<Identified>> executeUriQuery(Iterable<String> ids, ContentQuery query) {
+	public Map<Id, List<Identified>> executeUriQuery(Iterable<String> ids, ContentQuery query) {
 		return delegate.executeUriQuery(resolve(ids), query);
 	}
 	
-	@Override
-	public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
+	public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, ContentQuery query) {
 	    return delegate.executeIdQuery(ids, query);
 	}
 
