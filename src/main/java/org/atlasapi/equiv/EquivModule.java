@@ -118,7 +118,7 @@ public class EquivModule {
 
     private EquivalenceResultHandler<Item> itemResultHandlers(Iterable<Publisher> publishers) {
         return new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
-            new EpisodeFilteringEquivalenceResultHandler(
+            EpisodeFilteringEquivalenceResultHandler.relaxed(
                 new LookupWritingEquivalenceHandler<Item>(generatedTransitiveLookupWriter(lookupStore), publishers),
                 equivSummaryStore
             ),
