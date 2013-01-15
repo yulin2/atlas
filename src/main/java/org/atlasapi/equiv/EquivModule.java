@@ -293,7 +293,10 @@ public class EquivModule {
                 new TitleMatchingItemScorer(),
                 new SequenceItemEquivalenceScorer()
             ))
-            .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
+            .withCombiner(new RequiredScoreFilteringCombiner<Item>(
+                new NullScoreAwareAveragingCombiner<Item>(),
+                TitleMatchingItemScorer.NAME
+            ))
             .withFilter(this.<Item>standardFilter())
             .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
             .withHandler(new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
