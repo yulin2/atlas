@@ -63,8 +63,7 @@ public class PaChannelsUpdater extends ScheduledTask {
                     if (matcher.matches()) {
                         log.info("Processing file " + file.toString());
                         final File fileToProcess = dataStore.copyForProcessing(file);
-
-                        unmarshaller.setListener(featuresProcessingListener());
+                        unmarshaller.setListener(channelsProcessingListener());
                         reader.parse(fileToProcess.toURI().toString());
 
                         filesProcessed++;
@@ -87,7 +86,7 @@ public class PaChannelsUpdater extends ScheduledTask {
         }
     }
 
-    private Listener featuresProcessingListener() {
+    private Listener channelsProcessingListener() {
         return new Unmarshaller.Listener() {
             public void beforeUnmarshal(Object target, Object parent) {
             }

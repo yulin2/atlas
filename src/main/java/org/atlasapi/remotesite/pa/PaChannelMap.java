@@ -11,7 +11,6 @@ import org.atlasapi.media.channel.ChannelResolver;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 
-
 public class PaChannelMap {
 
 	private static final String PA_URI_PREFIX = "http://pressassociation.com/channels/";

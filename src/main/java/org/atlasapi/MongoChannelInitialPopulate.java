@@ -2,6 +2,7 @@ package org.atlasapi;
 
 import java.util.List;
 
+import org.atlasapi.media.channel.MongoChannelGroupStore;
 import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.channel.OldChannel;
 import org.atlasapi.media.entity.MediaType;
@@ -25,7 +26,8 @@ public class MongoChannelInitialPopulate {
 	}
 
     public static int writeChannels(DatabasedMongo dbMongo) {
-        MongoChannelStore store = new MongoChannelStore(dbMongo);
+        MongoChannelGroupStore channelGroupStore = new MongoChannelGroupStore(dbMongo);
+        MongoChannelStore store = new MongoChannelStore(dbMongo, channelGroupStore, channelGroupStore);
 		int written = 0;
 		for(OldChannel oldChannel: OldChannel.all()) {
 			if(oldChannel.title().toLowerCase().contains("radio") || NEW_RADIO_STATIONS.contains(oldChannel)) {

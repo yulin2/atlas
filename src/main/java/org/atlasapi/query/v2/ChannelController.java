@@ -1,6 +1,8 @@
 package org.atlasapi.query.v2;
 
 import static com.google.common.collect.Iterables.transform;
+import static org.atlasapi.query.v2.ChannelController.ANNOTATION_KEY;
+import static org.atlasapi.query.v2.ChannelController.HISTORY_ANNOTATION;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -61,6 +63,17 @@ import com.metabroadcast.common.query.Selection.SelectionBuilder;
 // TODO transplant on to BaseController when annotations are available.
 public class ChannelController {
 
+    private static final String PARENT_ANNOTATION = "parent";
+    private static final String VARIATIONS_ANNOTATION = "variations";
+    private static final String CHANNEL_GROUPS_ANNOTATION = "channel_groups";
+    public static final String HISTORY_ANNOTATION = "history";
+    public static final String ANNOTATION_KEY = "annotations";
+    private static final Set<String> VALID_ANNOTATIONS = ImmutableSet.<String>builder()
+            .add(CHANNEL_GROUPS_ANNOTATION)
+            .add(HISTORY_ANNOTATION)
+            .add(PARENT_ANNOTATION)
+            .add(VARIATIONS_ANNOTATION)
+            .build();
     private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(100).withDefaultLimit(10);
     private static final Splitter CSV_SPLITTER = Splitter.on(',').trimResults().omitEmptyStrings();
     private static final String TITLE = "title";
@@ -91,7 +104,8 @@ public class ChannelController {
     }
 
     @RequestMapping("/3.0/channels.json")
-    public void listChannels(HttpServletRequest request, HttpServletResponse response, 
+    public void listChannels(HttpServletRequest request, HttpServletResponse response,
+            @RequestParam(value = ANNOTATION_KEY, required = false) String annotationsStr,
             @RequestParam(value = "key", required = false) String channelKey,
             @RequestParam(value = "platforms", required = false) String platformKey, 
             @RequestParam(value = "regions", required = false) String regionKeys, 
@@ -99,44 +113,52 @@ public class ChannelController {
             @RequestParam(value = "media_type", required = false) String mediaTypeKey, 
             @RequestParam(value = "available_from", required = false) String availableFromKey,
             @RequestParam(value = "order_by", required = false) String orderBy) throws IOException {
+        try {
+            Selection selection = SELECTION_BUILDER.build(request);
 
-        Selection selection = SELECTION_BUILDER.build(request);
+            List<Channel> channels;
+            if (!Strings.isNullOrEmpty(channelKey)) {
+                Channel channelFromKey = data.get().keyToChannel.get(channelKey);
+                if (channelFromKey == null) {
+                    response.setStatus(HttpStatusCode.NOT_FOUND.code());
+                    response.setContentLength(0);
+                    return;
+                }
+                channels = ImmutableList.of(channelFromKey);
+            } else {
+                Optional<Ordering<Channel>> ordering = ordering(orderBy);
+                if (ordering.isPresent()) {
+                    channels = ordering.get().immutableSortedCopy(data.get().allChannels);
+                }
+                else {
+                    channels = ImmutableList.copyOf(data.get().allChannels);
+                }
+                channels = selection.applyTo(filterer.filter(channels, constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey), data.get().channelToGroups));
+            }
 
-        List<Channel> channels;
-        if (!Strings.isNullOrEmpty(channelKey)) {
-            Channel channelFromKey = data.get().keyToChannel.get(channelKey);
-            if (channelFromKey == null) {
-                response.setStatus(HttpStatusCode.NOT_FOUND.code());
-                response.setContentLength(0);
-                return;
-            }
-            channels = ImmutableList.of(channelFromKey);
-        } else {
-            Optional<Ordering<Channel>> ordering = ordering(orderBy);
-            if (ordering.isPresent()) {
-                channels = ordering.get().immutableSortedCopy(data.get().allChannels);
-            }
-            else {
-                channels = ImmutableList.copyOf(data.get().allChannels);
-            }
-            channels = selection.applyTo(filterer.filter(channels, constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey), data.get().channelToGroups));
+            Set<String> annotations = checkAnnotationValidity(splitString(annotationsStr));
+            writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels, showChannelGroups(annotations), showHistory(annotations), showParent(annotations), showVariations(annotations))));
+        } catch (IllegalArgumentException e) {
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
         }
-        
-       
-
-        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels, showChannelGroups(request))));
     }
     
     @RequestMapping("/3.0/channels/{id}.json")
-    public void listChannel(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) throws IOException {
+    public void listChannel(HttpServletRequest request, HttpServletResponse response,
+            @RequestParam(value = ANNOTATION_KEY, required = false) String annotationsStr, 
+            @PathVariable("id") String id) throws IOException {
+        try {
+            Channel possibleChannel = data.get().idToChannel.get(codec.decode(id).longValue());
 
-        Channel possibleChannel = data.get().idToChannel.get(codec.decode(id).longValue());
+            if (possibleChannel == null) {
+                response.sendError(HttpStatusCode.NOT_FOUND.code());
+            }
 
-        if (possibleChannel == null) {
-            response.sendError(HttpStatusCode.NOT_FOUND.code());
+            Set<String> annotations = checkAnnotationValidity(splitString(annotationsStr));
+            writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(ImmutableList.of(possibleChannel), showChannelGroups(annotations), showHistory(annotations), showParent(annotations), showVariations(annotations))));
+        } catch (IllegalArgumentException e) {
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
         }
-
-        writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(ImmutableList.of(possibleChannel), showChannelGroups(request))));
     }
     
     private Optional<Ordering<Channel>> ordering(String orderBy) {
@@ -204,9 +226,37 @@ public class ChannelController {
             return codec.decode(input).longValue();
         }
     };
+
+    private Set<String> checkAnnotationValidity(Set<String> annotations) {
+        for (String annotation : annotations) {
+            if (!VALID_ANNOTATIONS.contains(annotation)) {
+                throw new IllegalArgumentException(annotation + " is not a valid annotation");
+            }
+        }
+        return annotations;
+    }
     
-    public boolean showChannelGroups(HttpServletRequest request) {
-        return ImmutableSet.copyOf(CSV_SPLITTER.split(Strings.nullToEmpty(request.getParameter("annotations")))).contains("channel_groups");
+    private Set<String> splitString(String value) {
+        if (!Strings.isNullOrEmpty(value)) {
+            return ImmutableSet.copyOf(CSV_SPLITTER.split(Strings.nullToEmpty(value)));
+        }
+        return ImmutableSet.of();
+    }
+
+    private boolean showChannelGroups(Set<String> annotations) {
+        return annotations.contains(CHANNEL_GROUPS_ANNOTATION);
+    }
+    
+    private boolean showHistory(Set<String> annotations) {
+        return annotations.contains(HISTORY_ANNOTATION);
+    }
+    
+    private boolean showParent(Set<String> annotations) {
+        return annotations.contains(PARENT_ANNOTATION);
+    }
+    
+    private boolean showVariations(Set<String> annotations) {
+        return annotations.contains(VARIATIONS_ANNOTATION);
     }
     
     private void writeOut(HttpServletResponse response, HttpServletRequest request, ChannelQueryResult channelQueryResult) throws IOException {
@@ -268,6 +318,7 @@ public class ChannelController {
             Map<String, Channel> keyToChannel = Maps.uniqueIndex(allChannels, Channel.TO_KEY);
             Map<Long, ChannelGroup> idToChannelGroup = Maps.uniqueIndex(allChannelGroups, ChannelGroup.TO_ID);
             
+            // TODO rewrite this, can link from channels to channelgroups, rather than fetching all channelgroups, and computing the links backwards
             SetMultimap<Long, ChannelGroup> channelToGroups = HashMultimap.create();
             for (ChannelGroup group : allChannelGroups) {
                 for (ChannelNumbering channelNumbering : group.getChannelNumberings()) {
