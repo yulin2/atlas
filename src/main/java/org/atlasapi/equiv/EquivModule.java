@@ -61,9 +61,10 @@ import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtracto
 import org.atlasapi.equiv.results.filters.AlwaysTrueFilter;
 import org.atlasapi.equiv.results.filters.ConjunctiveFilter;
 import org.atlasapi.equiv.results.filters.EquivalenceFilter;
+import org.atlasapi.equiv.results.filters.MediaTypeFilter;
 import org.atlasapi.equiv.results.filters.MinimumScoreFilter;
 import org.atlasapi.equiv.results.filters.PublisherFilter;
-import org.atlasapi.equiv.results.filters.SpecializationMatchingFilter;
+import org.atlasapi.equiv.results.filters.SpecializationFilter;
 import org.atlasapi.equiv.results.persistence.FileEquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.RecentEquivalenceResultStore;
 import org.atlasapi.equiv.scorers.ContainerHierarchyMatchingEquivalenceScorer;
@@ -125,7 +126,8 @@ public class EquivModule {
     private <T extends Content> EquivalenceFilter<T> standardFilter() {
         return ConjunctiveFilter.valueOf(ImmutableList.of(
             new MinimumScoreFilter<T>(0.2),
-            new SpecializationMatchingFilter<T>(),
+            new MediaTypeFilter<T>(),
+            new SpecializationFilter<T>(),
             new PublisherFilter<T>()
         ));
     }
@@ -258,7 +260,7 @@ public class EquivModule {
             .withCombiner(NullScoreAwareAveragingCombiner.<Container> get())
             .withFilter(ConjunctiveFilter.valueOf(ImmutableList.of(
                 new MinimumScoreFilter<Container>(0.2),
-                new SpecializationMatchingFilter<Container>()
+                new SpecializationFilter<Container>()
             )))
             .withExtractor(PercentThresholdEquivalenceExtractor.<Container> moreThanPercent(90))
             .withHandler(containerResultHandlers(facebookAcceptablePublishers))
