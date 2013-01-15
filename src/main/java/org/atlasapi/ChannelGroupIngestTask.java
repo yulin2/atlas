@@ -7,14 +7,14 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.media.channel.ChannelGroup.ChannelGroupType;
-import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
-import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
-import org.atlasapi.persistence.media.channel.MongoChannelStore;
+import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+import org.atlasapi.persistence.media.channel.ChannelGroupWriter;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
@@ -33,12 +33,12 @@ import com.mongodb.MongoException;
 public class ChannelGroupIngestTask implements Runnable {
     
     private final Gson gson = new GsonBuilder().setFieldNamingPolicy(LOWER_CASE_WITH_UNDERSCORES).create();
-    private final ChannelGroupStore store;
+    private final ChannelGroupWriter channelGroupWriter;
     private final ChannelResolver channelResolver;
     private final IdGenerator idGenerator;
     
-    public ChannelGroupIngestTask(ChannelGroupStore store, ChannelResolver channelResolver, IdGenerator idGenerator) {
-        this.store = store;
+    public ChannelGroupIngestTask(ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, IdGenerator idGenerator) {
+        this.channelGroupWriter = channelGroupWriter;
         this.channelResolver = channelResolver;
         this.idGenerator = idGenerator;
         
@@ -52,15 +52,15 @@ public class ChannelGroupIngestTask implements Runnable {
             IngestDocument document = gson.fromJson(Resources.toString(resource, Charsets.UTF_8), IngestDocument.class);
             
             for (Platform platform : document.platforms) {
-                createChannelGroup(platform, Publisher.METABROADCAST, ChannelGroupType.PLATFORM);
+                createPlatform(platform, Publisher.METABROADCAST);
             }
             
             for (Platform platform : document.bbcRegions) {
-                createChannelGroup(platform, Publisher.BBC, ChannelGroupType.REGION);
+                createRegion(platform, Publisher.BBC);
             }
             
             for (Platform platform : document.itvRegions) {
-                createChannelGroup(platform, Publisher.ITV, ChannelGroupType.REGION);
+                createRegion(platform, Publisher.ITV);
             }
             
         } catch (Exception e) {
@@ -68,16 +68,26 @@ public class ChannelGroupIngestTask implements Runnable {
         }
     }
     
-    private void createChannelGroup(Platform platform, Publisher publisher, ChannelGroupType type) {
-        ChannelGroup channelGroup = new ChannelGroup();
+    private void createPlatform(Platform platform, Publisher publisher) {
+        ChannelGroup channelGroup = new org.atlasapi.media.channel.Platform();
         channelGroup.setId(idGenerator.generateRaw());
-        channelGroup.setTitle(platform.name);
+        channelGroup.addTitle(platform.name);
         channelGroup.setChannels(Iterables.transform(platform.channels, TO_CHANNEL_ID));
         channelGroup.setPublisher(publisher);
-        channelGroup.setType(type);
         channelGroup.setAvailableCountries(ImmutableSet.of(Countries.GB));
         
-        store.store(channelGroup);
+        channelGroupWriter.store(channelGroup);
+    }
+    
+    private void createRegion(Platform platform, Publisher publisher) {
+        ChannelGroup channelGroup = new Region();
+        channelGroup.setId(idGenerator.generateRaw());
+        channelGroup.addTitle(platform.name);
+        channelGroup.setChannels(Iterables.transform(platform.channels, TO_CHANNEL_ID));
+        channelGroup.setPublisher(publisher);
+        channelGroup.setAvailableCountries(ImmutableSet.of(Countries.GB));
+        
+        channelGroupWriter.store(channelGroup);
     }
     
     private Function<String, Long> TO_CHANNEL_ID = new Function<String, Long>() {
@@ -90,7 +100,9 @@ public class ChannelGroupIngestTask implements Runnable {
     public static void main(String[] args) throws UnknownHostException, MongoException {
         DatabasedMongo mongo = new DatabasedMongo(new Mongo(Configurer.get("mongo.host").get()), Configurer.get("mongo.dbName").get());
         
-        new ChannelGroupIngestTask(new MongoChannelGroupStore(mongo), new MongoChannelStore(mongo), new MongoSequentialIdGenerator(mongo, "channelGroup")).run();
+        MongoChannelGroupStore store = new MongoChannelGroupStore(mongo);
+        
+        new ChannelGroupIngestTask(new MongoChannelGroupStore(mongo), new MongoChannelStore(mongo, store, store), new MongoSequentialIdGenerator(mongo, "channelGroup")).run();
     }
     
     private static class IngestDocument {

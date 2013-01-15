@@ -23,6 +23,7 @@ import org.atlasapi.persistence.content.mongo.MongoProductStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
+import org.atlasapi.persistence.media.channel.CachingChannelStore;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
@@ -211,7 +212,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public MongoChannelStore channelStore() {
+    public CachingChannelStore channelStore() {
         return mongoContentPersistenceModule().channelStore();
     }
 

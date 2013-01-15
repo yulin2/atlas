@@ -12,7 +12,6 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.entity.Schedule.ScheduleChannel;
 import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
 import org.atlasapi.media.entity.simple.ContentQueryResult;
 import org.atlasapi.media.entity.simple.PeopleQueryResult;
@@ -47,7 +46,7 @@ import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelGroupResolver;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
@@ -104,7 +103,7 @@ public class QueryWebModule {
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ChannelResolver channelResolver;
-    private @Autowired ChannelGroupStore channelGroupResolver;
+    private @Autowired ChannelGroupResolver channelGroupResolver;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired @Qualifier("v2") SearchResolver v2SearchResolver;
     private @Autowired @Qualifier("v4") SearchResolver v4SearchResolver;
@@ -133,8 +132,7 @@ public class QueryWebModule {
     @Bean
     ChannelGroupController channelGroupController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier(), configFetcher, log,
-                standardWriter(new JsonTranslator<ChannelGroupQueryResult>(), new JaxbXmlTranslator<ChannelGroupQueryResult>()));
+        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier());
     }
 
     @Bean

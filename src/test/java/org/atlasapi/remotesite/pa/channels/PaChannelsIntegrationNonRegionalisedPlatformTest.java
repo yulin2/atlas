@@ -1,0 +1,51 @@
+package org.atlasapi.remotesite.pa.channels;
+
+import java.io.File;
+
+import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.channel.Platform;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelStore;
+import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
+import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.google.common.base.Optional;
+import com.metabroadcast.common.persistence.MongoTestHelper;
+import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+
+import junit.framework.TestCase;
+
+public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
+
+    private PaChannelsProcessor processor;
+    private File file = new File("src/test/resources/", "201212141549_20121215_tv_channel_data.xml");
+    private ChannelStore channelStore;
+    private ChannelGroupStore channelGroupStore;
+    private PaProgrammeDataStore store = new DummyPaProgrammeDataStore(file);
+    private PaChannelsUpdater updater; 
+    
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
+        channelGroupStore = new MongoChannelGroupStore(db);
+        channelStore = new MongoChannelStore(db, channelGroupStore, channelGroupStore);
+        processor = new PaChannelsProcessor(channelStore, channelStore, channelGroupStore, channelGroupStore);
+        updater = new PaChannelsUpdater(store, processor);
+        
+        updater.run();
+    }
+    
+    @Test
+    public void testNonRegionalisedPlatformIngest() {
+        Optional<ChannelGroup> maybePlatform = channelGroupStore.fromAlias("http://pressassociation.com/platforms/3");
+        assertTrue(maybePlatform.isPresent());
+        assertTrue(!maybePlatform.get().getAllChannelNumberings().isEmpty());
+        Platform platform = (Platform)maybePlatform.get();
+        assertTrue(platform.getRegions().isEmpty());
+    }
+}
