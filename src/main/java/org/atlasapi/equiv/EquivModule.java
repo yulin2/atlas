@@ -141,9 +141,7 @@ public class EquivModule {
             .withScorers(ImmutableSet.of(
                 new TitleMatchingItemScorer(), new SequenceItemScorer()
             ))
-            .withCombiner(new RequiredScoreFilteringCombiner<Item>(
-                new NullScoreAwareAveragingCombiner<Item>(),
-                ContainerChildEquivalenceGenerator.NAME))
+            .withCombiner(new NullScoreAwareAveragingCombiner<Item>())
             .withFilter(this.<Item>standardFilter())
             .withExtractor(PercentThresholdEquivalenceExtractor.<Item> moreThanPercent(90))
             .withHandler(new BroadcastingEquivalenceResultHandler<Item>(ImmutableList.of(
