@@ -54,7 +54,7 @@ import org.atlasapi.equiv.handlers.EquivalenceResultHandler;
 import org.atlasapi.equiv.handlers.EquivalenceSummaryWritingHandler;
 import org.atlasapi.equiv.handlers.LookupWritingEquivalenceHandler;
 import org.atlasapi.equiv.handlers.ResultWritingEquivalenceHandler;
-import org.atlasapi.equiv.results.combining.ItemScoreFilteringCombiner;
+import org.atlasapi.equiv.results.combining.RequiredScoreFilteringCombiner;
 import org.atlasapi.equiv.results.combining.NullScoreAwareAveragingCombiner;
 import org.atlasapi.equiv.results.extractors.MusicEquivalenceExtractor;
 import org.atlasapi.equiv.results.extractors.PercentThresholdEquivalenceExtractor;
@@ -140,7 +140,7 @@ public class EquivModule {
                 new TitleMatchingItemScorer(),
                 new SequenceItemEquivalenceScorer()
             ))
-            .withCombiner(new ItemScoreFilteringCombiner<Item>(
+            .withCombiner(new RequiredScoreFilteringCombiner<Item>(
                 new NullScoreAwareAveragingCombiner<Item>(),
                 ContainerChildEquivalenceGenerator.NAME))
             .withFilter(this.<Item>standardFilter())
@@ -167,7 +167,7 @@ public class EquivModule {
             .withScorers(ImmutableSet.<EquivalenceScorer<Container>> of(
                 new TitleMatchingContainerScorer()
             ))
-            .withCombiner(new ItemScoreFilteringCombiner<Container>(
+            .withCombiner(new RequiredScoreFilteringCombiner<Container>(
                 new NullScoreAwareAveragingCombiner<Container>(),
                 ContainerChildEquivalenceGenerator.NAME
             ))
@@ -274,7 +274,7 @@ public class EquivModule {
                 new TitleMatchingContainerScorer(),
                 new ContainerHierarchyMatchingEquivalenceScorer(contentResolver)
             ))
-            .withCombiner(new ItemScoreFilteringCombiner<Container>(
+            .withCombiner(new RequiredScoreFilteringCombiner<Container>(
                 new NullScoreAwareAveragingCombiner<Container>(),
                 ContainerChildEquivalenceGenerator.NAME)
             )
@@ -315,7 +315,7 @@ public class EquivModule {
                 new ContainerChildEquivalenceGenerator(contentResolver, equivSummaryStore)
             ))
             .withScorers(ImmutableSet.of(new TitleMatchingContainerScorer()))
-            .withCombiner(new ItemScoreFilteringCombiner<Container>(
+            .withCombiner(new RequiredScoreFilteringCombiner<Container>(
                 new NullScoreAwareAveragingCombiner<Container>(),
                 ContainerChildEquivalenceGenerator.NAME))
             .withFilter(this.<Container>standardFilter())
