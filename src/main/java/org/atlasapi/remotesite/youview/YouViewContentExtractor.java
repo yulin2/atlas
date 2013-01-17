@@ -41,6 +41,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String MEDIA_CONTENT_KEY = "content";
     private static final String DURATION_KEY = "duration";
     private static final String YOUVIEW_PREFIX = "youview:";
+    private static final String YOUVIEW_URI_PREFIX = "http://youview.com/programme/";
     private static final String SCHEDULE_SLOT_KEY = "scheduleSlot";
     private static final String AVAILABLE_KEY = "available";
     private static final String START_KEY = "start";
@@ -65,7 +66,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
 
         Optional<String> programmeId = getProgrammeId(source);
         if (programmeId.isPresent()) {
-            item.addAlias(programmeId.get());
+            item.addAlias(YOUVIEW_URI_PREFIX + programmeId.get());
         }
         Optional<String> programmeCrid = getProgrammeCrid(source);
         if (programmeCrid.isPresent()) {
