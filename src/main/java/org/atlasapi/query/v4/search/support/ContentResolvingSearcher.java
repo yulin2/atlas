@@ -8,6 +8,7 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.ContentQueryBuilder;
 import org.atlasapi.content.criteria.attribute.Attributes;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentSearcher;
@@ -36,13 +37,13 @@ public class ContentResolvingSearcher implements SearchResolver {
     public List<Identified> search(SearchQuery query, ApplicationConfiguration appConfig) {
         try {
             SearchResults searchResults = searcher.search(query).get(timeout, TimeUnit.MILLISECONDS);
-            List<Long> ids = searchResults.getIds();
+            List<Id> ids = searchResults.getIds();
             if (ids.isEmpty()) {
                 return ImmutableList.of();
             }
 
             ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(query.getIncludedPublishers())).withSelection(query.getSelection()).build();
-            Map<Long, List<Identified>> content = resolver.executeIdQuery(ids, contentQuery.copyWithApplicationConfiguration(appConfig));
+            Map<Id, List<Identified>> content = resolver.executeIdQuery(ids, contentQuery.copyWithApplicationConfiguration(appConfig));
 
             return ImmutableSet.copyOf(Iterables.concat(content.values())).asList();
         } catch (Exception ex) {

@@ -16,6 +16,7 @@ permissions and limitations under the License. */
 package org.atlasapi.query.uri;
 
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -56,13 +57,14 @@ public class LocalOrRemoteFetcher implements Fetcher<Identified>, ContentResolve
 	public ResolvedContent findByCanonicalUris(Iterable<String> uris) {
 		ResolvedContentBuilder builder = ResolvedContent.builder();
 		for (String uri : uris) {
-            builder.put(uri, fetch(uri));
+            Identified fetch = fetch(uri);
+            builder.put(fetch.getId(), fetch);
         }
         return builder.build();
 	}
-
+	
     @Override
-    public ResolvedContent findByIds(Iterable<Long> transform) {
+    public ResolvedContent findByIds(Iterable<Id> transform) {
         return localStore.findByIds(transform);
     }
 }

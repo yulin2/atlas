@@ -2,6 +2,7 @@ package org.atlasapi.output.simple;
 
 import java.util.Set;
 
+import org.atlasapi.equiv.EquivalenceRef;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
@@ -12,6 +13,7 @@ import org.atlasapi.output.Annotation;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
@@ -44,7 +46,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setGenres(content.getGenres());
             simpleDescription.setTags(content.getTags());
             simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),
-                LookupRef.TO_URI));
+                Functions.compose(Functions.toStringFunction(), EquivalenceRef.toEquivalenceRef())));
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
             simpleDescription.setMediumDescription(content.getMediumDescription());
             simpleDescription.setLongDescription(content.getLongDescription());

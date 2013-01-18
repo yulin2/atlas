@@ -14,6 +14,7 @@ import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.util.Identifiables;
+import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.media.product.ProductResolver;

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.output.ErrorSummary;
@@ -95,11 +96,11 @@ public class QueryController extends BaseController<QueryResult<Content, ? exten
 		}
 	}
 
-    private Iterable<Long> decode(List<String> ids) {
-        return Lists.transform(ids, new Function<String, Long>() {
+    private Iterable<Id> decode(List<String> ids) {
+        return Lists.transform(ids, new Function<String, Id>() {
             @Override
-            public Long apply(String input) {
-                return idCodec.decode(input).longValue();
+            public Id apply(String input) {
+                return Id.valueOf(idCodec.decode(input));
             }
         });
     }

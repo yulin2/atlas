@@ -6,12 +6,16 @@ import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import static org.atlasapi.equiv.results.probe.EquivalenceResultProbe.equivalenceResultProbeFor;
 
 import java.util.List;
+import java.util.Set;
+
+import org.atlasapi.media.common.Id;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.persistence.translator.TranslatorUtils;
+import com.mongodb.BasicDBList;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
@@ -25,12 +29,22 @@ public class MongoEquivalenceProbeStore implements EquivalenceProbeStore {
     
     @Override
     public void store(EquivalenceResultProbe probe) {
+        Set<Id> expectedEquivalent = probe.expectedEquivalent();
         probeCollection.update(
-            where().fieldEquals(ID, probe.target()).build(), 
-            update().setField("expected", probe.expectedEquivalent()).setField("notExpected", probe.expectedNotEquivalent()).build(), 
+            where().fieldEquals(ID, probe.target().longValue()).build(), 
+            update()
+                .setField("expected", toLongIds(expectedEquivalent))
+                .setField("notExpected", toLongIds(probe.expectedNotEquivalent()))
+                .build(), 
             true, 
             false
         );
+    }
+
+    private BasicDBList toLongIds(Set<Id> expectedEquivalent) {
+        BasicDBList list = new BasicDBList();
+        Iterables.addAll(list, Iterables.transform(expectedEquivalent, Id.toLongValue()));
+        return list;
     }
 
     @Override
@@ -43,9 +57,16 @@ public class MongoEquivalenceProbeStore implements EquivalenceProbeStore {
     }
 
     private EquivalenceResultProbe translate(DBObject probeDbo) {
-        return equivalenceResultProbeFor(TranslatorUtils.toString(probeDbo,ID))
-            .isEquivalentTo(TranslatorUtils.toList(probeDbo, "expected"))
-            .isNotEquivalentTo(TranslatorUtils.toList(probeDbo, "notExpected")).build();
+        String field = "expected";
+        return equivalenceResultProbeFor(Id.valueOf(TranslatorUtils.toLong(probeDbo,ID)))
+            .isEquivalentTo(fromLongIds(probeDbo, field))
+            .isNotEquivalentTo(fromLongIds(probeDbo, "notExpected"))
+            .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Iterable<Id> fromLongIds(DBObject probeDbo, String field) {
+        return Iterables.transform((Iterable<Long>)probeDbo.get(field), Id.fromLongValue());
     }
 
     @Override

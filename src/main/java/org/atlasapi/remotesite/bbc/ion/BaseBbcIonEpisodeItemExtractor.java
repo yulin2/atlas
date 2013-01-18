@@ -81,7 +81,8 @@ public abstract class BaseBbcIonEpisodeItemExtractor {
 
     protected void setEpisodeDetails(Episode item, IonEpisode episodeDetail) {
         if(!Strings.isNullOrEmpty(episodeDetail.getSeriesId())) {
-            item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
+            throw new RuntimeException("get series");
+//            item.setSeriesRef(new ParentRef(BbcFeeds.slashProgrammesUriForPid(episodeDetail.getSeriesId())));
         }
         
         if(episodeDetail.getPosition() == null) {

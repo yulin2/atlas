@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.equiv.update.EquivalenceUpdater;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.Identified;
@@ -68,12 +69,12 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 	}
 	
 	@Override
-	public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<Id, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return executeContentQuery(uris, query);
 	}
 
 	@Override
-	public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
+	public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, ContentQuery query) {
 	    return delegate.executeIdQuery(ids, query);
 	}
 
@@ -83,9 +84,9 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
         return delegate.executeAliasQuery(namespace, values, query);
     }
 	
-	public Map<Long, List<Identified>> executeContentQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<Id, List<Identified>> executeContentQuery(Iterable<String> uris, ContentQuery query) {
 
-		Map<Long, List<Identified>> found = delegate.executeUriQuery(uris, query);
+		Map<Id, List<Identified>> found = delegate.executeUriQuery(uris, query);
 		
 		Set<String> missingUris = missingUris(Iterables.concat(Iterables.transform(Iterables.concat(found.values()),TO_ALL_URIS)), uris);
 		
@@ -94,7 +95,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 		} 
 
 		Map<String, Identified> fetched = Maps.newHashMap();
-		Map<Long, List<Identified>> youtubeContentGroups = Maps.newHashMap();
+		Map<Id, List<Identified>> youtubeContentGroups = Maps.newHashMap();
 		
 		for (String missingUri : missingUris) {
 			Identified remoteContent = fetcher.fetch(missingUri);
@@ -107,7 +108,7 @@ public class UriFetchingQueryExecutor implements KnownTypeQueryExecutor {
 			}
 		}
 
-		Builder<Long, List<Identified>> results = ImmutableMap.<Long, List<Identified>>builder().putAll(found).putAll(youtubeContentGroups);
+		Builder<Id, List<Identified>> results = ImmutableMap.<Id, List<Identified>>builder().putAll(found).putAll(youtubeContentGroups);
 		
 		// If we couldn't resolve any of the missing uris then we should just return the results of the original query
 		if (fetched.isEmpty()) {

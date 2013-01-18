@@ -34,7 +34,7 @@ import com.metabroadcast.common.time.DateTimeZones;
 @RunWith(MockitoJUnitRunner.class)
 public class ContainerChildEquivalenceGeneratorTest extends TestCase {
 
-    private static final ImmutableSet<Id> NO_CANDIDATES = ImmutableSet.<Id>of();
+    private static final ImmutableSet<Id> NO_CANDIDATES = ImmutableSet.of();
     
     private final ContentResolver resolver = mock(ContentResolver.class);
     private final EquivalenceSummaryStore equivSummaryStore = mock(EquivalenceSummaryStore.class);
@@ -62,17 +62,14 @@ public class ContainerChildEquivalenceGeneratorTest extends TestCase {
         Container equiv2 = new Brand("equivalent2","e2",Publisher.ITV);
         equiv2.setId(5);
         
-        when(equivSummaryStore.summariesForIds(argThat(hasItems(child1.getId(),child2.getId())))).thenReturn(
-            ImmutableOptionalMap.fromMap(ImmutableMap.of(
-                child1.getId(),
-                new EquivalenceSummary(child1.getId(), subject.getId(),NO_CANDIDATES,ImmutableMap.of(
-                    Publisher.BBC, new ContentRef(Id.valueOf(6),Publisher.BBC,null),
-                    Publisher.PA, new ContentRef(Id.valueOf(7), Publisher.PA, equiv1.getId()))),
-                child2.getId(),
-                new EquivalenceSummary(child1.getId(), subject.getId(),NO_CANDIDATES,ImmutableMap.of(
-                    Publisher.BBC, new ContentRef(Id.valueOf(8),Publisher.BBC, equiv2.getId()),
-                    Publisher.PA, new ContentRef(Id.valueOf(7),Publisher.PA,  equiv1.getId()))
-                )
+        when(equivSummaryStore.summariesForChildren(subject.getId())).thenReturn(
+            ImmutableSet.of(
+                new EquivalenceSummary(3L,1L,NO_CANDIDATES,ImmutableMap.of(
+                    Publisher.BBC, new ContentRef(6L, Publisher.BBC,null),
+                    Publisher.PA, new ContentRef(5L, Publisher.PA, equiv1.getId()))),
+                new EquivalenceSummary(4L,1L,NO_CANDIDATES,ImmutableMap.of(
+                    Publisher.BBC, new ContentRef(7L, Publisher.BBC,equiv2.getId()),
+                    Publisher.PA, new ContentRef(5L, Publisher.PA, equiv1.getId()))
             ))
         );
         

@@ -34,8 +34,8 @@ import com.metabroadcast.common.query.Selection;
 public class ContentGroupController extends BaseController<Iterable<ContentGroup>> {
 
     private static final ErrorSummary NOT_FOUND = new ErrorSummary(new NullPointerException(), "PRODUCT_NOT_FOUND", HttpStatusCode.NOT_FOUND, "error");
-    private static final Function<ChildRef, Id> CHILD_REF_TO_URI_FN = new ChildRefToUri();
-    //
+    private static final Function<ChildRef, Id> CHILD_REF_TO_ID = new ChildRefToId();
+
     private final ContentGroupResolver contentGroupResolver;
     private final QueryController queryController;
     private final KnownTypeQueryExecutor queryExecutor;
@@ -63,14 +63,14 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
         try {
             contentGroupId = Id.valueOf(idCodec.decode(id));
         } catch (IllegalArgumentException e) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + id + " not found"));
+            outputter.writeError(req, resp, NOT_FOUND);
             return;
         }
         
         ContentQuery query = builder.build(req);
         ResolvedContent resolvedContent = contentGroupResolver.findByIds(ImmutableList.of(contentGroupId));
         if (resolvedContent.isEmpty()) {
-            outputter.writeError(req, resp, NOT_FOUND.withMessage("Content Group " + idCodec.decode(id).longValue() + " not found"));
+            outputter.writeError(req, resp, NOT_FOUND);
             return;
         }
         
@@ -97,7 +97,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
                     QueryResult<Content, ContentGroup> result = QueryResult.of(
                             Iterables.filter(
                             Iterables.concat(
-                            queryExecutor.executeIdQuery(Iterables.transform(contentGroup.getContents(), CHILD_REF_TO_URI_FN), query).values()),
+                            queryExecutor.executeIdQuery(Iterables.transform(contentGroup.getContents(), CHILD_REF_TO_ID), query).values()),
                             Content.class),
                             contentGroup);
                     queryController.modelAndViewFor(req, resp, result.withSelection(selection), query.getConfiguration());
@@ -110,7 +110,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
         }
     }
 
-    private static class ChildRefToUri implements Function<ChildRef, Id> {
+    private static class ChildRefToId implements Function<ChildRef, Id> {
 
         @Override
         public Id apply(ChildRef input) {

@@ -7,14 +7,15 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.channel.ChannelGroupType;
 import org.atlasapi.media.channel.ChannelGroupWriter;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.channel.MongoChannelGroupStore;
-import org.atlasapi.media.channel.MongoChannelStore;
 import org.atlasapi.media.channel.Region;
-import org.atlasapi.media.entity.Channel;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
+import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
+import org.atlasapi.persistence.media.channel.MongoChannelStore;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Function;
@@ -90,9 +91,9 @@ public class ChannelGroupIngestTask implements Runnable {
         channelGroupWriter.createOrUpdate(channelGroup);
     }
     
-    private Function<String, Long> TO_CHANNEL_ID = new Function<String, Long>() {
+    private Function<String, Id> TO_CHANNEL_ID = new Function<String, Id>() {
         @Override
-        public Long apply(String input) {
+        public Id apply(String input) {
             return channelResolver.fromUri(Channel.fromFieldName(input).get().uri()).requireValue().getId();
         }
     };

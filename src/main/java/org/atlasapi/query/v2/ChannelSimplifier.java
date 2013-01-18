@@ -2,15 +2,14 @@ package org.atlasapi.query.v2;
 
 import static com.google.common.collect.Iterables.transform;
 
-import java.math.BigInteger;
 import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.PublisherDetails;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
@@ -48,7 +47,7 @@ public class ChannelSimplifier {
         simple.setType("channel");
         simple.setUri(input.getCanonicalUri());
         if (input.getId() != null) {
-            simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
+            simple.setId(idCodec.encode(input.getId().toBigInteger()));
         }
         simple.setAliases(input.getAliases());
         simple.setSourceDetails(toPublisherDetails(input.publisher()));
@@ -80,7 +79,7 @@ public class ChannelSimplifier {
         simple.setType(input.getType().key());
         simple.setUri(input.getCanonicalUri());
         if (input.getId() != null) {
-            simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
+            simple.setId(idCodec.encode(input.getId().toBigInteger()));
         }
         simple.setAliases(input.getAliases());
         simple.setPublisherDetails(toPublisherDetails(input.getPublisher()));

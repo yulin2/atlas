@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
+import org.atlasapi.media.common.Id;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -32,6 +33,12 @@ public class EquivalenceResultProbeController {
     
     private final Splitter csv = Splitter.on(",").omitEmptyStrings().trimResults();
     private final EquivalenceProbeModelBuilder probeModelBuilder = new EquivalenceProbeModelBuilder();
+    private static final Function<String, Id> TO_ID = new Function<String, Id>(){
+
+                @Override
+                public Id apply(String input) {
+                    return Id.valueOf(input);
+                }};
 
     public EquivalenceResultProbeController(EquivalenceResultStore resultStore, EquivalenceProbeStore probeStore) {
         this.resultStore = resultStore;
@@ -74,7 +81,10 @@ public class EquivalenceResultProbeController {
             @RequestParam(value="expect",required=false,defaultValue="") String expect,
             @RequestParam(value="notExpect",required=false,defaultValue="") String notExpect) {
         
-        EquivalenceResultProbe probe = equivalenceResultProbeFor(target).isEquivalentTo(csv.split(expect)).isNotEquivalentTo(csv.split(notExpect)).build();
+        EquivalenceResultProbe probe = equivalenceResultProbeFor(Id.valueOf(target))
+            .isEquivalentTo(Iterables.transform(csv.split(expect), TO_ID))
+            .isNotEquivalentTo(Iterables.transform(csv.split(notExpect), TO_ID))
+            .build();
         
         probeStore.store(probe);
 

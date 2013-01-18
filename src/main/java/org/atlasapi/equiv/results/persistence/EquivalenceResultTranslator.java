@@ -14,6 +14,7 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.joda.time.DateTime;
@@ -116,10 +117,10 @@ public class EquivalenceResultTranslator {
         Set<String> strongs = TranslatorUtils.toSet(dbo, STRONG);
         
         ImmutableList.Builder<CombinedEquivalenceScore> totals = ImmutableList.builder();
-        Table<String, String, Double> results = HashBasedTable.create();
+        Table<Id, String, Double> results = HashBasedTable.create();
         
         for (DBObject equivDbo : TranslatorUtils.toDBObjectList(dbo, EQUIVS)) {
-            String id = TranslatorUtils.toString(equivDbo, ID);
+            Id id = Id.valueOf(TranslatorUtils.toLong(equivDbo, ID));
             Double combined = equivDbo.containsField(COMBINED) ? TranslatorUtils.toDouble(equivDbo, COMBINED) : Double.NaN;
             totals.add(
                     new CombinedEquivalenceScore(id, TranslatorUtils.toString(equivDbo, TITLE), combined, strongs.contains(id), publisherName(equivDbo))

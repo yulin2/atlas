@@ -3,6 +3,7 @@ package org.atlasapi.equiv.results.persistence;
 import java.io.Serializable;
 import java.util.List;
 
+import org.atlasapi.media.common.Id;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Objects;
@@ -14,12 +15,12 @@ public class StoredEquivalenceResult implements Serializable {
     
     private final String id;
     private final String title;
-    private final Table<String, String, Double> results;
+    private final Table<Id, String, Double> results;
     private final List<CombinedEquivalenceScore> totals;
     private final DateTime resultTime;
     private final List<Object> desc;
 
-    public StoredEquivalenceResult(String targetId, String targetTitle, Table<String, String, Double> results, List<CombinedEquivalenceScore> totals, DateTime resultTime, List<Object> desc) {
+    public StoredEquivalenceResult(String targetId, String targetTitle, Table<Id, String, Double> results, List<CombinedEquivalenceScore> totals, DateTime resultTime, List<Object> desc) {
         this.id = targetId;
         this.title = targetTitle;
         this.results = results;
@@ -36,7 +37,7 @@ public class StoredEquivalenceResult implements Serializable {
         return title;
     }
 
-    public Table<String, String, Double> sourceResults() {
+    public Table<Id, String, Double> sourceResults() {
         return results;
     }
 
@@ -64,7 +65,11 @@ public class StoredEquivalenceResult implements Serializable {
         }
         if(that instanceof StoredEquivalenceResult) {
             StoredEquivalenceResult other = (StoredEquivalenceResult) that;
-            return id.equals(other.id) && title.equals(other.title) && results.equals(other.results) && totals.equals(other.totals) && resultTime.equals(resultTime);
+            return id.equals(other.id) 
+                && title.equals(other.title) 
+                && results.equals(other.results) 
+                && totals.equals(other.totals) 
+                && resultTime.equals(resultTime);
         }
         return super.equals(that);
     }

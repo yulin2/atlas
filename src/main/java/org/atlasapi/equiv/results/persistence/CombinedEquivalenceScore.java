@@ -1,6 +1,10 @@
 package org.atlasapi.equiv.results.persistence;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.Serializable;
+
+import org.atlasapi.media.common.Id;
 
 import com.google.common.base.Objects;
 
@@ -9,21 +13,21 @@ public class CombinedEquivalenceScore implements Serializable {
 
     private static final long serialVersionUID = 1L;
     
-    private final String id;
+    private final Id id;
     private final String title;
     private final Double score;
     private final boolean strong;
     private final String publisher;
 
-    public CombinedEquivalenceScore(String id, String title, Double score, boolean strong, String publisher) {
-        this.id = id;
+    public CombinedEquivalenceScore(Id id, String title, Double score, boolean strong, String publisher) {
+        this.id = checkNotNull(id);
         this.title = title;
         this.score = score;
         this.strong = strong;
         this.publisher = publisher;
     }
 
-    public String id() {
+    public Id id() {
         return id;
     }
 

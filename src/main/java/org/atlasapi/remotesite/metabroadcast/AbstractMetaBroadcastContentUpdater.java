@@ -108,9 +108,10 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             return new Brand(newUri, newCuri, publisher);
         } else if (originalContent instanceof Series) {
             Series originalSeries = (Series) originalContent;
+            Brand brand = getOrCreateBrand(originalSeries.getParent().getId().toString());
             Series series = new Series(newUri, newCuri, publisher);
             if (originalSeries.getParent() != null) {
-                Brand brand = (Brand) getOrCreateContainer(originalSeries.getParent().getUri());
+                Brand brand = (Brand) getOrCreateContainer(originalSeries.getParent().getId().toString());
                 series.setParent(brand);
             }
             return series;
@@ -118,7 +119,7 @@ public abstract class AbstractMetaBroadcastContentUpdater {
             return new Clip(newUri, newCuri, publisher);
         } else if (originalContent instanceof Episode) {
             Episode originalEpisode = (Episode) originalContent;
-            Container brand = getOrCreateContainer(originalEpisode.getContainer().getUri());
+            Brand brand = getOrCreateBrand(originalEpisode.getContainer().getId().toString());
             Episode episode = new Episode(newUri, newCuri, publisher);
             episode.setContainer(brand);
             return episode;

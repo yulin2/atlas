@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.output.ErrorSummary;
@@ -55,7 +56,7 @@ public class TopicController extends BaseController<Iterable<Topic>> {
         
         ContentQuery query = builder.build(req);
         
-        Maybe<Topic> topicForUri = topicResolver.topicForId(idCodec.decode(id).longValue());
+        Maybe<Topic> topicForUri = topicResolver.topicForId(Id.valueOf(idCodec.decode(id)));
         
         if(topicForUri.isNothing()) {
             outputter.writeError(req, resp, new ErrorSummary(new NullPointerException(), "TOPIC_NOT_FOUND", HttpStatusCode.NOT_FOUND, "Topic " + id + " not found"));
@@ -77,7 +78,7 @@ public class TopicController extends BaseController<Iterable<Topic>> {
     public void topicContents(HttpServletRequest req, HttpServletResponse resp, @PathVariable("id") String id) throws IOException {
         ContentQuery query = builder.build(req);
 
-        long decodedId = idCodec.decode(id).longValue();
+        Id decodedId = Id.valueOf(idCodec.decode(id));
         Maybe<Topic> topicForUri = topicResolver.topicForId(decodedId);
         
         if(topicForUri.isNothing()) {

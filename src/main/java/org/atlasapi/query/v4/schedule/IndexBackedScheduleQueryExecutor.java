@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
@@ -80,7 +81,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         return new ChannelSchedule(query.getChannel(), query.getInterval(), contentList(query, scheduleRef, equivalentContent.asMap()));
     }
 
-    private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, Map<Long, Collection<Content>> resolvedContent) {
+    private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, Map<Id, Collection<Content>> resolvedContent) {
         Builder<Item> contentList = ImmutableList.builder();
         for (ScheduleRefEntry entry : scheduleRef.getScheduleEntries()){
             Collection<Content> resolved = resolvedContent.get(entry.getItemId());
@@ -169,10 +170,10 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         return appConfig.copyWithPrecedence(publishers);
     }
     
-    private static class ScheduleRefEntryToId implements Function<ScheduleRefEntry, Long> {
+    private static class ScheduleRefEntryToId implements Function<ScheduleRefEntry, Id> {
 
         @Override
-        public Long apply(ScheduleRefEntry input) {
+        public Id apply(ScheduleRefEntry input) {
             return input.getItemId();
         }
         
