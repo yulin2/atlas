@@ -9,6 +9,7 @@ import org.atlasapi.media.entity.Specialization;
 import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.output.Annotation;
 
+import com.google.common.base.Functions;
 import com.google.common.collect.Iterables;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
@@ -41,7 +42,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setGenres(content.getGenres());
             simpleDescription.setTags(content.getTags());
             simpleDescription.setSameAs(Iterables.transform(content.getEquivalentTo(),
-                LookupRef.TO_URI));
+                Functions.compose(Functions.toStringFunction(), LookupRef.TO_ID)));
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
         }
         

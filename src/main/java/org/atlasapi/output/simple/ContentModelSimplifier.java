@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Clip;
 import org.atlasapi.media.entity.ContentGroup;
@@ -133,14 +134,14 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
         });
     }
 
-    private Iterable<Topic> res(Iterable<Long> topics, Set<Annotation> annotations) {
+    private Iterable<Topic> res(Iterable<Id> topics, Set<Annotation> annotations) {
         if (Iterables.isEmpty(topics)) { // don't even ask (the resolver)
             return ImmutableList.of();
         }
         return topicResolver.topicsForIds(topics);
     }
 
-    private Iterable<ContentGroup> resolveContentGroups(Iterable<Long> contentGroups, Set<Annotation> annotations) {
+    private Iterable<ContentGroup> resolveContentGroups(Iterable<Id> contentGroups, Set<Annotation> annotations) {
         if (Iterables.isEmpty(contentGroups)) { // don't even ask (the resolver)
             return ImmutableList.of();
         }
@@ -175,7 +176,7 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
 
     private List<org.atlasapi.media.entity.simple.TopicRef> topicRefToSimple(final Content content, List<TopicRef> contentTopics, final Set<Annotation> annotations, final ApplicationConfiguration config) {
 
-        final Map<Long, Topic> topics = Maps.uniqueIndex(res(Iterables.transform(contentTopics, TOPICREF_TO_TOPIC_ID), annotations), TOPIC_TO_TO_TOPIC_ID);
+        final Map<Id, Topic> topics = Maps.uniqueIndex(res(Iterables.transform(contentTopics, TOPICREF_TO_TOPIC_ID), annotations), TOPIC_TO_TO_TOPIC_ID);
 
         return Lists.transform(contentTopics, new Function<TopicRef, org.atlasapi.media.entity.simple.TopicRef>() {
 
@@ -206,31 +207,31 @@ public abstract class ContentModelSimplifier<F extends Content, T extends Descri
             }
         });
     }
-    private final Function<TopicRef, Long> TOPICREF_TO_TOPIC_ID = new Function<TopicRef, Long>() {
+    private final Function<TopicRef, Id> TOPICREF_TO_TOPIC_ID = new Function<TopicRef, Id>() {
 
         @Override
-        public Long apply(TopicRef input) {
+        public Id apply(TopicRef input) {
             return input.getTopic();
         }
     };
-    private static Function<Topic, Long> TOPIC_TO_TO_TOPIC_ID = new Function<Topic, Long>() {
+    private static Function<Topic, Id> TOPIC_TO_TO_TOPIC_ID = new Function<Topic, Id>() {
 
         @Override
-        public Long apply(Topic input) {
+        public Id apply(Topic input) {
             return input.getId();
         }
     };
-    private final Function<ContentGroupRef, Long> CONTENT_GROUP_REF_TO_CONTENT_GROUP_ID = new Function<ContentGroupRef, Long>() {
+    private final Function<ContentGroupRef, Id> CONTENT_GROUP_REF_TO_CONTENT_GROUP_ID = new Function<ContentGroupRef, Id>() {
 
         @Override
-        public Long apply(ContentGroupRef input) {
+        public Id apply(ContentGroupRef input) {
             return input.getId();
         }
     };
-    private static Function<ContentGroup, Long> CONTENT_GROUP_TO_CONTENT_GROUP_ID = new Function<ContentGroup, Long>() {
+    private static Function<ContentGroup, Id> CONTENT_GROUP_TO_CONTENT_GROUP_ID = new Function<ContentGroup, Id>() {
 
         @Override
-        public Long apply(ContentGroup input) {
+        public Id apply(ContentGroup input) {
             return input.getId();
         }
     };

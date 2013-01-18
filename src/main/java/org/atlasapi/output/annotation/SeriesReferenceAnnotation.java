@@ -16,7 +16,7 @@ public class SeriesReferenceAnnotation extends OutputAnnotation<Content> {
         
         @Override
         public void write(Episode entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            writer.writeField("uri", entity.getSeriesRef().getUri());
+            writer.writeField("uri", entity.getSeriesRef().getId());
         }
 
         @Override

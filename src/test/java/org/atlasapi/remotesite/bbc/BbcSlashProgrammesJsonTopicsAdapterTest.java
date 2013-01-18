@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.media.entity.TopicRef;
@@ -55,7 +56,7 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
         
         List<TopicRef> refs = adapter.fetch("http://www.bbc.co.uk/programmes/b0144pvg");
         
-        assertThat(refs.get(0).getTopic(),is(id));
+        assertThat(refs.get(0).getTopic(),is(Id.valueOf(id)));
         assertThat(refs.get(0).getWeighting(), is(1.0f));
         assertThat(refs.get(0).isSupervised(), is(true));
         assertThat(refs.get(0).getRelationship(), is(TopicRef.Relationship.ABOUT));
@@ -112,7 +113,7 @@ public class BbcSlashProgrammesJsonTopicsAdapterTest extends TestCase {
     }
     
     private Topic topicWith(long id, String namespace, String value) {
-        return new Topic(id, namespace, value);
+        return new Topic(Id.valueOf(id), namespace, value);
     }
     
     private SlashProgrammesContainer containerWithTopic(String type, String title, String value) {

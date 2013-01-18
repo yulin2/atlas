@@ -76,7 +76,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         
         Series series = Iterables.getOnlyElement(writer.updatedSeries);
         assertThat(series.getCanonicalUri(), is(equalTo("http://www.channel4.com/programmes/the-hoobs/episode-guide/series-1")));
-        assertThat(series.getParent().getUri(), is(brand.getCanonicalUri()));
+        assertThat(series.getParent().getId().toString(), is(brand.getCanonicalUri()));
         
         List<Episode> contents = ImmutableList.copyOf(Iterables.filter(writer.updatedItems, Episode.class));
         assertThat(contents.size(), is(equalTo(1)));
@@ -86,7 +86,7 @@ public class C4EpgEntryProcessorTest extends TestCase {
         assertThat(episode.getTitle(), is(equalTo("Dancing")));
         assertThat(episode.getEpisodeNumber(), is(59));
         assertThat(episode.getSeriesNumber(), is(1));
-        assertThat(episode.getSeriesRef().getUri(), is(series.getCanonicalUri()));
+        assertThat(episode.getSeriesRef().getId().toString(), is(series.getCanonicalUri()));
         
         
         Version version = getOnlyElement(episode.getVersions());

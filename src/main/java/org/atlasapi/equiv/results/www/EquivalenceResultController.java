@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.equiv.results.persistence.EquivalenceResultStore;
 import org.atlasapi.equiv.results.persistence.StoredEquivalenceResult;
 import org.atlasapi.equiv.results.probe.EquivalenceProbeStore;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Identified;
@@ -46,7 +47,7 @@ public class EquivalenceResultController {
     @RequestMapping(value = "/system/equivalence/result", method = RequestMethod.GET)
     public String showResult(Map<String, Object> model, HttpServletResponse response, @RequestParam(value = "uri", required = true) String uri) throws IOException {
 
-        StoredEquivalenceResult equivalenceResult = store.forId(uri);
+        StoredEquivalenceResult equivalenceResult = store.forId(Id.valueOf(uri));
 
         if (equivalenceResult == null) {
             response.sendError(NOT_FOUND.code(), "No result for URI");
@@ -74,10 +75,10 @@ public class EquivalenceResultController {
 
         if (ided.requireValue() instanceof Container) {
 
-            List<StoredEquivalenceResult> results = store.forIds(Iterables.transform(((Container) ided.requireValue()).getChildRefs(), new Function<ChildRef, String>() {
+            List<StoredEquivalenceResult> results = store.forIds(Iterables.transform(((Container) ided.requireValue()).getChildRefs(), new Function<ChildRef, Id>() {
                 @Override
-                public String apply(ChildRef input) {
-                    return input.getUri();
+                public Id apply(ChildRef input) {
+                    return input.getId();
                 }
             }));
 

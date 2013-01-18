@@ -10,6 +10,7 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -26,10 +27,10 @@ public class ContainerChildEquivalenceGenerator implements EquivalenceGenerator<
     
     public static final String NAME = "Item";
 
-    private static final Function<ContentRef,String> TO_PARENT = new Function<ContentRef, String>() {
+    private static final Function<ContentRef,Id> TO_PARENT = new Function<ContentRef, Id>() {
         @Override
-        public String apply(ContentRef input) {
-            return input.getParentUri();
+        public Id apply(ContentRef input) {
+            return input.getParentId();
         }
     };
     
@@ -43,21 +44,21 @@ public class ContainerChildEquivalenceGenerator implements EquivalenceGenerator<
     
     @Override
     public ScoredCandidates<Container> generate(Container content, ResultDescription desc) {
-        Set<EquivalenceSummary> childSummaries = summaryStore.summariesForChildren(content.getCanonicalUri());
-        Multiset<String> parents = HashMultiset.create();
+        Set<EquivalenceSummary> childSummaries = summaryStore.summariesForChildren(content.getId());
+        Multiset<Id> parents = HashMultiset.create();
         for (EquivalenceSummary summary : childSummaries) {
             Iterables.addAll(parents, Iterables.filter(Iterables.transform(summary.getEquivalents().values(), TO_PARENT), Predicates.notNull()));
         }
         return scoreContainers(parents, childSummaries.size(), desc);
     }
 
-    private ScoredCandidates<Container> scoreContainers(Multiset<String> parents, int children, ResultDescription desc) {
+    private ScoredCandidates<Container> scoreContainers(Multiset<Id> parents, int children, ResultDescription desc) {
         Builder<Container> candidates = DefaultScoredCandidates.fromSource(NAME);
 
-        ResolvedContent containers = resolver.findByCanonicalUris(parents.elementSet());
+        ResolvedContent containers = resolver.findByIds(parents.elementSet());
         
-        for (Multiset.Entry<String> parent : parents.entrySet()) {
-            Maybe<Identified> possibledContainer = containers.get(parent.getElement());
+        for (Multiset.Entry<Id> parent : parents.entrySet()) {
+            Maybe<Identified> possibledContainer = containers.get(parent.getElement().toString());
             if (possibledContainer.hasValue()) {
                 Identified identified = possibledContainer.requireValue();
                 if (identified instanceof Container) {

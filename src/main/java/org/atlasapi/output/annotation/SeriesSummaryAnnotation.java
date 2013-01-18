@@ -30,7 +30,7 @@ public class SeriesSummaryAnnotation extends OutputAnnotation<Content> {
 
         @Override
         public void write(Episode entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            writer.writeField("uri", entity.getSeriesRef().getUri());
+            writer.writeField("uri", entity.getSeriesRef().getId());
             Optional<SeriesSummary> possibleSummary = containerSummaryResolver.summarizeSeries(entity.getSeriesRef());
             if (possibleSummary.isPresent()) {
                 SeriesSummary summary = possibleSummary.get();

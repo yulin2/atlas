@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.LookupRef;
@@ -60,11 +61,11 @@ public class LookupResolvingQueryExecutorTest {
         
         when(contentResolver.findByCanonicalUris(argThat(hasItems(queryItem.getCanonicalUri(), equivItem.getCanonicalUri()))))
             .thenReturn(ResolvedContent.builder()
-                .put(queryItem.getCanonicalUri(), queryItem)
-                .put(equivItem.getCanonicalUri(), equivItem)
+                .put(queryItem.getId(), queryItem)
+                .put(equivItem.getId(), equivItem)
             .build());
         
-        Map<Long, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), defaultQuery(DEFAULT_CONFIGURATION.getEnabledSources()));
+        Map<Id, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), defaultQuery(DEFAULT_CONFIGURATION.getEnabledSources()));
         
         assertEquals(2, result.get(query).size());
         for (Identified resolved : result.get(query)) {
@@ -89,10 +90,10 @@ public class LookupResolvingQueryExecutorTest {
         
         when(contentResolver.findByIds(argThat(hasItems(queryItem.getId()))))
             .thenReturn(ResolvedContent.builder()
-                .put(queryItem.getCanonicalUri(), queryItem)
+                .put(queryItem.getId(), queryItem)
             .build());
         
-        Map<Long, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), defaultQuery(DEFAULT_CONFIGURATION.getEnabledSources()));
+        Map<Id, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(query), defaultQuery(DEFAULT_CONFIGURATION.getEnabledSources()));
         
         assertEquals(1, result.size());
     }
@@ -108,7 +109,7 @@ public class LookupResolvingQueryExecutorTest {
         lookupStore.store(LookupEntry.lookupEntryFrom(item1));
         lookupStore.store(LookupEntry.lookupEntryFrom(item2));
 
-        Map<Long, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(uri1, uri2), defaultQuery(ImmutableSet.of(Publisher.PA)));
+        Map<Id, List<Identified>> result = executor.executeUriQuery(ImmutableList.of(uri1, uri2), defaultQuery(ImmutableSet.of(Publisher.PA)));
         
         verify(contentResolver, never()).findByCanonicalUris(Matchers.<Iterable<String>>any());
         assertEquals(0, result.size());

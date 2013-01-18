@@ -1,13 +1,9 @@
 package org.atlasapi.equiv.handlers;
 
-import static org.atlasapi.media.entity.ChildRef.TO_URI;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.annotation.Nullable;
 
 import org.atlasapi.equiv.ContentRef;
 import org.atlasapi.equiv.EquivalenceSummary;
@@ -15,10 +11,12 @@ import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.atlasapi.persistence.lookup.LookupWriter;
@@ -58,15 +56,15 @@ public class EpisodeMatchingEquivalenceHandler implements EquivalenceResultHandl
         Collection<Container> equivalentContainers = Collections2.transform(result.strongEquivalences().values(), TO_CONTAINER);
         Iterable<Episode> subjectsChildren = childrenOf(result.subject());
         Multimap<Container, Episode> equivalentsChildren = childrenOf(equivalentContainers);
-        Set<EquivalenceSummary> childSummaries = summaryStore.summariesForChildren(result.subject().getCanonicalUri());
-        Map<String, EquivalenceSummary> summaryMap = summaryMap(childSummaries);
+        Set<EquivalenceSummary> childSummaries = summaryStore.summariesForChildren(result.subject().getId());
+        Map<Id, EquivalenceSummary> summaryMap = summaryMap(childSummaries);
         
         stitch(subjectsChildren, summaryMap, equivalentsChildren, result.description());
         
         result.description().finishStage();
     }
 
-    private void stitch(Iterable<Episode> subjectsChildren, Map<String, EquivalenceSummary> summaryMap, Multimap<Container, Episode> equivalentsChildren, ReadableDescription desc) {
+    private void stitch(Iterable<Episode> subjectsChildren, Map<Id, EquivalenceSummary> summaryMap, Multimap<Container, Episode> equivalentsChildren, ReadableDescription desc) {
         for (Episode episode : subjectsChildren) {
             EquivalenceSummary summary = summaryMap.get(episode.getCanonicalUri());
             if (summary != null) {
@@ -113,10 +111,10 @@ public class EpisodeMatchingEquivalenceHandler implements EquivalenceResultHandl
             && target.getSeriesNumber().equals(ep.getSeriesNumber());
     }
 
-    private Map<String, EquivalenceSummary> summaryMap(Set<EquivalenceSummary> summaries) {
-        return Maps.uniqueIndex(summaries, new Function<EquivalenceSummary, String>() {
+    private Map<Id, EquivalenceSummary> summaryMap(Set<EquivalenceSummary> summaries) {
+        return Maps.uniqueIndex(summaries, new Function<EquivalenceSummary, Id>() {
             @Override
-            public String apply(@Nullable EquivalenceSummary input) {
+            public Id apply(EquivalenceSummary input) {
                 return input.getSubject();
             }
         });
@@ -132,8 +130,8 @@ public class EpisodeMatchingEquivalenceHandler implements EquivalenceResultHandl
 
     private Iterable<Episode> childrenOf(Container container) {
         ImmutableList<ChildRef> childRefs = container.getChildRefs();
-        Iterable<String> childUris = Iterables.transform(childRefs, TO_URI);
-        ResolvedContent children = contentResolver.findByCanonicalUris(childUris);
+        Iterable<Id> childUris = Iterables.transform(childRefs, Identifiables.toId());
+        ResolvedContent children = contentResolver.findByIds(childUris);
         return Iterables.filter(children.getAllResolvedResults(), Episode.class);
     }
 

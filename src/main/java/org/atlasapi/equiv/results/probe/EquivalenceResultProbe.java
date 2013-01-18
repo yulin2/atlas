@@ -4,31 +4,33 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Set;
 
+import org.atlasapi.media.common.Id;
+
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 
 public class EquivalenceResultProbe {
     
-    public static EquivalenceResultProbeBuilder equivalenceResultProbeFor(String canonicalUri) {
-        return new EquivalenceResultProbeBuilder(checkNotNull(canonicalUri));
+    public static EquivalenceResultProbeBuilder equivalenceResultProbeFor(Id id) {
+        return new EquivalenceResultProbeBuilder(checkNotNull(id));
     }
 
     public static class EquivalenceResultProbeBuilder {
 
-        private final String target;
-        private Set<String> equivalent = ImmutableSet.of();
-        private Set<String> notEquivalent = ImmutableSet.of();
+        private final Id target;
+        private Set<Id> equivalent = ImmutableSet.of();
+        private Set<Id> notEquivalent = ImmutableSet.of();
 
-        public EquivalenceResultProbeBuilder(String canonicalUri) {
-            this.target = canonicalUri;
+        public EquivalenceResultProbeBuilder(Id id) {
+            this.target = id;
         }
 
-        public EquivalenceResultProbeBuilder isEquivalentTo(Iterable<String> equivalents) {
+        public EquivalenceResultProbeBuilder isEquivalentTo(Iterable<Id> equivalents) {
             this.equivalent = ImmutableSet.copyOf(equivalents);
             return this;
         }
 
-        public EquivalenceResultProbeBuilder isNotEquivalentTo(Iterable<String> notEquivalents) {
+        public EquivalenceResultProbeBuilder isNotEquivalentTo(Iterable<Id> notEquivalents) {
             this.notEquivalent = ImmutableSet.copyOf(notEquivalents);
             return this;
         }
@@ -38,25 +40,25 @@ public class EquivalenceResultProbe {
         }
     }
 
-    private final String target;
-    private final Set<String> equivalent;
-    private final Set<String> notEquivalent;
+    private final Id target;
+    private final Set<Id> equivalent;
+    private final Set<Id> notEquivalent;
 
-    public EquivalenceResultProbe(String target, Set<String> equivalent, Set<String> notEquivalent) {
+    public EquivalenceResultProbe(Id target, Set<Id> equivalent, Set<Id> notEquivalent) {
         this.target = target;
         this.equivalent = equivalent;
         this.notEquivalent = notEquivalent;
     }
 
-    public String target() {
+    public Id target() {
         return target;
     }
 
-    public Set<String> expectedEquivalent() {
+    public Set<Id> expectedEquivalent() {
         return equivalent;
     }
 
-    public Set<String> expectedNotEquivalent() {
+    public Set<Id> expectedNotEquivalent() {
         return notEquivalent;
     }
 

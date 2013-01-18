@@ -240,7 +240,7 @@ public class JaxbXmlTranslatorTest extends TestCase {
                 hasChildElem(allOf(of(
                         localName(is("item")),
                         hasChildElem(allOf(of(localName(is("type")), value(is("item"))))),
-                        hasChildElem(allOf(of(localName(is("uri")), value(is(getOnlyElement(list.getContent()).getUri())))))
+                        hasChildElem(allOf(of(localName(is("uri")), value(is(getOnlyElement(list.getContent()).getId())))))
                 )))
         ))));
         

@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.ContentResolver;
@@ -30,18 +31,18 @@ public class LookupResolvingQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     @Override
-    public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         EquivalentContent content = contentResolver.resolveUris(uris, query.includedPublishers(), query.getAnnotations(), true);
         return transform(content);
     }
     
     @Override
-    public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, final ContentQuery query) {
         EquivalentContent content = contentResolver.resolveIds(ids, query.includedPublishers(), query.getAnnotations());
         return transform(content);
     }
 
-    protected Map<Long, List<Identified>> transform(EquivalentContent content) {
+    protected Map<Id, List<Identified>> transform(EquivalentContent content) {
         return Maps.transformValues(content.asMap(), new Function<Collection<Content>, List<Identified>>() {
             @Override
             public List<Identified> apply(@Nullable Collection<Content> input) {

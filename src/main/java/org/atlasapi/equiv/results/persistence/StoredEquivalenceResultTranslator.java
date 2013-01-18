@@ -12,6 +12,7 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.joda.time.DateTime;
 
@@ -25,7 +26,7 @@ public class StoredEquivalenceResultTranslator {
 
     public <T extends Content> StoredEquivalenceResult toStoredEquivalenceResult(EquivalenceResult<T> result) {
         ImmutableList.Builder<CombinedEquivalenceScore> totals = ImmutableList.builder();
-        Table<String, String, Double> results = HashBasedTable.create();
+        Table<Id, String, Double> results = HashBasedTable.create();
         
         final Ordering<Entry<T, Score>> equivalenceResultOrdering = Ordering.from(new Comparator<Entry<T, Score>>() {
             @Override
@@ -51,12 +52,12 @@ public class StoredEquivalenceResultTranslator {
             T content = combinedEquiv.getKey();
             
             Double combinedScore = combinedEquiv.getValue().isRealScore() ? combinedEquiv.getValue().asDouble() : Double.NaN;
-            totals.add(new CombinedEquivalenceScore(content.getCanonicalUri(), content.getTitle(), combinedScore, strongEquivalences.contains(content.getCanonicalUri()), content.getPublisher().title()));
+            totals.add(new CombinedEquivalenceScore(content.getId(), content.getTitle(), combinedScore, strongEquivalences.contains(content.getCanonicalUri()), content.getPublisher().title()));
             for (ScoredCandidates<T> source : result.rawScores()) {
                 
                 Score sourceScore = source.candidates().get(content);
                 Double score = sourceScore != null && sourceScore.isRealScore() ? sourceScore.asDouble() : Double.NaN;
-                results.put(content.getCanonicalUri(), source.source(), score);
+                results.put(content.getId(), source.source(), score);
             }
             
         }

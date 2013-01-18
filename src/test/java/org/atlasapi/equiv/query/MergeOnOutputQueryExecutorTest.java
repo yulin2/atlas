@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Actor;
 import org.atlasapi.media.entity.Brand;
@@ -78,7 +79,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(item1, item2));
 
 		ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC, Publisher.YOUTUBE)));
-		Map<Long, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
+		Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
 		
 		assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
 		assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
@@ -89,7 +90,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 
 	    // Let's not specify a precedence for YouTube, but content will be returned for YouTube
         ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.BBC /*, Publisher.YOUTUBE */)));
-        Map<Long, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
+        Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(item1.getCanonicalUri()), query));
         
         assertEquals(ImmutableList.of(item1), merged.get(item1.getId()));
         assertEquals(ImmutableList.of(clip1), ((Episode)Iterables.getOnlyElement(merged.get(item1.getId()))).getClips());
@@ -99,7 +100,7 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
         MergeOnOutputQueryExecutor merger = new MergeOnOutputQueryExecutor(delegate(film1, film2));
 
         ContentQuery query = ContentQuery.MATCHES_EVERYTHING.copyWithApplicationConfiguration(ApplicationConfiguration.DEFAULT_CONFIGURATION.copyWithPrecedence(ImmutableList.of(Publisher.PA, Publisher.RADIO_TIMES)));
-        Map<Long, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(film1.getCanonicalUri()), query));
+        Map<Id, List<Identified>> merged = ImmutableMap.copyOf(merger.executeUriQuery(ImmutableList.of(film1.getCanonicalUri()), query));
         
         assertEquals(ImmutableList.of(film1), merged.get(film1.getId()));
         assertEquals(ImmutableList.of(actor), ((Film)Iterables.getOnlyElement(merged.get(film1.getId()))).getPeople());
@@ -109,13 +110,13 @@ public class MergeOnOutputQueryExecutorTest extends TestCase {
 		return new KnownTypeQueryExecutor() {
 
 			@Override
-			public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
-				return ImmutableMap.<Long, List<Identified>>of(respondWith[0].getId(), ImmutableList.<Identified>copyOf(respondWith));
+			public Map<Id, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+				return ImmutableMap.<Id, List<Identified>>of(respondWith[0].getId(), ImmutableList.<Identified>copyOf(respondWith));
 			}
 
             @Override
-            public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
-                return ImmutableMap.<Long, List<Identified>>of(respondWith[0].getId(), ImmutableList.<Identified>copyOf(respondWith));
+            public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, ContentQuery query) {
+                return ImmutableMap.<Id, List<Identified>>of(respondWith[0].getId(), ImmutableList.<Identified>copyOf(respondWith));
             }
 		};
 	}

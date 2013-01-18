@@ -30,7 +30,7 @@ public class HuluItemAdapterTest extends TestCase {
 
         ParentRef brand = item.getContainer();
         assertNotNull(brand);
-        assertEquals("http://www.hulu.com/glee", brand.getUri());
+        assertEquals("http://www.hulu.com/glee", brand.getId());
 
         assertEquals("Asian F", item.getTitle());
         assertEquals(episodeUrl, item.getCanonicalUri());

@@ -5,6 +5,8 @@ import static com.metabroadcast.common.base.MorePredicates.transformingPredicate
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.common.Identifiable;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.EntityType;
@@ -12,6 +14,7 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.simple.ContentIdentifier;
 import org.atlasapi.media.entity.simple.Playlist;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;
@@ -85,24 +88,24 @@ public class ContainerModelSimplifier extends ContentModelSimplifier<Container, 
         return simplePlaylist;
     }
 
-    private Iterable<ContentIdentifier> filterAndTransformChildRefs(Container fullPlayList, Predicate<ChildRef> filter) {
+    private Iterable<ContentIdentifier> filterAndTransformChildRefs(Container fullPlayList, Predicate<Identifiable> filter) {
         return Iterables.transform(Iterables.filter(fullPlayList.getChildRefs(), filter), toContentIdentifier);
     }
 
-    private Predicate<ChildRef> availableFilter(Container fullPlayList) {
+    private Predicate<Identifiable> availableFilter(Container fullPlayList) {
         return asChildRefFilter(availableChildrenResolver.availableChildrenFor(fullPlayList));
     }
 
-    private Predicate<ChildRef> upcomingFilter(Container fullPlayList) {
+    private Predicate<Identifiable> upcomingFilter(Container fullPlayList) {
         return asChildRefFilter(upcomingChildrenResolver.availableChildrenFor(fullPlayList));
     }
 
-    private Predicate<ChildRef> recentlyBroadcastFilter(Container fullPlayList) {
+    private Predicate<Identifiable> recentlyBroadcastFilter(Container fullPlayList) {
         return asChildRefFilter(recentlyBroadcastResolver.recentlyBroadcastChildrenFor(fullPlayList, 3));
     }
     
-    private Predicate<ChildRef> asChildRefFilter(Iterable<String> childRefUris) {
-        return transformingPredicate(ChildRef.TO_URI, Predicates.in(ImmutableSet.copyOf(childRefUris)));
+    private Predicate<Identifiable> asChildRefFilter(Iterable<Id> childRefUris) {
+        return transformingPredicate(Identifiables.toId(), Predicates.in(ImmutableSet.copyOf(childRefUris)));
     }
 
     @Override

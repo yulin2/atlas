@@ -10,6 +10,7 @@ import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
@@ -17,6 +18,7 @@ import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
 import org.jmock.Expectations;
@@ -73,7 +75,7 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
         final Brand subject = brandWithSeries(5);
 
         context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),ChildRef.TO_URI))));
+            one(contentResolver).findByIds(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),Identifiables.toId()))));
                 will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
         }});
 
@@ -89,9 +91,9 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
         final Brand suggestion = brandWithSeries(6);
 
         context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),ChildRef.TO_URI))));
+            one(contentResolver).findByIds(with(ImmutableList.copyOf(Iterables.transform(subject.getSeriesRefs(),Identifiables.toId()))));
                 will(returnValue(ResolvedContent.builder().putAll(series(5)).build()));
-            one(contentResolver).findByCanonicalUris(with(ImmutableList.copyOf(Iterables.transform(suggestion.getSeriesRefs(),ChildRef.TO_URI))));
+            one(contentResolver).findByIds(with(ImmutableList.copyOf(Iterables.transform(suggestion.getSeriesRefs(),Identifiables.toId()))));
                 will(returnValue(ResolvedContent.builder().putAll(series(6)).build()));
         }});
 
@@ -119,18 +121,18 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
         return ImmutableList.copyOf(is);
     }
 
-    private Map<String, ? extends Identified> series(int i) {
-        Builder<String, Series> builder = ImmutableMap.builder();
+    private Map<Id, ? extends Identified> series(int i) {
+        Builder<Id, Series> builder = ImmutableMap.builder();
         for (int j = 0; j < i; j++) {
             Series series = new Series("uri"+j, "curie", Publisher.BBC);
-            builder.put(series.getCanonicalUri(), series);
+            builder.put(series.getId(), series);
         };
         return builder.build();
     }
     
     private Brand brandWithSeries(int series) {
         Brand brand = new Brand();
-        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new ChildRef(1L, "uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), series));
+        brand.setSeriesRefs(Iterables.limit(Iterables.cycle(new ChildRef(1L,  "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), series));
         return brand;
     }
 
@@ -141,7 +143,7 @@ public class ContainerHierarchyMatchingEquivalenceScorerTest {
     }
 
     public void setChildren(int children, Container brand) {
-        brand.setChildRefs(Iterables.limit(Iterables.cycle(new ChildRef(2L, "uri", "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), children));
+        brand.setChildRefs(Iterables.limit(Iterables.cycle(new ChildRef(2L, "sk", new DateTime(DateTimeZones.UTC), EntityType.EPISODE)), children));
     }
 
 }

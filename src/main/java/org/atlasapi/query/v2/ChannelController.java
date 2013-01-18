@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,11 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.ChannelQueryResult;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter;
 import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter.ChannelFilterBuilder;
 import org.joda.time.Duration;
@@ -184,7 +182,7 @@ public class ChannelController {
     }
 
     private Set<ChannelGroup> getChannelGroups(String platformId, String regionIds) {
-        Set<Long> channelGroups = Sets.newHashSet();
+        Set<Id> channelGroups = Sets.newHashSet();
         if (platformId != null) {
             Iterables.addAll(channelGroups, transform(CSV_SPLITTER.split(platformId), toDecodedId));
         }
@@ -199,11 +197,11 @@ public class ChannelController {
         }
     }
     
-    private final Function<String, Long> toDecodedId = new Function<String, Long>() {
+    private final Function<String, Id> toDecodedId = new Function<String, Id>() {
 
         @Override
-        public Long apply(String input) {
-            return codec.decode(input).longValue();
+        public Id apply(String input) {
+            return Id.valueOf(codec.decode(input));
         }
     };
     
@@ -266,13 +264,13 @@ public class ChannelController {
         public ChannelAndGroupsData call() throws Exception {
             Set<Channel> allChannels = ImmutableSet.copyOf(channelResolver.all());
             Set<ChannelGroup> allChannelGroups = ImmutableSet.copyOf(channelGroupResolver.channelGroups());
-            Map<Long, Channel> idToChannel = Maps.uniqueIndex(allChannels, Channel.TO_ID);
+            Map<Id, Channel> idToChannel = Maps.uniqueIndex(allChannels, Channel.TO_ID);
             Map<String, Channel> keyToChannel = Maps.uniqueIndex(allChannels, Channel.TO_KEY);
-            Map<Long, ChannelGroup> idToChannelGroup = Maps.uniqueIndex(allChannelGroups, ChannelGroup.TO_ID);
+            Map<Id, ChannelGroup> idToChannelGroup = Maps.uniqueIndex(allChannelGroups, ChannelGroup.TO_ID);
             
             SetMultimap<Channel, ChannelGroup> channelToGroups = HashMultimap.create();
             for (ChannelGroup group : allChannelGroups) {
-                for (Long id : group.getChannels()) {
+                for (Id id : group.getChannels()) {
                     channelToGroups.put(idToChannel.get(id), group);
                 }
             }
@@ -284,11 +282,11 @@ public class ChannelController {
     private class ChannelAndGroupsData {
         private final Set<Channel> allChannels;
         private final SetMultimap<Channel, ChannelGroup> channelToGroups;
-        private final Map<Long, Channel> idToChannel;
+        private final Map<Id, Channel> idToChannel;
         private final Map<String, Channel> keyToChannel;
-        private final Map<Long, ChannelGroup> idToChannelGroup;
+        private final Map<Id, ChannelGroup> idToChannelGroup;
         
-        public ChannelAndGroupsData(Set<Channel> allChannels, Map<Long, Channel> idToChannel, Map<String, Channel> keyToChannel, Map<Long, ChannelGroup> idToChannelGroup, SetMultimap<Channel, ChannelGroup> channelToGroups) {
+        public ChannelAndGroupsData(Set<Channel> allChannels, Map<Id, Channel> idToChannel, Map<String, Channel> keyToChannel, Map<Id, ChannelGroup> idToChannelGroup, SetMultimap<Channel, ChannelGroup> channelToGroups) {
             this.allChannels = allChannels;
             this.idToChannel = idToChannel;
             this.keyToChannel = keyToChannel;

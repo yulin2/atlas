@@ -18,6 +18,7 @@ import org.atlasapi.equiv.results.filters.EquivalenceFilter;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
@@ -80,7 +81,7 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         assertFalse(restoredResult.sourceResults().isEmpty());
         
-        Set<Cell<String, String, Double>> cells = restoredResult.sourceResults().cellSet();
+        Set<Cell<Id, String, Double>> cells = restoredResult.sourceResults().cellSet();
         assertEquals(1, cells.size());
         assertEquals(5.0, Iterables.getOnlyElement(cells).getValue());
         assertEquals(equivalent1.getCanonicalUri(), Iterables.getOnlyElement(cells).getRowKey());
@@ -115,11 +116,11 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         assertFalse(restoredResult.sourceResults().isEmpty());
         
-        String eq1Uri = equivalent1.getCanonicalUri();
+        Id eq1Uri = equivalent1.getId();
         assertEquals(10.0, restoredResult.sourceResults().get(eq1Uri, "source1"));
         assertEquals(5.0, restoredResult.sourceResults().get(eq1Uri, "source2"));
 
-        String eq2Uri = equivalent2.getCanonicalUri();
+        Id eq2Uri = equivalent2.getId();
         assertEquals(5.0, restoredResult.sourceResults().get(eq2Uri, "source1"));
         assertEquals(Double.NaN, restoredResult.sourceResults().get(eq2Uri, "source2"));
         
@@ -148,17 +149,17 @@ public class EquivalenceResultTranslatorTest extends TestCase {
         
         assertFalse(restoredResult.sourceResults().isEmpty());
         
-        String eq1Uri = equivalent1.getCanonicalUri();
+        Id eq1Uri = equivalent1.getId();
         assertEquals(10.0, restoredResult.sourceResults().get(eq1Uri, "source1"));
         assertEquals(5.0, restoredResult.sourceResults().get(eq1Uri, "source2"));
         assertEquals(Double.NaN, restoredResult.sourceResults().get(eq1Uri, "source3"));
 
-        String eq2Uri = equivalent2.getCanonicalUri();
+        Id eq2Uri = equivalent2.getId();
         assertEquals(5.0, restoredResult.sourceResults().get(eq2Uri, "source1"));
         assertEquals(Double.NaN, restoredResult.sourceResults().get(eq2Uri, "source2"));
         assertEquals(Double.NaN, restoredResult.sourceResults().get(eq2Uri, "source3"));
 
-        String eq3Uri = equivalent3.getCanonicalUri();
+        Id eq3Uri = equivalent3.getId();
         assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source1"));
         assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source2"));
         assertEquals(5.0, restoredResult.sourceResults().get(eq3Uri, "source3"));

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroup.ChannelGroupType;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.persistence.media.channel.ChannelGroupStore;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
@@ -70,7 +71,7 @@ public class ChannelGroupIngestTask implements Runnable {
     
     private void createChannelGroup(Platform platform, Publisher publisher, ChannelGroupType type) {
         ChannelGroup channelGroup = new ChannelGroup();
-        channelGroup.setId(idGenerator.generateRaw());
+        channelGroup.setId(Id.valueOf(idGenerator.generateRaw()));
         channelGroup.setTitle(platform.name);
         channelGroup.setChannels(Iterables.transform(platform.channels, TO_CHANNEL_ID));
         channelGroup.setPublisher(publisher);
@@ -80,9 +81,9 @@ public class ChannelGroupIngestTask implements Runnable {
         store.store(channelGroup);
     }
     
-    private Function<String, Long> TO_CHANNEL_ID = new Function<String, Long>() {
+    private Function<String, Id> TO_CHANNEL_ID = new Function<String, Id>() {
         @Override
-        public Long apply(String input) {
+        public Id apply(String input) {
             return channelResolver.fromUri(Channel.fromFieldName(input).get().uri()).requireValue().getId();
         }
     };

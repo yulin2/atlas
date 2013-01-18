@@ -6,6 +6,7 @@ import static com.metabroadcast.common.persistence.mongo.MongoConstants.ID;
 import java.util.List;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 
 import com.google.common.base.Function;
@@ -33,14 +34,15 @@ public class MongoEquivalenceResultStore implements EquivalenceResultStore {
     }
 
     @Override
-    public StoredEquivalenceResult forId(String canonicalUri) {
-        return translator.fromDBObject(equivResults.findOne(canonicalUri));
+    public StoredEquivalenceResult forId(Id id) {
+        return translator.fromDBObject(equivResults.findOne(id));
     }
 
     @Override
-    public List<StoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
-        return ImmutableList.copyOf(Iterables.transform(equivResults.find(where().idIn(canonicalUris).build()), new Function<DBObject, StoredEquivalenceResult>() {
-
+    public List<StoredEquivalenceResult> forIds(Iterable<Id> ids) {
+        Iterable<Long> longIds = Iterables.transform(ids, Id.toLongValue());
+        Iterable<DBObject> found = equivResults.find(where().longIdIn(longIds).build());
+        return ImmutableList.copyOf(Iterables.transform(found, new Function<DBObject, StoredEquivalenceResult>() {
             @Override
             public StoredEquivalenceResult apply(DBObject input) {
                 return translator.fromDBObject(input);

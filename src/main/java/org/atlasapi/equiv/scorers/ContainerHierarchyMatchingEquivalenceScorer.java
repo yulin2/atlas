@@ -7,11 +7,13 @@ import org.atlasapi.equiv.results.scores.DefaultScoredCandidates;
 import org.atlasapi.equiv.results.scores.DefaultScoredCandidates.Builder;
 import org.atlasapi.equiv.results.scores.Score;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.ChildRef;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Series;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentResolver;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -148,8 +150,8 @@ public class ContainerHierarchyMatchingEquivalenceScorer implements EquivalenceS
     }
 
     public ImmutableList<Series> seriesFor(Brand brand) {
-        Iterable<String> uris = ImmutableList.copyOf(Iterables.transform(brand.getSeriesRefs(), ChildRef.TO_URI));
-        List<Identified> allResolvedSeries = contentResolver.findByCanonicalUris(uris).getAllResolvedResults();
+        Iterable<Id> uris = ImmutableList.copyOf(Iterables.transform(brand.getSeriesRefs(), Identifiables.toId()));
+        List<Identified> allResolvedSeries = contentResolver.findByIds(uris).getAllResolvedResults();
         return ImmutableList.copyOf(Iterables.filter(allResolvedSeries, Series.class));
     }
 

@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.persistence.media.channel.ChannelGroupStore;
 import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.springframework.stereotype.Controller;
@@ -50,7 +51,7 @@ public class ChannelGroupController extends BaseController<ChannelGroupQueryResu
 
     @RequestMapping("/3.0/channel_groups/{id}.json")
     public void listChannel(HttpServletRequest request, HttpServletResponse response, @PathVariable("id") String id) throws IOException {
-        Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(idCodec.decode(id).longValue());
+        Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(Id.valueOf(idCodec.decode(id)));
         if (!possibleChannelGroup.isPresent()) {
             response.sendError(HttpStatusCode.NOT_FOUND.code());
         }

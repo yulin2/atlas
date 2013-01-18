@@ -9,6 +9,7 @@ import org.atlasapi.equiv.results.EquivalenceResult;
 import org.atlasapi.equiv.results.description.ReadableDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidate;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
@@ -40,8 +41,8 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
             return;
         }
         
-        String containerUri = container.getUri();
-        Optional<EquivalenceSummary> possibleSummary = summaryStore.summariesForUris(ImmutableSet.of(containerUri)).get(containerUri);
+        Id containerUri = container.getId();
+        Optional<EquivalenceSummary> possibleSummary = summaryStore.summariesForIds(ImmutableSet.of(containerUri)).get(containerUri);
         if (!possibleSummary.isPresent()) {
             desc.appendText("Item Container summary not found").finishStage();
             return;
@@ -64,9 +65,9 @@ public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResu
                     return true;
                 }
 
-                String candidateContainerUri = candidateContainer.getUri();
+                Id candidateContainerUri = candidateContainer.getId();
                 ContentRef validContainer = containerEquivalents.get(candidate.getPublisher());
-                if (validContainer == null || validContainer.getCanonicalUri().equals(candidateContainerUri)) {
+                if (validContainer == null || validContainer.getId().equals(candidateContainerUri)) {
                     return true;
                 }
                 desc.appendText("%s removed. Unacceptable container: %s", scoredCandidate, candidateContainerUri);

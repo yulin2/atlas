@@ -10,7 +10,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.math.BigInteger;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -171,7 +170,7 @@ public class ScheduleRequestParserTest {
     private StubHttpServletRequest scheduleRequest(Channel channel, DateTime from, DateTime to, Publisher publisher, String appKey, Set<Annotation> annotations, String extension) {
         String uri = String.format(
             "http://localhost/4.0/schedules/%s%s",
-            codec.encode(BigInteger.valueOf(channel.getId())),
+            codec.encode(channel.getId().toBigInteger()),
             extension
         );
         return new StubHttpServletRequest().withRequestUri(uri)

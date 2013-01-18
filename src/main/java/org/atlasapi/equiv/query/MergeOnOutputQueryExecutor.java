@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
@@ -46,16 +47,16 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     }
 
     @Override
-    public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeUriQuery(Iterable<String> uris, final ContentQuery query) {
         return mergeResults(query, delegate.executeUriQuery(uris, query));
     }
 
     @Override
-    public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
+    public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, final ContentQuery query) {
         return mergeResults(query, delegate.executeIdQuery(ids, query));
     }
 
-    private Map<Long, List<Identified>> mergeResults(final ContentQuery query, Map<Long, List<Identified>> unmergedResult) {
+    private Map<Id, List<Identified>> mergeResults(final ContentQuery query, Map<Id, List<Identified>> unmergedResult) {
         ApplicationConfiguration config = query.getConfiguration();
         if (!config.precedenceEnabled()) {
             return unmergedResult;

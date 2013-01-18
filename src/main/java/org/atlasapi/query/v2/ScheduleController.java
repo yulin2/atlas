@@ -9,13 +9,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -90,7 +91,7 @@ public class ScheduleController extends BaseController<Iterable<ChannelSchedule>
         return ImmutableSet.copyOf(Iterables.transform(Iterables.filter(Iterables.transform(URI_SPLITTER.split(channelId), new Function<String, Maybe<Channel>>() {
             @Override
             public Maybe<Channel> apply(String input) {
-                return channelResolver.fromId(idCodec.decode(input).longValue());
+                return channelResolver.fromId(Id.valueOf(idCodec.decode(input)));
             }
         }),Maybe.HAS_VALUE),Maybe.<Channel>requireValueFunction()));
     }
