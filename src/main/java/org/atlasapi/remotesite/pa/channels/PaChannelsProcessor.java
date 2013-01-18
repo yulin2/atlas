@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.pa.channels;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
@@ -30,7 +32,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
 
 public class PaChannelsProcessor {
@@ -241,18 +243,61 @@ public class PaChannelsProcessor {
         if (serviceProvider.getRegionalisationList() == null || serviceProvider.getRegionalisationList().getRegionalisation().isEmpty()) {
             addChannelsToPlatform(platform, paPlatform.getEpg().getEpgContent());
         } else {
-            // the platform is regionalised
-            List<Region> regions = createRegionsForPlatform(serviceProvider.getRegionalisationList().getRegionalisation(), paRegions);
-            for (Region region : regions) {
-                region.setPlatform(platform);
-                region = (Region)mergeAndWriteChannelGroup(region);
-                setChannelsForRegion(region, paPlatform.getEpg().getEpgContent());
+            Map<String, Region> regions = createRegionsForPlatform(serviceProvider.getRegionalisationList().getRegionalisation(), paRegions);
+
+            Map<String, Region> writtenRegionMap = Maps.newHashMap();
+            for (Entry<String, Region> entry : regions.entrySet()) {
+                entry.getValue().setPlatform(platform);
+                Region region = (Region)mergeAndWriteChannelGroup(entry.getValue());
+                writtenRegionMap.put(entry.getKey(), region);
+            }
+//            for (Region region : regions.values()) {
+//                region.setPlatform(platform);
+//                region = (Region)mergeAndWriteChannelGroup(region);
+//            }
+            
+            for (EpgContent epgContent : paPlatform.getEpg().getEpgContent()) {
+                addChannelNumberings(epgContent, writtenRegionMap);
             }
         }
     }
     
-    List<Region> createRegionsForPlatform(List<Regionalisation> regionalisations, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions) {
-        List<Region> regions = Lists.newArrayList();
+    private void addChannelNumberings(EpgContent epgContent, Map<String, Region> regions) {
+        // resolve the channel
+        Maybe<Channel> resolved = channelResolver.forAlias(PaChannelMap.createUriFromId(epgContent.getChannelId()));
+        if (!resolved.hasValue()) {
+            throw new RuntimeException("PA Channel with id " + epgContent.getChannelId() + " not found");
+        }
+        
+        Channel channel = resolved.requireValue();
+        LocalDate startDate = formatter.parseLocalDate(epgContent.getStartDate());
+        LocalDate endDate;
+        if (epgContent.getEndDate() != null) {
+            endDate = formatter.parseLocalDate(epgContent.getEndDate());
+            endDate.plusDays(1);
+        } else {
+            endDate = null;
+        }
+        int channelNumber = Integer.parseInt(epgContent.getChannelNumber());
+        
+        RegionalisationList regionalisationList = epgContent.getRegionalisationList();
+        if (regionalisationList == null) {
+            // add to all regions
+            for (Region region : regions.values()) {
+                channel.addChannelNumber(region, channelNumber, startDate, endDate);
+            }
+        } else {
+            // add to selected regions
+            for (Regionalisation epgRegion : regionalisationList.getRegionalisation()) {
+                channel.addChannelNumber(regions.get(epgRegion.getRegionId()), channelNumber, startDate, endDate);
+            }
+        }
+        
+        channelWriter.write(channel);
+    }
+
+    Map<String, Region> createRegionsForPlatform(List<Regionalisation> regionalisations, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions) {
+        Map<String, Region> regions = Maps.newHashMap();
         // If there are regions, create/update the regions as appropriate and then add the regions to the platform.
         for (Regionalisation regionalisation : regionalisations) {
             Region region = new Region();            
@@ -275,7 +320,7 @@ public class PaChannelsProcessor {
             region.addAlias(REGION_ALIAS_PREFIX + regionalisation.getRegionId());
             region.setPublisher(Publisher.METABROADCAST);
             
-            regions.add(region);
+            regions.put(regionalisation.getRegionId(), region);
         }
         return regions;
     }
@@ -330,55 +375,6 @@ public class PaChannelsProcessor {
         return null;
     }
 
-    private void setChannelsForRegion(Region region, List<EpgContent> epgContentList) {
-        for (EpgContent epgContent : epgContentList) {
-            RegionalisationList regionalisationList = epgContent.getRegionalisationList();
-            if (regionalisationList != null && !regionalisationList.getRegionalisation().isEmpty()) {
-                String regionId = Iterables.getOnlyElement(region.getAliases()).replace(REGION_ALIAS_PREFIX, "");
-                for (Regionalisation epgRegion : regionalisationList.getRegionalisation()) {
-                    if (epgRegion.getRegionId().equals(regionId)) {
-                     // channel is regionalised, and is in correct region
-                        Maybe<Channel> resolved = channelResolver.forAlias(PaChannelMap.createUriFromId(epgContent.getChannelId()));
-                        if (!resolved.hasValue()) {
-                            throw new RuntimeException("PA Channel with id " + epgContent.getChannelId() + " not found");
-                        }
-                        Channel channel = resolved.requireValue();
-                        LocalDate startDate = formatter.parseLocalDate(epgContent.getStartDate());
-                        LocalDate endDate;
-                        if (epgContent.getEndDate() != null) {
-                            endDate = formatter.parseLocalDate(epgContent.getEndDate());
-                            endDate.plusDays(1);
-                        } else {
-                            endDate = null;
-                        }
-                        
-                        channel.addChannelNumber(region, Integer.parseInt(epgContent.getChannelNumber()), startDate, endDate);
-                        channelWriter.write(channel);
-                        break;
-                    }
-                }
-            } else {
-                // channel not regionalised, add it to region
-                Maybe<Channel> resolved = channelResolver.forAlias(PaChannelMap.createUriFromId(epgContent.getChannelId()));
-                if (!resolved.hasValue()) {
-                    throw new RuntimeException("PA Channel with id " + epgContent.getChannelId() + " not found");
-                }
-                Channel channel = resolved.requireValue();
-                LocalDate startDate = formatter.parseLocalDate(epgContent.getStartDate());
-                LocalDate endDate;
-                if (epgContent.getEndDate() != null) {
-                    endDate = formatter.parseLocalDate(epgContent.getEndDate());
-                    endDate.plusDays(1);
-                } else {
-                    endDate = null;
-                }
-                
-                channel.addChannelNumber(region, Integer.parseInt(epgContent.getChannelNumber()), startDate, endDate);
-                channelWriter.write(channel);
-            }
-        }
-    }
-
     private ChannelGroup mergeAndWriteChannelGroup(ChannelGroup channelGroup) {
         String alias = Iterables.getOnlyElement(channelGroup.getAliases());
         Optional<ChannelGroup> resolved = channelGroupResolver.fromAlias(alias);
@@ -400,6 +396,36 @@ public class PaChannelsProcessor {
             return channelGroupWriter.store(existing);
         } else {
             return channelGroupWriter.store(channelGroup);
+        }
+    }
+    
+    class ChannelDetails {
+        private Channel channel;
+        private int channelNumber;
+        private LocalDate startDate;
+        private LocalDate endDate;
+        
+        ChannelDetails(Channel channel, int channelNumber, LocalDate startDate, LocalDate endDate) {
+            this.channel = channel;
+            this.channelNumber = channelNumber;
+            this.startDate = startDate;
+            this.endDate = endDate;
+        }
+
+        public Channel getChannel() {
+            return channel;
+        }
+        
+        public int getChannelNumber() {
+            return channelNumber;
+        }
+
+        public LocalDate getStartDate() {
+            return startDate;
+        }
+
+        public LocalDate getEndDate() {
+            return endDate;
         }
     }
 }
