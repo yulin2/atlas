@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
+import java.util.Map;
 
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelGroupWriter;
@@ -72,9 +73,9 @@ public class BasicChannelGroupIngestTest {
         
         
         
-        List<Region> regions = processor.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()));
+        Map<String, Region> regions = processor.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()));
         
-        Region region = Iterables.getOnlyElement(regions);
+        Region region = Iterables.getOnlyElement(regions.values());
         
         assertEquals("South", region.getTitle());
         assertEquals(new TemporalString("South", new LocalDate(2009, 1, 28), null), Iterables.getOnlyElement(region.getAllTitles()));
