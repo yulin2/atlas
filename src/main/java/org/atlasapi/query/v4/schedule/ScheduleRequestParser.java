@@ -14,6 +14,7 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.SourceStatus;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.media.channel.ChannelResolver;
@@ -116,9 +117,9 @@ class ScheduleRequestParser {
     }
 
     private Maybe<Channel> resolveChannel(String channelId) {
-        long cid;
+        Id cid;
         try {
-            cid = idCodec.decode(channelId).longValue();
+            cid = Id.valueOf(idCodec.decode(channelId));
         } catch (IllegalArgumentException e) {
             return Maybe.nothing();
         }

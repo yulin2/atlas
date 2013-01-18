@@ -32,7 +32,7 @@ public class DefaultWsSeriesHandler implements WsSeriesHandler {
     
     @Override
     public void handle(WsSeries series) {
-        String seriesUri = uriFor(series);
+        String seriesUri = null;//uriFor(series);
         
         Maybe<Identified> possibleSeries = resolver.findByCanonicalUris(ImmutableSet.of(seriesUri)).get(seriesUri);
         

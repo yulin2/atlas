@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
@@ -38,7 +39,7 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
 
         @Override
         public void write(Topic topic, FieldWriter writer, OutputContext ctxt) throws IOException {
-            String id = idCodec.encode(BigInteger.valueOf(topic.getId()));
+            String id = idCodec.encode(topic.getId().toBigInteger());
             writer.writeField("id", id);
             writer.writeField("uri", topicUriBase + topic.getId());
             writer.writeField("namespace", topic.getNamespace());
@@ -57,16 +58,16 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
         }
     }
 
-    private static final Function<TopicRef, Long> REF_TO_ID = new Function<TopicRef, Long>() {
+    private static final Function<TopicRef, Id> REF_TO_ID = new Function<TopicRef, Id>() {
         @Override
-        public Long apply(TopicRef input) {
+        public Id apply(TopicRef input) {
             return input.getTopic();
         }
     };
-    private static Function<Topic, Long> TOPIC_ID = new Function<Topic, Long>() {
+    private static Function<Topic, Id> TOPIC_ID = new Function<Topic, Id>() {
 
         @Override
-        public Long apply(Topic input) {
+        public Id apply(Topic input) {
             return input.getId();
         }
     };
@@ -81,7 +82,7 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
         this.topicWriter = new TopicWriter(idCodec, localHostName);
     }
 
-    private Iterable<Topic> resolve(List<Long> topicIds) {
+    private Iterable<Topic> resolve(List<Id> topicIds) {
         if (topicIds.isEmpty()) { // don't even ask (the resolver)
             return ImmutableList.of();
         }
@@ -92,7 +93,7 @@ public class TopicsAnnotation extends OutputAnnotation<Content> {
     public void write(Content entity, FieldWriter writer, OutputContext ctxt) throws IOException {
         List<TopicRef> topicRefs = entity.getTopicRefs();
         Iterable<Topic> topics = resolve(Lists.transform(topicRefs, REF_TO_ID));
-        final Map<Long, Topic> topicsMap = Maps.uniqueIndex(topics, TOPIC_ID);
+        final Map<Id, Topic> topicsMap = Maps.uniqueIndex(topics, TOPIC_ID);
         
         writer.writeList(new EntityListWriter<TopicRef>() {
 

@@ -9,6 +9,8 @@ import java.util.Set;
 import org.atlasapi.equiv.results.description.DefaultDescription;
 import org.atlasapi.equiv.results.description.ResultDescription;
 import org.atlasapi.equiv.results.scores.ScoredCandidates;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
@@ -172,8 +174,8 @@ public class SequenceItemScorerTest {
 
     private Episode episode(String uri, Integer seriesNumber, Integer episodeNumber) {
         Episode candidate = new Episode(uri, uri, Publisher.BBC);
-        candidate.setParentRef(new ParentRef("b"+uri));
-        candidate.setParentRef(new ParentRef("s"+uri));
+        candidate.setParentRef(new ParentRef(Id.valueOf(uri.hashCode()), EntityType.BRAND));
+        candidate.setSeriesRef(new ParentRef(Id.valueOf(2*uri.hashCode()), EntityType.SERIES));
         candidate.setSeriesNumber(seriesNumber);
         candidate.setEpisodeNumber(episodeNumber);
         return candidate;

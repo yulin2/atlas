@@ -39,8 +39,8 @@ public class RestoredEquivalenceResultModelBuilder {
         for (CombinedEquivalenceScore equivalence : target.combinedResults()) {
             SimpleModel equivModel = new SimpleModel();
             
-            equivModel.put("id",equivalence.id());
-            equivModel.put("encodedId",UrlEncoded.encodeString(equivalence.id()));
+            equivModel.putAsString("id",equivalence.id().longValue());
+            equivModel.put("encodedId",UrlEncoded.encodeString(equivalence.id().toString()));
             equivModel.put("title", equivalence.title());
             equivModel.put("strong", equivalence.strong());
             equivModel.put("publisher", equivalence.publisher());

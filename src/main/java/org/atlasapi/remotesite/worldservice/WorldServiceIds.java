@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.worldservice;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.remotesite.worldservice.model.WsProgramme;
 import org.atlasapi.remotesite.worldservice.model.WsSeries;
 
@@ -12,11 +13,11 @@ public class WorldServiceIds {
     private static final String WS_EPISODE_CURIE = "ws-e:";
     
     
-    public static String uriForBrand(String id) {
-        return WS_ARCHIVE_BRAND_BASE + id;
+    public static Id uriForBrand(String id) {
+        return null;//WS_ARCHIVE_BRAND_BASE + id;
     }
 
-    public static String uriFor(WsSeries series) {
+    public static Id uriFor(WsSeries series) {
         return uriForBrand(series.getSeriesId());
     }
     

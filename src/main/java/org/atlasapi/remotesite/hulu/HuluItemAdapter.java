@@ -60,7 +60,7 @@ public class HuluItemAdapter implements SiteSpecificAdapter<Episode> {
 
             Episode episode = extractor.extract(navigator);
 
-            if (episode.getContainer() != null && episode.getContainer().getUri() != null && brandAdapter != null) {
+            if (episode.getContainer() != null && episode.getContainer().getId() != null && brandAdapter != null) {
                 //we can't thread this fetch, since any attempt to write 'episode' (by an external writer) will fail before it completes.
                 brandAdapter.fetch(uri);
             }

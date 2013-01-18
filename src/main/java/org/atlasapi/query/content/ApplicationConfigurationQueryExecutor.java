@@ -9,6 +9,7 @@ import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.content.criteria.operator.Operators;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
@@ -32,12 +33,12 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 //	}
 
 	@Override
-	public Map<Long, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
+	public Map<Id, List<Identified>> executeUriQuery(Iterable<String> uris, ContentQuery query) {
 		return delegate.executeUriQuery(uris, queryForContent(query));
 	}
 
 	@Override
-	public Map<Long, List<Identified>> executeIdQuery(Iterable<Long> ids, ContentQuery query) {
+	public Map<Id, List<Identified>> executeIdQuery(Iterable<Id> ids, ContentQuery query) {
 	    return delegate.executeIdQuery(ids, queryForContent(query));
 	}
 

@@ -19,6 +19,9 @@ import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.query.v2.ChannelGroupFilterer.ChannelGroupFilter;
 import org.atlasapi.query.v2.ChannelGroupFilterer.ChannelGroupFilter.ChannelGroupFilterBuilder;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -105,7 +108,7 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
     public void listChannel(HttpServletRequest request, HttpServletResponse response, 
             @PathVariable("id") String id) throws IOException {
         try {
-            Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(idCodec.decode(id).longValue());
+            Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(Id.valueOf(idCodec.decode(id)));
             if (!possibleChannelGroup.isPresent()) {
                 errorViewFor(request, response, NOT_FOUND);
             } else {
@@ -137,7 +140,7 @@ public class ChannelGroupController extends BaseController<Iterable<ChannelGroup
         
         if (!Strings.isNullOrEmpty(platformId)) {
             // resolve platform if present
-            Optional<ChannelGroup> possiblePlatform = channelGroupResolver.channelGroupFor(idCodec.decode(platformId).longValue());
+            Optional<ChannelGroup> possiblePlatform = channelGroupResolver.channelGroupFor(Id.valueOf(idCodec.decode(platformId)));
             if (!possiblePlatform.isPresent()) {
                 throw new IllegalArgumentException("could not resolve channel group with id " + platformId);
             }

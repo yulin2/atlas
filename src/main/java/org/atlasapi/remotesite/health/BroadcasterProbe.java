@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.health;
 
 import java.util.Map.Entry;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
@@ -35,13 +36,13 @@ public class BroadcasterProbe implements HealthProbe {
 	@Override
 	public ProbeResult probe() {
 		ProbeResult result = new ProbeResult(title());
-		for (Entry<String, Maybe<Identified>> uriContent : contentStore.findByCanonicalUris(uris).asMap().entrySet()) {
+		for (Entry<Id, Maybe<Identified>> uriContent : contentStore.findByCanonicalUris(uris).asMap().entrySet()) {
 		    Maybe<Identified> content = uriContent.getValue();
 			if (content.hasValue() && content.requireValue() instanceof Described) {
 			    Described playlist = (Described) content.requireValue();
 				result.add(Strings.isNullOrEmpty(playlist.getTitle())?playlist.getCanonicalUri():playlist.getTitle(), playlist.getLastFetched().toString(DateTimeFormat.mediumDateTime()), playlist.getLastFetched().isAfter(clock.now().minus(maxStaleness)));
 			} else {
-				result.addFailure(uriContent.getKey(), "not found");
+				result.addFailure(uriContent.getKey().toString(), "not found");
 			}
 		}
 		return result;

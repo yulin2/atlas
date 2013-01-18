@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.common.Id;
+import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.persistence.content.ContentResolver;

@@ -1,7 +1,6 @@
 package org.atlasapi.output.annotation;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.query.v4.schedule.FieldWriter;
@@ -24,7 +23,7 @@ public class IdentificationSummaryAnnotation extends OutputAnnotation<Identified
     }
 
     private String encodedIdOrNull(Identified entity) {
-        return entity.getId() != null ? codec.encode(BigInteger.valueOf(entity.getId()))
+        return entity.getId() != null ? codec.encode(entity.getId().toBigInteger())
                                       : null;
     }
 }

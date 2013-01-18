@@ -3,6 +3,7 @@ package org.atlasapi.query.topic;
 import java.util.Set;
 
 import org.atlasapi.content.criteria.ContentQuery;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
@@ -34,12 +35,12 @@ public class PublisherFilteringTopicResolver implements TopicQueryResolver {
     //TODO pass in ContentQuery, filter by publisher, selection etc...
 
     @Override
-    public Maybe<Topic> topicForId(Long id) {
+    public Maybe<Topic> topicForId(Id id) {
         return delegate.topicForId(id);
     }
 
     @Override
-    public Iterable<Topic> topicsForIds(Iterable<Long> ids) {
+    public Iterable<Topic> topicsForIds(Iterable<Id> ids) {
         return delegate.topicsForIds(ids);
     }
 }

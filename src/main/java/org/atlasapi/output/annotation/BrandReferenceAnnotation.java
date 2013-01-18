@@ -14,7 +14,7 @@ public class BrandReferenceAnnotation extends OutputAnnotation<Content> {
         
         @Override
         public void write(Item entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            writer.writeField("uri", entity.getContainer().getUri());
+            writer.writeField("uri", entity.getContainer().getId());
         }
 
         @Override

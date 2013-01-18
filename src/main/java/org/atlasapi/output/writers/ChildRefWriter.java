@@ -17,7 +17,7 @@ public final class ChildRefWriter implements EntityListWriter<ChildRef> {
 
     @Override
     public void write(ChildRef entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-        writer.writeField("uri", entity.getUri());
+        writer.writeField("uri", entity.getId());
         writer.writeField("type", entity.getType());
     }
 

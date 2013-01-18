@@ -10,12 +10,14 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 
 import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public class FileEquivalenceResultStore implements EquivalenceResultStore {
 
@@ -50,29 +52,37 @@ public class FileEquivalenceResultStore implements EquivalenceResultStore {
     }
 
     @Override
-    public StoredEquivalenceResult forId(String canonicalUri) {
-        File file = fileFromCanonicalUri(canonicalUri);
+    public StoredEquivalenceResult forId(Id id) {
+        File file = fileFromCanonicalUri(id.toString());
         if(!file.exists()) {
             return null;
         }
         
+        ObjectInputStream is = null;
+        boolean threw = true;
         try {
-            ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
-            return (StoredEquivalenceResult) is.readObject();
-        } catch (IOException e) {
+            is = new ObjectInputStream(new FileInputStream(file));
+            StoredEquivalenceResult readObject = (StoredEquivalenceResult) is.readObject();
+            threw = false;
+            return readObject;
+        } catch (Exception e) {
             Throwables.propagate(e);
-        } catch (ClassNotFoundException e) {
-            Throwables.propagate(e);
+        } finally {
+            try {
+                Closeables.close(is, threw);
+            } catch (IOException e) {
+                Throwables.propagate(e);
+            }
         }
         return null;
     }
 
     @Override
-    public List<StoredEquivalenceResult> forIds(Iterable<String> canonicalUris) {
-        return Lists.newArrayList(Iterables.transform(canonicalUris, new Function<String, StoredEquivalenceResult>() {
+    public List<StoredEquivalenceResult> forIds(Iterable<Id> ids) {
+        return Lists.newArrayList(Iterables.transform(ids, new Function<Id, StoredEquivalenceResult>() {
 
             @Override
-            public StoredEquivalenceResult apply(String input) {
+            public StoredEquivalenceResult apply(Id input) {
                 return forId(input);
             }
             

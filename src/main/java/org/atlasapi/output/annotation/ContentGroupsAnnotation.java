@@ -4,6 +4,7 @@ package org.atlasapi.output.annotation;
 import java.io.IOException;
 import java.util.List;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.ContentGroupRef;
@@ -56,7 +57,7 @@ public class ContentGroupsAnnotation extends OutputAnnotation<Content> {
         return resolveContentGroups(Lists.transform(refs, REF_TO_ID));
     }
 
-    private Iterable<ContentGroup> resolveContentGroups(List<Long> contentGroups) {
+    private Iterable<ContentGroup> resolveContentGroups(List<Id> contentGroups) {
         if (contentGroups.isEmpty()) {
             return ImmutableList.of();
         }
@@ -64,10 +65,10 @@ public class ContentGroupsAnnotation extends OutputAnnotation<Content> {
         return Iterables.filter(resolved.asResolvedMap().values(), ContentGroup.class);
     }
 
-    private static final Function<ContentGroupRef, Long> REF_TO_ID = new Function<ContentGroupRef, Long>() {
+    private static final Function<ContentGroupRef, Id> REF_TO_ID = new Function<ContentGroupRef, Id>() {
 
         @Override
-        public Long apply(ContentGroupRef input) {
+        public Id apply(ContentGroupRef input) {
             return input.getId();
         }
     };

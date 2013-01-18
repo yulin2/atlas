@@ -13,6 +13,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.ScheduleEntry;
 import org.atlasapi.media.entity.Version;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
+import org.atlasapi.media.util.Identifiables;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
@@ -163,7 +164,7 @@ public class C4EpgBrandlessEntryProcessor {
     private ItemRefAndBroadcast extractRelevantEpisode(C4EpgEntry entry, Brand brand, String synthbrandName, Channel channel, DateTime now) {
         boolean found = false;
         //look for an episode with a broadcast with this entry's id, replace if found.
-        Iterable<Episode> subItems = Iterables.filter(contentStore.findByCanonicalUris(Iterables.transform(brand.getChildRefs(), ChildRef.TO_URI)).getAllResolvedResults(), Episode.class);
+        Iterable<Episode> subItems = Iterables.filter(contentStore.findByIds(Iterables.transform(brand.getChildRefs(), Identifiables.toId())).getAllResolvedResults(), Episode.class);
 		for (Episode episode : subItems) {
             for (Version version : episode.getVersions()) {
                 Set<Broadcast> broadcasts = Sets.newHashSet();

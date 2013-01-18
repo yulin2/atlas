@@ -29,7 +29,7 @@ public class BrandSummaryAnnotation extends OutputAnnotation<Content> {
         public void write(Item entity, FieldWriter writer, OutputContext ctxt) throws IOException {
             ParentRef container = entity.getContainer();
             ContainerSummary summary = entity.getContainerSummary();
-            writer.writeField("uri", container.getUri());
+            writer.writeField("uri", container.getId());
             if (summary != null) {
                 writer.writeField("type", summary.getType());
                 writer.writeField("title", summary.getTitle());

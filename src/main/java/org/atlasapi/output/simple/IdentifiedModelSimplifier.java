@@ -1,6 +1,5 @@
 package org.atlasapi.output.simple;
 
-import java.math.BigInteger;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Identified;
@@ -21,7 +20,7 @@ public abstract class IdentifiedModelSimplifier<F extends Identified, T extends 
         
         aliased.setUri(identified.getCanonicalUri());
         if (identified.getId() != null) {
-            aliased.setId(idCodec.encode(BigInteger.valueOf(identified.getId())));
+            aliased.setId(idCodec.encode(identified.getId().toBigInteger()));
         }
         
         if (annotations.contains(Annotation.DESCRIPTION)

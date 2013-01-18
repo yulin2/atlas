@@ -1,6 +1,5 @@
 package org.atlasapi.output.simple;
 
-import java.math.BigInteger;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -27,7 +26,7 @@ public class ProductModelSimplifier extends IdentifiedModelSimplifier<Product, o
     public org.atlasapi.media.entity.simple.Product simplify(Product model, Set<Annotation> annotations, ApplicationConfiguration config) {
         org.atlasapi.media.entity.simple.Product simpleProduct = new org.atlasapi.media.entity.simple.Product();
         
-        String id = idCodec.encode(BigInteger.valueOf(model.getId()));
+        String id = idCodec.encode(model.getId().toBigInteger());
         simpleProduct.setId(id);
         simpleProduct.setUri(productUriFormat + id);
         simpleProduct.setType(model.getType() != null ? model.getType().toString() : null);

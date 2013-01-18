@@ -3,6 +3,9 @@ package org.atlasapi.query.v2;
 import static com.google.common.collect.Iterables.transform;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +22,13 @@ import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AtlasErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.entity.MediaType;
+import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.media.entity.simple.ChannelQueryResult;
+import org.atlasapi.persistence.media.channel.ChannelGroupStore;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter;
 import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter.ChannelFilterBuilder;
 import org.springframework.stereotype.Controller;
@@ -37,6 +47,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.base.MoreOrderings;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -126,7 +137,7 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
     public void listChannel(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("id") String id) throws IOException {
         try {
-            Maybe<Channel> possibleChannel = channelResolver.fromId(codec.decode(id).longValue());
+            Maybe<Channel> possibleChannel = channelResolver.fromId(Id.valueOf(codec.decode(id)));
             if (possibleChannel.isNothing()) {
                 errorViewFor(request, response, NOT_FOUND);
             } else {
@@ -193,8 +204,8 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
         return filter.build();
     }
 
-    private Set<Long> getChannelGroups(String platformId, String regionIds) {
-        Builder<Long> channelGroups = ImmutableSet.builder();
+    private Set<ChannelGroup> getChannelGroups(String platformId, String regionIds) {
+        Set<Id> channelGroups = Sets.newHashSet();
         if (platformId != null) {
             channelGroups.addAll(transform(CSV_SPLITTER.split(platformId), toDecodedId));
         }
@@ -204,11 +215,11 @@ public class ChannelController extends BaseController<Iterable<Channel>> {
         return channelGroups.build();
     }
     
-    private final Function<String, Long> toDecodedId = new Function<String, Long>() {
+    private final Function<String, Id> toDecodedId = new Function<String, Id>() {
 
         @Override
-        public Long apply(String input) {
-            return codec.decode(input).longValue();
+        public Id apply(String input) {
+            return Id.valueOf(codec.decode(input));
         }
     };
 }

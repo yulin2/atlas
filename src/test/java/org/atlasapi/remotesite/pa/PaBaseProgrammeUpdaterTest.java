@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Identified;
@@ -196,7 +197,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
     }    
 
     private Item loadItemAtPosition(Brand brand, int index) {
-        return (Item) resolver.findByCanonicalUris(ImmutableList.of(brand.getChildRefs().get(index).getUri())).getFirstValue().requireValue();
+        return (Item) resolver.findByIds(ImmutableList.of(brand.getChildRefs().get(index).getId())).getFirstValue().requireValue();
     }
 
     static class TestPaProgrammeUpdater extends PaBaseProgrammeUpdater {
@@ -231,7 +232,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 		}
 
 		@Override
-		public Maybe<Channel> fromId(Long id) {
+		public Maybe<Channel> fromId(Id id) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -255,7 +256,7 @@ public class PaBaseProgrammeUpdaterTest extends TestCase {
 		}
 
         @Override
-        public Iterable<Channel> forIds(Iterable<Long> ids) {
+        public Iterable<Channel> forIds(Iterable<Id> ids) {
             throw new UnsupportedOperationException();
         }
 

@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Topic;
 import org.atlasapi.media.entity.Topic.Type;
@@ -84,12 +85,12 @@ public class BbcSlashProgrammesRdfTopicExtractorTest extends TestCase {
     	}
 
         @Override
-        public Maybe<Topic> topicForId(Long id) {
+        public Maybe<Topic> topicForId(Id id) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
         @Override
-        public Iterable<Topic> topicsForIds(Iterable<Long> ids) {
+        public Iterable<Topic> topicsForIds(Iterable<Id> ids) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 

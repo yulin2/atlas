@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
@@ -78,7 +79,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())
-                    .addEntry(new ScheduleRefEntry(item.getId(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
+                    .addEntry(new ScheduleRefEntry(item.getId().longValue(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
                     .build()
             ));
         
@@ -110,8 +111,8 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(
                 ScheduleRef.forChannel(channel.getCanonicalUri())
-                    .addEntry(new ScheduleRefEntry(item.getId(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
-                    .addEntry(new ScheduleRefEntry(item.getId(), channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2"))
+                    .addEntry(new ScheduleRefEntry(item.getId().longValue(), channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid"))
+                    .addEntry(new ScheduleRefEntry(item.getId().longValue(), channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2"))
                     .build()
             ));
         
@@ -149,9 +150,9 @@ public class IndexBackedScheduleQueryExecutorTest {
         version.addBroadcast(broadcast);
     }
 
-    private EquivalentContent queryResult(Long itemUri, List<Content> content) {
+    private EquivalentContent queryResult(Id itemId, List<Content> content) {
         Builder builder = EquivalentContent.builder();
-        builder.putEquivalents(itemUri,content);
+        builder.putEquivalents(itemId,content);
         return builder.build();
     }
 
@@ -164,7 +165,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         version.addBroadcast(broadcast);
         
         Item item = new Item(itemUri, itemUri, Publisher.METABROADCAST);
-        item.setId(Long.valueOf(itemUri.hashCode()));
+        item.setId(Id.valueOf(Long.valueOf(itemUri.hashCode())));
         item.addVersion(version);
         
         return item;

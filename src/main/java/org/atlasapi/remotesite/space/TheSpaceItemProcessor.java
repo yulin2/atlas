@@ -108,7 +108,7 @@ public class TheSpaceItemProcessor {
         final Episode episode = (Episode) content;
         ParentRef parentRef = episode.getContainer();
         if (parentRef != null) {
-            ResolvedContent parents = contentResolver.findByCanonicalUris(Arrays.asList(parentRef.getUri()));
+            ResolvedContent parents = contentResolver.findByIds(Arrays.asList(parentRef.getId()));
             if (!parents.isEmpty() && parents.getFirstValue().requireValue() instanceof Series) {
                 Container parent = (Container) parents.getFirstValue().requireValue();
                 parent.setChildRefs(Iterables.filter(parent.getChildRefs(), new Predicate<ChildRef>() {

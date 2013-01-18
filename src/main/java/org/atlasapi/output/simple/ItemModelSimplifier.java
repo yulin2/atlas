@@ -338,7 +338,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private BrandSummary buildBrandSummary(Item fullItem, Set<Annotation> annotations) {
         BrandSummary summary = new BrandSummary();
-        summary.setUri(fullItem.getContainer().getUri());
+        summary.setUri(fullItem.getContainer().getId().toString());
         if (annotations.contains(Annotation.BRAND_SUMMARY) && fullItem.getContainerSummary() != null) {
             summary.setTitle(fullItem.getContainerSummary().getTitle());
             summary.setDescription(fullItem.getContainerSummary().getDescription());
@@ -350,7 +350,7 @@ public class ItemModelSimplifier extends ContentModelSimplifier<Item, org.atlasa
 
     private SeriesSummary buildSeriesSummary(Item fullItem, Set<Annotation> annotations) {
         SeriesSummary summary = new SeriesSummary();
-        summary.setUri(fullItem.getContainer().getUri());
+        summary.setUri(fullItem.getContainer().getId().toString());
         if (annotations.contains(Annotation.SERIES_SUMMARY) && fullItem.getContainerSummary() != null) {
             summary.setTitle(fullItem.getContainerSummary().getTitle());
         } else if (fullItem.getContainerSummary() == null) {

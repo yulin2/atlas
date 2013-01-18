@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Brand;
@@ -134,12 +135,13 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
     }
 
     public <T extends Content> void checkFetchesLinksTagsAndContent(final T content, final List<RelatedLink> links, final List<KeyPhrase> tags) {
-        final String uri = content.getCanonicalUri();
+        final Id id = content.getId();
         context.checking(new Expectations(){{
-            one(linkAdapter).fetch(uri);will(returnValue(links));
-            one(tagAdapter).fetch(uri);will(returnValue(tags));
-            one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
-            one(resolver).findByCanonicalUris(with(hasItem(uri))); will(returnValue(builder().put(uri, content).build()));
+            one(linkAdapter).fetch(id.toString());will(returnValue(links));
+            one(tagAdapter).fetch(id.toString());will(returnValue(tags));
+            one(topicsAdapter).fetch(id.toString());will(returnValue(ImmutableList.of()));
+            one(resolver).findByIds(with(hasItem(id))); 
+                will(returnValue(builder().put(id, content).build()));
         }});
     }
 

@@ -19,7 +19,7 @@ public class ExtendedIdentificationAnnotation extends OutputAnnotation<Identifie
         @Override
         public void write(LookupRef entity, FieldWriter formatter, OutputContext ctxt) throws IOException {
 //            formatter.writeField("id", idCodec.encode(BigInteger.valueOf(entity.id())));
-            formatter.writeField("uri", entity.uri());
+            formatter.writeField("uri", entity.id());
             formatter.writeField("source", entity.publisher().key());
         }
 

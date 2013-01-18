@@ -11,6 +11,7 @@ import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.content.criteria.ContentQueryBuilder;
 import org.atlasapi.content.criteria.attribute.Attributes;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
@@ -58,7 +59,7 @@ public class ContentResolvingSearchTest extends TestCase {
         SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
         
         when(fuzzySearcher.search(query)).thenReturn(new SearchResults(ImmutableList.of(brand.getId())));
-        when(contentResolver.executeIdQuery(ImmutableList.of(brand.getId()), contentQuery)).thenReturn(ImmutableMap.<Long,List<Identified>>of(brand.getId(), ImmutableList.<Identified>of(brand)));
+        when(contentResolver.executeIdQuery(ImmutableList.of(brand.getId()), contentQuery)).thenReturn(ImmutableMap.<Id,List<Identified>>of(brand.getId(), ImmutableList.<Identified>of(brand)));
             
         List<Identified> content = searcher.search(query, ApplicationConfiguration.DEFAULT_CONFIGURATION);
         assertFalse(content.isEmpty());
