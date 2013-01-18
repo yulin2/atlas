@@ -18,6 +18,17 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+/**
+ * Filter candidate equivalent episodes based on their parents. 
+ * 
+ * In strict mode an Item's candidate equivalent's Container must be
+ * equivalent to the Item's Container. That is, for a candidate equivalent,
+ * E, of item, I, E's Container, Ec, must be equivalent to I's Container,
+ * Ic. In relaxed mode, Ec need not be equivalent to Ic but there must be
+ * no other equivalent container for that source.
+ * @author tom
+ *
+ */
 public class EpisodeFilteringEquivalenceResultHandler implements EquivalenceResultHandler<Item> {
 
     public static final EquivalenceResultHandler<Item> strict(
