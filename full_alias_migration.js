@@ -151,13 +151,12 @@ db.channels.find({"_id" : NumberLong(104789)}).forEach(
 		
 		// add existing aliases to aliases map 
 		if (typeof c.ids !== "undefined") {
-			addAlias(c.ids[i], aliases);
+			for (var i = 0; i < c.ids.length; i++) {
+				addAlias(c.ids[i], aliases);
+			}
 		}
 		
-		// transfer to array before writing?
-		
 		var aliasArray = [];
-		
 		for (var key in aliases) {
 			print("Namespace: " + aliases[key].namespace);
 			print("Value: " + aliases[key].value);
