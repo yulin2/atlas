@@ -50,6 +50,10 @@ public class RequiredScoreFilteringCombiner<T extends Content> implements ScoreC
             public Score transformEntry(T equiv, Score combinedScore) {
                 Score itemScore = itemScoreMap.get(equiv);
 
+                if (itemScore == null) {
+                    return Score.NULL_SCORE;
+                }
+                
                 if (threshold.apply(itemScore)) {
                     return combinedScore;
                 }
