@@ -50,7 +50,8 @@ public class ChannelSimplifier {
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
-        simple.setAliases(input.getAliases());
+        // TODO new alias
+        simple.setAliases(input.getAliasUrls());
         simple.setPublisherDetails(toPublisherDetails(input.source()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
         simple.setHighDefinition(input.highDefinition());
@@ -84,7 +85,8 @@ public class ChannelSimplifier {
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
-        simple.setAliases(input.getAliases());
+        // TODO new alias
+        simple.setAliases(input.getAliasUrls());
         simple.setPublisherDetails(toPublisherDetails(input.getPublisher()));
         simple.setTitle(input.getTitle());
         if (input.getAvailableCountries() != null) {

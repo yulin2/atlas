@@ -61,8 +61,10 @@ aliasMapping[escapeRegExp("http://gb.netflix.com/movies/") + "([0-9]*)"] = {"nam
 aliasMapping[escapeRegExp("http://api.netflix.com/catalog/titles/movies/") + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
 aliasMapping[escapeRegExp("http://api.netflix.com/catalog/titles/programs/") + "([0-9]*)" + escapeRegExp("/") + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
 
-aliasMapping[escapeRegExp("http://youview.com/service/") + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
-aliasMapping[escapeRegExp("http://youview.com/scheduleevent/") + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
+aliasMapping[escapeRegExp("http://youview.com/service/") + "([0-9]*)"] = {"namespace" : "youview:service", "value" : "1"};
+aliasMapping[escapeRegExp("http://youview.com/scheduleevent/") + "([0-9]*)"] = {"namespace" : "youview:scheduleevent", "value" : "1"};
+aliasMapping[escapeRegExp("http://youview.com/") + "([0-9]*)"] = {"namespace" : "youview:scheduleevent", "value" : "1"};
+aliasMapping[escapeRegExp("http://youview.com/programme/") + "([0-9]*)"] = {"namespace" : "youview:programme", "value" : "1"};
 
 aliasMapping[escapeRegExp("http://previewnetworks.com/film/") + "([0-9]*)"] = {"namespace" : "", "value" : "1"};
 
@@ -120,7 +122,7 @@ aliasMapping["(^HIS_[^_]+_?[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
 aliasMapping["(^COM_[^_]+_(s|S)?\d+)"] = {"namespace" : "", "value" : "1"};
 aliasMapping["(^GNX_[^_]+_[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
 aliasMapping["(^T_[^_]+_[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
-aliasMapping["([A-Za-z\s]+[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
+aliasMapping["(^([A-Z0-9][a-z0-9]*\s)+[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
 
 aliasMapping["(^[a-zA-Z0-9_-]*$)"] = {"namespace" : "", "value" : "1"};
 

@@ -123,7 +123,7 @@ aliasMapping["(^HIS_[^_]+_?[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
 aliasMapping["(^COM_[^_]+_(s|S)?\d+)"] = {"namespace" : "", "value" : "1"};
 aliasMapping["(^GNX_[^_]+_[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
 aliasMapping["(^T_[^_]+_[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
-aliasMapping["(^([A-Z0-9][a-z0-9]+\s)+[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
+aliasMapping["(^([A-Z0-9][a-z0-9]*\s)+[sS]?[0-9]*$)"] = {"namespace" : "", "value" : "1"};
 
 aliasMapping["(^[a-zA-Z0-9_-]*$)"] = {"namespace" : "atlas:channel:key", "value" : "1"};
 

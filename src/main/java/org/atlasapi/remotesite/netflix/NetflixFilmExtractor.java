@@ -27,7 +27,8 @@ public class NetflixFilmExtractor extends NetflixContentExtractor<Film>  {
         film.setGenres(getGenres(source));
         film.setPeople(getPeople(source));
         film.setCertificates(getCertificates(source));
-        film.addAlias(getAlias(source));
+        // TODO new alias
+        film.addAliasUrl(getAlias(source));
         film.setPublisher(getPublisher());
         film.setSpecialization(Specialization.FILM);
 

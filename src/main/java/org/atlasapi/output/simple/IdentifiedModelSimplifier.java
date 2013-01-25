@@ -25,7 +25,8 @@ public abstract class IdentifiedModelSimplifier<F extends Identified, T extends 
         
         if (annotations.contains(Annotation.DESCRIPTION)
          || annotations.contains(Annotation.EXTENDED_DESCRIPTION)) {
-            aliased.setAliases(identified.getAliases());
+            // TODO add in new aliases
+            aliased.setAliases(identified.getAliasUrls());
             aliased.setCurie(identified.getCurie());
         }
         

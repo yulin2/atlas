@@ -25,7 +25,8 @@ public class NetflixBrandExtractor extends NetflixContentExtractor<Brand> {
         brand.setGenres(getGenres(source));
         brand.setPeople(getPeople(source));
         brand.setCertificates(getCertificates(source));
-        brand.addAlias(getAlias(source));
+        // TODO new alias
+        brand.addAliasUrl(getAlias(source));
         brand.setPublisher(getPublisher());
         brand.setSpecialization(Specialization.TV);
 

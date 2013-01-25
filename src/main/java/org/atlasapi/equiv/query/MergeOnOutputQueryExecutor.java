@@ -11,6 +11,7 @@ import org.atlasapi.media.entity.Identified;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -34,6 +35,12 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
     @Override
     public Map<String, List<Identified>> executeIdQuery(Iterable<Long> ids, final ContentQuery query) {
         return mergeResults(query, delegate.executeIdQuery(ids, query));
+    }
+
+    @Override
+    public Map<String, List<Identified>> executeAliasQuery(Optional<String> namespace, Iterable<String> values,
+            ContentQuery query) {
+        return mergeResults(query, delegate.executeAliasQuery(namespace, values, query));
     }
 
     private Map<String, List<Identified>> mergeResults(final ContentQuery query, Map<String, List<Identified>> unmergedResult) {
@@ -61,5 +68,4 @@ public class MergeOnOutputQueryExecutor implements KnownTypeQueryExecutor {
             }
         });
     }
-
 }

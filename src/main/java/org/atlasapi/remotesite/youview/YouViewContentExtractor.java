@@ -6,6 +6,7 @@ import nu.xom.Elements;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -46,6 +47,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String START_KEY = "start";
     private static final String END_KEY = "end";
     private static final String SCHEDULE_EVENT_PREFIX = "http://youview.com/scheduleevent/";
+    private static final String YOUVIEW_PROGRAMME_ID_PREFIX = "http://youview.com/programme/";
     private final YouViewChannelResolver channelResolver;
     
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
@@ -58,16 +60,20 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     public Item extract(Element source) {
         
         Item item = new Item();
-        item.setCanonicalUri(getUri(source));
+        String id = getId(source);
+        item.setCanonicalUri(SCHEDULE_EVENT_PREFIX + id);
+        item.addAlias(new Alias("youview:scheduleevent", id));
         item.setTitle(getTitle(source));
         item.setMediaType(getMediaType(source));
         item.setPublisher(Publisher.YOUVIEW);
 
         Optional<String> programmeId = getProgrammeId(source);
         if (programmeId.isPresent()) {
-            item.addAlias(programmeId.get());
+            item.addAliasUrl(YOUVIEW_PROGRAMME_ID_PREFIX + programmeId.get());
+            item.addAlias(new Alias("youview:programme", programmeId.get()));
         }
-        item.addAlias(getProgrammeCrid(source));
+        item.addAliasUrl(getProgrammeCrid(source));
+        item.addAlias(new Alias("dvb:pcrid", getProgrammeCrid(source)));
         item.addVersion(getVersion(source));
         return item;
     }
@@ -106,7 +112,8 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         
         Broadcast broadcast = new Broadcast(broadcastOn, transmissionTime, transmissionTime.plus(broadcastDuration));
         broadcast.withId(id);
-        broadcast.addAlias(eventLocator);
+        broadcast.addAliasUrl(eventLocator);
+        broadcast.addAlias(new Alias("dvb:event-locator", eventLocator));
         
         return broadcast;
     }
@@ -217,11 +224,11 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         return StringEscapeUtils.unescapeHtml(atomTitle.getValue());
     }
 
-    private String getUri(Element source) {
+    private String getId(Element source) {
         Element atomId = source.getFirstChildElement(ID_KEY, source.getNamespaceURI(ATOM_PREFIX));
         if (atomId == null) {
             throw new ElementNotFoundException(source, ATOM_PREFIX + ":" + ID_KEY);
         }
-        return SCHEDULE_EVENT_PREFIX + atomId.getValue();
+        return atomId.getValue();
     } 
 }
