@@ -76,6 +76,7 @@ public class ContentGroupController extends BaseController<Iterable<ContentGroup
         ContentGroup contentGroup = (ContentGroup)resolvedContent.getFirstValue().requireValue();
         if (!query.allowsSource(contentGroup.getPublisher())) {
             outputter.writeError(req, resp, FORBIDDEN.withErrorCode("Content Group not available"));
+            return;
         }
         modelAndViewFor(req, resp, ImmutableSet.of(contentGroup), query.getConfiguration());
     }
