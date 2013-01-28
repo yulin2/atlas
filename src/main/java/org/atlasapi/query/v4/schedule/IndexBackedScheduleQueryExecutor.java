@@ -4,20 +4,19 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.EquivalentContent;
-import org.atlasapi.persistence.content.EquivalentContentResolver;
+import org.atlasapi.media.util.Resolved;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
@@ -25,25 +24,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.metabroadcast.common.collect.OptionalMap;
 
 public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
 
     private static final long QUERY_TIMEOUT = 60000;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private EquivalentContentResolver contentQueryExecutor;
+    private ContentResolver contentResolver;
     private ScheduleIndex index;
 
-    public IndexBackedScheduleQueryExecutor(ScheduleIndex index, EquivalentContentResolver contentQueryExecutor) {
+    public IndexBackedScheduleQueryExecutor(ScheduleIndex index, ContentResolver contentResolver) {
         this.index = index;
-        this.contentQueryExecutor = contentQueryExecutor;
+        this.contentResolver = contentResolver;
     }
 
     @Override
@@ -72,24 +72,26 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
             return new ChannelSchedule(query.getChannel(), query.getInterval(), ImmutableList.<Item>of());
         }
         
-        EquivalentContent equivalentContent = contentQueryExecutor.resolveIds(
-            Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToId()), 
-            ImmutableSet.of(query.getPublisher()), 
-            query.getAnnotations() 
+        Resolved<Content> scheduleContent = contentResolver.resolveIds(
+            Iterables.transform(scheduleRef.getScheduleEntries(), new ScheduleRefEntryToId())
         );
         
-        return new ChannelSchedule(query.getChannel(), query.getInterval(), contentList(query, scheduleRef, equivalentContent.asMap()));
+        return new ChannelSchedule(query.getChannel(), query.getInterval(), contentList(query, scheduleRef, scheduleContent.toMap()));
     }
 
-    private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, Map<Id, Collection<Content>> resolvedContent) {
+    private Iterable<Item> contentList(ScheduleQuery query, ScheduleRef scheduleRef, OptionalMap<Id, Content> resolvedContent) {
         Builder<Item> contentList = ImmutableList.builder();
         for (ScheduleRefEntry entry : scheduleRef.getScheduleEntries()){
-            Collection<Content> resolved = resolvedContent.get(entry.getItemId());
-            /* copy the item here because it may appear in the same schedule
-             * twice but will only appear in resolvedContent once.
-             */
-            Item item = findRequestSourceItem(query, resolved);
+            Optional<Content> resolved = resolvedContent.get(entry.getItemId());
+            if (!resolved.isPresent()) {
+                // item in index but not store, throw exception?
+                continue; 
+            }
+            Item item = (Item) resolved.get();
             if (item != null) {
+                /* copy the item here because it may appear in the same schedule
+                 * twice but will only appear in resolvedContent once.
+                 */
                 item = item.copy();
                 if (trimBroadcasts(entry, item)) {
                     contentList.add(item);

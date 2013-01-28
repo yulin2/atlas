@@ -521,6 +521,16 @@
             <artifactId>spring-jms</artifactId>
             <version>3.0.5.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>14.0-rc2</version>
+        </dependency>
+        <dependency>
+            <groupId>atlas-cassandra</groupId>
+            <artifactId>atlas-cassandra</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <properties>
         <atlas.version>${project.version}</atlas.version>
