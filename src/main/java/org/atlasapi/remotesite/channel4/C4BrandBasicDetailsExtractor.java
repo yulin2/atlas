@@ -52,8 +52,9 @@ public class C4BrandBasicDetailsExtractor implements ContentExtractor<Feed, Bran
 		Brand brand = new Brand(brandUri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(brandUri), Publisher.C4);
 		brand.setLastUpdated(clock.now());
 
-		brand.addAlias(brandUri + "/4od");
-		brand.addAlias(canonicalIdTag(source));
+		// TODO new alias
+		brand.addAliasUrl(brandUri + "/4od");
+		brand.addAliasUrl(source.getId());
 
 		brand.setTitle(source.getTitle());
 		brand.setDescription(source.getSubtitle().getValue());

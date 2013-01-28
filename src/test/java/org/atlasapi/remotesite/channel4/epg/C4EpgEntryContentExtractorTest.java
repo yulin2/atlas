@@ -92,7 +92,8 @@ public class C4EpgEntryContentExtractorTest {
         
         Episode item = (Episode) extracted.getItem();
         assertThat(item.getCanonicalUri(), is(idUri));
-        assertThat(item.getAliases(), hasItem(hierarchyUri));
+        // TODO new aliases
+        assertThat(item.getAliasUrls(), hasItem(hierarchyUri));
         assertThat(item.getContainer().getUri(), is(brandUri));
         assertThat(item.getSeriesRef().getUri(), is(seriesUri));
         
@@ -143,7 +144,8 @@ public class C4EpgEntryContentExtractorTest {
         ContentHierarchyAndBroadcast extracted = extractor.extract(source);
         
         assertThat(extracted.getItem().getCanonicalUri(), is(synthUri));
-        assertThat(extracted.getItem().getAliases(), is(hasItem(idUri)));
+        // TODO new aliases
+        assertThat(extracted.getItem().getAliasUrls(), is(hasItem(idUri)));
     }
     
     @Test

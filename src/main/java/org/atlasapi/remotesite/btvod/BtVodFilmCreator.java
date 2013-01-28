@@ -33,9 +33,10 @@ public class BtVodFilmCreator implements BtVodContentCreator<Film> {
             film.addVersion(BtVodExtractionHelper.generateVersion(location));
         }
         if (data.getSelfLink() != null) {
-            film.addAlias(data.getSelfLink());
+            // TODO new aliases
+            film.addAliasUrl(data.getSelfLink());
         }
-        film.addAlias(data.getExternalId());
+        film.addAliasUrl(data.getExternalId());
         film.setSpecialization(Specialization.FILM);
         film.setPublisher(Publisher.BT);
         

@@ -107,7 +107,8 @@ public class PaChannelsProcessor {
                 setChannelTitleAndImage(child, paChannel.getNames().getName(), ImmutableList.<Logo>of());
             }
             
-            child.addAlias(PaChannelMap.createUriFromId(paChannel.getId()));
+            // TODO new aliases
+            child.addAliasUrl(PaChannelMap.createUriFromId(paChannel.getId()));
             
             children.add(child);
         }
@@ -138,7 +139,8 @@ public class PaChannelsProcessor {
             setChannelTitleAndImage(parentChannel, station.getNames().getName(), ImmutableList.<Logo>of());
 //        }
         
-        parentChannel.addAlias(createStationUriFromId(station.getId()));
+         // TODO new aliases
+        parentChannel.addAliasUrl(createStationUriFromId(station.getId()));
         
         return parentChannel;
     }
@@ -164,7 +166,8 @@ public class PaChannelsProcessor {
             setChannelTitleAndImage(channel, paChannel.getNames().getName(), ImmutableList.<Logo>of());
         }
         
-        channel.addAlias(PaChannelMap.createUriFromId(paChannel.getId()));
+        // TODO new aliases
+        channel.addAliasUrl(PaChannelMap.createUriFromId(paChannel.getId()));
         
         return channel;
     }
@@ -192,7 +195,8 @@ public class PaChannelsProcessor {
     }
     
     private Channel createOrMergeChannel(Channel newChannel) {
-        Maybe<Channel> existing = channelResolver.forAlias(Iterables.getOnlyElement(newChannel.getAliases()));
+        // TODO new aliases
+        Maybe<Channel> existing = channelResolver.forAlias(Iterables.getOnlyElement(newChannel.getAliasUrls()));
         if (existing.hasValue()) {
             Channel existingChannel = existing.requireValue();
 
@@ -317,7 +321,8 @@ public class PaChannelsProcessor {
             }
             
             region.setCanonicalUri(REGION_PREFIX + regionalisation.getRegionId());
-            region.addAlias(REGION_ALIAS_PREFIX + regionalisation.getRegionId());
+            // TODO new aliases
+            region.addAliasUrl(REGION_ALIAS_PREFIX + regionalisation.getRegionId());
             region.setPublisher(Publisher.METABROADCAST);
             
             regions.put(regionalisation.getRegionId(), region);
@@ -329,7 +334,8 @@ public class PaChannelsProcessor {
 
         Platform platform = new Platform();
         platform.setCanonicalUri(PLATFORM_PREFIX + paPlatform.getId());
-        platform.addAlias(PLATFORM_ALIAS_PREFIX + paPlatform.getId());
+        // TODO new aliases
+        platform.addAliasUrl(PLATFORM_ALIAS_PREFIX + paPlatform.getId());
         platform.setPublisher(Publisher.METABROADCAST);
         
         for (Name name : paPlatform.getNames().getName()) {
@@ -376,7 +382,8 @@ public class PaChannelsProcessor {
     }
 
     private ChannelGroup mergeAndWriteChannelGroup(ChannelGroup channelGroup) {
-        String alias = Iterables.getOnlyElement(channelGroup.getAliases());
+        // TODO new aliases
+        String alias = Iterables.getOnlyElement(channelGroup.getAliasUrls());
         Optional<ChannelGroup> resolved = channelGroupResolver.fromAlias(alias);
         
         if (resolved.isPresent()) {

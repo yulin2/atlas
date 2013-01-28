@@ -286,5 +286,4 @@ public class C4AtomApi {
 	public BiMap<String, Channel> getChannelMap() {
 		return channelMap;
 	}
-	
 }

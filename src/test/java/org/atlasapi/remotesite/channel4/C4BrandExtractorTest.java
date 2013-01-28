@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.channel4;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -19,7 +18,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Container;
 import org.atlasapi.media.entity.Content;
@@ -35,6 +33,7 @@ import org.atlasapi.media.entity.Version;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.testing.StubContentResolver;
 import org.atlasapi.remotesite.FixedResponseHttpClient;
 import org.joda.time.DateTime;
@@ -140,8 +139,9 @@ public class C4BrandExtractorTest extends TestCase {
 		
 		assertThat(firstItem.getCanonicalUri(), is("http://www.channel4.com/programmes/36423/001"));
 
-		assertThat(firstItem.getAliases().size(), is(2));
-		assertThat(firstItem.getAliases(), hasItems(
+		// TODO new alias
+		assertThat(firstItem.getAliasUrls().size(), is(2));
+		assertThat(firstItem.getAliasUrls(), hasItems(
             "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/episode-guide/series-1/episode-1", 
             "http://www.channel4.com/programmes/ramsays-kitchen-nightmares/4od#2922045"
         ));
@@ -197,7 +197,8 @@ public class C4BrandExtractorTest extends TestCase {
 	    Version version = new Version();
 	    episode.addVersion(version);
 	    Broadcast oldBroadcast = new Broadcast("some channel", new DateTime(), new DateTime());
-	    oldBroadcast.addAlias("tag:www.channel4.com:someid");
+	    // TODO new alias
+	    oldBroadcast.addAliasUrl("tag:www.channel4.com:someid");
 	    version.addBroadcast(oldBroadcast);
 	    
 	    when(resolver.findByCanonicalUris(argThat(hasItem(episode.getCanonicalUri()))))

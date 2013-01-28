@@ -34,9 +34,10 @@ public class BtVodEpisodeCreator implements BtVodContentCreator<Episode> {
             episode.addVersion(BtVodExtractionHelper.generateVersion(location));
         }
         if (data.getSelfLink() != null) {
-            episode.addAlias(data.getSelfLink());
+            // TODO new aliases
+            episode.addAliasUrl(data.getSelfLink());
         }
-        episode.addAlias(data.getExternalId());
+        episode.addAliasUrl(data.getExternalId());
         
         episode.setSeriesRef(new ParentRef(data.getContainer().get()));
         episode.setParentRef(new ParentRef(data.getContainer().get()));

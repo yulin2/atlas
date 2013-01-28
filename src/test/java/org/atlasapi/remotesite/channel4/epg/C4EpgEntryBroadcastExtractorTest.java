@@ -38,7 +38,8 @@ public class C4EpgEntryBroadcastExtractorTest {
         Broadcast broadcast = extractor.extract(source);
         
         assertThat(broadcast.getSourceId(), is("c4:26424439"));
-        assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C426424439"));
+        // TODO new aliases
+        assertThat(broadcast.getAliasUrls(), hasItem("tag:www.channel4.com,2009:slot/C426424439"));
         assertThat(broadcast.getBroadcastOn(), is(channel.getCanonicalUri()));
         assertThat(broadcast.getTransmissionTime(), is(entry.txDate()));
         assertThat((long)broadcast.getBroadcastDuration(), is(entry.duration().getStandardSeconds()));
@@ -60,7 +61,8 @@ public class C4EpgEntryBroadcastExtractorTest {
         Broadcast broadcast = extractor.extract(source);
         
         assertThat(broadcast.getSourceId(), is("c4:26424438"));
-        assertThat(broadcast.getAliases(), hasItem("tag:www.channel4.com,2009:slot/C426424438"));
+        // TODO new aliases
+        assertThat(broadcast.getAliasUrls(), hasItem("tag:www.channel4.com,2009:slot/C426424438"));
         assertThat(broadcast.getBroadcastOn(), is(channel.getCanonicalUri()));
         assertThat(broadcast.getTransmissionTime(), is(entry.txDate()));
         assertThat((long)broadcast.getBroadcastDuration(), is(entry.duration().getStandardSeconds()));

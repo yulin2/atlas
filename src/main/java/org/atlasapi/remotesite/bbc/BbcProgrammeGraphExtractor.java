@@ -397,7 +397,8 @@ public class BbcProgrammeGraphExtractor implements ContentExtractor<BbcProgramme
 
         Set<String> aliases = BbcAliasCompiler.bbcAliasUrisFor(item.getCanonicalUri());
         if (!aliases.isEmpty()) {
-            item.setAliases(aliases);
+            // TODO new alias
+            item.setAliasUrls(aliases);
         }
 
         item.setIsLongForm(true);

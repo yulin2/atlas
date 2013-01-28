@@ -162,7 +162,8 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
     }
 
     private String hierarchyUri(Episode episode) {
-        for (String alias : episode.getAliases()) {
+        // TODO new aliases
+        for (String alias : episode.getAliasUrls()) {
             if (C4AtomApi.isACanonicalEpisodeUri(alias)) {
                 return alias;
             }
@@ -233,10 +234,11 @@ public class C4AtomBackedBrandUpdater implements C4BrandUpdater {
                 existingEpisode.setSeriesNumber(fetchedEpisode.getSeriesNumber());
             }
             
-            Set<String> allAliases = Sets.newHashSet(Sets.union(existingEpisode.getAliases(),fetchedEpisode.getAliases()));
+            // TODO new aliases
+            Set<String> allAliases = Sets.newHashSet(Sets.union(existingEpisode.getAliasUrls(),fetchedEpisode.getAliasUrls()));
             allAliases.add(fetchedEpisode.getCanonicalUri());
             allAliases.remove(existingEpisode.getCanonicalUri());
-            existingEpisode.setAliases(allAliases);
+            existingEpisode.setAliasUrls(allAliases);
         }
         
         existingClip.setVersions(versions);

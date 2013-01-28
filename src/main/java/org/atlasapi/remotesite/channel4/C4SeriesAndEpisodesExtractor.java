@@ -52,7 +52,8 @@ public class C4SeriesAndEpisodesExtractor implements ContentExtractor<Feed, SetM
 
     private Series createSeriesFromFeed(String uri, Feed source) {
         Series series = new Series(uri, PerPublisherCurieExpander.CurieAlgorithm.C4.compact(uri), Publisher.C4);
-        series.addAlias(C4AtomApi.canonicalizeSeriesFeedId(source));
+        // TODO new aliases
+        series.addAliasUrl(C4AtomApi.canonicalizeSeriesFeedId(source));
 
         series.setLastUpdated(clock.now());
         

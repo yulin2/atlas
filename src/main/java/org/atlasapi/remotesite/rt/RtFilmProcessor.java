@@ -83,7 +83,8 @@ public class RtFilmProcessor {
 
         Element imdbElem = filmElement.getFirstChildElement("imdb_ref");
         if (imdbElem != null) {
-            film.addAlias(normalize(imdbElem.getValue()));
+            // TODO new alias
+            film.addAliasUrl(normalize(imdbElem.getValue()));
         }
 
         film.setSpecialization(Specialization.FILM);

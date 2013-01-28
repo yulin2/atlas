@@ -38,16 +38,19 @@ public class MongoChannelInitialPopulate {
 			}
 			if(XMLTV_MAP.containsKey(oldChannel)) {
 				for(Integer id : XMLTV_MAP.get(oldChannel)) {
-					oldChannel.addAlias(String.format("http://xmltv.radiotimes.com/channels/%d", id));
+					oldChannel.addAliasUrl(String.format("http://xmltv.radiotimes.com/channels/%d", id));
+					// TODO new alias
 				}
 			}
 			if(PA_CHANNEL_MAP.containsKey(oldChannel)) {
 				Integer id = PA_CHANNEL_MAP.get(oldChannel);
-				oldChannel.addAlias(String.format("http://pressassociation.com/channels/%d", id));
+				oldChannel.addAliasUrl(String.format("http://pressassociation.com/channels/%d", id));
+				// TODO new alias
 			}
 			if(REDUX_CHANNEL_MAP.containsKey(oldChannel)) {
 				String id = REDUX_CHANNEL_MAP.get(oldChannel);
-				oldChannel.addAlias(String.format("http://devapi.bbcredux.com/channels/%s", id));
+				oldChannel.addAliasUrl(String.format("http://devapi.bbcredux.com/channels/%s", id));
+				// TODO new alias
 			}
 			oldChannel.setSource(Publisher.METABROADCAST);
 			oldChannel.setCanonicalUri(oldChannel.uri());

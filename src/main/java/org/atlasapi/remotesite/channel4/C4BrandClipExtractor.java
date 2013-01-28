@@ -38,7 +38,8 @@ public class C4BrandClipExtractor extends BaseC4EpisodeExtractor implements Cont
 
         String fourOdUri = C4AtomApi.fourOdUri(entry);
         if (fourOdUri != null) {
-            clip.addAlias(fourOdUri);
+            // TODO new aliases
+            clip.addAliasUrl(fourOdUri);
         }
 
         clip.setTitle(title(entry));

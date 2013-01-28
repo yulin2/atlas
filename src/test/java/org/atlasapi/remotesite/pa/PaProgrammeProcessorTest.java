@@ -83,7 +83,8 @@ public class PaProgrammeProcessorTest {
         
         assertThat(written.getCanonicalUri(), is("http://pressassociation.com/episodes/1"));
         assertThat(written.getCurie(), is("pa:e-1"));
-        assertThat(written.getAliases(), hasItem("http://pressassociation.com/films/5"));
+        // TODO new aliases
+        assertThat(written.getAliasUrls(), hasItem("http://pressassociation.com/films/5"));
         
     }
     
@@ -117,7 +118,8 @@ public class PaProgrammeProcessorTest {
         
         Item written = argCaptor.getValue();
         
-        assertThat(written.getAliases(), hasItem("http://pressassociation.com/episodes/1"));
+        // TODO new aliases
+        assertThat(written.getAliasUrls(), hasItem("http://pressassociation.com/episodes/1"));
         
     }
 
@@ -151,7 +153,8 @@ public class PaProgrammeProcessorTest {
         
         Item written = argCaptor.getValue();
         
-        assertThat(written.getAliases(), hasItem("http://pressassociation.com/films/5"));
+        // TODO new aliases
+        assertThat(written.getAliasUrls(), hasItem("http://pressassociation.com/films/5"));
         
     }
 

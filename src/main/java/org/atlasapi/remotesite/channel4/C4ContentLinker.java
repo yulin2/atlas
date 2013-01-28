@@ -32,7 +32,8 @@ class C4ContentLinker {
             Episode odEpisode = odIndex.remove(episode.getCanonicalUri());
             if (odEpisode != null) {
                 episode.setVersions(odEpisode.getVersions());
-                episode.addAliases(odEpisode.getAliases());
+                // TODO new aliases
+                episode.addAliasUrls(odEpisode.getAliasUrls());
             }
         }
         
@@ -48,7 +49,8 @@ class C4ContentLinker {
         Multimap<String, Episode> indexedEpg = Multimaps.index(epgContent, TO_URI);
 
         for (Episode episode : episodeGuideContent.values()) {
-            for (String alias : episode.getAliases()) {
+            // TODO new aliases
+            for (String alias : episode.getAliasUrls()) {
                 for (Episode broadcastEpisode : indexedEpg.get(alias)) {
                     Version version = episodeVersion(episode);
                     Broadcast broadcast = getOnlyBroadcast(broadcastEpisode);

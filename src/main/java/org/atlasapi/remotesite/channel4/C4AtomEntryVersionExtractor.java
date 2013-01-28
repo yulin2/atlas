@@ -113,7 +113,8 @@ public class C4AtomEntryVersionExtractor implements ContentExtractor<Entry, Vers
         location.setUri(uri);
         
         if(locationId != null) { 
-            location.addAlias(locationId.replace("tag:pmlsc", "tag:www"));
+            // TODO new aliases
+            location.addAliasUrl(locationId.replace("tag:pmlsc", "tag:www"));
         }
         location.setTransportType(TransportType.LINK);
         

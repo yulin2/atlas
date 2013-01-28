@@ -18,7 +18,8 @@ final class C4EpisodeGuideEpisodeExtractor extends BaseC4EpisodeExtractor implem
     @Override
     public Episode extract(Entry source) {
         Episode basicEpisode = createBasicEpisode(source, C4AtomApi.foreignElementLookup(source));
-        basicEpisode.addAlias(C4AtomApi.hierarchyEpisodeUri(source));
+        // TODO new aliases
+        basicEpisode.addAliasUrl(C4AtomApi.hierarchyEpisodeUri(source));
         return basicEpisode;
     }
 

@@ -15,6 +15,7 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Actor;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Certificate;
@@ -316,11 +317,13 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
         String brandUri = PaHelper.getBrandUri(brandId);
+        Alias brandAlias = PaHelper.getBrandAlias(brandId);
         
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(brandUri)).getFirstValue();
         
         Brand brand = possiblePrevious.hasValue() ? (Brand) possiblePrevious.requireValue() : new Brand(brandUri, PaHelper.getBrandCurie(brandId), Publisher.PA);
         
+        brand.addAlias(brandAlias);
         brand.setTitle(progData.getTitle());
         brand.setDescription(progData.getSeriesSynopsis());
         brand.setSpecialization(specialization(progData, channel));
@@ -347,10 +350,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             return Maybe.nothing();
         }
         String seriesUri = PaHelper.getSeriesUri(progData.getSeriesId(), progData.getSeriesNumber());
+        Alias seriesAlias = PaHelper.getSeriesAlias(progData.getSeriesId(), progData.getSeriesNumber());
+        
         
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(seriesUri)).getFirstValue();
         
         Series series = possiblePrevious.hasValue() ? (Series) possiblePrevious.requireValue() : new Series(seriesUri, PaHelper.getSeriesCurie(progData.getSeriesId(), progData.getSeriesNumber()), Publisher.PA);
+        
+        series.addAlias(seriesAlias);
         
         if(progData.getEpisodeTotal() != null && progData.getEpisodeTotal().trim().length() > 0) {
             try {
@@ -409,7 +416,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 film = new Film();
                 Item.copyTo((Episode) previous, film);
             }
-            film.addAlias(filmUri);
+            film.addAliasUrl(filmUri);
         } else if (newFilm.hasValue()) {
             Identified previous = newFilm.requireValue();
             if (previous instanceof Film) {
@@ -419,7 +426,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
                 film = new Film();
                 Item.copyTo((Episode) previous, film);
             }
-            film.addAlias(rtFilmAlias);
+            film.addAliasUrl(rtFilmAlias);
         } else {
             film = getBasicFilm(progData);
         }
@@ -429,6 +436,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             Certificate certificate = new Certificate(certificateValue, Countries.GB);
             film.setCertificates(ImmutableSet.of(certificate));
         }
+        film.addAlias(PaHelper.getFilmAlias(programmeId(progData)));
         
         Broadcast broadcast = setCommonDetails(progData, channel, zone, film, updatedAt);
         
@@ -555,6 +563,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             item = getBasicEpisode(progData, isEpisode);
         }
         
+        item.addAlias(PaHelper.getEpisodeAlias(programmeId(progData)));
+        
         Broadcast broadcast = setCommonDetails(progData, channel, zone, item, updatedAt);
         
         try {
@@ -576,6 +586,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private Item convertItemToEpisode(Item item) {
         Episode episode = new Episode(item.getCanonicalUri(), item.getCurie(),item.getPublisher());
         episode.setAliases(item.getAliases());
+        episode.setAliasUrls(item.getAliasUrls());
         episode.setBlackAndWhite(item.getBlackAndWhite());
         episode.setClips(item.getClips());
         episode.setParentRef(item.getContainer());
@@ -702,7 +713,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
     private Film getBasicFilm(ProgData progData) {
         Film film = new Film(PaHelper.getFilmUri(programmeId(progData)), PaHelper.getEpisodeCurie(programmeId(progData)), Publisher.PA);
-        film.addAlias(PaHelper.getFilmRtAlias(progData.getRtFilmnumber()));
+        // TODO new alias
+        film.addAliasUrl(PaHelper.getFilmRtAlias(progData.getRtFilmnumber()));
         
         setBasicDetails(progData, film);
         

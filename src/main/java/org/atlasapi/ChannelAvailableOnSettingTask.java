@@ -46,7 +46,7 @@ public class ChannelAvailableOnSettingTask extends ScheduledTask {
                 availableOn.add(channel.broadcaster().key());
             }
             
-            addAll(availableOn, filter(transform(channel.getAliases(), TO_AVAILABLE_ON), notNull()));
+            addAll(availableOn, filter(transform(channel.getAliasUrls(), TO_AVAILABLE_ON), notNull()));
             
             collection.update(where().idEquals(channel.getId()).build(), update().setField(ChannelTranslator.AVAILABLE_ON, availableOn).build());
         }

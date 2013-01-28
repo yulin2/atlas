@@ -99,7 +99,8 @@ public class ChannelHierarchyTest {
                 .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131474.png", new LocalDate(2011, 9, 28))
                 .withStartDate(new LocalDate(2010, 6, 1))
                 .build();
-        westMids.addAlias("http://pressassociation.com/channels/11");
+        // TODO new aliases
+        westMids.addAliasUrl("http://pressassociation.com/channels/11");
         
         Channel channelIsl = Channel.builder()
                 .withSource(Publisher.METABROADCAST)
@@ -108,7 +109,8 @@ public class ChannelHierarchyTest {
                 .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131731.png", new LocalDate(2011, 10, 15))
                 .withStartDate(new LocalDate(2010, 4, 23))
                 .build();
-        channelIsl.addAlias("http://pressassociation.com/channels/1663");
+        // TODO new aliases
+        channelIsl.addAliasUrl("http://pressassociation.com/channels/1663");
         
         ExtendedChannelEquivalence equiv = new ExtendedChannelEquivalence();
         assertTrue(equiv.pairwise().equivalent(ImmutableList.of(westMids, channelIsl), ImmutableList.copyOf(children)));

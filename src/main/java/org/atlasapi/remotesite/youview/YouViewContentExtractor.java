@@ -6,6 +6,7 @@ import nu.xom.Elements;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Item;
@@ -59,18 +60,22 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     public Item extract(Element source) {
         
         Item item = new Item();
-        item.setCanonicalUri(getUri(source));
+        String id = getId(source);
+        item.setCanonicalUri(SCHEDULE_EVENT_PREFIX + id);
+        item.addAlias(new Alias("youview:scheduleevent", id));
         item.setTitle(getTitle(source));
         item.setMediaType(getMediaType(source));
         item.setPublisher(Publisher.YOUVIEW);
 
         Optional<String> programmeId = getProgrammeId(source);
         if (programmeId.isPresent()) {
-            item.addAlias(YOUVIEW_URI_PREFIX + programmeId.get());
+            item.addAliasUrl(YOUVIEW_URI_PREFIX + programmeId.get());
+            item.addAlias(new Alias("youview:programme", programmeId.get()));
         }
         Optional<String> programmeCrid = getProgrammeCrid(source);
         if (programmeCrid.isPresent()) {
-            item.addAlias(programmeCrid.get());
+            item.addAliasUrl(programmeCrid.get());
+            item.addAlias(new Alias("dvb:pcrid", programmeCrid.get()));
         }
         item.addVersion(getVersion(source));
         return item;
@@ -110,7 +115,8 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         
         Broadcast broadcast = new Broadcast(broadcastOn, transmissionTime, transmissionTime.plus(broadcastDuration));
         broadcast.withId(id);
-        broadcast.addAlias(eventLocator);
+        broadcast.addAliasUrl(eventLocator);
+        broadcast.addAlias(new Alias("dvb:event-locator", eventLocator));
         
         return broadcast;
     }
@@ -221,11 +227,11 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         return StringEscapeUtils.unescapeHtml(atomTitle.getValue());
     }
 
-    private String getUri(Element source) {
+    private String getId(Element source) {
         Element atomId = source.getFirstChildElement(ID_KEY, source.getNamespaceURI(ATOM_PREFIX));
         if (atomId == null) {
             throw new ElementNotFoundException(source, ATOM_PREFIX + ":" + ID_KEY);
         }
-        return SCHEDULE_EVENT_PREFIX + atomId.getValue();
+        return atomId.getValue();
     } 
 }
