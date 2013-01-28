@@ -16,6 +16,7 @@ import static org.joda.time.Duration.standardSeconds;
 import org.atlasapi.media.TransportType;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Encoding;
+import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Location;
@@ -80,7 +81,7 @@ public class DefaultWsProgrammeHandler implements WsProgrammeHandler {
             episode = new Episode(episodeUri, curieFor(programme), WORLD_SERVICE);
         }
 
-        episode.setParentRef(new ParentRef(uriForBrand(programme.getSeriesId())));
+        episode.setParentRef(new ParentRef(uriForBrand(programme.getSeriesId()), EntityType.BRAND));
         episode.setTitle(titleFrom(programme, audioItems));
         episode.setDescription(programme.getSynopsis());
         if (!Strings.isNullOrEmpty(programme.getEpisodeNo()) && programme.getEpisodeNo().matches("\\d+")) {

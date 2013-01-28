@@ -23,6 +23,7 @@ import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.entity.Brand;
+import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Episode;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.ParentRef;
@@ -101,7 +102,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
             .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getId(), Optional.of(equivSummary))));
         
         Episode badEquiv = new Episode("bequiv", "bequivCurie", Publisher.PA);
-        badEquiv.setParentRef(new ParentRef(100));
+        badEquiv.setParentRef(new ParentRef(100, EntityType.BRAND));
         
         Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
             Publisher.PA, ScoredCandidate.<Item>valueOf(badEquiv, Score.ONE)
@@ -148,7 +149,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
             .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getId(), Optional.of(equivSummary))));
         
         Episode ignoredEquiv = new Episode("ignoredequiv", "ignoredequiv", Publisher.C4);
-        ignoredEquiv.setParentRef(new ParentRef(100));
+        ignoredEquiv.setParentRef(new ParentRef(100, EntityType.BRAND));
 
         Map<Publisher, ScoredCandidate<Item>> strong = ImmutableMap.of(
             Publisher.C4, ScoredCandidate.<Item>valueOf(ignoredEquiv, Score.ONE)
