@@ -67,7 +67,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
     
     private Image toImage(org.atlasapi.media.entity.Image image) {
         if (image == null) {
-            return null;
+            return new Image();
         }
         Image simpleImage = new Image(image.getCanonicalUri());
         if (image.getType() != null) {
