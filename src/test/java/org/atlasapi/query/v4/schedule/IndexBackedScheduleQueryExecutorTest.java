@@ -4,30 +4,28 @@ import static org.atlasapi.media.entity.MediaType.VIDEO;
 import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.METABROADCAST;
 import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.EquivalentContent;
-import org.atlasapi.persistence.content.EquivalentContent.Builder;
-import org.atlasapi.persistence.content.EquivalentContentResolver;
+import org.atlasapi.media.util.Resolved;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
@@ -46,8 +44,8 @@ import com.metabroadcast.common.time.DateTimeZones;
 public class IndexBackedScheduleQueryExecutorTest {
 
     private final ScheduleIndex index = mock(ScheduleIndex.class);
-    private final EquivalentContentResolver contentQueryExecutor = mock(EquivalentContentResolver.class);
-    private final IndexBackedScheduleQueryExecutor queryExecutor = new IndexBackedScheduleQueryExecutor(index, contentQueryExecutor);
+    private final ContentResolver contentResolver = mock(ContentResolver.class);
+    private final IndexBackedScheduleQueryExecutor queryExecutor = new IndexBackedScheduleQueryExecutor(index, contentResolver);
     
     @Test
     @SuppressWarnings("unchecked")
@@ -61,7 +59,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         
         ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
 
-        verify(contentQueryExecutor, never()).resolveUris(argThat(any(Iterable.class)), argThat(any(Set.class)), argThat(any(Set.class)), eq(false));
+        verify(contentResolver, never()).resolveIds(argThat(any(Iterable.class)));
         
         assertThat(channelSchedule.channel(), is(channel));
         assertThat(channelSchedule.items().isEmpty(), is(true));
@@ -83,12 +81,12 @@ public class IndexBackedScheduleQueryExecutorTest {
                     .build()
             ));
         
-        when(contentQueryExecutor.resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class))))
-            .thenReturn(queryResult(item.getId(), ImmutableList.<Content>of(item)));
+        when(contentResolver.resolveIds(argThat(hasItem(item.getId()))))
+            .thenReturn(queryResult(ImmutableList.<Content>of(item)));
         
         ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
 
-        verify(contentQueryExecutor).resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class)));
+        verify(contentResolver).resolveIds(argThat(hasItems(item.getId())));
         
         assertThat(channelSchedule.channel(), is(channel));
         
@@ -116,12 +114,12 @@ public class IndexBackedScheduleQueryExecutorTest {
                     .build()
             ));
         
-        when(contentQueryExecutor.resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class))))
-            .thenReturn(queryResult(item.getId(), ImmutableList.<Content>of(item)));
+        when(contentResolver.resolveIds(argThat(hasItems(item.getId()))))
+            .thenReturn(queryResult(ImmutableList.<Content>of(item)));
     
         ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
     
-        verify(contentQueryExecutor).resolveIds(argThat(hasItems(item.getId())), argThat(any(Set.class)), argThat(any(Set.class)));
+        verify(contentResolver).resolveIds(argThat(hasItems(item.getId())));
         
         assertThat(channelSchedule.channel(), is(channel));
         
@@ -150,10 +148,8 @@ public class IndexBackedScheduleQueryExecutorTest {
         version.addBroadcast(broadcast);
     }
 
-    private EquivalentContent queryResult(Id itemId, List<Content> content) {
-        Builder builder = EquivalentContent.builder();
-        builder.putEquivalents(itemId,content);
-        return builder.build();
+    private Resolved<Content> queryResult(List<Content> content) {
+        return Resolved.valueOf(content);
     }
 
     private Item itemWithBroadcast(String itemUri, String channelUri, DateTime start, DateTime end, String bid) {
