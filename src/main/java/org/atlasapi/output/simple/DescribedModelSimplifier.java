@@ -3,7 +3,6 @@ package org.atlasapi.output.simple;
 import java.util.Set;
 
 import org.atlasapi.media.entity.Described;
-import org.atlasapi.media.entity.ImageType;
 import org.atlasapi.media.entity.LookupRef;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Specialization;
@@ -11,10 +10,10 @@ import org.atlasapi.media.entity.simple.Description;
 import org.atlasapi.media.entity.simple.Image;
 import org.atlasapi.output.Annotation;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
-import com.metabroadcast.common.media.MimeType;
 
 public abstract class DescribedModelSimplifier<F extends Described, T extends Description> extends IdentifiedModelSimplifier<F,T> {
     
@@ -29,7 +28,7 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setDescription(content.getDescription());
             
             simpleDescription.setImage(content.getImage());
-            simpleDescription.setImages(toImages(content.getImages()));
+            simpleDescription.setImages(ImmutableList.of(toImage(content.getPrimaryImage())));
             simpleDescription.setThumbnail(content.getThumbnail());
 
             MediaType mediaType = content.getMediaType();
@@ -50,23 +49,49 @@ public abstract class DescribedModelSimplifier<F extends Described, T extends De
             simpleDescription.setPresentationChannel(content.getPresentationChannel());
         }
         
+        if (annotations.contains(Annotation.IMAGES)) {
+            simpleDescription.setImages(toImages(content.getImages()));
+        }
     }
 
     private Iterable<Image> toImages(Iterable<org.atlasapi.media.entity.Image> images) {
         Builder<Image> simpleImages = ImmutableSet.builder();
         for(org.atlasapi.media.entity.Image image : images) {
-            Image simpleImage = new Image(image.getCanonicalUri());
-            simpleImage.setCopyright(image.getCopyright());
-            simpleImage.setPublisher(toPublisherDetails(image.getPublisher()));
-            simpleImage.setWidth(image.getWidth());
-            simpleImage.setHeight(image.getHeight());
-            if(ImageType.SIXTEEN_BY_NINE.equals(image.getType())) {
-                simpleImage.setType("16x9");
-                simpleImage.setFormat(MimeType.IMAGE_JPG.toString());
-            }
-            simpleImages.add(simpleImage);
+            simpleImages.add(toImage(image));
         }
         return simpleImages.build();
     }
-
+    
+    private Image toImage(org.atlasapi.media.entity.Image image) {
+        Image simpleImage = new Image(image.getCanonicalUri());
+        if (image.getType() != null) {
+            simpleImage.setType(image.getType().getName());
+        }
+        if (image.getColor() != null) {
+            simpleImage.setColor(image.getColor().getName());
+        }
+        if (image.getBackground() != null) {
+            simpleImage.setBackground(image.getBackground().getName());
+        }
+        if (image.getWidth() != null) {
+            simpleImage.setWidth(image.getWidth());
+        }
+        if (image.getHeight() != null) {
+            simpleImage.setHeight(image.getHeight());
+        }
+        if (image.getAspectRatio() != null) {
+            simpleImage.setAspectRatio(image.getAspectRatio().getName());
+        }
+        if (image.getMimeType() != null) {
+            simpleImage.setMimeType(image.getMimeType().toString());
+        }
+        if (image.getAvailabilityStart() != null) {
+            simpleImage.setAvailabilityStart(image.getAvailabilityStart().toDate());
+        }
+        if (image.getAvailabilityEnd() != null) {
+            simpleImage.setAvailabilityEnd(image.getAvailabilityEnd().toDate());
+        }
+        
+        return simpleImage;
+    }
 }
