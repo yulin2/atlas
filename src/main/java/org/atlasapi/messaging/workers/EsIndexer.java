@@ -1,40 +1,44 @@
 package org.atlasapi.messaging.workers;
 
 import java.util.Arrays;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.ContentIndexer;
 import javax.jms.ConnectionFactory;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.media.util.Resolved;
 import org.atlasapi.messaging.EntityUpdatedMessage;
-import org.atlasapi.persistence.content.ContentIndexer;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.IndexException;
-import org.atlasapi.persistence.content.ResolvedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 public class EsIndexer extends AbstractWorker {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     //
-    private final ContentResolver contentResolver;
+    private final ContentStore contentStore;
     private final ContentIndexer contentIndexer;
 
-    public EsIndexer(ContentResolver contentResolver, ContentIndexer contentIndexer) {
-        this.contentResolver = contentResolver;
+    public EsIndexer(ContentStore contentResolver, ContentIndexer contentIndexer) {
+        this.contentStore = contentResolver;
         this.contentIndexer = contentIndexer;
     }
 
     @Override
     public void process(EntityUpdatedMessage message) {
         // TODO_SB : ResolvedContent should be eliminated or made way simpler:
-        ResolvedContent results = contentResolver.findByCanonicalUris(Arrays.asList(message.getEntityId()));
+        Resolved<Content> results = contentStore.resolveIds(ImmutableList.of(Id.valueOf(message.getEntityId())));
         //
-        if (results.getAllResolvedResults().size() > 1) {
-            throw new IllegalStateException("More than one content found for id: " + message.getEntityId());
-        } else if (results.getAllResolvedResults().size() == 1) {
-            Identified source = results.getFirstValue().requireValue();
+        Optional<Content> content = results.getResources().first();
+        if (content.isPresent()) {
+            Content source = content.get();
             log.info("Indexing {}", source);
             if (source instanceof Item) {
                 try {

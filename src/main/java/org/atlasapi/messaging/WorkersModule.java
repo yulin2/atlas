@@ -4,11 +4,13 @@ import com.metabroadcast.common.properties.Configurer;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.jms.ConnectionFactory;
+
+import org.atlasapi.media.content.ContentIndexer;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.messaging.worker.Worker;
 import org.atlasapi.messaging.workers.EsIndexer;
 import org.atlasapi.messaging.workers.MessageLogger;
 import org.atlasapi.messaging.workers.ReplayingWorker;
-import org.atlasapi.persistence.content.ContentIndexer;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.messaging.MessageStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +46,13 @@ public class WorkersModule {
     @Autowired
     private ContentIndexer contentIndexer;
     @Autowired
-    @Qualifier(value = "cassandra")
-    private ContentResolver contentResolver;
+//    @Qualifier(value = "cassandra")
+    private ContentStore contentStore;
 
     @Bean
     @Lazy(true)
     public ReplayingWorker esIndexer() {
-        return new ReplayingWorker(new EsIndexer(contentResolver, contentIndexer));
+        return new ReplayingWorker(new EsIndexer(contentStore, contentIndexer));
     }
 
     @Bean
