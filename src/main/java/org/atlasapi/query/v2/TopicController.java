@@ -10,7 +10,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.ContentQuery;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.output.AtlasModelWriter;
 import org.atlasapi.output.QueryResult;

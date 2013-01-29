@@ -3,7 +3,7 @@ package org.atlasapi.output.simple;
 import java.util.Set;
 
 import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.media.entity.Topic;
+import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.Annotation;
 
 public class TopicModelSimplifier extends IdentifiedModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> {
