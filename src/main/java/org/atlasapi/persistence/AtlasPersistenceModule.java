@@ -3,10 +3,14 @@ package org.atlasapi.persistence;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
+import org.atlasapi.media.CassandraPersistenceModule;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.messaging.MessageQueuingContentStore;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentResolverBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -78,12 +82,16 @@ public class AtlasPersistenceModule {
 
     private final String mongoHost = Configurer.get("mongo.host").get();
     private final String mongoDbName = Configurer.get("mongo.dbName").get();
+    
     private final String cassandraEnv = Configurer.get("cassandra.env").get();
+    private final String cassandraCluster = Configurer.get("cassandra.cluster").get();
+    private final String cassandraKeyspace = Configurer.get("cassandra.keyspace").get();
     private final String cassandraSeeds = Configurer.get("cassandra.seeds").get();
     private final String cassandraPort = Configurer.get("cassandra.port").get();
     private final String cassandraConnectionTimeout = Configurer.get("cassandra.connectionTimeout").get();
     private final String cassandraRequestTimeout = Configurer.get("cassandra.requestTimeout").get();
     private final String cassandraClientThreads = Configurer.get("cassandra.clientThreads").get();
+ 
     private final String esSeeds = Configurer.get("elasticsearch.seeds").get();
     private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
     private final Parameter processingConfig = Configurer.get("processing.config");
@@ -92,9 +100,28 @@ public class AtlasPersistenceModule {
     @Resource(name = "changesProducer")
     private JmsTemplate changesProducer;
 
+    @PostConstruct
+    public void init() {
+        persistenceModule().start();
+    }
+    
     @Bean
     public IdGenerator idGenerator() {
         return new UUIDGenerator();
+    }
+    
+    @Bean
+    public CassandraPersistenceModule persistenceModule() {
+        return new CassandraPersistenceModule(Splitter.on(",").split(cassandraSeeds), 
+            Integer.parseInt(cassandraPort), cassandraCluster, cassandraKeyspace, 
+            Integer.parseInt(cassandraClientThreads), Integer.parseInt(cassandraConnectionTimeout), 
+            idGeneratorBuilder());
+    }
+    
+    @Bean
+    public ContentStore contentStore() {
+        return new MessageQueuingContentStore(changesProducer, 
+            persistenceModule().contentStore());
     }
 
     @Bean
@@ -212,6 +239,7 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
+    @Primary
     public MongoChannelStore channelStore() {
         return mongoContentPersistenceModule().channelStore();
     }
@@ -311,7 +339,7 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    @Primary
+//    @Primary
     @Qualifier(value = "cassandra")
     public CassandraChannelStore cassandraChannelStore() {
         return cassandraContentPersistenceModule().cassandraChannelStore();
