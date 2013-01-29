@@ -10,6 +10,7 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,12 +28,10 @@ public class PaSingleDateUpdatingController {
     private final PaChannelProcessor channelProcessor;
     private final AdapterLog log;
     private final PaProgrammeDataStore fileManager;
-    private final ScheduleResolver scheduleResolver;
 	private ChannelResolver channelResolver;
 
-    public PaSingleDateUpdatingController(PaChannelProcessor channelProcessor, ScheduleResolver scheduleResolver, ChannelResolver channelResolver, AdapterLog log, PaProgrammeDataStore fileManager) {
+    public PaSingleDateUpdatingController(PaChannelProcessor channelProcessor, ChannelResolver channelResolver, AdapterLog log, PaProgrammeDataStore fileManager) {
         this.channelProcessor = channelProcessor;
-        this.scheduleResolver = scheduleResolver;
         this.log = log;
         this.fileManager = fileManager;
         this.channelResolver = channelResolver;

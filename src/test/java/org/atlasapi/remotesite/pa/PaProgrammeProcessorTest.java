@@ -17,15 +17,14 @@ import static org.mockito.Mockito.atLeastOnce;
 import java.util.Iterator;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Described;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Image;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
-import org.atlasapi.persistence.content.ResolvedContent;
+import org.atlasapi.media.util.Resolved;
 import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.NullAdapterLog;
@@ -45,14 +44,16 @@ import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.ImmutableList;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
 import com.metabroadcast.common.time.Timestamp;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentStore;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PaProgrammeProcessorTest {
 
-    private final ContentWriter contentWriter = mock(ContentWriter.class);
-    private final ContentResolver contentResolver = mock(ContentResolver.class);
+    private final ContentStore contentStore = mock(ContentStore.class);
     private final ChannelResolver channelResolver = mock(ChannelResolver.class);
     private final ItemsPeopleWriter itemsPeopleWriter = mock(ItemsPeopleWriter.class);
     private final Described described = mock(Described.class);
@@ -74,7 +75,7 @@ public class PaProgrammeProcessorTest {
                 return Maybe.just(new Channel(METABROADCAST, input, input, false, VIDEO, input));
             }
         });
-        progProcessor = new PaProgrammeProcessor(contentWriter, contentResolver, channelResolver, itemsPeopleWriter, log);
+        progProcessor = new PaProgrammeProcessor(contentStore, channelResolver, itemsPeopleWriter, log);
     }
     
     @Test 
@@ -201,15 +202,16 @@ public class PaProgrammeProcessorTest {
         progData.setDuration("1");
         progData.setDate("06/08/2012");
         progData.setTime("11:40");
-        when(contentResolver.findByCanonicalUris(ImmutableList.of(
-            "http://pressassociation.com/films/5",
-            "http://pressassociation.com/episodes/1"
-        ))).thenReturn(ResolvedContent.builder().build());
+        when(contentStore.resolveAliases(ImmutableList.of(
+            PaHelper.getFilmAlias("5"),
+            PaHelper.getEpisodeAlias("1")
+        ), Publisher.PA))
+            .thenReturn(ImmutableOptionalMap.<Alias,Content>of());
         
         progProcessor.process(progData, channel, UTC, Timestamp.of(0));
 
         ArgumentCaptor<Item> argCaptor = ArgumentCaptor.forClass(Item.class);
-        verify(contentWriter).createOrUpdate(argCaptor.capture());
+        verify(contentStore).writeContent(argCaptor.capture());
         
         Item written = argCaptor.getValue();
         
@@ -236,18 +238,16 @@ public class PaProgrammeProcessorTest {
         version.setProvider(Publisher.PA);
         film.addVersion(version);
         
-        when(contentResolver.findByCanonicalUris(ImmutableList.of(
-            "http://pressassociation.com/films/5",
-            "http://pressassociation.com/episodes/1"
-        ))).thenReturn(ResolvedContent.builder()
-            .put("http://pressassociation.com/films/5", film)
-            .build() 
-        );
+        when(contentStore.resolveAliases(ImmutableList.of(
+            PaHelper.getFilmAlias("5"),
+            PaHelper.getEpisodeAlias("1")
+        ), Publisher.PA))
+            .thenReturn(ImmutableOptionalMap.<Alias,Content>of(PaHelper.getFilmAlias("5"), film));
         
         progProcessor.process(progData, channel, UTC, Timestamp.of(0));
 
         ArgumentCaptor<Item> argCaptor = ArgumentCaptor.forClass(Item.class);
-        verify(contentWriter).createOrUpdate(argCaptor.capture());
+        verify(contentStore).writeContent(argCaptor.capture());
         
         Item written = argCaptor.getValue();
         
@@ -272,18 +272,16 @@ public class PaProgrammeProcessorTest {
         version.setProvider(Publisher.PA);
         film.addVersion(version);
         
-        when(contentResolver.findByCanonicalUris(ImmutableList.of(
-            "http://pressassociation.com/films/5",
-            "http://pressassociation.com/episodes/1"
-        ))).thenReturn(ResolvedContent.builder()
-            .put("http://pressassociation.com/episodes/1", film)
-            .build() 
-        );
+        when(contentStore.resolveAliases(ImmutableList.of(
+                PaHelper.getFilmAlias("5"),
+                PaHelper.getEpisodeAlias("1")
+            ), Publisher.PA))
+            .thenReturn(ImmutableOptionalMap.<Alias,Content>of(PaHelper.getEpisodeAlias("1"), film));
         
         progProcessor.process(progData, channel, UTC, Timestamp.of(0));
 
         ArgumentCaptor<Item> argCaptor = ArgumentCaptor.forClass(Item.class);
-        verify(contentWriter).createOrUpdate(argCaptor.capture());
+        verify(contentStore).writeContent(argCaptor.capture());
         
         Item written = argCaptor.getValue();
         

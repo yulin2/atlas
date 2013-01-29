@@ -109,6 +109,6 @@ public class ScheduleProbe implements HealthProbe {
 
     @Override
     public String slug() {
-        return String.format("%s%dschedule", publisher.name(), channel == null ? 0 : channel.getId());
+        return String.format("%s%dschedule", publisher.name(), channel == null ? 0 : channel.getId().longValue());
     }
 }
