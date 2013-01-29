@@ -66,16 +66,14 @@ public class PaModule {
     private final static RepetitionRule COMPLETE_INGEST = RepetitionRules.NEVER;//weekly(DayOfWeek.FRIDAY, new LocalTime(22, 0, 0));
     
     private @Autowired SimpleScheduler scheduler;
-    private @Autowired ContentWriter contentWriter;
-    private @Autowired ContentResolver contentResolver;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired PeopleResolver personResolver;
     private @Autowired PersonWriter personWriter;
     private @Autowired ChannelGroupWriter channelGroupWriter;
     private @Autowired ChannelGroupResolver channelGroupResolver;
+    private @Autowired ContentStore contentStore;
     private @Autowired AdapterLog log;
-    private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ItemsPeopleWriter peopleWriter;
     private @Autowired ScheduleWriter scheduleWriter;
     private @Autowired ChannelResolver channelResolver;
@@ -139,24 +137,17 @@ public class PaModule {
     }
     
     @Bean PaProgDataProcessor paProgrammeProcessor() {
-        return new PaProgrammeProcessor(contentWriter, contentResolver, channelResolver, peopleWriter, log);
+        return new PaProgrammeProcessor(contentStore, channelResolver, peopleWriter, log);
     }
     
     @Bean PaCompleteUpdater paCompleteUpdater() {
-        PaEmptyScheduleProcessor processor = new PaEmptyScheduleProcessor(paProgrammeProcessor(), scheduleResolver);
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(processor, broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
-        PaCompleteUpdater updater = new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), channelResolver);
-        return updater;
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), paScheduleVersionStore());
+        return new PaCompleteUpdater(channelProcessor, paProgrammeDataStore(), channelResolver);
     }
     
     @Bean PaRecentUpdater paRecentUpdater() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
-        PaRecentUpdater updater = new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, fileUploadResultStore, paScheduleVersionStore());
-        return updater;
-    }
-    
-    @Bean BroadcastTrimmer broadcastTrimmer() {
-        return new ScheduleResolverBroadcastTrimmer(Publisher.PA, scheduleResolver, contentResolver, contentWriter);
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), paScheduleVersionStore());
+        return new PaRecentUpdater(channelProcessor, paProgrammeDataStore(), channelResolver, new MongoFileUploadResultStore(mongo), paScheduleVersionStore());
     }
     
     @Bean PaFileUpdater paFileUpdater() {
@@ -164,8 +155,8 @@ public class PaModule {
     }
     
     public @Bean PaSingleDateUpdatingController paUpdateController() {
-        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), broadcastTrimmer(), scheduleWriter, paScheduleVersionStore());
-        return new PaSingleDateUpdatingController(channelProcessor, scheduleResolver, channelResolver, log, paProgrammeDataStore());
+        PaChannelProcessor channelProcessor = new PaChannelProcessor(paProgrammeProcessor(), paScheduleVersionStore());
+        return new PaSingleDateUpdatingController(channelProcessor, channelResolver, log, paProgrammeDataStore());
     }
     
     public @Bean PaScheduleVersionStore paScheduleVersionStore() {

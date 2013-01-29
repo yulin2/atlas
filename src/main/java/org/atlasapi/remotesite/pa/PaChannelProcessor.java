@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.ScheduleEntry.ItemRefAndBroadcast;
 import org.atlasapi.persistence.content.schedule.mongo.ScheduleWriter;
@@ -23,14 +24,10 @@ public class PaChannelProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PaChannelProcessor.class);
     private final PaProgDataProcessor processor;
-    private final BroadcastTrimmer trimmer;
-    private final ScheduleWriter scheduleWriter;
     private final PaScheduleVersionStore scheduleVersionStore;
 
-    public PaChannelProcessor(PaProgDataProcessor processor, BroadcastTrimmer trimmer, ScheduleWriter scheduleWriter, PaScheduleVersionStore scheduleVersionStore) {
+    public PaChannelProcessor(PaProgDataProcessor processor, PaScheduleVersionStore scheduleVersionStore) {
         this.processor = processor;
-        this.trimmer = trimmer;
-        this.scheduleWriter = scheduleWriter;
         this.scheduleVersionStore = scheduleVersionStore;
     }
 
@@ -39,7 +36,6 @@ public class PaChannelProcessor {
         Set<ItemRefAndBroadcast> broadcasts = new HashSet<ItemRefAndBroadcast>();
         Channel channel = channelData.channel();
         try {
-            Builder<String, String> acceptableBroadcastIds = ImmutableMap.builder();
             for (ProgData programme : channelData.programmes()) {
                 String programmeLock = lockIdentifier(programme);
                 lock(currentlyProcessing, programmeLock);
@@ -47,24 +43,19 @@ public class PaChannelProcessor {
                     ItemRefAndBroadcast itemAndBroadcast = processor.process(programme, channel, channelData.zone(), channelData.lastUpdated());
                     if(itemAndBroadcast != null) {
 	                    broadcasts.add(itemAndBroadcast);
-	                    acceptableBroadcastIds.put(itemAndBroadcast.getBroadcast().getSourceId(),itemAndBroadcast.getItemUri());
                     }
                     scheduleVersionStore.store(channel, channelData.scheduleDay(), channelData.version());
                     processed++;
                 } catch (Exception e) {
-                    log.error(String.format("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()));
+                    log.error(String.format("Error processing channel %s, prog id %s", channel.key(), programme.getProgId()), e);
                 } finally {
                     unlock(currentlyProcessing, programmeLock);
                 }
             }
-            if (trimmer != null) {
-                trimmer.trimBroadcasts(channelData.schedulePeriod(), channel, acceptableBroadcastIds.build());
-            }
-            scheduleWriter.replaceScheduleBlock(Publisher.PA, channel, broadcasts);
             
         } catch (Exception e) {
             //TODO: should we just throw e?
-            log.error(String.format("Error processing channel %s", channel.key()));
+            log.error(String.format("Error processing channel" + channel.key(), e));
         }
         return processed;
     }
