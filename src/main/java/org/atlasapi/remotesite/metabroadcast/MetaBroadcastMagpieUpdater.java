@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.media.entity.simple.TopicRef;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.Topic.Type;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;

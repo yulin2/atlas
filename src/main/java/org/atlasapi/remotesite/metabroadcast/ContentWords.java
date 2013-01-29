@@ -3,8 +3,8 @@ package org.atlasapi.remotesite.metabroadcast;
 import java.util.Iterator;
 import java.util.List;
 
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.Topic.Type;
 
 public class ContentWords {
 

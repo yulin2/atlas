@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.atlasapi.media.entity.KeyPhrase;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.Topic;
-import org.atlasapi.media.entity.Topic.Type;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.ResolvedContent;
@@ -20,6 +18,8 @@ import com.google.common.base.Optional;
 import com.hp.hpl.jena.sparql.function.library.namespace;
 import org.atlasapi.media.entity.TopicRef;
 import org.atlasapi.media.entity.TopicRef.Relationship;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.Topic.Type;
 
 public class MetaBroadcastTwitterTopicsUpdater extends AbstractMetaBroadcastContentUpdater {
     
