@@ -45,6 +45,7 @@ import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.ContentGroup;
@@ -183,6 +184,7 @@ public class QueryWebModule {
     private @Autowired DatabasedMongo mongo;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
+    private @Autowired ContentStore contentStore;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
@@ -285,7 +287,7 @@ public class QueryWebModule {
     
     @Bean
     org.atlasapi.query.v4.schedule.ScheduleController v4ScheduleController() {
-        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, equivalentContentResolver);
+        ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, contentStore);
         return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, new ScheduleQueryResultWriter(annotations()));
     }
     
