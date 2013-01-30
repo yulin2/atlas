@@ -263,10 +263,13 @@ var updatePrecedence = function(callback) {
 var updateEnabled = function(callback){
 	var slug = app.slug;
 	var count = 0;
+	
+	
 	for(var i = 0, ii = app.configuration.publishers.length; i<ii; i++){
 		var enabled = app.configuration.publishers[i].enabled;
 		var publisher = app.configuration.publishers[i].key;
 		var available = app.configuration.publishers[i].state == "available";
+
 		if (!available) {
 			count++;
 			continue;
@@ -287,6 +290,7 @@ var updateEnabled = function(callback){
 			type: type,
 			url: url,
 			data: data,
+			async: false,
 			success:function(responseData, textStatus, XMLHttpRequest) {
 				
 			},
@@ -301,6 +305,8 @@ var updateEnabled = function(callback){
 			}
 		});
 	}
+	
+	
 }
 
 var disablePrecedence = function(callback) {
