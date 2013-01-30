@@ -50,11 +50,6 @@ public class AtlasModule {
         }
         return mongo;
     }
-    
-    public @Bean Mongo adminMongo() {
-        Mongo adminMongo = new Mongo(mongoHosts());
-        return adminMongo;
-    }
 
     private List<ServerAddress> mongoHosts() {
         Splitter splitter = Splitter.on(",").omitEmptyStrings().trimResults();
