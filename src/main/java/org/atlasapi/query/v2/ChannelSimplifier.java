@@ -69,9 +69,9 @@ public class ChannelSimplifier {
         
         if(showChannelGroups) {
             if (showHistory) {
-                simple.setChannels(simplifyToChannelGroups(input.channelNumbers(), showHistory));
+                simple.setChannelGroups(simplifyToChannelGroups(input.channelNumbers(), showHistory));
             } else {
-                simple.setChannels(simplifyToChannelGroups(input.allChannelNumbers(), showHistory));
+                simple.setChannelGroups(simplifyToChannelGroups(input.allChannelNumbers(), showHistory));
             }
         }
         if (input.parent() != null) {
@@ -121,8 +121,8 @@ public class ChannelSimplifier {
         return simple;
     }
 
-    public List<org.atlasapi.media.entity.simple.ChannelGroup> simplify(List<ChannelGroup> channels, final boolean showChannels, final boolean showHistory) {
-        return Lists.transform(channels, new Function<ChannelGroup, org.atlasapi.media.entity.simple.ChannelGroup>() {
+    public List<org.atlasapi.media.entity.simple.ChannelGroup> simplify(List<ChannelGroup> channelGroups, final boolean showChannels, final boolean showHistory) {
+        return Lists.transform(channelGroups, new Function<ChannelGroup, org.atlasapi.media.entity.simple.ChannelGroup>() {
 
             @Override
             public org.atlasapi.media.entity.simple.ChannelGroup apply(ChannelGroup input) {
