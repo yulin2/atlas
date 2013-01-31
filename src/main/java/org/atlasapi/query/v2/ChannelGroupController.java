@@ -37,6 +37,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
@@ -140,7 +141,9 @@ public class ChannelGroupController {
     }
     
     private void writeOut(HttpServletResponse response, HttpServletRequest request, ChannelGroupQueryResult channelGroupQueryResult) throws IOException {
-
+        response.setCharacterEncoding(Charsets.UTF_8.toString());
+        response.setContentType(MimeType.APPLICATION_JSON.toString());
+        
         String callback = callback(request);
         
         OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream(), Charsets.UTF_8);

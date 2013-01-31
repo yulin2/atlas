@@ -1,8 +1,6 @@
 package org.atlasapi.query.v2;
 
 import static com.google.common.collect.Iterables.transform;
-import static org.atlasapi.query.v2.ChannelController.ANNOTATION_KEY;
-import static org.atlasapi.query.v2.ChannelController.HISTORY_ANNOTATION;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -56,6 +54,7 @@ import com.metabroadcast.common.base.MoreOrderings;
 import com.metabroadcast.common.caching.BackgroundComputingValue;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
@@ -260,7 +259,9 @@ public class ChannelController {
     }
     
     private void writeOut(HttpServletResponse response, HttpServletRequest request, ChannelQueryResult channelQueryResult) throws IOException {
-
+        response.setCharacterEncoding(Charsets.UTF_8.toString());
+        response.setContentType(MimeType.APPLICATION_JSON.toString());
+        
         String callback = callback(request);
         
         OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream(), Charsets.UTF_8);
