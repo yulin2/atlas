@@ -35,8 +35,9 @@ import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 
 public class PaChannelsIngestIntegrationTest extends TestCase {
 
-    private PaChannelsProcessor processor;
-    private File file = new File("src/test/resources/", "201212141549_20121214_tv_channel_data.xml");
+    private PaChannelsIngester channelsIngester;
+    private PaChannelGroupsIngester channelGroupsIngester;
+    private File file = new File("src/test/resources/", "201212141541_tv_channel_data.xml");
     private ChannelStore channelStore;
     private ChannelGroupStore channelGroupStore;
     private PaProgrammeDataStore store = new DummyPaProgrammeDataStore(file);
@@ -49,9 +50,9 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
         channelGroupStore = new MongoChannelGroupStore(db);
         channelStore = new MongoChannelStore(db, channelGroupStore, channelGroupStore);
-        processor = new PaChannelsProcessor(channelStore, channelStore, channelGroupStore, channelGroupStore);
-        updater = new PaChannelsUpdater(store, processor);
-        
+        channelsIngester = new PaChannelsIngester(channelStore, channelStore);
+        channelGroupsIngester = new PaChannelGroupsIngester(channelGroupStore, channelGroupStore, channelStore, channelStore);
+        updater = new PaChannelsUpdater(store, channelsIngester, channelGroupsIngester);
         updater.run();
     }
     
@@ -109,8 +110,8 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         
         // bbc one ni digital on ni region only
         // channel id 414, # 1
-        maybeChannel = channelStore.forAlias("http://pressassociation.com/channels/414");
-        Channel bbcNiDigital = maybeChannel.requireValue();
+        maybeChannel = channelStore.forAlias("http://pressassociation.com/channels/1");
+        Channel bbcNi = maybeChannel.requireValue();
         
         // NI has BBC One NI Digital and BBC Four
         boolean bbcFourPresent = false;
@@ -120,7 +121,7 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
                 && numbering.getChannelNumber().equals(9)) {
                 bbcFourPresent = true;
             }
-            if (numbering.getChannel().equals(bbcNiDigital.getId())
+            if (numbering.getChannel().equals(bbcNi.getId())
                     && numbering.getChannelNumber().equals(1)) {
                     bbcOneNiPresent = true;
                 }
@@ -143,7 +144,7 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
                 && numbering.getChannelNumber().equals(9)) {
                 bbcFourPresent = true;
             }
-            if (numbering.getChannel().equals(bbcNiDigital.getId())
+            if (numbering.getChannel().equals(bbcNi.getId())
                     && numbering.getChannelNumber().equals(1)) {
                     bbcOneNiPresent = true;
                 }

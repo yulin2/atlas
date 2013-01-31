@@ -60,6 +60,8 @@ public class ChannelSimplifier {
         simple.setPublisherDetails(toPublisherDetails(input.source()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
         simple.setHighDefinition(input.highDefinition());
+        simple.setRegional(input.regional());
+        simple.setTimeshift(input.timeshift().getStandardSeconds());
         simple.setAvailableFrom(transform(input.availableFrom(), TO_PUBLISHER_DETAILS));
         simple.setTitle(input.title());
         simple.setImage(input.image());

@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.pa.channels;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.atlasapi.media.channel.Channel;
@@ -15,13 +16,10 @@ import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.PaChannelMap;
 import org.atlasapi.remotesite.pa.channels.bindings.EpgContent;
-import org.atlasapi.remotesite.pa.channels.bindings.Logo;
 import org.atlasapi.remotesite.pa.channels.bindings.Name;
 import org.atlasapi.remotesite.pa.channels.bindings.Regionalisation;
 import org.atlasapi.remotesite.pa.channels.bindings.RegionalisationList;
 import org.atlasapi.remotesite.pa.channels.bindings.ServiceProvider;
-import org.atlasapi.remotesite.pa.channels.bindings.Station;
-import org.atlasapi.remotesite.pa.channels.bindings.TvChannelData;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -29,196 +27,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.intl.Countries;
+import com.metabroadcast.common.intl.Country;
 
-public class PaChannelsProcessor {
-    
-    static final String IMAGE_PREFIX = "http://images.atlas.metabroadcast.com/pressassociation.com/channels/";
+public class PaChannelGroupsIngester {
+
     private static final String PLATFORM_ALIAS_PREFIX = "http://pressassociation.com/platforms/";
     private static final String REGION_ALIAS_PREFIX = "http://pressassociation.com/regions/";
     private static final String PLATFORM_PREFIX = "http://ref.atlasapi.org/platforms/pressassociation.com/";
     private static final String REGION_PREFIX = "http://ref.atlasapi.org/regions/pressassociation.com/";
-    private static final String CHANNEL_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/";
-    private static final String STATION_ALIAS_PREFIX = "http://pressassociation.com/stations/";
-    private static final String STATION_URI_PREFIX = "http://ref.atlasapi.org/channels/pressassociation.com/stations/";
     
-    private final ChannelResolver channelResolver;
-    private final ChannelWriter channelWriter;
     private final ChannelGroupResolver channelGroupResolver;
     private final ChannelGroupWriter channelGroupWriter;
+    private final ChannelResolver channelResolver;
+    private final ChannelWriter channelWriter;
     private final DateTimeFormatter formatter = ISODateTimeFormat.date();
-    private final Logger log = LoggerFactory.getLogger(PaChannelsProcessor.class);
+    private final Logger log = LoggerFactory.getLogger(PaChannelGroupsIngester.class);
     
-    public PaChannelsProcessor(ChannelResolver channelResolver, ChannelWriter channelWriter, ChannelGroupResolver channelGroupResolver, ChannelGroupWriter channelGroupWriter) {
-        this.channelResolver = channelResolver;
-        this.channelWriter = channelWriter;
+    public PaChannelGroupsIngester(ChannelGroupResolver channelGroupResolver, ChannelGroupWriter channelGroupWriter, ChannelResolver channelResolver, ChannelWriter channelWriter) {
         this.channelGroupResolver = channelGroupResolver;
         this.channelGroupWriter = channelGroupWriter;
+        this.channelResolver = channelResolver;
+        this.channelWriter = channelWriter;
     }
     
-    public void process(TvChannelData channelData) {
-        processStations(channelData.getStations().getStation());
-        processPlatforms(channelData.getPlatforms().getPlatform(), channelData.getServiceProviders().getServiceProvider(), channelData.getRegions().getRegion());
-    }
-    
-    private void processStations(List<Station> stations) {
-        for (Station station : stations) {
-            if (!station.getChannels().getChannel().isEmpty()) {
-                if (station.getChannels().getChannel().size() == 1) {
-                    Channel channel = processStandaloneChannel(station.getChannels().getChannel().get(0));
-                    createOrMergeChannel(channel);
-                } else {
-                    Channel parentChannel = createOrMergeChannel(processParentChannel(station));
-
-                    List<Channel> children = processChildChannels(station.getChannels().getChannel());
-
-                    for (Channel child : children) {
-                        child.setParent(parentChannel);
-                        createOrMergeChannel(child);
-                    }
-                }
-            } else {
-                log.error("Station with id " + station.getId() + " has no channels");
-            }
-        }
-    }
-    
-    List<Channel> processChildChannels(List<org.atlasapi.remotesite.pa.channels.bindings.Channel> channels) {
-        Builder<Channel> children = ImmutableList.<Channel>builder();
-        for (org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel : channels) {
-             
-            LocalDate startDate = formatter.parseLocalDate(paChannel.getStartDate());
-
-            Channel child = Channel.builder()
-                    .withUri(CHANNEL_URI_PREFIX + paChannel.getId())
-                    .withKey(generateChannelKey(paChannel.getId()))
-                    .withSource(Publisher.METABROADCAST)
-                    .withStartDate(startDate)
-                    .withEndDate(null)
-                    .build();
-            
-            if (paChannel.getLogos() != null) {
-                setChannelTitleAndImage(child, paChannel.getNames().getName(), paChannel.getLogos().getLogo());
-            } else {
-                setChannelTitleAndImage(child, paChannel.getNames().getName(), ImmutableList.<Logo>of());
-            }
-            
-            child.addAlias(PaChannelMap.createUriFromId(paChannel.getId()));
-            
-            children.add(child);
-        }
-        return children.build();
-    }
-
-    private String generateChannelKey(String id) {
-        return "pa-channel-" + id;
-    }
-
-    private String generateStationKey(String id) {
-        return "pa-station-" + id;
-    }
-
-    Channel processParentChannel(Station station) {
-        
-        Channel parentChannel = Channel.builder()
-                .withUri(STATION_URI_PREFIX + station.getId())
-                .withKey(generateStationKey(station.getId()))
-                .withSource(Publisher.METABROADCAST)
-                .withStartDate(null)
-                .withEndDate(null)
-                .build();
-        
-//        if (station.getLogos() != null) {
-//            setChannelTitleAndImage(parentChannel, station.getNames().getName(), station.getLogos().getLogo());
-//        } else {
-            setChannelTitleAndImage(parentChannel, station.getNames().getName(), ImmutableList.<Logo>of());
-//        }
-        
-        parentChannel.addAlias(createStationUriFromId(station.getId()));
-        
-        return parentChannel;
-    }
-
-    private String createStationUriFromId(String id) {
-        return STATION_ALIAS_PREFIX + id;
-    }
-
-    Channel processStandaloneChannel(org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel) {
-        LocalDate startDate = formatter.parseLocalDate(paChannel.getStartDate());
-        
-        Channel channel = Channel.builder()
-                .withUri(CHANNEL_URI_PREFIX + paChannel.getId())
-                .withKey(generateChannelKey(paChannel.getId()))
-                .withSource(Publisher.METABROADCAST)
-                .withStartDate(startDate)
-                .withEndDate(null)
-                .build();
-        
-        if (paChannel.getLogos() != null) {
-            setChannelTitleAndImage(channel, paChannel.getNames().getName(), paChannel.getLogos().getLogo());
-        } else {
-            setChannelTitleAndImage(channel, paChannel.getNames().getName(), ImmutableList.<Logo>of());
-        }
-        
-        channel.addAlias(PaChannelMap.createUriFromId(paChannel.getId()));
-        
-        return channel;
-    }
-    
-    private void setChannelTitleAndImage(Channel channel, List<Name> names, List<Logo> images) {
-        for (Name name : names) {
-            LocalDate titleStartDate = formatter.parseLocalDate(name.getStartDate());
-            if (name.getEndDate() != null) {
-                LocalDate titleEndDate = formatter.parseLocalDate(name.getEndDate());
-                channel.addTitle(name.getvalue(), titleStartDate, titleEndDate.plusDays(1));
-            } else {
-                channel.addTitle(name.getvalue(), titleStartDate);
-            }
-        }
-
-        for (Logo logo : images) {
-            LocalDate imageStartDate = formatter.parseLocalDate(logo.getStartDate());
-            if (logo.getEndDate() != null) {
-                LocalDate imageEndDate = formatter.parseLocalDate(logo.getEndDate());
-                channel.addImage(IMAGE_PREFIX + logo.getvalue(), imageStartDate, imageEndDate.plusDays(1));
-            } else {
-                channel.addImage(IMAGE_PREFIX + logo.getvalue(), imageStartDate);
-            }
-        }    
-    }
-    
-    private Channel createOrMergeChannel(Channel newChannel) {
-        Maybe<Channel> existing = channelResolver.forAlias(Iterables.getOnlyElement(newChannel.getAliases()));
-        if (existing.hasValue()) {
-            Channel existingChannel = existing.requireValue();
-
-            existingChannel.setTitles(newChannel.allTitles());
-            existingChannel.setImages(newChannel.allImages());
-            existingChannel.setStartDate(newChannel.startDate());
-            existingChannel.setEndDate(newChannel.endDate());
-            existingChannel.addAliases(newChannel.getAliases());
-            
-            if (newChannel.mediaType() != null) {
-                existingChannel.setMediaType(newChannel.mediaType());
-            }
-            if (newChannel.highDefinition() != null) {
-                existingChannel.setHighDefinition(newChannel.highDefinition());
-            }
-            if (newChannel.parent() != null) {
-                existingChannel.setParent(newChannel.parent());
-            }
-            
-            return channelWriter.write(existingChannel);
-        } else {
-            return channelWriter.write(newChannel);
-        }
-    }
-
-    private void processPlatforms(List<org.atlasapi.remotesite.pa.channels.bindings.Platform> platforms, List<ServiceProvider> serviceProviders, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions) {
+    public void processPlatforms(List<org.atlasapi.remotesite.pa.channels.bindings.Platform> platforms, List<ServiceProvider> serviceProviders, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions) {
         try {
             for (org.atlasapi.remotesite.pa.channels.bindings.Platform paPlatform : platforms) {
                 processPlatform(paPlatform, serviceProviders, paRegions);
@@ -243,7 +79,7 @@ public class PaChannelsProcessor {
         if (serviceProvider.getRegionalisationList() == null || serviceProvider.getRegionalisationList().getRegionalisation().isEmpty()) {
             addChannelsToPlatform(platform, paPlatform.getEpg().getEpgContent());
         } else {
-            Map<String, Region> regions = createRegionsForPlatform(serviceProvider.getRegionalisationList().getRegionalisation(), paRegions);
+            Map<String, Region> regions = createRegionsForPlatform(serviceProvider.getRegionalisationList().getRegionalisation(), paRegions, platform.getAvailableCountries());
 
             Map<String, Region> writtenRegionMap = Maps.newHashMap();
             for (Entry<String, Region> entry : regions.entrySet()) {
@@ -251,10 +87,6 @@ public class PaChannelsProcessor {
                 Region region = (Region)mergeAndWriteChannelGroup(entry.getValue());
                 writtenRegionMap.put(entry.getKey(), region);
             }
-//            for (Region region : regions.values()) {
-//                region.setPlatform(platform);
-//                region = (Region)mergeAndWriteChannelGroup(region);
-//            }
             
             for (EpgContent epgContent : paPlatform.getEpg().getEpgContent()) {
                 addChannelNumberings(epgContent, writtenRegionMap);
@@ -263,7 +95,6 @@ public class PaChannelsProcessor {
     }
     
     private void addChannelNumberings(EpgContent epgContent, Map<String, Region> regions) {
-        // resolve the channel
         Maybe<Channel> resolved = channelResolver.forAlias(PaChannelMap.createUriFromId(epgContent.getChannelId()));
         if (!resolved.hasValue()) {
             throw new RuntimeException("PA Channel with id " + epgContent.getChannelId() + " not found");
@@ -272,6 +103,8 @@ public class PaChannelsProcessor {
         Channel channel = resolved.requireValue();
         LocalDate startDate = formatter.parseLocalDate(epgContent.getStartDate());
         LocalDate endDate;
+        // add a day, due to PA considering a date range to run from the start of startDate to the end of endDate,
+        // whereas we consider a range to run from the start of startDate to the start of endDate
         if (epgContent.getEndDate() != null) {
             endDate = formatter.parseLocalDate(epgContent.getEndDate());
             endDate.plusDays(1);
@@ -296,7 +129,7 @@ public class PaChannelsProcessor {
         channelWriter.write(channel);
     }
 
-    Map<String, Region> createRegionsForPlatform(List<Regionalisation> regionalisations, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions) {
+    Map<String, Region> createRegionsForPlatform(List<Regionalisation> regionalisations, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions, Set<Country> countries) {
         Map<String, Region> regions = Maps.newHashMap();
         // If there are regions, create/update the regions as appropriate and then add the regions to the platform.
         for (Regionalisation regionalisation : regionalisations) {
@@ -319,7 +152,7 @@ public class PaChannelsProcessor {
             region.setCanonicalUri(REGION_PREFIX + regionalisation.getRegionId());
             region.addAlias(REGION_ALIAS_PREFIX + regionalisation.getRegionId());
             region.setPublisher(Publisher.METABROADCAST);
-            
+            region.setAvailableCountries(countries);            
             regions.put(regionalisation.getRegionId(), region);
         }
         return regions;
@@ -331,6 +164,12 @@ public class PaChannelsProcessor {
         platform.setCanonicalUri(PLATFORM_PREFIX + paPlatform.getId());
         platform.addAlias(PLATFORM_ALIAS_PREFIX + paPlatform.getId());
         platform.setPublisher(Publisher.METABROADCAST);
+        
+        if (paPlatform.getCountries() != null) {
+            for (org.atlasapi.remotesite.pa.channels.bindings.Country country : paPlatform.getCountries().getCountry()) {
+                platform.addAvailableCountry(Countries.fromCode(country.getCode()));
+            }
+        }
         
         for (Name name : paPlatform.getNames().getName()) {
             LocalDate titleStartDate = formatter.parseLocalDate(name.getStartDate());
@@ -354,6 +193,8 @@ public class PaChannelsProcessor {
             Channel channel = resolved.requireValue();
             LocalDate startDate = formatter.parseLocalDate(epgContent.getStartDate());
             LocalDate endDate;
+            // add a day, due to PA considering a date range to run from the start of startDate to the end of endDate,
+            // whereas we consider a range to run from the start of startDate to the start of endDate
             if (epgContent.getEndDate() != null) {
                 endDate = formatter.parseLocalDate(epgContent.getEndDate());
                 endDate.plusDays(1);
@@ -366,7 +207,7 @@ public class PaChannelsProcessor {
         }
     }
 
-    private ServiceProvider getServiceProvider(String serviceProviderId, List<ServiceProvider> serviceProviders) {
+    public static ServiceProvider getServiceProvider(String serviceProviderId, List<ServiceProvider> serviceProviders) {
         for (ServiceProvider provider : serviceProviders) {
             if (provider.getId().equals(serviceProviderId)) {
                 return provider;
@@ -396,36 +237,6 @@ public class PaChannelsProcessor {
             return channelGroupWriter.store(existing);
         } else {
             return channelGroupWriter.store(channelGroup);
-        }
-    }
-    
-    class ChannelDetails {
-        private Channel channel;
-        private int channelNumber;
-        private LocalDate startDate;
-        private LocalDate endDate;
-        
-        ChannelDetails(Channel channel, int channelNumber, LocalDate startDate, LocalDate endDate) {
-            this.channel = channel;
-            this.channelNumber = channelNumber;
-            this.startDate = startDate;
-            this.endDate = endDate;
-        }
-
-        public Channel getChannel() {
-            return channel;
-        }
-        
-        public int getChannelNumber() {
-            return channelNumber;
-        }
-
-        public LocalDate getStartDate() {
-            return startDate;
-        }
-
-        public LocalDate getEndDate() {
-            return endDate;
         }
     }
 }
