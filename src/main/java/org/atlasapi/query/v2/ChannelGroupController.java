@@ -64,7 +64,7 @@ public class ChannelGroupController {
         this.channelGroupResolver = channelGroupResolver;
         this.idCodec = idCodec;
         this.simplifier = simplifier;
-        this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        this.gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
     }
 
     @RequestMapping("/3.0/channel_groups.json")

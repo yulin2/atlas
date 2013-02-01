@@ -75,16 +75,17 @@ public class BasicChannelGroupIngestTest {
         yorkshire.setId("67");
         yorkshire.setName("Yorkshire", "2007-06-10");
         
+        PlatformInfo platformInfo = new PlatformInfo();
+        platformInfo.setId("3");
         
-        
-        Map<String, Region> regions = ingester.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()), ImmutableSet.of(Countries.GB));
+        Map<String, Region> regions = ingester.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()), platformInfo.createPlatform(), ImmutableSet.of(Countries.GB));
         
         Region region = Iterables.getOnlyElement(regions.values());
         
         assertEquals("South", region.getTitle());
         assertEquals(new TemporalString("South", new LocalDate(2009, 1, 28), null), Iterables.getOnlyElement(region.getAllTitles()));
-        assertEquals("http://ref.atlasapi.org/regions/pressassociation.com/61", region.getCanonicalUri());
-        assertEquals("http://pressassociation.com/regions/61", Iterables.getOnlyElement(region.getAliases()));
+        assertEquals("http://ref.atlasapi.org/regions/pressassociation.com/3-61", region.getCanonicalUri());
+        assertEquals("http://pressassociation.com/regions/3-61", Iterables.getOnlyElement(region.getAliases()));
         assertEquals(Publisher.METABROADCAST, region.getPublisher());
         assertEquals(ImmutableSet.of(Countries.GB), region.getAvailableCountries());
     }

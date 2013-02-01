@@ -70,7 +70,7 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         assertEquals("BBC One", maybeParent.requireValue().title());
         
         // check numbering
-        ChannelNumbering numbering = Iterables.getOnlyElement(channel.allChannelNumbers());
+        ChannelNumbering numbering = Iterables.getOnlyElement(channel.channelNumbers());
         assertThat(numbering.getChannelNumber(), is(1));
         assertEquals(channel.getId(), numbering.getChannel());
         
@@ -91,17 +91,17 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
     public void testNoChannelsOnPlatform() {
         Optional<ChannelGroup> maybePlatform = channelGroupStore.fromAlias("http://pressassociation.com/platforms/3");
         assertTrue(maybePlatform.isPresent());
-        assertTrue(maybePlatform.get().getAllChannelNumberings().isEmpty());
+        assertTrue(maybePlatform.get().getChannelNumberings().isEmpty());
     }
     
     // test regions have unique channels, but some are on all regions
     @Test
     public void testRegionalisedChannels() {
-        Optional<ChannelGroup> maybeRegion = channelGroupStore.fromAlias("http://pressassociation.com/regions/56");
+        Optional<ChannelGroup> maybeRegion = channelGroupStore.fromAlias("http://pressassociation.com/regions/3-56");
         assertTrue(maybeRegion.isPresent());
         Region niRegion = (Region)maybeRegion.get();
         
-        Set<ChannelNumbering> numberings = niRegion.getAllChannelNumberings();
+        Set<ChannelNumbering> numberings = niRegion.getChannelNumberings();
         
         // bbc 4 on multiple regions
         // channel id 742, channel # 9
@@ -130,11 +130,11 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         assertTrue(bbcFourPresent);
         assertTrue(bbcOneNiPresent);
         
-        maybeRegion = channelGroupStore.fromAlias("http://pressassociation.com/regions/55");
+        maybeRegion = channelGroupStore.fromAlias("http://pressassociation.com/regions/3-55");
         assertTrue(maybeRegion.isPresent());
         Region nWRegion = (Region)maybeRegion.get();
         
-        numberings = nWRegion.getAllChannelNumberings();
+        numberings = nWRegion.getChannelNumberings();
         
         // North West has BBC Four, but not BBC One NI Digital
         bbcFourPresent = false;

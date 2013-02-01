@@ -46,7 +46,7 @@ public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
     public void testNonRegionalisedPlatformIngest() {
         Optional<ChannelGroup> maybePlatform = channelGroupStore.fromAlias("http://pressassociation.com/platforms/3");
         assertTrue(maybePlatform.isPresent());
-        assertTrue(!maybePlatform.get().getAllChannelNumberings().isEmpty());
+        assertTrue(!maybePlatform.get().getChannelNumberings().isEmpty());
         Platform platform = (Platform)maybePlatform.get();
         assertTrue(platform.getRegions().isEmpty());
     }

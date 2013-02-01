@@ -79,7 +79,7 @@ public class PaChannelGroupsIngester {
         if (serviceProvider.getRegionalisationList() == null || serviceProvider.getRegionalisationList().getRegionalisation().isEmpty()) {
             addChannelsToPlatform(platform, paPlatform.getEpg().getEpgContent());
         } else {
-            Map<String, Region> regions = createRegionsForPlatform(serviceProvider.getRegionalisationList().getRegionalisation(), paRegions, platform.getAvailableCountries());
+            Map<String, Region> regions = createRegionsForPlatform(serviceProvider.getRegionalisationList().getRegionalisation(), paRegions, paPlatform, platform.getAvailableCountries());
 
             Map<String, Region> writtenRegionMap = Maps.newHashMap();
             for (Entry<String, Region> entry : regions.entrySet()) {
@@ -129,7 +129,7 @@ public class PaChannelGroupsIngester {
         channelWriter.write(channel);
     }
 
-    Map<String, Region> createRegionsForPlatform(List<Regionalisation> regionalisations, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions, Set<Country> countries) {
+    Map<String, Region> createRegionsForPlatform(List<Regionalisation> regionalisations, List<org.atlasapi.remotesite.pa.channels.bindings.Region> paRegions, org.atlasapi.remotesite.pa.channels.bindings.Platform paPlatform, Set<Country> countries) {
         Map<String, Region> regions = Maps.newHashMap();
         // If there are regions, create/update the regions as appropriate and then add the regions to the platform.
         for (Regionalisation regionalisation : regionalisations) {
@@ -149,8 +149,8 @@ public class PaChannelGroupsIngester {
                 }
             }
             
-            region.setCanonicalUri(REGION_PREFIX + regionalisation.getRegionId());
-            region.addAlias(REGION_ALIAS_PREFIX + regionalisation.getRegionId());
+            region.setCanonicalUri(REGION_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId());
+            region.addAlias(REGION_ALIAS_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId());
             region.setPublisher(Publisher.METABROADCAST);
             region.setAvailableCountries(countries);            
             regions.put(regionalisation.getRegionId(), region);
