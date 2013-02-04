@@ -26,7 +26,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -39,8 +38,15 @@ public class ChannelSimplifier {
     private final NumberToShortStringCodec idCodec;
     private final ChannelResolver channelResolver;
     private final ChannelGroupResolver channelGroupResolver;
+    
+    private static final Predicate<ChannelNumbering> CURRENT_OR_FUTURE = new Predicate<ChannelNumbering>() {
+        @Override
+        public boolean apply(ChannelNumbering input) {
+            return input.getEndDate() == null || !input.getEndDate().isAfter(new LocalDate());
+        }
+    };
 
-    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver) {
+    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver   ) {
         this.idCodec = idCodec;
         this.channelResolver = channelResolver;
         this.channelGroupResolver = channelGroupResolver;
@@ -225,85 +231,63 @@ public class ChannelSimplifier {
                 new Function<Long, Iterable<org.atlasapi.media.entity.simple.ChannelNumbering>>() {
                     @Override
                     public Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> apply(Long input) {
-                        
                         Iterable<ChannelNumbering> numberings = channelMapping.get(input);
                         final Iterable<HistoricalChannelNumberingEntry> history = generateHistory(numberings);
-                        return simplifyChannelNumberings(numberings, history, toChannels, showHistory);
+                        return simplifyChannelNumberingsWithHistory(numberings, history, toChannels);
                     }
                 }
             ));
         } else {
-            return Iterables.filter(Iterables.transform(
-                channelNumberings, 
+            return Iterables.transform(
+                Iterables.filter(channelNumberings, CURRENT_OR_FUTURE), 
                 new Function<ChannelNumbering, org.atlasapi.media.entity.simple.ChannelNumbering>() {
-                    
                     @Override
                     public org.atlasapi.media.entity.simple.ChannelNumbering apply(ChannelNumbering input) {
-                        // if channelnumbering is not current or future, reject it
-                        if (input.getEndDate() != null && input.getEndDate().isBefore(new LocalDate())) {
-                        return null;
-                        } else {
-                            org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
-                            simple.setChannelNumber(input.getChannelNumber());
-                            if (toChannels) {
-                                Maybe<Channel> channel = channelResolver.fromId(input.getChannel());
-                                Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  input.getChannel());
-                                simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
-                            } else {
-                                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(input.getChannelGroup());
-                                Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  input.getChannelGroup());
-                                simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
-                            }
-
-                            return simple;
-                        }
+                        org.atlasapi.media.entity.simple.ChannelNumbering simple = simplifyNumbering(input, toChannels, showHistory, null);
+                        simple.setChannelNumber(input.getChannelNumber());
+                        return simple;
                     }
                 }
-            ), Predicates.notNull());
+            );
         }
     }
 
-    private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplifyChannelNumberings(
-            Iterable<ChannelNumbering> numberings, Iterable<HistoricalChannelNumberingEntry> history, boolean toChannels, boolean showHistory) {
+    private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplifyChannelNumberingsWithHistory(
+            Iterable<ChannelNumbering> numberings, Iterable<HistoricalChannelNumberingEntry> history, boolean toChannels) {
+        
         Iterable<ChannelNumbering> currentNumberings = getCurrentNumberings(numberings);
         
         if (Iterables.isEmpty(currentNumberings)) {
             if (Iterables.isEmpty(numberings)) {
                 return ImmutableList.of();
             }
-            ChannelNumbering numbering = Iterables.get(numberings, 0);
-            org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
-            
-            if (toChannels) {
-                Maybe<Channel> channel = channelResolver.fromId(numbering.getChannel());
-                Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  numbering.getChannel());
-                simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
-            } else {
-                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(numbering.getChannelGroup());
-                Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  numbering.getChannelGroup());
-                simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
-            }
-            simple.setHistory(history);
-            return ImmutableList.of(simple);
+            return ImmutableList.of(simplifyNumbering(Iterables.get(numberings, 0), toChannels, true, history));
         } else {
             List<org.atlasapi.media.entity.simple.ChannelNumbering> simpleNumberings = Lists.newArrayList();
             for (ChannelNumbering currentNumbering : currentNumberings) {
-                org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+                org.atlasapi.media.entity.simple.ChannelNumbering simple = simplifyNumbering(currentNumbering, toChannels, true, history);
                 simple.setChannelNumber(currentNumbering.getChannelNumber());
-                if (toChannels) {
-                    Maybe<Channel> channel = channelResolver.fromId(currentNumbering.getChannel());
-                    Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  currentNumbering.getChannel());
-                    simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
-                } else {
-                    Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(currentNumbering.getChannelGroup());
-                    Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  currentNumbering.getChannelGroup());
-                    simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
-                }
-                simple.setHistory(history);
                 simpleNumberings.add(simple);
             }
             return simpleNumberings;
         }
+    }
+    
+    private org.atlasapi.media.entity.simple.ChannelNumbering simplifyNumbering(ChannelNumbering input, boolean toChannels, boolean showHistory, Iterable<HistoricalChannelNumberingEntry> history) {
+        org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+        if (toChannels) {
+            Maybe<Channel> channel = channelResolver.fromId(input.getChannel());
+            Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  input.getChannel());
+            simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
+        } else {
+            Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(input.getChannelGroup());
+            Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  input.getChannelGroup());
+            simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
+        }
+        if (history != null) {
+            simple.setHistory(history);
+        }
+        return simple;
     }
 
     private Iterable<HistoricalChannelNumberingEntry> generateHistory(Iterable<ChannelNumbering> numberings) {
