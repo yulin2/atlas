@@ -111,18 +111,17 @@ public class PaChannelGroupsIngester {
         } else {
             endDate = null;
         }
-        int channelNumber = Integer.parseInt(epgContent.getChannelNumber());
         
         RegionalisationList regionalisationList = epgContent.getRegionalisationList();
         if (regionalisationList == null) {
             // add to all regions
             for (Region region : regions.values()) {
-                channel.addChannelNumber(region, channelNumber, startDate, endDate);
+                channel.addChannelNumber(region, epgContent.getChannelNumber(), startDate, endDate);
             }
         } else {
             // add to selected regions
             for (Regionalisation epgRegion : regionalisationList.getRegionalisation()) {
-                channel.addChannelNumber(regions.get(epgRegion.getRegionId()), channelNumber, startDate, endDate);
+                channel.addChannelNumber(regions.get(epgRegion.getRegionId()), epgContent.getChannelNumber(), startDate, endDate);
             }
         }
         
@@ -202,7 +201,7 @@ public class PaChannelGroupsIngester {
                 endDate = null;
             }
             
-            channel.addChannelNumber(platform, Integer.parseInt(epgContent.getChannelNumber()), startDate, endDate);
+            channel.addChannelNumber(platform, epgContent.getChannelNumber(), startDate, endDate);
             channelWriter.write(channel);
         }
     }

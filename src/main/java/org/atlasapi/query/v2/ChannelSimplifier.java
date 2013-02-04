@@ -27,6 +27,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
@@ -219,29 +220,18 @@ public class ChannelSimplifier {
                 }
             }
             
-            return Iterables.transform(
+            return Iterables.concat(Iterables.transform(
                 channelMapping.keys(), 
-                new Function<Long, org.atlasapi.media.entity.simple.ChannelNumbering>() {
+                new Function<Long, Iterable<org.atlasapi.media.entity.simple.ChannelNumbering>>() {
                     @Override
-                    public org.atlasapi.media.entity.simple.ChannelNumbering apply(Long input) {
-                        org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+                    public Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> apply(Long input) {
+                        
                         Iterable<ChannelNumbering> numberings = channelMapping.get(input);
-                        ChannelNumbering numbering = getCurrentNumbering(numberings);
-                        simple.setChannelNumber(numbering.getChannelNumber());
-                        if (toChannels) {
-                            Maybe<Channel> channel = channelResolver.fromId(numbering.getChannel());
-                            Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  numbering.getChannel());
-                            simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
-                        } else {
-                            Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(numbering.getChannelGroup());
-                            Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  numbering.getChannelGroup());
-                            simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
-                        }
-                        simple.setHistory(generateHistory(numberings));
-                        return simple;
+                        final Iterable<HistoricalChannelNumberingEntry> history = generateHistory(numberings);
+                        return simplifyChannelNumberings(numberings, history, toChannels, showHistory);
                     }
                 }
-            );
+            ));
         } else {
             return Iterables.filter(Iterables.transform(
                 channelNumberings, 
@@ -273,6 +263,49 @@ public class ChannelSimplifier {
         }
     }
 
+    private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplifyChannelNumberings(
+            Iterable<ChannelNumbering> numberings, Iterable<HistoricalChannelNumberingEntry> history, boolean toChannels, boolean showHistory) {
+        Iterable<ChannelNumbering> currentNumberings = getCurrentNumberings(numberings);
+        
+        if (Iterables.isEmpty(currentNumberings)) {
+            if (Iterables.isEmpty(numberings)) {
+                return ImmutableList.of();
+            }
+            ChannelNumbering numbering = Iterables.get(numberings, 0);
+            org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+            
+            if (toChannels) {
+                Maybe<Channel> channel = channelResolver.fromId(numbering.getChannel());
+                Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  numbering.getChannel());
+                simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
+            } else {
+                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(numbering.getChannelGroup());
+                Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  numbering.getChannelGroup());
+                simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
+            }
+            simple.setHistory(history);
+            return ImmutableList.of(simple);
+        } else {
+            List<org.atlasapi.media.entity.simple.ChannelNumbering> simpleNumberings = Lists.newArrayList();
+            for (ChannelNumbering currentNumbering : currentNumberings) {
+                org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+                simple.setChannelNumber(currentNumbering.getChannelNumber());
+                if (toChannels) {
+                    Maybe<Channel> channel = channelResolver.fromId(currentNumbering.getChannel());
+                    Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  currentNumbering.getChannel());
+                    simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
+                } else {
+                    Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(currentNumbering.getChannelGroup());
+                    Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  currentNumbering.getChannelGroup());
+                    simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
+                }
+                simple.setHistory(history);
+                simpleNumberings.add(simple);
+            }
+            return simpleNumberings;
+        }
+    }
+
     private Iterable<HistoricalChannelNumberingEntry> generateHistory(Iterable<ChannelNumbering> numberings) {
         return Iterables.transform(numberings, new Function<ChannelNumbering, HistoricalChannelNumberingEntry>() {
             @Override
@@ -285,9 +318,9 @@ public class ChannelSimplifier {
         });
     }
 
-    private ChannelNumbering getCurrentNumbering(Iterable<ChannelNumbering> numberings) {
+    private Iterable<ChannelNumbering> getCurrentNumberings(Iterable<ChannelNumbering> numberings) {
         final LocalDate now = new LocalDate();
-        return Iterables.getOnlyElement(Iterables.filter(numberings, new Predicate<ChannelNumbering>() {
+        return Iterables.filter(numberings, new Predicate<ChannelNumbering>() {
                 @Override
                 public boolean apply(ChannelNumbering input) {
                     if (input.getStartDate() != null) {
@@ -301,7 +334,7 @@ public class ChannelSimplifier {
                         return true;
                     }
                 }
-            }));
+            });
     }
 
     private org.atlasapi.media.entity.simple.ChannelGroup toSubChannelGroup(ChannelGroup input) {

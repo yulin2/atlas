@@ -1,8 +1,5 @@
     package org.atlasapi.remotesite.pa.channels;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -71,7 +68,7 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         
         // check numbering
         ChannelNumbering numbering = Iterables.getOnlyElement(channel.channelNumbers());
-        assertThat(numbering.getChannelNumber(), is(1));
+        assertEquals(numbering.getChannelNumber(), "1");
         assertEquals(channel.getId(), numbering.getChannel());
         
         // get region
