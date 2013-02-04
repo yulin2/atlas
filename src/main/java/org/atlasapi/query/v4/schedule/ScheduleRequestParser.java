@@ -52,7 +52,6 @@ class ScheduleRequestParser {
     private final Duration maxQueryDuration;
     private final Clock clock;
 
-
     public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock) {
         this.channelResolver = channelResolver;
         this.applicationStore = appFetcher;
