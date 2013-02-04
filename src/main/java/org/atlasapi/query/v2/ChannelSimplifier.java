@@ -16,11 +16,19 @@ import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.channel.TemporalString;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.media.entity.simple.History;
+import org.atlasapi.media.entity.simple.HistoricalChannelEntry;
+import org.atlasapi.media.entity.simple.HistoricalChannelGroupEntry;
+import org.atlasapi.media.entity.simple.HistoricalChannelNumberingEntry;
 import org.atlasapi.media.entity.simple.PublisherDetails;
+import org.joda.time.LocalDate;
+import org.openjena.atlas.lib.MultiMap;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.metabroadcast.common.base.Maybe;
@@ -62,17 +70,19 @@ public class ChannelSimplifier {
         simple.setPublisherDetails(toPublisherDetails(input.source()));
         simple.setBroadcaster(toPublisherDetails(input.broadcaster()));
         simple.setHighDefinition(input.highDefinition());
+        simple.setRegional(input.regional());
+        if (input.timeshift() != null) {
+            simple.setTimeshift(input.timeshift().getStandardSeconds());
+        }
         simple.setAvailableFrom(transform(input.availableFrom(), TO_PUBLISHER_DETAILS));
         simple.setTitle(input.title());
         simple.setImage(input.image());
         simple.setMediaType(input.mediaType() != null ? input.mediaType().toString().toLowerCase() : null);
+        simple.setStartDate(input.startDate());            
+        simple.setEndDate(input.endDate());            
         
         if(showChannelGroups) {
-            if (showHistory) {
-                simple.setChannelGroups(simplifyToChannelGroups(input.channelNumbers(), showHistory));
-            } else {
-                simple.setChannelGroups(simplifyToChannelGroups(input.allChannelNumbers(), showHistory));
-            }
+            simple.setChannelGroups(simplify(input.channelNumbers(), false, showHistory));
         }
         if (input.parent() != null) {
             Maybe<Channel> channel = channelResolver.fromId(input.parent());
@@ -101,19 +111,32 @@ public class ChannelSimplifier {
             ));
         }
         
-        if (showHistory) {
-            History history = new History();
-            history.setStartDate(input.startDate());
-            history.setEndDate(input.endDate());
-            history.setTitle(simplify(input.allTitles()));
-            history.setImage(simplify(input.allImages()));
-            
-            simple.setHistory(history);
+        if (showHistory) {            
+            simple.setHistory(calculateChannelHistory(input));
         }
 
         return simple;
     }
     
+    private List<HistoricalChannelEntry> calculateChannelHistory(Channel input) {
+        List<HistoricalChannelEntry> entries = Lists.newArrayList();
+        for (TemporalString title : input.allTitles()) {
+            HistoricalChannelEntry entry = new HistoricalChannelEntry();
+            entry.setStartDate(title.getStartDate());
+            entry.setTitle(title.getValue());
+            entry.setImage(input.imageForDate(title.getStartDate()));
+            entries.add(entry);
+        }
+        for (TemporalString image : input.allImages()) {
+            HistoricalChannelEntry entry = new HistoricalChannelEntry();
+            entry.setStartDate(image.getStartDate());
+            entry.setTitle(input.titleForDate(image.getStartDate()));
+            entry.setImage(image.getValue());
+            entries.add(entry);
+        }
+        return entries;
+    }
+
     private org.atlasapi.media.entity.simple.Channel toSubChannel(Channel input) {
         org.atlasapi.media.entity.simple.Channel simple = new org.atlasapi.media.entity.simple.Channel();
         simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
@@ -151,11 +174,7 @@ public class ChannelSimplifier {
             simple.setAvailableCountries(Countries.toCodes(input.getAvailableCountries()));
         }
         if(showChannels) {
-            if (showHistory) {
-                simple.setChannels(simplifyToChannels(input.getChannelNumberings(), showHistory));
-            } else {
-                simple.setChannels(simplifyToChannels(input.getAllChannelNumberings(), showHistory));
-            }
+            simple.setChannels(simplify(input.getChannelNumberings(), true, showHistory));
         }
         if (input instanceof Platform) {
             simple.setRegions(Iterables.transform(
@@ -176,65 +195,149 @@ public class ChannelSimplifier {
             simple.setPlatform(toSubChannelGroup(platform.get()));
         }
         if (showHistory) {
-            History history = new History();
-            history.setTitle(simplify(input.getAllTitles()));
-            simple.setHistory(history);
+            simple.setHistory(calculateChannelHistory(input));
         }
         
         return simple;
     }
-
-    private Iterable<org.atlasapi.media.entity.simple.TemporalString> simplify(Iterable<TemporalString> titles) {
-        return Iterables.transform(titles, new Function<TemporalString, org.atlasapi.media.entity.simple.TemporalString>() {
-            @Override
-            public org.atlasapi.media.entity.simple.TemporalString apply(TemporalString input) {
-                org.atlasapi.media.entity.simple.TemporalString simple = new org.atlasapi.media.entity.simple.TemporalString();
-                simple.setValue(input.getValue());
-                simple.setStartDate(input.getStartDate());
-                simple.setEndDate(input.getEndDate());
-                return simple;
-            }
-        });
-    }
-
-    private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplifyToChannels(Set<ChannelNumbering> channelNumberings, final boolean showHistory) {
-        return Iterables.transform(channelNumberings, new Function<ChannelNumbering, org.atlasapi.media.entity.simple.ChannelNumbering>() {
-            @Override
-            public org.atlasapi.media.entity.simple.ChannelNumbering apply(ChannelNumbering input) {
-                org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
-                simple.setChannelNumber(input.getChannelNumber());
-                Maybe<Channel> channel = channelResolver.fromId(input.getChannel());
-                if (!channel.hasValue()) {
-                    throw new RuntimeException("Could not resolve channel with id " +  input.getChannel());
-                }
-                simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
-                if (showHistory) {
-                    simple.setStartDate(input.getStartDate());
-                    simple.setEndDate(input.getEndDate());
-                }
-                return simple;
-            }
-        });
+    
+    private List<HistoricalChannelGroupEntry> calculateChannelHistory(ChannelGroup input) {
+        List<HistoricalChannelGroupEntry> entries = Lists.newArrayList();
+        for (TemporalString title : input.getAllTitles()) {
+            HistoricalChannelGroupEntry entry = new HistoricalChannelGroupEntry();
+            entry.setStartDate(title.getStartDate());
+            entry.setTitle(title.getValue());
+            entries.add(entry);
+        }
+        return entries;
     }
     
-    private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplifyToChannelGroups(Set<ChannelNumbering> channelNumberings, final boolean showHistory) {
-        return Iterables.transform(channelNumberings, new Function<ChannelNumbering, org.atlasapi.media.entity.simple.ChannelNumbering>() {
-            @Override
-            public org.atlasapi.media.entity.simple.ChannelNumbering apply(ChannelNumbering input) {
-                org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
-                simple.setChannelNumber(input.getChannelNumber());
-                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(input.getChannelGroup());
-                if (!channelGroup.isPresent()) {
-                    throw new RuntimeException("Could not resolve channelGroup with id " +  input.getChannelGroup());
+    private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplify(Set<ChannelNumbering> channelNumberings, final boolean toChannels, final boolean showHistory) {
+        if (showHistory) {
+            final MultiMap<Long, ChannelNumbering> channelMapping = MultiMap.createMapSet();
+            for (ChannelNumbering numbering : channelNumberings) {
+                if (toChannels) {
+                    channelMapping.put(numbering.getChannel(), numbering);
+                } else {
+                    channelMapping.put(numbering.getChannelGroup(), numbering);
                 }
+            }
+            
+            return Iterables.concat(Iterables.transform(
+                channelMapping.keys(), 
+                new Function<Long, Iterable<org.atlasapi.media.entity.simple.ChannelNumbering>>() {
+                    @Override
+                    public Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> apply(Long input) {
+                        
+                        Iterable<ChannelNumbering> numberings = channelMapping.get(input);
+                        final Iterable<HistoricalChannelNumberingEntry> history = generateHistory(numberings);
+                        return simplifyChannelNumberings(numberings, history, toChannels, showHistory);
+                    }
+                }
+            ));
+        } else {
+            return Iterables.filter(Iterables.transform(
+                channelNumberings, 
+                new Function<ChannelNumbering, org.atlasapi.media.entity.simple.ChannelNumbering>() {
+                    
+                    @Override
+                    public org.atlasapi.media.entity.simple.ChannelNumbering apply(ChannelNumbering input) {
+                        // if channelnumbering is not current or future, reject it
+                        if (input.getEndDate() != null && input.getEndDate().isBefore(new LocalDate())) {
+                        return null;
+                        } else {
+                            org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+                            simple.setChannelNumber(input.getChannelNumber());
+                            if (toChannels) {
+                                Maybe<Channel> channel = channelResolver.fromId(input.getChannel());
+                                Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  input.getChannel());
+                                simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
+                            } else {
+                                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(input.getChannelGroup());
+                                Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  input.getChannelGroup());
+                                simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
+                            }
+
+                            return simple;
+                        }
+                    }
+                }
+            ), Predicates.notNull());
+        }
+    }
+
+    private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplifyChannelNumberings(
+            Iterable<ChannelNumbering> numberings, Iterable<HistoricalChannelNumberingEntry> history, boolean toChannels, boolean showHistory) {
+        Iterable<ChannelNumbering> currentNumberings = getCurrentNumberings(numberings);
+        
+        if (Iterables.isEmpty(currentNumberings)) {
+            if (Iterables.isEmpty(numberings)) {
+                return ImmutableList.of();
+            }
+            ChannelNumbering numbering = Iterables.get(numberings, 0);
+            org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+            
+            if (toChannels) {
+                Maybe<Channel> channel = channelResolver.fromId(numbering.getChannel());
+                Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  numbering.getChannel());
+                simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
+            } else {
+                Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(numbering.getChannelGroup());
+                Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  numbering.getChannelGroup());
                 simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
-                if (showHistory) {
-                    simple.setStartDate(input.getStartDate());
-                    simple.setEndDate(input.getEndDate());
+            }
+            simple.setHistory(history);
+            return ImmutableList.of(simple);
+        } else {
+            List<org.atlasapi.media.entity.simple.ChannelNumbering> simpleNumberings = Lists.newArrayList();
+            for (ChannelNumbering currentNumbering : currentNumberings) {
+                org.atlasapi.media.entity.simple.ChannelNumbering simple = new org.atlasapi.media.entity.simple.ChannelNumbering();
+                simple.setChannelNumber(currentNumbering.getChannelNumber());
+                if (toChannels) {
+                    Maybe<Channel> channel = channelResolver.fromId(currentNumbering.getChannel());
+                    Preconditions.checkArgument(channel.hasValue(), "Could not resolve channel with id " +  currentNumbering.getChannel());
+                    simple.setChannel(simplify(channel.requireValue(), false, showHistory, false, false));
+                } else {
+                    Optional<ChannelGroup> channelGroup = channelGroupResolver.channelGroupFor(currentNumbering.getChannelGroup());
+                    Preconditions.checkArgument(channelGroup.isPresent(), "Could not resolve channelGroup with id " +  currentNumbering.getChannelGroup());
+                    simple.setChannelGroup(simplify(channelGroup.get(), false, showHistory));
                 }
-                return simple;
+                simple.setHistory(history);
+                simpleNumberings.add(simple);
+            }
+            return simpleNumberings;
+        }
+    }
+
+    private Iterable<HistoricalChannelNumberingEntry> generateHistory(Iterable<ChannelNumbering> numberings) {
+        return Iterables.transform(numberings, new Function<ChannelNumbering, HistoricalChannelNumberingEntry>() {
+            @Override
+            public HistoricalChannelNumberingEntry apply(ChannelNumbering input) {
+                HistoricalChannelNumberingEntry entry = new HistoricalChannelNumberingEntry();
+                entry.setStartDate(input.getStartDate());
+                entry.setChannelNumber(input.getChannelNumber());
+                return entry;
             }
         });
+    }
+
+    private Iterable<ChannelNumbering> getCurrentNumberings(Iterable<ChannelNumbering> numberings) {
+        final LocalDate now = new LocalDate();
+        return Iterables.filter(numberings, new Predicate<ChannelNumbering>() {
+                @Override
+                public boolean apply(ChannelNumbering input) {
+                    if (input.getStartDate() != null) {
+                        if (input.getEndDate() != null) {
+                            return input.getStartDate().compareTo(now) <= 0
+                                    && input.getEndDate().compareTo(now) > 0;
+                        } else {
+                            return input.getStartDate().compareTo(now) <= 0;
+                        }
+                    } else {
+                        return true;
+                    }
+                }
+            });
     }
 
     private org.atlasapi.media.entity.simple.ChannelGroup toSubChannelGroup(ChannelGroup input) {

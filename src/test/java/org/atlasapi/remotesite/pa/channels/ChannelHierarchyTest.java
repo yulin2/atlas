@@ -1,6 +1,8 @@
 package org.atlasapi.remotesite.pa.channels;
 
+import static org.hamcrest.Matchers.isOneOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -8,9 +10,8 @@ import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.TemporalString;
+import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.media.channel.ChannelGroupResolver;
-import org.atlasapi.persistence.media.channel.ChannelGroupWriter;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.channel.ChannelWriter;
 import org.atlasapi.remotesite.pa.channels.bindings.Channels;
@@ -18,6 +19,10 @@ import org.atlasapi.remotesite.pa.channels.bindings.Logo;
 import org.atlasapi.remotesite.pa.channels.bindings.Logos;
 import org.atlasapi.remotesite.pa.channels.bindings.Name;
 import org.atlasapi.remotesite.pa.channels.bindings.Names;
+import org.atlasapi.remotesite.pa.channels.bindings.ProviderChannelId;
+import org.atlasapi.remotesite.pa.channels.bindings.ProviderChannelIds;
+import org.atlasapi.remotesite.pa.channels.bindings.Variation;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -33,7 +38,7 @@ import com.google.inject.internal.Sets;
 
 public class ChannelHierarchyTest {
 
-    private final PaChannelsProcessor processor = new PaChannelsProcessor(Mockito.mock(ChannelResolver.class), Mockito.mock(ChannelWriter.class), Mockito.mock(ChannelGroupResolver.class), Mockito.mock(ChannelGroupWriter.class));
+    private final PaChannelsIngester processor = new PaChannelsIngester(Mockito.mock(ChannelResolver.class), Mockito.mock(ChannelWriter.class));
     
     @Test
     public void testStationWithSingleChannel() {
@@ -43,19 +48,39 @@ public class ChannelHierarchyTest {
         channel.setName("Heat TV", "2009-10-11", "2010-01-10");
         channel.setName("Newer Heat TV", "2010-01-11", null);
         channel.setImage("p131906.png", "2009-10-11");
+        channel.setProviderAlias("9", "1078");
+        channel.setFormat();
+        channel.setRegional();
+        channel.setTimeshift("60");
         
-        Channel createdChannel = processor.processStandaloneChannel(channel.createPaChannel());
+        ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
+        serviceProvider.setId("9");
+        serviceProvider.setName("YouView", "2000-01-01");
+        
+        Channel createdChannel = processor.processStandaloneChannel(channel.createPaChannel(), ImmutableList.of(serviceProvider.createServiceProvider()));
         
         assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/1741", createdChannel.getCanonicalUri());
-        assertEquals("http://pressassociation.com/channels/1741", Iterables.getOnlyElement(createdChannel.getAliases()));
+        
+        // TODO new aliases
+        String firstAlias = Iterables.get(createdChannel.getAliasUrls(), 0);
+        String secondAlias = Iterables.get(createdChannel.getAliasUrls(), 1);
+        assertThat(firstAlias, isOneOf("http://pressassociation.com/channels/1741", "http://youview.com/service/1078"));
+        assertThat(secondAlias, isOneOf("http://pressassociation.com/channels/1741", "http://youview.com/service/1078"));
+        
         assertEquals("Newer Heat TV", createdChannel.title());
         assertEquals(new LocalDate(2009, 6, 6), createdChannel.startDate());
+        
         TemporalString oldName = new TemporalString("Heat TV", new LocalDate(2009, 10, 11), new LocalDate(2010, 1, 11));
         TemporalString newName = new TemporalString("Newer Heat TV", new LocalDate(2010, 1, 11), null);
         assertEquals(ImmutableSet.of(oldName, newName), ImmutableSet.copyOf(createdChannel.allTitles()));
+        
         assertEquals("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131906.png", createdChannel.image());
         assertEquals(new TemporalString("p131906.png", new LocalDate(2009, 10, 11), null), Iterables.getOnlyElement(createdChannel.allImages()));
+        
         assertEquals(Publisher.METABROADCAST, createdChannel.source());
+        assertTrue(createdChannel.highDefinition());
+        assertTrue(createdChannel.regional());
+        assertEquals(Duration.standardSeconds(3600), createdChannel.timeshift());
     }
     
     @Test
@@ -65,6 +90,8 @@ public class ChannelHierarchyTest {
         westMidlands.setId("11");
         westMidlands.setName("BBC One West Midlands", "2011-09-28", null);
         westMidlands.setImage("p131474.png", "2011-09-28");
+        westMidlands.setFormat();
+        westMidlands.setMediaType("TV");
         
         ChannelInfo channelIslands = new ChannelInfo();
         channelIslands.setStartDate("2010-04-23");
@@ -72,44 +99,59 @@ public class ChannelHierarchyTest {
         channelIslands.setId("1663");
         channelIslands.setName("BBC One Channel Islands", "2011-10-15", null);
         channelIslands.setImage("p131731.png", "2011-10-15");
+        channelIslands.setFormat();
+        channelIslands.setMediaType("TV");
         
         StationInfo station = new StationInfo();
         station.setId("1");
         station.setName("BBC One", "2002-03-12");
         // TODO test images on stations
-        // TODO test mediaType/HighDefinition flag on channels
 //        station.setImage("", "");
         station.addChannel(westMidlands);
         station.addChannel(channelIslands);
         
-        Channel parent = processor.processParentChannel(station.createPaStation());
-        List<Channel> children = processor.processChildChannels(station.createPaStation().getChannels().getChannel());
+        ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
+        serviceProvider.setId("9");
+        serviceProvider.setName("YouView", "2000-01-01");
+        
+        Channel parent = processor.processParentChannel(station.createPaStation(), westMidlands.createPaChannel());
+        List<Channel> children = processor.processChildChannels(station.createPaStation().getChannels().getChannel(), ImmutableList.of(serviceProvider.createServiceProvider()));
         
         assertEquals(Publisher.METABROADCAST, parent.source());
         assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/stations/1", parent.uri());
         assertEquals("BBC One", parent.title());
         assertEquals(new TemporalString("BBC One", new LocalDate(2002, 3, 12), null), Iterables.getOnlyElement(parent.allTitles()));
 //      assertEquals("", parent.image());
+        
         assertEquals("http://pressassociation.com/stations/1", Iterables.getOnlyElement(parent.getAliases()));
         
+        assertTrue(parent.highDefinition());
+        assertEquals(MediaType.VIDEO, parent.mediaType());
+        
         Channel westMids = Channel.builder()
-                .withSource(Publisher.METABROADCAST)
-                .withUri("http://ref.atlasapi.org/channels/pressassociation.com/11")
-                .withTitle("BBC One West Midlands", new LocalDate(2011, 9, 28))
-                .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131474.png", new LocalDate(2011, 9, 28))
-                .withStartDate(new LocalDate(2010, 6, 1))
-                .build();
-        // TODO new aliases
+            .withSource(Publisher.METABROADCAST)
+            .withUri("http://ref.atlasapi.org/channels/pressassociation.com/11")
+            .withTitle("BBC One West Midlands", new LocalDate(2011, 9, 28))
+            .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131474.png", new LocalDate(2011, 9, 28))
+            .withStartDate(new LocalDate(2010, 6, 1))
+            .withMediaType(MediaType.VIDEO)
+            .withHighDefinition(true)
+            .withRegional(false)
+            .build();
+        // TODO new alias
         westMids.addAliasUrl("http://pressassociation.com/channels/11");
         
         Channel channelIsl = Channel.builder()
-                .withSource(Publisher.METABROADCAST)
-                .withUri("http://ref.atlasapi.org/channels/pressassociation.com/1663")
-                .withTitle("BBC One Channel Islands", new LocalDate(2011, 10, 15))
-                .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131731.png", new LocalDate(2011, 10, 15))
-                .withStartDate(new LocalDate(2010, 4, 23))
-                .build();
-        // TODO new aliases
+            .withSource(Publisher.METABROADCAST)
+            .withUri("http://ref.atlasapi.org/channels/pressassociation.com/1663")
+            .withTitle("BBC One Channel Islands", new LocalDate(2011, 10, 15))
+            .withImage("http://images.atlas.metabroadcast.com/pressassociation.com/channels/p131731.png", new LocalDate(2011, 10, 15))
+            .withStartDate(new LocalDate(2010, 4, 23))
+            .withMediaType(MediaType.VIDEO)
+            .withHighDefinition(true)
+            .withRegional(false)
+            .build();
+        // TODO new alias
         channelIsl.addAliasUrl("http://pressassociation.com/channels/1663");
         
         ExtendedChannelEquivalence equiv = new ExtendedChannelEquivalence();
@@ -121,14 +163,16 @@ public class ChannelHierarchyTest {
         @Override
         protected boolean doEquivalent(Channel a, Channel b) {
             return a.source().equals(b.source())
-                    && Objects.equal(a.uri(), b.uri())
-                    && Objects.equal(a.title(), b.title())
-                    // TODO will test these fields once they're in the output from PA and can be ingested
-                    && Objects.equal(a.image(), b.image())
-                    && Objects.equal(a.mediaType(), b.mediaType())
-                    && Objects.equal(a.highDefinition(), b.highDefinition())
-                    && Objects.equal(a.variations(), b.variations())
-                    && Objects.equal(a.parent(), b.parent());
+                && Objects.equal(a.uri(), b.uri())
+                && Objects.equal(a.title(), b.title())
+                && Objects.equal(a.image(), b.image())
+                && Objects.equal(a.mediaType(), b.mediaType())
+                && Objects.equal(a.highDefinition(), b.highDefinition())
+                && Objects.equal(a.regional(), b.regional())
+                && Objects.equal(a.timeshift(), b.timeshift())
+                && Objects.equal(a.variations(), b.variations())
+                && Objects.equal(a.parent(), b.parent())
+                && Objects.equal(a.startDate(), b.startDate());
         }
 
         @Override
@@ -145,6 +189,12 @@ public class ChannelHierarchyTest {
         private String imageStartDate;
         private String startDate;
         private String endDate;
+        private String serviceProviderId;
+        private String providerChannelId;
+        private String format;
+        private boolean regional = false;
+        private String timeshift;
+        private String mediaType;
         
         public void setName(String name, String nameStartDate, String endDate) {
             TimeboxedString title = new TimeboxedString();
@@ -169,6 +219,27 @@ public class ChannelHierarchyTest {
             this.endDate = endDate;
         }
         
+        public void setProviderAlias(String serviceProviderId, String providerChannelId) {
+            this.serviceProviderId = serviceProviderId;
+            this.providerChannelId = providerChannelId;
+        }
+        
+        public void setFormat() {
+            this.format = "HD";
+        }
+        
+        public void setTimeshift(String timeshift) {
+            this.timeshift = timeshift;
+        }
+        
+        public void setRegional() {
+            this.regional = true;
+        }
+        
+        public void setMediaType(String mediaType) {
+            this.mediaType = mediaType;
+        }
+        
         public org.atlasapi.remotesite.pa.channels.bindings.Channel createPaChannel() {
             org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel = new org.atlasapi.remotesite.pa.channels.bindings.Channel();
             
@@ -186,6 +257,15 @@ public class ChannelHierarchyTest {
             }
             paChannel.setNames(paChannelNames);
             
+            if (serviceProviderId != null) {
+                ProviderChannelIds channelIds = new ProviderChannelIds();
+                ProviderChannelId channelId = new ProviderChannelId();
+                channelId.setServiceProviderId(serviceProviderId);
+                channelId.setvalue(providerChannelId);
+                channelIds.getProviderChannelId().add(channelId);
+                paChannel.setProviderChannelIds(channelIds);
+            }
+            
             Logos logos = new Logos();
             Logo logo = new Logo();
             logo.setvalue(image);
@@ -197,6 +277,26 @@ public class ChannelHierarchyTest {
             paChannel.setStartDate(startDate);
             // TODO add this back in, as PaChannels will be able to have endDates
             //paChannel.setEndDate(endDate);
+            if (format != null) {
+                paChannel.setFormat(format);
+            }
+            
+            if (timeshift != null) {
+                Variation variation = new Variation();
+                variation.setTimeshift(timeshift);
+                variation.setType("HD");
+                paChannel.getVariation().add(variation);
+            }
+            
+            if (regional) {
+                Variation variation = new Variation();
+                variation.setType("regional");
+                paChannel.getVariation().add(variation);
+            }
+            
+            if (mediaType != null) {
+                paChannel.setMediaType(mediaType);
+            }
             
             return paChannel;
         }

@@ -25,7 +25,8 @@ import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.channel.ChannelWriter;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
-import org.atlasapi.remotesite.pa.channels.PaChannelsProcessor;
+import org.atlasapi.remotesite.pa.channels.PaChannelGroupsIngester;
+import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
 import org.atlasapi.remotesite.pa.channels.PaChannelsUpdater;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
@@ -111,11 +112,15 @@ public class PaModule {
     }
     
     @Bean PaChannelsUpdater paChannelsUpdater() {
-        return new PaChannelsUpdater(paProgrammeDataStore(), channelsProcessor());
+        return new PaChannelsUpdater(paProgrammeDataStore(), channelsIngester(), channelGroupsIngester());
     }
     
-    @Bean PaChannelsProcessor channelsProcessor() {
-        return new PaChannelsProcessor(channelResolver, channelWriter, channelGroupResolver, channelGroupWriter);
+    @Bean PaChannelsIngester channelsIngester() {
+        return new PaChannelsIngester(channelResolver, channelWriter);
+    }
+    
+    @Bean PaChannelGroupsIngester channelGroupsIngester() {
+        return new PaChannelGroupsIngester(channelGroupResolver, channelGroupWriter, channelResolver, channelWriter);
     }
 
     @Bean PaFeaturesUpdater paFeaturesUpdater() {

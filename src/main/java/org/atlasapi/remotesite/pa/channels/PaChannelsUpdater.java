@@ -32,12 +32,14 @@ public class PaChannelsUpdater extends ScheduledTask {
     private static final DateTimeFormatter FILEDATETIME_FORMAT = DateTimeFormat.forPattern("yyyyMMddHHmm").withZone(DateTimeZones.LONDON);
 
     private final PaProgrammeDataStore dataStore;
-    private final PaChannelsProcessor processor;
+    private final PaChannelsIngester channelsIngester;
+    private final PaChannelGroupsIngester channelGroupsIngester;
     private final Logger log = LoggerFactory.getLogger(PaChannelsUpdater.class);
 
-    public PaChannelsUpdater(PaProgrammeDataStore dataStore, PaChannelsProcessor processor) {
+    public PaChannelsUpdater(PaProgrammeDataStore dataStore, PaChannelsIngester channelsIngester, PaChannelGroupsIngester channelGroupsIngester) {
         this.dataStore = dataStore;
-        this.processor = processor;
+        this.channelsIngester = channelsIngester;
+        this.channelGroupsIngester = channelGroupsIngester;
     }
     
     @Override
@@ -82,7 +84,7 @@ public class PaChannelsUpdater extends ScheduledTask {
                     }
                 } else {
                     log.info("Not processing file " + file.toString() + " as filename format is not recognised");
-                    FileUploadResult.failedUpload(SERVICE, file.getName()).withMessage("Format not recognised");
+                    FileUploadResult.successfulUpload(SERVICE, file.getName()).withMessage("Format not recognised");
                 }
             }
 
@@ -116,7 +118,9 @@ public class PaChannelsUpdater extends ScheduledTask {
 
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof TvChannelData) {
-                    processor.process((TvChannelData) target);
+                    TvChannelData channelData = (TvChannelData) target;
+                    channelsIngester.processStations(channelData.getStations().getStation(), channelData.getServiceProviders().getServiceProvider());
+                    channelGroupsIngester.processPlatforms(channelData.getPlatforms().getPlatform(), channelData.getServiceProviders().getServiceProvider(), channelData.getRegions().getRegion());
                 }
             }
         };

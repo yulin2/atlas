@@ -37,6 +37,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
+import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
@@ -63,7 +64,7 @@ public class ChannelGroupController {
         this.channelGroupResolver = channelGroupResolver;
         this.idCodec = idCodec;
         this.simplifier = simplifier;
-        this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        this.gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
     }
 
     @RequestMapping("/3.0/channel_groups.json")
@@ -140,7 +141,9 @@ public class ChannelGroupController {
     }
     
     private void writeOut(HttpServletResponse response, HttpServletRequest request, ChannelGroupQueryResult channelGroupQueryResult) throws IOException {
-
+        response.setCharacterEncoding(Charsets.UTF_8.toString());
+        response.setContentType(MimeType.APPLICATION_JSON.toString());
+        
         String callback = callback(request);
         
         OutputStreamWriter writer = new OutputStreamWriter(response.getOutputStream(), Charsets.UTF_8);

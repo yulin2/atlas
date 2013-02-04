@@ -20,8 +20,9 @@ import junit.framework.TestCase;
 
 public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
 
-    private PaChannelsProcessor processor;
-    private File file = new File("src/test/resources/", "201212141549_20121215_tv_channel_data.xml");
+    private PaChannelsIngester channelsIngester;
+    private PaChannelGroupsIngester channelGroupsIngester;
+    private File file = new File("src/test/resources/", "201212141542_tv_channel_data.xml");
     private ChannelStore channelStore;
     private ChannelGroupStore channelGroupStore;
     private PaProgrammeDataStore store = new DummyPaProgrammeDataStore(file);
@@ -34,8 +35,9 @@ public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
         channelGroupStore = new MongoChannelGroupStore(db);
         channelStore = new MongoChannelStore(db, channelGroupStore, channelGroupStore);
-        processor = new PaChannelsProcessor(channelStore, channelStore, channelGroupStore, channelGroupStore);
-        updater = new PaChannelsUpdater(store, processor);
+        channelsIngester = new PaChannelsIngester(channelStore, channelStore);
+        channelGroupsIngester = new PaChannelGroupsIngester(channelGroupStore, channelGroupStore, channelStore, channelStore);
+        updater = new PaChannelsUpdater(store, channelsIngester, channelGroupsIngester);
         
         updater.run();
     }
@@ -44,7 +46,7 @@ public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
     public void testNonRegionalisedPlatformIngest() {
         Optional<ChannelGroup> maybePlatform = channelGroupStore.fromAlias("http://pressassociation.com/platforms/3");
         assertTrue(maybePlatform.isPresent());
-        assertTrue(!maybePlatform.get().getAllChannelNumberings().isEmpty());
+        assertTrue(!maybePlatform.get().getChannelNumberings().isEmpty());
         Platform platform = (Platform)maybePlatform.get();
         assertTrue(platform.getRegions().isEmpty());
     }

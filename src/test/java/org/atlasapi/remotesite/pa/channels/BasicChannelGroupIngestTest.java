@@ -25,12 +25,14 @@ import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.metabroadcast.common.intl.Countries;
 
 public class BasicChannelGroupIngestTest {
 
-    private final PaChannelsProcessor processor = new PaChannelsProcessor(mock(ChannelResolver.class), mock(ChannelWriter.class), mock(ChannelGroupResolver.class), mock(ChannelGroupWriter.class));
+    private final PaChannelGroupsIngester ingester = new PaChannelGroupsIngester(mock(ChannelGroupResolver.class), mock(ChannelGroupWriter.class), mock(ChannelResolver.class), mock(ChannelWriter.class));
     
     @Test
     public void testBasicPlatformIngest() {
@@ -38,12 +40,13 @@ public class BasicChannelGroupIngestTest {
         platformInfo.setName("Freeview", "2011-09-28");
         platformInfo.setId("3");
         platformInfo.setServiceProviderId("2");
-        // create serviceProvider with no regions
+        platformInfo.setCountries(ImmutableList.of(Countries.GB.code()))
+;        // create serviceProvider with no regions
         ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
         serviceProvider.setId("2");
         serviceProvider.setRegions(Lists.<RegionalisationInfo>newArrayList());
 
-        Platform platform = processor.processBasicPlatform(platformInfo.createPlatform());
+        Platform platform = ingester.processBasicPlatform(platformInfo.createPlatform());
         
         // test that platform fields are picked up ok
         assertEquals("Freeview", platform.getTitle());
@@ -51,6 +54,7 @@ public class BasicChannelGroupIngestTest {
         assertEquals("http://ref.atlasapi.org/platforms/pressassociation.com/3", platform.getCanonicalUri());
         assertEquals("http://pressassociation.com/platforms/3", Iterables.getOnlyElement(platform.getAliases()));
         assertEquals(Publisher.METABROADCAST, platform.getPublisher());
+        assertEquals(ImmutableSet.of(Countries.GB), platform.getAvailableCountries());
     }
     
     @Test
@@ -71,17 +75,19 @@ public class BasicChannelGroupIngestTest {
         yorkshire.setId("67");
         yorkshire.setName("Yorkshire", "2007-06-10");
         
+        PlatformInfo platformInfo = new PlatformInfo();
+        platformInfo.setId("3");
         
-        
-        Map<String, Region> regions = processor.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()));
+        Map<String, Region> regions = ingester.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()), platformInfo.createPlatform(), ImmutableSet.of(Countries.GB));
         
         Region region = Iterables.getOnlyElement(regions.values());
         
         assertEquals("South", region.getTitle());
         assertEquals(new TemporalString("South", new LocalDate(2009, 1, 28), null), Iterables.getOnlyElement(region.getAllTitles()));
-        assertEquals("http://ref.atlasapi.org/regions/pressassociation.com/61", region.getCanonicalUri());
-        assertEquals("http://pressassociation.com/regions/61", Iterables.getOnlyElement(region.getAliases()));
+        assertEquals("http://ref.atlasapi.org/regions/pressassociation.com/3-61", region.getCanonicalUri());
+        assertEquals("http://pressassociation.com/regions/3-61", Iterables.getOnlyElement(region.getAliases()));
         assertEquals(Publisher.METABROADCAST, region.getPublisher());
+        assertEquals(ImmutableSet.of(Countries.GB), region.getAvailableCountries());
     }
 }
 
@@ -91,6 +97,7 @@ class PlatformInfo {
     private String id;
     private List<EpgContentInfo> epgContents = Lists.newArrayList();
     private String serviceProviderId;
+    private List<String> countries = Lists.newArrayList();
     
     public void setName(String name, String startDate) {
         this.name = name;
@@ -109,6 +116,10 @@ class PlatformInfo {
         this.serviceProviderId = id;
     }
     
+    public void setCountries(List<String> countries) {
+        this.countries = countries;
+    }
+    
     public org.atlasapi.remotesite.pa.channels.bindings.Platform createPlatform() {
         org.atlasapi.remotesite.pa.channels.bindings.Platform platform = new org.atlasapi.remotesite.pa.channels.bindings.Platform();
         
@@ -125,6 +136,14 @@ class PlatformInfo {
         }
         platform.setEpg(epg);
         
+        org.atlasapi.remotesite.pa.channels.bindings.Countries paCountries = new org.atlasapi.remotesite.pa.channels.bindings.Countries();
+        for (String country : countries) {
+            org.atlasapi.remotesite.pa.channels.bindings.Country paCountry = new org.atlasapi.remotesite.pa.channels.bindings.Country();
+            paCountry.setCode(country);
+            paCountries.getCountry().add(paCountry);
+        }
+        platform.setCountries(paCountries);
+        
         platform.setId(id);
         platform.setServiceProviderId(serviceProviderId);
         
@@ -135,6 +154,8 @@ class PlatformInfo {
 class ServiceProviderInfo {
     private List<RegionalisationInfo> regions = Lists.newArrayList();
     private String id;
+    private String name;
+    private String nameStartDate;
 
     public void setRegions(List<RegionalisationInfo> regions) {
         this.regions = regions;
@@ -142,6 +163,11 @@ class ServiceProviderInfo {
     
     public void setId(String id) {
         this.id = id;
+    }
+    
+    public void setName(String name, String nameStartDate) {
+        this.name = name;
+        this.nameStartDate = nameStartDate;
     }
     
     public ServiceProvider createServiceProvider() {
@@ -152,6 +178,13 @@ class ServiceProviderInfo {
             regionalisationList.getRegionalisation().add(regionalisation.createRegionalisation());                
         }
         serviceProvider.setRegionalisationList(regionalisationList);
+        
+        Names paSPNames = new Names();
+        Name paSPName = new Name();
+        paSPName.setvalue(name);
+        paSPName.setStartDate(nameStartDate);
+        paSPNames.getName().add(paSPName);
+        serviceProvider.setNames(paSPNames);
         
         serviceProvider.setId(id);
         
