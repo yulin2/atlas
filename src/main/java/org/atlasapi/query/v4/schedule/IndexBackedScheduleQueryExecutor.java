@@ -20,6 +20,7 @@ import org.atlasapi.media.util.Resolved;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
+import org.atlasapi.query.common.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.metabroadcast.common.collect.OptionalMap;
 
-public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
+public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor {
 
     private static final long QUERY_TIMEOUT = 60000;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -47,7 +48,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
     }
 
     @Override
-    public ScheduleQueryResult execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
+    public QueryResult<ChannelSchedule> execute(ScheduleQuery query) throws ScheduleQueryExecutionException {
         long id = Thread.currentThread().getId();
         long startIndexTime = System.currentTimeMillis();
 
@@ -60,11 +61,11 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         long retrieveTime = System.currentTimeMillis() - startRetrieveTime;
 
         log.info("{}: schedule times: {}\t{}", new Object[]{id, indexTime, retrieveTime});
-        return new ScheduleQueryResult(schedule, query.getAnnotations(), query.getApplicationConfiguration());
+        return QueryResult.singleResult(schedule, query.getContext());
     }
 
     private ListenableFuture<ScheduleRef> queryIndex(ScheduleQuery query) {
-        return index.resolveSchedule(query.getPublisher(), query.getChannel(), query.getInterval());
+        return index.resolveSchedule(query.getSource(), query.getChannel(), query.getInterval());
     }
 
     private ChannelSchedule transformToChannelSchedule(ScheduleQuery query, ScheduleRef scheduleRef) {
@@ -109,7 +110,7 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
             for (Identified identified : resolved) {
                 if (identified instanceof Item) {
                     Item item = (Item) identified;
-                    if (query.getPublisher().equals(item.getPublisher())) {
+                    if (query.getSource().equals(item.getPublisher())) {
                         return item;
                     }
                 }
@@ -163,9 +164,9 @@ public class IndexBackedScheduleQueryExecutor implements ScheduleQueryExecutor{
         if (!appConfig.precedenceEnabled()) {
             return appConfig;
         }
-        List<Publisher> publishers = Lists.newArrayList(query.getPublisher());
+        List<Publisher> publishers = Lists.newArrayList(query.getSource());
         for (Publisher publisher : appConfig.orderdPublishers()) {
-            if (!publisher.equals(query.getPublisher())) {
+            if (!publisher.equals(query.getSource())) {
                 publishers.add(publisher);
             }
         }

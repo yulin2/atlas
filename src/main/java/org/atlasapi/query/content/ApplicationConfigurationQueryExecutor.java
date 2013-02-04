@@ -61,11 +61,11 @@ public class ApplicationConfigurationQueryExecutor implements KnownTypeQueryExec
 		return ContentQuery.joinTo(query, new ContentQuery(queryAtoms));
 	}
 
-	private AtomicQuery mergeAttribute(Attribute<?> attr, ContentQuery query){
+	private AtomicQuery mergeAttribute(Attribute<Publisher> attr, ContentQuery query){
 		Set<Publisher> configPublishers = query.getConfiguration().getEnabledSources();
 		ImmutableSet<Publisher> requestedPublishers = query.includedPublishers();
 		
-		Set<?> values;
+		Set<Publisher> values;
 		if (requestedPublishers.isEmpty()) {
 			values = configPublishers;
 		} else {

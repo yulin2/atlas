@@ -42,7 +42,7 @@ public class ContentResolvingSearcher implements SearchResolver {
                 return ImmutableList.of();
             }
 
-            ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(query.getIncludedPublishers())).withSelection(query.getSelection()).build();
+            ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Publisher>copyOf(query.getIncludedPublishers())).withSelection(query.getSelection()).build();
             Map<Id, List<Identified>> content = resolver.executeIdQuery(ids, contentQuery.copyWithApplicationConfiguration(appConfig));
 
             return ImmutableSet.copyOf(Iterables.concat(content.values())).asList();

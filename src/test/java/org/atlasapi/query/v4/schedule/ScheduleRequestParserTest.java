@@ -76,9 +76,9 @@ public class ScheduleRequestParserTest {
         
         assertThat(query.getChannel(), is(channel));
         assertThat(query.getInterval(), is(intvl));
-        assertThat(query.getPublisher(), is(BBC));
-        assertThat(query.getAnnotations(), is(Annotation.defaultAnnotations()));
-        assertThat(query.getApplicationConfiguration(), is(DEFAULT_CONFIGURATION));
+        assertThat(query.getSource(), is(BBC));
+        assertThat(query.getContext().getAnnotations(), is(Annotation.defaultAnnotations()));
+        assertThat(query.getContext().getApplicationConfiguration(), is(DEFAULT_CONFIGURATION));
     }
     
     @Test
@@ -98,9 +98,9 @@ public class ScheduleRequestParserTest {
         
         assertThat(query.getChannel(), is(channel));
         assertThat(query.getInterval(), is(intvl));
-        assertThat(query.getPublisher(), is(BBC));
-        assertThat(query.getAnnotations(), is(Annotation.defaultAnnotations()));
-        assertThat(query.getApplicationConfiguration(), is(DEFAULT_CONFIGURATION));
+        assertThat(query.getSource(), is(BBC));
+        assertThat(query.getContext().getAnnotations(), is(Annotation.defaultAnnotations()));
+        assertThat(query.getContext().getApplicationConfiguration(), is(DEFAULT_CONFIGURATION));
     }
     
     @Test(expected=IllegalArgumentException.class)

@@ -1,9 +1,10 @@
-package org.atlasapi.query.v2;
+package org.atlasapi.query.common;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,7 +17,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-public class QueryParameterAnnotationsExtractor {
+public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor {
     
     private static final Set<String> annotationKeys = ImmutableSet.copyOf(
         Iterables.transform(Annotation.all(), Annotation.toKeyFunction())
@@ -26,18 +27,26 @@ public class QueryParameterAnnotationsExtractor {
         Iterables.transform(Annotation.all(), Annotation.toRequestName())
     );
     
-    private final String parameterName;
     private final Splitter csvSplitter = Splitter.on(",").omitEmptyStrings().trimResults();
 
-    public QueryParameterAnnotationsExtractor(String parameterName) {
+    private final String parameterName;
+    private final Optional<String> context;
+
+    public QueryParameterAnnotationsExtractor(String parameterName, @Nullable String context) {
         this.parameterName = parameterName;
+        this.context = Optional.fromNullable(context);
     }
     
+    public QueryParameterAnnotationsExtractor(@Nullable String context) {
+        this("annotations", context);
+    }
+
     public QueryParameterAnnotationsExtractor() {
-        this("annotations");
+        this("annotations", null);
     }
     
-    public Optional<Set<Annotation>> extractFromRequest(HttpServletRequest request, Optional<String> context) {
+    @Override
+    public Optional<Set<Annotation>> extractFromRequest(HttpServletRequest request) {
         
         String serialisedAnnotations = request.getParameter(parameterName);
         
@@ -64,6 +73,7 @@ public class QueryParameterAnnotationsExtractor {
         
     }
 
+    @Deprecated
     public Optional<Set<Annotation>> extractFromKeys(HttpServletRequest request) {
         
         String serialisedAnnotations = request.getParameter(parameterName);

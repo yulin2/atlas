@@ -1,6 +1,8 @@
 package org.atlasapi.query.v4.schedule;
 
-public class ScheduleQueryExecutionException extends Exception {
+import org.atlasapi.query.common.QueryExecutionException;
+
+public class ScheduleQueryExecutionException extends QueryExecutionException {
 
     private static final long serialVersionUID = 1L;
 

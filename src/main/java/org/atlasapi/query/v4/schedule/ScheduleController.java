@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.media.entity.ChannelSchedule;
+import org.atlasapi.query.common.QueryResult;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +27,14 @@ public class ScheduleController {
 
     private final ScheduleRequestParser requestParser;
     private final ScheduleQueryExecutor queryExecutor;
-    private final QueryResultWriter<ScheduleQueryResult> resultWriter;
+    private final QueryResultWriter<ChannelSchedule> resultWriter;
 
     private ResponseWriterFactory writerResolver = new ResponseWriterFactory();
 
     public ScheduleController(ScheduleQueryExecutor queryExecutor,
         ChannelResolver channelResolver,
         ApplicationConfigurationFetcher appFetcher,
-        QueryResultWriter<ScheduleQueryResult> resultWriter) {
+        QueryResultWriter<ChannelSchedule> resultWriter) {
         this.requestParser = new ScheduleRequestParser(
             channelResolver,
             appFetcher,
@@ -50,7 +52,7 @@ public class ScheduleController {
         try {
             writer = writerResolver.writerFor(request, response);
             ScheduleQuery scheduleQuery = requestParser.queryFrom(request);
-            ScheduleQueryResult queryResult = queryExecutor.execute(scheduleQuery);
+            QueryResult<ChannelSchedule> queryResult = queryExecutor.execute(scheduleQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);

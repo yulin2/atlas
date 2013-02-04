@@ -18,13 +18,15 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.query.v2.QueryParameterAnnotationsExtractor;
+import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.common.QueryContext;
+import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
+import org.atlasapi.query.common.RequestParameterValidator;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -48,10 +50,9 @@ class ScheduleRequestParser {
     
     private final NumberToShortStringCodec idCodec;
     private final DateTimeInQueryParser dateTimeParser;
-    private final QueryParameterAnnotationsExtractor annotationExtractor;
+    private final AnnotationsExtractor annotationExtractor;
     private final Duration maxQueryDuration;
     private final Clock clock;
-
 
     public ScheduleRequestParser(ChannelResolver channelResolver, ApplicationConfigurationFetcher appFetcher, Duration maxQueryDuration, Clock clock) {
         this.channelResolver = channelResolver;
@@ -82,9 +83,9 @@ class ScheduleRequestParser {
         appConfig = appConfigForValidPublisher(publisher, appConfig, queryInterval);
         checkArgument(appConfig != null, "Source %s not enabled", publisher);
         
-        Set<Annotation> annotations = annotationExtractor.extractFromRequest(request, Optional.<String>absent()).or(defaultAnnotations());
+        Set<Annotation> annotations = annotationExtractor.extractFromRequest(request).or(defaultAnnotations());
 
-        return new ScheduleQuery(publisher, channel, queryInterval, appConfig, annotations);
+        return new ScheduleQuery(publisher, channel, queryInterval, new QueryContext(appConfig, annotations));
     }
 
     private ApplicationConfiguration appConfigForValidPublisher(Publisher publisher,

@@ -2,12 +2,9 @@ package org.atlasapi.query.v4.schedule;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Set;
-
-import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.output.Annotation;
+import org.atlasapi.query.common.QueryContext;
 import org.joda.time.Interval;
 
 public final class ScheduleQuery {
@@ -15,26 +12,16 @@ public final class ScheduleQuery {
     private final Publisher source;
     private final Channel channel;
     private final Interval interval;
-    private final ApplicationConfiguration appConfig;
-    private final Set<Annotation> annotations;
-    
-    public ScheduleQuery(Publisher source, Channel channel, Interval interval) {
-        this(source, channel, interval, ApplicationConfiguration.DEFAULT_CONFIGURATION);
-    }
-    
-    public ScheduleQuery(Publisher source, Channel channel, Interval interval, ApplicationConfiguration appConfig) {
-        this(source, channel, interval, appConfig, Annotation.defaultAnnotations());
-    }
+    private final QueryContext context;
 
-    public ScheduleQuery(Publisher source, Channel channel, Interval interval, ApplicationConfiguration appConfig, Set<Annotation> annotations) {
+    public ScheduleQuery(Publisher source, Channel channel, Interval interval, QueryContext context) {
         this.source = checkNotNull(source);
         this.channel = checkNotNull(channel);
         this.interval = checkNotNull(interval);
-        this.appConfig = checkNotNull(appConfig);
-        this.annotations = checkNotNull(annotations);
+        this.context = checkNotNull(context);
     }
 
-    public Publisher getPublisher() {
+    public Publisher getSource() {
         return source;
     }
 
@@ -46,12 +33,8 @@ public final class ScheduleQuery {
         return interval;
     }
     
-    public ApplicationConfiguration getApplicationConfiguration() {
-        return appConfig;
-    }
-    
-    public Set<Annotation> getAnnotations() {
-        return annotations;
+    public QueryContext getContext() {
+        return this.context;
     }
 
 }

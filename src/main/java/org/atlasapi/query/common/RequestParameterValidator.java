@@ -1,4 +1,4 @@
-package org.atlasapi.query.v4.schedule;
+package org.atlasapi.query.common;
 
 import java.util.Map;
 import java.util.Set;

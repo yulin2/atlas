@@ -15,6 +15,7 @@ import org.atlasapi.media.content.util.MessageQueueingContentWriter;
 import org.atlasapi.messaging.MessageQueueingContentStore;
 import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingTopicStore;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentResolverBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -225,7 +226,7 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    public TopicCreatingTopicResolver topicResolver() {
+    public TopicCreatingTopicResolver oldTopicStore() {
         return mongoContentPersistenceModule().topicStore();
     }
     
@@ -484,7 +485,7 @@ public class AtlasPersistenceModule {
     @Qualifier("cassandraTopicBootstrapper")
     public ContentBootstrapper cassandraTopicBootstrapper() {
         ContentBootstrapper bootstrapper = new ContentBootstrapper();
-        bootstrapper.withTopicListers(topicResolver());
+        bootstrapper.withTopicListers(oldTopicStore());
         return bootstrapper;
     }
 

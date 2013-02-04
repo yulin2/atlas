@@ -43,6 +43,8 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.content.criteria.attribute.Attribute;
+import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.content.ContentStore;
@@ -63,6 +65,8 @@ import org.atlasapi.media.entity.simple.ScheduleChannel;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
 import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicIndex;
+import org.atlasapi.media.topic.TopicResolver;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.AtlasModelWriter;
@@ -150,6 +154,11 @@ import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
+import org.atlasapi.persistence.topic.TopicSearcher;
+import org.atlasapi.query.common.AttributeCoercers;
+import org.atlasapi.query.common.QueryAttributeParser;
+import org.atlasapi.query.common.QueryExecutor;
+import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
 import org.atlasapi.query.topic.PublisherFilteringTopicResolver;
@@ -166,17 +175,23 @@ import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleIndexDebugController;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
+import org.atlasapi.query.v4.topic.IndexBackedTopicQueryExecutor;
+import org.atlasapi.query.v4.topic.TopicQueryParser;
+import org.atlasapi.query.v4.topic.TopicQueryResultWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
+import com.metabroadcast.common.query.Selection;
+import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.metabroadcast.common.time.SystemClock;
 
 @Configuration
@@ -197,8 +212,9 @@ public class QueryWebModule {
     private @Autowired @Qualifier("v2") SearchResolver v2SearchResolver;
     private @Autowired @Qualifier("v4") SearchResolver v4SearchResolver;
     private @Autowired PeopleResolver peopleResolver;
-    private @Autowired TopicQueryResolver topicResolver;
-    private @Autowired @Qualifier("topicStore") TopicStore topicStore;
+    private @Autowired TopicQueryResolver topicQueryResolver;
+    private @Autowired TopicResolver topicResolver;
+    private @Autowired TopicIndex topicIndex;
     private @Autowired TopicContentLister topicContentLister;
     private @Autowired TopicSearcher topicSearcher;
     private @Autowired SegmentResolver segmentResolver;
@@ -210,6 +226,14 @@ public class QueryWebModule {
     private @Autowired AdapterLog log;
     
     private @Autowired ScheduleIndex scheduleIndex;
+    
+    @Bean NumberToShortStringCodec idCodec() {
+        return SubstitutionTableNumberCodec.lowerCaseOnly();
+    }
+    
+    @Bean SelectionBuilder  selectionBuilder() {
+        return Selection.builder().withDefaultLimit(50).withMaxLimit(100);
+    }
     
     @Bean ChannelController channelController() {
         return new ChannelController(configFetcher, log, channelModelWriter(), channelResolver, new SubstitutionTableNumberCodec());
@@ -291,13 +315,25 @@ public class QueryWebModule {
     
     @Bean
     org.atlasapi.query.v4.schedule.ScheduleController v4ScheduleController() {
+        //TODO: move executor to query module
         ScheduleQueryExecutor scheduleQueryExecutor = new IndexBackedScheduleQueryExecutor(scheduleIndex, contentStore);
         return new org.atlasapi.query.v4.schedule.ScheduleController(scheduleQueryExecutor, channelResolver, configFetcher, new ScheduleQueryResultWriter(annotations()));
     }
     
     @Bean
     org.atlasapi.query.v4.topic.TopicController v4TopicController() {
-        return new org.atlasapi.query.v4.topic.TopicController(topicResolver, topicSearcher, topicModelOutputter(), configFetcher);
+        //TODO: move executor to query module
+        QueryExecutor<Topic> topicQueryExecutor = new IndexBackedTopicQueryExecutor(topicIndex, topicResolver);
+        return new org.atlasapi.query.v4.topic.TopicController(topicQueryExecutor, configFetcher, 
+            new TopicQueryResultWriter(annotations()), new TopicQueryParser("topics",
+                new QueryAttributeParser(ImmutableMap.of(Attributes.ID, AttributeCoercers.idCoercer(idCodec()))),
+                idCodec(), configFetcher, selectionBuilder(), new QueryParameterAnnotationsExtractor("topic")
+            ));
+    }
+    
+    @Bean
+    org.atlasapi.query.v4.topic.PopularTopicController v4PopularTopicController() {
+        return new org.atlasapi.query.v4.topic.PopularTopicController(topicQueryResolver, topicSearcher, topicModelOutputter(), configFetcher);
     }
 
     @Bean
@@ -317,7 +353,7 @@ public class QueryWebModule {
 
     @Bean
     TopicController topicController() {
-        return new TopicController(new PublisherFilteringTopicResolver(topicResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(), queryController());
+        return new TopicController(new PublisherFilteringTopicResolver(topicQueryResolver), new PublisherFilteringTopicContentLister(topicContentLister), configFetcher, log, topicModelOutputter(), queryController());
     }
 
     @Bean
@@ -342,7 +378,7 @@ public class QueryWebModule {
         AvailableChildrenResolver availableChildren = new MongoAvailableChildrenResolver(mongo);
         UpcomingChildrenResolver upcomingChildren = new MongoUpcomingChildrenResolver(mongo);
         RecentlyBroadcastChildrenResolver recentChildren = new MongoRecentlyBroadcastChildrenResolver(mongo);
-        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicResolver, availableChildren, upcomingChildren, productResolver, recentChildren);
+        ContainerModelSimplifier containerSimplier = new ContainerModelSimplifier(itemModelSimplifier(), localHostName, contentGroupResolver, topicQueryResolver, availableChildren, upcomingChildren, productResolver, recentChildren);
         containerSimplier.exposeIds(Boolean.valueOf(exposeIds));
         return containerSimplier;
     }
@@ -351,7 +387,7 @@ public class QueryWebModule {
     ItemModelSimplifier itemModelSimplifier() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo, idCodec);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicQueryResolver, productResolver, segmentResolver, containerSummary);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }
@@ -441,7 +477,7 @@ public class QueryWebModule {
         .register(SUB_ITEMS, new SubItemAnnotation(), commonImplied)
         .register(CLIPS, new ClipsAnnotation(), commonImplied)
         .register(PEOPLE, new PeopleAnnotation(), commonImplied)
-        .register(TOPICS, new TopicsAnnotation(topicResolver, localHostName, idCodec), commonImplied)
+        .register(TOPICS, new TopicsAnnotation(topicQueryResolver, localHostName, idCodec), commonImplied)
         .register(CONTENT_GROUPS, new ContentGroupsAnnotation(contentGroupResolver), commonImplied)
         .register(SEGMENT_EVENTS, new SegmentEventsAnnotation(), commonImplied)
         .register(RELATED_LINKS, new RelatedLinksAnnotation(), commonImplied)

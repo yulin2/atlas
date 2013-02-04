@@ -55,7 +55,7 @@ public class ContentResolvingSearchTest extends TestCase {
         List<Publisher> publishers = ImmutableList.of(Publisher.BBC);
 
         String searchQuery = "test";
-        ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Enum<Publisher>>copyOf(publishers)).withSelection(selection).build();
+        ContentQuery contentQuery = ContentQueryBuilder.query().isAnEnumIn(Attributes.DESCRIPTION_PUBLISHER, ImmutableList.<Publisher>copyOf(publishers)).withSelection(selection).build();
         SearchQuery query = new SearchQuery(searchQuery, selection, publishers, 1.0f, 0.0f, 0.0f);
         
         when(fuzzySearcher.search(query)).thenReturn(new SearchResults(ImmutableList.of(brand.getId())));
