@@ -12,7 +12,9 @@ import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
-import org.atlasapi.messaging.MessageQueuingContentStore;
+import org.atlasapi.messaging.MessageQueueingContentStore;
+import org.atlasapi.media.topic.TopicStore;
+import org.atlasapi.messaging.MessageQueueingTopicStore;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentResolverBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -97,8 +99,8 @@ public class AtlasPersistenceModule {
     private final String esRequestTimeout = Configurer.get("elasticsearch.requestTimeout").get();
     private final Parameter processingConfig = Configurer.get("processing.config");
 
-    @Resource(name = "changesProducer")
-    private JmsTemplate changesProducer;
+    @Resource(name = "contentChanges") private JmsTemplate contentChanges;
+    @Resource(name = "topicChanges") private JmsTemplate topicChanges;
 
     @PostConstruct
     public void init() {
@@ -120,8 +122,13 @@ public class AtlasPersistenceModule {
     
     @Bean
     public ContentStore contentStore() {
-        return new MessageQueuingContentStore(changesProducer, 
+        return new MessageQueueingContentStore(contentChanges, 
             persistenceModule().contentStore());
+    }
+    
+    @Bean TopicStore topicStore() {
+        return new MessageQueueingTopicStore(topicChanges,
+            persistenceModule().topicStore());
     }
 
     @Bean
@@ -198,7 +205,7 @@ public class AtlasPersistenceModule {
         if (Boolean.valueOf(generateIds)) {
             contentWriter = new LookupStoreBackedIdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
-        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter, new TranslatorContentHasher());
+        contentWriter = new MessageQueueingContentWriter(contentChanges, contentWriter, new TranslatorContentHasher());
         return contentWriter;
     }
 
@@ -218,7 +225,7 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    public TopicCreatingTopicResolver topicStore() {
+    public TopicCreatingTopicResolver topicResolver() {
         return mongoContentPersistenceModule().topicStore();
     }
     
@@ -319,7 +326,7 @@ public class AtlasPersistenceModule {
             contentWriter = new ContentResolverBackedIdSettingContentWriter(cassandraContentStore(), idGeneratorBuilder().generator("content"), contentWriter);
         }
         contentWriter = new EquivalenceWritingContentWriter(contentWriter, cassandraContentPersistenceModule().cassandraLookupEntryStore());
-        contentWriter = new MessageQueueingContentWriter(changesProducer, contentWriter, new TranslatorContentHasher());
+        contentWriter = new MessageQueueingContentWriter(contentChanges, contentWriter, new TranslatorContentHasher());
         return contentWriter;
     }
 
@@ -477,7 +484,7 @@ public class AtlasPersistenceModule {
     @Qualifier("cassandraTopicBootstrapper")
     public ContentBootstrapper cassandraTopicBootstrapper() {
         ContentBootstrapper bootstrapper = new ContentBootstrapper();
-        bootstrapper.withTopicListers(topicStore());
+        bootstrapper.withTopicListers(topicResolver());
         return bootstrapper;
     }
 

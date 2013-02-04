@@ -1,16 +1,16 @@
 package org.atlasapi.messaging;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.UUID;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 
-import org.atlasapi.media.content.Content;
-import org.atlasapi.media.content.ContentStore;
-import org.atlasapi.media.content.ForwardingContentStore;
-import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.media.topic.ForwardingTopicStore;
+import org.atlasapi.media.topic.Topic;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.media.util.WriteResult;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.slf4j.Logger;
@@ -20,45 +20,44 @@ import org.springframework.jms.core.MessageCreator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+public class MessageQueueingTopicStore extends ForwardingTopicStore {
+    
+    private static final Logger log = LoggerFactory.getLogger(MessageQueueingContentStore.class);
 
-public class MessageQueuingContentStore extends ForwardingContentStore {
-
-    private static final Logger log = LoggerFactory.getLogger(MessageQueueingContentWriter.class);
-
-    private JmsTemplate template;
-    private ContentStore delegate;
+    private final JmsTemplate template;
+    private final TopicStore delegate;
+    
     private final ObjectMapper mapper = JsonFactory.makeJsonMapper();
 
-    public MessageQueuingContentStore(JmsTemplate template, ContentStore delegate) {
-        this.template = template;
-        this.delegate = delegate;
+    public MessageQueueingTopicStore(JmsTemplate template, TopicStore delegate) {
+        this.template = checkNotNull(template);
+        this.delegate = checkNotNull(delegate);
     }
     
     @Override
-    protected ContentStore delegate() {
+    protected TopicStore delegate() {
         return delegate;
     }
 
     @Override
-    public <C extends Content> WriteResult<C> writeContent(C content) {
-        WriteResult<C> result = super.writeContent(content);
+    public WriteResult<Topic> writeTopic(Topic topic) {
+        WriteResult<Topic> result = delegate.writeTopic(topic);
         if (result.written()) {
             writeMessage(result);
         }
         return result;
     }
 
-    private <C extends Content> void writeMessage(final WriteResult<C> result) {
+    private void writeMessage(final WriteResult<Topic> result) {
         template.send(new MessageCreator() {
             @Override
             public Message createMessage(Session session) throws JMSException {
-                TextMessage message = session.createTextMessage(serialize(createEntityUpdatedMessage(result)));
-                return message;
+                return session.createTextMessage(serialize(createEntityUpdatedMessage(result)));
             }
         });
     }
     
-    private <C extends Content> EntityUpdatedMessage createEntityUpdatedMessage(WriteResult<C> result) {
+    private <T extends Topic> EntityUpdatedMessage createEntityUpdatedMessage(WriteResult<T> result) {
         return new EntityUpdatedMessage(
                 UUID.randomUUID().toString(),
                 result.getWriteTime().getMillis(),
@@ -76,5 +75,4 @@ public class MessageQueuingContentStore extends ForwardingContentStore {
         }
         return result;
     }
-    
 }
