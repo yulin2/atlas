@@ -17,8 +17,10 @@ public class AtlasMessagingModule {
     
     @Value("${messaging.broker.url}")
     private String brokerUrl;
-    @Value("${messaging.destination.changes}")
-    private String changesDestination;
+    @Value("${messaging.destination.changes.content}")
+    private String contentChangesDestination;
+    @Value("${messaging.destination.changes.topic}")
+    private String topicChangesDestination;
     @Autowired
     private MessageStore messageStore;
 
@@ -32,10 +34,19 @@ public class AtlasMessagingModule {
     
     @Bean
     @Lazy(true)
-    public JmsTemplate changesProducer() {
+    public JmsTemplate contentChanges() {
         JmsTemplate jmsTemplate = new JmsTemplate(activemqConnectionFactory());
         jmsTemplate.setPubSubDomain(true);
-        jmsTemplate.setDefaultDestinationName(changesDestination);
+        jmsTemplate.setDefaultDestinationName(contentChangesDestination);
+        return jmsTemplate;
+    }
+    
+    @Bean
+    @Lazy(true)
+    public JmsTemplate topicChanges() {
+        JmsTemplate jmsTemplate = new JmsTemplate(activemqConnectionFactory());
+        jmsTemplate.setPubSubDomain(true);
+        jmsTemplate.setDefaultDestinationName(topicChangesDestination);
         return jmsTemplate;
     }
     
