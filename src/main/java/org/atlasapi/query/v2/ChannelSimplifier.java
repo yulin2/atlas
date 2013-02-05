@@ -42,11 +42,11 @@ public class ChannelSimplifier {
     private static final Predicate<ChannelNumbering> CURRENT_OR_FUTURE = new Predicate<ChannelNumbering>() {
         @Override
         public boolean apply(ChannelNumbering input) {
-            return input.getEndDate() == null || !input.getEndDate().isAfter(new LocalDate());
+            return input.getEndDate() == null || input.getEndDate().isAfter(new LocalDate());
         }
     };
 
-    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver   ) {
+    public ChannelSimplifier(NumberToShortStringCodec idCodec, ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver) {
         this.idCodec = idCodec;
         this.channelResolver = channelResolver;
         this.channelGroupResolver = channelGroupResolver;
