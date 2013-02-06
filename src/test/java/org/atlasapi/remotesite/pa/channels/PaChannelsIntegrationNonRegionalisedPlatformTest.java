@@ -22,6 +22,7 @@ public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
 
     private PaChannelsIngester channelsIngester;
     private PaChannelGroupsIngester channelGroupsIngester;
+    private PaChannelDataHandler dataHandler;
     private File file = new File("src/test/resources/", "201212141542_tv_channel_data.xml");
     private ChannelStore channelStore;
     private ChannelGroupStore channelGroupStore;
@@ -35,10 +36,10 @@ public class PaChannelsIntegrationNonRegionalisedPlatformTest extends TestCase {
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
         channelGroupStore = new MongoChannelGroupStore(db);
         channelStore = new MongoChannelStore(db, channelGroupStore, channelGroupStore);
-        channelsIngester = new PaChannelsIngester(channelStore, channelStore);
-        channelGroupsIngester = new PaChannelGroupsIngester(channelGroupStore, channelGroupStore, channelStore, channelStore);
-        updater = new PaChannelsUpdater(store, channelsIngester, channelGroupsIngester);
-        
+        channelsIngester = new PaChannelsIngester();
+        channelGroupsIngester = new PaChannelGroupsIngester();
+        dataHandler = new PaChannelDataHandler(channelsIngester, channelGroupsIngester, channelStore, channelStore, channelGroupStore, channelGroupStore);
+        updater = new PaChannelsUpdater(store, dataHandler);
         updater.run();
     }
     

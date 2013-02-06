@@ -1,7 +1,6 @@
 package org.atlasapi.remotesite.pa.channels;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,7 @@ import com.metabroadcast.common.intl.Countries;
 
 public class BasicChannelGroupIngestTest {
 
-    private final PaChannelGroupsIngester ingester = new PaChannelGroupsIngester(mock(ChannelGroupResolver.class), mock(ChannelGroupWriter.class), mock(ChannelResolver.class), mock(ChannelWriter.class));
+    private final PaChannelGroupsIngester ingester = new PaChannelGroupsIngester();
     
     @Test
     public void testBasicPlatformIngest() {
@@ -46,13 +45,14 @@ public class BasicChannelGroupIngestTest {
         serviceProvider.setId("2");
         serviceProvider.setRegions(Lists.<RegionalisationInfo>newArrayList());
 
-        Platform platform = ingester.processBasicPlatform(platformInfo.createPlatform());
+        ChannelGroupTree result = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.createServiceProvider()), ImmutableList.<org.atlasapi.remotesite.pa.channels.bindings.Region>of());
+        Platform platform = result.getPlatform();
         
         // test that platform fields are picked up ok
         assertEquals("Freeview", platform.getTitle());
         assertEquals(new TemporalString("Freeview", new LocalDate(2011, 9, 28), null), Iterables.getOnlyElement(platform.getAllTitles()));
         assertEquals("http://ref.atlasapi.org/platforms/pressassociation.com/3", platform.getCanonicalUri());
-        assertEquals("http://pressassociation.com/platforms/3", Iterables.getOnlyElement(platform.getAliases()));
+        assertEquals("http://pressassociation.com/platforms/3", Iterables.getOnlyElement(platform.getAliasUrls()));
         assertEquals(Publisher.METABROADCAST, platform.getPublisher());
         assertEquals(ImmutableSet.of(Countries.GB), platform.getAvailableCountries());
     }
@@ -64,6 +64,7 @@ public class BasicChannelGroupIngestTest {
         regionalisation.setRegionId("61");
         
         ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
+        serviceProvider.setId("2");
         serviceProvider.setRegions(Lists.newArrayList(regionalisation));
         
         // create regions
@@ -76,16 +77,20 @@ public class BasicChannelGroupIngestTest {
         yorkshire.setName("Yorkshire", "2007-06-10");
         
         PlatformInfo platformInfo = new PlatformInfo();
+        platformInfo.setName("Freeview", "2011-09-28");
         platformInfo.setId("3");
+        platformInfo.setServiceProviderId("2");
+        platformInfo.setCountries(ImmutableList.of(Countries.GB.code()));
         
-        Map<String, Region> regions = ingester.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()), platformInfo.createPlatform(), ImmutableSet.of(Countries.GB));
+        ChannelGroupTree tree = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.createServiceProvider()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()));
+        Map<String, Region> regions = tree.getRegions();
         
         Region region = Iterables.getOnlyElement(regions.values());
         
         assertEquals("South", region.getTitle());
         assertEquals(new TemporalString("South", new LocalDate(2009, 1, 28), null), Iterables.getOnlyElement(region.getAllTitles()));
         assertEquals("http://ref.atlasapi.org/regions/pressassociation.com/3-61", region.getCanonicalUri());
-        assertEquals("http://pressassociation.com/regions/3-61", Iterables.getOnlyElement(region.getAliases()));
+        assertEquals("http://pressassociation.com/regions/3-61", Iterables.getOnlyElement(region.getAliasUrls()));
         assertEquals(Publisher.METABROADCAST, region.getPublisher());
         assertEquals(ImmutableSet.of(Countries.GB), region.getAvailableCountries());
     }

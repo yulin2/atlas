@@ -21,15 +21,16 @@ import org.atlasapi.media.entity.simple.HistoricalChannelGroupEntry;
 import org.atlasapi.media.entity.simple.HistoricalChannelNumberingEntry;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.joda.time.LocalDate;
-import org.openjena.atlas.lib.MultiMap;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.intl.Countries;
@@ -220,7 +221,7 @@ public class ChannelSimplifier {
     
     private Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> simplify(Set<ChannelNumbering> channelNumberings, final boolean toChannels, final boolean showHistory) {
         if (showHistory) {
-            final MultiMap<Long, ChannelNumbering> channelMapping = MultiMap.createMapSet();
+            final Multimap<Long, ChannelNumbering> channelMapping = ArrayListMultimap.create();
             for (ChannelNumbering numbering : channelNumberings) {
                 if (toChannels) {
                     channelMapping.put(numbering.getChannel(), numbering);

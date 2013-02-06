@@ -32,14 +32,12 @@ public class PaChannelsUpdater extends ScheduledTask {
     private static final DateTimeFormatter FILEDATETIME_FORMAT = DateTimeFormat.forPattern("yyyyMMddHHmm").withZone(DateTimeZones.LONDON);
 
     private final PaProgrammeDataStore dataStore;
-    private final PaChannelsIngester channelsIngester;
-    private final PaChannelGroupsIngester channelGroupsIngester;
+    private final PaChannelDataHandler channelDataHandler;
     private final Logger log = LoggerFactory.getLogger(PaChannelsUpdater.class);
 
-    public PaChannelsUpdater(PaProgrammeDataStore dataStore, PaChannelsIngester channelsIngester, PaChannelGroupsIngester channelGroupsIngester) {
+    public PaChannelsUpdater(PaProgrammeDataStore dataStore, PaChannelDataHandler channelDataHandler) {
         this.dataStore = dataStore;
-        this.channelsIngester = channelsIngester;
-        this.channelGroupsIngester = channelGroupsIngester;
+        this.channelDataHandler = channelDataHandler;
     }
     
     @Override
@@ -118,9 +116,7 @@ public class PaChannelsUpdater extends ScheduledTask {
 
             public void afterUnmarshal(Object target, Object parent) {
                 if (target instanceof TvChannelData) {
-                    TvChannelData channelData = (TvChannelData) target;
-                    channelsIngester.processStations(channelData.getStations().getStation(), channelData.getServiceProviders().getServiceProvider());
-                    channelGroupsIngester.processPlatforms(channelData.getPlatforms().getPlatform(), channelData.getServiceProviders().getServiceProvider(), channelData.getRegions().getRegion());
+                    channelDataHandler.handle((TvChannelData) target);
                 }
             }
         };

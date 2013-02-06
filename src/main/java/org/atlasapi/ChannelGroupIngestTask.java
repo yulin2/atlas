@@ -76,7 +76,7 @@ public class ChannelGroupIngestTask implements Runnable {
         channelGroup.setPublisher(publisher);
         channelGroup.setAvailableCountries(ImmutableSet.of(Countries.GB));
         
-        channelGroupWriter.store(channelGroup);
+        channelGroupWriter.createOrUpdate(channelGroup);
     }
     
     private void createRegion(Platform platform, Publisher publisher) {
@@ -87,7 +87,7 @@ public class ChannelGroupIngestTask implements Runnable {
         channelGroup.setPublisher(publisher);
         channelGroup.setAvailableCountries(ImmutableSet.of(Countries.GB));
         
-        channelGroupWriter.store(channelGroup);
+        channelGroupWriter.createOrUpdate(channelGroup);
     }
     
     private Function<String, Long> TO_CHANNEL_ID = new Function<String, Long>() {

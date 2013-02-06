@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
-import org.atlasapi.persistence.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.remotesite.pa.PaChannelMap;
@@ -25,10 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.ImmutableList.Builder;
-import com.metabroadcast.common.base.Maybe;
 
 public class PaChannelsIngester {
 
@@ -45,43 +42,29 @@ public class PaChannelsIngester {
         .put("Radio", MediaType.VIDEO)
         .build();
     
-    private final ChannelResolver channelResolver;
-    private final ChannelWriter channelWriter;
     private final DateTimeFormatter formatter = ISODateTimeFormat.date();
     private final Logger log = LoggerFactory.getLogger(PaChannelsIngester.class);
 
-    public PaChannelsIngester(ChannelResolver channelResolver, ChannelWriter channelWriter) {
-        this.channelResolver = channelResolver;
-        this.channelWriter = channelWriter;
-    }
-    
-    public void processStations(List<Station> stations, List<ServiceProvider> serviceProviders) {
-        for (Station station : stations) {
-            try {
+    public ChannelTree processStation(Station station, List<ServiceProvider> serviceProviders) {
+        try {
             if (!station.getChannels().getChannel().isEmpty()) {
                 if (station.getChannels().getChannel().size() == 1) {
-                    Channel channel = processStandaloneChannel(station.getChannels().getChannel().get(0), serviceProviders);
-                    createOrMergeChannel(channel);
+                    return new ChannelTree(null, ImmutableList.of(processStandaloneChannel(station.getChannels().getChannel().get(0), serviceProviders)));
                 } else {
-                    Channel parentChannel = createOrMergeChannel(processParentChannel(station, station.getChannels().getChannel().get(0)));
-
+                    Channel parent = processParentChannel(station, station.getChannels().getChannel().get(0));
                     List<Channel> children = processChildChannels(station.getChannels().getChannel(), serviceProviders);
-
-                    for (Channel child : children) {
-                        child.setParent(parentChannel);
-                        createOrMergeChannel(child);
-                    }
+                    return new ChannelTree(parent, children);
                 }
             } else {
                 log.error("Station with id " + station.getId() + " has no channels");
             }
-            } catch (Exception e) {
-                log.error("Exception thrown while processing station with id " + station.getId(), e);
-            }
+        } catch (Exception e) {
+            log.error("Exception thrown while processing station with id " + station.getId(), e);
         }
+        return new ChannelTree(null, ImmutableList.<Channel>of());
     }
-    
-    List<Channel> processChildChannels(List<org.atlasapi.remotesite.pa.channels.bindings.Channel> channels, List<ServiceProvider> serviceProviders) {
+
+    private List<Channel> processChildChannels(List<org.atlasapi.remotesite.pa.channels.bindings.Channel> channels, List<ServiceProvider> serviceProviders) {
         Builder<Channel> children = ImmutableList.<Channel>builder();
         for (org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel : channels) {
             children.add(processStandaloneChannel(paChannel, serviceProviders)); 
@@ -97,7 +80,7 @@ public class PaChannelsIngester {
         return "pa-station-" + id;
     }
 
-    Channel processParentChannel(Station station, org.atlasapi.remotesite.pa.channels.bindings.Channel firstChild) {
+    private Channel processParentChannel(Station station, org.atlasapi.remotesite.pa.channels.bindings.Channel firstChild) {
         
         Channel parentChannel = Channel.builder()
             .withUri(STATION_URI_PREFIX + station.getId())
@@ -129,7 +112,7 @@ public class PaChannelsIngester {
         return STATION_ALIAS_PREFIX + id;
     }
 
-    Channel processStandaloneChannel(org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel, List<ServiceProvider> serviceProviders) {
+    private Channel processStandaloneChannel(org.atlasapi.remotesite.pa.channels.bindings.Channel paChannel, List<ServiceProvider> serviceProviders) {
         LocalDate startDate = formatter.parseLocalDate(paChannel.getStartDate());
         
         Channel channel = Channel.builder()
@@ -236,32 +219,5 @@ public class PaChannelsIngester {
                 channel.addImage(IMAGE_PREFIX + logo.getvalue(), imageStartDate);
             }
         }    
-    }
-    
-    private Channel createOrMergeChannel(Channel newChannel) {
-        // TODO new aliases
-        String alias = Iterables.getFirst(newChannel.getAliasUrls(), null);
-        if (alias == null) {
-            throw new RuntimeException("channel with uri " + newChannel.getCanonicalUri() + " has no aliases");
-        }
-        Maybe<Channel> existing = channelResolver.forAlias(alias);
-        if (existing.hasValue()) {
-            Channel existingChannel = existing.requireValue();
-
-            existingChannel.setTitles(newChannel.allTitles());
-            existingChannel.setImages(newChannel.allImages());
-            existingChannel.setStartDate(newChannel.startDate());
-            existingChannel.setEndDate(newChannel.endDate());
-            existingChannel.addAliases(newChannel.getAliases());
-            existingChannel.setParent(newChannel.parent());
-            existingChannel.setMediaType(newChannel.mediaType());
-            existingChannel.setHighDefinition(newChannel.highDefinition());
-            existingChannel.setRegional(newChannel.regional());
-            existingChannel.setTimeshift(newChannel.timeshift());
-            
-            return channelWriter.write(existingChannel);
-        } else {
-            return channelWriter.write(newChannel);
-        }
     }
 }
