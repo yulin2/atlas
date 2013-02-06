@@ -195,11 +195,13 @@ public class ChannelSimplifier {
             ));
         }
         if (input instanceof Region) {
-            Optional<ChannelGroup> platform = channelGroupResolver.channelGroupFor(((Region)input).getPlatform());
-            if (!platform.isPresent()) {
-                throw new RuntimeException("Could not resolve platform on Region " +  input.getTitle());
+            if (((Region)input).getPlatform() != null) {
+                Optional<ChannelGroup> platform = channelGroupResolver.channelGroupFor(((Region)input).getPlatform());
+                if (!platform.isPresent()) {
+                    throw new RuntimeException("Could not resolve platform on Region " +  input.getTitle());
+                }
+                simple.setPlatform(toSubChannelGroup(platform.get()));
             }
-            simple.setPlatform(toSubChannelGroup(platform.get()));
         }
         if (showHistory) {
             simple.setHistory(calculateChannelHistory(input));
