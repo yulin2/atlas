@@ -25,7 +25,7 @@ import org.junit.Test;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.internal.Iterables;
+import com.google.common.collect.Iterables;
 import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.persistence.MongoTestHelper;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
@@ -34,6 +34,7 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
 
     private PaChannelsIngester channelsIngester;
     private PaChannelGroupsIngester channelGroupsIngester;
+    private PaChannelDataHandler dataHandler;
     private File file = new File("src/test/resources/", "201212141541_tv_channel_data.xml");
     private ChannelStore channelStore;
     private ChannelGroupStore channelGroupStore;
@@ -47,9 +48,10 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         DatabasedMongo db = MongoTestHelper.anEmptyTestDatabase();
         channelGroupStore = new MongoChannelGroupStore(db);
         channelStore = new MongoChannelStore(db, channelGroupStore, channelGroupStore);
-        channelsIngester = new PaChannelsIngester(channelStore, channelStore);
-        channelGroupsIngester = new PaChannelGroupsIngester(channelGroupStore, channelGroupStore, channelStore, channelStore);
-        updater = new PaChannelsUpdater(store, channelsIngester, channelGroupsIngester);
+        channelsIngester = new PaChannelsIngester();
+        channelGroupsIngester = new PaChannelGroupsIngester();
+        dataHandler = new PaChannelDataHandler(channelsIngester, channelGroupsIngester, channelStore, channelStore, channelGroupStore, channelGroupStore);
+        updater = new PaChannelsUpdater(store, dataHandler);
         updater.run();
     }
     
@@ -115,11 +117,11 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         boolean bbcOneNiPresent = false;
         for (ChannelNumbering numbering : numberings) {
             if (numbering.getChannel().equals(bbcFour.getId())
-                && numbering.getChannelNumber().equals(9)) {
+                && numbering.getChannelNumber().equals("9")) {
                 bbcFourPresent = true;
             }
             if (numbering.getChannel().equals(bbcNi.getId())
-                    && numbering.getChannelNumber().equals(1)) {
+                    && numbering.getChannelNumber().equals("1")) {
                     bbcOneNiPresent = true;
                 }
         }
@@ -138,11 +140,11 @@ public class PaChannelsIngestIntegrationTest extends TestCase {
         bbcOneNiPresent = false;
         for (ChannelNumbering numbering : numberings) {
             if (numbering.getChannel().equals(bbcFour.getId())
-                && numbering.getChannelNumber().equals(9)) {
+                && numbering.getChannelNumber().equals("9")) {
                 bbcFourPresent = true;
             }
             if (numbering.getChannel().equals(bbcNi.getId())
-                    && numbering.getChannelNumber().equals(1)) {
+                    && numbering.getChannelNumber().equals("1")) {
                     bbcOneNiPresent = true;
                 }
         }

@@ -51,7 +51,7 @@ public class MongoChannelInitialPopulate {
 			}
 			oldChannel.setSource(Publisher.METABROADCAST);
 			oldChannel.setCanonicalUri(oldChannel.uri());
-			store.write(oldChannel);
+			store.createOrUpdate(oldChannel);
 			written++;
 		}
         return written;

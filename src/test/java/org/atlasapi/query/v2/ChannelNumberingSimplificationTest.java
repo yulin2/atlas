@@ -49,7 +49,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         Platform platform = new Platform();
         platform.setId(channelGroupId);
         
-        channelGroupStore.store(platform);
+        channelGroupStore.createOrUpdate(platform);
     }
     
     @Test
@@ -67,7 +67,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channel.addChannelNumber(numbering);
         channelGroup.addChannelNumbering(numbering);
         
-        channelGroup = channelGroupStore.store(channelGroup);
+        channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         
         org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, true, false, false);
         assertThat(simpleChannel.getChannelGroups().size(), is(1));
@@ -99,7 +99,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channelGroup.addChannelNumbering(one);
         channelGroup.addChannelNumbering(two);
         
-        channelGroup = channelGroupStore.store(channelGroup);
+        channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         
         org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, false, false, false);
         assertThat(simpleChannel.getChannelGroups().size(), is(2));
@@ -143,7 +143,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channelGroup.addChannelNumbering(current);
         channelGroup.addChannelNumbering(future);
         
-        channelGroup = channelGroupStore.store(channelGroup);
+        channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         
         org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, false, false, false);
         assertThat(simpleChannel.getChannelGroups().size(), is(2));
@@ -188,7 +188,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channelGroup.addChannelNumbering(current);
         channelGroup.addChannelNumbering(future);
         
-        channelGroup = channelGroupStore.store(channelGroup);
+        channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         
         org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, true, false, false);
         assertThat(simpleChannel.getChannelGroups().size(), is(1));
@@ -239,7 +239,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channelGroup.addChannelNumbering(current2);
         channelGroup.addChannelNumbering(future);
         
-        channelGroup = channelGroupStore.store(channelGroup);
+        channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         
         org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, true, false, false);
         assertThat(simpleChannel.getChannelGroups().size(), is(2));
@@ -285,7 +285,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         }
 
         @Override
-        public ChannelGroup store(ChannelGroup channelGroup) {
+        public ChannelGroup createOrUpdate(ChannelGroup channelGroup) {
             channelGroups.put(channelGroup.getId(), channelGroup);
             return channelGroup;
         }

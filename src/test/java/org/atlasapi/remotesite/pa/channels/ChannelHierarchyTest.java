@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.TemporalString;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
@@ -25,7 +23,6 @@ import org.atlasapi.remotesite.pa.channels.bindings.Variation;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.google.common.base.Equivalence;
 import com.google.common.collect.ImmutableList;
@@ -35,10 +32,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.internal.Objects;
 import com.google.inject.internal.Sets;
 
-
 public class ChannelHierarchyTest {
 
-    private final PaChannelsIngester processor = new PaChannelsIngester(Mockito.mock(ChannelResolver.class), Mockito.mock(ChannelWriter.class));
+    private final PaChannelsIngester ingester = new PaChannelsIngester();
     
     @Test
     public void testStationWithSingleChannel() {
@@ -53,11 +49,19 @@ public class ChannelHierarchyTest {
         channel.setRegional();
         channel.setTimeshift("60");
         
+        StationInfo station = new StationInfo();
+        station.setId("1");
+        station.setName("Heat TV", "2002-03-12");
+        // TODO test images on stations
+//        station.setImage("", "");
+        station.addChannel(channel);
+        
         ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
         serviceProvider.setId("9");
         serviceProvider.setName("YouView", "2000-01-01");
         
-        Channel createdChannel = processor.processStandaloneChannel(channel.createPaChannel(), ImmutableList.of(serviceProvider.createServiceProvider()));
+        ChannelTree tree = ingester.processStation(station.createPaStation(), ImmutableList.of(serviceProvider.createServiceProvider()));
+        Channel createdChannel = Iterables.getOnlyElement(tree.getChildren());
         
         assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/1741", createdChannel.getCanonicalUri());
         
@@ -113,8 +117,10 @@ public class ChannelHierarchyTest {
         serviceProvider.setId("9");
         serviceProvider.setName("YouView", "2000-01-01");
         
-        Channel parent = processor.processParentChannel(station.createPaStation(), westMidlands.createPaChannel());
-        List<Channel> children = processor.processChildChannels(station.createPaStation().getChannels().getChannel(), ImmutableList.of(serviceProvider.createServiceProvider()));
+        ChannelTree tree = ingester.processStation(station.createPaStation(), ImmutableList.of(serviceProvider.createServiceProvider()));
+        
+        Channel parent = tree.getParent();
+        List<Channel> children = tree.getChildren();
         
         assertEquals(Publisher.METABROADCAST, parent.source());
         assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/stations/1", parent.uri());

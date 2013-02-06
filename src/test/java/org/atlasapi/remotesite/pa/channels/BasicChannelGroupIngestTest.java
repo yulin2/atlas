@@ -1,15 +1,10 @@
 package org.atlasapi.remotesite.pa.channels;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.Map;
 
-import org.atlasapi.media.channel.ChannelGroupResolver;
-import org.atlasapi.media.channel.ChannelGroupWriter;
-import org.atlasapi.media.channel.ChannelResolver;
-import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.channel.Region;
 import org.atlasapi.media.channel.TemporalString;
@@ -32,7 +27,7 @@ import com.metabroadcast.common.intl.Countries;
 
 public class BasicChannelGroupIngestTest {
 
-    private final PaChannelGroupsIngester ingester = new PaChannelGroupsIngester(mock(ChannelGroupResolver.class), mock(ChannelGroupWriter.class), mock(ChannelResolver.class), mock(ChannelWriter.class));
+    private final PaChannelGroupsIngester ingester = new PaChannelGroupsIngester();
     
     @Test
     public void testBasicPlatformIngest() {
@@ -46,7 +41,8 @@ public class BasicChannelGroupIngestTest {
         serviceProvider.setId("2");
         serviceProvider.setRegions(Lists.<RegionalisationInfo>newArrayList());
 
-        Platform platform = ingester.processBasicPlatform(platformInfo.createPlatform());
+        ChannelGroupTree result = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.createServiceProvider()), ImmutableList.<org.atlasapi.remotesite.pa.channels.bindings.Region>of());
+        Platform platform = result.getPlatform();
         
         // test that platform fields are picked up ok
         assertEquals("Freeview", platform.getTitle());
@@ -64,6 +60,7 @@ public class BasicChannelGroupIngestTest {
         regionalisation.setRegionId("61");
         
         ServiceProviderInfo serviceProvider = new ServiceProviderInfo();
+        serviceProvider.setId("2");
         serviceProvider.setRegions(Lists.newArrayList(regionalisation));
         
         // create regions
@@ -76,9 +73,13 @@ public class BasicChannelGroupIngestTest {
         yorkshire.setName("Yorkshire", "2007-06-10");
         
         PlatformInfo platformInfo = new PlatformInfo();
+        platformInfo.setName("Freeview", "2011-09-28");
         platformInfo.setId("3");
+        platformInfo.setServiceProviderId("2");
+        platformInfo.setCountries(ImmutableList.of(Countries.GB.code()));
         
-        Map<String, Region> regions = ingester.createRegionsForPlatform(ImmutableList.of(regionalisation.createRegionalisation()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()), platformInfo.createPlatform(), ImmutableSet.of(Countries.GB));
+        ChannelGroupTree tree = ingester.processPlatform(platformInfo.createPlatform(), ImmutableList.of(serviceProvider.createServiceProvider()), ImmutableList.of(south.createRegion(), yorkshire.createRegion()));
+        Map<String, Region> regions = tree.getRegions();
         
         Region region = Iterables.getOnlyElement(regions.values());
         
