@@ -9,18 +9,20 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.attribute.Attribute;
-import org.atlasapi.content.criteria.attribute.IdAttribute;
+import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.query.v2.QueryParameterAnnotationsExtractor;
+import org.atlasapi.query.common.AttributeCoercer;
+import org.atlasapi.query.common.AttributeCoercers;
+import org.atlasapi.query.common.Query;
+import org.atlasapi.query.common.QueryAttributeParser;
+import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -32,17 +34,11 @@ import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 
-
 public class TopicQueryParserTest {
 
     private final NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
     private final QueryAttributeParser atrributes = new QueryAttributeParser(ImmutableMap.<Attribute<?>, AttributeCoercer<String, ?>> of(
-        new IdAttribute("id", Topic.class, false), new AbstractAttributeCoercer<String, Id>() {
-            @Override
-            protected Id coerce(String input) {
-                return Id.valueOf(idCodec.decode(input));
-            }
-        }
+        Attributes.ID, AttributeCoercers.idCoercer(idCodec) 
     ));
     
     private final ApplicationConfigurationFetcher appFetcher = mock(ApplicationConfigurationFetcher.class);

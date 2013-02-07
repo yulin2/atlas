@@ -1,4 +1,4 @@
-package org.atlasapi.query.v4.topic;
+package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -31,13 +31,13 @@ public class QueryAttributeParser {
     private ImmutableMap<String, Attribute<?>> attributes;
     private Map<Attribute<?>, AttributeCoercer<String, ?>> coercers;
 
-    public QueryAttributeParser(Map<Attribute<?>, AttributeCoercer<String,?>> attributes) {
-        this.attributes = Maps.uniqueIndex(attributes.keySet(), new Function<Attribute<?>, String>(){
+    public QueryAttributeParser(Map<? extends Attribute<?>, ? extends AttributeCoercer<String,?>> attributes) {
+        this.attributes = ImmutableMap.copyOf(Maps.uniqueIndex(attributes.keySet(), new Function<Attribute<?>, String>(){
             @Override
             public String apply(Attribute<?> input) {
                 return input.externalName();
-        }});
-        this.coercers = attributes;
+        }}));
+        this.coercers = ImmutableMap.copyOf(attributes);
     }
 
     public AtomicQuerySet parse(HttpServletRequest request) {

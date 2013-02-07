@@ -35,7 +35,6 @@ import static org.atlasapi.output.Annotation.TOPICS;
 import static org.atlasapi.output.Annotation.UPCOMING;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
@@ -133,6 +132,10 @@ import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicSearcher;
+import org.atlasapi.query.common.AttributeCoercers;
+import org.atlasapi.query.common.QueryAttributeParser;
+import org.atlasapi.query.common.QueryExecutor;
+import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
 import org.atlasapi.query.topic.PublisherFilteringTopicResolver;
@@ -149,9 +152,6 @@ import org.atlasapi.query.v4.schedule.IndexBackedScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleIndexDebugController;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
-import org.atlasapi.query.v4.topic.AttributeCoercer;
-import org.atlasapi.query.v4.topic.IdStringCoercer;
-import org.atlasapi.query.v4.topic.TopicQueryExecutor;
 import org.atlasapi.query.v4.topic.IndexBackedTopicQueryExecutor;
 import org.atlasapi.query.v4.topic.TopicQueryParser;
 import org.atlasapi.query.v4.topic.TopicQueryResultWriter;
@@ -254,11 +254,11 @@ public class QueryWebModule {
     @Bean
     org.atlasapi.query.v4.topic.TopicController v4TopicController() {
         //TODO: move executor to query module
-        TopicQueryExecutor topicQueryExecutor = new IndexBackedTopicQueryExecutor(topicIndex, topicResolver);
+        QueryExecutor<Topic> topicQueryExecutor = new IndexBackedTopicQueryExecutor(topicIndex, topicResolver);
         return new org.atlasapi.query.v4.topic.TopicController(topicQueryExecutor, configFetcher, 
-            new TopicQueryResultWriter(annotations()), new TopicQueryParser(
-                ImmutableMap.<Attribute<?>, AttributeCoercer<String,?>>of(Attributes.ID, new IdStringCoercer(idCodec())),
-                idCodec(), configFetcher, selectionBuilder()
+            new TopicQueryResultWriter(annotations()), new TopicQueryParser("topics",
+                new QueryAttributeParser(ImmutableMap.of(Attributes.ID, AttributeCoercers.idCoercer(idCodec()))),
+                idCodec(), configFetcher, selectionBuilder(), new QueryParameterAnnotationsExtractor("topic")
             ));
     }
     

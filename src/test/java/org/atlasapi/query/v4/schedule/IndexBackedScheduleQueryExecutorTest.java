@@ -29,6 +29,7 @@ import org.atlasapi.media.util.Resolved;
 import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.content.schedule.ScheduleRef;
 import org.atlasapi.persistence.content.schedule.ScheduleRef.ScheduleRefEntry;
+import org.atlasapi.query.common.QueryContext;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Test;
@@ -52,12 +53,12 @@ public class IndexBackedScheduleQueryExecutorTest {
     public void testDoesntResolveContentOnEmptyScheduleRef() throws Exception {
         Channel channel = new Channel(BBC, "One", "one", VIDEO, "one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval);
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
 
         when(index.resolveSchedule(METABROADCAST, channel, interval))
             .thenReturn(Futures.immediateFuture(ScheduleRef.forChannel(channel.getCanonicalUri()).build()));
         
-        ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
+        ChannelSchedule channelSchedule = queryExecutor.execute(query).getOnlyResource();
 
         verify(contentResolver, never()).resolveIds(argThat(any(Iterable.class)));
         
@@ -69,7 +70,7 @@ public class IndexBackedScheduleQueryExecutorTest {
     public void testHandlesSimpleScheduleQuery() throws Exception {
         Channel channel = new Channel(BBC, "One", "one", VIDEO, "one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval);
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
         
         Item item = itemWithBroadcast("item", channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid");
         addBroadcast(item, channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2");
@@ -84,7 +85,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(contentResolver.resolveIds(argThat(hasItem(item.getId()))))
             .thenReturn(queryResult(ImmutableList.<Content>of(item)));
         
-        ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
+        ChannelSchedule channelSchedule = queryExecutor.execute(query).getOnlyResource();
 
         verify(contentResolver).resolveIds(argThat(hasItems(item.getId())));
         
@@ -101,7 +102,7 @@ public class IndexBackedScheduleQueryExecutorTest {
     public void testRepeatedScheduleItemAppearsTwice() throws Exception {
         Channel channel = new Channel(BBC, "One", "one", VIDEO, "one");
         Interval interval = new Interval(0, 100, DateTimeZones.UTC);
-        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval);
+        ScheduleQuery query = new ScheduleQuery(METABROADCAST, channel, interval, QueryContext.defaultContext());
         
         Item item = itemWithBroadcast("item", channel.getCanonicalUri(), dateTime(25), dateTime(75), "bid");
         addBroadcast(item, channel.getCanonicalUri(), dateTime(125), dateTime(175), "bid2");
@@ -117,7 +118,7 @@ public class IndexBackedScheduleQueryExecutorTest {
         when(contentResolver.resolveIds(argThat(hasItems(item.getId()))))
             .thenReturn(queryResult(ImmutableList.<Content>of(item)));
     
-        ChannelSchedule channelSchedule = queryExecutor.execute(query).getChannelSchedule();
+        ChannelSchedule channelSchedule = queryExecutor.execute(query).getOnlyResource();
     
         verify(contentResolver).resolveIds(argThat(hasItems(item.getId())));
         

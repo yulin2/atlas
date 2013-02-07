@@ -1,4 +1,4 @@
-package org.atlasapi.query.v4.topic;
+package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -11,11 +11,22 @@ import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.query.Selection;
 
 public class QueryContext {
+    
+    private static final QueryContext DEFLT_INSTANCE = new QueryContext(
+        ApplicationConfiguration.DEFAULT_CONFIGURATION, Annotation.defaultAnnotations());
+
+    public static final QueryContext defaultContext() {
+        return DEFLT_INSTANCE;
+    }
 
     private final ApplicationConfiguration appConfig;
     private final ImmutableSet<Annotation> annotations;
     private final Optional<Selection> selection;
 
+    public QueryContext(ApplicationConfiguration appConfig, Iterable<Annotation> annotations) {
+        this(appConfig, annotations, null);
+    }
+    
     public QueryContext(ApplicationConfiguration appConfig, Iterable<Annotation> annotations,
         Selection selection) {
         this.appConfig = checkNotNull(appConfig);
@@ -23,7 +34,7 @@ public class QueryContext {
         this.selection = Optional.fromNullable(selection);
     }
 
-    public ApplicationConfiguration getAppConfig() {
+    public ApplicationConfiguration getApplicationConfiguration() {
         return this.appConfig;
     }
 

@@ -1,6 +1,5 @@
 package org.atlasapi.query.v4.schedule;
 
-import static org.atlasapi.application.ApplicationConfiguration.DEFAULT_CONFIGURATION;
 import static org.hamcrest.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -17,9 +16,10 @@ import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.BrandSummary;
-import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
+import org.atlasapi.query.common.QueryContext;
+import org.atlasapi.query.common.QueryResult;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Before;
@@ -60,7 +60,7 @@ public class ScheduleQueryResultWriterTest {
         HttpServletRequest request = new StubHttpServletRequest();
         StubHttpServletResponse response = new StubHttpServletResponse();
         JsonResponseWriter responseWriter = new JsonResponseWriter(request, response);
-        ScheduleQueryResult result = new ScheduleQueryResult(cs, Annotation.defaultAnnotations(), DEFAULT_CONFIGURATION);
+        QueryResult<ChannelSchedule> result = QueryResult.singleResult(cs, QueryContext.defaultContext());
         
         writer.write(result, responseWriter);
         

@@ -9,6 +9,8 @@ import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.annotation.OutputAnnotation;
+import org.atlasapi.query.common.QueryContext;
+import org.atlasapi.query.common.QueryResult;
 import org.atlasapi.query.v4.schedule.EntityListWriter;
 import org.atlasapi.query.v4.schedule.FieldWriter;
 import org.atlasapi.query.v4.schedule.OutputContext;
@@ -47,21 +49,26 @@ public class TopicQueryResultWriter implements QueryResultWriter<Topic> {
     }
 
     @Override
-    public void write(TopicQueryResult result, ResponseWriter writer) throws IOException {
+    public void write(QueryResult<Topic> result, ResponseWriter writer) throws IOException {
         writer.startResponse();
         writeResult(result, writer);
         writer.finishResponse();
     }
 
-    private void writeResult(TopicQueryResult result, ResponseWriter writer)
+    private void writeResult(QueryResult<Topic> result, ResponseWriter writer)
         throws IOException {
 
-        OutputContext ctxt = new OutputContext(
-            registry.activeAnnotations(result.getAnnotations()),
-            result.getApplicationConfiguration()
-        );
+        OutputContext ctxt = outputContext(result.getContext());
 
         FluentIterable<Topic> topics = result.getResources();
         writer.writeList(new TopicWriter(), topics, ctxt);
     }
+    
+    private OutputContext outputContext(QueryContext queryContext) {
+        return new OutputContext(
+            registry.activeAnnotations(queryContext.getAnnotations()),
+            queryContext.getApplicationConfiguration()
+        );
+    }
+    
 }
