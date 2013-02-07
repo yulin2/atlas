@@ -5,6 +5,6 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface QueryParser<T> {
 
-    T queryFrom(HttpServletRequest request);
-
+    Query<T> parse(HttpServletRequest request);
+    
 }
