@@ -17,7 +17,7 @@ import org.atlasapi.query.v4.schedule.ResponseWriter;
 
 import com.google.common.collect.FluentIterable;
 
-public class TopicQueryResultWriter implements QueryResultWriter<TopicQueryResult> {
+public class TopicQueryResultWriter implements QueryResultWriter<Topic> {
 
     private final class TopicWriter implements EntityListWriter<Topic> {
 

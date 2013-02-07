@@ -14,18 +14,19 @@ import com.metabroadcast.common.servlet.StubHttpServletRequest;
 
 public class QueryParameterAnnotationsExtractorTest {
 
-    private final QueryParameterAnnotationsExtractor extractor = new QueryParameterAnnotationsExtractor();
+    private final QueryParameterAnnotationsExtractor contextlessExtractor = new QueryParameterAnnotationsExtractor();
+    private final QueryParameterAnnotationsExtractor contentContextExtractor = new QueryParameterAnnotationsExtractor("content");
 
     @Test
     public void testExtractsAbsentWhenParameterMissing() {
-        Optional<Set<Annotation>> extracted = extractor.extractFromKeys(new StubHttpServletRequest());
+        Optional<Set<Annotation>> extracted = contextlessExtractor.extractFromKeys(new StubHttpServletRequest());
         assertFalse(extracted.isPresent());
     }
     
     @Test
     public void testExtractsAnnotationsFromKeys() {
         HttpServletRequest request = requestWithAnnotationParameter("description,extended_description");
-        Optional<Set<Annotation>> extracted = extractor.extractFromKeys(request);
+        Optional<Set<Annotation>> extracted = contextlessExtractor.extractFromKeys(request);
         assertTrue(extracted.isPresent());
         assertTrue(extracted.get().contains(Annotation.DESCRIPTION));
         assertTrue(extracted.get().contains(Annotation.EXTENDED_DESCRIPTION));
@@ -34,13 +35,13 @@ public class QueryParameterAnnotationsExtractorTest {
     @Test(expected=IllegalArgumentException.class)
     public void testThrowsExceptionForInvalidAnnotationKey() {
         HttpServletRequest request = requestWithAnnotationParameter("descroption,extended_annotation");
-        extractor.extractFromKeys(request);
+        contextlessExtractor.extractFromKeys(request);
     }
 
     @Test
     public void testExtractsAnnotationsFromNamesWithContext() {
         HttpServletRequest request = requestWithAnnotationParameter("description,extended_description");
-        Optional<Set<Annotation>> extracted = extractor.extractFromRequest(request, Optional.of("content"));
+        Optional<Set<Annotation>> extracted = contentContextExtractor.extractFromRequest(request);
         assertTrue(extracted.isPresent());
         assertTrue(extracted.get().contains(Annotation.DESCRIPTION));
         assertTrue(extracted.get().contains(Annotation.EXTENDED_DESCRIPTION));
@@ -49,13 +50,13 @@ public class QueryParameterAnnotationsExtractorTest {
     @Test(expected=IllegalArgumentException.class)
     public void testThrowsExceptionForInvalidAnnotationNameWithContext() {
         HttpServletRequest request = requestWithAnnotationParameter("descroption,extended_annotation");
-        extractor.extractFromRequest(request, Optional.of("content"));
+        contentContextExtractor.extractFromRequest(request);
     }
 
     @Test
     public void testExtractsAnnotationsFromNamesWithoutContext() {
         HttpServletRequest request = requestWithAnnotationParameter("content.description,content.extended_description");
-        Optional<Set<Annotation>> extracted = extractor.extractFromRequest(request, Optional.<String>absent());
+        Optional<Set<Annotation>> extracted = contextlessExtractor.extractFromRequest(request);
         assertTrue(extracted.isPresent());
         assertTrue(extracted.get().contains(Annotation.DESCRIPTION));
         assertTrue(extracted.get().contains(Annotation.EXTENDED_DESCRIPTION));
@@ -64,7 +65,7 @@ public class QueryParameterAnnotationsExtractorTest {
     @Test(expected=IllegalArgumentException.class)
     public void testThrowsExceptionForInvalidAnnotationNameWithoutContext() {
         HttpServletRequest request = requestWithAnnotationParameter("content.descroption,content.extended_annotation");
-        extractor.extractFromRequest(request, Optional.<String>absent());
+        contextlessExtractor.extractFromRequest(request);
     }
     
     private HttpServletRequest requestWithAnnotationParameter(String string) {

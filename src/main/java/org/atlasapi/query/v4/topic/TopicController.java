@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.query.v4.schedule.ErrorResultWriter;
 import org.atlasapi.query.v4.schedule.QueryResultWriter;
@@ -19,28 +20,28 @@ public class TopicController {
 
     private static Logger log = LoggerFactory.getLogger(TopicController.class);
 
-    private final QueryParser<TopicQuery> requestParser;
-    private final TopicQueryExecutor queryExecutor;
-    private final QueryResultWriter<TopicQueryResult> resultWriter;
+    private final QueryParser<Topic> requestParser;
+    private final QueryExecutor<Topic> queryExecutor;
+    private final QueryResultWriter<Topic> resultWriter;
 
     private ResponseWriterFactory writerResolver = new ResponseWriterFactory();
 
-    public TopicController(TopicQueryExecutor queryExecutor,
+    public TopicController(QueryExecutor<Topic> queryExecutor,
         ApplicationConfigurationFetcher appFetcher,
-        QueryResultWriter<TopicQueryResult> resultWriter, TopicQueryParser topicQueryParser) {
+        QueryResultWriter<Topic> resultWriter, TopicQueryParser topicQueryParser) {
         this.requestParser = topicQueryParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
     }
 
-    @RequestMapping({ "/4.0/topics/{tid}.*", "/4.0/topics/{tid}" })
-    public void writeTopic(HttpServletRequest request, HttpServletResponse response)
+    @RequestMapping({ "/4.0/topics/{tid}.*", "/4.0/topics/{tid}", "/4.0/topics.*", "/4.0/topics" })
+    public void writeSingleTopic(HttpServletRequest request, HttpServletResponse response)
         throws IOException {
         ResponseWriter writer = null;
         try {
             writer = writerResolver.writerFor(request, response);
-            TopicQuery topicQuery = requestParser.queryFrom(request);
-            TopicQueryResult queryResult = queryExecutor.execute(topicQuery);
+            Query<Topic> topicQuery = requestParser.parse(request);
+            QueryResult<Topic> queryResult = queryExecutor.execute(topicQuery);
             resultWriter.write(queryResult, writer);
         } catch (Exception e) {
             log.error("Request exception " + request.getRequestURI(), e);
