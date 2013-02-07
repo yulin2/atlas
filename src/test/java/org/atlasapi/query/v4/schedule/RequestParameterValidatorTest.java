@@ -2,6 +2,7 @@ package org.atlasapi.query.v4.schedule;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.atlasapi.query.common.RequestParameterValidator;
 import org.junit.Test;
 
 import com.metabroadcast.common.servlet.StubHttpServletRequest;

@@ -1,30 +1,27 @@
-package org.atlasapi.query.v4.topic;
+package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.application.ApplicationConfiguration;
-import org.atlasapi.output.Annotation;
-
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
 
 public abstract class QueryResult<T> {
 
-    private final ImmutableSet<Annotation> annotations;
-    private final ApplicationConfiguration appConfig;
-
-    protected QueryResult(Iterable<Annotation> annotations,
-        ApplicationConfiguration appConfig) {
-        this.annotations = ImmutableSet.copyOf(annotations);
-        this.appConfig = checkNotNull(appConfig);
+    public static final <T> QueryResult<T> singleResult(T resource, QueryContext context) {
+        return new SingleQueryResult<T>(resource, context);
     }
 
-    public ImmutableSet<Annotation> getAnnotations() {
-        return annotations;
+    public static final <T> QueryResult<T> listResult(Iterable<T> resource, QueryContext context) {
+        return new ListQueryResult<T>(resource, context);
+    }
+    
+    private final QueryContext context;
+
+    protected QueryResult(QueryContext context) {
+        this.context = checkNotNull(context);
     }
 
-    public ApplicationConfiguration getApplicationConfiguration() {
-        return appConfig;
+    public QueryContext getContext() {
+        return context;
     }
 
     public abstract boolean isListResult();
@@ -33,13 +30,12 @@ public abstract class QueryResult<T> {
 
     public abstract T getOnlyResource();
 
-    private final class SingleQueryResult extends QueryResult<T> {
+    private static final class SingleQueryResult<T> extends QueryResult<T> {
 
         private final T resource;
 
-        public SingleQueryResult(T resource, Iterable<Annotation> annotations,
-            ApplicationConfiguration appConfig) {
-            super(annotations, appConfig);
+        public SingleQueryResult(T resource, QueryContext context) {
+            super(context);
             this.resource = checkNotNull(resource);
         }
 
@@ -60,13 +56,12 @@ public abstract class QueryResult<T> {
 
     }
 
-    private final class ListQueryResult extends QueryResult<T> {
+    private static final class ListQueryResult<T> extends QueryResult<T> {
 
         private final FluentIterable<T> resources;
 
-        public ListQueryResult(Iterable<T> resources, Iterable<Annotation> annotations,
-            ApplicationConfiguration appConfig) {
-            super(annotations, appConfig);
+        public ListQueryResult(Iterable<T> resources, QueryContext context) {
+            super(context);
             this.resources = FluentIterable.from(resources);
         }
         

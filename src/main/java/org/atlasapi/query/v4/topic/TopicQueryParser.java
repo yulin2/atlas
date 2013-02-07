@@ -14,22 +14,24 @@ import org.atlasapi.content.criteria.AtomicQuerySet;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.Annotation;
-import org.atlasapi.query.v2.QueryParameterAnnotationsExtractor;
+import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.common.Query;
+import org.atlasapi.query.common.QueryAttributeParser;
+import org.atlasapi.query.common.QueryContext;
+import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
+import org.atlasapi.query.common.QueryParser;
 
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
-import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
 public class TopicQueryParser implements QueryParser<Topic> {
 
-    private static final Selection NO_SELECTION = null;
-    
     private final NumberToShortStringCodec idCodec;
     private final QueryAttributeParser attributeParser;
     private final SelectionBuilder selectionBuilder;
     private final ApplicationConfigurationFetcher configFetcher;
-    private final QueryParameterAnnotationsExtractor annotationExtractor;
+    private final AnnotationsExtractor annotationExtractor;
 
     private final Pattern singleResourcePattern;
 
@@ -55,7 +57,7 @@ public class TopicQueryParser implements QueryParser<Topic> {
     
     private Query<Topic> singleQuery(HttpServletRequest request, Id singleId) {
         return Query.singleQuery(singleId, 
-            new QueryContext(appConfig(request), annotations(request), NO_SELECTION));
+            new QueryContext(appConfig(request), annotations(request)));
     }
     
 
@@ -80,7 +82,7 @@ public class TopicQueryParser implements QueryParser<Topic> {
     private Id tryExtractSingleId(HttpServletRequest request) {
         Matcher matcher = singleResourcePattern.matcher(request.getRequestURI());
         return matcher.find() ? Id.valueOf(idCodec.decode(matcher.group(1)))
-                             : null;
+                              : null;
     }
 
 }

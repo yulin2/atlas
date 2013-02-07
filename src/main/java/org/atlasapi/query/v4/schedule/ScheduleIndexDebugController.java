@@ -51,7 +51,7 @@ public class ScheduleIndexDebugController {
     @RequestMapping({"/system/debug/schedules/{cid}.*","/system/debug/schedules/{cid}"})
     public void debugSchedule(HttpServletRequest request, HttpServletResponse response) throws Exception {
         ScheduleQuery query = requestParser.queryFrom(request);
-        ListenableFuture<ScheduleRef> resolveSchedule = index.resolveSchedule(query.getPublisher(), query.getChannel(), query.getInterval());
+        ListenableFuture<ScheduleRef> resolveSchedule = index.resolveSchedule(query.getSource(), query.getChannel(), query.getInterval());
         gson.toJson(resolveSchedule.get(5, TimeUnit.SECONDS), response.getWriter());
     }
     

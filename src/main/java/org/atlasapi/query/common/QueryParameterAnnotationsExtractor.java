@@ -1,4 +1,4 @@
-package org.atlasapi.query.v2;
+package org.atlasapi.query.common;
 
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +17,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-public class QueryParameterAnnotationsExtractor {
+public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor {
     
     private static final Set<String> annotationKeys = ImmutableSet.copyOf(
         Iterables.transform(Annotation.all(), Annotation.toKeyFunction())
@@ -45,6 +45,7 @@ public class QueryParameterAnnotationsExtractor {
         this("annotations", null);
     }
     
+    @Override
     public Optional<Set<Annotation>> extractFromRequest(HttpServletRequest request) {
         
         String serialisedAnnotations = request.getParameter(parameterName);

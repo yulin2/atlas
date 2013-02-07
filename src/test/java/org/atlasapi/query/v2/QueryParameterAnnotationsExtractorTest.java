@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.output.Annotation;
+import org.atlasapi.query.common.AnnotationsExtractor;
+import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
 import org.junit.Test;
 
 import com.google.common.base.Optional;
@@ -15,7 +17,7 @@ import com.metabroadcast.common.servlet.StubHttpServletRequest;
 public class QueryParameterAnnotationsExtractorTest {
 
     private final QueryParameterAnnotationsExtractor contextlessExtractor = new QueryParameterAnnotationsExtractor();
-    private final QueryParameterAnnotationsExtractor contentContextExtractor = new QueryParameterAnnotationsExtractor("content");
+    private final AnnotationsExtractor contentContextExtractor = new QueryParameterAnnotationsExtractor("content");
 
     @Test
     public void testExtractsAbsentWhenParameterMissing() {

@@ -9,8 +9,10 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AnnotationRegistry;
 import org.atlasapi.output.annotation.OutputAnnotation;
+import org.atlasapi.query.common.QueryContext;
+import org.atlasapi.query.common.QueryResult;
 
-public class ScheduleQueryResultWriter implements QueryResultWriter<ScheduleQueryResult> {
+public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSchedule> {
 
     private final class ScheduleChannelWriter implements EntityWriter<Channel> {
 
@@ -57,23 +59,21 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ScheduleQuer
     }
 
     @Override
-    public void write(ScheduleQueryResult result, ResponseWriter writer) throws IOException {
+    public void write(QueryResult<ChannelSchedule> result, ResponseWriter writer) throws IOException {
         writer.startResponse();
         writeResult(result, writer);
         writer.finishResponse();
     }
 
-    private void writeResult(ScheduleQueryResult result, ResponseWriter writer)
+    private void writeResult(QueryResult<ChannelSchedule> result, ResponseWriter writer)
         throws IOException {
 
-        OutputContext ctxt = new OutputContext(
-            registry.activeAnnotations(result.getAnnotations()),
-            result.getApplicationConfiguration()
-        );
+        OutputContext ctxt = outputContext(result.getContext());
 
-        ChannelSchedule channelSchedule = result.getChannelSchedule();
+        ChannelSchedule channelSchedule = result.getOnlyResource();
 
-        if (result.getAnnotations().contains(Annotation.LICENSE)) {
+        //TODO: train-wreck
+        if (result.getContext().getAnnotations().contains(Annotation.LICENSE)) {
             writer.writeField("license",
                 "In accessing this feed, you agree that you will only " +
                 "access its contents for your own personal and non-commercial " +
@@ -85,6 +85,13 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ScheduleQuer
         
         writer.writeObject(new ScheduleChannelWriter(), channelSchedule.channel(), ctxt);
         writer.writeList(new ScheduleItemWriter(), channelSchedule.items(), ctxt);
+    }
+
+    private OutputContext outputContext(QueryContext queryContext) {
+        return new OutputContext(
+            registry.activeAnnotations(queryContext.getAnnotations()),
+            queryContext.getApplicationConfiguration()
+        );
     }
 
 }

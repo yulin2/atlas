@@ -1,4 +1,4 @@
-package org.atlasapi.query.v4.topic;
+package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
