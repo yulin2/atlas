@@ -88,7 +88,7 @@ public class BlipTvGraphExtractorTest extends TestCase {
 		
 		EncodingMatcher encoding2 = encodingMatcher()
 			.withDataContainerFormat(is(MimeType.VIDEO_QUICKTIME))
-			.withLocations(hasItem(
+			.withLocations(hasItems(
 					locationMatcher()
 						.withTransportType(is(TransportType.DOWNLOAD))
 						.withUri(is("http://blip.tv/2.mov"))));

@@ -5,7 +5,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.ErrorSummary;
 import org.atlasapi.query.common.Query;
@@ -30,10 +29,9 @@ public class TopicController {
 
     private ResponseWriterFactory writerResolver = new ResponseWriterFactory();
 
-    public TopicController(QueryExecutor<Topic> queryExecutor,
-        ApplicationConfigurationFetcher appFetcher,
-        QueryResultWriter<Topic> resultWriter, TopicQueryParser topicQueryParser) {
-        this.requestParser = topicQueryParser;
+    public TopicController(QueryParser<Topic> queryParser,
+        QueryExecutor<Topic> queryExecutor, QueryResultWriter<Topic> resultWriter) {
+        this.requestParser = queryParser;
         this.queryExecutor = queryExecutor;
         this.resultWriter = resultWriter;
     }

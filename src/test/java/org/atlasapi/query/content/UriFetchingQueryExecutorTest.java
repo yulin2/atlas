@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.query.content;
 
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 
 import java.util.List;
@@ -81,7 +80,7 @@ public class UriFetchingQueryExecutorTest extends TestCase {
 			
 			// the result of the fetcher cannot be returned directly because further view restrictions / filters
 			// need to be applied -- so the query is retried with the item now loaded into the db
-			one(delegate).executeUriQuery(with(hasItem("item1")), with(A_FILTER)); will(returnValue(uriContentMapFor(item1)));
+			one(delegate).executeUriQuery(with(hasItems("item1")), with(A_FILTER)); will(returnValue(uriContentMapFor(item1)));
 		}});
 		
 		executor.executeUriQuery(ImmutableList.of("item1"), A_FILTER);

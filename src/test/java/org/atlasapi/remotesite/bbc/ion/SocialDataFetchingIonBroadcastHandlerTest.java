@@ -2,6 +2,7 @@ package org.atlasapi.remotesite.bbc.ion;
 
 import static org.atlasapi.persistence.content.ResolvedContent.builder;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 
 import java.util.List;
 
@@ -86,7 +87,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
             one(linkAdapter).fetch(uri);will(returnValue(ImmutableList.of(RelatedLink.unknownTypeLink("link url").build())));
             one(tagAdapter).fetch(uri);will(returnValue(ImmutableList.of(new KeyPhrase("phrase", Publisher.BBC))));
             one(topicsAdapter).fetch(uri);will(returnValue(ImmutableList.of()));
-            one(resolver).findByCanonicalUris(with(hasItem(uri))); will(returnValue(builder().build()));
+            one(resolver).findByCanonicalUris(with(hasItems(uri))); will(returnValue(builder().build()));
             never(writer).createOrUpdate(with(any(Item.class)));
         }});
 
@@ -140,7 +141,7 @@ public class SocialDataFetchingIonBroadcastHandlerTest extends TestCase {
             one(linkAdapter).fetch(id.toString());will(returnValue(links));
             one(tagAdapter).fetch(id.toString());will(returnValue(tags));
             one(topicsAdapter).fetch(id.toString());will(returnValue(ImmutableList.of()));
-            one(resolver).findByIds(with(hasItem(id))); 
+            one(resolver).findByIds(with(hasItems(id))); 
                 will(returnValue(builder().put(id, content).build()));
         }});
     }

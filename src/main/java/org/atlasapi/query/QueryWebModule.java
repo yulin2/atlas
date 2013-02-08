@@ -160,6 +160,7 @@ import org.atlasapi.query.common.QueryAtomParser;
 import org.atlasapi.query.common.QueryAttributeParser;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
+import org.atlasapi.query.common.StandardQueryParser;
 import org.atlasapi.query.content.schedule.ScheduleOverlapListener;
 import org.atlasapi.query.topic.PublisherFilteringTopicContentLister;
 import org.atlasapi.query.topic.PublisherFilteringTopicResolver;
@@ -177,7 +178,6 @@ import org.atlasapi.query.v4.schedule.ScheduleIndexDebugController;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
 import org.atlasapi.query.v4.topic.IndexBackedTopicQueryExecutor;
-import org.atlasapi.query.v4.topic.TopicQueryParser;
 import org.atlasapi.query.v4.topic.TopicQueryResultWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -325,11 +325,18 @@ public class QueryWebModule {
     org.atlasapi.query.v4.topic.TopicController v4TopicController() {
         //TODO: move executor to query module
         QueryExecutor<Topic> topicQueryExecutor = new IndexBackedTopicQueryExecutor(topicIndex, topicResolver);
-        return new org.atlasapi.query.v4.topic.TopicController(topicQueryExecutor, configFetcher, 
-            new TopicQueryResultWriter(annotations()), new TopicQueryParser("topics",
-                new QueryAttributeParser(ImmutableList.of(QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())))),
-                idCodec(), configFetcher, selectionBuilder(), new QueryParameterAnnotationsExtractor("topic")
-            ));
+        return new org.atlasapi.query.v4.topic.TopicController(topicQueryParser(), 
+            topicQueryExecutor, new TopicQueryResultWriter(annotations()));
+    }
+
+    private StandardQueryParser<Topic> topicQueryParser() {
+        return new StandardQueryParser<Topic>("topics", 
+            new QueryAttributeParser(ImmutableList.of(
+                QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec()))
+            )),
+            idCodec(), configFetcher, selectionBuilder(), 
+            new QueryParameterAnnotationsExtractor("topic")
+        );
     }
     
     @Bean

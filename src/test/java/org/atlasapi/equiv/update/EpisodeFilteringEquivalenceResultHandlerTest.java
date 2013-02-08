@@ -1,6 +1,6 @@
 package org.atlasapi.equiv.update;
 
-import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -109,7 +109,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
 
         EquivalenceSummary equivSummary = summary(subjectContainer.getId(), strongContainer);
         
-        when(summaryStore.summariesForIds(argThat(hasItem(subject.getContainer().getId()))))
+        when(summaryStore.summariesForIds(argThat(hasItems(subject.getContainer().getId()))))
             .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getId(), Optional.of(equivSummary))));
         
         Episode badEquiv = new Episode("bequiv", "bequivCurie", Publisher.PA);
@@ -136,7 +136,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
 
         EquivalenceSummary equivSummary = summary(subjectContainer.getId(), strongContainer);
         
-        when(summaryStore.summariesForIds(argThat(hasItem(subject.getContainer().getId()))))
+        when(summaryStore.summariesForIds(argThat(hasItems(subject.getContainer().getId()))))
             .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getId(), Optional.of(equivSummary))));
         
         Episode goodEquiv = new Episode("gequiv", "gequivCurie", Publisher.BBC);
@@ -160,7 +160,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
 
         EquivalenceSummary equivSummary = new EquivalenceSummary(subject.getContainer().getId(), ImmutableList.<Id>of(), ImmutableMap.<Publisher,ContentRef>of());
         
-        when(summaryStore.summariesForIds(argThat(hasItem(subject.getContainer().getId()))))
+        when(summaryStore.summariesForIds(argThat(hasItems(subject.getContainer().getId()))))
             .thenReturn(ImmutableOptionalMap.fromMap(ImmutableMap.of(subject.getContainer().getId(), equivSummary)));
         
         Episode ignoredEquiv = new Episode("ignoredequiv", "ignoredequiv", Publisher.C4);
@@ -184,7 +184,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
         
         EquivalenceSummary equivSummary = new EquivalenceSummary(subject.getId(), ImmutableList.<Id>of(), ImmutableMap.<Publisher,ContentRef>of());
         
-        when(summaryStore.summariesForIds(argThat(hasItem(subject.getContainer().getId()))))
+        when(summaryStore.summariesForIds(argThat(hasItems(subject.getContainer().getId()))))
             .thenReturn(ImmutableOptionalMap.copyOf(ImmutableMap.of(subject.getContainer().getId(), Optional.of(equivSummary))));
         
         Item noBrand = new Item("nobrand", "nobrandCurie", Publisher.FIVE);
@@ -211,7 +211,7 @@ public class EpisodeFilteringEquivalenceResultHandlerTest {
             ImmutableMap.<Publisher,ContentRef>of()
         );
         
-        when(summaryStore.summariesForIds(argThat(hasItem(subject.getContainer().getId()))))
+        when(summaryStore.summariesForIds(argThat(hasItems(subject.getContainer().getId()))))
             .thenReturn(ImmutableOptionalMap.fromMap(ImmutableMap.of(
                 subject.getContainer().getId(), equivSummary
             )));

@@ -82,7 +82,7 @@ public class IndexBackedScheduleQueryExecutorTest {
                     .build()
             ));
         
-        when(contentResolver.resolveIds(argThat(hasItem(item.getId()))))
+        when(contentResolver.resolveIds(argThat(hasItems(item.getId()))))
             .thenReturn(queryResult(ImmutableList.<Content>of(item)));
         
         ChannelSchedule channelSchedule = queryExecutor.execute(query).getOnlyResource();

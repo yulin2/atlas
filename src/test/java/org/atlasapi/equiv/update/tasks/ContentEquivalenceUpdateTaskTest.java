@@ -4,6 +4,7 @@ import static org.atlasapi.media.entity.Publisher.BBC;
 import static org.atlasapi.media.entity.Publisher.C4;
 import static org.atlasapi.media.entity.Publisher.PA;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -87,7 +88,7 @@ public class ContentEquivalenceUpdateTaskTest extends TestCase {
         when(progressStore.progressForTask(taskName))
             .thenReturn(ContentListingProgress.START);
         
-        when(contentResolver.findByCanonicalUris(argThat(hasItem("episode"))))
+        when(contentResolver.findByCanonicalUris(argThat(hasItems("episode"))))
             .thenReturn(ResolvedContent.builder().put(paEp.getId(), paEp).build());
         
         new ContentEquivalenceUpdateTask(contentLister, contentResolver, progressStore, updater, ImmutableSet.<String>of()).forPublishers(PA, BBC, C4).run();

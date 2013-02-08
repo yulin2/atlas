@@ -14,7 +14,6 @@ permissions and limitations under the License. */
 
 package org.atlasapi.output;
 
-import static com.google.common.collect.ImmutableSet.of;
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static org.atlasapi.media.entity.testing.ItemTestDataBuilder.item;
 import static org.atlasapi.media.entity.testing.PlaylistTestDataBuilder.playlist;
@@ -29,6 +28,7 @@ import nu.xom.Builder;
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.ParsingException;
+import nu.xom.Serializer;
 import nu.xom.ValidityException;
 
 import org.atlasapi.application.ApplicationConfiguration;
@@ -40,10 +40,13 @@ import org.atlasapi.media.entity.simple.KeyPhrase;
 import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.entity.simple.RelatedLink;
+import org.hamcrest.Description;
+import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.junit.Test;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 import com.metabroadcast.common.servlet.StubHttpServletResponse;
@@ -75,15 +78,15 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
 		
 		Element root = outputDoc.getRootElement();
-		assertThat(root, allOf(of(localName(is("content")), namespacePrefix(is("play")))));
+		assertThat(root, allOf(localName(is("content")), namespacePrefix(is("play"))));
         
         Element itemElem = root.getChildElements().get(0);
-        assertThat(itemElem, allOf(of(localName(is("item")), namespacePrefix(is("play")))));
+        assertThat(itemElem, allOf(localName(is("item")), namespacePrefix(is("play"))));
         
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("uri")), value(is(item.getUri()))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("curie")), value(is(item.getCurie()))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("id")), value(is(item.getId()))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("type")), value(is(item.getType()))))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("uri")), value(is(item.getUri())))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("curie")), value(is(item.getCurie())))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("id")), value(is(item.getId())))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("type")), value(is(item.getType())))));
         
 	}
 
@@ -96,7 +99,12 @@ public class JaxbXmlTranslatorTest extends TestCase {
         
         Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
         
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("aliases")),hasChildElem(allOf(of(localName(is("alias")),value(is(getOnlyElement(item.getAliases()))))))))));
+        assertThat(itemElem, hasChildElem(
+            allOf(localName(is("aliases")),
+                hasChildElem(allOf(localName(is("alias")),
+                    value(is(getOnlyElement(item.getAliases())
+            )))))
+        ));
 		
 	}
 
@@ -109,26 +117,26 @@ public class JaxbXmlTranslatorTest extends TestCase {
         
         Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
         
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("title")),value(is(String.valueOf(item.getTitle())))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("description")),value(is(item.getDescription()))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("image")),value(is(item.getImage()))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("thumbnail")),value(is(String.valueOf(item.getThumbnail())))))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("title")),value(is(String.valueOf(item.getTitle()))))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("description")),value(is(item.getDescription())))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("image")),value(is(item.getImage())))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("thumbnail")),value(is(String.valueOf(item.getThumbnail()))))));
         
-        assertThat(itemElem, hasChildElem(allOf(of(
+        assertThat(itemElem, hasChildElem(allOf(
                 localName(is("genres")),
                 namespacePrefix(is("play")),
-                hasChildElem(allOf(of(localName(is("genre")),value(is(getOnlyElement(item.getGenres()))))))
-        ))));
+                hasChildElem(allOf(localName(is("genre")),value(is(getOnlyElement(item.getGenres()))))))
+        ));
 
-        assertThat(itemElem, hasChildElem(allOf(of(
-                localName(is("publisher")),
-                hasChildElem(allOf(of(localName(is("country")),value(is(item.getSource().getCountry()))))),
-                hasChildElem(allOf(of(localName(is("key")),value(is(item.getSource().getKey()))))),
-                hasChildElem(allOf(of(localName(is("name")),value(is(item.getSource().getName())))))
-        ))));
+        assertThat(itemElem, hasChildElem(allOf(
+                localName(is("source")),
+                hasChildElem(allOf(localName(is("country")),value(is(item.getSource().getCountry())))),
+                hasChildElem(allOf(localName(is("key")),value(is(item.getSource().getKey())))),
+                hasChildElem(allOf(localName(is("name")),value(is(item.getSource().getName()))))
+        )));
         
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("scheduleOnly")),value(is(String.valueOf(item.isScheduleOnly())))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("specialization")),value(is(item.getSpecialization().toString().toLowerCase()))))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("scheduleOnly")),value(is(String.valueOf(item.isScheduleOnly()))))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("specialization")),value(is(item.getSpecialization().toString().toLowerCase())))));
 
         //TODO: clips, key phrases, tags, sameAs, mediaType, topics, presentation channel
         
@@ -143,24 +151,24 @@ public class JaxbXmlTranslatorTest extends TestCase {
         
         Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
 	    
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("episodeNumber")),value(is(String.valueOf(item.getEpisodeNumber())))))));
-        assertThat(itemElem, hasChildElem(allOf(of(localName(is("seriesNumber")),value(is(String.valueOf(item.getSeriesNumber())))))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("episodeNumber")),value(is(String.valueOf(item.getEpisodeNumber()))))));
+        assertThat(itemElem, hasChildElem(allOf(localName(is("seriesNumber")),value(is(String.valueOf(item.getSeriesNumber()))))));
         
-        assertThat(itemElem, hasChildElem(allOf(of(
+        assertThat(itemElem, hasChildElem(allOf(
                 localName(is("container")),
-                hasChildElem(allOf(of(localName(is("curie")),value(is(item.getBrandSummary().getCurie()))))),
-                hasChildElem(allOf(of(localName(is("uri")),value(is(item.getBrandSummary().getUri()))))),
-                hasChildElem(allOf(of(localName(is("description")),value(is(item.getBrandSummary().getDescription()))))),
-                hasChildElem(allOf(of(localName(is("title")),value(is(item.getBrandSummary().getTitle())))))
-        ))));
+                hasChildElem(allOf(localName(is("curie")),value(is(item.getBrandSummary().getCurie())))),
+                hasChildElem(allOf(localName(is("uri")),value(is(item.getBrandSummary().getUri())))),
+                hasChildElem(allOf(localName(is("description")),value(is(item.getBrandSummary().getDescription())))),
+                hasChildElem(allOf(localName(is("title")),value(is(item.getBrandSummary().getTitle()))))
+        )));
         
-        assertThat(itemElem, hasChildElem(allOf(of(
+        assertThat(itemElem, hasChildElem(allOf(
                 localName(is("seriesSummary")),
-                hasChildElem(allOf(of(localName(is("curie")),value(is(item.getSeriesSummary().getCurie()))))),
-                hasChildElem(allOf(of(localName(is("uri")),value(is(item.getSeriesSummary().getUri()))))),
-                hasChildElem(allOf(of(localName(is("description")),value(is(item.getSeriesSummary().getDescription()))))),
-                hasChildElem(allOf(of(localName(is("title")),value(is(item.getSeriesSummary().getTitle())))))
-        ))));
+                hasChildElem(allOf(localName(is("curie")),value(is(item.getSeriesSummary().getCurie())))),
+                hasChildElem(allOf(localName(is("uri")),value(is(item.getSeriesSummary().getUri())))),
+                hasChildElem(allOf(localName(is("description")),value(is(item.getSeriesSummary().getDescription())))),
+                hasChildElem(allOf(localName(is("title")),value(is(item.getSeriesSummary().getTitle()))))
+        )));
         
         //TODO: locations, broadcasts, people, blackAndWhite, countriesOfOrigin, year
 	}
@@ -174,20 +182,20 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
         Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
         
-        assertThat(itemElem, hasChildElem(allOf(of(
+        assertThat(itemElem, hasChildElem(allOf(
                 localName(is("key_phrases")),
-                hasChildElem(allOf(of(
+                hasChildElem(allOf(
                         localName(is("key_phrase")),
-                        hasChildElem(allOf(of(
+                        hasChildElem(allOf(
                                 localName(is("phrase")),
                                 value(is(phrase.getPhrase()))
-                        ))),
-                        hasChildElem(allOf(of(
+                        )),
+                        hasChildElem(allOf(
                                 localName(is("weighting")),
                                 value(is(phrase.getWeighting().toString()))
-                        )))
-                )))
-        ))));
+                        ))
+                ))
+        )));
     }
 
     @Test
@@ -203,24 +211,24 @@ public class JaxbXmlTranslatorTest extends TestCase {
 
         Element itemElem = outputDoc.getRootElement().getChildElements().get(0);
         
-        assertThat(itemElem, hasChildElem(allOf(of(
+        assertThat(itemElem, hasChildElem(allOf(
                 localName(is("related_links")),
-                hasChildElem(allOf(of(
+                hasChildElem(allOf(
                         localName(is("related_link")),
-                        hasChildElem(allOf(of(
+                        hasChildElem(allOf(
                                 localName(is("url")),
                                 value(is(link.getUrl()))
-                        ))),
-                        hasChildElem(allOf(of(
+                        )),
+                        hasChildElem(allOf(
                                 localName(is("title")),
                                 value(is(link.getTitle()))
-                        ))),
-                        hasChildElem(allOf(of(
+                        )),
+                        hasChildElem(allOf(
                                 localName(is("type")),
                                 value(is(link.getType()))
-                        )))
+                        ))
                 )))
-        ))));
+        ));
     }
 
     @Test
@@ -232,19 +240,23 @@ public class JaxbXmlTranslatorTest extends TestCase {
 		
         Document outputDoc = serializeToXml(new ContentQueryResult(list));
         
-        Element listElem = outputDoc.getRootElement().getChildElements().get(0);
-        assertThat(listElem, allOf(of(localName(is("playlist")), namespacePrefix(is("play")))));
+        Serializer serializer = new Serializer(System.out, Charsets.UTF_8.toString());
+        serializer.setLineSeparator("\n");
+        serializer.setIndent(4);
+        serializer.write(new Document(outputDoc));
         
-        assertThat(listElem, hasChildElem(allOf(of(
+        Element listElem = outputDoc.getRootElement().getChildElements().get(0);
+        assertThat(listElem, allOf(localName(is("playlist")), namespacePrefix(is("play"))));
+        
+        assertThat(listElem, hasChildElem(allOf(
                 localName(is("content")),
-                hasChildElem(allOf(of(
+                hasChildElem(allOf(
                         localName(is("item")),
                         hasChildElem(allOf(of(localName(is("type")), value(is("item"))))),
                         hasChildElem(allOf(of(localName(is("id")), value(is("dd"))))),
                         hasChildElem(allOf(of(localName(is("uri")), value(is(getOnlyElement(list.getContent()).getUri())))))
                 )))
-        ))));
-        
+        ));
 	}
 
     private Document serializeToXml(ContentQueryResult result) throws IOException, ParsingException, ValidityException {
@@ -256,67 +268,57 @@ public class JaxbXmlTranslatorTest extends TestCase {
         return outputDoc;
     }
     
-    private Matcher<? extends Element> localName(final Matcher<String> nameMatcher) {
-        return new TypeSafeMatcher<Element>() {
-            
+    private Matcher<Element> localName(final Matcher<String> nameMatcher) {
+        return new FeatureMatcher<Element, String>(nameMatcher, "element with name", "name") {
             @Override
-            public void describeTo(org.hamcrest.Description desc) {
-                desc.appendValue("Element with ").appendDescriptionOf(nameMatcher);
-            }
-
-            @Override
-            public boolean matchesSafely(Element elem) {
-                return nameMatcher.matches(elem.getLocalName());
+            protected String featureValueOf(Element actual) {
+                return actual.getLocalName();
             }
         };
     }
     
-    private Matcher<? extends Element> namespacePrefix(final Matcher<String> namespaceMatcher) {
-        return new TypeSafeMatcher<Element>() {
-
+    private Matcher<Element> namespacePrefix(final Matcher<String> namespaceMatcher) {
+        return new FeatureMatcher<Element, String>(namespaceMatcher, "element with namespace", "namespace") {
             @Override
-            public void describeTo(org.hamcrest.Description desc) {
-                desc.appendValue("Element with ").appendDescriptionOf(namespaceMatcher);
-            }
-
-            @Override
-            public boolean matchesSafely(Element elem) {
-                return namespaceMatcher.matches(elem.getNamespacePrefix());
+            protected String featureValueOf(Element actual) {
+                return actual.getNamespacePrefix();
             }
         };
     }
     
-    private Matcher<? extends Element> value(final Matcher<String> contentMatcher) {
-        return new TypeSafeMatcher<Element>() {
-
+    private Matcher<Element> value(final Matcher<String> contentMatcher) {
+        return new FeatureMatcher<Element, String>(contentMatcher, "element with value", "value") {
             @Override
-            public void describeTo(org.hamcrest.Description desc) {
-                desc.appendValue("Element with ").appendDescriptionOf(contentMatcher);
-            }
-
-            @Override
-            public boolean matchesSafely(Element elem) {
-                return contentMatcher.matches(elem.getValue());
+            protected String featureValueOf(Element actual) {
+                return actual.getValue();
             }
         };
     }
     
-    private Matcher<Element> hasChildElem(final Matcher<? extends Element> elemMatcher) {
-        return new TypeSafeMatcher<Element>() {
+    private Matcher<Element> hasChildElem(final Matcher<? super Element> elemMatcher) {
+        return new TypeSafeDiagnosingMatcher<Element>() {
 
             @Override
             public void describeTo(org.hamcrest.Description desc) {
-                desc.appendValue("Element with ").appendDescriptionOf(elemMatcher);
+                desc.appendText("a element with child ")
+                    .appendDescriptionOf(elemMatcher);
             }
 
             @Override
-            public boolean matchesSafely(Element elem) {
-                for (int i = 0; i < elem.getChildCount(); i++) {
-                    if (elemMatcher.matches(elem.getChildElements().get(i))) {
+            protected boolean matchesSafely(Element item, Description mismatchDescription) {
+                boolean isPastFirst = false;
+                for (int i = 0; i < item.getChildElements().size(); i++) {
+                    Element child = item.getChildElements().get(i);
+                    if (elemMatcher.matches(child)){
                         return true;
                     }
+                    if (isPastFirst) {
+                      mismatchDescription.appendText(", ");
+                    }
+                    elemMatcher.describeMismatch(child, mismatchDescription);
+                    isPastFirst = true;
                 }
-                return false;
+                return false; 
             }
         };
     }
