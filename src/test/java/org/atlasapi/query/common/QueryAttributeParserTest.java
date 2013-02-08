@@ -1,30 +1,35 @@
 package org.atlasapi.query.common;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.atlasapi.content.criteria.AtomicQuery;
 import org.atlasapi.content.criteria.AtomicQuerySet;
 import org.atlasapi.content.criteria.IdAttributeQuery;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
+import org.atlasapi.content.criteria.StringAttributeQuery;
 import org.atlasapi.content.criteria.attribute.Attributes;
+import org.atlasapi.content.criteria.operator.Operators;
 import org.atlasapi.media.common.Id;
 import org.junit.Test;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
 import com.metabroadcast.common.servlet.StubHttpServletRequest;
 
-
 public class QueryAttributeParserTest {
 
     private NumberToShortStringCodec idCodec = SubstitutionTableNumberCodec.lowerCaseOnly();
-    private final QueryAttributeParser parser = new QueryAttributeParser(ImmutableMap.of(
-        Attributes.ID, AttributeCoercers.idCoercer(idCodec),
-        Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer(),
-        Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer()
+    private final QueryAttributeParser parser = new QueryAttributeParser(ImmutableList.of(
+        QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec)),
+        QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
+        QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer())
     ));
     
     @Test
@@ -32,9 +37,11 @@ public class QueryAttributeParserTest {
         final Id id1 = Id.valueOf(1234);
         final Id id2 = Id.valueOf(1235);
         
-        AtomicQuerySet queries = parser.parse(request().withParam("id",String.format("%s,%s", 
+        String idParam = String.format("%s,%s", 
             idCodec.encode(id1.toBigInteger()), idCodec.encode(id2.toBigInteger())
-        )));
+        );
+        
+        AtomicQuerySet queries = parser.parse(request().withParam("id",idParam));
         
         AtomicQuery idAttributeQuery = Iterables.getOnlyElement(queries);
         
@@ -51,7 +58,93 @@ public class QueryAttributeParserTest {
         }));
     }
     
+    @Test
+    public void testParseQueryWithMultipleParams() {
+
+        AtomicQuerySet queries = parser.parse(request()
+            .withParam("aliases.namespace","theNamespace")
+            .withParam("aliases.value", "theValue")
+        );
+        
+        assertThat(queries.size(), is(2));
+        List<Boolean> accept = queries.accept(new QueryVisitorAdapter<Boolean>() {
+
+            @Override
+            public Boolean visit(StringAttributeQuery query) {
+                if (query.getAttributeName().equals(Attributes.ALIASES_NAMESPACE.externalName())) {
+                    return Iterables.getOnlyElement(query.getValue()).equals("theNamespace");
+                }
+                if (query.getAttributeName().equals(Attributes.ALIASES_VALUE.externalName())) {
+                    return Iterables.getOnlyElement(query.getValue()).equals("theValue");
+                }
+                return false;
+            }
+            
+            @Override
+            protected Boolean defaultValue(AtomicQuery query) {
+                return false;
+            }
+        });
+        
+        assertTrue(Iterables.all(accept, Predicates.equalTo(true)));
+        
+    }
+    
+    @Test
+    public void testParseQueryWithOperator() {
+        
+        AtomicQuerySet queries = parser.parse(request()
+            .withParam("aliases.namespace.beginning","theNamespace")
+            .withParam("aliases.value.equals", "theValue")
+        );
+        
+        assertThat(queries.size(), is(2));
+        List<Boolean> accept = queries.accept(new QueryVisitorAdapter<Boolean>() {
+
+            @Override
+            public Boolean visit(StringAttributeQuery query) {
+                if (query.getAttributeName().equals(Attributes.ALIASES_NAMESPACE.externalName())) {
+                    return Iterables.getOnlyElement(query.getValue()).equals("theNamespace") 
+                        && query.getOperator().equals(Operators.BEGINNING);
+                }
+                if (query.getAttributeName().equals(Attributes.ALIASES_VALUE.externalName())) {
+                    return Iterables.getOnlyElement(query.getValue()).equals("theValue")
+                        && query.getOperator().equals(Operators.EQUALS);
+                }
+                return false;
+            }
+            
+            @Override
+            protected Boolean defaultValue(AtomicQuery query) {
+                return false;
+            }
+        });
+        
+        assertTrue(Iterables.all(accept, Predicates.equalTo(true)));
+        
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testThrowsExceptionForUnknownParameter() {
+        
+        parser.parse(request()
+            .withParam("aliases.namesppace","theNamespace")
+        );
+        
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void testThrowsExceptionForUnknownOperator() {
+        
+        parser.parse(request()
+            .withParam("aliases.namespace.begginning","theNamespace")
+        );
+        
+    }
+    
     private StubHttpServletRequest request() {
         return new StubHttpServletRequest();
     }
+    
+    
 }

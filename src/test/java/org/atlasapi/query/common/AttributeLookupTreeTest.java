@@ -1,6 +1,10 @@
 package org.atlasapi.query.common;
 
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
+
+import java.util.Set;
 
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.junit.Test;
@@ -9,7 +13,7 @@ import org.junit.Test;
 public class AttributeLookupTreeTest {
 
     @Test
-    public void test() {
+    public void testAttributeLookup() {
         
         AttributeLookupTree tree = new AttributeLookupTree();
         
@@ -37,4 +41,18 @@ public class AttributeLookupTreeTest {
         
     }
 
+    @Test
+    public void testGetAllKeys() {
+
+        AttributeLookupTree tree = new AttributeLookupTree();
+        
+        tree.put(Attributes.ID);
+        tree.put(Attributes.ALIASES_NAMESPACE);
+        tree.put(Attributes.ALIASES_VALUE);
+        
+        Set<String> keys = tree.allKeys();
+        assertThat(keys.size(), is(3));
+        assertThat(keys, hasItems("id", "aliases.namespace", "aliases.value"));
+    }
+    
 }
