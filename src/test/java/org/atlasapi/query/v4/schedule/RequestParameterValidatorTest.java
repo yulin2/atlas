@@ -27,7 +27,7 @@ public class RequestParameterValidatorTest {
 
     @Test(expected=IllegalArgumentException.class)
     public void testThrowsExceptionInvalidParameters() {
-        validator.validateParameters(requestWithParams("from","to","wibble"));
+        validator.validateParameters(requestWithParams("form","to","wibble"));
     }
 
     private HttpServletRequest requestWithParams(String... params) {
