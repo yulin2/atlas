@@ -156,6 +156,7 @@ import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.persistence.topic.TopicSearcher;
 import org.atlasapi.query.common.AttributeCoercers;
+import org.atlasapi.query.common.QueryAtomParser;
 import org.atlasapi.query.common.QueryAttributeParser;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
@@ -184,7 +185,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 import com.metabroadcast.common.ids.SubstitutionTableNumberCodec;
@@ -326,7 +327,7 @@ public class QueryWebModule {
         QueryExecutor<Topic> topicQueryExecutor = new IndexBackedTopicQueryExecutor(topicIndex, topicResolver);
         return new org.atlasapi.query.v4.topic.TopicController(topicQueryExecutor, configFetcher, 
             new TopicQueryResultWriter(annotations()), new TopicQueryParser("topics",
-                new QueryAttributeParser(ImmutableMap.of(Attributes.ID, AttributeCoercers.idCoercer(idCodec()))),
+                new QueryAttributeParser(ImmutableList.of(QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())))),
                 idCodec(), configFetcher, selectionBuilder(), new QueryParameterAnnotationsExtractor("topic")
             ));
     }

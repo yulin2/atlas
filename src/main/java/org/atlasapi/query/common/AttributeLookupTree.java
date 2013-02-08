@@ -2,9 +2,12 @@ package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.Set;
+
 import org.atlasapi.content.criteria.attribute.Attribute;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.googlecode.concurrenttrees.radix.ConcurrentRadixTree;
 import com.googlecode.concurrenttrees.radix.node.Node;
 import com.googlecode.concurrenttrees.radix.node.concrete.DefaultCharArrayNodeFactory;
@@ -54,6 +57,20 @@ public final class AttributeLookupTree extends ConcurrentRadixTree<Optional<Attr
             return (Optional<Attribute<?>>) curNode.getValue();
         }
         return Optional.absent();
+    }
+    
+    public Set<String> allKeys() {
+        final ImmutableSet.Builder<String> keys = ImmutableSet.builder();
+        traverseDescendants("", root, new NodeKeyPairHandler() {
+            @Override
+            public boolean handle(ConcurrentRadixTree.NodeKeyPair nodeKeyPair) {
+                if (nodeKeyPair.node.getOutgoingEdges().isEmpty()) {
+                    keys.add(nodeKeyPair.key.toString());
+                }
+                return true;
+            }
+        });
+        return keys.build();
     }
 
     public void put(Attribute<?> attribute) {

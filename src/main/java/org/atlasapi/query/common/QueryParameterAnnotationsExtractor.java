@@ -1,28 +1,55 @@
 package org.atlasapi.query.common;
 
-import java.util.Iterator;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.StringUtils;
 import org.atlasapi.output.Annotation;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor {
     
-    private static final Set<String> annotationKeys = ImmutableSet.copyOf(
-        Iterables.transform(Annotation.all(), Annotation.toKeyFunction())
-    );
-    
+    private static final class Contextualize implements Function<String, String> {
+
+        private Optional<String> context;
+
+        public Contextualize(Optional<String> context) {
+            this.context = context;
+        }
+
+        @Override
+        public String apply(String input) {
+            return Annotation.requestNameForContext(input, context);
+        }
+    }
+
+    private static final class ContextPrependTransform implements Function<String, String> {
+
+        private Optional<String> context;
+
+        public ContextPrependTransform(Optional<String> context) {
+            this.context = context;
+        }
+
+        @Override
+        public String apply(String input) {
+            if (context.isPresent()) {
+                input = input.substring(context.get().length()+1);
+            }
+            return input;
+        }
+    }
+
     private static final Set<String> annotationNames = ImmutableSet.copyOf(
         Iterables.transform(Annotation.all(), Annotation.toRequestName())
     );
@@ -31,10 +58,14 @@ public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor 
 
     private final String parameterName;
     private final Optional<String> context;
+    private final ReplacementSuggestion replacmentSuggestion;
 
     public QueryParameterAnnotationsExtractor(String parameterName, @Nullable String context) {
-        this.parameterName = parameterName;
+        this.parameterName = checkNotNull(parameterName);
         this.context = Optional.fromNullable(context);
+        this.replacmentSuggestion = new ReplacementSuggestion(annotationNames, 
+            "Invalid annotations: ", " (did you mean %s?)", 
+            new Contextualize(this.context), new ContextPrependTransform(this.context));
     }
     
     public QueryParameterAnnotationsExtractor(@Nullable String context) {
@@ -55,7 +86,7 @@ public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor 
         }
         
         List<String> invalid = Lists.newLinkedList();
-        Builder<Annotation> annotations = ImmutableSet.builder();
+        ImmutableSet.Builder<Annotation> annotations = ImmutableSet.builder();
         for (String annotationKey : csvSplitter.split(serialisedAnnotations)) {
             Optional<Annotation> possibleAnnotation = Annotation.fromRequestName(annotationKey, context);
             if (possibleAnnotation.isPresent()) {
@@ -69,7 +100,7 @@ public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor 
             return Optional.<Set<Annotation>>of(annotations.build());
         }
         
-        throw new IllegalArgumentException(invalidParamMessage(invalid, annotationNames, context));
+        throw new IllegalArgumentException(replacmentSuggestion.forInvalid(invalid));
         
     }
 
@@ -83,7 +114,7 @@ public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor 
         }
         
         List<String> invalid = Lists.newLinkedList();
-        Builder<Annotation> annotations = ImmutableSet.builder();
+        ImmutableSet.Builder<Annotation> annotations = ImmutableSet.builder();
         for (String annotationKey : csvSplitter.split(serialisedAnnotations)) {
             Optional<Annotation> possibleAnnotation = Annotation.fromKey(annotationKey);
             if (possibleAnnotation.isPresent()) {
@@ -97,43 +128,8 @@ public class QueryParameterAnnotationsExtractor implements AnnotationsExtractor 
             return Optional.<Set<Annotation>>of(annotations.build());
         }
         
-        throw new IllegalArgumentException(invalidParamMessage(invalid, annotationKeys, Optional.<String>absent()));
+        throw new IllegalArgumentException(replacmentSuggestion.forInvalid(invalid));
         
-    }
-    
-    private String invalidParamMessage(List<String> invalidParams, Set<String> valid, Optional<String> context) {
-        StringBuilder msg = new StringBuilder("Invalid annotations: ");
-        Iterator<String> iter = invalidParams.iterator();
-        if (iter.hasNext()) {
-            appendInvalidName(msg, iter.next(), valid, context);
-            while(iter.hasNext()) {
-                msg.append(", ");
-                appendInvalidName(msg, iter.next(), valid, context);
-            }
-        }
-        return msg.toString();
-    }
-
-    private void appendInvalidName(StringBuilder msg, String invalid, Set<String> valid, Optional<String> context) {
-        msg.append(invalid);
-        String suggestion = findSuggestion(Annotation.requestNameForContext(invalid, context), valid);
-        if (suggestion != null) {
-            if (context.isPresent()) {
-                suggestion = suggestion.substring(context.get().length()+1);
-            }
-            msg.append(" (did you mean ").append(suggestion).append("?)");
-        }
-    }
-
-    private String findSuggestion(String invalid, Set<String> validParams) {
-        for (String valid : validParams) {
-            int distance = StringUtils.getLevenshteinDistance(valid, invalid);
-            int maxDistance = 2;
-            if (distance < maxDistance) {
-                return valid;
-            }
-        }
-        return null;
     }
     
 }
