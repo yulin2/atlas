@@ -3,16 +3,19 @@ package org.atlasapi.persistence;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalenceWritingContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
+import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
 import org.atlasapi.persistence.content.elasticsearch.EsScheduleIndex;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
@@ -22,21 +25,22 @@ import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.mongo.MongoProductStore;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.schedule.mongo.MongoScheduleStore;
+import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.atlasapi.persistence.lookup.mongo.MongoLookupEntryStore;
 import org.atlasapi.persistence.media.channel.CachingChannelStore;
+import org.atlasapi.persistence.media.channel.ChannelStore;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
-import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.persistence.media.segment.IdSettingSegmentWriter;
 import org.atlasapi.persistence.media.segment.MongoSegmentResolver;
 import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
+import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Primary;
-import org.springframework.jms.core.JmsTemplate;
-import org.atlasapi.persistence.ids.MongoSequentialIdGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jms.core.JmsTemplate;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
@@ -52,10 +56,6 @@ import com.metabroadcast.common.properties.Parameter;
 import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
-import javax.annotation.PostConstruct;
-import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
-import org.atlasapi.persistence.content.elasticsearch.ESContentSearcher;
-import org.atlasapi.persistence.topic.elasticsearch.ESTopicSearcher;
 
 @Configuration
 public class AtlasPersistenceModule {
@@ -212,7 +212,10 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public CachingChannelStore channelStore() {
+    public ChannelStore channelStore() {
+        if (processingConfig == null || !processingConfig.toBoolean()) {
+            return new CachingChannelStore(mongoContentPersistenceModule().channelStore());
+        }
         return mongoContentPersistenceModule().channelStore();
     }
 
