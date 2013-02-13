@@ -92,6 +92,7 @@ public class PaChannelsUpdater extends ScheduledTask {
 
             try {        
                 log.info("Processing file " + latestFile.toString());
+                reportStatus(String.format("processed latest file: %s", latestFile.getName()));
                 final File fileToProcess = dataStore.copyForProcessing(latestFile);
                 unmarshaller.setListener(channelsProcessingListener());
                 reader.parse(fileToProcess.toURI().toString());
