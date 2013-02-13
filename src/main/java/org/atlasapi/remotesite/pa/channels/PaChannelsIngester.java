@@ -22,6 +22,7 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableMap;
@@ -39,8 +40,16 @@ public class PaChannelsIngester {
     private static final String YOUVIEW_CHANNEL_ALIAS_PREFIX = "http://youview.com/service/";
     private static final Map<String, MediaType> MEDIA_TYPE_MAPPING = ImmutableMap.<String, MediaType>builder()
         .put("TV", MediaType.VIDEO)
-        .put("Radio", MediaType.VIDEO)
+        .put("Radio", MediaType.AUDIO)
         .build();
+    
+
+    private static final Predicate<Variation> IS_REGIONAL = new Predicate<Variation>() {
+        @Override
+        public boolean apply(Variation input) {
+            return input.getType().equals(REGIONAL_VARIATION);
+        }
+    };
     
     private final DateTimeFormatter formatter = ISODateTimeFormat.date();
     private final Logger log = LoggerFactory.getLogger(PaChannelsIngester.class);
@@ -137,7 +146,7 @@ public class PaChannelsIngester {
         channel.setHighDefinition(getHighDefinition(paChannel.getFormat()));
         
         List<Variation> variations = paChannel.getVariation();
-        channel.setRegional(getRegional(variations));
+        channel.setRegional(!Iterables.isEmpty(Iterables.filter(variations, IS_REGIONAL)));
         channel.setTimeshift(getTimeshift(variations));
         
         List<Logo> logos;
@@ -160,15 +169,6 @@ public class PaChannelsIngester {
             }
         }
         return null;
-    }
-
-    private Boolean getRegional(List<Variation> variations) {
-        for (Variation variation : variations) {
-            if (variation.getType().equals(REGIONAL_VARIATION)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private Boolean getHighDefinition(String format) {
