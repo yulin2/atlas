@@ -40,7 +40,7 @@ public class PaChannelsIngester {
     private static final String YOUVIEW_CHANNEL_ALIAS_PREFIX = "http://youview.com/service/";
     private static final Map<String, MediaType> MEDIA_TYPE_MAPPING = ImmutableMap.<String, MediaType>builder()
         .put("TV", MediaType.VIDEO)
-        .put("Radio", MediaType.VIDEO)
+        .put("Radio", MediaType.AUDIO)
         .build();
     
 
