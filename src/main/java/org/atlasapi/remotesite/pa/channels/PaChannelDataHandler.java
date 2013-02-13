@@ -113,6 +113,7 @@ public class PaChannelDataHandler {
             existingChannel.setHighDefinition(newChannel.highDefinition());
             existingChannel.setRegional(newChannel.regional());
             existingChannel.setTimeshift(newChannel.timeshift());
+            existingChannel.setChannelNumbers(newChannel.channelNumbers());
             
             return channelWriter.createOrUpdate(existingChannel);
         } else {
