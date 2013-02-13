@@ -99,7 +99,7 @@ public class PaChannelsUpdater extends ScheduledTask {
                 FileUploadResult.successfulUpload(SERVICE, latestFile.getName());
             } catch (Exception e) {
                 FileUploadResult.failedUpload(SERVICE, latestFile.getName()).withCause(e);
-                log.error("Error processing file " + latestFile.toString(), e);
+                Throwables.propagate(e);
             }
 
             reportStatus(String.format("found %s files, processed latest file: %s", Iterables.size(files), latestFile.getName()));
