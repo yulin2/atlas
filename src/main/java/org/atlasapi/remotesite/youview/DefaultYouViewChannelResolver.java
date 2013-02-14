@@ -16,7 +16,7 @@ import com.google.common.collect.Maps;
 public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
     
     private static final String YOUVIEW_URI_PREFIX = "http://youview.com/service/";
-    private static Pattern YOUVIEW_URI_MATCHER = Pattern.compile("^" + YOUVIEW_URI_PREFIX + "(\\d+)$");
+    static Pattern YOUVIEW_URI_MATCHER = Pattern.compile("^" + YOUVIEW_URI_PREFIX + "(\\d+)$");
     
     private final Map<Integer, Channel> channelMap = Maps.newHashMap();
     
