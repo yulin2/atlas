@@ -1,5 +1,6 @@
 package org.atlasapi.remotesite.youview;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -9,6 +10,7 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 
 public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
@@ -43,4 +45,10 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
         }
         return Optional.absent();
     }
+
+    @Override
+    public List<Channel> getAllChannels() {
+        return ImmutableList.copyOf(channelMap.values());
+    }
+
 }

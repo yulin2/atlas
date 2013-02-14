@@ -42,12 +42,13 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     private static final String MEDIA_CONTENT_KEY = "content";
     private static final String DURATION_KEY = "duration";
     private static final String YOUVIEW_PREFIX = "youview:";
+    private static final String YOUVIEW_URI_PREFIX = "http://youview.com/programme/";
     private static final String SCHEDULE_SLOT_KEY = "scheduleSlot";
     private static final String AVAILABLE_KEY = "available";
     private static final String START_KEY = "start";
     private static final String END_KEY = "end";
     private static final String SCHEDULE_EVENT_PREFIX = "http://youview.com/scheduleevent/";
-    private static final String YOUVIEW_PROGRAMME_ID_PREFIX = "http://youview.com/programme/";
+
     private final YouViewChannelResolver channelResolver;
     
     private final DateTimeFormatter dateFormatter = ISODateTimeFormat.dateTimeNoMillis();
@@ -60,6 +61,7 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
     public Item extract(Element source) {
         
         Item item = new Item();
+
         String id = getId(source);
         item.setCanonicalUri(SCHEDULE_EVENT_PREFIX + id);
         item.addAlias(new Alias("youview:scheduleevent", id));
@@ -69,11 +71,14 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
 
         Optional<String> programmeId = getProgrammeId(source);
         if (programmeId.isPresent()) {
-            item.addAliasUrl(YOUVIEW_PROGRAMME_ID_PREFIX + programmeId.get());
+            item.addAliasUrl(YOUVIEW_URI_PREFIX + programmeId.get());
             item.addAlias(new Alias("youview:programme", programmeId.get()));
         }
-        item.addAliasUrl(getProgrammeCrid(source));
-        item.addAlias(new Alias("dvb:pcrid", getProgrammeCrid(source)));
+        Optional<String> programmeCrid = getProgrammeCrid(source);
+        if (programmeCrid.isPresent()) {
+            item.addAliasUrl(programmeCrid.get());
+            item.addAlias(new Alias("dvb:pcrid", programmeCrid.get()));
+        }
         item.addVersion(getVersion(source));
         return item;
     }
@@ -177,12 +182,12 @@ public class YouViewContentExtractor implements ContentExtractor<Element, Item> 
         return version;
     }
 
-    private String getProgrammeCrid(Element source) {
+    private Optional<String> getProgrammeCrid(Element source) {
         Element programmeCrid = getElementOfType(source, IDENTIFIER_KEY, YV_PREFIX, PROGRAMME_CRID_KEY);
         if (programmeCrid == null) {
-            throw new ElementNotFoundException(source, YV_PREFIX + ":" + IDENTIFIER_KEY + " with type: " + PROGRAMME_CRID_KEY);
+            return Optional.absent();
         }
-        return programmeCrid.getValue();
+        return Optional.fromNullable(programmeCrid.getValue());
     }
 
     private Element getElementOfType(Element source, String elementName, String prefixName, String elementType) {

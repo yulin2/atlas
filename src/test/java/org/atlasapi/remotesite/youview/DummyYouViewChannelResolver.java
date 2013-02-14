@@ -1,10 +1,12 @@
 package org.atlasapi.remotesite.youview;
 
+import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 
 public class DummyYouViewChannelResolver implements YouViewChannelResolver {
 
@@ -28,6 +30,11 @@ public class DummyYouViewChannelResolver implements YouViewChannelResolver {
             return Optional.fromNullable(channelMap.get(channelId));
         }
         return Optional.absent();
+    }
+
+    @Override
+    public List<Channel> getAllChannels() {
+        return ImmutableList.copyOf(channelMap.values());
     }
 
 }

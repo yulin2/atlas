@@ -52,7 +52,7 @@ public class YouViewItemParseTest {
         assertEquals("http://youview.com/scheduleevent/7780297", item.getCanonicalUri());
         assertEquals("Hatfields & McCoys", item.getTitle());
         assertEquals(MediaType.VIDEO, item.getMediaType());
-        assertEquals(ImmutableSet.of("7655992", "crid://www.five.tv/V65K2"), item.getAliases());
+        assertEquals(ImmutableSet.of("http://youview.com/programme/7655992", "crid://www.five.tv/V65K2"), item.getAliases());
         assertEquals(Publisher.YOUVIEW, item.getPublisher());
         
         Version version = Iterables.getOnlyElement(item.getVersions());

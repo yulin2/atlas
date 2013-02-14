@@ -1,14 +1,19 @@
 package org.atlasapi.remotesite.youview;
+
+import static org.atlasapi.remotesite.youview.DefaultYouViewChannelResolver.YOUVIEW_URI_MATCHER;
+
+import java.util.List;
+import java.util.regex.Matcher;
+
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Elements;
 
+import org.atlasapi.media.channel.Channel;
 import org.atlasapi.remotesite.redux.UpdateProgress;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +30,10 @@ public class YouViewUpdater extends ScheduledTask {
     private final Duration plus;
     private final Duration minus;
     private final Logger log = LoggerFactory.getLogger(YouViewUpdater.class);
+    private final YouViewChannelResolver channelResolver;
     
-    public YouViewUpdater(YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler, Duration minus, Duration plus) {
+    public YouViewUpdater(YouViewChannelResolver channelResolver, YouViewScheduleFetcher fetcher, YouViewXmlElementHandler elementHandler, Duration minus, Duration plus) {
+        this.channelResolver = channelResolver;
         this.fetcher = fetcher;
         this.elementHandler = elementHandler;
         this.minus = minus;
@@ -42,14 +49,17 @@ public class YouViewUpdater extends ScheduledTask {
             
             YouViewDataProcessor<UpdateProgress> processor = processor();
             
+            List<Channel> youViewChannels = channelResolver.getAllChannels();
+            
             while (startTime.isBefore(endTime)) {
+                for (Channel channel : youViewChannels) {
+                    Document xml = fetcher.getSchedule(startTime, startTime.plusDays(1), getYouViewId(channel));
+                    Element root = xml.getRootElement();
+                    Elements entries = root.getChildElements(ENTRY_KEY, root.getNamespaceURI(ATOM_PREFIX));
 
-                Document xml = fetcher.getSchedule(startTime, startTime.plusDays(1));
-                Element root = xml.getRootElement();
-                Elements entries = root.getChildElements(ENTRY_KEY, root.getNamespaceURI(ATOM_PREFIX));
-
-                for (int i = 0; i < entries.size(); i++) {
-                    processor.process(entries.get(i));
+                    for (int i = 0; i < entries.size(); i++) {
+                        processor.process(entries.get(i));
+                    }
                 }
                 startTime = startTime.plusDays(1);
             }
@@ -62,6 +72,16 @@ public class YouViewUpdater extends ScheduledTask {
 
     }
     
+    private int getYouViewId(Channel channel) {
+        for (String alias : channel.getAliasUrls()) {
+            Matcher m = YOUVIEW_URI_MATCHER.matcher(alias);
+            if(m.matches()) {
+                return Integer.decode(m.group(1));
+            }
+        }
+        throw new RuntimeException("Channel " + channel.getCanonicalUri() + " does not have a YouView alias");
+    }
+
     private YouViewDataProcessor<UpdateProgress> processor() {
         return new YouViewDataProcessor<UpdateProgress>() {
             

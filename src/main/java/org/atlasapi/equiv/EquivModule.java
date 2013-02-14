@@ -205,6 +205,7 @@ public class EquivModule {
         updaters.register(YOUVIEW, Container.class, broadcastItemContainerEquivalenceUpdater(youViewPublishers));
 
         Set<Publisher> reduxPublishers = Sets.union(acceptablePublishers, ImmutableSet.of(BBC_REDUX));
+
         updaters.register(BBC_REDUX, Item.class, broadcastItemEquivalenceUpdater(reduxPublishers));
         updaters.register(BBC_REDUX, Container.class, broadcastItemContainerEquivalenceUpdater(reduxPublishers));
         
