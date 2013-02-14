@@ -3,7 +3,10 @@ package org.atlasapi.remotesite.pa;
 import javax.annotation.PostConstruct;
 
 import org.atlasapi.feeds.upload.persistence.FileUploadResultStore;
+import org.atlasapi.media.channel.ChannelGroupResolver;
+import org.atlasapi.media.channel.ChannelGroupWriter;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelWriter;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
@@ -17,6 +20,10 @@ import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
 import org.atlasapi.remotesite.channel4.epg.BroadcastTrimmer;
 import org.atlasapi.remotesite.channel4.epg.ScheduleResolverBroadcastTrimmer;
+import org.atlasapi.remotesite.pa.channels.PaChannelDataHandler;
+import org.atlasapi.remotesite.pa.channels.PaChannelGroupsIngester;
+import org.atlasapi.remotesite.pa.channels.PaChannelsIngester;
+import org.atlasapi.remotesite.pa.channels.PaChannelsUpdater;
 import org.atlasapi.remotesite.pa.data.DefaultPaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.atlasapi.remotesite.pa.features.PaFeaturesUpdater;
@@ -36,13 +43,13 @@ import org.springframework.context.annotation.Import;
 import com.metabroadcast.common.persistence.mongo.DatabasedMongo;
 import com.metabroadcast.common.scheduling.RepetitionRule;
 import com.metabroadcast.common.scheduling.RepetitionRules;
-import com.metabroadcast.common.scheduling.ScheduledTask;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 import com.metabroadcast.common.security.UsernameAndPassword;
 
 @Configuration
 @Import(RtFilmModule.class)
 public class PaModule {
+    private final static RepetitionRule CHANNELS_INGEST = RepetitionRules.every(Duration.standardHours(12));
     private final static RepetitionRule FEATURES_INGEST = RepetitionRules.daily(LocalTime.MIDNIGHT);
     private final static RepetitionRule RECENT_FILE_INGEST = RepetitionRules.every(Duration.standardMinutes(10)).withOffset(Duration.standardMinutes(15));
     private final static RepetitionRule RECENT_FILE_DOWNLOAD = RepetitionRules.every(Duration.standardMinutes(10));
@@ -53,11 +60,14 @@ public class PaModule {
     private @Autowired ContentResolver contentResolver;
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
+    private @Autowired ChannelGroupWriter channelGroupWriter;
+    private @Autowired ChannelGroupResolver channelGroupResolver;
     private @Autowired AdapterLog log;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired ItemsPeopleWriter peopleWriter;
     private @Autowired ScheduleWriter scheduleWriter;
     private @Autowired ChannelResolver channelResolver;
+    private @Autowired ChannelWriter channelWriter;
     private @Autowired FileUploadResultStore fileUploadResultStore;
     private @Autowired DatabasedMongo mongo;
     
@@ -72,6 +82,7 @@ public class PaModule {
     
     @PostConstruct
     public void startBackgroundTasks() {
+        scheduler.schedule(paChannelsUpdater().withName("PA Channels Updater"), CHANNELS_INGEST);
         scheduler.schedule(paFeaturesUpdater().withName("PA Features Updater"), FEATURES_INGEST);
         scheduler.schedule(paFileUpdater().withName("PA File Updater"), RECENT_FILE_DOWNLOAD);
         scheduler.schedule(paCompleteUpdater().withName("PA Complete Updater"), COMPLETE_INGEST);
@@ -79,7 +90,15 @@ public class PaModule {
         log.record(new AdapterLogEntry(Severity.INFO).withDescription("PA update scheduled task installed").withSource(PaCompleteUpdater.class));
     }
     
-    @Bean ScheduledTask paFeaturesUpdater() {
+    @Bean PaChannelsUpdater paChannelsUpdater() {
+        return new PaChannelsUpdater(paProgrammeDataStore(), channelDataHandler());
+    }
+    
+    @Bean PaChannelDataHandler channelDataHandler() {
+        return new PaChannelDataHandler(new PaChannelsIngester(), new PaChannelGroupsIngester(), channelResolver, channelWriter, channelGroupResolver, channelGroupWriter);
+    }
+
+    @Bean PaFeaturesUpdater paFeaturesUpdater() {
         return new PaFeaturesUpdater(paProgrammeDataStore(), contentResolver, contentGroupResolver, contentGroupWriter);
     }
 
