@@ -84,7 +84,8 @@ public class NetflixEpisodeParseTest {
         }
         
         assertThat(episode.getAliases().size(), is(1));
-        for (String alias : episode.getAliases()) {
+        // TODO new alias
+        for (String alias : episode.getAliasUrls()) {
             assertThat(alias, equalTo("http://api.netflix.com/catalog/titles/programs/262101/70151113"));
         }
 

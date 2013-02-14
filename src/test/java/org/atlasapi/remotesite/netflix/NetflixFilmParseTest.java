@@ -92,7 +92,8 @@ public class NetflixFilmParseTest {
         }
         
         assertThat(film.getAliases().size(), is(1));
-        for (String alias : film.getAliases()) {
+        // TODO new alias
+        for (String alias : film.getAliasUrls()) {
             assertThat(alias, equalTo("http://api.netflix.com/catalog/titles/movies/21930861"));
         }
 

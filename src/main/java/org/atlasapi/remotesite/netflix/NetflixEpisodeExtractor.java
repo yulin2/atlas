@@ -38,7 +38,8 @@ public class NetflixEpisodeExtractor implements NetflixContentExtractor<Episode>
         episode.setYear(getYear(source));
         episode.setGenres(getGenres(source));
         episode.setCertificates(getCertificates(source));
-        episode.addAlias(getAlias(source));
+        // TODO new alias
+        episode.addAliasUrl(getAlias(source));
         episode.setParentRef(getParentRef(source));
         episode.setSeriesRef(getSeriesRef(source));
         episode.setEpisodeNumber(getEpisodeNumber(source));
