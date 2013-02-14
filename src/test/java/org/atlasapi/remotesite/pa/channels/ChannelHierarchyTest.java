@@ -128,7 +128,7 @@ public class ChannelHierarchyTest {
         assertEquals(new TemporalString("BBC One", new LocalDate(2002, 3, 12), null), Iterables.getOnlyElement(parent.allTitles()));
 //      assertEquals("", parent.image());
         
-        assertEquals("http://pressassociation.com/stations/1", Iterables.getOnlyElement(parent.getAliases()));
+        assertEquals("http://pressassociation.com/stations/1", Iterables.getOnlyElement(parent.getAliasUrls()));
         
         assertTrue(parent.highDefinition());
         assertEquals(MediaType.VIDEO, parent.mediaType());

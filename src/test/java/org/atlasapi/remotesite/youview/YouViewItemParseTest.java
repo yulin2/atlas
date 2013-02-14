@@ -52,7 +52,7 @@ public class YouViewItemParseTest {
         assertEquals("http://youview.com/scheduleevent/7780297", item.getCanonicalUri());
         assertEquals("Hatfields & McCoys", item.getTitle());
         assertEquals(MediaType.VIDEO, item.getMediaType());
-        assertEquals(ImmutableSet.of("http://youview.com/programme/7655992", "crid://www.five.tv/V65K2"), item.getAliases());
+        assertEquals(ImmutableSet.of("http://youview.com/programme/7655992", "crid://www.five.tv/V65K2"), item.getAliasUrls());
         assertEquals(Publisher.YOUVIEW, item.getPublisher());
         
         Version version = Iterables.getOnlyElement(item.getVersions());
@@ -64,7 +64,7 @@ public class YouViewItemParseTest {
         assertEquals(new DateTime(2012, 11, 18, 23, 30, 00), broadcast.getTransmissionTime());
         assertEquals(new DateTime(2012, 11, 19, 00, 30, 00), broadcast.getTransmissionEndTime());
         assertThat(broadcast.getBroadcastDuration(), is(3600));
-        assertEquals(ImmutableSet.of("dvb://233a..2134;8696"), broadcast.getAliases());
+        assertEquals(ImmutableSet.of("dvb://233a..2134;8696"), broadcast.getAliasUrls());
         assertEquals("youview:7780297", broadcast.getSourceId());
         
         Encoding encoding = Iterables.getOnlyElement(version.getManifestedAs());
@@ -81,7 +81,7 @@ public class YouViewItemParseTest {
     public void testItemParsingNoProgrammeId() throws ValidityException, ParsingException, IOException {
         Item item = contentExtractor.extract(getContentElementFromFile("youview-item-no-programme-id.xml"));
         
-        assertEquals(ImmutableSet.of("crid://www.five.tv/V65K2"), item.getAliases());
+        assertEquals(ImmutableSet.of("crid://www.five.tv/V65K2"), item.getAliasUrls());
     }
     
     public static Element getContentElementFromFile(String fileName) throws ValidityException, ParsingException, IOException {

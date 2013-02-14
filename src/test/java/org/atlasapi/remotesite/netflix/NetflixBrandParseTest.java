@@ -137,7 +137,7 @@ public class NetflixBrandParseTest {
             assertThat(cert.country(), equalTo(Countries.GB));
         }
         
-        assertThat(brand.getAliases().size(), is(1));
+        assertThat(brand.getAliasUrls().size(), is(1));
         // TODO new alias
         for (String alias : brand.getAliasUrls()) {
             assertThat(alias, equalTo("http://api.netflix.com/catalog/titles/series/70136130"));
