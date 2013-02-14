@@ -65,8 +65,8 @@ public class ChannelHierarchyTest {
         
         assertEquals("http://ref.atlasapi.org/channels/pressassociation.com/1741", createdChannel.getCanonicalUri());
         
-        String firstAlias = Iterables.get(createdChannel.getAliases(), 0);
-        String secondAlias = Iterables.get(createdChannel.getAliases(), 1);
+        String firstAlias = Iterables.get(createdChannel.getAliasUrls(), 0);
+        String secondAlias = Iterables.get(createdChannel.getAliasUrls(), 1);
         assertThat(firstAlias, isOneOf("http://pressassociation.com/channels/1741", "http://youview.com/service/1078"));
         assertThat(secondAlias, isOneOf("http://pressassociation.com/channels/1741", "http://youview.com/service/1078"));
         
@@ -143,7 +143,7 @@ public class ChannelHierarchyTest {
             .withHighDefinition(true)
             .withRegional(false)
             .build();
-        westMids.addAlias("http://pressassociation.com/channels/11");
+        westMids.addAliasUrl("http://pressassociation.com/channels/11");
         
         Channel channelIsl = Channel.builder()
             .withSource(Publisher.METABROADCAST)
@@ -155,7 +155,7 @@ public class ChannelHierarchyTest {
             .withHighDefinition(true)
             .withRegional(false)
             .build();
-        channelIsl.addAlias("http://pressassociation.com/channels/1663");
+        channelIsl.addAliasUrl("http://pressassociation.com/channels/1663");
         
         ExtendedChannelEquivalence equiv = new ExtendedChannelEquivalence();
         assertTrue(equiv.pairwise().equivalent(ImmutableList.of(westMids, channelIsl), ImmutableList.copyOf(children)));
