@@ -55,7 +55,7 @@ public class PaChannelDataHandler {
                 if (parent != null) {
                     child.setParent(parent);
                 }
-                for (String alias : child.getAliases()) {
+                for (String alias : child.getAliasUrls()) {
                     if (isPaAlias(alias)) {
                         channelMap.put(alias, child);
                     }
@@ -91,7 +91,7 @@ public class PaChannelDataHandler {
     
     private Channel createOrMerge(Channel newChannel) {
         String alias = null;
-        for (String newAlias : newChannel.getAliases()) {
+        for (String newAlias : newChannel.getAliasUrls()) {
             if (isPaAlias(newAlias)) {
                 alias = newAlias;
                 break;
@@ -123,7 +123,7 @@ public class PaChannelDataHandler {
     
     private ChannelGroup createOrMerge(ChannelGroup channelGroup) {
         String alias = null;
-        for (String newAlias : channelGroup.getAliases()) {
+        for (String newAlias : channelGroup.getAliasUrls()) {
             if (isPaAlias(newAlias)) {
                 alias = newAlias;
                 break;
@@ -136,7 +136,7 @@ public class PaChannelDataHandler {
         if (resolved.isPresent()) {
             ChannelGroup existing = resolved.get();
 
-            existing.addAliases(channelGroup.getAliases());
+            existing.addAliasUrls(channelGroup.getAliasUrls());
             existing.setTitles(channelGroup.getAllTitles());
             
             if (channelGroup instanceof Region) {
