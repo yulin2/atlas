@@ -10,8 +10,10 @@ import org.atlasapi.genres.GenreMap;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Actor;
+import org.atlasapi.media.entity.Alias;
 import org.atlasapi.media.entity.Brand;
 import org.atlasapi.media.entity.Broadcast;
+import org.atlasapi.media.entity.Certificate;
 import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Episode;
@@ -52,6 +54,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.internal.Sets;
 import com.metabroadcast.common.base.Maybe;
+import com.metabroadcast.common.intl.Countries;
 import com.metabroadcast.common.text.MoreStrings;
 import com.metabroadcast.common.time.Timestamp;
 
@@ -245,14 +248,17 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         }
 
         String brandUri = PaHelper.getBrandUri(brandId);
+        Alias brandAlias = PaHelper.getBrandAlias(brandId);
         
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(brandUri)).getFirstValue();
         
         Brand brand = possiblePrevious.hasValue() ? (Brand) possiblePrevious.requireValue() : new Brand(brandUri, "pa:b-" + brandId, Publisher.PA);
         
+        brand.addAlias(brandAlias);
         brand.setTitle(progData.getTitle());
         brand.setDescription(progData.getSeriesSynopsis());
         brand.setSpecialization(specialization(progData, channel));
+        setCertificate(progData, brand);
         setGenres(progData, brand);
 
         if (progData.getPictures() != null) {
@@ -275,10 +281,14 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             return Maybe.nothing();
         }
         String seriesUri = PaHelper.getSeriesUri(progData.getSeriesId(), progData.getSeriesNumber());
+        Alias seriesAlias = PaHelper.getSeriesAlias(progData.getSeriesId(), progData.getSeriesNumber());
+        
         
         Maybe<Identified> possiblePrevious = contentResolver.findByCanonicalUris(ImmutableList.of(seriesUri)).getFirstValue();
         
         Series series = possiblePrevious.hasValue() ? (Series) possiblePrevious.requireValue() : new Series(seriesUri, "pa:s-" + progData.getSeriesId() + "-" + progData.getSeriesNumber(), Publisher.PA);
+        
+        series.addAlias(seriesAlias);
         
         if(progData.getEpisodeTotal() != null && progData.getEpisodeTotal().trim().length() > 0) {
             try {
@@ -298,6 +308,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     
         series.setPublisher(Publisher.PA);
         series.setSpecialization(specialization(progData, channel));
+        setCertificate(progData, series);
         setGenres(progData, series);
         
         if (progData.getPictures() != null) {
@@ -336,6 +347,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         } else {
             film = getBasicFilm(progData);
         }
+        film.addAlias(PaHelper.getFilmAlias(programmeId(progData)));
         
         Broadcast broadcast = setCommonDetails(progData, channel, zone, film, updatedAt);
         
@@ -361,15 +373,24 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
 
         if (progData.getBillings() != null) {
             for (Billing billing : progData.getBillings().getBilling()) {
-                if (billing.getType().equals("synopsis")) {
-                	if(episode.getDescription() == null || !channel.uri().contains("wales")) {
-	                    episode.setDescription(billing.getvalue());
-	                    break;
-                	}
+                if((episode.getDescription() == null || !channel.uri().contains("wales")) 
+                        && billing.getType().equals("synopsis")) {
+                    episode.setDescription(billing.getvalue());
+                }
+                if ((episode.getShortDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail1")) {
+                    episode.setShortDescription(billing.getvalue());
+                }
+                if ((episode.getMediumDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail2")) {
+                    episode.setMediumDescription(billing.getvalue());
+                }
+                if ((episode.getLongDescription() == null || !channel.uri().contains("wales"))
+                        && billing.getType().equals("pa_detail3")) {
+                    episode.setLongDescription(billing.getvalue());
                 }
             }
         }
-
 
         episode.setMediaType(channel.mediaType());
         episode.setSpecialization(specialization(progData, channel));
@@ -403,6 +424,10 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
         episode.setPeople(people(progData));
 
         Version version = findBestVersion(episode.getVersions());
+        version.set3d(getBooleanValue(progData.getAttr().getThreeD()));
+        Duration duration = Duration.standardMinutes(Long.valueOf(progData.getDuration()));
+        version.setDuration(duration);
+        setCertificate(progData, episode);
 
         Broadcast broadcast = broadcast(progData, channel, zone, updatedAt);
         addBroadcast(version, broadcast);
@@ -415,6 +440,12 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             return "http://pressassociation.com/genres/" + from.getCategoryCode();
         }
     };
+
+    private void setCertificate(ProgData progData, Content content) {
+        if (progData.getCertificate() != null) {
+            content.setCertificates(ImmutableList.of(new Certificate(progData.getCertificate(), Countries.GB)));
+        }
+    }
     
     private void setGenres(ProgData progData, Content content) {
         Set<String> extractedGenres = genreMap.map(ImmutableSet.copyOf(Iterables.transform(progData.getCategory(), TO_GENRE_URIS)));
@@ -442,6 +473,8 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
             item = getBasicEpisode(progData, isEpisode);
         }
         
+        item.addAlias(PaHelper.getEpisodeAlias(programmeId(progData)));
+        
         Broadcast broadcast = setCommonDetails(progData, channel, zone, item, updatedAt);
         
         try {
@@ -463,6 +496,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     private Item convertItemToEpisode(Item item) {
         Episode episode = new Episode(item.getCanonicalUri(), item.getCurie(),item.getPublisher());
         episode.setAliases(item.getAliases());
+        episode.setAliasUrls(item.getAliasUrls());
         episode.setBlackAndWhite(item.getBlackAndWhite());
         episode.setClips(item.getClips());
         episode.setParentRef(item.getContainer());
@@ -599,6 +633,7 @@ public class PaProgrammeProcessor implements PaProgDataProcessor {
     }
     
     private void setBasicDetails(ProgData progData, Item item) {
+        setCertificate(progData, item);
         Version version = new Version();
         version.setProvider(Publisher.PA);
         version.set3d(getBooleanValue(progData.getAttr().getThreeD()));

@@ -2,134 +2,79 @@ package org.atlasapi.equiv.generators;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasEntry;
-
-import java.util.List;
-import java.util.Map;
-
+import static org.hamcrest.Matchers.hasItems;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import junit.framework.TestCase;
 
-import org.atlasapi.equiv.results.EquivalenceResult;
+import org.atlasapi.equiv.ContentRef;
+import org.atlasapi.equiv.EquivalenceSummary;
+import org.atlasapi.equiv.EquivalenceSummaryStore;
 import org.atlasapi.equiv.results.description.DefaultDescription;
-import org.atlasapi.equiv.results.persistence.LiveEquivalenceResultStore;
 import org.atlasapi.equiv.results.scores.Score;
-import org.atlasapi.equiv.results.scores.ScoredEquivalent;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.equiv.update.ContentEquivalenceUpdater;
-import org.atlasapi.media.entity.Brand;
-import org.atlasapi.media.entity.ChildRef;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 import org.atlasapi.media.entity.Container;
-import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Episode;
-import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.persistence.logging.NullAdapterLog;
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
-import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableSet;
+import com.metabroadcast.common.collect.ImmutableOptionalMap;
 
-@RunWith(JMock.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ContainerChildEquivalenceGeneratorTest extends TestCase {
 
-    private final String A_SORT_KEY = "asdf";
-    private final DateTime NULL_UPDATED = null;
-
-    private final Mockery context = new Mockery();
-    @SuppressWarnings("unchecked")
-    private final ContentEquivalenceUpdater<Item> itemUpdater = context.mock(ContentEquivalenceUpdater.class);
-    private final ContentResolver contentResolver = context.mock(ContentResolver.class);
-    private final LiveEquivalenceResultStore resultStore = context.mock(LiveEquivalenceResultStore.class);
+    private static final ImmutableSet<String> NO_CANDIDATES = ImmutableSet.<String>of();
     
-    private final ContainerChildEquivalenceGenerator generator = new ContainerChildEquivalenceGenerator(contentResolver, itemUpdater, resultStore, new NullAdapterLog());
-    
-    @Test
-    public void testAttemptsToResolveAllChildrenOfContainer() {
-        
-        final ImmutableList<ChildRef> childRefs = ImmutableList.of(
-                new ChildRef("child1", A_SORT_KEY, NULL_UPDATED, EntityType.EPISODE),
-                new ChildRef("child2", A_SORT_KEY, NULL_UPDATED, EntityType.EPISODE)
-        );
-        
-        context.checking(new Expectations(){{
-            ignoring(itemUpdater);
-            ignoring(resultStore);
-            one(contentResolver).findByCanonicalUris(Lists.transform(childRefs, ChildRef.TO_URI));
-                will(returnValue(ResolvedContent.builder().build()));
-        }});
+    private final ContentResolver resolver = mock(ContentResolver.class);
+    private final EquivalenceSummaryStore equivSummaryStore = mock(EquivalenceSummaryStore.class);
 
-        Container container = new Container();
-        container.setChildRefs(childRefs);
-        
-        generator.generate(container, new DefaultDescription());
-    }
-    
-    @Test
-    public void testCallsUpdaterAndStoresResultForChildrenOfContainer() {
-        
-        final Episode ep = new Episode("ep1", "cep2", Publisher.BBC);
-        
-        final ImmutableList<ChildRef> childRefs = ImmutableList.of(ep.childRef());
-
-        final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.<Publisher,ScoredEquivalent<Item>>of());
-
-        context.checking(new Expectations(){{
-            one(contentResolver).findByCanonicalUris(Lists.transform(childRefs, ChildRef.TO_URI));
-                will(returnValue(ResolvedContent.builder().put(ep.getCanonicalUri(), ep).build()));
-            one(itemUpdater).updateEquivalences(ep, Optional.<List<Item>>absent());
-                will(returnValue(equivResult));
-            one(resultStore).store(equivResult);will(returnValue(equivResult));
-        }});
-        
-        Container container = new Container();
-        container.setChildRefs(childRefs);
-        
-        generator.generate(container, new DefaultDescription());
-    }
+    private final ContainerChildEquivalenceGenerator generator = new ContainerChildEquivalenceGenerator(resolver, equivSummaryStore);
     
     @Test
     public void testExtractsContainerFromStrongItemEquivalents() {
         
-        final Episode ep = new Episode("ep1", "cep2", Publisher.BBC);
+        Container subject = new Container("subject","s",Publisher.BBC);
+        subject.setChildRefs(ImmutableSet.of(
+            new Episode("child1","c1",Publisher.BBC).childRef(),
+            new Episode("child2","c2",Publisher.BBC).childRef()
+        ));
+        Container equiv1 = new Container("equivalent1","e1",Publisher.PA);
+        Container equiv2 = new Container("equivalent2","e2",Publisher.ITV);
         
-        final ImmutableList<ChildRef> childRefs = ImmutableList.of(ep.childRef());
-
-        final String equivParentUri = "containerUri";
-        final Container equivParent = new Brand(equivParentUri, equivParentUri, Publisher.PA);
+        when(equivSummaryStore.summariesForUris(argThat(hasItems("child1","child2")))).thenReturn(
+            ImmutableOptionalMap.fromMap(ImmutableMap.of(
+                "child1",
+                new EquivalenceSummary("child1","subject",NO_CANDIDATES,ImmutableMap.of(
+                    Publisher.BBC, new ContentRef("equivItem",Publisher.BBC,""),
+                    Publisher.PA, new ContentRef("equivC1", Publisher.PA, "equivalent1"))),
+                "child2",
+                new EquivalenceSummary("child2","subject",NO_CANDIDATES,ImmutableMap.of(
+                    Publisher.BBC, new ContentRef("equivC2",Publisher.BBC,"equivalent2"),
+                    Publisher.PA, new ContentRef("equivC1",Publisher.PA, "equivalent1"))
+                )
+            ))
+        );
         
-        final Episode equiv = new Episode("equiv","cequiv",Publisher.PA);
-        equiv.setContainer(equivParent);
-        equivParent.setChildRefs(ImmutableList.of(equiv.childRef()));
+        ResolvedContent content = ResolvedContent.builder()
+                .put(equiv1.getCanonicalUri(), equiv1)
+                .put(equiv2.getCanonicalUri(), equiv2)
+                .build();
         
-        final EquivalenceResult<Item> equivResult = resultFor(ep, ImmutableMap.of(Publisher.PA, ScoredEquivalent.<Item>equivalentScore(equiv, Score.ONE)));
-
-        context.checking(new Expectations(){{
-            one(contentResolver);
-                will(returnValue(ResolvedContent.builder().put(ep.getCanonicalUri(), ep).build()));
-            one(itemUpdater).updateEquivalences(ep, Optional.<List<Item>>absent());
-                will(returnValue(equivResult));
-            one(resultStore).store(equivResult);will(returnValue(equivResult));
-            one(contentResolver);
-                will(returnValue(ResolvedContent.builder().put(equivParentUri,equivParent).build()));
-        }});
+        when(resolver.findByCanonicalUris(argThat(hasItems("equivalent1","equivalent2")))).thenReturn(
+            content
+        );
         
-        Container container = new Container();
-        container.setChildRefs(childRefs);
+        ScoredCandidates<Container> scores = generator.generate(subject, new DefaultDescription());
         
-        ScoredEquivalents<Container> scores = generator.generate(container, new DefaultDescription());
-        
-        assertThat(scores.equivalents(), hasEntry(equivParent, Score.ONE));
+        assertThat(scores.candidates(), hasEntry(equiv1, Score.ONE));
+        assertThat(scores.candidates(), hasEntry(equiv2, Score.valueOf(0.5)));
     }
 
-    private EquivalenceResult<Item> resultFor(final Episode ep, Map<Publisher, ScoredEquivalent<Item>> strong) {
-        return new EquivalenceResult<Item>(ep, ImmutableList.<ScoredEquivalents<Item>> of(), null, strong, null);
-    }
 }

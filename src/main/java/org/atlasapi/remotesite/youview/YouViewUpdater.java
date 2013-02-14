@@ -73,7 +73,7 @@ public class YouViewUpdater extends ScheduledTask {
     }
     
     private int getYouViewId(Channel channel) {
-        for (String alias : channel.getAliases()) {
+        for (String alias : channel.getAliasUrls()) {
             Matcher m = YOUVIEW_URI_MATCHER.matcher(alias);
             if(m.matches()) {
                 return Integer.decode(m.group(1));

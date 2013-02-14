@@ -34,9 +34,6 @@ public class PeopleController extends BaseController<Iterable<Person>> {
         try {
             ContentQuery filter = builder.build(request);
 
-            if (!Selection.ALL.equals(filter.getSelection())) {
-                throw new IllegalArgumentException("Cannot specifiy a limit or offset here");
-            }
             String uri = request.getParameter("uri");
             if (uri == null) {
                 throw new IllegalArgumentException("No uri specified");

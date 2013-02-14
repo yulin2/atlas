@@ -4,7 +4,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.input.DefaultGsonModelReader;
 import org.atlasapi.input.DelegatingModelTransformer;
 import org.atlasapi.input.ItemModelTransformer;
-import org.atlasapi.media.channel.ChannelGroupStore;
+import org.atlasapi.media.channel.ChannelGroupResolver;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Content;
@@ -100,7 +100,7 @@ public class QueryWebModule {
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
-    private @Autowired ChannelGroupStore channelGroupResolver;
+    private @Autowired ChannelGroupResolver channelGroupResolver;
     private @Autowired ScheduleResolver scheduleResolver;
     private @Autowired SearchResolver searchResolver;
     private @Autowired PeopleResolver peopleResolver;
@@ -125,8 +125,7 @@ public class QueryWebModule {
     @Bean
     ChannelGroupController channelGroupController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier(), configFetcher, log,
-                standardWriter(new JsonTranslator<ChannelGroupQueryResult>(), new JaxbXmlTranslator<ChannelGroupQueryResult>()));
+        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier());
     }
 
     @Bean
@@ -200,8 +199,9 @@ public class QueryWebModule {
 
     @Bean
     ItemModelSimplifier itemModelSimplifier() {
+        NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
         ContainerSummaryResolver containerSummary = new MongoContainerSummaryResolver(mongo);
-        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary);
+        ItemModelSimplifier itemSimplifier = new ItemModelSimplifier(localHostName, contentGroupResolver, topicResolver, productResolver, segmentResolver, containerSummary, channelResolver, idCodec);
         itemSimplifier.exposeIds(Boolean.valueOf(exposeIds));
         return itemSimplifier;
     }

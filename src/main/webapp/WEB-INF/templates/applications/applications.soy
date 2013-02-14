@@ -127,6 +127,7 @@
 {/template}
 
 /**
+ * @param page
  * @param applications
  */
 {template .index}
@@ -135,15 +136,15 @@
 	{param application: null /}
 {/call}
 	<h1>Applications</h1>
-	<!--<div class="form fr mrm">
+	<div class="form fr mrm">
     	<div class="grp">
-    		<label for="filter">Filter</label>
+    		<label for="search">Search</label>
     		<div class="inputHolder">
-    			<input type="text" id="filter" />
-    			<span class="extra neg" style="display: none;"><a href="#" class="icn cross" id="clearFilter" title="Clear">Clear</a></span>
+    			<input type="text" id="search" value="{$page.search}"/>
+    			<span class="extra pos"><a href="#" class="icn tick" id="runSearch" title="Search">Search</a></span>
     		</div>
     	</div>
-	</div>-->
+	</div>
 	<button type="button" class="btn pos mlm fr" onclick="$('.overlayBlocker').show();">Create Application</button>
 	<h2 class="fl">Current Applications</h2>
 	<div id="applications-list" data-apps="{length($applications)}" class="cf cb">
@@ -169,10 +170,25 @@
 				<!--<span>{$application.credentials.apiKey}</span>-->
 			{/foreach}
 		{else}
-			<div class="alert inf">You don't currently have any applications.</div>
+		    {if $page.search == ''}
+			    <div class="alert inf">You don't currently have any applications.</div>
+			{else}
+			    <div class="alert inf">No results</div>
+			{/if}
 		{/if}
 	</div>
-	
+	<div>
+	{if $page.nextUrl}
+	   <div class="prevNextBtn  fr">
+	       <a href="{$page.nextUrl}" class="btn inf mlm">Next</a>
+	   </div>
+	{/if}
+	{if $page.prevUrl}
+	   <div class="prevNextBtn">
+	       <a href="{$page.prevUrl}" class="btn inf mlm">Previous</a>
+	   </div>
+	{/if}
+	</div>
 	<div class="overlayBlocker" style="display: none;">
 		<div class="overlay">
 			<a href="#" class="closeOverlay"></a>

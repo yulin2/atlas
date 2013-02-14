@@ -1,5 +1,7 @@
 package org.atlasapi.remotesite.redux;
 
+import junit.framework.TestCase;
+
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
@@ -23,7 +25,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.time.DateTimeZones;
-import com.mongodb.util.TestCase;
 
 @RunWith(JMock.class)
 public class FullProgrammeItemExtractorTest extends TestCase {
@@ -35,7 +36,8 @@ public class FullProgrammeItemExtractorTest extends TestCase {
     public void testExtract() {
 
         final Channel channel = new Channel(Publisher.METABROADCAST, "BBC One", "bbcone", false, MediaType.VIDEO, "http://www.bbc.co.uk/bbcone");
-    	channel.addAlias("http://devapi.bbcredux.com/channels/bbconehd");
+        // TODO new alias
+    	channel.addAliasUrl("http://devapi.bbcredux.com/channels/bbconehd");
     	context.checking(new Expectations() {
 			{
 				allowing(channelResolver).forAliases("http://devapi.bbcredux.com/channels/");

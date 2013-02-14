@@ -1,54 +1,49 @@
 package org.atlasapi.equiv.scorers;
 
-import static org.atlasapi.persistence.logging.AdapterLogEntry.warnEntry;
-
 import java.util.List;
+import java.util.Set;
 
 import org.atlasapi.equiv.results.description.ResultDescription;
-import org.atlasapi.equiv.results.scores.ScoredEquivalents;
-import org.atlasapi.media.entity.Content;
-import org.atlasapi.persistence.logging.AdapterLog;
+import org.atlasapi.equiv.results.scores.ScoredCandidates;
 
-import com.google.common.base.Throwables;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 
-public class EquivalenceScorers<T extends Content> {
-
-    public static <T extends Content> EquivalenceScorers<T> from(Iterable<ContentEquivalenceScorer<T>> generators, AdapterLog log) {
-        return new EquivalenceScorers<T>(generators, log);
+public class EquivalenceScorers<T> {
+    
+    public static <T> EquivalenceScorers<T> from(Iterable<? extends EquivalenceScorer<T>> generators) {
+        return new EquivalenceScorers<T>(generators);
     }
 
-    private final Iterable<ContentEquivalenceScorer<T>> scorers;
-    private final AdapterLog log;
+    private final List<? extends EquivalenceScorer<T>> scorers;
 
-    public EquivalenceScorers(Iterable<ContentEquivalenceScorer<T>> scorers, AdapterLog log) {
-        this.scorers = scorers;
-        this.log = log;
+    public EquivalenceScorers(Iterable<? extends EquivalenceScorer<T>> scorers) {
+        this.scorers = ImmutableList.copyOf(scorers);
     }
 
-    public List<ScoredEquivalents<T>> score(T content, List<T> generatedSuggestions, ResultDescription desc) {
+    public List<ScoredCandidates<T>> score(T content, Set<? extends T> candidates, ResultDescription desc) {
         desc.startStage("Scoring equivalences");
-        Builder<ScoredEquivalents<T>> scoredScores = ImmutableList.builder();
+        Builder<ScoredCandidates<T>> scoredScores = ImmutableList.builder();
 
-        for (ContentEquivalenceScorer<T> scorer : scorers) {
+        for (EquivalenceScorer<T> scorer : scorers) {
             try {
                 desc.startStage(scorer.toString());
-                scoredScores.add(scorer.score(content, generatedSuggestions, desc));
+                scoredScores.add(scorer.score(content, candidates, desc));
                 desc.finishStage();
             } catch (Exception e) {
-                log.record(warnEntry().withSource(getClass()).withCause(e).withDescription("Exception running %s for %s", scorer, content));
-                /*
-                 * Propagate to make sure the equivalence update for this
-                 * content fails - if a scorer fails intermittently there's a
-                 * risk of equivalence flip-flop.
-                 */
-                throw Throwables.propagate(e);
+                throw new RuntimeException(String.format("{} - {}", scorer, content), e);
             }
         }
 
         desc.finishStage();
         return scoredScores.build();
     }
-
+    
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(getClass())
+                .add("scorers", scorers)
+                .toString();
+    }
 }
