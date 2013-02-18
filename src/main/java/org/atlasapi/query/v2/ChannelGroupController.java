@@ -111,7 +111,8 @@ public class ChannelGroupController {
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
         } catch (InvalidAPIKeyException apiE) {
-            throw new IllegalArgumentException("Invalid API Key.", apiE);
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
+                    "Invalid API Key.");
        }
     }
 
@@ -159,7 +160,8 @@ public class ChannelGroupController {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(),
                     e.getMessage());
         } catch (InvalidAPIKeyException apiE) {
-            throw new IllegalArgumentException("Invalid API Key.", apiE);
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
+                    "Invalid API Key.");
         }
     }
 
