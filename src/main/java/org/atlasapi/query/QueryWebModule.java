@@ -132,7 +132,7 @@ public class QueryWebModule {
     @Bean
     ChannelGroupController channelGroupController() {
         NumberToShortStringCodec idCodec = new SubstitutionTableNumberCodec();
-        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier());
+        return new ChannelGroupController(channelGroupResolver, idCodec, channelSimplifier(), configFetcher);
     }
 
     @Bean
