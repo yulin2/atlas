@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupType;
 import org.atlasapi.media.channel.Platform;
@@ -109,7 +110,9 @@ public class ChannelGroupController {
             writeOut(response, request, new ChannelGroupQueryResult(simplifier.simplify(channelGroups, showChannels(annotations), showHistory(annotations))));
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
-        }
+        } catch (InvalidAPIKeyException apiE) {
+            throw new IllegalArgumentException("Invalid API Key.", apiE);
+       }
     }
 
     private Set<String> checkAnnotationValidity(Set<String> annotations) {
@@ -155,6 +158,8 @@ public class ChannelGroupController {
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(),
                     e.getMessage());
+        } catch (InvalidAPIKeyException apiE) {
+            throw new IllegalArgumentException("Invalid API Key.", apiE);
         }
     }
 
