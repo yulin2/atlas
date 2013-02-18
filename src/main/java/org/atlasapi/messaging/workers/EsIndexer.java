@@ -2,16 +2,13 @@ package org.atlasapi.messaging.workers;
 
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Container;
-import org.atlasapi.media.content.ContentIndexer;
-import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.IndexException;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.util.Resolved;
 import org.atlasapi.messaging.EntityUpdatedMessage;
-import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.media.content.ContentIndexer;
-import org.atlasapi.persistence.content.IndexException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
