@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.atlasapi.content.criteria.AtomicQuery;
-import org.atlasapi.content.criteria.AtomicQuerySet;
+import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.IdAttributeQuery;
 import org.atlasapi.content.criteria.QueryVisitorAdapter;
 import org.atlasapi.content.criteria.StringAttributeQuery;
@@ -41,7 +41,7 @@ public class QueryAttributeParserTest {
             idCodec.encode(id1.toBigInteger()), idCodec.encode(id2.toBigInteger())
         );
         
-        AtomicQuerySet queries = parser.parse(request().withParam("id",idParam));
+        AttributeQuerySet queries = parser.parse(request().withParam("id",idParam));
         
         AtomicQuery idAttributeQuery = Iterables.getOnlyElement(queries);
         
@@ -61,7 +61,7 @@ public class QueryAttributeParserTest {
     @Test
     public void testParseQueryWithMultipleParams() {
 
-        AtomicQuerySet queries = parser.parse(request()
+        AttributeQuerySet queries = parser.parse(request()
             .withParam("aliases.namespace","theNamespace")
             .withParam("aliases.value", "theValue")
         );
@@ -93,7 +93,7 @@ public class QueryAttributeParserTest {
     @Test
     public void testParseQueryWithOperator() {
         
-        AtomicQuerySet queries = parser.parse(request()
+        AttributeQuerySet queries = parser.parse(request()
             .withParam("aliases.namespace.beginning","theNamespace")
             .withParam("aliases.value.equals", "theValue")
         );

@@ -8,8 +8,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.atlasapi.content.criteria.AtomicQuery;
-import org.atlasapi.content.criteria.AtomicQuerySet;
+import org.atlasapi.content.criteria.AttributeQuery;
+import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.content.criteria.attribute.Attribute;
 
 import com.google.common.base.Function;
@@ -47,12 +47,12 @@ public class QueryAttributeParser {
         return lookup;
     }
 
-    public AtomicQuerySet parse(HttpServletRequest request) {
-        return new AtomicQuerySet(parseListQuery(request));
+    public AttributeQuerySet parse(HttpServletRequest request) {
+        return new AttributeQuerySet(parseListQuery(request));
     }
 
-    private Iterable<? extends AtomicQuery> parseListQuery(HttpServletRequest request) {
-        ImmutableSet.Builder<AtomicQuery> operands = ImmutableSet.builder();
+    private Iterable<? extends AttributeQuery<?>> parseListQuery(HttpServletRequest request) {
+        ImmutableSet.Builder<AttributeQuery<?>> operands = ImmutableSet.builder();
         LinkedList<String> invalidParams = Lists.newLinkedList();
         for(Entry<String, String[]> param : getParameterMap(request).entrySet()) {
             Optional<Attribute<?>> attribute = attributesLookup.attributeFor(param.getKey());

@@ -38,6 +38,7 @@ import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.ContentGroup;
@@ -52,6 +53,7 @@ import org.atlasapi.media.entity.simple.ProductQueryResult;
 import org.atlasapi.media.entity.simple.ScheduleChannel;
 import org.atlasapi.media.entity.simple.TopicQueryResult;
 import org.atlasapi.media.product.Product;
+import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
 import org.atlasapi.media.topic.TopicIndex;
 import org.atlasapi.media.topic.TopicResolver;
@@ -115,7 +117,6 @@ import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
-import org.atlasapi.persistence.content.schedule.ScheduleIndex;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.media.channel.ChannelGroupStore;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
@@ -131,7 +132,6 @@ import org.atlasapi.persistence.output.RecentlyBroadcastChildrenResolver;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
 import org.atlasapi.persistence.topic.TopicContentLister;
 import org.atlasapi.persistence.topic.TopicQueryResolver;
-import org.atlasapi.persistence.topic.TopicSearcher;
 import org.atlasapi.query.common.AttributeCoercers;
 import org.atlasapi.query.common.QueryAtomParser;
 import org.atlasapi.query.common.QueryAttributeParser;
@@ -194,7 +194,7 @@ public class QueryWebModule {
     private @Autowired TopicResolver topicResolver;
     private @Autowired TopicIndex topicIndex;
     private @Autowired TopicContentLister topicContentLister;
-    private @Autowired TopicSearcher topicSearcher;
+    private @Autowired PopularTopicIndex popularTopicIndex;
     private @Autowired SegmentResolver segmentResolver;
     private @Autowired ProductResolver productResolver;
 
@@ -272,7 +272,7 @@ public class QueryWebModule {
     
     @Bean
     org.atlasapi.query.v4.topic.PopularTopicController v4PopularTopicController() {
-        return new org.atlasapi.query.v4.topic.PopularTopicController(topicQueryResolver, topicSearcher, topicModelOutputter(), configFetcher);
+        return new org.atlasapi.query.v4.topic.PopularTopicController(topicResolver, popularTopicIndex, topicModelOutputter(), configFetcher);
     }
 
     @Bean

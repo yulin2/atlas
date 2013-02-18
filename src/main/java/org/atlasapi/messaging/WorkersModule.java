@@ -10,7 +10,7 @@ import org.atlasapi.messaging.worker.Worker;
 import org.atlasapi.messaging.workers.EsIndexer;
 import org.atlasapi.messaging.workers.MessageLogger;
 import org.atlasapi.messaging.workers.ReplayingWorker;
-import org.atlasapi.persistence.content.ContentIndexer;
+import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.messaging.MessageStore;
 import org.springframework.beans.factory.annotation.Autowired;

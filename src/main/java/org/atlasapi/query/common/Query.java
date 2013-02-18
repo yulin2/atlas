@@ -2,7 +2,7 @@ package org.atlasapi.query.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.atlasapi.content.criteria.AtomicQuerySet;
+import org.atlasapi.content.criteria.AttributeQuerySet;
 import org.atlasapi.media.common.Id;
 
 public abstract class Query<T> {
@@ -11,7 +11,7 @@ public abstract class Query<T> {
         return new SingleQuery<T>(id, context);
     }
 
-    public static final <T> Query<T> listQuery(AtomicQuerySet operands,
+    public static final <T> Query<T> listQuery(AttributeQuerySet operands,
                                                QueryContext context) {
         return new ListQuery<T>(operands, context);
     }
@@ -28,7 +28,7 @@ public abstract class Query<T> {
 
     public abstract boolean isListQuery();
 
-    public abstract AtomicQuerySet getOperands();
+    public abstract AttributeQuerySet getOperands();
 
     public abstract Id getOnlyId();
 
@@ -51,7 +51,7 @@ public abstract class Query<T> {
         }
 
         @Override
-        public AtomicQuerySet getOperands() {
+        public AttributeQuerySet getOperands() {
             throw new IllegalStateException(
                 "Query.getOperands() cannot be called on a single query");
         }
@@ -60,14 +60,14 @@ public abstract class Query<T> {
 
     private static final class ListQuery<T> extends Query<T> {
 
-        private final AtomicQuerySet operands;
+        private final AttributeQuerySet operands;
 
-        public ListQuery(AtomicQuerySet operands, QueryContext context) {
+        public ListQuery(AttributeQuerySet operands, QueryContext context) {
             super(context);
             this.operands = checkNotNull(operands);
         }
 
-        public AtomicQuerySet getOperands() {
+        public AttributeQuerySet getOperands() {
             return this.operands;
         }
 

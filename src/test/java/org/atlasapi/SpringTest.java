@@ -14,7 +14,6 @@
  permissions and limitations under the License. */
 package org.atlasapi;
 
-import org.atlasapi.persistence.content.elasticsearch.schema.EsSchema;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
 import org.elasticsearch.node.NodeBuilder;
@@ -35,7 +34,7 @@ public class SpringTest {
 
     @BeforeClass
     static public void before() throws InterruptedException {
-        NodeBuilder.nodeBuilder().clusterName(EsSchema.CLUSTER_NAME).build().start();
+        NodeBuilder.nodeBuilder().clusterName("Atlas").build().start();
     }
 
     @Test

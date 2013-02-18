@@ -8,12 +8,16 @@ import javax.annotation.Resource;
 
 import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.CassandraPersistenceModule;
+import org.atlasapi.media.ElasticSearchContentIndexModule;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.EsContentIndexer;
+import org.atlasapi.media.content.EsContentSearcher;
+import org.atlasapi.media.content.schedule.EsScheduleIndex;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.media.topic.EsPopularTopicIndex;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingContentStore;
-import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingTopicStore;
-import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentResolverBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -25,9 +29,6 @@ import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.elasticsearch.EsContentIndexer;
-import org.atlasapi.persistence.content.elasticsearch.EsContentSearcher;
-import org.atlasapi.persistence.content.elasticsearch.EsScheduleIndex;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupResolver;
 import org.atlasapi.persistence.content.mongo.MongoContentGroupWriter;
@@ -55,7 +56,6 @@ import org.atlasapi.persistence.messaging.mongo.MongoMessageStore;
 import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
 import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
-import org.atlasapi.persistence.topic.elasticsearch.EsTopicSearcher;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -287,7 +287,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public EsTopicSearcher topicSearcher() {
+    public EsPopularTopicIndex popularTopicIndex() {
         return esContentIndexModule().topicSearcher();
     }
 
