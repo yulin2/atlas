@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.messaging.producers.MessageReplayer;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.elasticsearch.EsContentIndexer;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
 import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
@@ -45,7 +45,7 @@ public class SystemModule {
     private @Autowired CassandraSegmentStore cassandraSegmentStore;
     private @Autowired CassandraTopicStore cassandraTopicStore;
     private @Autowired CassandraLookupEntryStore cassandraLookupEntryStore;
-    private @Autowired EsContentIndexer esContentIndexer;
+    private @Autowired ContentIndexer esContentIndexer;
     private @Autowired @Qualifier("cassandraContentBootstrapper") ContentBootstrapper cassandraContentBootstrapper;
     private @Autowired @Qualifier("cassandraChannelBootstrapper") ContentBootstrapper cassandraChannelBootstrapper;
     private @Autowired @Qualifier("cassandraContentGroupBootstrapper") ContentBootstrapper cassandraContentGroupBootstrapper;

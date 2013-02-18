@@ -1,38 +1,46 @@
 package org.atlasapi.query.v4.topic;
 
-import com.google.common.base.Strings;
-import com.metabroadcast.common.query.Selection;
-import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.media.common.Id;
+import org.atlasapi.media.topic.PopularTopicIndex;
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.media.topic.TopicResolver;
+import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AtlasModelWriter;
-import org.atlasapi.persistence.topic.TopicQueryResolver;
-import org.atlasapi.persistence.topic.TopicSearcher;
+import org.atlasapi.output.ErrorSummary;
 import org.joda.time.Interval;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.google.common.base.Function;
+import com.google.common.base.Strings;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.metabroadcast.common.query.Selection;
+import com.metabroadcast.common.webapp.query.DateTimeInQueryParser;
 
 @Controller
 public class PopularTopicController {
 
     private final DateTimeInQueryParser dateTimeInQueryParser = new DateTimeInQueryParser();
-    private final TopicQueryResolver topicResolver;
-    private final TopicSearcher topicSearcher;
+    private final TopicResolver resolver;
+    private final PopularTopicIndex index;
     private final AtlasModelWriter<Iterable<Topic>> responseWriter;
     private final ApplicationConfigurationFetcher configurationFetcher;
 
-    public PopularTopicController(TopicQueryResolver topicResolver, TopicSearcher topicSearcher, AtlasModelWriter<Iterable<Topic>> responseWriter, ApplicationConfigurationFetcher configurationFetcher) {
-        this.topicResolver = topicResolver;
-        this.topicSearcher = topicSearcher;
+    public PopularTopicController(TopicResolver resolver, PopularTopicIndex index, AtlasModelWriter<Iterable<Topic>> responseWriter, ApplicationConfigurationFetcher configurationFetcher) {
+        this.resolver = resolver;
+        this.index = index;
         this.responseWriter = responseWriter;
         this.configurationFetcher = configurationFetcher;
     }
@@ -46,10 +54,20 @@ public class PopularTopicController {
         try {
             ApplicationConfiguration configuration = configurationFetcher.configurationFor(request).valueOrDefault(ApplicationConfiguration.DEFAULT_CONFIGURATION);
             Interval interval = new Interval(dateTimeInQueryParser.parse(from), dateTimeInQueryParser.parse(to));
-            List<Topic> topics = topicSearcher.popularTopics(interval, topicResolver, selection);
-            responseWriter.writeTo(request, response, topics, Collections.EMPTY_SET, configuration);
+            ListenableFuture<FluentIterable<Id>> topicIds = index.popularTopics(interval, selection);
+            responseWriter.writeTo(request, response, resolve(topicIds), ImmutableSet.<Annotation>of(), configuration);
         } catch (Exception ex) {
             responseWriter.writeError(request, response, ErrorSummary.forException(ex));
         }
+    }
+
+    private Iterable<Topic> resolve(ListenableFuture<FluentIterable<Id>> topicIds) throws Exception {
+        return Futures.get(Futures.transform(topicIds,
+            new Function<FluentIterable<Id>, Iterable<Topic>>() {
+                @Override
+                public FluentIterable<Topic> apply(FluentIterable<Id> input) {
+                    return resolver.resolveIds(input).getResources();
+                }
+            }), 60, TimeUnit.SECONDS, Exception.class);
     }
 }

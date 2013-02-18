@@ -2,7 +2,7 @@ package org.atlasapi.query.v4.topic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.Topic;
@@ -14,9 +14,10 @@ import org.atlasapi.query.common.QueryExecutionException;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryResult;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.Futures;
+import com.metabroadcast.common.query.Selection;
 
 public class IndexBackedTopicQueryExecutor implements QueryExecutor<Topic> {
 
@@ -46,13 +47,17 @@ public class IndexBackedTopicQueryExecutor implements QueryExecutor<Topic> {
         return QueryResult.listResult(resolved.getResources(), query.getContext());
     }
 
-    private Iterable<Id> getTopicIds(Query<Topic> query) {
+    private Iterable<Id> getTopicIds(Query<Topic> query) throws QueryExecutionException {
         return query.isListQuery() ? queryIndex(query)
                                   : ImmutableList.of(query.getOnlyId());
     }
 
-    private Iterable<Id> queryIndex(Query<Topic> query) {
-        throw new UnsupportedOperationException();
+    private Iterable<Id> queryIndex(Query<Topic> query) throws QueryExecutionException {
+        return Futures.get(index.query(
+            query.getOperands(), 
+            query.getContext().getApplicationConfiguration().getEnabledSources(), 
+            query.getContext().getSelection().or(Selection.ALL)
+        ), 1, TimeUnit.MINUTES, QueryExecutionException.class);
     }
 
     private Resolved<Topic> resolve(Iterable<Id> ids) {

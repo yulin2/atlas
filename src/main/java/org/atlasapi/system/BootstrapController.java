@@ -17,15 +17,16 @@ import java.util.concurrent.RejectedExecutionException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.atlasapi.media.content.ContentIndexer;
 import org.atlasapi.persistence.bootstrap.ChangeListener;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.bootstrap.elasticsearch.ESChangeListener;
 import org.atlasapi.persistence.content.elasticsearch.ESContentIndexer;
 import org.atlasapi.persistence.bootstrap.cassandra.CassandraChangeListener;
+import org.atlasapi.persistence.bootstrap.elasticsearch.IndexingChangeListener;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
 import org.atlasapi.persistence.content.cassandra.CassandraProductStore;
-import org.atlasapi.persistence.content.elasticsearch.EsContentIndexer;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
 import org.atlasapi.persistence.lookup.cassandra.CassandraLookupEntryStore;
 import org.atlasapi.persistence.media.channel.cassandra.CassandraChannelGroupStore;
@@ -63,7 +64,7 @@ public class BootstrapController {
     private CassandraSegmentStore cassandraSegmentStore;
     private CassandraTopicStore cassandraTopicStore;
     private CassandraLookupEntryStore cassandraLookupEntryStore;
-    private EsContentIndexer esContentIndexer;
+    private ContentIndexer esContentIndexer;
     //
     private ContentBootstrapper cassandraContentBootstrapper;
     private ContentBootstrapper cassandraChannelBootstrapper;
@@ -110,7 +111,7 @@ public class BootstrapController {
         this.cassandraLookupEntryStore = cassandraLookupEntryStore;
     }
 
-    public void setEsContentIndexer(EsContentIndexer esContentIndexer) {
+    public void setEsContentIndexer(ContentIndexer esContentIndexer) {
         this.esContentIndexer = esContentIndexer;
     }
 
@@ -197,9 +198,9 @@ public class BootstrapController {
         doBootstrap(cassandraTopicBootstrapper, cassandraChangeListener, response);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/es")
-    public void bootstrapES(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
-        ESChangeListener esChangeListener = new ESChangeListener(getConcurrencyLevel(concurrency, response));
+    @RequestMapping(method = RequestMethod.POST, value = "/system/bootstrap/es/content")
+    public void bootstrapESContent(@RequestParam(required = false) String concurrency, HttpServletResponse response) throws IOException {
+        IndexingChangeListener esChangeListener = new IndexingChangeListener(getConcurrencyLevel(concurrency, response));
         esChangeListener.setESContentIndexer(esContentIndexer);
         doBootstrap(esContentBootstrapper, esChangeListener, response);
     }

@@ -14,7 +14,6 @@
  permissions and limitations under the License. */
 package org.atlasapi;
 
-import org.atlasapi.persistence.content.elasticsearch.schema.EsSchema;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.query.v2.QueryController;
 import org.junit.Test;

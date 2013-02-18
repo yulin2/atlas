@@ -9,19 +9,15 @@ import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.content.criteria.AttributeQuery;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.topic.Topic;
-import org.atlasapi.query.common.AttributeCoercers;
-import org.atlasapi.query.common.Query;
-import org.atlasapi.query.common.QueryAtomParser;
-import org.atlasapi.query.common.QueryAttributeParser;
-import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -66,7 +62,7 @@ public class StandardQueryParserTest {
         
         assertTrue(q.isListQuery());
         assertThat(q.getOperands().size(), is(1));
-        assertThat(((AttributeQuery<Id>)Iterables.getOnlyElement(q.getOperands())).getValue(),
+        assertThat((List<Id>)Iterables.getOnlyElement(q.getOperands()).getValue(),
             hasItem(Id.valueOf(idCodec.decode("cbbh"))));
     }
 

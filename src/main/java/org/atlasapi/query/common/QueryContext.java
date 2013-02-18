@@ -41,6 +41,10 @@ public class QueryContext {
     public ImmutableSet<Annotation> getAnnotations() {
         return this.annotations;
     }
+    
+    public Optional<Selection> getSelection() {
+        return this.selection;
+    }
 
     @Override
     public boolean equals(Object that) {

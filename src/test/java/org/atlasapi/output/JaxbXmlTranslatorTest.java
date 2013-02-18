@@ -41,6 +41,7 @@ import org.atlasapi.media.entity.simple.Playlist;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.media.entity.simple.RelatedLink;
 import org.hamcrest.Description;
+import org.hamcrest.DiagnosingMatcher;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;

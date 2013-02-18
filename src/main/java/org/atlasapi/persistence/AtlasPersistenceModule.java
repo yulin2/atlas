@@ -10,12 +10,16 @@ import javax.annotation.Resource;
 import org.atlasapi.messaging.AtlasMessagingModule;
 import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.CassandraPersistenceModule;
+import org.atlasapi.media.ElasticSearchContentIndexModule;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.EsContentIndexer;
+import org.atlasapi.media.content.EsContentSearcher;
+import org.atlasapi.media.content.schedule.EsScheduleIndex;
 import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.media.topic.EsPopularTopicIndex;
+import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingContentStore;
-import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingTopicStore;
-import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.persistence.bootstrap.ContentBootstrapper;
 import org.atlasapi.persistence.content.ContentResolverBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -302,7 +306,7 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
-    public EsTopicSearcher topicSearcher() {
+    public EsPopularTopicIndex popularTopicIndex() {
         return esContentIndexModule().topicSearcher();
     }
     
