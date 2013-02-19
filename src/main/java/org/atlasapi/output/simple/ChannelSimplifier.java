@@ -37,7 +37,7 @@ public class ChannelSimplifier {
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
-        simple.setAliases(input.getAliases());
+        simple.setAliases(input.getAliasUrls());
         simple.setHighDefinition(input.highDefinition());
         simple.setRegional(input.regional());
         if (input.timeshift() != null) {

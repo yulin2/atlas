@@ -41,7 +41,7 @@ public class ChannelGroupSimplifier {
         if (input.getId() != null) {
             simple.setId(idCodec.encode(BigInteger.valueOf(input.getId())));
         }
-        simple.setAliases(input.getAliases());
+        simple.setAliases(input.getAliasUrls());
         simple.setTitle(input.getTitle());
         if (input.getAvailableCountries() != null) {
             simple.setAvailableCountries(Countries.toCodes(input.getAvailableCountries()));

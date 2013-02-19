@@ -21,7 +21,8 @@ public class PersonModelSimplifier extends IdentifiedModelSimplifier<Person, org
         copyIdentifiedAttributesTo(fullPerson, person, annotations);
 
         person.setName(fullPerson.getTitle());
-        person.setProfileLinks(fullPerson.getAliases());
+        // TODO new alias
+        person.setProfileLinks(fullPerson.getAliasUrls());
         person.setContent(simpleContentListFrom(fullPerson.getContents()));
         
         return person;

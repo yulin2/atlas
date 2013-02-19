@@ -107,7 +107,7 @@ public class PaChannelGroupsIngester {
             }
             
             region.setCanonicalUri(REGION_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId());
-            region.addAlias(REGION_ALIAS_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId());
+            region.addAliasUrl(REGION_ALIAS_PREFIX + paPlatform.getId() + "-" + regionalisation.getRegionId());
             region.setPublisher(Publisher.METABROADCAST);
             region.setAvailableCountries(countries);            
             regions.put(regionalisation.getRegionId(), region);
@@ -119,7 +119,7 @@ public class PaChannelGroupsIngester {
 
         Platform platform = new Platform();
         platform.setCanonicalUri(PLATFORM_PREFIX + paPlatform.getId());
-        platform.addAlias(PLATFORM_ALIAS_PREFIX + paPlatform.getId());
+        platform.addAliasUrl(PLATFORM_ALIAS_PREFIX + paPlatform.getId());
         platform.setPublisher(Publisher.METABROADCAST);
         
         if (paPlatform.getCountries() != null) {

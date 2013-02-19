@@ -111,7 +111,7 @@ public class PaChannelsIngester {
         parentChannel.setHighDefinition(getHighDefinition(firstChild.getFormat()));
         parentChannel.setRegional(false);
             
-        parentChannel.addAlias(createStationUriFromId(station.getId()));
+        parentChannel.addAliasUrl(createStationUriFromId(station.getId()));
         
         return parentChannel;
     }
@@ -133,7 +133,7 @@ public class PaChannelsIngester {
         
         if (paChannel.getProviderChannelIds() != null) {
             for (ProviderChannelId providerChannelId : paChannel.getProviderChannelIds().getProviderChannelId()) {
-                channel.addAlias(lookupAlias(providerChannelId, serviceProviders));                
+                channel.addAliasUrl(lookupAlias(providerChannelId, serviceProviders));                
             }
         }
         
@@ -155,7 +155,7 @@ public class PaChannelsIngester {
         }
         setChannelTitleAndImage(channel, paChannel.getNames().getName(), logos);
         
-        channel.addAlias(PaChannelMap.createUriFromId(paChannel.getId()));
+        channel.addAliasUrl(PaChannelMap.createUriFromId(paChannel.getId()));
         
         return channel;
     }
