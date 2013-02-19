@@ -5,42 +5,32 @@ import static com.google.common.collect.Iterables.transform;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
-import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.atlasapi.application.ApplicationConfiguration;
+import org.atlasapi.application.query.ApplicationConfigurationFetcher;
+import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
-import org.atlasapi.persistence.media.channel.ChannelGroupResolver;
-import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelNumbering;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.ChannelQueryResult;
-import org.atlasapi.media.entity.simple.HistoricalChannelEntry;
+import org.atlasapi.persistence.media.channel.ChannelGroupResolver;
+import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter;
 import org.atlasapi.query.v2.ChannelFilterer.ChannelFilter.ChannelFilterBuilder;
 import org.joda.time.Duration;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +40,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.HashMultimap;
@@ -64,10 +55,7 @@ import com.google.common.io.Flushables;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.base.MoreOrderings;
 import com.metabroadcast.common.caching.BackgroundComputingValue;
 import com.metabroadcast.common.http.HttpStatusCode;
@@ -101,13 +89,15 @@ public class ChannelController {
     private final Gson gson;
     private final BackgroundComputingValue<ChannelAndGroupsData> data;
     private final NumberToShortStringCodec codec;
+    private final ApplicationConfigurationFetcher configFetcher;
     
-    public ChannelController(final ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver, ChannelSimplifier channelSimplifier, NumberToShortStringCodec codec) {
+    public ChannelController(final ChannelResolver channelResolver, ChannelGroupResolver channelGroupResolver, ChannelSimplifier channelSimplifier, NumberToShortStringCodec codec, ApplicationConfigurationFetcher configFetcher) {
         this.channelSimplifier = channelSimplifier;
         this.codec = codec;
         this.gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
         
         this.data = new BackgroundComputingValue<ChannelController.ChannelAndGroupsData>(Duration.standardMinutes(10), new ChannelAndGroupsDataUpdater(channelResolver, channelGroupResolver));
+        this.configFetcher = configFetcher;
     }
     
     @PostConstruct
@@ -132,8 +122,15 @@ public class ChannelController {
             @RequestParam(value = "order_by", required = false) String orderBy) throws IOException {
         try {
             Selection selection = SELECTION_BUILDER.build(request);
-
-            List<Channel> channels;
+            //App Config for filtering
+            final ApplicationConfiguration appConfig;
+            Maybe<ApplicationConfiguration> possibleAppConfig = configFetcher.configurationFor(request);
+            if(possibleAppConfig.isNothing()){
+                appConfig = ApplicationConfiguration.defaultConfiguration();
+            }else{
+                appConfig = possibleAppConfig.requireValue();
+            }
+            List<Channel> channels = null;
             if (!Strings.isNullOrEmpty(channelKey)) {
                 Channel channelFromKey = data.get().keyToChannel.get(channelKey);
                 if (channelFromKey == null) {
@@ -141,7 +138,12 @@ public class ChannelController {
                     response.setContentLength(0);
                     return;
                 }
-                channels = ImmutableList.of(channelFromKey);
+                if(appConfig.isEnabled(channelFromKey.source())){
+                    channels = ImmutableList.of(channelFromKey);
+                }else{
+                    response.sendError(HttpStatusCode.FORBIDDEN.code(),
+                            "API key doesn't allow use of this channel.");
+                }
             } else {
                 Optional<Ordering<Channel>> ordering = ordering(orderBy);
                 if (ordering.isPresent()) {
@@ -150,13 +152,22 @@ public class ChannelController {
                 else {
                     channels = ImmutableList.copyOf(data.get().allChannels);
                 }
-                channels = selection.applyTo(filterer.filter(channels, constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey), data.get().channelToGroups));
+                channels = selection.applyTo(Iterables.filter(filterer.filter(channels, constructFilter(platformKey, regionKeys, broadcasterKey, mediaTypeKey, availableFromKey), data.get().channelToGroups), 
+                        new Predicate<Channel>() {
+                    @Override
+                    public boolean apply(@Nullable Channel channel) {
+                        return appConfig.isEnabled(channel.source());
+                    }}
+                ));
             }
 
             Set<String> annotations = checkAnnotationValidity(splitString(annotationsStr));
             writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels, showChannelGroups(annotations), showHistory(annotations), showParent(annotations), showVariations(annotations))));
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
+        } catch (InvalidAPIKeyException apiE) {
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
+                    "Invalid API Key.");
         }
     }
     
@@ -166,15 +177,30 @@ public class ChannelController {
             @PathVariable("id") String id) throws IOException {
         try {
             Channel possibleChannel = data.get().idToChannel.get(codec.decode(id).longValue());
+            //App Config for filtering
+            Maybe<ApplicationConfiguration> possibleAppConfig = configFetcher.configurationFor(request);
+            final ApplicationConfiguration appConfig;
+            if(possibleAppConfig.isNothing()){
+                appConfig = ApplicationConfiguration.defaultConfiguration();
+            }else{
+                appConfig = possibleAppConfig.requireValue();
+            }
 
             if (possibleChannel == null) {
                 response.sendError(HttpStatusCode.NOT_FOUND.code());
+            }
+            if(!appConfig.isEnabled(possibleChannel.source())){
+                response.sendError(HttpStatusCode.FORBIDDEN.code(),
+                        "API key doesn't allow use of this channel.");
             }
 
             Set<String> annotations = checkAnnotationValidity(splitString(annotationsStr));
             writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(ImmutableList.of(possibleChannel), showChannelGroups(annotations), showHistory(annotations), showParent(annotations), showVariations(annotations))));
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
+        } catch (InvalidAPIKeyException apiE) {
+            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
+                    "Invalid API Key.");
         }
     }
     
