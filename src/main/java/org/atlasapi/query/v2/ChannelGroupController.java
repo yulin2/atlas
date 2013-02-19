@@ -1,26 +1,21 @@
 package org.atlasapi.query.v2;
 
-import static org.atlasapi.query.v2.ChannelController.ANNOTATION_KEY;
-import static org.atlasapi.query.v2.ChannelController.HISTORY_ANNOTATION;
-
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupType;
 import org.atlasapi.media.channel.Platform;
-import org.atlasapi.media.entity.simple.ChannelGroupQueryResult;
+import org.atlasapi.output.Annotation;
+import org.atlasapi.output.AtlasErrorSummary;
+import org.atlasapi.output.AtlasModelWriter;
+import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.media.channel.ChannelGroupResolver;
 import org.atlasapi.query.v2.ChannelGroupFilterer.ChannelGroupFilter;
 import org.atlasapi.query.v2.ChannelGroupFilterer.ChannelGroupFilter.ChannelGroupFilterBuilder;
@@ -29,142 +24,116 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.common.io.Flushables;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.metabroadcast.common.base.Maybe;
 import com.metabroadcast.common.http.HttpStatusCode;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
-import com.metabroadcast.common.media.MimeType;
 import com.metabroadcast.common.query.Selection;
 import com.metabroadcast.common.query.Selection.SelectionBuilder;
 
 @Controller
-public class ChannelGroupController {
+public class ChannelGroupController extends BaseController<Iterable<ChannelGroup>> {
 
-    private static final String CHANNELS_ANNOTATION = "channels";
+    private static final ImmutableSet<Annotation> validAnnotations = ImmutableSet.<Annotation>builder()
+            .add(Annotation.CHANNELS)
+            .add(Annotation.HISTORY)
+            .build();
+    
+    private static final AtlasErrorSummary NOT_FOUND = new AtlasErrorSummary(new NullPointerException())
+        .withErrorCode("Channel Group not found")
+        .withStatusCode(HttpStatusCode.NOT_FOUND);
+    
+    private static final AtlasErrorSummary FORBIDDEN = new AtlasErrorSummary(new NullPointerException())
+        .withStatusCode(HttpStatusCode.FORBIDDEN);
+    
+    private static final AtlasErrorSummary BAD_ANNOTATION = new AtlasErrorSummary(new NullPointerException())
+    .withMessage("Invalid annotation specified. Valid annotations are: " + Joiner.on(',').join(Iterables.transform(validAnnotations, Annotation.TO_KEY)))
+    .withStatusCode(HttpStatusCode.BAD_REQUEST);
+    
     private static final String TYPE_KEY = "type";
     private static final String PLATFORM_ID_KEY = "platform_id";
-    private static final SelectionBuilder SELECTION_BUILDER = Selection
-            .builder().withMaxLimit(50).withDefaultLimit(10);
-    private static final Splitter CSV_SPLITTER = Splitter.on(',').trimResults()
-            .omitEmptyStrings();
-    private static final Set<String> VALID_ANNOTATIONS = ImmutableSet
-            .<String> builder().add(CHANNELS_ANNOTATION)
-            .add(HISTORY_ANNOTATION).build();
-    private final ChannelGroupResolver channelGroupResolver;
-    private final ChannelSimplifier simplifier;
-    private final ChannelGroupFilterer filterer = new ChannelGroupFilterer();
-    private final Gson gson;
-    private final NumberToShortStringCodec idCodec;
-    private final ApplicationConfigurationFetcher configFetcher;
 
-    public ChannelGroupController(ChannelGroupResolver channelGroupResolver,
-            NumberToShortStringCodec idCodec, ChannelSimplifier simplifier,
-            ApplicationConfigurationFetcher configFetcher) {
+    private static final SelectionBuilder SELECTION_BUILDER = Selection.builder().withMaxLimit(50).withDefaultLimit(10);
+    private final ChannelGroupResolver channelGroupResolver;
+    private final ChannelGroupFilterer filterer = new ChannelGroupFilterer();
+    private final NumberToShortStringCodec idCodec;
+
+    private final QueryParameterAnnotationsExtractor annotationExtractor;
+   
+
+    public ChannelGroupController(ApplicationConfigurationFetcher configFetcher, AdapterLog log, AtlasModelWriter<Iterable<ChannelGroup>> outputter, ChannelGroupResolver channelGroupResolver, NumberToShortStringCodec idCodec) {
+        super(configFetcher, log, outputter);
         this.channelGroupResolver = channelGroupResolver;
         this.idCodec = idCodec;
-        this.simplifier = simplifier;
-        this.configFetcher = configFetcher;
-        this.gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd")
-                .setFieldNamingPolicy(
-                        FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+        this.annotationExtractor = new QueryParameterAnnotationsExtractor();
     }
 
-    @RequestMapping("/3.0/channel_groups.json")
+    @RequestMapping(value={"/3.0/channel_groups.*", "/channel_groups.*"})
     public void listChannels(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam(value = ANNOTATION_KEY, required = false) String annotationsStr,
             @RequestParam(value = TYPE_KEY, required = false) String type,
             @RequestParam(value = PLATFORM_ID_KEY, required = false) String platformId) throws IOException {
         try {
-        	Maybe<ApplicationConfiguration> possibleAppConfig = configFetcher.configurationFor(request);
-            final ApplicationConfiguration appConfig;
-        	if(possibleAppConfig.isNothing()){
-                appConfig = ApplicationConfiguration.defaultConfiguration();
-        	}else{
-                appConfig = possibleAppConfig.requireValue();
-        	}
+            final ApplicationConfiguration appConfig = appConfig(request);
+        	
             List<ChannelGroup> channelGroups = ImmutableList.copyOf(channelGroupResolver.channelGroups());
 
             Selection selection = SELECTION_BUILDER.build(request);        
             channelGroups = selection.applyTo(Iterables.filter(
-                    filterer.filter(channelGroups, constructFilter(platformId, type)), 
-                    new Predicate<ChannelGroup>() {
-                        @Override
-                        public boolean apply(@Nullable ChannelGroup arg0) {
-                            return appConfig.isEnabled(arg0.getPublisher());
-                        }}
-                    ));
+                filterer.filter(channelGroups, constructFilter(platformId, type)), 
+                new Predicate<ChannelGroup>() {
+                    @Override
+                    public boolean apply(ChannelGroup input) {
+                        return appConfig.isEnabled(input.getPublisher());
+                    }
+                }));
 
-            Set<String> annotations = checkAnnotationValidity(splitString(annotationsStr));
-            writeOut(response, request, new ChannelGroupQueryResult(simplifier.simplify(channelGroups, showChannels(annotations), showHistory(annotations))));
-        } catch (IllegalArgumentException e) {
-            response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
-        } catch (InvalidAPIKeyException apiE) {
-            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
-                    "Invalid API Key.");
-       }
-    }
-
-    private Set<String> checkAnnotationValidity(Set<String> annotations) {
-        for (String annotation : annotations) {
-            if (!VALID_ANNOTATIONS.contains(annotation)) {
-                throw new IllegalArgumentException(annotation
-                        + " is not a valid annotation");
+            Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
+            if (annotations.isPresent() && !validAnnotations(annotations.get())) {
+                errorViewFor(request, response, BAD_ANNOTATION);
+            } else {
+                modelAndViewFor(request, response, channelGroups, appConfig);
             }
+        } catch (Exception e) {
+            errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
-        return annotations;
     }
 
-    @RequestMapping("/3.0/channel_groups/{id}.json")
-    public void listChannel(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            @PathVariable("id") String id,
-            @RequestParam(value = ANNOTATION_KEY, required = false) String annotationsStr)
-            throws IOException {
+    @RequestMapping(value={"/3.0/channel_groups/{id}.*", "/channel_groups/{id}.*"})
+    public void listChannel(HttpServletRequest request, HttpServletResponse response, 
+            @PathVariable("id") String id) throws IOException {
         try {
-            Maybe<ApplicationConfiguration> possibleAppConfig = configFetcher.configurationFor(request);
-            if(possibleAppConfig.isNothing()){
-                throw new IllegalArgumentException("Unknown API Key.");
-            }
-            final ApplicationConfiguration appConfig = possibleAppConfig.requireValue();
-            Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver
-                    .channelGroupFor(idCodec.decode(id).longValue());
+            ApplicationConfiguration appConfig = appConfig(request);
+            
+            Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver.channelGroupFor(idCodec.decode(id).longValue());
+            
             if (!possibleChannelGroup.isPresent()) {
-                response.sendError(HttpStatusCode.NOT_FOUND.code());
-            } else if (appConfig.isEnabled(possibleChannelGroup.get().getPublisher())){
-                Set<String> annotations = checkAnnotationValidity(splitString(annotationsStr));
-                writeOut(
-                        response,
-                        request,
-                        new ChannelGroupQueryResult(simplifier.simplify(
-                                ImmutableList.of(possibleChannelGroup.get()),
-                                showChannels(annotations),
-                                showHistory(annotations))));
-            }else{
-                response.sendError(HttpStatusCode.FORBIDDEN.code(),
-                        "API key doesn't allow use of this channel.");
+                errorViewFor(request, response, NOT_FOUND);
+            } else {
+                if (!appConfig.isEnabled(possibleChannelGroup.get().getPublisher())) {
+                    outputter.writeError(request, response, FORBIDDEN.withMessage("ChannelGroup " + id + " not available"));
+                }
+                Optional<Set<Annotation>> annotations = annotationExtractor.extract(request);
+                if (annotations.isPresent() && !validAnnotations(annotations.get())) {
+                    errorViewFor(request, response, BAD_ANNOTATION);
+                } else {
+                    modelAndViewFor(request, response, ImmutableList.of(possibleChannelGroup.get()), appConfig);
+                }
             }
-        } catch (IllegalArgumentException e) {
-            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
-                    e.getMessage());
-        } catch (InvalidAPIKeyException apiE) {
-            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
-                    "Invalid API Key.");
+            
+        } catch (Exception e) {
+            errorViewFor(request, response, AtlasErrorSummary.forException(e));
         }
     }
-
+    
+    private boolean validAnnotations(Set<Annotation> annotations) {
+        return validAnnotations.containsAll(annotations);
+    }
+    
     private ChannelGroupFilter constructFilter(String platformId, String type) {
         ChannelGroupFilterBuilder filter = ChannelGroupFilter.builder();
 
@@ -196,62 +165,5 @@ public class ChannelGroupController {
         }
 
         return filter.build();
-    }
-
-    private void writeOut(HttpServletResponse response,
-            HttpServletRequest request,
-            ChannelGroupQueryResult channelGroupQueryResult) throws IOException {
-        response.setCharacterEncoding(Charsets.UTF_8.toString());
-        response.setContentType(MimeType.APPLICATION_JSON.toString());
-
-        String callback = callback(request);
-
-        OutputStreamWriter writer = new OutputStreamWriter(
-                response.getOutputStream(), Charsets.UTF_8);
-        boolean ignoreEx = true;
-        try {
-            if (callback != null) {
-                writer.write(callback + "(");
-            }
-            gson.toJson(channelGroupQueryResult, writer);
-            if (callback != null) {
-                writer.write(");");
-            }
-            ignoreEx = false;
-        } finally {
-            Flushables.flush(writer, ignoreEx);
-        }
-    }
-
-    private String callback(HttpServletRequest request) {
-        if (request == null) {
-            return null;
-        }
-        String callback = request.getParameter("callback");
-        if (Strings.isNullOrEmpty(callback)) {
-            return null;
-        }
-
-        try {
-            return URLEncoder.encode(callback, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null;
-        }
-    }
-
-    private Set<String> splitString(String value) {
-        if (!Strings.isNullOrEmpty(value)) {
-            return ImmutableSet.copyOf(CSV_SPLITTER.split(Strings
-                    .nullToEmpty(value)));
-        }
-        return ImmutableSet.of();
-    }
-
-    private boolean showChannels(Set<String> annotations) {
-        return annotations.contains(CHANNELS_ANNOTATION);
-    }
-
-    private boolean showHistory(Set<String> annotations) {
-        return annotations.contains(HISTORY_ANNOTATION);
     }
 }
