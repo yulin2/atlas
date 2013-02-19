@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
-import org.atlasapi.application.query.InvalidAPIKeyException;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupResolver;
@@ -140,7 +139,7 @@ public class ChannelController {
             }else{
                 appConfig = possibleAppConfig.requireValue();
             }
-            List<Channel> channels;
+            List<Channel> channels = null;
             if (!Strings.isNullOrEmpty(channelKey)) {
                 Channel channelFromKey = data.get().keyToChannel.get(channelKey);
                 if (channelFromKey == null) {
@@ -175,9 +174,6 @@ public class ChannelController {
             writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(channels, showChannelGroups(annotations), showHistory(annotations), showParent(annotations), showVariations(annotations))));
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
-        } catch (InvalidAPIKeyException apiE) {
-            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
-                    "Invalid API Key.");
         }
     }
     
@@ -208,9 +204,6 @@ public class ChannelController {
             writeOut(response, request, new ChannelQueryResult(channelSimplifier.simplify(ImmutableList.of(possibleChannel), showChannelGroups(annotations), showHistory(annotations), showParent(annotations), showVariations(annotations))));
         } catch (IllegalArgumentException e) {
             response.sendError(HttpStatusCode.BAD_REQUEST.code(), e.getMessage());
-        } catch (InvalidAPIKeyException apiE) {
-            response.sendError(HttpStatusCode.BAD_REQUEST.code(),
-                    "Invalid API Key.");
         }
     }
     
