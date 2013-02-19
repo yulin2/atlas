@@ -131,10 +131,12 @@ public class ChannelGroupController {
             throws IOException {
         try {
             Maybe<ApplicationConfiguration> possibleAppConfig = configFetcher.configurationFor(request);
+            final ApplicationConfiguration appConfig;
             if(possibleAppConfig.isNothing()){
-                throw new IllegalArgumentException("Unknown API Key.");
+                appConfig = ApplicationConfiguration.defaultConfiguration();
+            }else{
+                appConfig = possibleAppConfig.requireValue();
             }
-            final ApplicationConfiguration appConfig = possibleAppConfig.requireValue();
             Optional<ChannelGroup> possibleChannelGroup = channelGroupResolver
                     .channelGroupFor(idCodec.decode(id).longValue());
             if (!possibleChannelGroup.isPresent()) {
