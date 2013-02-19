@@ -48,16 +48,15 @@ public class ChannelNumberingsChannelToChannelGroupModelSimplifier implements Mo
             }
 
             return Iterables.concat(Iterables.transform(
-                    channelMapping.keys(), 
-                    new Function<Long, Iterable<org.atlasapi.media.entity.simple.ChannelNumbering>>() {
-                        @Override
-                        public Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> apply(Long input) {
-                            Iterable<ChannelNumbering> numberings = channelMapping.get(input);
-                            final Iterable<HistoricalChannelNumberingEntry> history = generateHistory(numberings);
-                            return simplifyChannelNumberingsWithHistory(numberings, history, config);
-                        }
+                channelMapping.keySet(), 
+                new Function<Long, Iterable<org.atlasapi.media.entity.simple.ChannelNumbering>>() {
+                    @Override
+                    public Iterable<org.atlasapi.media.entity.simple.ChannelNumbering> apply(Long input) {
+                        Iterable<ChannelNumbering> numberings = channelMapping.get(input);
+                        final Iterable<HistoricalChannelNumberingEntry> history = generateHistory(numberings);
+                        return simplifyChannelNumberingsWithHistory(numberings, history, config);
                     }
-                    ));
+                }));
         } else {
             return Iterables.transform(
                     Iterables.filter(channelNumberings, CURRENT_OR_FUTURE), 

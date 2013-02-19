@@ -1,4 +1,4 @@
-package org.atlasapi.query.v2;
+package org.atlasapi.output.simple;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -7,6 +7,7 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
 import org.atlasapi.media.channel.ChannelGroupStore;
@@ -15,6 +16,7 @@ import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.Platform;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
+import org.atlasapi.output.Annotation;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +24,7 @@ import org.mockito.Mockito;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
@@ -29,8 +32,12 @@ import com.metabroadcast.common.ids.NumberToShortStringCodec;
 public class ChannelNumberingSimplificationTest extends TestCase {
     
     private static final ChannelGroupStore channelGroupStore = new DummyChannelGroupStore();
+    private static final ChannelSimplifier channelSimplifier = new ChannelSimplifier(Mockito.mock(NumberToShortStringCodec.class), Mockito.mock(ChannelResolver.class), new PublisherSimplifier());
+    private static final ChannelGroupSimplifier channelGroupSimplifier = new ChannelGroupSimplifier(Mockito.mock(NumberToShortStringCodec.class), channelGroupStore, new PublisherSimplifier());
+    private static final ChannelNumberingChannelGroupModelSimplifier nestedChannelGroupSimplifier = new ChannelNumberingChannelGroupModelSimplifier(channelGroupSimplifier);
+    private static final ChannelNumberingsChannelToChannelGroupModelSimplifier numberingSimplifier = new ChannelNumberingsChannelToChannelGroupModelSimplifier(channelGroupStore, nestedChannelGroupSimplifier);
     
-    private static final ChannelSimplifier simplifier = new ChannelSimplifier(Mockito.mock(NumberToShortStringCodec.class), Mockito.mock(ChannelResolver.class), channelGroupStore);
+    private static final ChannelModelSimplifier simplifier = new ChannelModelSimplifier(channelSimplifier, numberingSimplifier);
     
     private final Channel channel = Channel.builder()
         .withMediaType(MediaType.VIDEO)
@@ -39,6 +46,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
     
     private static final long channelId = 1234L;
     private static final long channelGroupId = 5678L;
+    private static final ApplicationConfiguration appConfig = Mockito.mock(ApplicationConfiguration.class);
     
     @Override
     @Before
@@ -68,11 +76,10 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channelGroup.addChannelNumbering(numbering);
         
         channelGroup = channelGroupStore.createOrUpdate(channelGroup);
-        
-        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, true, false, false);
+        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS, Annotation.HISTORY), appConfig);
         assertThat(simpleChannel.getChannelGroups().size(), is(1));
         
-        simpleChannel = simplifier.simplify(channel, true, false, false, false);
+        simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS), appConfig);
         assertTrue(simpleChannel.getChannelGroups().isEmpty());
     }
 
@@ -100,8 +107,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channelGroup.addChannelNumbering(two);
         
         channelGroup = channelGroupStore.createOrUpdate(channelGroup);
-        
-        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, false, false, false);
+        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS), appConfig);
         assertThat(simpleChannel.getChannelGroups().size(), is(2));
         
         assertEquals("1", simpleChannel.getChannelGroups().get(0).getChannelNumber());
@@ -144,8 +150,8 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         channelGroup.addChannelNumbering(future);
         
         channelGroup = channelGroupStore.createOrUpdate(channelGroup);
-        
-        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, false, false, false);
+
+        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS), appConfig);
         assertThat(simpleChannel.getChannelGroups().size(), is(2));
         
         org.atlasapi.media.entity.simple.ChannelNumbering first = simpleChannel.getChannelGroups().get(0);
@@ -190,7 +196,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         
         channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         
-        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, true, false, false);
+         org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS, Annotation.HISTORY), appConfig);
         assertThat(simpleChannel.getChannelGroups().size(), is(1));
         
         org.atlasapi.media.entity.simple.ChannelNumbering first = Iterables.getOnlyElement(simpleChannel.getChannelGroups());
@@ -241,7 +247,7 @@ public class ChannelNumberingSimplificationTest extends TestCase {
         
         channelGroup = channelGroupStore.createOrUpdate(channelGroup);
         
-        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, true, true, false, false);
+        org.atlasapi.media.entity.simple.Channel simpleChannel = simplifier.simplify(channel, ImmutableSet.of(Annotation.CHANNEL_GROUPS, Annotation.HISTORY), appConfig);
         assertThat(simpleChannel.getChannelGroups().size(), is(2));
         
         org.atlasapi.media.entity.simple.ChannelNumbering first = Iterables.get(simpleChannel.getChannelGroups(), 0);
