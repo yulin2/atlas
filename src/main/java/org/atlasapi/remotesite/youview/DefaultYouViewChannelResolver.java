@@ -18,16 +18,13 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
     private static final String YOUVIEW_URI_PREFIX = "http://youview.com/service/";
     static Pattern YOUVIEW_URI_MATCHER = Pattern.compile("^" + YOUVIEW_URI_PREFIX + "(\\d+)$");
     
+    private final ChannelResolver channelResolver;
     private final Map<Integer, Channel> channelMap = Maps.newHashMap();
     
+    
     public DefaultYouViewChannelResolver(ChannelResolver channelResolver) {
-        for (Entry<String, Channel> entry: channelResolver.forAliases(YOUVIEW_URI_PREFIX).entrySet()) {
-            Matcher m = YOUVIEW_URI_MATCHER.matcher(entry.getKey());
-            if(m.matches()) {
-                Integer channel = Integer.decode(m.group(1));
-                channelMap.put(channel, entry.getValue());
-            }
-        }
+        this.channelResolver = channelResolver;
+        refresh();
     }
     
     @Override
@@ -48,6 +45,18 @@ public class DefaultYouViewChannelResolver implements YouViewChannelResolver {
 
     @Override
     public List<Channel> getAllChannels() {
+        refresh();
         return ImmutableList.copyOf(channelMap.values());
+    }
+
+    private void refresh() {
+        channelMap.clear();
+        for (Entry<String, Channel> entry: channelResolver.forAliases(YOUVIEW_URI_PREFIX).entrySet()) {
+            Matcher m = YOUVIEW_URI_MATCHER.matcher(entry.getKey());
+            if(m.matches()) {
+                Integer channel = Integer.decode(m.group(1));
+                channelMap.put(channel, entry.getValue());
+            }
+        }
     }
 }
