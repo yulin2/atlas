@@ -7,12 +7,15 @@ import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.joda.time.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.metabroadcast.common.properties.Configurer;
 import com.metabroadcast.common.scheduling.RepetitionRules;
 import com.metabroadcast.common.scheduling.RepetitionRules.Every;
 import com.metabroadcast.common.scheduling.SimpleScheduler;
 
+@Configuration
 public class YouViewModule {
     private final static Every EVERY_15_MINUTES = RepetitionRules.every(Duration.standardMinutes(15));
     private final static Every EVERY_HOUR = RepetitionRules.every(Duration.standardHours(1));
@@ -25,15 +28,15 @@ public class YouViewModule {
     @PostConstruct
     public void startBackgroundTasks() {
         scheduler.schedule(youViewTodayUpdater().withName("YouView Today Updater"), EVERY_15_MINUTES);
-        scheduler.schedule(youViewFornightUpdater().withName("YouView Updater ±7 Days"), EVERY_HOUR);
+        scheduler.schedule(youViewFortnightUpdater().withName("YouView Updater ±7 Days"), EVERY_HOUR);
     }
 
-    private YouViewFortnightUpdater youViewFornightUpdater() {
-        return new YouViewFortnightUpdater(channelResolver(), youViewFetcher(), youViewXmlElementHandler());
+    private YouViewFortnightUpdater youViewFortnightUpdater() {
+        return new YouViewFortnightUpdater(youViewChannelResolver(), youViewFetcher(), youViewXmlElementHandler());
     }
 
     private YouViewTodayUpdater youViewTodayUpdater() {
-        return new YouViewTodayUpdater(channelResolver(), youViewFetcher(), youViewXmlElementHandler());
+        return new YouViewTodayUpdater(youViewChannelResolver(), youViewFetcher(), youViewXmlElementHandler());
     }
     
     private YouViewScheduleFetcher youViewFetcher() {
@@ -43,11 +46,12 @@ public class YouViewModule {
     }
     
     private YouViewXmlElementHandler youViewXmlElementHandler() {
-        YouViewContentExtractor extractor = new YouViewContentExtractor(channelResolver());
+        YouViewContentExtractor extractor = new YouViewContentExtractor(youViewChannelResolver());
         return new DefaultYouViewXmlElementHandler(extractor, contentResolver, contentWriter);
     }
-
-    private YouViewChannelResolver channelResolver() {
+    
+    @Bean
+    YouViewChannelResolver youViewChannelResolver() {  
         return new DefaultYouViewChannelResolver(channelResolver);
     }
 }
