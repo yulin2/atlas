@@ -5,10 +5,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.query.v4.schedule.EntityListWriter;
-import org.atlasapi.query.v4.schedule.EntityWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
+import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.EntityWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 
 public final class SourceWriter implements EntityListWriter<Publisher> {
 

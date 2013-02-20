@@ -5,9 +5,9 @@ import java.io.IOException;
 import org.atlasapi.media.entity.EntityType;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Item.ContainerSummary;
-import org.atlasapi.query.v4.schedule.EntityWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
+import org.atlasapi.output.EntityWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 
 public final class ItemDisplayTitleWriter implements EntityWriter<Item> {
 

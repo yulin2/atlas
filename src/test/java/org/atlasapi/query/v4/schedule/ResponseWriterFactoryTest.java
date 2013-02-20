@@ -2,6 +2,10 @@ package org.atlasapi.query.v4.schedule;
 
 import static org.junit.Assert.assertNotNull;
 
+import org.atlasapi.output.NotAcceptableException;
+import org.atlasapi.output.NotFoundException;
+import org.atlasapi.output.ResponseWriter;
+import org.atlasapi.output.ResponseWriterFactory;
 import org.junit.Before;
 import org.junit.Test;
 

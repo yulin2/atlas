@@ -8,6 +8,11 @@ import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.output.AnnotationRegistry;
+import org.atlasapi.output.EntityWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
+import org.atlasapi.output.QueryResultWriter;
+import org.atlasapi.output.ResponseWriter;
 import org.atlasapi.output.annotation.OutputAnnotation;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryResult;
@@ -28,27 +33,6 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSched
         @Override
         public String fieldName() {
             return "channel";
-        }
-    }
-
-    private final class ScheduleItemWriter implements EntityListWriter<Item> {
-
-        @Override
-        public void write(Item entity, FieldWriter writer, OutputContext ctxt) throws IOException {
-            List<OutputAnnotation<? super Item>> annotations = ctxt.getAnnotations(entity.getClass(), Annotation.ID);
-            for (int i = 0; i < annotations.size(); i++) {
-                annotations.get(i).write(entity, writer, ctxt);
-            }
-        }
-
-        @Override
-        public String listName() {
-            return "content";
-        }
-
-        @Override
-        public String fieldName() {
-            return "item";
         }
     }
 
@@ -84,7 +68,7 @@ public class ScheduleQueryResultWriter implements QueryResultWriter<ChannelSched
         }
         
         writer.writeObject(new ScheduleChannelWriter(), channelSchedule.channel(), ctxt);
-        writer.writeList(new ScheduleItemWriter(), channelSchedule.items(), ctxt);
+        writer.writeList(new ContentListWriter(), channelSchedule.items(), ctxt);
     }
 
     private OutputContext outputContext(QueryContext queryContext) {

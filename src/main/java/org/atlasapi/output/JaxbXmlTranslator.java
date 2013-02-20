@@ -57,6 +57,7 @@ import org.atlasapi.media.entity.simple.ContentGroupQueryResult;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Deprecated
 public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
 
     private static final String GZIP_HEADER_VALUE = "gzip";

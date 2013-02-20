@@ -1,11 +1,10 @@
-package org.atlasapi.query.v4.schedule;
+package org.atlasapi.output;
 
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.atlasapi.output.ErrorSummary;
 
 
 public class ErrorResultWriter {

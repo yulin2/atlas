@@ -7,7 +7,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.media.entity.ChannelSchedule;
+import org.atlasapi.output.ErrorResultWriter;
 import org.atlasapi.output.ErrorSummary;
+import org.atlasapi.output.QueryResultWriter;
+import org.atlasapi.output.ResponseWriter;
+import org.atlasapi.output.ResponseWriterFactory;
 import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.query.common.QueryResult;
 import org.joda.time.Duration;

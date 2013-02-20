@@ -1,8 +1,9 @@
-package org.atlasapi.query.v4.schedule;
+package org.atlasapi.output;
 
 import java.io.IOException;
 
 import javax.annotation.Nullable;
+
 
 public interface FieldWriter {
 

@@ -5,9 +5,9 @@ import java.io.IOException;
 
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.ChildRefWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 
 
 public class SubItemAnnotation extends OutputAnnotation<Content> {

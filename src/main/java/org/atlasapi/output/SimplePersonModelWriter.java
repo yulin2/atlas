@@ -16,6 +16,7 @@ import com.google.common.collect.Iterables;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Deprecated
 public class SimplePersonModelWriter extends TransformingModelWriter<Iterable<Person>, PeopleQueryResult> {
 
     private final PersonModelSimplifier personSimplifier;

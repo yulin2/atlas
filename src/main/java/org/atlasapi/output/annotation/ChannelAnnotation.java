@@ -7,10 +7,10 @@ import java.io.IOException;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.query.v4.schedule.EntityListWriter;
-import org.atlasapi.query.v4.schedule.EntityWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
+import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.EntityWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 
 
 public class ChannelAnnotation extends OutputAnnotation<Channel> {

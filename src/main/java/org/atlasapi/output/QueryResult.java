@@ -9,7 +9,7 @@ import org.atlasapi.media.entity.Identified;
 import com.google.common.base.Optional;
 import com.metabroadcast.common.query.Selection;
 
-
+@Deprecated
 public class QueryResult<CONTENT, CONTEXT> implements Iterable<CONTENT> {
     
     public static <CONTENT extends Identified, CONTEXT extends Identified> QueryResult<CONTENT, CONTEXT> of(Iterable<CONTENT> content) {

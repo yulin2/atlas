@@ -17,6 +17,7 @@ import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.BrandSummary;
 import org.atlasapi.output.AnnotationRegistry;
+import org.atlasapi.output.JsonResponseWriter;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryResult;
