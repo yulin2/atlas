@@ -13,7 +13,7 @@ import com.google.common.base.Optional;
 public class C4EpgEntryUriExtractor {
     
     private final Pattern uriPattern = Pattern.compile(
-        "http://(.+).channel4.com/([^/]+)/([^./]+)(.atom|/episode-guide/series-(\\d+)(.atom|/episode-(\\d+).atom))"
+        "https?://(.+).channel4.com/([^/]+)/([^./]+)(.atom|/episode-guide/series-(\\d+)(.atom|/episode-(\\d+).atom))"
     );
     
     private final int episodeNumberGroup = 7;
