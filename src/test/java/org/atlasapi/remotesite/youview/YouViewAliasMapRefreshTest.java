@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.media.channel.ChannelStore;
+import org.atlasapi.persistence.media.channel.ChannelStore;
 import org.atlasapi.media.entity.MediaType;
 import org.atlasapi.media.entity.Publisher;
 import org.junit.Test;
