@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Deprecated
 public class SimpleScheduleModelWriter extends TransformingModelWriter<ChannelSchedule, ScheduleChannel> {
 
     private final ItemModelSimplifier itemModelSimplifier;

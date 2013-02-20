@@ -10,9 +10,9 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.Policy;
 import org.atlasapi.media.entity.Version;
-import org.atlasapi.query.v4.schedule.EntityListWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
+import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.joda.time.DateTime;
 
 import com.google.common.base.Function;

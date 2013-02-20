@@ -22,7 +22,7 @@ import com.metabroadcast.common.media.MimeType;
 import org.atlasapi.query.v4.schedule.ScheduleController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+@Deprecated
 public class DispatchingAtlasModelWriter<T> implements AtlasModelWriter<T> {
 
     private static Logger log = LoggerFactory.getLogger(DispatchingAtlasModelWriter.class);

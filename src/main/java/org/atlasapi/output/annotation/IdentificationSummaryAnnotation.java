@@ -3,8 +3,8 @@ package org.atlasapi.output.annotation;
 import java.io.IOException;
 
 import org.atlasapi.media.entity.Identified;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 
 import com.metabroadcast.common.ids.NumberToShortStringCodec;
 

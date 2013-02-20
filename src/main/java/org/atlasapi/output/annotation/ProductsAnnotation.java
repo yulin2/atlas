@@ -6,10 +6,10 @@ import java.io.IOException;
 import org.atlasapi.application.ApplicationConfiguration;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.product.Product;
+import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.persistence.media.product.ProductResolver;
-import org.atlasapi.query.v4.schedule.EntityListWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;

@@ -18,6 +18,7 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.output.NotFoundException;
 import org.atlasapi.query.common.AnnotationsExtractor;
 import org.atlasapi.query.common.QueryContext;
 import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;

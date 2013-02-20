@@ -19,6 +19,7 @@ import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.output.Annotation;
 import org.atlasapi.media.channel.ChannelResolver;
+import org.atlasapi.output.NotFoundException;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;

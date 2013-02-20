@@ -8,6 +8,7 @@ import org.atlasapi.media.topic.Topic;
 import org.atlasapi.output.simple.ModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 
+@Deprecated
 public class SimpleTopicModelWriter extends TransformingModelWriter<Iterable<Topic>, TopicQueryResult> {
 
     private final ModelSimplifier<Topic, org.atlasapi.media.entity.simple.Topic> topicSimplifier;

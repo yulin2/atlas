@@ -7,10 +7,10 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Item.ContainerSummary;
 import org.atlasapi.media.entity.ParentRef;
 import org.atlasapi.media.entity.simple.BrandSummary;
+import org.atlasapi.output.EntityWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.persistence.output.ContainerSummaryResolver;
-import org.atlasapi.query.v4.schedule.EntityWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 
 import com.google.common.base.Optional;
 

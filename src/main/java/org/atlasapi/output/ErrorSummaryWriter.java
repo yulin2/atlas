@@ -1,8 +1,7 @@
-package org.atlasapi.query.v4.schedule;
+package org.atlasapi.output;
 
 import java.io.IOException;
 
-import org.atlasapi.output.ErrorSummary;
 
 final class ErrorSummaryWriter implements EntityWriter<ErrorSummary> {
 

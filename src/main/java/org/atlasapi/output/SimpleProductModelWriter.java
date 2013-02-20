@@ -8,6 +8,7 @@ import org.atlasapi.media.product.Product;
 import org.atlasapi.output.simple.ProductModelSimplifier;
 import org.atlasapi.persistence.content.ContentResolver;
 
+@Deprecated
 public class SimpleProductModelWriter extends TransformingModelWriter<Iterable<Product>, ProductQueryResult> {
 
     private final ProductModelSimplifier modelSimplifier;

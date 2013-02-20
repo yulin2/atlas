@@ -6,11 +6,11 @@ import com.google.common.collect.FluentIterable;
 
 public abstract class QueryResult<T> {
 
-    public static final <T> QueryResult<T> singleResult(T resource, QueryContext context) {
+    public static final <T> SingleQueryResult<T> singleResult(T resource, QueryContext context) {
         return new SingleQueryResult<T>(resource, context);
     }
 
-    public static final <T> QueryResult<T> listResult(Iterable<T> resource, QueryContext context) {
+    public static final <T> ListQueryResult<T> listResult(Iterable<T> resource, QueryContext context) {
         return new ListQueryResult<T>(resource, context);
     }
     
@@ -30,7 +30,7 @@ public abstract class QueryResult<T> {
 
     public abstract T getOnlyResource();
 
-    private static final class SingleQueryResult<T> extends QueryResult<T> {
+    public static final class SingleQueryResult<T> extends QueryResult<T> {
 
         private final T resource;
 
@@ -56,7 +56,7 @@ public abstract class QueryResult<T> {
 
     }
 
-    private static final class ListQueryResult<T> extends QueryResult<T> {
+    public static final class ListQueryResult<T> extends QueryResult<T> {
 
         private final FluentIterable<T> resources;
 

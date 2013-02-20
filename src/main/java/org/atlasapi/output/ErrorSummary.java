@@ -3,8 +3,6 @@ package org.atlasapi.output;
 import java.util.Map;
 import java.util.UUID;
 
-import org.atlasapi.query.v4.schedule.NotAcceptableException;
-import org.atlasapi.query.v4.schedule.NotFoundException;
 
 import com.google.common.collect.ImmutableMap;
 import com.metabroadcast.common.http.HttpStatusCode;

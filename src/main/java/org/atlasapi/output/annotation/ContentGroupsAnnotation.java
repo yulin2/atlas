@@ -8,12 +8,12 @@ import org.atlasapi.media.common.Id;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.ContentGroup;
 import org.atlasapi.media.entity.ContentGroupRef;
+import org.atlasapi.output.EntityListWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.ChildRefWriter;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ResolvedContent;
-import org.atlasapi.query.v4.schedule.EntityListWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;

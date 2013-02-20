@@ -1,4 +1,4 @@
-package org.atlasapi.query.v4.schedule;
+package org.atlasapi.output;
 
 
 public class NotAcceptableException extends Exception {

@@ -47,8 +47,8 @@ import org.atlasapi.content.criteria.attribute.Attribute;
 import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.schedule.ScheduleIndex;
+import org.atlasapi.media.content.ContentIndex;
 import org.atlasapi.media.content.ContentStore;
-import org.atlasapi.media.content.schedule.ScheduleIndex;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.ChannelSchedule;
 import org.atlasapi.media.entity.ContentGroup;
@@ -158,8 +158,11 @@ import org.atlasapi.persistence.topic.TopicQueryResolver;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.persistence.topic.TopicSearcher;
 import org.atlasapi.query.common.AttributeCoercers;
+import org.atlasapi.query.common.ContextualQueryExecutor;
+import org.atlasapi.query.common.ContextualQueryParser;
 import org.atlasapi.query.common.QueryAtomParser;
 import org.atlasapi.query.common.QueryAttributeParser;
+import org.atlasapi.query.common.QueryContextParser;
 import org.atlasapi.query.common.QueryExecutor;
 import org.atlasapi.query.common.QueryParameterAnnotationsExtractor;
 import org.atlasapi.query.common.StandardQueryParser;
@@ -180,6 +183,9 @@ import org.atlasapi.query.v4.schedule.ScheduleIndexDebugController;
 import org.atlasapi.query.v4.schedule.ScheduleQueryExecutor;
 import org.atlasapi.query.v4.schedule.ScheduleQueryResultWriter;
 import org.atlasapi.query.v4.topic.IndexBackedTopicQueryExecutor;
+import org.atlasapi.query.v4.topic.TopicContentController;
+import org.atlasapi.query.v4.topic.TopicContentQueryExecutor;
+import org.atlasapi.query.v4.topic.TopicContentResultWriter;
 import org.atlasapi.query.v4.topic.TopicQueryResultWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -207,6 +213,7 @@ public class QueryWebModule {
     private @Autowired ContentGroupWriter contentGroupWriter;
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ContentStore contentStore;
+    private @Autowired ContentIndex contentIndex;
     private @Autowired ContentWriter contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
@@ -330,14 +337,38 @@ public class QueryWebModule {
         return new org.atlasapi.query.v4.topic.TopicController(topicQueryParser(), 
             topicQueryExecutor, new TopicQueryResultWriter(annotations()));
     }
+    
+    @Bean
+    TopicContentController topicContentController() {
+        ContextualQueryExecutor<Topic, Content> queryExecutor = new TopicContentQueryExecutor(
+            topicResolver, contentIndex, contentStore
+        );
+        ContextualQueryParser<Topic, Content> parser = new ContextualQueryParser<Topic, Content>(
+            "topics", Attributes.TOPIC_ID, "content", idCodec(),
+            contentQueryAttributeParser(),
+            new QueryContextParser(configFetcher,
+                new QueryParameterAnnotationsExtractor(), selectionBuilder()));
+        return new TopicContentController(parser, queryExecutor, new TopicContentResultWriter(
+            annotations()));
+    }
+
+    private QueryAttributeParser contentQueryAttributeParser() {
+        return new QueryAttributeParser(ImmutableList.of(
+            QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
+            QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
+            QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer())
+        ));
+    }
 
     private StandardQueryParser<Topic> topicQueryParser() {
         return new StandardQueryParser<Topic>("topics", 
             new QueryAttributeParser(ImmutableList.of(
-                QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec()))
+                QueryAtomParser.valueOf(Attributes.ID, AttributeCoercers.idCoercer(idCodec())),
+                QueryAtomParser.valueOf(Attributes.ALIASES_NAMESPACE, AttributeCoercers.stringCoercer()),
+                QueryAtomParser.valueOf(Attributes.ALIASES_VALUE, AttributeCoercers.stringCoercer())
             )),
-            idCodec(), configFetcher, selectionBuilder(), 
-            new QueryParameterAnnotationsExtractor("topic")
+            idCodec(), new QueryContextParser(configFetcher, 
+            new QueryParameterAnnotationsExtractor("topic"), selectionBuilder())
         );
     }
     
