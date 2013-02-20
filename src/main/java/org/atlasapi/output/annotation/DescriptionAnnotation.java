@@ -9,11 +9,11 @@ import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.Series;
 import org.atlasapi.media.entity.Song;
+import org.atlasapi.output.EntityWriter;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.ItemDisplayTitleWriter;
 import org.atlasapi.output.writers.SourceWriter;
-import org.atlasapi.query.v4.schedule.EntityWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 import org.joda.time.Duration;
 
 public class DescriptionAnnotation extends OutputAnnotation<Content> {

@@ -8,12 +8,12 @@ import java.util.Map;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.CertificateWriter;
 import org.atlasapi.output.writers.LanguageWriter;
 import org.atlasapi.output.writers.ReleaseDateWriter;
 import org.atlasapi.output.writers.SubtitleWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 
 import com.google.common.collect.ImmutableMap;
 

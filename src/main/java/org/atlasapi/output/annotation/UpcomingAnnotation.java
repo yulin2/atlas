@@ -9,10 +9,10 @@ import org.atlasapi.media.common.Identifiable;
 import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.util.Identifiables;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.ChildRefWriter;
 import org.atlasapi.persistence.output.UpcomingChildrenResolver;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;

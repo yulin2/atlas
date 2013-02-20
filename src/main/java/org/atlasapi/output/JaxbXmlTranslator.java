@@ -61,6 +61,7 @@ import com.sun.xml.bind.marshaller.NamespacePrefixMapper;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Deprecated
 public class JaxbXmlTranslator<T> implements AtlasModelWriter<T> {
 
     private static final String GZIP_HEADER_VALUE = "gzip";

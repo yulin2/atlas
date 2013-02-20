@@ -12,6 +12,7 @@ import org.atlasapi.output.simple.ContentGroupModelSimplifier;
 
 /**
  */
+@Deprecated
 public class SimpleContentGroupModelWriter extends TransformingModelWriter<Iterable<ContentGroup>, ContentGroupQueryResult> {
 
     private final ContentGroupModelSimplifier simplifier;

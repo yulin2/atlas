@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableSet;
  *  
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Deprecated
 public class SimpleContentModelWriter extends TransformingModelWriter<QueryResult<Content,? extends Identified>, ContentQueryResult> {
 
     private final ItemModelSimplifier itemModelSimplifier;

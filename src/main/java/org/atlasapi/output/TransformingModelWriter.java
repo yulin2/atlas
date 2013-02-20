@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.application.ApplicationConfiguration;
 
+@Deprecated
 public abstract class TransformingModelWriter<I, O> implements AtlasModelWriter<I> {
     
     private final AtlasModelWriter<O> delegate;

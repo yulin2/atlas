@@ -10,9 +10,9 @@ import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Version;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 import org.atlasapi.output.writers.BroadcastWriter;
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.ImmutableSet;

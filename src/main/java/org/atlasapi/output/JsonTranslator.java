@@ -53,6 +53,7 @@ import com.metabroadcast.common.time.DateTimeZones;
  * 
  * @author Robert Chatley (robert@metabroadcast.com)
  */
+@Deprecated
 public class JsonTranslator<T> implements AtlasModelWriter<T> {
     
     private static final String GZIP_HEADER_VALUE = "gzip";

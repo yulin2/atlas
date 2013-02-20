@@ -7,11 +7,11 @@ import org.atlasapi.media.common.Id;
 
 public abstract class Query<T> {
 
-    public static final <T> Query<T> singleQuery(Id id, QueryContext context) {
+    public static final <T> SingleQuery<T> singleQuery(Id id, QueryContext context) {
         return new SingleQuery<T>(id, context);
     }
 
-    public static final <T> Query<T> listQuery(AttributeQuerySet operands,
+    public static final <T> ListQuery<T> listQuery(AttributeQuerySet operands,
                                                QueryContext context) {
         return new ListQuery<T>(operands, context);
     }
@@ -32,7 +32,7 @@ public abstract class Query<T> {
 
     public abstract Id getOnlyId();
 
-    private static final class SingleQuery<T> extends Query<T> {
+    public static final class SingleQuery<T> extends Query<T> {
 
         private final Id id;
 
@@ -58,7 +58,7 @@ public abstract class Query<T> {
 
     }
 
-    private static final class ListQuery<T> extends Query<T> {
+    public static final class ListQuery<T> extends Query<T> {
 
         private final AttributeQuerySet operands;
 

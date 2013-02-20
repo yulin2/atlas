@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 
-import org.atlasapi.query.v4.schedule.FieldWriter;
-import org.atlasapi.query.v4.schedule.OutputContext;
+import org.atlasapi.output.FieldWriter;
+import org.atlasapi.output.OutputContext;
 
 import com.google.common.base.Objects;
 
