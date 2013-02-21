@@ -112,7 +112,6 @@ import org.atlasapi.output.simple.TopicModelSimplifier;
 import org.atlasapi.persistence.content.ContentGroupResolver;
 import org.atlasapi.persistence.content.ContentGroupWriter;
 import org.atlasapi.persistence.content.ContentResolver;
-import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.EquivalentContentResolver;
 import org.atlasapi.persistence.content.ScheduleResolver;
 import org.atlasapi.persistence.content.SearchResolver;
@@ -190,7 +189,7 @@ public class QueryWebModule {
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ContentStore contentStore;
     private @Autowired ContentIndex contentIndex;
-    private @Autowired ContentWriter contentWriter;
+    private @Autowired ContentStore contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ChannelGroupStore channelGroupResolver;

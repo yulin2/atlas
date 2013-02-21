@@ -1,6 +1,7 @@
 package org.atlasapi.messaging;
 
 import javax.jms.ConnectionFactory;
+
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.atlasapi.messaging.producers.MessageReplayer;
 import org.atlasapi.persistence.messaging.MessageStore;
@@ -19,7 +20,7 @@ public class AtlasMessagingModule {
     private String brokerUrl;
     @Value("${messaging.destination.changes.content}")
     private String contentChangesDestination;
-    @Value("${messaging.destination.changes.topic}")
+    @Value("${messaging.destination.changes.topics}")
     private String topicChangesDestination;
     @Autowired
     private MessageStore messageStore;
