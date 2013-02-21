@@ -11,7 +11,7 @@ import org.atlasapi.media.content.Container;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.messaging.EntityUpdatedMessage;
-import org.atlasapi.persistence.content.ContentHasher;
+import org.atlasapi.media.content.ContentHasher;
 import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.serialization.json.JsonFactory;
 import org.slf4j.Logger;
