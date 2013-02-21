@@ -11,7 +11,7 @@ import org.atlasapi.content.criteria.attribute.Attributes;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.media.entity.Identified;
 import org.atlasapi.media.entity.Publisher;
-import org.atlasapi.persistence.content.ContentSearcher;
+import org.atlasapi.media.content.ContentSearcher;
 import org.atlasapi.persistence.content.SearchResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.search.model.SearchQuery;

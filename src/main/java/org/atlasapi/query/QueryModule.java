@@ -58,7 +58,7 @@ public class QueryModule {
     @Autowired
     private ContentResolver contentResolver;
     @Autowired
-    private org.atlasapi.persistence.content.ContentSearcher contentSearcher;
+    private org.atlasapi.media.content.ContentSearcher contentSearcher;
     @Autowired
     @Qualifier("contentUpdater")
     private EquivalenceUpdater<Content> equivUpdater;
