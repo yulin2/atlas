@@ -64,6 +64,7 @@ public class QueryModule {
     @Autowired
     @Qualifier("contentSearcher")
     private org.atlasapi.media.content.ContentSearcher contentSearcher;
+    @Autowired
     @Qualifier("contentUpdater")
     private EquivalenceUpdater<Content> equivUpdater;
     //
