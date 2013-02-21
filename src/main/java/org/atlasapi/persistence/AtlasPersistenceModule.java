@@ -12,11 +12,13 @@ import org.atlasapi.equiv.CassandraEquivalenceSummaryStore;
 import org.atlasapi.media.CassandraPersistenceModule;
 import org.atlasapi.media.ElasticSearchContentIndexModule;
 import org.atlasapi.media.content.ContentStore;
+import org.atlasapi.media.content.EsContentIndex;
 import org.atlasapi.media.content.EsContentIndexer;
 import org.atlasapi.media.content.EsContentSearcher;
 import org.atlasapi.media.content.schedule.EsScheduleIndex;
-import org.atlasapi.media.content.util.MessageQueueingContentWriter;
+import org.atlasapi.media.entity.Person;
 import org.atlasapi.media.topic.EsPopularTopicIndex;
+import org.atlasapi.media.topic.EsTopicIndex;
 import org.atlasapi.media.topic.TopicStore;
 import org.atlasapi.messaging.MessageQueueingContentStore;
 import org.atlasapi.messaging.MessageQueueingTopicStore;
@@ -26,7 +28,6 @@ import org.atlasapi.persistence.content.ContentWriter;
 import org.atlasapi.persistence.content.IdSettingContentWriter;
 import org.atlasapi.persistence.content.KnownTypeContentResolver;
 import org.atlasapi.persistence.content.LookupResolvingContentResolver;
-import org.atlasapi.persistence.content.LookupStoreBackedIdSettingContentWriter;
 import org.atlasapi.persistence.content.SimpleKnownTypeContentResolver;
 import org.atlasapi.persistence.content.cassandra.CassandraContentGroupStore;
 import org.atlasapi.persistence.content.cassandra.CassandraContentStore;
@@ -38,6 +39,7 @@ import org.atlasapi.persistence.content.mongo.MongoContentLister;
 import org.atlasapi.persistence.content.mongo.MongoContentResolver;
 import org.atlasapi.persistence.content.mongo.MongoPersonStore;
 import org.atlasapi.persistence.content.mongo.MongoProductStore;
+import org.atlasapi.persistence.content.people.PersonWriter;
 import org.atlasapi.persistence.content.people.QueuingItemsPeopleWriter;
 import org.atlasapi.persistence.content.people.QueuingPersonWriter;
 import org.atlasapi.persistence.content.people.cassandra.CassandraPersonStore;
@@ -59,7 +61,6 @@ import org.atlasapi.persistence.shorturls.MongoShortUrlSaver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.atlasapi.persistence.topic.TopicStore;
 import org.atlasapi.persistence.topic.TopicCreatingTopicResolver;
-import org.atlasapi.persistence.topic.cassandra.CassandraTopicStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
@@ -204,17 +205,6 @@ public class AtlasPersistenceModule {
     }
 
     @Bean
-    public ContentWriter contentWriter() {
-        ContentWriter contentWriter = mongoContentPersistenceModule().contentWriter();
-        contentWriter = new EquivalenceWritingContentWriter(contentWriter, lookupStore());
-        if (Boolean.valueOf(generateIds)) {
-            contentWriter = new LookupStoreBackedIdSettingContentWriter(lookupStore(), idGeneratorBuilder().generator("content"), contentWriter);
-        }
-        contentWriter = new MessageQueueingContentWriter(contentChanges, contentWriter, new TranslatorContentHasher());
-        return contentWriter;
-    }
-
-    @Bean
     public LookupResolvingContentResolver contentResolver() {
         return mongoContentPersistenceModule().contentResolver();
     }
@@ -306,6 +296,18 @@ public class AtlasPersistenceModule {
 
     @Bean
     @Primary
+    public EsContentIndex contentIndex() {
+        return esContentIndexModule().contentIndex();
+    }
+
+    @Bean
+    @Primary
+    public EsTopicIndex topicIndex() {
+        return esContentIndexModule().topicIndex();
+    }
+
+    @Bean
+    @Primary
     public EsPopularTopicIndex popularTopicIndex() {
         return esContentIndexModule().topicSearcher();
     }
@@ -320,19 +322,6 @@ public class AtlasPersistenceModule {
     @Qualifier(value = "cassandra")
     public CassandraContentStore cassandraContentStore() {
         return cassandraContentPersistenceModule().cassandraContentStore();
-    }
-
-    @Bean
-    @Primary
-    @Qualifier(value = "cassandra")
-    public ContentWriter cassandraContentWriter() {
-        ContentWriter contentWriter = cassandraContentPersistenceModule().cassandraContentStore();
-        if (Boolean.valueOf(generateIds)) {
-            contentWriter = new ContentResolverBackedIdSettingContentWriter(cassandraContentStore(), idGeneratorBuilder().generator("content"), contentWriter);
-        }
-        contentWriter = new EquivalenceWritingContentWriter(contentWriter, cassandraContentPersistenceModule().cassandraLookupEntryStore());
-        contentWriter = new MessageQueueingContentWriter(contentChanges, contentWriter, new TranslatorContentHasher());
-        return contentWriter;
     }
 
     @Bean
@@ -391,7 +380,18 @@ public class AtlasPersistenceModule {
     @Qualifier(value = "cassandra")
     public QueuingItemsPeopleWriter cassandraItemsPeopleWriter() {
         SystemOutAdapterLog log = new SystemOutAdapterLog();
-        return new QueuingItemsPeopleWriter(new QueuingPersonWriter(cassandraContentPersistenceModule().cassandraPersonStore(), log), log);
+        return new QueuingItemsPeopleWriter(new QueuingPersonWriter(new PersonWriter() {
+            
+            @Override
+            public void updatePersonItems(Person person) {
+                
+            }
+            
+            @Override
+            public void createOrUpdatePerson(Person person) {
+                
+            }
+        }, log), log);
     }
 
     @Bean
@@ -406,19 +406,6 @@ public class AtlasPersistenceModule {
     @Qualifier(value = "cassandra")
     public CassandraSegmentStore cassandraSegmentStore() {
         return cassandraContentPersistenceModule().cassandraSegmentStore();
-    }
-
-    @Bean
-    @Qualifier(value = "cassandra")
-    public CassandraTopicStore cassandraTopicStore() {
-        return cassandraContentPersistenceModule().cassandraTopicStore();
-    }
-
-    @Bean
-    @Primary
-    @Qualifier(value = "cassandra")
-    public TopicCreatingTopicResolver cassandraTopicCreatingTopicResolver() {
-        return new TopicCreatingTopicResolver(cassandraContentPersistenceModule().cassandraTopicStore(), idGenerator());
     }
 
     @Bean

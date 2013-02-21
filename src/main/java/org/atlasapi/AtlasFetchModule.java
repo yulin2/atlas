@@ -17,24 +17,30 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.content.Container;
+import org.atlasapi.media.content.ContentStore;
 import org.atlasapi.media.entity.Identified;
+import org.atlasapi.media.entity.Item;
+import org.atlasapi.persistence.AtlasPersistenceModule;
 import org.atlasapi.persistence.system.Fetcher;
 import org.atlasapi.query.uri.LocalOrRemoteFetcher;
 import org.atlasapi.query.uri.SavingFetcher;
 import org.atlasapi.query.uri.canonical.Canonicaliser;
 import org.atlasapi.query.uri.canonical.CanonicalisingFetcher;
+import org.atlasapi.remotesite.RemoteSiteModule;
 import org.atlasapi.remotesite.bbc.BbcUriCanonicaliser;
 import org.atlasapi.remotesite.bliptv.BlipTvAdapter;
 import org.atlasapi.remotesite.dailymotion.DailyMotionItemAdapter;
 import org.atlasapi.remotesite.facebook.FacebookCanonicaliser;
-import org.atlasapi.remotesite.hulu.WritingHuluBrandAdapter;
 import org.atlasapi.remotesite.hulu.HuluItemAdapter;
+import org.atlasapi.remotesite.hulu.WritingHuluBrandAdapter;
 import org.atlasapi.remotesite.ted.TedTalkAdapter;
 import org.atlasapi.remotesite.tinyurl.SavingShortUrlCanonicaliser;
 import org.atlasapi.remotesite.tinyurl.ShortenedUrlCanonicaliser;
 import org.atlasapi.remotesite.youtube.YouTubeFeedCanonicaliser;
 import org.atlasapi.remotesite.youtube.YoutubeUriCanonicaliser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -56,7 +62,19 @@ public class AtlasFetchModule {
 
     @PostConstruct
     public void passWriterToReader() {
-        savingFetcher().setStore(atlasPersistenceModule.contentWriter());
+        final ContentStore contentStore = atlasPersistenceModule.contentStore();
+        savingFetcher().setStore(new org.atlasapi.persistence.content.ContentWriter() {
+
+            @Override
+            public void createOrUpdate(Item item) {
+                contentStore.writeContent(item);
+            }
+
+            @Override
+            public void createOrUpdate(Container container) {
+                contentStore.writeContent(container);
+            }
+        });
     }
 
     @Bean

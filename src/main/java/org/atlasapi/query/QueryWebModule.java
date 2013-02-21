@@ -214,7 +214,7 @@ public class QueryWebModule {
     private @Autowired ContentGroupResolver contentGroupResolver;
     private @Autowired ContentStore contentStore;
     private @Autowired ContentIndex contentIndex;
-    private @Autowired ContentWriter contentWriter;
+    private @Autowired ContentStore contentWriter;
     private @Autowired ContentResolver contentResolver;
     private @Autowired ChannelResolver channelResolver;
     private @Autowired ChannelGroupResolver channelGroupResolver;
