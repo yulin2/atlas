@@ -118,7 +118,7 @@ public class AtlasPersistenceModule {
         return new CassandraPersistenceModule(Splitter.on(",").split(cassandraSeeds), 
             Integer.parseInt(cassandraPort), cassandraCluster, cassandraKeyspace, 
             Integer.parseInt(cassandraClientThreads), Integer.parseInt(cassandraConnectionTimeout), 
-            idGeneratorBuilder());
+            idGeneratorBuilder(), new TranslatorContentHasher());
     }
     
     @Bean
