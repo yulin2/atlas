@@ -15,7 +15,6 @@ public class YouTubeAccessControlDeserializer implements
     public YouTubeAccessControl deserialize(JsonElement json, Type typeOfT,
             JsonDeserializationContext context) throws JsonParseException {
         YouTubeAccessControl accessControl = new YouTubeAccessControl();
-
         return accessControl;
     }
 

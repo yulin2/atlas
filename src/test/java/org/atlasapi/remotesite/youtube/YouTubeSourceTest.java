@@ -21,8 +21,8 @@ import static org.hamcrest.Matchers.is;
 import junit.framework.TestCase;
 
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource;
-import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.atlasapi.remotesite.youtube.entity.YouTubeSource.Video;
+import org.atlasapi.remotesite.youtube.entity.YouTubeVideoEntry;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 

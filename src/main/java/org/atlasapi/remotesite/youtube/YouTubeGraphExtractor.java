@@ -231,4 +231,4 @@ public class YouTubeGraphExtractor implements ContentExtractor<YouTubeSource, It
 
         return embedCode;
     }
-};
+}
