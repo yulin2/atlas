@@ -38,6 +38,7 @@ import org.atlasapi.media.entity.Content;
 import org.atlasapi.media.entity.CrewMember;
 import org.atlasapi.media.entity.Encoding;
 import org.atlasapi.media.entity.Episode;
+import org.atlasapi.media.entity.Film;
 import org.atlasapi.media.entity.Item;
 import org.atlasapi.media.entity.Location;
 import org.atlasapi.media.entity.MediaType;
@@ -79,8 +80,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private static final String EPISODE_RESOURCE_TYPE = "episodes";
     private static final String SEASON_RESOURCE_TYPE = "seasons";
     private static final String SHOW_RESOURCE_TYPE = "shows";
+    private static final String FILM_RESOURCE_TYPE = "films";
     
     private static final String TELE_VIDEO_RECS = "television-video-recordings";
+    private static final String MOVIE_VIDEO_RECS = "movie-video-recordings";
     private static final String VOD = "VOD";
     private static final String EPISODE = "episode";
     private static final String SEASON = "season";
@@ -108,6 +111,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
 
     @Override
     public Optional<Content> extract(LoveFilmDataRow source) {
+        if(ACCESS_METHOD.valueIs(source, VOD) 
+            && ITEM_TYPE_KEYWORD.valueIs(source, MOVIE_VIDEO_RECS)) {
+            return extractFilm(source);                
+        }
         if (LoveFilmCsvColumn.ENTITY.valueIs(source, SHOW)) {
             return extractBrand(source);
         }
@@ -115,18 +122,18 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             return extractSeries(source);
         }
         if (LoveFilmCsvColumn.ENTITY.valueIs(source, EPISODE)) {
-            if(!(ITEM_TYPE_KEYWORD.valueIs(source, TELE_VIDEO_RECS)
-                    && ACCESS_METHOD.valueIs(source, VOD))){
-                return Optional.absent();
+            if (ACCESS_METHOD.valueIs(source, VOD) 
+                && ITEM_TYPE_KEYWORD.valueIs(source, TELE_VIDEO_RECS)) {
+                return extractEpisode(source);                
             }
-            return extractEpisode(source);
+            return Optional.absent();
         }
         return Optional.absent();
     }
 
     private Optional<Content> extractBrand(LoveFilmDataRow source) {
         Brand brand = createBrand(source);
-        
+        brand.setSpecialization(Specialization.TV);
         return Optional.of(setCommonFields(brand, source));
     }
 
@@ -144,13 +151,23 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
             series.setParentRef(new ParentRef(uri(SHOW_ID.valueFrom(source),SHOW_RESOURCE_TYPE)));
             content = series;
         }
-        
+        content.setSpecialization(Specialization.TV);
         return Optional.of(setCommonFields(content, source));
     }
 
+    private Optional<Content> extractFilm(LoveFilmDataRow source) {
+        Film film = createFilm(source);
+        
+        film.setVersions(versionAndLocationFrom(source));
+        
+        Content itemWithCommonFields = setCommonFields(film, source);
+        itemWithCommonFields.setTitle(episodeTitle(source, film));
+        return Optional.of(itemWithCommonFields);
+    }
+    
     private Optional<Content> extractEpisode(LoveFilmDataRow source) {
         String parentId = SHOW_ID.valueFrom(source);
-        Item item = createItem(source);
+        Item item;
         
         String episodeSequence = EPISODE_SEQUENCE.valueFrom(source);
         if (!Strings.isNullOrEmpty(parentId) && !Strings.isNullOrEmpty(episodeSequence)) {
@@ -162,14 +179,16 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
                 episode.setSeriesRef(new ParentRef(uri(SERIES_ID.valueFrom(source), SEASON_RESOURCE_TYPE)));
             }
             item = episode;
-        } 
+        } else {
+            item = createItem(source);
+        }
 
         if (!Strings.isNullOrEmpty(parentId)) {
             item.setParentRef(new ParentRef(uri(parentId, SHOW_RESOURCE_TYPE)));
         }
         
         item.setVersions(versionAndLocationFrom(source));
-        
+        item.setSpecialization(Specialization.TV);
         Content itemWithCommonFields = setCommonFields(item, source);
         itemWithCommonFields.setTitle(episodeTitle(source, item));
         return Optional.of(itemWithCommonFields);
@@ -220,6 +239,10 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
     private Item createItem(LoveFilmDataRow source) {
         return createContent(new Item(), source, EPISODE_RESOURCE_TYPE, "e");
     }
+    
+    private Film createFilm(LoveFilmDataRow source) {
+        return createContent(new Film(), source, FILM_RESOURCE_TYPE, "f");
+    }
 
     private <C extends Content> C createContent(C content, LoveFilmDataRow row, String resourceType, String curieType) {
         String sku = SKU.valueFrom(row);
@@ -248,7 +271,6 @@ public class LoveFilmDataRowContentExtractor implements ContentExtractor<LoveFil
         content.setLanguages(languagesFrom(LANGUAGE.valueFrom(source)));
         content.setCertificates(certificatesFrom(BBFC_RATING.valueFrom(source)));
         content.setMediaType(MediaType.VIDEO);
-        content.setSpecialization(Specialization.TV);
         return content;
     }
     
