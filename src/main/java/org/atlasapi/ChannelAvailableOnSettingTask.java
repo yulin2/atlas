@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
 import java.util.Set;
 
 import org.atlasapi.media.channel.Channel;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.channel.ChannelTranslator;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.media.entity.Publisher;

@@ -7,10 +7,10 @@ import java.net.UnknownHostException;
 import java.util.List;
 
 import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.channel.ChannelGroup.ChannelGroupType;
 import org.atlasapi.media.common.Id;
 import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.channel.MongoChannelGroupStore;
 import org.atlasapi.persistence.media.channel.MongoChannelStore;
 import org.atlasapi.media.entity.Channel;

@@ -36,6 +36,7 @@ import static org.atlasapi.output.Annotation.UPCOMING;
 
 import org.atlasapi.application.query.ApplicationConfigurationFetcher;
 import org.atlasapi.content.criteria.attribute.Attributes;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.content.Content;
 import org.atlasapi.media.content.ContentIndex;
 import org.atlasapi.media.content.ContentStore;
@@ -119,7 +120,6 @@ import org.atlasapi.persistence.content.people.PeopleResolver;
 import org.atlasapi.persistence.content.query.KnownTypeQueryExecutor;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.product.ProductResolver;
 import org.atlasapi.persistence.media.segment.SegmentResolver;
 import org.atlasapi.persistence.output.AvailableChildrenResolver;

@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 
 import javax.annotation.PostConstruct;
 
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.ContentResolver;
 import org.atlasapi.persistence.content.ContentWriter;
@@ -20,7 +21,6 @@ import org.atlasapi.persistence.content.people.ItemsPeopleWriter;
 import org.atlasapi.persistence.logging.AdapterLog;
 import org.atlasapi.persistence.logging.AdapterLogEntry;
 import org.atlasapi.persistence.logging.AdapterLogEntry.Severity;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.persistence.media.segment.SegmentWriter;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.persistence.topic.TopicStore;

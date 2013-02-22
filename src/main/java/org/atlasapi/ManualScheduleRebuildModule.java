@@ -2,7 +2,7 @@ package org.atlasapi;
 
 import javax.annotation.PostConstruct;
 
-import org.atlasapi.persistence.media.channel.ChannelResolver;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.persistence.content.listing.ContentLister;
 import org.atlasapi.persistence.content.mongo.FullMongoScheduleRepopulator;
