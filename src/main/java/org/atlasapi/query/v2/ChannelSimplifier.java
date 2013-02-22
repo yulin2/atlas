@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.atlasapi.media.channel.Channel;
 import org.atlasapi.media.channel.ChannelGroup;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Publisher;
 import org.atlasapi.media.entity.simple.PublisherDetails;
 import org.atlasapi.persistence.media.channel.ChannelGroupStore;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;

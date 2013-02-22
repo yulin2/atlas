@@ -7,8 +7,8 @@ import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.persistence.media.channel.ChannelResolver;
 import org.atlasapi.remotesite.pa.data.PaProgrammeDataStore;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;

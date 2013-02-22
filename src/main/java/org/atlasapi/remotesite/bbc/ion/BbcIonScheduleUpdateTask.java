@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.atlasapi.media.channel.Channel;
+import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.media.entity.Broadcast;
 import org.atlasapi.media.util.ItemAndBroadcast;
 import org.atlasapi.persistence.logging.AdapterLog;
-import org.atlasapi.media.channel.ChannelResolver;
 import org.atlasapi.persistence.system.RemoteSiteClient;
 import org.atlasapi.remotesite.bbc.ion.model.IonBroadcast;
 import org.atlasapi.remotesite.bbc.ion.model.IonSchedule;
